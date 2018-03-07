@@ -29,12 +29,12 @@ class Task extends MY_Controller {
 		$validate = Validate::make($params,
 			[
 				'type'			=> 'min:0',
-				'city_id'		=> 'main:1'
+				'city_id'		=> 'min:1'
 			]
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), $errno, $validate['errmsg']);
+			return $this->response(array(), 100400, $validate['errmsg']);
 		}
 
 		if(array_key_exists($type, $this->config->item('task_type'))){
@@ -71,7 +71,7 @@ class Task extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'city_id'		=> 'main:1',
+				'city_id'		=> 'min:1',
 				'dates'			=> 'nullunable',
 				'start_time'	=> 'nullunable',
 				'end_time'		=> 'nullunable'
@@ -79,7 +79,7 @@ class Task extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), $errno, $validate['errmsg']);
+			return $this->response(array(), 100400, $validate['errmsg']);
 		}
 
 		$data = [
@@ -90,6 +90,31 @@ class Task extends MY_Controller {
 			'end_time'	=> $params['end_time'],
 			'type'		=> 1,
 		];
+
+		$res = httpPOST($this->config->item('task_interface') . '/create', $data);
+		if(!$res){
+			return $this->response([], 100500, 'The connection task service failed.');
+		}
+
+		return $this->response($res['data']);
+	}
+
+	/**
+	* 获取任务详情
+	* @param task_id	Y 任务ID
+	* @return json
+	*/
+	public function getTaskDetail(){
+		// 校验参数
+		$validate = Validate::make($params,
+			[
+				'task_id'		=> 'min:1'
+			]
+		);
+
+		if(!$validate['status']){
+			return $this->response(array(), 100400, $validate['errmsg']);
+		}
 
 		$res = httpPOST($this->config->item('task_interface') . '/create', $data);
 		if(!$res){
