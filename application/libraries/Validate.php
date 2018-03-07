@@ -116,8 +116,7 @@ class Validate {
 				return ['status'=>false, 'errmsg'=>self::combinErrmsg('nullunable', $param)];
 			}
 		}
-
-		if(empty(strval($value))){
+		if(strval($value) === ''){
 			return ['status'=>false, 'errmsg'=>self::combinErrmsg('nullunable', $param)];
 		}
 

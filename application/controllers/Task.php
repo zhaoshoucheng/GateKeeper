@@ -12,6 +12,8 @@ class Task extends MY_Controller {
 		parent::__construct();
 		$this->config->load('nconf');
 		$this->load->helper('http');
+
+		$this->load->model('cycletask_model');
 	}
 
 	/**
@@ -97,5 +99,49 @@ class Task extends MY_Controller {
 		}
 
 		return $this->response($res['data']);
+	}
+
+	/**
+	* 创建周期任务
+	* @param city_id	Y 城市ID
+	* @param start_time Y 评估开始时间 00:00
+	* @param end_time 	Y 评估结束时间 00:00
+	* @param type	 	Y 周期任务类型 0 前一天；1 前一自然周工作日/周末；2 前四个周*'
+	* @param expect_start_time	 	N 周期望开始时间
+	* @return json
+	*/
+	public function createCycleTask(){
+		$user = 'admin';
+		$expect_start_time = '';
+
+		$params = $this->input->post();
+
+		// 校验参数
+		$validate = Validate::make($params,
+			[
+				'city_id'		=> 'nullunable',
+				'start_time'	=> 'nullunable',
+				'end_time'		=> 'nullunable',
+				'type'		=> 'nullunable',
+			]
+		);
+
+		if(!$validate['status']){
+			return $this->response(array(), -1, $validate['errmsg']);
+		}
+
+		$task = [
+			'user'		=> $user,
+			'city_id'	=> $params['city_id'],
+			'start_time'=> $params['start_time'],
+			'end_time'	=> $params['end_time'],
+			'type'		=> $params['type'],
+		];
+
+		$bRet = $this->cycletask_model->addTask($task);
+		if ($bRet === false) {
+			$this->errno = -1;
+			$this->errmsg = '创建周期任务失败';
+		}
 	}
 }
