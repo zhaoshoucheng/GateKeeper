@@ -3,7 +3,7 @@
 
 class Task_model extends CI_Model
 {
-    private $_table = 'task';
+    private $_table = 'task_result';
 
     function __construct()
     {
@@ -27,5 +27,12 @@ class Task_model extends CI_Model
     {
         $bRet = $this->its_tool->where('id', $task_id)->update($this->_table, $task);
         return $bRet;
+    }
+
+    function getTask($user, $city_id, $type, $kind, $cols = '*')
+    {
+        $aRet = $this->its_tool->select($cols)->from($this->_table)->where('user', $user)->where('city_id', $city_id)->where('kind', $kind)->where('type', $type)->order_by('id', 'DESC')->get()->result_array();
+        // var_dump($this->its_tool->last_query());
+        return $aRet;
     }
 }

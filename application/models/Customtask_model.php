@@ -1,9 +1,9 @@
 <?php
 
 
-class Cycletask_model extends CI_Model
+class Customtask_model extends CI_Model
 {
-    private $_table = 'cycle_task';
+    private $_table = 'custom_task';
 
     function __construct()
     {
@@ -28,4 +28,9 @@ class Cycletask_model extends CI_Model
     //     $bRet = $this->its_tool->where('id', $task_id)->update($this->_table, $task);
     //     return $bRet;
     // }
+    
+    function getall() {
+        $aRet = $this->its_tool->get($this->_table)->result_array();
+        return $aRet;
+    }
 }

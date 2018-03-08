@@ -10,17 +10,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Task extends MY_Controller {
 	public function __construct(){
 		parent::__construct();
-		$this->config->load('nconf');
-		$this->load->helper('http');
+		// $this->config->load('nconf');
+		// $this->load->helper('http');
 
 		$this->load->model('cycletask_model');
+		$this->load->model('customtask_model');
 		$this->load->model('task_model');
 	}
 
 	/**
 	* 获取任务列表
-	* @param type 		Y 获取任务类型 0：周期任务 1：自定义任务
 	* @param city_id	Y 城市ID
+	* @param type 		Y 获取任务类型 0：所有 1：周期任务 2：自定义任务
+	* @param kind 		Y 获取任务类型 0：所有 1：指标任务 2：诊断任务
 	* @return json
 	*/
 	public function getList(){
@@ -31,31 +33,74 @@ class Task extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'type'			=> 'min:0',
-				'city_id'		=> 'main:1'
+				'city_id'		=> 'nullunable',
+				'type'			=> 'nullunable',
+				'kind'			=> 'nullunable',
 			]
 		);
 
-		if(!$validate['status']){
-			return $this->response(array(), $errno, $validate['errmsg']);
-		}
+		$city_id = intval($params['city_id']);
+		$type = intval($params['type']);
+		$kind = intval($params['kind']);
 
-		if(array_key_exists($type, $this->config->item('task_type'))){
-			return $this->response([], 100400, 'The parameter type value error.');
+		$cycle_task_tmp = array();
+		$custom_task_tmp = array();
+		// 周期任务
+		if ($type === 0 or $type === 1) {
+			$user = 'admin';
+			// 指标任务
+			if ($kind === 0 or $kind === 1) {
+				$aRet = $this->task_model->getTask($user, $city_id, 1, 1);
+				$cycle_task_tmp = array_merge($cycle_task_tmp, $aRet);
+			}
+			// 诊断任务
+			if ($kind === 0 or $kind === 2) {
+				$aRet = $this->task_model->getTask($user, $city_id, 1, 2);
+				$cycle_task_tmp = array_merge($cycle_task_tmp, $aRet);
+			}
 		}
-
-		$data = [
-			'type'		=> (int)$params['type'],
-			'city_id'	=> (int)$params['city_id'],
-			'user'		=> $user
+		// 自定义任务
+		if ($type === 0 or $type === 2) {
+			if (isset($params['user'])) {
+				$user = $params['user'];
+				// 指标任务
+				if ($kind === 0 or $kind === 1) {
+					$aRet = $this->task_model->getTask($user, $city_id, 2, 1);
+					$custom_task_tmp = array_merge($custom_task_tmp, $aRet);
+				}
+				// 诊断任务
+				if ($kind === 0 or $kind === 2) {
+					$aRet = $this->task_model->getTask($user, $city_id, 2, 2);
+					$custom_task_tmp = array_merge($custom_task_tmp, $aRet);
+				}
+			}
+		}
+		$cycle_task = array();
+		$custom_task = array();
+		foreach ($cycle_task_tmp as $task) {
+			$cycle_task[] = array(
+				'task_id' => $task['id'],
+				'dates' => $task['dates'],
+				'time_range' => $task['start_time'] . '-' . $task['end_time'],
+				'junctions' => ($task['junctions'] === '' or $task['junctions'] === null) ? '全城' : '路口',
+				'status' => ($task['status'] == -1) ? '失败' : $task['rate'] . '%',
+				'exec_date' => date('m.d', $task['task_start_time']),
+			);
+		}
+		foreach ($custom_task_tmp as $task) {
+			$custom_task[] = array(
+				'task_id' => $task['id'],
+				'dates' => $task['dates'],
+				'time_range' => $task['start_time'] . '-' . $task['end_time'],
+				'junctions' => ($task['junctions'] === '' or $task['junctions'] === null) ? '全城' : '路口',
+				'status' => ($task['status'] == -1) ? '失败' : $task['rate'] . '%',
+				'exec_date' => date('m.d', $task['task_start_time']),
+			);
+		}
+		$this->output_data = [
+			'cycle_task' => $cycle_task,
+			'custom_task' => $custom_task,
 		];
-
-		$res = httpPOST($this->config->item('task_interface') . '/getlist', $data);
-		if(!$res){
-			return $this->response([], 100500, 'The connection task service failed.');
-		}
-
-		return $this->response($res['data']);
 	}
 
 	/**
@@ -80,7 +125,6 @@ class Task extends MY_Controller {
 				'dates'			=> 'nullunable',
 				'start_time'	=> 'nullunable',
 				'end_time'		=> 'nullunable',
-				'type'			=> 'nullunable',
 				'kind'			=> 'nullunable',
 			]
 		);
@@ -95,11 +139,13 @@ class Task extends MY_Controller {
 			'dates'		=> $params['dates'],
 			'start_time'=> $params['start_time'],
 			'end_time'	=> $params['end_time'],
-			'type'		=> $params['type'],
 			'kind'		=> $params['kind'],
 		];
+		if (isset($params['junctions'])) {
+			$task['junctions'] = $params['junctions'];
+		}
 
-		$iRet = $this->task_model->addTask($task);
+		$iRet = $this->customtask_model->addTask($task);
 		if ($iRet === -1) {
 			$this->errno = -1;
 			$this->errmsg = '创建任务失败';
@@ -121,7 +167,7 @@ class Task extends MY_Controller {
 	*/
 	public function createCycleTask(){
 		$user = 'admin';
-		$expect_start_time = '02:00:00 0';
+		$expect_exec_time = '02:00:00';
 
 		$params = $this->input->post();
 
@@ -129,9 +175,10 @@ class Task extends MY_Controller {
 		$validate = Validate::make($params,
 			[
 				'city_id'		=> 'nullunable',
+				'dates'			=> 'nullunable',
 				'start_time'	=> 'nullunable',
 				'end_time'		=> 'nullunable',
-				'type'			=> 'nullunable',
+				'kind'			=> 'nullunable',
 			]
 		);
 
@@ -142,13 +189,17 @@ class Task extends MY_Controller {
 		$task = [
 			'user'		=> $user,
 			'city_id'	=> $params['city_id'],
+			'dates'	=> $params['dates'],
 			'start_time'=> $params['start_time'],
 			'end_time'	=> $params['end_time'],
-			'type'		=> $params['type'],
-			'expect_start_time'		=> $expect_start_time,
+			'kind'		=> $params['kind'],
+			'expect_exec_time'		=> $expect_exec_time,
 		];
-		if (isset($params['expect_start_time'])) {
-			$task['expect_start_time'] = $params['expect_start_time'];
+		if (isset($params['expect_exec_time'])) {
+			$task['expect_exec_time'] = $params['expect_exec_time'];
+		}
+		if (isset($params['junctions'])) {
+			$task['junctions'] = $params['junctions'];
 		}
 
 		$iRet = $this->cycletask_model->addTask($task);
@@ -202,5 +253,10 @@ class Task extends MY_Controller {
 			$this->errno = -1;
 			$this->errmsg = '创建周期任务失败';
 		}
+	}
+
+	public function test() {
+		$aRet = $this->customtask_model->getall();
+		var_dump($aRet);
 	}
 }
