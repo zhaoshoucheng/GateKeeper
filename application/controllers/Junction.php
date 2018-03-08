@@ -68,5 +68,42 @@ class Junction extends MY_Controller {
 	/**
 	* 获取路口详情
 	*/
+	public function getJunctionDetail(){
+
+	}
+
+	/**
+	* 获取全城路口
+	* @param city_id 		Y 城市ID
+	* @return json
+	*/
+	public function getAllCityJunctions(){
+		$params = $this->input->post();
+
+		// 校验参数
+		$validate = Validate::make($params, ['city_id' => 'min:1']);
+		if(!$validate['status']){
+			return $this->response([], 100400, $validate['errmsg']);
+		}
+
+		$this->load->helper('http');
+
+		$data = [
+					'city_id'	=> (int)$params['city_id'],
+					'token'		=> $this->config->item('waymap_token'),
+					'offset'	=> 0,
+					'count'		=> 10000
+				];
+
+		$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/getList', $data);
+		if(!$res){
+			return $this->response([], 100500, 'Failed to connect to waymap service.');
+		}
+		$res = json_decode($res, true);
+		if($res['errorCode'] != 0){
+			return $this->response([], 100500, $res['errorMsg']);
+		}
+		return $this->response($res['data']);
+	}
 
 }
