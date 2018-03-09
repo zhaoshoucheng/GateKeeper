@@ -255,6 +255,36 @@ class Task extends MY_Controller {
 		}
 	}
 
+	public function getSuccTask() {
+		$user = 'admin';
+
+		$params = $this->input->post();
+
+		// 校验参数
+		$validate = Validate::make($params,
+			[
+				'city_id'		=> 'nullunable',
+			]
+		);
+
+		$city_id = $params['city_id'];
+
+		$tasks = array();
+		$types = [1, 2, 3];
+		foreach ($types as $task_type) {
+			$aRet = $this->task_model->getSuccTask($user, $city_id, 1, 2, $task_type);
+			if (!empty($aRet)) {
+				$tasks[$task_type] = [
+					'task_id' => $aRet[0]['conf_id'],
+					'dates' => $aRet[0]['dates'],
+				];
+			} else {
+				$tasks[$task_type] = [];
+			}
+		}
+		$this->output_data = $tasks;
+	}
+
 	public function test() {
 		$aRet = $this->customtask_model->getall();
 		var_dump($aRet);
