@@ -47,6 +47,27 @@ class Junction_model extends CI_Model {
 		return $res;
 	}
 
+	/**
+	* 获取路口指标详情
+	*/
+	public function getFlowQuotas($data){
+		$select = 'id, task_id, junction_id, time_point, result_comment, monments';
+
+		$time_point = trim($data['time_point']);
+		$where = 'task_id = ' . (int)$data['task_id']
+				. ' and junction_id = ' . trim($data['junction_id'])
+				. " and time_point = '{$time_point}'";
+
+		$res = $this->db->select($select)
+						->from($this->tb)
+						->where($where)
+						->get()
+						->row_array();
+
+		$res['monments'] = json_decode($res['monments'], true);
+		return $res;
+	}
+
 	private function selectColumns($key){
 		$select = '';
 		if(array_key_exists($key, $this->config->item('junction_quota_key'))){
