@@ -66,10 +66,30 @@ class Junction extends MY_Controller {
 	}
 
 	/**
-	* 获取路口详情
+	* 获取路口指标详情
+	* @param task_id 		Y 任务ID
+	* @param junction_id 	Y 路口ID
+	* @param time_point 	Y 时间点
+	* @return json
 	*/
-	public function getJunctionDetail(){
+	public function getJunctionQuotaDetail(){
+		$params = $this->input->post();
 
+		// 校验参数
+		$validate = Validate::make($params,
+			[
+				'task_id'		=> 'min:1',
+				'junction_id'	=> 'nullunable',
+				'time_point'	=> 'nullunable'
+			]
+		);
+		if(!$validate['status']){
+			return $this->response([], 100400, $validate['errmsg']);
+		}
+
+		$res = $this->junction_model->getFlowQuotas($params);
+
+		return $this->response($res);
 	}
 
 	/**
@@ -103,7 +123,32 @@ class Junction extends MY_Controller {
 		if($res['errorCode'] != 0){
 			return $this->response([], 100500, $res['errorMsg']);
 		}
-		return $this->response($res['data']);
+
+		$result = [];
+		foreach($res['data'] as $v){
+			$result[] = [
+					'junction_id'	=> $v['logic_junction_id'],
+					'lng'			=> $v['lng'],
+					'lat'			=> $v['lat'],
+					'city_id'		=> $v['city_id'],
+					'name'			=> $v['name']
+				];
+		}
+		return $this->response($result);
+	}
+
+	/**
+	* 获取路口路网数据--供getJunctionQuotaDetail使用
+	*/
+	private function getWayMapData(){
+
+	}
+
+	/**
+	* 获取路口配时数据-供getJunctionQuotaDetail使用
+	*/
+	private function getJunctionTimingData(){
+		
 	}
 
 }
