@@ -28,4 +28,46 @@ class Cycletask_model extends CI_Model
     //     $bRet = $this->its_tool->where('id', $task_id)->update($this->_table, $task);
     //     return $bRet;
     // }
+    
+    function process() {
+        $this->its_tool->trans_start();
+        // 获取所有待投递的任务
+        $now = time();
+        $today = strtotime(date('Y-m-d'), $now);
+        $time = date('H:i:s', $now);
+        // var_dump($today);
+        // var_dump($time);
+        // return;
+        $query = $this->its_tool->select('*')->from($this->_table)->where('last_exec_time <', $today)->where('expect_exec_time <', $time)->order_by('id')->get();
+        $result = $query->result_array();
+        // var_dump($result);
+        // return;
+        if (empty($result)) {
+            $this->its_tool->trans_complete();
+            return;
+        }
+        foreach ($result as $value) {
+            $conf_id = $value['id'];
+            // 任务状态置为已投递
+            $query = $this->its_tool->where('id', $conf_id)->update($this->_table, ['last_exec_time' => $now]);
+            // task_result表插入一条待执行任务
+            $task = [
+                'city_id' => $value['city_id'],
+                'user' => $value['user'],
+                'dates' => $value['dates'],
+                'start_time' => $value['start_time'],
+                'end_time' => $value['end_time'],
+                'type' => 1,
+                'conf_id' => $conf_id,
+                'kind' => $value['kind'],
+                'junctions' => $value['junctions'],
+                'rate' => 0,
+                'status' => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+            $query = $this->its_tool->insert('task_result', $task);
+        }
+        $this->its_tool->trans_complete();
+    }
 }

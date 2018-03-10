@@ -22,7 +22,7 @@ class Cron extends CI_Controller {
 	}
 
 	public function scan_cycle_task() {
-
+		$this->cycletask_model->process();
 	}
 
 	public function start() {
