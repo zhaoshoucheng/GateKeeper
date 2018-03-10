@@ -255,6 +255,11 @@ class Task extends MY_Controller {
 		}
 	}
 
+	/**
+	* 获取最近执行成功的任务id
+	* @param city_id	Y 城市ID
+	* @return json
+	*/
 	public function getSuccTask() {
 		$user = 'admin';
 
