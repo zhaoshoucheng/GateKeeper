@@ -26,6 +26,25 @@ class Cron extends CI_Controller {
 	}
 
 	public function start() {
+		for ($i = 0; ; ) {
+			$task = $this->task_model->process();
+			if ($task === false) {
+				$i ++;
+				if ($i === 2) {
+					break;
+				}
+				sleep(10 * 60);
+			} else {
+				var_dump($task);
+				$bRet = $this->run($task);
+				if ($bRet === false) {
+					$this->task_model->updateTask($task['id'], ['status' => -1, 'task_end_time' => time()]);
+				}
+			}
+		}
+	}
 
+	public function run($task) {
+		return true;
 	}
 }

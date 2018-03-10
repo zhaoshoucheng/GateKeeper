@@ -37,4 +37,23 @@ class Task_model extends CI_Model
         // var_dump($this->its_tool->last_query());
         return $aRet;
     }
+
+    function process() {
+        $this->its_tool->trans_start();
+        // 取出一条待执行任务
+        $sql = "select * from task_result where status = 0 order by id limit 1 for update";
+        $query = $this->its_tool->query($sql);
+        $result = $query->result_array();
+        if (empty($result)) {
+            $this->its_tool->trans_complete();
+            return false;
+        }
+        
+        $task = $result[0];
+        $task_id = $task['id'];
+        // 任务状态置为已投递
+        $query = $this->its_tool->where('id', $task_id)->update($this->_table, ['status' => 1, 'task_start_time' => time()]);
+        $this->its_tool->trans_complete();
+        return $task;
+    }
 }
