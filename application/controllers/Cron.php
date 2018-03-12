@@ -3,6 +3,7 @@
 crontab
 解释周期任务配置，生成新的运行任务，设置为等待运行状态
 遍历任务状态表，获取等待运行的任务，启动任务
+*2 * * * * cd /home/xiaoju/webroot/ipd-cloud/application/itstool; /home/xiaoju/php/bin/php index.php cron start > /dev/null 2>&1
 ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
@@ -45,6 +46,9 @@ class Cron extends CI_Controller {
 	}
 
 	public function run($task) {
+		// thrift 路网
+		// thritf 启动
+		sleep(5 * 60);
 		return true;
 	}
 }

@@ -109,7 +109,6 @@ class Task extends MY_Controller {
 	* @param dates 		Y 评估日期 多个用逗号隔开
 	* @param start_time Y 评估开始时间 00:00
 	* @param end_time 	Y 评估结束时间 00:00
-	* @param type 		Y 1 周期任务；2 自定义任务
 	* @param kind 		Y 1 指标任务；2 诊断任务
 	* @return json
 	*/
@@ -151,7 +150,7 @@ class Task extends MY_Controller {
 			$this->errmsg = '创建任务失败';
 		} else {
 			$this->output_data = [
-				'task_id' => $iRet,
+				'custom_conf_id' => $iRet,
 			];
 		}
 	}
@@ -159,10 +158,11 @@ class Task extends MY_Controller {
 	/**
 	* 创建周期任务
 	* @param city_id	Y 城市ID
+	* @param dates 		Y 评估日期 多个用逗号隔开
 	* @param start_time Y 评估开始时间 00:00
 	* @param end_time 	Y 评估结束时间 00:00
 	* @param type	 	Y 1 前一天；2 前一自然周工作日/周末；3 前四个周*
-	* @param expect_start_time	 	N 周期望开始时间 hh:mm:ss ms
+	* @param expect_exec_time	 	N 周期望开始时间 hh:mm:ss
 	* @return json
 	*/
 	public function createCycleTask(){
@@ -219,7 +219,7 @@ class Task extends MY_Controller {
 	* @param task_start_time 	N 任务实际开始时间
 	* @param task_end_time 		N 任务实际结束时间
 	* @param rate	 			N 进度
-	* @param status	 			N 状态
+	* @param status	 			N 执行状态，0 待执行；1 执行中；2 成功；-1 失败
 	* @param task_comment	 	N 注释
 	* @return json
 	*/
