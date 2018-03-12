@@ -26,7 +26,7 @@ class Task extends MY_Controller {
 	* @return json
 	*/
 	public function getList(){
-		$user = 'ningxiangbing';
+		$user = 'admin';
 
 		$params = $this->input->post();
 
@@ -224,6 +224,7 @@ class Task extends MY_Controller {
 	* @return json
 	*/
 	public function UpdateTaskStatus(){
+		$user = 'admin';
 
 		$params = $this->input->post();
 
