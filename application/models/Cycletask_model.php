@@ -63,6 +63,8 @@ class Cycletask_model extends CI_Model
                 'junctions' => $value['junctions'],
                 'rate' => 0,
                 'status' => 0,
+                'except_try_time' => $now,
+                'try_times' => 0,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ];

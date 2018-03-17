@@ -80,7 +80,7 @@ class Task extends MY_Controller {
 		foreach ($cycle_task_tmp as $task) {
 			$cycle_task[] = array(
 				'task_id' => $task['id'],
-				'dates' => $task['dates'],
+				'dates' => explode(',', $task['dates']),
 				'time_range' => $task['start_time'] . '-' . $task['end_time'],
 				'junctions' => ($task['junctions'] === '' or $task['junctions'] === null) ? '全城' : '路口',
 				'status' => ($task['status'] == -1) ? '失败' : $task['rate'] . '%',
@@ -90,7 +90,7 @@ class Task extends MY_Controller {
 		foreach ($custom_task_tmp as $task) {
 			$custom_task[] = array(
 				'task_id' => $task['id'],
-				'dates' => $task['dates'],
+				'dates' => explode(',', $task['dates']),
 				'time_range' => $task['start_time'] . '-' . $task['end_time'],
 				'junctions' => ($task['junctions'] === '' or $task['junctions'] === null) ? '全城' : '路口',
 				'status' => ($task['status'] == -1) ? '失败' : $task['rate'] . '%',
@@ -216,9 +216,48 @@ class Task extends MY_Controller {
 	/**
 	* 修改运行任务状态信息
 	* @param task_id			Y 任务ID
-	* @param task_start_time 	N 任务实际开始时间
-	* @param task_end_time 		N 任务实际结束时间
 	* @param rate	 			N 进度
+	* @return json
+	*/
+	public function UpdateTaskRate(){
+		$user = 'admin';
+
+		$params = $this->input->post();
+
+		// 校验参数
+		$validate = Validate::make($params,
+			[
+				'task_id'		=> 'nullunable',
+				'rate'			=> 'nullunable',
+			]
+		);
+
+		if(!$validate['status']){
+			return $this->response(array(), -1, $validate['errmsg']);
+		}
+
+		$task_id = $params['task_id'];
+		$rate = $params['rate'];
+
+		// $task = array();
+		// $keys = ['task_start_time', 'task_end_time', 'rate', 'status', 'task_comment'];
+		// foreach ($keys as $key) {
+		// 	if (isset($params[$key])) {
+		// 		$task[$key] = $params[$key];
+		// 	}
+		// }
+
+		$bRet = $this->task_model->updateTask($task_id, ['rate' => $rate]);
+		if ($bRet === false) {
+			$this->errno = -1;
+			$this->errmsg = '更新任务进度失败';
+		}
+	}
+
+	/**
+	* 修改运行任务状态信息
+	* @param task_id			Y 任务ID
+	* @param ider	 			N 身份	0 mapflow, 1 calcute
 	* @param status	 			N 执行状态，0 待执行；1 执行中；2 成功；-1 失败
 	* @param task_comment	 	N 注释
 	* @return json
@@ -232,6 +271,8 @@ class Task extends MY_Controller {
 		$validate = Validate::make($params,
 			[
 				'task_id'		=> 'nullunable',
+				'ider'			=> 'nullunable',
+				'status'		=> 'nullunable',
 			]
 		);
 
@@ -240,16 +281,23 @@ class Task extends MY_Controller {
 		}
 
 		$task_id = $params['task_id'];
+		$ider = $params['ider'];
+		$status = $params['status'];
+		$task_comment = $params['task_comment'];
 
-		$task = array();
-		$keys = ['task_start_time', 'task_end_time', 'rate', 'status', 'task_comment'];
-		foreach ($keys as $key) {
-			if (isset($params[$key])) {
-				$task[$key] = $params[$key];
-			}
-		}
+		// $ider_to_id = [
+		// 	'mapflow' => 0,
+		// 	'calcute' => 1,
+		// ];
+		// if (isset($ider_to_id[$ider])) {
+		// 	$ider = $ider_to_id[$ider];
+		// } else {
+		// 	$this->errno = -1;
+		// 	$this->errmsg = '参数错误';
+		// }
+		$ider = intval($ider);
 
-		$bRet = $this->task_model->updateTask($task_id, $task);
+		$bRet = $this->task_model->updateTaskStatus($task_id, $ider, $status, $task_comment);
 		if ($bRet === false) {
 			$this->errno = -1;
 			$this->errmsg = '创建周期任务失败';
@@ -276,19 +324,31 @@ class Task extends MY_Controller {
 		$city_id = $params['city_id'];
 
 		$tasks = array();
-		$types = [1, 2, 3];
-		foreach ($types as $task_type) {
+		$types = [1 => 'last_day', 2 => 'last_week', 3 => 'last_month'];
+		foreach ($types as $task_type => $value) {
 			$aRet = $this->task_model->getSuccTask($user, $city_id, 1, 2, $task_type);
 			if (!empty($aRet)) {
-				$tasks[$task_type] = [
+				$tasks[$value] = [
 					'task_id' => $aRet[0]['conf_id'],
 					'dates' => $aRet[0]['dates'],
 				];
 			} else {
-				$tasks[$task_type] = [];
+				$tasks[$value] = [];
 			}
 		}
 		$this->output_data = $tasks;
+	}
+
+	/**
+	* 设置十进制数位
+	* @param i
+	* @param bit
+	* @return int
+	*/
+	private function setBit($i, $bit) {
+		$weight = pow(10, $bit);
+		$bit_value = $i / $weight % 10;
+		return $bit - $bit_value * $weight + $bit * $weight;
 	}
 
 	public function test() {

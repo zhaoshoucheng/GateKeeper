@@ -5,10 +5,15 @@ class Task_model extends CI_Model
 {
     private $_table = 'task_result';
 
+    private $max_try_times = 10;
+    private $completed_status = 33;
+
     function __construct() {
         parent::__construct();
         $this->its_tool = $this->load->database('default', true);
 
+        $this->load->helper('http');
+        $this->load->config('nconf');
     }
 
     function addTask($task) {
@@ -26,6 +31,49 @@ class Task_model extends CI_Model
         return $bRet;
     }
 
+    function updateTaskStatus($task_id, $ider, $status, $comment = null) {
+        try {
+            $this->its_tool->trans_start();
+
+            $sql = "select * from task_result where id = ? for update";
+            $query = $this->its_tool->query($sql, array($task_id));
+            $result = $query->result_array();
+            if (empty($result)) {
+                // 获取到的任务已经被处理了
+                $this->its_tool->trans_complete();
+                return false;
+            }
+
+            $task_ = $result[0];
+            $task_status = intval($task['status']);
+            $task_comment = $task['task_comment'];
+
+            $weight = pow(10, $ider);
+            $bit_value = $task_status / $weight % 10;
+            $task_status = $task_status - $bit_value * $weight + $status * $weight;
+
+            $task['status'] = $task_status;
+            
+
+            if ($comment !== null) {
+                if ($task_comment === null or $task_comment === '') {
+                    $data[$ider][$status] = $comment;
+                } else {
+                    $data = json_decode($task_comment, true);
+                    $data[$ider][$status] = $comment;
+                }
+                $task['task_comment'] = json_encode($data);
+            }
+
+            $this->updateTask($task_id, $task);
+            $this->its_tool->trans_complete();
+            return true;
+        } catch (\Exception $e) {
+            $this->its_tool->trans_rollback();
+            return false;
+        }
+    }
+
     function getTask($user, $city_id, $type, $kind, $cols = '*') {
         $aRet = $this->its_tool->select($cols)->from($this->_table)->where('user', $user)->where('city_id', $city_id)->where('kind', $kind)->where('type', $type)->order_by('id', 'DESC')->get()->result_array();
         // var_dump($this->its_tool->last_query());
@@ -39,21 +87,68 @@ class Task_model extends CI_Model
     }
 
     function process() {
-        $this->its_tool->trans_start();
-        // 取出一条待执行任务
-        $sql = "select * from task_result where status = 0 order by id limit 1 for update";
-        $query = $this->its_tool->query($sql);
-        $result = $query->result_array();
-        if (empty($result)) {
+        $now = time();
+        
+        try {
+            $this->its_tool->trans_start();
+
+            // 所有超过重试次数任务设置为失败
+            $query = $this->its_tool->where('try_times > ', $this->max_try_times)->update($this->_table, ['status' => -1, 'task_end_time' => $now]);
+
+            // 取出一条待执行任务
+            $query = $this->its_tool->select('*')->from($this->_table)->where('status', $this->completed_status)->where('expect_try_time <', $now)->where('try_times <=', $this->max_try_times)->limit(1)->get();
+            $result = $query->result_array();
+            if (empty($result)) {
+                // 木有待投递任务
+                $this->its_tool->trans_complete();
+                return true;
+            }
+
+            $task = $result[0];
+            $task_id = $task['id'];
+            $sql = "select * from task_result where id = ? and status = ? expect_try_time < ? and try_time <= ? for update";
+            $query = $this->its_tool->query($sql, array($task_id, $this->completed_status, $now, $this->max_try_times));
+            $result = $query->result_array();
+            if (empty($result)) {
+                // 获取到的任务已经被处理了
+                $this->its_tool->trans_complete();
+                return true;
+            }
+
+            $task = $result[0];
+            $city_id = $task['city_id'];
+            $dates = $task['dates'];
+            $start_time = $task['start_time'];
+            $end_time = $task['end_time'];
+
+            $ret = $this->getDateVersion($dates);
+            if ($ret['errorCode'] == -1) {
+                // maptypeversion 未就绪
+                $this->updateTask($task_id, array(
+                    'expect_try_time' => $time() + 10 * 60,
+                    'try_times' => intval($task['try_times']) + 1,
+                ));
+                $this->its_tool->trans_complete();
+                return true;
+            }
+
+            // 任务状态置为已投递
+            $query = $this->its_tool->where('id', $task_id)->update($this->_table, ['status' => 1, 'task_start_time' => time()]);
             $this->its_tool->trans_complete();
+            return $task;
+        } catch (\Exception $e) {
+            $this->its_tool->trans_rollback();
             return false;
         }
-        
-        $task = $result[0];
-        $task_id = $task['id'];
-        // 任务状态置为已投递
-        $query = $this->its_tool->where('id', $task_id)->update($this->_table, ['status' => 1, 'task_start_time' => time()]);
-        $this->its_tool->trans_complete();
-        return $task;
+    }
+
+    function getDateVersion($date) {
+        $data = [
+                    // 'date'  => '2017-06-01,2017-10-10,2018-03-10',
+                    'date' => $date,
+                    'token'     => $this->config->item('waymap_token'),
+                ];
+        $res = httpPOST($this->config->item('waymap_interface') . '/flow-duration/map/getDateVersion', $data);
+        return $res;
     }
 }

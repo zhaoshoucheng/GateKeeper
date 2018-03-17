@@ -60,6 +60,8 @@ class Customtask_model extends CI_Model
                 'junctions' => $value['junctions'],
                 'rate' => 0,
                 'status' => 0,
+                'except_try_time' => time(),
+                'try_times' => 0,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ];

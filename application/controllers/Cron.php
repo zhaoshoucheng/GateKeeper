@@ -12,6 +12,7 @@ class Cron extends CI_Controller {
 	public function __construct(){
 		parent::__construct();
 		$this->load->helper('http');
+		$this->load->config('nconf');
 
 		$this->load->model('cycletask_model');
 		$this->load->model('customtask_model');
@@ -29,7 +30,7 @@ class Cron extends CI_Controller {
 	public function start() {
 		for ($i = 0; ; ) {
 			$task = $this->task_model->process();
-			if ($task === false) {
+			if ($task === true or $task === false) {
 				$i ++;
 				if ($i === 2) {
 					break;
@@ -37,8 +38,18 @@ class Cron extends CI_Controller {
 				sleep(10 * 60);
 			} else {
 				var_dump($task);
-				$bRet = $this->run($task);
-				if ($bRet === false) {
+				try {
+					$trace_id = uniqid();
+					$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
+					// process_flow
+					// process_index
+					$task->area_flow_process($city_id, $task_id, $trace_id, $hdfs_dir, array_values($dateVersion));
+					$task->caculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion);
+					$bRet = $this->run($task);
+					if ($bRet === false) {
+						
+					}
+				} catch (\Exception $e) {
 					$this->task_model->updateTask($task['id'], ['status' => -1, 'task_end_time' => time()]);
 				}
 			}
