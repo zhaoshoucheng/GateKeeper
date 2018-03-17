@@ -17,9 +17,9 @@ $config['task_interface'] = 'http://' . $task_server . ':' . $task_port;
 $config['task_type'] = [0=>'周期任务', 1=>'自定义任务'];
 
 // 路网接口服务器地址
-$waymap_server = '10.94.105.126';
+$waymap_server = '100.90.164.31';
 // 路网接口服务器端口
-$waymap_port = '8887';
+$waymap_port = '8001';
 // 路网接口地址
 $config['waymap_interface'] = 'http://' . $waymap_server . ":" . $waymap_port;
 // 路网接口token
