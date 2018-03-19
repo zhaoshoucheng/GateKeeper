@@ -30,7 +30,7 @@ class Cycletask_model extends CI_Model
     // }
     
     function process() {
-        $this->its_tool->trans_start();
+        $this->its_tool->trans_begin();
         // 获取所有待投递的任务
         $now = time();
         $today = strtotime(date('Y-m-d'), $now);
@@ -43,7 +43,7 @@ class Cycletask_model extends CI_Model
         // var_dump($result);
         // return;
         if (empty($result)) {
-            $this->its_tool->trans_complete();
+            $this->its_tool->trans_rollback();
             return;
         }
         foreach ($result as $value) {
@@ -70,6 +70,6 @@ class Cycletask_model extends CI_Model
             ];
             $query = $this->its_tool->insert('task_result', $task);
         }
-        $this->its_tool->trans_complete();
+        $this->its_tool->trans_commit();
     }
 }

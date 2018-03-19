@@ -40,7 +40,7 @@ class Task_model extends CI_Model
             $result = $query->result_array();
             if (empty($result)) {
                 // 获取到的任务已经被处理了
-                $this->its_tool->trans_complete();
+                $this->its_tool->trans_begin();
                 return false;
             }
 
@@ -66,7 +66,7 @@ class Task_model extends CI_Model
             }
 
             $this->updateTask($task_id, $task);
-            $this->its_tool->trans_complete();
+            $this->its_tool->trans_commit();
             return true;
         } catch (\Exception $e) {
             $this->its_tool->trans_rollback();
@@ -90,7 +90,7 @@ class Task_model extends CI_Model
         $now = time();
         
         try {
-            $this->its_tool->trans_start();
+            $this->its_tool->trans_begin();
 
             // 所有超过重试次数任务设置为失败
             $query = $this->its_tool->where('try_times > ', $this->max_try_times)->update($this->_table, ['status' => -1, 'task_end_time' => $now]);
@@ -100,7 +100,7 @@ class Task_model extends CI_Model
             $result = $query->result_array();
             if (empty($result)) {
                 // 木有待投递任务
-                $this->its_tool->trans_complete();
+                $this->its_tool->trans_rollback();
                 return true;
             }
 
@@ -111,7 +111,7 @@ class Task_model extends CI_Model
             $result = $query->result_array();
             if (empty($result)) {
                 // 获取到的任务已经被处理了
-                $this->its_tool->trans_complete();
+                $this->its_tool->trans_rollback();
                 return true;
             }
 
@@ -128,13 +128,13 @@ class Task_model extends CI_Model
                     'expect_try_time' => $time() + 10 * 60,
                     'try_times' => intval($task['try_times']) + 1,
                 ));
-                $this->its_tool->trans_complete();
+                $this->its_tool->trans_rollback();
                 return true;
             }
 
             // 任务状态置为已投递
             $query = $this->its_tool->where('id', $task_id)->update($this->_table, ['status' => 1, 'task_start_time' => time()]);
-            $this->its_tool->trans_complete();
+            $this->its_tool->trans_commit();
             return $task;
         } catch (\Exception $e) {
             $this->its_tool->trans_rollback();

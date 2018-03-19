@@ -35,12 +35,12 @@ class Customtask_model extends CI_Model
     }
 
     function process() {
-        $this->its_tool->trans_start();
+        $this->its_tool->trans_begin();
         // 获取所有待投递的任务
         $query = $this->its_tool->select('*')->from($this->_table)->where('status', 0)->order_by('id')->get();
         $result = $query->result_array();
         if (empty($result)) {
-            $this->its_tool->trans_complete();
+            $this->its_tool->trans_rollback();
             return;
         }
         foreach ($result as $value) {
@@ -67,6 +67,6 @@ class Customtask_model extends CI_Model
             ];
             $query = $this->its_tool->insert('task_result', $task);
         }
-        $this->its_tool->trans_complete();
+        $this->its_tool->trans_commit();
     }
 }
