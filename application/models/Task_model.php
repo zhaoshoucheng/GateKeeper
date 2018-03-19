@@ -27,6 +27,7 @@ class Task_model extends CI_Model
     }
 
     function updateTask($task_id, $task) {
+        $task['updated_at'] = date('Y-m-d H:i:s');
         $bRet = $this->its_tool->where('id', $task_id)->update($this->_table, $task);
         return $bRet;
     }
@@ -39,8 +40,7 @@ class Task_model extends CI_Model
             $query = $this->its_tool->query($sql, array($task_id));
             $result = $query->result_array();
             if (empty($result)) {
-                // 获取到的任务已经被处理了
-                $this->its_tool->trans_begin();
+                $this->its_tool->trans_rollback();
                 return false;
             }
 
@@ -50,9 +50,7 @@ class Task_model extends CI_Model
 
             $weight = pow(10, $ider);
             $bit_value = $task_status / $weight % 10;
-            $task_status = $task_status - $bit_value * $weight + $status * $weight;
-
-            $task['status'] = $task_status;
+            $task['status'] = $task_status - $bit_value * $weight + $status * $weight;
             
 
             if ($comment !== null) {
@@ -93,10 +91,10 @@ class Task_model extends CI_Model
             $this->its_tool->trans_begin();
 
             // 所有超过重试次数任务设置为失败
-            $query = $this->its_tool->where('try_times > ', $this->max_try_times)->update($this->_table, ['status' => -1, 'task_end_time' => $now]);
+            $query = $this->its_tool->where('try_times > ', $this->max_try_times)->update($this->_table, ['status' => -1, 'task_end_time' => $now, 'updated_at' => $now]);
 
             // 取出一条待执行任务
-            $query = $this->its_tool->select('*')->from($this->_table)->where('status', $this->completed_status)->where('expect_try_time <', $now)->where('try_times <=', $this->max_try_times)->limit(1)->get();
+            $query = $this->its_tool->select('*')->from($this->_table)->where('status', 0)->where('task_start_time', 0)->where('expect_try_time <=', $now)->where('try_times <=', $this->max_try_times)->limit(1)->get();
             $result = $query->result_array();
             if (empty($result)) {
                 // 木有待投递任务
@@ -106,8 +104,8 @@ class Task_model extends CI_Model
 
             $task = $result[0];
             $task_id = $task['id'];
-            $sql = "select * from task_result where id = ? and status = ? expect_try_time < ? and try_time <= ? for update";
-            $query = $this->its_tool->query($sql, array($task_id, $this->completed_status, $now, $this->max_try_times));
+            $sql = "select * from task_result where id = ? and status = ? and task_start_time = ? and expect_try_time <= ? and try_times <= ? for update";
+            $query = $this->its_tool->query($sql, array($task_id, 0, 0, $now, $this->max_try_times));
             $result = $query->result_array();
             if (empty($result)) {
                 // 获取到的任务已经被处理了
@@ -122,18 +120,19 @@ class Task_model extends CI_Model
             $end_time = $task['end_time'];
 
             $ret = $this->getDateVersion($dates);
+            $ret = json_decode($ret, true);
             if ($ret['errorCode'] == -1) {
                 // maptypeversion 未就绪
                 $this->updateTask($task_id, array(
                     'expect_try_time' => $time() + 10 * 60,
                     'try_times' => intval($task['try_times']) + 1,
                 ));
-                $this->its_tool->trans_rollback();
+                $this->its_tool->trans_commit();
                 return true;
             }
 
             // 任务状态置为已投递
-            $query = $this->its_tool->where('id', $task_id)->update($this->_table, ['status' => 1, 'task_start_time' => time()]);
+            $query = $this->its_tool->where('id', $task_id)->update($this->_table, ['task_start_time' => time()]);
             $this->its_tool->trans_commit();
             return $task;
         } catch (\Exception $e) {

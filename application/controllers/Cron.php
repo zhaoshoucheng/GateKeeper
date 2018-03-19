@@ -6,6 +6,8 @@ crontab
 *2 * * * * cd /home/xiaoju/webroot/ipd-cloud/application/itstool; /home/xiaoju/php/bin/php index.php cron start > /dev/null 2>&1
 ***************************************************************/
 
+// use Didi\Cloud\ItsMap\Task;
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Cron extends CI_Controller {
@@ -37,29 +39,23 @@ class Cron extends CI_Controller {
 				}
 				sleep(10 * 60);
 			} else {
-				var_dump($task);
+				print_r($task);
 				try {
 					$trace_id = uniqid();
+					$task_id = $task['id'];
+					$start_time = $task['start_time'];
+					$end_time = $task['end_time'];
 					$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
 					// process_flow
 					// process_index
-					$task->area_flow_process($city_id, $task_id, $trace_id, $hdfs_dir, array_values($dateVersion));
-					$task->caculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion);
-					$bRet = $this->run($task);
-					if ($bRet === false) {
-						
-					}
+					// $task = new Task();
+					// $task->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values($dateVersion));
+					// $task->caculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion);
+					$this->task_model->updateTask($task['id'], ['trace_id' => $trace_id, 'task_end_time' => time()]);
 				} catch (\Exception $e) {
 					$this->task_model->updateTask($task['id'], ['status' => -1, 'task_end_time' => time()]);
 				}
 			}
 		}
-	}
-
-	public function run($task) {
-		// thrift 路网
-		// thritf 启动
-		sleep(5 * 60);
-		return true;
 	}
 }

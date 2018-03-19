@@ -35,38 +35,45 @@ class Customtask_model extends CI_Model
     }
 
     function process() {
-        $this->its_tool->trans_begin();
-        // 获取所有待投递的任务
-        $query = $this->its_tool->select('*')->from($this->_table)->where('status', 0)->order_by('id')->get();
-        $result = $query->result_array();
-        if (empty($result)) {
+        try {
+            $this->its_tool->trans_begin();
+            // 获取所有待投递的任务
+            // $query = $this->its_tool->select('*')->from($this->_table)->where('status', 0)->order_by('id')->get();
+            $sql = "select * from custom_task where status = 0 order by id for update";
+            $query = $this->its_tool->query($sql);
+            $result = $query->result_array();
+            if (empty($result)) {
+                $this->its_tool->trans_rollback();
+                return;
+            }
+            foreach ($result as $value) {
+                $conf_id = $value['id'];
+                // 任务状态置为已投递
+                $query = $this->its_tool->where('id', $conf_id)->update($this->_table, ['status' => 1]);
+                // task_result表插入一条待执行任务
+                $task = [
+                    'city_id' => $value['city_id'],
+                    'user' => $value['user'],
+                    'dates' => $value['dates'],
+                    'start_time' => $value['start_time'],
+                    'end_time' => $value['end_time'],
+                    'type' => 2,
+                    'conf_id' => $conf_id,
+                    'kind' => $value['kind'],
+                    'junctions' => $value['junctions'],
+                    'rate' => 0,
+                    'status' => 0,
+                    'expect_try_time' => time(),
+                    'try_times' => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+                $query = $this->its_tool->insert('task_result', $task);
+            }
+            $this->its_tool->trans_commit();
+        } catch (\Exception $e) {
             $this->its_tool->trans_rollback();
-            return;
         }
-        foreach ($result as $value) {
-            $conf_id = $value['id'];
-            // 任务状态置为已投递
-            $query = $this->its_tool->where('id', $conf_id)->update($this->_table, ['status' => 1]);
-            // task_result表插入一条待执行任务
-            $task = [
-                'city_id' => $value['city_id'],
-                'user' => $value['user'],
-                'dates' => $value['dates'],
-                'start_time' => $value['start_time'],
-                'end_time' => $value['end_time'],
-                'type' => 2,
-                'conf_id' => $conf_id,
-                'kind' => $value['kind'],
-                'junctions' => $value['junctions'],
-                'rate' => 0,
-                'status' => 0,
-                'except_try_time' => time(),
-                'try_times' => 0,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
-            $query = $this->its_tool->insert('task_result', $task);
-        }
-        $this->its_tool->trans_commit();
+        
     }
 }

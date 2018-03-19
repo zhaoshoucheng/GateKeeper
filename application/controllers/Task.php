@@ -338,21 +338,4 @@ class Task extends MY_Controller {
 		}
 		$this->output_data = $tasks;
 	}
-
-	/**
-	* 设置十进制数位
-	* @param i
-	* @param bit
-	* @return int
-	*/
-	private function setBit($i, $bit) {
-		$weight = pow(10, $bit);
-		$bit_value = $i / $weight % 10;
-		return $bit - $bit_value * $weight + $bit * $weight;
-	}
-
-	public function test() {
-		$aRet = $this->customtask_model->getall();
-		var_dump($aRet);
-	}
 }
