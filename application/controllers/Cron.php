@@ -6,9 +6,11 @@ crontab
 *2 * * * * cd /home/xiaoju/webroot/ipd-cloud/application/itstool; /home/xiaoju/php/bin/php index.php cron start > /dev/null 2>&1
 ***************************************************************/
 
-// use Didi\Cloud\ItsMap\Task;
 
 defined('BASEPATH') OR exit('No direct script access allowed');
+
+require_once '../../vendor/autoload.php';
+// use Didi\Cloud\ItsMap\Task;
 
 class Cron extends CI_Controller {
 	public function __construct(){
@@ -43,6 +45,7 @@ class Cron extends CI_Controller {
 				try {
 					$trace_id = uniqid();
 					$task_id = $task['id'];
+					$city_id = $task['city_id'];
 					$start_time = $task['start_time'];
 					$end_time = $task['end_time'];
 					$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
@@ -50,12 +53,30 @@ class Cron extends CI_Controller {
 					// process_index
 					// $task = new Task();
 					// $task->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values($dateVersion));
-					// $task->caculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion);
+					// $task->calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion);
 					$this->task_model->updateTask($task['id'], ['trace_id' => $trace_id, 'task_end_time' => time()]);
 				} catch (\Exception $e) {
 					$this->task_model->updateTask($task['id'], ['status' => -1, 'task_end_time' => time()]);
 				}
 			}
 		}
+	}
+
+	public function test() {
+		$trace_id = uniqid();
+		$task_id = '123456';
+		$start_time = '07:00';
+		$end_time = '09:00';
+		$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
+		$dateVersion = [
+			'2018-01-01' => '2017120116',
+		];
+
+		$task = new Task();
+		$task->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values($dateVersion));
+		$dateVersion = [
+			'20180101' => '2017120116',
+		];
+		$task->calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion);
 	}
 }
