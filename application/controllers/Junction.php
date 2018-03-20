@@ -326,14 +326,14 @@ class Junction extends MY_Controller {
 		}
 
 		$result = [];
-		foreach($map as $k=>$v){
+		foreach($map['data'] as $k=>$v){
 			$result[$k]['logic_flow_id'] = $v['logic_flow_id'];
-			$result[$k]['flow_label'] = $phase_position[$v['logic_flow_id']];
+			$result[$k]['flow_label'] = isset($phase_position[$v['logic_flow_id']]) ? $phase_position[$v['logic_flow_id']] : '';
 			$result[$k]['lng'] = $v['inlink_info']['s_node']['lng'];
 			$result[$k]['lat'] = $v['inlink_info']['s_node']['lat'];
 		}
 
-		echo "<pre>";print_r($result);exit;
+		//echo "<pre>";print_r($result);exit;
 		return $this->response($result);
 
 	}
