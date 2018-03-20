@@ -15,24 +15,23 @@ class Junction extends MY_Controller {
 	}
 
 	/**
-	* 获取全城路口信息
+	* 评估-获取全城路口信息
 	* @param task_id		Y 任务ID
 	* @param city_id 		Y 城市ID
 	* @param type 			Y 指标计算类型 0：统合 1：时间点
 	* @param time_point		N 评估时间点 指标计算类型为1时非空
-	* @param confidence		Y 置信度 多个用|隔开
+	* @param confidence		Y 置信度
 	* @param quota_key		Y 指标key
 	* @return json
 	*/
 	public function getAllCityJunctionInfo(){
 		$params = $this->input->post();
-
 		// 校验参数
 		$validate = Validate::make($params,
 			[
 				'task_id'		=> 'min:1',
 				'type'			=> 'min:0',
-				'confidence'	=> 'nullunable',
+				'city_id'		=> 'min:1',
 				'quota_key'		=> 'nullunable'
 			]
 		);
@@ -42,17 +41,22 @@ class Junction extends MY_Controller {
 
 		$data['task_id'] = (int)$params['task_id'];
 		$data['type'] = (int)$params['type'];
+		$data['city_id'] = $params['city_id'];
 		$data['time_point'] = trim($params['time_point']);
 
 		if($data['type'] == 1 && empty(trim($data['time_point']))){
 			return $this->response([], 100400, 'The time_point cannot be empty.');
 		}
 
-		$data['confidence'] = array_filter(explode("|", trim($params['confidence'])));
-		foreach($data['confidence'] as $v){
-			if(!array_key_exists($v, $this->config->item('confidence'))){
-				return $this->response([], 100400, 'The value of confidence ' . $v . ' is wrong.');
+		$data['confidence'] = $params['confidence'];
+		if(is_array($data['confidence']) && count($data['confidence']) >= 1){
+			foreach($data['confidence'] as $v){
+				if(!array_key_exists($v, $this->config->item('confidence'))){
+					return $this->response([], 100400, 'The value of confidence ' . $v . ' is wrong.');
+				}
 			}
+		}else{
+			return $this->response([], 100400, 'The confidence cannot be empty and must be array.');
 		}
 
 		$data['quota_key'] = strtolower(trim($params['quota_key']));
@@ -68,8 +72,10 @@ class Junction extends MY_Controller {
 	/**
 	* 获取路口指标详情
 	* @param task_id 		Y 任务ID
+	* @param dates 			Y 评估/诊断日期
 	* @param junction_id 	Y 路口ID
 	* @param time_point 	Y 时间点
+	* @param type 			Y 详情类型 1：指标详情页 2：诊断详情页
 	* @return json
 	*/
 	public function getJunctionQuotaDetail(){
@@ -80,75 +86,259 @@ class Junction extends MY_Controller {
 			[
 				'task_id'		=> 'min:1',
 				'junction_id'	=> 'nullunable',
-				'time_point'	=> 'nullunable'
+				'time_point'	=> 'nullunable',
+				'diagnose_key'	=> 'nullunable',
+				'type'			=> 'min:1'
 			]
 		);
 		if(!$validate['status']){
 			return $this->response([], 100400, $validate['errmsg']);
 		}
 
+		if(!is_array($params['dates']) || count($params['dates']) < 1){
+			return $this->response([], 100400, 'The dates cannot be empty and must be array.');
+		}
+
+		if(!array_key_exists(trim($params['diagnose_key']), $this->config->item('diagnose_key'))){
+			return $this->response([], 100400, 'The value of diagnose_key ' . $params['diagnose_key'] . ' is wrong.');
+		}
+
+		// 获取路口指标详情
 		$res = $this->junction_model->getFlowQuotas($params);
+		if(count($res) < 1){
+			return [];
+		}
 
 		return $this->response($res);
 	}
 
 	/**
-	* 获取全城路口
-	* @param city_id 		Y 城市ID
+	* 获取配时方案及配时详情
+	* @param dates 			Y 评估/诊断日期
+	* @param junction_id 	Y 路口ID
+	* @param time_point 	Y 时间点
 	* @return json
 	*/
-	public function getAllCityJunctions(){
+	public function getJunctionTiming(){
 		$params = $this->input->post();
-
 		// 校验参数
-		$validate = Validate::make($params, ['city_id' => 'min:1']);
+		$validate = Validate::make($params,
+			[
+				'junction_id'		=> 'nullunable',
+				'time_point'		=> 'nullunable'
+			]
+		);
 		if(!$validate['status']){
 			return $this->response([], 100400, $validate['errmsg']);
 		}
 
+		if(!is_array($params['dates']) || count($params['dates']) < 1){
+			return $this->response([], 100400, 'The dates cannot be empty and must be array.');
+		}
+
 		$this->load->helper('http');
 
-		$data = [
-					'city_id'	=> (int)$params['city_id'],
-					'token'		=> $this->config->item('waymap_token'),
-					'offset'	=> 0,
-					'count'		=> 10000
-				];
-
-		$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/getList', $data);
-		if(!$res){
-			return $this->response([], 100500, 'Failed to connect to waymap service.');
+		// 获取配时详情
+		$timing_data = [
+						'logic_junction_id'	=>trim($params['junction_id']),
+						'days'				=>trim(implode(',', $params['dates'])),
+						'time'				=>trim($params['time_point'])
+					];
+		$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
+		if(!$timing){
+			return $this->response([], 100500, 'Failed to connect to timing service.');
 		}
-		$res = json_decode($res, true);
-		if($res['errorCode'] != 0){
-			return $this->response([], 100500, $res['errorMsg']);
+		$timing = json_decode($timing, true);
+		if($timing['errorCode'] != 0){
+			return $this->response([], 100500, $timing['errorMsg']);
 		}
 
+		// 格式化配时数据
+		$timing_result = $this->formatTimingData($timing['data']);
+
+		//echo "<pre>";print_r($timing_result);exit;
+		return $this->response($timing_result);
+	}
+
+	/**
+	* 诊断-获取全城路口诊断问题列表
+	* @param task_id		Y 任务ID
+	* @param city_id 		Y 城市ID
+	* @param time_point		Y 时间点
+	* @param confidence		Y 置信度
+	* @param diagnose_key	Y 诊断key
+	* @return json
+	*/
+	public function getAllCityJunctionsDiagnoseList(){
+		$params = $this->input->post();
+		// 校验参数
+		$validate = Validate::make($params,
+			[
+				'task_id'			=> 'min:1',
+				'city_id'			=> 'min:1',
+				'time_point'		=> 'nullunable'
+			]
+		);
+		if(!$validate['status']){
+			return $this->response([], 100400, $validate['errmsg']);
+		}
+
+		$data['task_id'] = (int)$params['task_id'];
+		$data['time_point'] = trim($params['time_point']);
+		$data['city_id'] = $params['city_id'];
+
+		$data['confidence'] = $params['confidence'];
+		if(is_array($data['confidence']) && count($data['confidence']) >= 1){
+			foreach($data['confidence'] as $v){
+				if(!array_key_exists($v, $this->config->item('confidence'))){
+					return $this->response([], 100400, 'The value of confidence ' . $v . ' is wrong.');
+				}
+			}
+		}else{
+			return $this->response([], 100400, 'The confidence cannot be empty and must be array.');
+		}
+
+		$data['diagnose_key'] = $params['diagnose_key'];
+		if(is_array($data['diagnose_key']) && count($data['diagnose_key']) >= 1){
+			foreach($data['diagnose_key'] as $v){
+				if(!array_key_exists($v, $this->config->item('diagnose_key'))){
+					return $this->response([], 100400, 'The value of diagnose_key ' . $v . ' is wrong.');
+				}
+			}
+		}else{
+			return $this->response([], 100400, 'The diagnose_key cannot be empty and must be array.');
+		}
+
+		$res = $this->junction_model->getJunctionsDiagnoseList($data);
+
+		return $this->response($res);
+
+	}
+
+	/**
+	* 诊断-诊断问题排序列表
+	* @param task_id		Y 任务ID
+	* @param city_id 		Y 城市ID
+	* @param time_point		Y 时间点
+	* @param diagnose_key	Y 诊断key
+	* @param orderby 		N 诊断问题排序 1：正序 2：倒序 默认2
+	* @return json
+	*/
+	public function getDiagnoseRankList(){
+		$params = $this->input->post();
+		// 校验参数
+		$validate = Validate::make($params,
+			[
+				'task_id'			=> 'min:1',
+				'time_point'		=> 'nullunable',
+				'city_id'			=> 'min:1'
+			]
+		);
+		if(!$validate['status']){
+			return $this->response([], 100400, $validate['errmsg']);
+		}
+
+		$data['orderby'] = 2;
+		if(isset($params['orderby']) && (int)$params['orderby'] == 1){
+			$data['orderby'] = 1;
+		}
+
+		$data['task_id'] = (int)$params['task_id'];
+		$data['time_point'] = trim($params['time_point']);
+
+		$res = [];
+
+		$diagnose_key = $params['diagnose_key'];
+		$diagnose_key_conf = $this->config->item('diagnose_key');
+		if(is_array($diagnose_key) && count($diagnose_key) >= 1){
+			foreach($diagnose_key as $k=>$v){
+				if(!array_key_exists($v, $diagnose_key_conf)){
+					return $this->response([], 100400, 'The value of diagnose_key ' . $v . ' is wrong.');
+				}
+				$data['diagnose_key'] = $v;
+				$res[$v] = $this->junction_model->getDiagnoseRankList($data);
+			}
+		}else{
+			return $this->response([], 100400, 'The diagnose_key cannot be empty and must be array.');
+		}
+
+		return $this->response($res);
+
+	}
+
+	/**
+	* 获取路口相位信息并组织为 logic_flow_id => 相位名称 的数组
+	*/
+	private function getJunctionPhasePosition($data){
 		$result = [];
-		foreach($res['data'] as $v){
-			$result[] = [
-					'junction_id'	=> $v['logic_junction_id'],
-					'lng'			=> $v['lng'],
-					'lat'			=> $v['lat'],
-					'city_id'		=> $v['city_id'],
-					'name'			=> $v['name']
-				];
+
+		$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
+		if(!$timing){
+			return $this->response([], 100500, 'Failed to connect to timing service.');
 		}
-		return $this->response($result);
+		$timing = json_decode($timing, true);
+		if($timing['errorCode'] != 0){
+			return $this->response([], 100500, $timing['errorMsg']);
+		}
+
+		foreach($data as $k=>$v){
+			$result[$v[0]['flow_logic']['logic_flow_id']] = $v[0]['flow_logic']['comment'];
+		}
+
+		return $result;
 	}
 
 	/**
-	* 获取路口路网数据--供getJunctionQuotaDetail使用
+	* 组织配时方案详情
 	*/
-	private function getWayMapData(){
+	private function buildTimingPlanDetail($data){
+		$result = [];
 
+		$result['total_plan'] = $data['total_plan'];
+		$result['tod_start_time'] = $data['latest_plan'][0]['tod_start_time'];
+		$result['tod_end_time'] = $data['latest_plan'][0]['tod_end_time'];
+		$result['extra_timing'] = $data['latest_plan'][0]['plan_detail']['extra_timing'];
+		$result['movement_timing'] = $data['latest_plan'][0]['plan_detail']['movement_timing'];
+
+		return $result;
 	}
 
 	/**
-	* 获取路口配时数据-供getJunctionQuotaDetail使用
+	* 格式化配时数据
 	*/
-	private function getJunctionTimingData(){
-		
+	private function formatTimingData($data){
+		$result = [];
+		$result['total_plan'] = $data['total_plan'];
+		$result['tod_start_time'] = $data['latest_plan'][0]['tod_start_time'];
+		$result['tod_end_time'] = $data['latest_plan'][0]['tod_end_time'];
+		$result['cycle'] = $data['latest_plan'][0]['plan_detail']['extra_timing']['cycle'];
+		$result['offset'] = $data['latest_plan'][0]['plan_detail']['extra_timing']['offset'];
+
+		foreach($data['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
+			$result['timing_detail'][$k]['logic_flow_id'] = $v[0]['flow_logic']['logic_flow_id'];
+			$result['timing_detail'][$k]['state'] = $v[0]['state'];
+			$result['timing_detail'][$k]['start_time'] = $v[0]['start_time'];
+			$result['timing_detail'][$k]['duration'] = $v[0]['duration'];
+			$result['timing_detail'][$k]['inlink_id'] = $v[0]['flow_logic']['inlink_id'];
+			$result['timing_detail'][$k]['outlink_id'] = $v[0]['flow_logic']['outlink_id'];
+			$result['timing_detail'][$k]['comment'] = $v[0]['flow_logic']['comment'];
+		}
+
+		$result['timing_detail'] = array_values($result['timing_detail']);
+		return $result;
 	}
 
+	/**
+	* 构造flow inlink
+	*/
+	private function buildFlowInlink($data){
+		$result = [];
+
+		foreach($data as $v){
+			$result[$v['logic_flow_id']]['inlink_info'] = $v['inlink_info'];
+			$result[$v['logic_flow_id']]['outlink_info'] = $v['outlink_info'];
+		}
+
+		return $result;
+	}
 }
