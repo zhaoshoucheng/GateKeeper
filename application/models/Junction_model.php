@@ -91,8 +91,12 @@ class Junction_model extends CI_Model {
 	* @return array
 	*/
 	public function getFlowQuotas($data){
-		$select = 'id, junction_id, movements';
-
+		$diagnose_key_conf = $this->config->item('diagnose_key');
+		$select_str = '';
+		foreach($diagnose_key_conf as $k=>$v){
+			$select_str .= empty($select_str) ? $k : ',' . $k;
+		}
+		$select = 'id, junction_id, ' . $select_str . ', movements';
 		$time_point = trim($data['time_point']);
 		$where = 'task_id = ' . (int)$data['task_id']
 				. ' and junction_id = "' . trim($data['junction_id']) . '"'
@@ -127,48 +131,34 @@ class Junction_model extends CI_Model {
 		}
 
 		$res['movements'] = json_decode($res['movements'], true);
+
+		// 标注相位名称
+		foreach($res['movements'] as $k=>$v){
+			$res['movements'][$k]['comment'] = isset($phase_position[$v['movement_id']]) ? $phase_position[$v['movement_id']] : "";
+		}
+
 		$flow_quota_key = $this->config->item('flow_quota_key');
 		// 诊断详情
 		if((int)$data['type'] == 2){
-			$diagnose_key_conf = $this->config->item('diagnose_key');
 			foreach($diagnose_key_conf as $k=>$v){
-				$counter = 0;
-				foreach($v['flow_quota'] as $k1=>$v1){
-					foreach($res['movements'] as $k2=>$v2){
-						if($v2[$k1] > $v1['threshold']){
-							$counter = 1;
-							break;
-						}
-					}
-					if($counter == 1){
-						break;
-					}
-				}
-				if($counter == 1){
+				if($res[$k] > $v['junction_threshold']){
 					$res['diagnose_detail'][$k]['name'] = $v['name'];
 					$res['diagnose_detail'][$k]['key'] = $k;
 					$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $v['flow_quota']);
 				}
 			}
 
+			// 组织每个问题的不同指标数据集合
 			if(isset($res['diagnose_detail'])){
-				foreach($diagnose_key_conf as $k=>$v){
-					if(isset($res['diagnose_detail'][$k])){
-						foreach($res['movements'] as $k1=>&$v1){
-							$v1['comment'] = isset($phase_position[$v1['movement_id']]) ? $phase_position[$v1['movement_id']] : "";
-							$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'', 'green_split'=>'', 'route_length'=>'']));
-						}
+				foreach($res['diagnose_detail'] as $k=>$v){
+					foreach($res['movements'] as $k1=>$v1){
+						$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'', 'green_split'=>'', 'route_length'=>'']));
 					}
 				}
-			}
-		}else{
-			foreach($res['movements'] as &$v){
-				$v['comment'] = isset($phase_position[$v['movement_id']]) ? $phase_position[$v['movement_id']] : "";
 			}
 		}
 
 		$res['flow_quota'] = $flow_quota_key;
-
 		//echo "<pre>";print_r($res);exit;
 		return $res;
 	}

@@ -263,16 +263,41 @@ class Junction extends MY_Controller {
 		}
 
 		return $this->response($res);
-
 	}
 
 	/**
-	* 获取路口相位信息并组织为 logic_flow_id => 相位名称 的数组
+	* 获取路口地图绘制数据
+	* @param junction_id 	Y 逻辑路口ID		string
+	* @param dates 			Y 评估/诊断时间	array
+	* @param time_point		Y 时间点			string
+	* @return json
 	*/
-	private function getJunctionPhasePosition($data){
-		$result = [];
+	public function getJunctionMapData(){
+		$params = $this->input->post();
+		// 校验参数
+		$validate = Validate::make($params,
+			[
+				'junction_id'	=> 'nullunable',
+				'time_point'	=> 'nullunable'
+			]
+		);
+		if(!$validate['status']){
+			return $this->response([], 100400, $validate['errmsg']);
+		}
 
-		$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
+		if(!is_array($params['dates']) || count($params['dates']) < 1){
+			return $this->response([], 100400, 'The dates cannot be empty and must be array.');
+		}
+
+		// 获取配时信息，组织地图version flow_id=>flow_label
+		$this->load->helper('http');
+		$phase_data = [
+						'logic_junction_id'	=>trim($params['junction_id']),
+						'days'				=>trim(implode(',', $params['dates'])),
+						'time'				=>trim($params['time_point'])
+					];
+
+		$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $phase_data);
 		if(!$timing){
 			return $this->response([], 100500, 'Failed to connect to timing service.');
 		}
@@ -281,26 +306,36 @@ class Junction extends MY_Controller {
 			return $this->response([], 100500, $timing['errorMsg']);
 		}
 
-		foreach($data as $k=>$v){
-			$result[$v[0]['flow_logic']['logic_flow_id']] = $v[0]['flow_logic']['comment'];
+		// flow_id => flow_label
+		$phase_position = [];
+		foreach($timing['data']['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
+			$phase_position[$v[0]['flow_logic']['logic_flow_id']] = $v[0]['flow_logic']['comment'];
 		}
 
-		return $result;
-	}
+		// 获取路网数据
+		$data['version'] = $timing['data']['map_version'];
+		$data['logic_junction_id'] = trim($params['junction_id']);
+		$data['token'] = $this->config->item('waymap_token');
+		$map = httpGET($this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr', $data);
+		if(!$map){
+			return $this->response($data, 100500, 'Failed to connect to waymap service.<br>'.$this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr');
+		}
+		$map = json_decode($map, true);
+		if($map['errorCode'] != 0){
+			return $this->response([], 100500, $map['errorMsg']);
+		}
 
-	/**
-	* 组织配时方案详情
-	*/
-	private function buildTimingPlanDetail($data){
 		$result = [];
+		foreach($map as $k=>$v){
+			$result[$k]['logic_flow_id'] = $v['logic_flow_id'];
+			$result[$k]['flow_label'] = $phase_position[$v['logic_flow_id']];
+			$result[$k]['lng'] = $v['inlink_info']['s_node']['lng'];
+			$result[$k]['lat'] = $v['inlink_info']['s_node']['lat'];
+		}
 
-		$result['total_plan'] = $data['total_plan'];
-		$result['tod_start_time'] = $data['latest_plan'][0]['tod_start_time'];
-		$result['tod_end_time'] = $data['latest_plan'][0]['tod_end_time'];
-		$result['extra_timing'] = $data['latest_plan'][0]['plan_detail']['extra_timing'];
-		$result['movement_timing'] = $data['latest_plan'][0]['plan_detail']['movement_timing'];
+		echo "<pre>";print_r($result);exit;
+		return $this->response($result);
 
-		return $result;
 	}
 
 	/**
@@ -328,17 +363,9 @@ class Junction extends MY_Controller {
 		return $result;
 	}
 
-	/**
-	* 构造flow inlink
-	*/
-	private function buildFlowInlink($data){
-		$result = [];
-
-		foreach($data as $v){
-			$result[$v['logic_flow_id']]['inlink_info'] = $v['inlink_info'];
-			$result[$v['logic_flow_id']]['outlink_info'] = $v['outlink_info'];
-		}
-
-		return $result;
+	public function gethostname(){
+		$name = gethostname();
+		echo "hostname = " . $name;
+		exit;
 	}
 }
