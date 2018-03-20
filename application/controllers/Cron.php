@@ -47,6 +47,7 @@ class Cron extends CI_Controller {
 					$city_id = $task['city_id'];
 					$start_time = $task['start_time'];
 					$end_time = $task['end_time'];
+					$dateVersion = $task['dateVersion'];
 					$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
 					// process_flow
 					// process_index
