@@ -70,27 +70,50 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | The $query_builder variables lets you determine whether or not to load
 | the query builder class.
 */
+
 $active_group = 'default';
 $query_builder = TRUE;
 
+$online_host = [
+    'ipd-cloud-server01.gz01'
+];
+$hostname = gethostname();
+$development = 1; //本地环境    2:server01环境
+if (in_array($hostname, $online_host)) {
+    $development = 2;
+}
+
+$username = 'root';
+$hostname = '127.0.0.1';
+$password = 'Ning123456!!';
+$database = 'itstool';
+
+if($development == 2){
+	$username = 'root';
+	$hostname = '100.90.164.31';
+	$password = 'Znjty@Didi@2017';
+	$database = 'its_tool';
+}
+
+
 $db['default'] = array(
-	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => '',
-	'password' => '',
-	'database' => '',
-	'dbdriver' => 'mysqli',
-	'dbprefix' => '',
-	'pconnect' => FALSE,
-	'db_debug' => (ENVIRONMENT !== 'production'),
-	'cache_on' => FALSE,
-	'cachedir' => '',
-	'char_set' => 'utf8',
-	'dbcollat' => 'utf8_general_ci',
-	'swap_pre' => '',
-	'encrypt' => FALSE,
-	'compress' => FALSE,
-	'stricton' => FALSE,
-	'failover' => array(),
-	'save_queries' => TRUE
+    'dsn'   => '',
+    'username' => $username,
+    'hostname' => $hostname,
+    'password' => $password,
+    'database' => $database,
+    'dbdriver' => 'mysqli',
+    'dbprefix' => '',
+    'pconnect' => FALSE,
+    'db_debug' => (ENVIRONMENT !== 'production'),
+    'cache_on' => FALSE,
+    'cachedir' => '',
+    'char_set' => 'utf8',
+    'dbcollat' => 'utf8_general_ci',
+    'swap_pre' => '',
+    'encrypt' => FALSE,
+    'compress' => FALSE,
+    'stricton' => FALSE,
+    'failover' => array(),
+    'save_queries' => TRUE
 );
