@@ -130,6 +130,7 @@ class Task_model extends CI_Model
                 $this->its_tool->trans_commit();
                 return true;
             }
+            $task['dateVersion'] = $ret['data'];
 
             // 任务状态置为已投递
             $query = $this->its_tool->where('id', $task_id)->update($this->_table, ['task_start_time' => time()]);

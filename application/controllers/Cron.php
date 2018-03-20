@@ -50,8 +50,9 @@ class Cron extends CI_Controller {
 					$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
 					// process_flow
 					// process_index
-					// $task = new Task();
-					// $task->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values($dateVersion));
+					$task = new Task();
+					$response = $task->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values($dateVersion));
+					print_r($response);
 					// $task->calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion);
 					$this->task_model->updateTask($task['id'], ['trace_id' => $trace_id]);
 				} catch (\Exception $e) {
@@ -62,7 +63,7 @@ class Cron extends CI_Controller {
 	}
 
 	public function test() {
-		$city_id = strval(2);
+		$city_id = strval(12);
 		$trace_id = uniqid();
 		$task_id = '123456';
 		$start_time = '07:00';

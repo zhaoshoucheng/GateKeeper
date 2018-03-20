@@ -222,7 +222,7 @@ class Task extends MY_Controller {
 	public function UpdateTaskRate(){
 		$user = 'admin';
 
-		$params = $this->input->post_get();
+		$params = $this->input->get();
 
 		// 校验参数
 		$validate = Validate::make($params,
