@@ -222,7 +222,7 @@ class Task extends MY_Controller {
 	public function UpdateTaskRate(){
 		$user = 'admin';
 
-		$params = $this->input->post();
+		$params = $this->input->post_get();
 
 		// 校验参数
 		$validate = Validate::make($params,
@@ -265,7 +265,7 @@ class Task extends MY_Controller {
 	public function UpdateTaskStatus(){
 		$user = 'admin';
 
-		$params = $this->input->post();
+		$params = $this->input->get();
 
 		// 校验参数
 		$validate = Validate::make($params,
@@ -283,7 +283,12 @@ class Task extends MY_Controller {
 		$task_id = $params['task_id'];
 		$ider = $params['ider'];
 		$status = $params['status'];
-		$task_comment = $params['task_comment'];
+		if (isset($params['task_comment'])) {
+			$task_comment = $params['task_comment'];
+		} else {
+			$task_comment = null;
+		}
+		
 
 		// $ider_to_id = [
 		// 	'mapflow' => 0,
@@ -300,7 +305,7 @@ class Task extends MY_Controller {
 		$bRet = $this->task_model->updateTaskStatus($task_id, $ider, $status, $task_comment);
 		if ($bRet === false) {
 			$this->errno = -1;
-			$this->errmsg = '创建周期任务失败';
+			$this->errmsg = '更新任务状态失败';
 		}
 	}
 

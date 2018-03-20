@@ -44,7 +44,7 @@ class Task_model extends CI_Model
                 return false;
             }
 
-            $task_ = $result[0];
+            $task = $result[0];
             $task_status = intval($task['status']);
             $task_comment = $task['task_comment'];
 
