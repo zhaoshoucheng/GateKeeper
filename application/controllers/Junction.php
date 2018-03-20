@@ -362,10 +362,4 @@ class Junction extends MY_Controller {
 		$result['timing_detail'] = array_values($result['timing_detail']);
 		return $result;
 	}
-
-	public function gethostname(){
-		$name = gethostname();
-		echo "hostname = " . $name;
-		exit;
-	}
 }
