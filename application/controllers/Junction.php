@@ -364,5 +364,6 @@ class Junction extends MY_Controller {
 	public function testLogin(){
 		echo "username = " . $this->username;
 		echo "<hr>host = " . $_SERVER['HTTP_HOST'];
+		exit;
 	}
 }
