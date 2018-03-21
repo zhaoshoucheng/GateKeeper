@@ -362,4 +362,11 @@ class Junction extends MY_Controller {
 		$result['timing_detail'] = array_values($result['timing_detail']);
 		return $result;
 	}
+
+	/**
+	* 测试登录
+	*/
+	public function testLogin(){
+		echo "username = " . $this->username;
+	}
 }
