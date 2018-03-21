@@ -177,6 +177,7 @@ class Task extends MY_Controller {
 				'start_time'	=> 'nullunable',
 				'end_time'		=> 'nullunable',
 				'kind'			=> 'nullunable',
+				'type'			=> 'nullunable',
 			]
 		);
 
@@ -191,6 +192,7 @@ class Task extends MY_Controller {
 			'start_time'=> $params['start_time'],
 			'end_time'	=> $params['end_time'],
 			'kind'		=> $params['kind'],
+			'type'		=> $params['type'],
 			'expect_exec_time'		=> $expect_exec_time,
 		];
 		if (isset($params['expect_exec_time'])) {
