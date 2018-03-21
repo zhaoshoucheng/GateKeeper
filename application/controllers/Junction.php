@@ -39,6 +39,11 @@ class Junction extends MY_Controller {
 			return $this->response([], 100400, $validate['errmsg']);
 		}
 
+		if($this->debug){
+			$params['task_id'] = 1090;
+			$params['city_id'] = 12;
+		}
+
 		$data['task_id'] = (int)$params['task_id'];
 		$data['type'] = (int)$params['type'];
 		$data['city_id'] = $params['city_id'];
@@ -90,6 +95,14 @@ class Junction extends MY_Controller {
 				'type'			=> 'min:1'
 			]
 		);
+
+		// 测试做假数据用，真实数据出来后删除
+		if($this->debug){
+			$params['task_id'] = 1090;
+			$params['dates'] = ['20180105', '20180106'];
+			$params['time_point'] = '05:00';
+		}
+
 		if(!$validate['status']){
 			return $this->response([], 100400, $validate['errmsg']);
 		}
@@ -125,6 +138,13 @@ class Junction extends MY_Controller {
 		);
 		if(!$validate['status']){
 			return $this->response([], 100400, $validate['errmsg']);
+		}
+
+		// 测试做假数据用，真实数据出来后删除
+		if($this->debug){
+			$params['junction_id'] = '2017030116_5546361';
+			$params['dates'] = ['20180105', '20180106'];
+			$params['time_point'] = '05:00';
 		}
 
 		if(!is_array($params['dates']) || count($params['dates']) < 1){
@@ -176,6 +196,13 @@ class Junction extends MY_Controller {
 		);
 		if(!$validate['status']){
 			return $this->response([], 100400, $validate['errmsg']);
+		}
+
+		// 测试做假数据用，真实数据出来后删除
+		if($this->debug){
+			$params['task_id'] = 1090;
+			$params['city_id'] = 12;
+			$params['time_point'] = '05:00';
 		}
 
 		$data['task_id'] = (int)$params['task_id'];
@@ -233,6 +260,13 @@ class Junction extends MY_Controller {
 			return $this->response([], 100400, $validate['errmsg']);
 		}
 
+		// 测试做假数据用，真实数据出来后删除
+		if($this->debug){
+			$params['task_id'] = 1090;
+			$params['city_id'] = 12;
+			$params['time_point'] = '05:00';
+		}
+
 		$data['orderby'] = 2;
 		if(isset($params['orderby']) && (int)$params['orderby'] == 1){
 			$data['orderby'] = 1;
@@ -278,6 +312,13 @@ class Junction extends MY_Controller {
 		);
 		if(!$validate['status']){
 			return $this->response([], 100400, $validate['errmsg']);
+		}
+
+		// 测试做假数据用，真实数据出来后删除
+		if($this->debug){
+			$params['junction_id'] = '2017030116_5546361';
+			$params['dates'] = ['20180105', '20180106'];
+			$params['time_point'] = '05:00';
 		}
 
 		if(!is_array($params['dates']) || count($params['dates']) < 1){
