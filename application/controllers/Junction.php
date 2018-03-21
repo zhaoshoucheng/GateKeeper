@@ -87,7 +87,6 @@ class Junction extends MY_Controller {
 				'task_id'		=> 'min:1',
 				'junction_id'	=> 'nullunable',
 				'time_point'	=> 'nullunable',
-				'diagnose_key'	=> 'nullunable',
 				'type'			=> 'min:1'
 			]
 		);
@@ -97,10 +96,6 @@ class Junction extends MY_Controller {
 
 		if(!is_array($params['dates']) || count($params['dates']) < 1){
 			return $this->response([], 100400, 'The dates cannot be empty and must be array.');
-		}
-
-		if(!array_key_exists(trim($params['diagnose_key']), $this->config->item('diagnose_key'))){
-			return $this->response([], 100400, 'The value of diagnose_key ' . $params['diagnose_key'] . ' is wrong.');
 		}
 
 		// 获取路口指标详情
@@ -368,5 +363,6 @@ class Junction extends MY_Controller {
 	*/
 	public function testLogin(){
 		echo "username = " . $this->username;
+		echo "<hr>host = " . $_SERVER['HTTP_HOST'];
 	}
 }
