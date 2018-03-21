@@ -18,9 +18,10 @@ class MY_Controller extends CI_Controller {
 	public function __construct(){
 		parent::__construct();
 		date_default_timezone_set('Asia/Shanghai');
-		if($this->input->post('debug')){
-			$this->debug = true;
-		}
+		$host = $_SERVER['HTTP_HOST'];
+        if ($host == '100.90.164.31:8088') {
+            $this->debug = true;
+        }
 	}
 
 	public function response($data, $errno = 0, $errmsg = '') {
