@@ -124,6 +124,9 @@ class Junction_model extends CI_Model {
 		if($timing['errorCode'] != 0){
 			return [];
 		}
+		if(count($timing['data']['latest_plan']) < 1){
+			return [];
+		}
 
 		$phase_position = [];
 		foreach($timing['data']['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
@@ -387,7 +390,7 @@ class Junction_model extends CI_Model {
 	* 测试
 	*/
 	public function testdata(){
-		$res = $this->db->select()->from($this->tb)->where('task_id', 1090)->get()->result_array();
+		$res = $this->db->select()->from($this->tb)->get()->result_array();
 
 		return $res;
 	}
