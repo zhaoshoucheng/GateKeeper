@@ -333,7 +333,7 @@ class Junction extends MY_Controller {
 						'time'				=>trim($params['time_point'])
 					];
 
-		$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $phase_data);
+		$timing = httpGET($this->config->item('timing_interface') . '9/signal-mis/TimingService/queryTimingByTimePoint', $phase_data);
 		if(!$timing){
 			return $this->response([], 100500, 'Failed to connect to timing service.');
 		}
