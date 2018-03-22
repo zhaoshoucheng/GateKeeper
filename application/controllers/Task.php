@@ -337,7 +337,7 @@ class Task extends MY_Controller {
 			if (!empty($aRet)) {
 				$tasks[$value] = [
 					'task_id' => $aRet[0]['conf_id'],
-					'dates' => $aRet[0]['dates'],
+					'dates' => explode(',', $aRet[0]['dates']),
 				];
 			} else {
 				$tasks[$value] = [];
