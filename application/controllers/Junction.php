@@ -16,12 +16,12 @@ class Junction extends MY_Controller {
 
 	/**
 	* 评估-获取全城路口信息
-	* @param task_id		Y 任务ID
-	* @param city_id 		Y 城市ID
-	* @param type 			Y 指标计算类型 0：统合 1：时间点
-	* @param time_point		N 评估时间点 指标计算类型为1时非空
-	* @param confidence		Y 置信度
-	* @param quota_key		Y 指标key
+	* @param task_id     interger  Y 任务ID
+	* @param city_id     interger  Y 城市ID
+	* @param type        interger  Y 指标计算类型 0：统合 1：时间点
+	* @param time_point  string    N 评估时间点 指标计算类型为1时非空
+	* @param confidence	 interger  Y 置信度 0:全部 1:高 2:低
+	* @param quota_key   string    Y 指标key
 	* @return json
 	*/
 	public function getAllCityJunctionInfo(){
@@ -32,7 +32,8 @@ class Junction extends MY_Controller {
 				'task_id'		=> 'min:1',
 				'type'			=> 'min:0',
 				'city_id'		=> 'min:1',
-				'quota_key'		=> 'nullunable'
+				'quota_key'		=> 'nullunable',
+				'confidence'	=> 'min:0'
 			]
 		);
 		if(!$validate['status']){
@@ -48,16 +49,10 @@ class Junction extends MY_Controller {
 			return $this->response([], 100400, 'The time_point cannot be empty.');
 		}
 
-		$data['confidence'] = $params['confidence'];
-		if(is_array($data['confidence']) && count($data['confidence']) >= 1){
-			foreach($data['confidence'] as $v){
-				if(!array_key_exists($v, $this->config->item('confidence'))){
-					return $this->response([], 100400, 'The value of confidence ' . $v . ' is wrong.');
-				}
-			}
-		}else{
-			return $this->response([], 100400, 'The confidence cannot be empty and must be array.');
+		if(!array_key_exists($params['confidence'], $this->config->item('confidence'))){
+			return $this->response([], 100400, 'The value of confidence ' . $params['confidence'] . ' is wrong.');
 		}
+		$data['confidence'] = $params['confidence'];
 
 		$data['quota_key'] = strtolower(trim($params['quota_key']));
 		if(!array_key_exists($data['quota_key'], $this->config->item('junction_quota_key'))){
@@ -158,11 +153,11 @@ class Junction extends MY_Controller {
 
 	/**
 	* 诊断-获取全城路口诊断问题列表
-	* @param task_id		Y 任务ID
-	* @param city_id 		Y 城市ID
-	* @param time_point		Y 时间点
-	* @param confidence		Y 置信度
-	* @param diagnose_key	Y 诊断key
+	* @param task_id        interger  Y 任务ID
+	* @param city_id        interger  Y 城市ID
+	* @param time_point     string    Y 时间点
+	* @param confidence     interger  Y 置信度 0:全部 1:高 2:低
+	* @param diagnose_key	string    Y 诊断key
 	* @return json
 	*/
 	public function getAllCityJunctionsDiagnoseList(){
@@ -172,7 +167,8 @@ class Junction extends MY_Controller {
 			[
 				'task_id'			=> 'min:1',
 				'city_id'			=> 'min:1',
-				'time_point'		=> 'nullunable'
+				'time_point'		=> 'nullunable',
+				'confidence'		=> 'min:0'
 			]
 		);
 		if(!$validate['status']){
@@ -183,16 +179,10 @@ class Junction extends MY_Controller {
 		$data['time_point'] = trim($params['time_point']);
 		$data['city_id'] = $params['city_id'];
 
-		$data['confidence'] = $params['confidence'];
-		if(is_array($data['confidence']) && count($data['confidence']) >= 1){
-			foreach($data['confidence'] as $v){
-				if(!array_key_exists($v, $this->config->item('confidence'))){
-					return $this->response([], 100400, 'The value of confidence ' . $v . ' is wrong.');
-				}
-			}
-		}else{
-			return $this->response([], 100400, 'The confidence cannot be empty and must be array.');
+		if(!array_key_exists($params['confidence'], $this->config->item('confidence'))){
+			return $this->response([], 100400, 'The value of confidence ' . $params['confidence'] . ' is wrong.');
 		}
+		$data['confidence'] = $params['confidence'];
 
 		$data['diagnose_key'] = $params['diagnose_key'];
 		if(is_array($data['diagnose_key']) && count($data['diagnose_key']) >= 1){

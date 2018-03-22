@@ -24,7 +24,7 @@ class Junction_model extends CI_Model {
 	* @param data['type']		计算指数类型 0：统合 1：时间点		interger
 	* @param data['city_id']	城市ID							interger
 	* @param data['time_point']	评估时间点 指标计算类型为1时非空		stirng
-	* @param data['confidence']	置信度							array
+	* @param data['confidence']	置信度							interger
 	* @param data['quota_key']	指标key							string
 	* @return array
 	*/
@@ -48,10 +48,8 @@ class Junction_model extends CI_Model {
 		}
 
 		$confidence_conf = $this->config->item('confidence');
-		if(count($data['confidence']) < count($confidence_conf)){
-			foreach($data['confidence'] as $v){
-				$where .= ' and ' . $quota_key . '_confidence ' . $confidence_conf[$v]['expression'];
-			}
+		if($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)){
+			$where .= ' and ' . $quota_key . '_confidence ' . $confidence_conf[$data['confidence']]['expression'];
 		}
 
 		$res = $this->db->select($select)
@@ -168,11 +166,11 @@ class Junction_model extends CI_Model {
 
 	/**
 	* 获取全城路口诊断问题列表
-	* @param data['task_id']		任务ID				interger
-	* @param data['city_id']		城市ID				interger
-	* @param data['time_point']		时间点				string
-	* @param data['confidence']		置信度 多个用|隔开		array
-	* @param data['diagnose_key']	诊断问题KEY 			array
+	* @param data['task_id']        任务ID       interger
+	* @param data['city_id']        城市ID       interger
+	* @param data['time_point']     时间点       string
+	* @param data['confidence']     置信度       interger
+	* @param data['diagnose_key']   诊断问题KEY   array
 	* @return array
 	*/
 	public function getJunctionsDiagnoseList($data){
@@ -202,10 +200,8 @@ class Junction_model extends CI_Model {
 		$temp_confidence_expression[2] = '(' . $confidence_where . ') / ' . $diagnose_key_count . '<' . $confidence_threshold;
 
 		$confidence_conf = $this->config->item('confidence');
-		if(count($data['confidence']) < count($confidence_conf)){
-			foreach($data['confidence'] as $v){
-				$where .= ' and ' . $temp_confidence_expression[$v];
-			}
+		if($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)){
+			$where .= ' and ' . $temp_confidence_expression[$data['confidence']];
 		}
 
 		$res = $this->db->select($select)
