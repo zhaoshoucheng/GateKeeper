@@ -28,6 +28,10 @@ $confidence_threshold = 0.5;
 
 // 评估置信度
 $config['confidence'] = [
+	0=>[
+		'name'		=> '全部',
+		'expression'=> '> 0'
+	],
 	1=>[
 		'name'		=> '高',
 		'expression'=> '>=' . $confidence_threshold
