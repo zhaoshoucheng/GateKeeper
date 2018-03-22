@@ -407,4 +407,13 @@ class Junction extends MY_Controller {
 		echo "<hr>host = " . $_SERVER['HTTP_HOST'];
 		exit;
 	}
+
+	/**
+	* 测试数据库
+	*/
+	public function testdata(){
+		$data = $this->testdata();
+
+		return $this->response($data);
+	}
 }
