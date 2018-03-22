@@ -29,11 +29,11 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'task_id'		=> 'min:1',
-				'type'			=> 'min:0',
-				'city_id'		=> 'min:1',
-				'quota_key'		=> 'nullunable',
-				'confidence'	=> 'min:0'
+				'task_id'    => 'min:1',
+				'type'       => 'min:0',
+				'city_id'    => 'min:1',
+				'quota_key'  => 'nullunable',
+				'confidence' => 'min:0'
 			]
 		);
 		if(!$validate['status']){
@@ -81,10 +81,10 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'task_id'		=> 'min:1',
-				'junction_id'	=> 'nullunable',
-				'time_point'	=> 'nullunable',
-				'type'			=> 'min:1'
+				'task_id'     => 'min:1',
+				'junction_id' => 'nullunable',
+				'time_point'  => 'nullunable',
+				'type'        => 'min:1'
 			]
 		);
 
@@ -117,8 +117,8 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'junction_id'		=> 'nullunable',
-				'time_point'		=> 'nullunable'
+				'junction_id' => 'nullunable',
+				'time_point'  => 'nullunable'
 			]
 		);
 		if(!$validate['status']){
@@ -225,9 +225,9 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'task_id'			=> 'min:1',
-				'time_point'		=> 'nullunable',
-				'city_id'			=> 'min:1'
+				'task_id'    => 'min:1',
+				'time_point' => 'nullunable',
+				'city_id'    => 'min:1'
 			]
 		);
 		if(!$validate['status']){
@@ -273,8 +273,8 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'junction_id'	=> 'nullunable',
-				'time_point'	=> 'nullunable'
+				'junction_id' => 'nullunable',
+				'time_point'  => 'nullunable'
 			]
 		);
 		if(!$validate['status']){
@@ -364,6 +364,7 @@ class Junction extends MY_Controller {
 	*/
 	public function testLogin(){
 		echo "username = " . $this->username;
+		echo "<hr>host = " . $_SERVER['HTTP_HOST'];
 		exit;
 	}
 
