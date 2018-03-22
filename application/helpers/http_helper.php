@@ -30,14 +30,14 @@ if (!function_exists('httpGET')) {
         $ret = curl_exec($ch);
         if(curl_errno($ch)){
             $errmsg = curl_error($ch);
-            log_message('error', "requesturi=$path||errno=9999||$errmsg||$ret");
+            log_message('error', "requesturi={$url}||errno=9999||{$errmsg}||{$ret}");
             curl_close($ch);
             return false;
         }
         $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         if($responseCode != 200){
-            log_message('error', "requesturi=$path||errno=9999||response code:$responseCode||$ret");
+            log_message('error', "requesturi={$url}||errno=9999||response code:{$responseCode}||{$ret}");
             return false;
         }
         return $ret;
@@ -70,14 +70,14 @@ if (!function_exists('httpPOST')) {
         $ret = curl_exec($ch);
         if(curl_errno($ch)){
             $errmsg = curl_error($ch);
-            log_message('error', "requesturi=$path||errno=9999||$errmsg||$ret");
+            log_message('error', "requesturi=$url||errno=9999||$errmsg||$ret");
             curl_close($ch);
             return false;
         }
         $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         if($responseCode != 200){
-            log_message('error', "requesturi=$path||errno=9999||response code:$responseCode||$ret");
+            log_message('error', "requesturi=$url||errno=9999||response code:$responseCode||$ret");
             return false;
         }
         return $ret;
