@@ -29,11 +29,11 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'task_id'		=> 'min:1',
-				'type'			=> 'min:0',
-				'city_id'		=> 'min:1',
-				'quota_key'		=> 'nullunable',
-				'confidence'	=> 'min:0'
+				'task_id'    => 'min:1',
+				'type'       => 'min:0',
+				'city_id'    => 'min:1',
+				'quota_key'  => 'nullunable',
+				'confidence' => 'min:0'
 			]
 		);
 		if(!$validate['status']){
@@ -43,10 +43,12 @@ class Junction extends MY_Controller {
 		$data['task_id'] = (int)$params['task_id'];
 		$data['type'] = (int)$params['type'];
 		$data['city_id'] = $params['city_id'];
-		$data['time_point'] = trim($params['time_point']);
 
-		if($data['type'] == 1 && empty(trim($data['time_point']))){
+		if($data['type'] == 1 && (!isset($params['time_point']) || empty(trim($params['time_point'])))){
 			return $this->response([], 100400, 'The time_point cannot be empty.');
+		}
+		if($data['type'] == 1){
+			$data['time_point'] = trim($params['time_point']);
 		}
 
 		if(!array_key_exists($params['confidence'], $this->config->item('confidence'))){
@@ -66,11 +68,11 @@ class Junction extends MY_Controller {
 
 	/**
 	* 获取路口指标详情
-	* @param task_id 		Y 任务ID
-	* @param dates 			Y 评估/诊断日期
-	* @param junction_id 	Y 路口ID
-	* @param time_point 	Y 时间点
-	* @param type 			Y 详情类型 1：指标详情页 2：诊断详情页
+	* @param task_id      interger Y 任务ID
+	* @param dates        string   Y 评估/诊断日期
+	* @param junction_id  string   Y 逻辑路口ID
+	* @param time_point   string   Y 时间点
+	* @param type         interger Y 详情类型 1：指标详情页 2：诊断详情页
 	* @return json
 	*/
 	public function getJunctionQuotaDetail(){
@@ -79,10 +81,10 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'task_id'		=> 'min:1',
-				'junction_id'	=> 'nullunable',
-				'time_point'	=> 'nullunable',
-				'type'			=> 'min:1'
+				'task_id'     => 'min:1',
+				'junction_id' => 'nullunable',
+				'time_point'  => 'nullunable',
+				'type'        => 'min:1'
 			]
 		);
 
@@ -105,9 +107,9 @@ class Junction extends MY_Controller {
 
 	/**
 	* 获取配时方案及配时详情
-	* @param dates 			Y 评估/诊断日期
-	* @param junction_id 	Y 路口ID
-	* @param time_point 	Y 时间点
+	* @param dates        string Y 评估/诊断日期
+	* @param junction_id  string Y 路口ID
+	* @param time_point   string Y 时间点
 	* @return json
 	*/
 	public function getJunctionTiming(){
@@ -115,8 +117,8 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'junction_id'		=> 'nullunable',
-				'time_point'		=> 'nullunable'
+				'junction_id' => 'nullunable',
+				'time_point'  => 'nullunable'
 			]
 		);
 		if(!$validate['status']){
@@ -155,7 +157,8 @@ class Junction extends MY_Controller {
 	* 诊断-获取全城路口诊断问题列表
 	* @param task_id        interger  Y 任务ID
 	* @param city_id        interger  Y 城市ID
-	* @param time_point     string    Y 时间点
+	* @param type           interger  Y 指标计算类型 0：统合 1：时间点
+	* @param time_point     string    N 时间点 指标计算类型为1时非空
 	* @param confidence     interger  Y 置信度 0:全部 1:高 2:低
 	* @param diagnose_key	string    Y 诊断key
 	* @return json
@@ -165,10 +168,10 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'task_id'			=> 'min:1',
-				'city_id'			=> 'min:1',
-				'time_point'		=> 'nullunable',
-				'confidence'		=> 'min:0'
+				'task_id'    => 'min:1',
+				'city_id'    => 'min:1',
+				'type'       => 'min:0',
+				'confidence' => 'min:0'
 			]
 		);
 		if(!$validate['status']){
@@ -176,8 +179,15 @@ class Junction extends MY_Controller {
 		}
 
 		$data['task_id'] = (int)$params['task_id'];
-		$data['time_point'] = trim($params['time_point']);
 		$data['city_id'] = $params['city_id'];
+		$data['type'] = (int)$params['type'];
+
+		if($data['type'] == 1 && (!isset($params['time_point']) || empty(trim($params['time_point'])))){
+			return $this->response([], 100400, 'The time_point cannot be empty.');
+		}
+		if($data['type'] == 1){
+			$data['time_point'] = trim($params['time_point']);
+		}
 
 		if(!array_key_exists($params['confidence'], $this->config->item('confidence'))){
 			return $this->response([], 100400, 'The value of confidence ' . $params['confidence'] . ' is wrong.');
@@ -203,11 +213,11 @@ class Junction extends MY_Controller {
 
 	/**
 	* 诊断-诊断问题排序列表
-	* @param task_id		Y 任务ID
-	* @param city_id 		Y 城市ID
-	* @param time_point		Y 时间点
-	* @param diagnose_key	Y 诊断key
-	* @param orderby 		N 诊断问题排序 1：正序 2：倒序 默认2
+	* @param task_id       interger Y 任务ID
+	* @param city_id       interger Y 城市ID
+	* @param time_point    string   Y 时间点
+	* @param diagnose_key  string   Y 诊断key
+	* @param orderby       interger N 诊断问题排序 1：正序 2：倒序 默认2
 	* @return json
 	*/
 	public function getDiagnoseRankList(){
@@ -215,9 +225,9 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'task_id'			=> 'min:1',
-				'time_point'		=> 'nullunable',
-				'city_id'			=> 'min:1'
+				'task_id'    => 'min:1',
+				'time_point' => 'nullunable',
+				'city_id'    => 'min:1'
 			]
 		);
 		if(!$validate['status']){
@@ -253,9 +263,9 @@ class Junction extends MY_Controller {
 
 	/**
 	* 获取路口地图绘制数据
-	* @param junction_id 	Y 逻辑路口ID		string
-	* @param dates 			Y 评估/诊断时间	array
-	* @param time_point		Y 时间点			string
+	* @param junction_id  string Y 逻辑路口ID
+	* @param dates        string Y 评估/诊断时间
+	* @param time_point   string Y 时间点
 	* @return json
 	*/
 	public function getJunctionMapData(){
@@ -263,8 +273,8 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'junction_id'	=> 'nullunable',
-				'time_point'	=> 'nullunable'
+				'junction_id' => 'nullunable',
+				'time_point'  => 'nullunable'
 			]
 		);
 		if(!$validate['status']){
@@ -354,6 +364,7 @@ class Junction extends MY_Controller {
 	*/
 	public function testLogin(){
 		echo "username = " . $this->username;
+		echo "<hr>host = " . $_SERVER['HTTP_HOST'];
 		exit;
 	}
 
