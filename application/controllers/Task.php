@@ -26,7 +26,7 @@ class Task extends MY_Controller {
 	* @return json
 	*/
 	public function getList(){
-		$user = 'admin';
+		$user = $this->username;
 
 		$params = $this->input->post();
 
@@ -61,18 +61,16 @@ class Task extends MY_Controller {
 		}
 		// 自定义任务
 		if ($type === 0 or $type === 2) {
-			if (isset($params['user'])) {
-				$user = $params['user'];
-				// 指标任务
-				if ($kind === 0 or $kind === 1) {
-					$aRet = $this->task_model->getTask($user, $city_id, 2, 1);
-					$custom_task_tmp = array_merge($custom_task_tmp, $aRet);
-				}
-				// 诊断任务
-				if ($kind === 0 or $kind === 2) {
-					$aRet = $this->task_model->getTask($user, $city_id, 2, 2);
-					$custom_task_tmp = array_merge($custom_task_tmp, $aRet);
-				}
+			$user = $this->username;
+			// 指标任务
+			if ($kind === 0 or $kind === 1) {
+				$aRet = $this->task_model->getTask($user, $city_id, 2, 1);
+				$custom_task_tmp = array_merge($custom_task_tmp, $aRet);
+			}
+			// 诊断任务
+			if ($kind === 0 or $kind === 2) {
+				$aRet = $this->task_model->getTask($user, $city_id, 2, 2);
+				$custom_task_tmp = array_merge($custom_task_tmp, $aRet);
 			}
 		}
 		$cycle_task = array();
@@ -113,7 +111,7 @@ class Task extends MY_Controller {
 	* @return json
 	*/
 	public function createCustomTask(){
-		$user = 'admin';
+		$user = $this->username;
 
 		$params = $this->input->post();
 
@@ -179,6 +177,7 @@ class Task extends MY_Controller {
 				'start_time'	=> 'nullunable',
 				'end_time'		=> 'nullunable',
 				'kind'			=> 'nullunable',
+				'type'			=> 'nullunable',
 			]
 		);
 
@@ -193,6 +192,7 @@ class Task extends MY_Controller {
 			'start_time'=> $params['start_time'],
 			'end_time'	=> $params['end_time'],
 			'kind'		=> $params['kind'],
+			'type'		=> $params['type'],
 			'expect_exec_time'		=> $expect_exec_time,
 		];
 		if (isset($params['expect_exec_time'])) {
@@ -220,7 +220,6 @@ class Task extends MY_Controller {
 	* @return json
 	*/
 	public function UpdateTaskRate(){
-		$user = 'admin';
 
 		$params = $this->input->get();
 
@@ -263,7 +262,6 @@ class Task extends MY_Controller {
 	* @return json
 	*/
 	public function UpdateTaskStatus(){
-		$user = 'admin';
 
 		$params = $this->input->get();
 
@@ -325,6 +323,10 @@ class Task extends MY_Controller {
 				'city_id'		=> 'nullunable',
 			]
 		);
+
+		if(!$validate['status']){
+			return $this->response(array(), -1, $validate['errmsg']);
+		}
 
 		$city_id = $params['city_id'];
 
