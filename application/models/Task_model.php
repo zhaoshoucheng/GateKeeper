@@ -6,7 +6,7 @@ class Task_model extends CI_Model
     private $_table = 'task_result';
 
     private $max_try_times = 10;
-    private $completed_status = 33;
+    private $completed_status = 11;
 
     function __construct() {
         parent::__construct();
