@@ -413,7 +413,6 @@ class Junction extends MY_Controller {
 	*/
 	public function testdata(){
 		$data = $this->junction_model->testdata();
-
 		return $this->response($data);
 	}
 }
