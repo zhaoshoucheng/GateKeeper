@@ -412,7 +412,7 @@ class Junction extends MY_Controller {
 	* 测试数据库
 	*/
 	public function testdata(){
-		$data = $this->testdata();
+		$data = $this->junction_model->testdata();
 
 		return $this->response($data);
 	}
