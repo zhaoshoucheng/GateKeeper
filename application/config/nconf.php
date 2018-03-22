@@ -17,9 +17,9 @@ $config['waymap_interface'] = 'http://' . $waymap_server . ":" . $waymap_port;
 $config['waymap_token'] = '4c3e3b6a3588161128d0604daab528db';
 
 // 配时接口服务器地址
-$timing_server = '10.94.105.126';
+$timing_server = '100.90.164.31';
 // 配时接口服务器端口
-$timing_port = '8887';
+$timing_port = '8006';
 // 配时接口地址
 $config['timing_interface'] = 'http://' . $timing_server . ":" . $timing_port;
 
