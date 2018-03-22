@@ -20,12 +20,12 @@ class Junction_model extends CI_Model {
 
 	/**
 	* 获取全城路口信息
-	* @param data['task_id']	任务ID							interger
-	* @param data['type']		计算指数类型 0：统合 1：时间点		interger
-	* @param data['city_id']	城市ID							interger
-	* @param data['time_point']	评估时间点 指标计算类型为1时非空		stirng
-	* @param data['confidence']	置信度							interger
-	* @param data['quota_key']	指标key							string
+	* @param data['task_id']    interger 任务ID
+	* @param data['type']       interger 计算指数类型 0：统合 1：时间点
+	* @param data['city_id']    interger 城市ID
+	* @param data['time_point'] string   评估时间点 指标计算类型为1时非空
+	* @param data['confidence']	interger 置信度
+	* @param data['quota_key']  string   指标key
 	* @return array
 	*/
 	public function getAllCityJunctionInfo($data){
@@ -166,11 +166,12 @@ class Junction_model extends CI_Model {
 
 	/**
 	* 获取全城路口诊断问题列表
-	* @param data['task_id']        任务ID       interger
-	* @param data['city_id']        城市ID       interger
-	* @param data['time_point']     时间点       string
-	* @param data['confidence']     置信度       interger
-	* @param data['diagnose_key']   诊断问题KEY   array
+	* @param data['task_id']      interger 任务ID
+	* @param data['city_id']      interger 城市ID
+	* @param data['time_point']   string   时间点
+	* @param data['type']         interger 计算类型
+	* @param data['confidence']   interger 置信度
+	* @param data['diagnose_key'] string   诊断问题KEY
 	* @return array
 	*/
 	public function getJunctionsDiagnoseList($data){
@@ -183,7 +184,12 @@ class Junction_model extends CI_Model {
 		$selectstr = empty($this->selectColumns($data['diagnose_key'])) ? '' : ',' . $this->selectColumns($data['diagnose_key']);
 		$select = 'id, junction_id' . $selectstr;
 
-		$where = 'task_id = ' . $data['task_id'] . " and time_point = '{$data["time_point"]}'";
+		$where = 'task_id = ' . $data['task_id'];
+		if($data['type'] == 0){
+			$where .= " and type = " . $data['type'];
+		}else if($data['type'] == 1){
+			$where .= " and time_point = '{$data['time_point']}'";
+		}
 
 		// 诊断问题数
 		$diagnose_key_count = count($data['diagnose_key']);

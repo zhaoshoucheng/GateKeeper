@@ -47,6 +47,13 @@ class Validate {
 			return ['status'=>false, 'errmsg'=> 'The rules cannot be empty.'];
 		}
 
+		$diff = array_diff_key($rules, $data);
+		if(count($diff) >= 1){
+			foreach($diff as $k=>$v){
+				return ['status'=>false, 'errmsg'=> 'The ' . $k . ' must be set.'];
+			}
+		}
+
 		self::$custom_msg = $custom_msg;
 
 		// 循环规则
