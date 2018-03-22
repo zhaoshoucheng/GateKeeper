@@ -68,8 +68,8 @@ class Cron extends CI_Controller {
 		$city_id = strval(12);
 		$trace_id = uniqid();
 		$task_id = '123456';
-		$start_time = '07:00';
-		$end_time = '09:00';
+		$start_time = '07:00:00';
+		$end_time = '09:00:00';
 		$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
 		$dateVersion = [
 			'2018-01-01' => '2017120116',
