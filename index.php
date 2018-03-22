@@ -55,18 +55,18 @@
  */
 	// define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
 
-$online_host = array(
-	'ipd-cloud-internal-web00.gz01',
-	'ipd-cloud-internal-web01.gz01',
-	'ipd-cloud-server00.gz01',
-	'ipd-cloud-server01.gz01',
-);
-$hostname = gethostname();
-if (in_array($hostname, $online_host)) {
-	define('ENVIRONMENT', 'production');
-}else{
-	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
-}
+// $online_host = array(
+// 	'ipd-cloud-internal-web00.gz01',
+// 	'ipd-cloud-internal-web01.gz01',
+// 	'ipd-cloud-server00.gz01',
+// 	'ipd-cloud-server01.gz01',
+// );
+// $hostname = gethostname();
+// if (in_array($hostname, $online_host)) {
+// 	define('ENVIRONMENT', 'production');
+// }else{
+// 	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
+// }
 
 /*
  *---------------------------------------------------------------
