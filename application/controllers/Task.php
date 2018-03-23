@@ -54,7 +54,7 @@ class Task extends MY_Controller {
 				$cycle_task_tmp = array_merge($cycle_task_tmp, $aRet);
 			}
 			// 诊断任务
-			if ($kind === 0 or $kind === 2) {
+			if ($kind === 0 or $kind === 1 or $kind === 2) {
 				$aRet = $this->task_model->getTask($user, $city_id, 1, 2);
 				$cycle_task_tmp = array_merge($cycle_task_tmp, $aRet);
 			}
@@ -68,7 +68,7 @@ class Task extends MY_Controller {
 				$custom_task_tmp = array_merge($custom_task_tmp, $aRet);
 			}
 			// 诊断任务
-			if ($kind === 0 or $kind === 2) {
+			if ($kind === 0 or $kind === 1 or $kind === 2) {
 				$aRet = $this->task_model->getTask($user, $city_id, 2, 2);
 				$custom_task_tmp = array_merge($custom_task_tmp, $aRet);
 			}
