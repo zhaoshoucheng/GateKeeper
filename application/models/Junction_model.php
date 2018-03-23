@@ -181,7 +181,13 @@ class Junction_model extends CI_Model {
 			return [];
 		}
 
-		$selectstr = empty($this->selectColumns($data['diagnose_key'])) ? '' : ',' . $this->selectColumns($data['diagnose_key']);
+		$diagnose_key_conf = $this->config->item('diagnose_key');
+		$select_quota_key = [];
+		foreach($diagnose_key_conf as $k=>$v){
+			$select_quota_key[] = $k;
+		}
+
+		$selectstr = empty($this->selectColumns($select_quota_key)) ? '' : ',' . $this->selectColumns($select_quota_key);
 		$select = 'id, junction_id' . $selectstr;
 
 		$where = 'task_id = ' . $data['task_id'];
@@ -193,7 +199,6 @@ class Junction_model extends CI_Model {
 
 		// 诊断问题数
 		$diagnose_key_count = count($data['diagnose_key']);
-		$diagnose_key_conf = $this->config->item('diagnose_key');
 
 		$confidence_where = '';
 		foreach($data['diagnose_key'] as $v){
@@ -215,7 +220,6 @@ class Junction_model extends CI_Model {
 						->where($where)
 						->get()
 						->result_array();
-
 		$temp_diagnose_data = [];
 		foreach($res as $k=>$v){
 			foreach($data['diagnose_key'] as $val){
