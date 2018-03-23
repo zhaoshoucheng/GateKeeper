@@ -20,7 +20,7 @@ class Junction extends MY_Controller {
 	* @param city_id     interger  Y 城市ID
 	* @param type        interger  Y 指标计算类型 0：统合 1：时间点
 	* @param time_point  string    N 评估时间点 指标计算类型为1时非空
-	* @param confidence	 interger  Y 置信度 0:全部 1:高 2:低
+	* @param confidence  interger  Y 置信度 0:全部 1:高 2:低
 	* @param quota_key   string    Y 指标key
 	* @return json
 	*/
@@ -301,6 +301,9 @@ class Junction extends MY_Controller {
 		if($timing['errorCode'] != 0){
 			return $this->response([], 100500, $timing['errorMsg']);
 		}
+		if(count($timing['data']['latest_plan']) < 1){
+			return $this->response([]);
+		}
 
 		// flow_id => flow_label
 		$phase_position = [];
@@ -314,7 +317,7 @@ class Junction extends MY_Controller {
 		$data['token'] = $this->config->item('waymap_token');
 		$map = httpGET($this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr', $data);
 		if(!$map){
-			return $this->response($data, 100500, 'Failed to connect to waymap service.<br>'.$this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr');
+			return $this->response($data, 100500, 'Failed to connect to waymap service.');
 		}
 		$map = json_decode($map, true);
 		if($map['errorCode'] != 0){
