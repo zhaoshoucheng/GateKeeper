@@ -125,7 +125,7 @@ class Task_model extends CI_Model
                 // maptypeversion 未就绪
                 if ($task['try_times'] < $this->max_try_times) {
                     $this->updateTask($task_id, array(
-                        'expect_try_time' => $time() + 10 * 60,
+                        'expect_try_time' => $now + 10 * 60,
                         'try_times' => intval($task['try_times']) + 1,
                     ));
                 } else {
