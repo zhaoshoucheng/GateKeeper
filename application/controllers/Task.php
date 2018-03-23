@@ -340,7 +340,7 @@ class Task extends MY_Controller {
 			$aRet = $this->task_model->getSuccTask($user, $city_id, 1, 2, $task_type);
 			if (!empty($aRet)) {
 				$tasks[$value] = [
-					'task_id' => $aRet[0]['conf_id'],
+					'task_id' => $aRet[0]['task_id'],
 					'dates' => explode(',', $aRet[0]['dates']),
 				];
 			} else {

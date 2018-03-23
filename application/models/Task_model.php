@@ -94,7 +94,7 @@ class Task_model extends CI_Model
             // $query = $this->its_tool->where('try_times > ', $this->max_try_times)->update($this->_table, ['status' => -1, 'task_end_time' => $now, 'updated_at' => $now]);
 
             // 取出一条待执行任务
-            $query = $this->its_tool->select('*')->from($this->_table)->where('status', 0)->where('task_start_time', 0)->where('expect_try_time <=', $now)->where('try_times <=', $this->max_try_times)->limit(1)->get();
+            $query = $this->its_tool->select('task_result.id as task_id, task_result.dates as dates')->from($this->_table)->where('status', 0)->where('task_start_time', 0)->where('expect_try_time <=', $now)->where('try_times <=', $this->max_try_times)->limit(1)->get();
             $result = $query->result_array();
             if (empty($result)) {
                 // 木有待投递任务
