@@ -18,7 +18,7 @@ class Junction extends MY_Controller {
 	* 评估-获取全城路口信息
 	* @param task_id     interger  Y 任务ID
 	* @param city_id     interger  Y 城市ID
-	* @param type        interger  Y 指标计算类型 0：统合 1：时间点
+	* @param type        interger  Y 指标计算类型 1：统合 0：时间点
 	* @param time_point  string    N 评估时间点 指标计算类型为1时非空
 	* @param confidence  interger  Y 置信度 0:全部 1:高 2:低
 	* @param quota_key   string    Y 指标key
@@ -44,10 +44,10 @@ class Junction extends MY_Controller {
 		$data['type'] = (int)$params['type'];
 		$data['city_id'] = $params['city_id'];
 
-		if($data['type'] == 1 && (!isset($params['time_point']) || empty(trim($params['time_point'])))){
+		if($data['type'] == 0 && (!isset($params['time_point']) || empty(trim($params['time_point'])))){
 			return $this->response([], 100400, 'The time_point cannot be empty.');
 		}
-		if($data['type'] == 1){
+		if($data['type'] == 0){
 			$data['time_point'] = trim($params['time_point']);
 		}
 
@@ -157,7 +157,7 @@ class Junction extends MY_Controller {
 	* 诊断-获取全城路口诊断问题列表
 	* @param task_id        interger  Y 任务ID
 	* @param city_id        interger  Y 城市ID
-	* @param type           interger  Y 指标计算类型 0：统合 1：时间点
+	* @param type           interger  Y 指标计算类型 1：统合 0：时间点
 	* @param time_point     string    N 时间点 指标计算类型为1时非空
 	* @param confidence     interger  Y 置信度 0:全部 1:高 2:低
 	* @param diagnose_key	string    Y 诊断key
@@ -182,10 +182,10 @@ class Junction extends MY_Controller {
 		$data['city_id'] = $params['city_id'];
 		$data['type'] = (int)$params['type'];
 
-		if($data['type'] == 1 && (!isset($params['time_point']) || empty(trim($params['time_point'])))){
+		if($data['type'] == 0 && (!isset($params['time_point']) || empty(trim($params['time_point'])))){
 			return $this->response([], 100400, 'The time_point cannot be empty.');
 		}
-		if($data['type'] == 1){
+		if($data['type'] == 0){
 			$data['time_point'] = trim($params['time_point']);
 		}
 
