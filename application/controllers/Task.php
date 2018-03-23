@@ -157,7 +157,6 @@ class Task extends MY_Controller {
 	/**
 	* 创建周期任务
 	* @param city_id	Y 城市ID
-	* @param dates 		Y 评估日期 多个用逗号隔开
 	* @param start_time Y 评估开始时间 00:00
 	* @param end_time 	Y 评估结束时间 00:00
 	* @param type	 	Y 1 前一天；2 前一自然周工作日/周末；3 前四个周*
@@ -174,7 +173,7 @@ class Task extends MY_Controller {
 		$validate = Validate::make($params,
 			[
 				'city_id'		=> 'nullunable',
-				'dates'			=> 'nullunable',
+				// 'dates'			=> 'nullunable',
 				'start_time'	=> 'nullunable',
 				'end_time'		=> 'nullunable',
 				'kind'			=> 'nullunable',
@@ -189,7 +188,7 @@ class Task extends MY_Controller {
 		$task = [
 			'user'		=> $user,
 			'city_id'	=> $params['city_id'],
-			'dates'	=> $params['dates'],
+			// 'dates'	=> $params['dates'],
 			'start_time'=> $params['start_time'],
 			'end_time'	=> $params['end_time'],
 			'kind'		=> $params['kind'],

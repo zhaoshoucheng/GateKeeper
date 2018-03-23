@@ -29,6 +29,12 @@ class Cycletask_model extends CI_Model
     //     return $bRet;
     // }
     
+    function checkIsWorkday($now) {
+        $idx = date('N', $now);
+        $idx = intval($idx);
+        return $idx <= 5;
+    }
+
     function process() {
         try {
             $this->its_tool->trans_begin();
@@ -46,13 +52,41 @@ class Cycletask_model extends CI_Model
             }
             foreach ($result as $value) {
                 $conf_id = $value['id'];
+                
+                $dates = '';
+                if ($value['type'] == 1) {
+                    $dates = date('Y-m-d', $now - 86400);
+                } elseif ($value['type'] == 2) {
+                    $is_workday = $this->checkIsWorkday($now);
+                    for ($i=1; $i < 8; $i++) { 
+                        $t = $now - $i * 86400;
+                        if ($is_workday == $this->checkIsWorkday($t)) {
+                            if ($dates == '') {
+                                $dates .= date('Y-m-d', $t);
+                            } else {
+                                $dates .= date('Y-m-d', $t) . ',';
+                            }
+                        }
+                    }
+                } elseif ($value['type'] == 3) {
+                    for ($i=1; $i < 5; $i++) { 
+                        $t = $now - $i * 7 * 86400;
+                        if ($dates == '') {
+                            $dates .= date('Y-m-d', $t);
+                        } else {
+                            $dates .= date('Y-m-d', $t) . ',';
+                        }
+                    }
+                } else {
+                    return;
+                }
                 // 任务状态置为已投递
                 $query = $this->its_tool->where('id', $conf_id)->update($this->_table, ['last_exec_time' => $now]);
                 // task_result表插入一条待执行任务
                 $task = [
                     'city_id' => $value['city_id'],
                     'user' => $value['user'],
-                    'dates' => $value['dates'],
+                    'dates' => $dates,
                     'start_time' => $value['start_time'],
                     'end_time' => $value['end_time'],
                     'type' => 1,
