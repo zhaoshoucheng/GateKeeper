@@ -23,7 +23,7 @@ function make_output() {
     mkdir -p $output
   
     # 填充output目录, output的内容即为待部署内容
-    cp -rf index.php composer.json contributing.md  system vendor application ${output}/       # 拷贝必要的文件和目录至output目录,
+    cp -rf index.php composer.json contributing.md  system vendor composer.lock application ${output}/       # 拷贝必要的文件和目录至output目录,
                                              #此处$file和$directory表分别示欲拷贝的文件和目录
     local ret=$?
     return $ret
