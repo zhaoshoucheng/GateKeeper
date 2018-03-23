@@ -64,7 +64,7 @@ class Cycletask_model extends CI_Model
                             if ($dates == '') {
                                 $dates .= date('Y-m-d', $t);
                             } else {
-                                $dates .= date('Y-m-d', $t) . ',';
+                                $dates .= ',' . date('Y-m-d', $t);
                             }
                         }
                     }
@@ -74,7 +74,7 @@ class Cycletask_model extends CI_Model
                         if ($dates == '') {
                             $dates .= date('Y-m-d', $t);
                         } else {
-                            $dates .= date('Y-m-d', $t) . ',';
+                            $dates .= ',' . date('Y-m-d', $t);
                         }
                     }
                 } else {
