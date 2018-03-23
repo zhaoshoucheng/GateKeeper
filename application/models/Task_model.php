@@ -91,7 +91,7 @@ class Task_model extends CI_Model
             $this->its_tool->trans_begin();
 
             // 所有超过重试次数任务设置为失败
-            $query = $this->its_tool->where('try_times > ', $this->max_try_times)->update($this->_table, ['status' => -1, 'task_end_time' => $now, 'updated_at' => $now]);
+            // $query = $this->its_tool->where('try_times > ', $this->max_try_times)->update($this->_table, ['status' => -1, 'task_end_time' => $now, 'updated_at' => $now]);
 
             // 取出一条待执行任务
             $query = $this->its_tool->select('*')->from($this->_table)->where('status', 0)->where('task_start_time', 0)->where('expect_try_time <=', $now)->where('try_times <=', $this->max_try_times)->limit(1)->get();
@@ -123,10 +123,18 @@ class Task_model extends CI_Model
             $ret = json_decode($ret, true);
             if ($ret['errorCode'] == -1) {
                 // maptypeversion 未就绪
-                $this->updateTask($task_id, array(
-                    'expect_try_time' => $time() + 10 * 60,
-                    'try_times' => intval($task['try_times']) + 1,
-                ));
+                if ($task['try_times'] < $this->max_try_times) {
+                    $this->updateTask($task_id, array(
+                        'expect_try_time' => $time() + 10 * 60,
+                        'try_times' => intval($task['try_times']) + 1,
+                    ));
+                } else {
+                    $this->updateTask($task_id, array(
+                        'status' => -1,
+                        'try_times' => intval($task['try_times']) + 1,
+                        'task_end_time' => $now,
+                    ));
+                }
                 $this->its_tool->trans_commit();
                 return true;
             }
