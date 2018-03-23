@@ -6,4 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Thrift' => array($vendorDir . '/apache/thrift/lib/php/lib'),
 );
