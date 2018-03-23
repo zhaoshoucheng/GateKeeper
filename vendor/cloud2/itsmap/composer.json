@@ -1,0 +1,22 @@
+{
+  "description": "Didi交通路网基础库",
+  "name": "cloud/itsmap",
+  "type": "library",
+  "license": "Didi",
+  "authors": [
+      {
+          "name": "Yejianfeng",
+          "email": "yejianfeng@didichuxing.com"
+      }
+  ],
+  "require": {
+      "php": ">=5.2.4",
+      "illuminate/database" : "*",
+      "apache/thrift" : "0.9.2"
+  },
+  "autoload": {
+      "psr-4": {
+          "Didi\\Cloud\\ItsMap\\": "src"
+      }
+  }
+}
