@@ -41,10 +41,10 @@ class Junction_model extends CI_Model {
 		$select = 'id, junction_id' . $selectstr;
 
 		$where = 'task_id = ' . $data['task_id'];
-		if($data['type'] == 0){
+		if($data['type'] == 1){
 			$where .= " and type = " . $data['type'];
-		}else if($data['type'] == 1){
-			$where .= " and time_point = '{$data['time_point']}'";
+		}else if($data['type'] == 0){
+			$where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
 		}
 
 		$confidence_conf = $this->config->item('confidence');
@@ -98,7 +98,7 @@ class Junction_model extends CI_Model {
 		$time_point = trim($data['time_point']);
 		$where = 'task_id = ' . (int)$data['task_id']
 				. ' and junction_id = "' . trim($data['junction_id']) . '"'
-				. " and time_point = '{$time_point}'";
+				. " and type = 0 and time_point = '{$time_point}'";
 
 		$res = $this->db->select($select)
 						->from($this->tb)
@@ -191,10 +191,10 @@ class Junction_model extends CI_Model {
 		$select = 'id, junction_id' . $selectstr;
 
 		$where = 'task_id = ' . $data['task_id'];
-		if($data['type'] == 0){
+		if($data['type'] == 1){
 			$where .= " and type = " . $data['type'];
-		}else if($data['type'] == 1){
-			$where .= " and time_point = '{$data['time_point']}'";
+		}else if($data['type'] == 0){
+			$where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
 		}
 
 		// 诊断问题数
@@ -249,7 +249,7 @@ class Junction_model extends CI_Model {
 	public function getDiagnoseRankList($data){
 		$select = 'junction_id, ' . $data['diagnose_key'];
 
-		$where = 'task_id = ' . $data['task_id'] . " and time_point = '{$data["time_point"]}'";
+		$where = 'task_id = ' . $data['task_id'] . " and type = 0 and time_point = '{$data["time_point"]}'";
 
 		$diagnose_key_conf = $this->config->item('diagnose_key');
 		$where .= " and {$data['diagnose_key']} > '{$diagnose_key_conf[$data['diagnose_key']]['junction_threshold']}'";
