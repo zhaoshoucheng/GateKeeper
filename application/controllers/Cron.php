@@ -35,10 +35,10 @@ class Cron extends CI_Controller {
 			$task = $this->task_model->process();
 			if ($task === true or $task === false) {
 				$i ++;
-				if ($i === 2) {
+				if ($i === 5) {
 					break;
 				}
-				sleep(10 * 60);
+				sleep(2 * 60);
 			} else {
 				print_r($task);
 				try {

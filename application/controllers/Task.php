@@ -75,13 +75,14 @@ class Task extends MY_Controller {
 		}
 		$cycle_task = array();
 		$custom_task = array();
+		$run_status = [0, 1, 10, 11];
 		foreach ($cycle_task_tmp as $task) {
 			$cycle_task[] = array(
 				'task_id' => $task['id'],
 				'dates' => explode(',', $task['dates']),
 				'time_range' => $task['start_time'] . '-' . $task['end_time'],
 				'junctions' => ($task['junctions'] === '' or $task['junctions'] === null) ? '全城' : '路口',
-				'status' => ($task['status'] == -1) ? '失败' : $task['rate'] . '%',
+				'status' => (in_array($task['status'], $run_status)) ? $task['rate'] . '%' : '失败',
 				'exec_date' => date('m.d', $task['task_start_time']),
 			);
 		}
@@ -91,7 +92,7 @@ class Task extends MY_Controller {
 				'dates' => explode(',', $task['dates']),
 				'time_range' => $task['start_time'] . '-' . $task['end_time'],
 				'junctions' => ($task['junctions'] === '' or $task['junctions'] === null) ? '全城' : '路口',
-				'status' => ($task['status'] == -1) ? '失败' : $task['rate'] . '%',
+				'status' => (in_array($task['status'], $run_status)) ? $task['rate'] . '%' : '失败',
 				'exec_date' => date('m.d', $task['task_start_time']),
 			);
 		}
@@ -245,8 +246,12 @@ class Task extends MY_Controller {
 		// 		$task[$key] = $params[$key];
 		// 	}
 		// }
-
-		$bRet = $this->task_model->updateTask($task_id, ['rate' => $rate]);
+		$task = array();
+		$task['rate'] = $rate;
+		if (intval($rate == 100)) {
+			$task['task_end_time'] = time();
+		}
+		$bRet = $this->task_model->updateTask($task_id, $task);
 		if ($bRet === false) {
 			$this->errno = -1;
 			$this->errmsg = '更新任务进度失败';
