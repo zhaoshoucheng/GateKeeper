@@ -29,7 +29,7 @@ class Cycletask_model extends CI_Model
     //     return $bRet;
     // }
     
-    function checkIsWorkday($now) {
+    function isWorkday($now) {
         $idx = date('N', $now);
         $idx = intval($idx);
         return $idx <= 5;
@@ -57,10 +57,10 @@ class Cycletask_model extends CI_Model
                 if ($value['type'] == 1) {
                     $dates = date('Y-m-d', $now - 86400);
                 } elseif ($value['type'] == 2) {
-                    $is_workday = $this->checkIsWorkday($now);
+                    $is_workday = $this->isWorkday($now);
                     for ($i=1; $i < 8; $i++) { 
                         $t = $now - $i * 86400;
-                        if ($is_workday == $this->checkIsWorkday($t)) {
+                        if ($is_workday == $this->isWorkday($t)) {
                             if ($dates == '') {
                                 $dates .= date('Y-m-d', $t);
                             } else {
@@ -78,6 +78,7 @@ class Cycletask_model extends CI_Model
                         }
                     }
                 } else {
+                    $this->its_tool->trans_rollback();
                     return;
                 }
                 // 任务状态置为已投递

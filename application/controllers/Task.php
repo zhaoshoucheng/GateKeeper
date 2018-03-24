@@ -159,13 +159,14 @@ class Task extends MY_Controller {
 	* @param city_id	Y 城市ID
 	* @param start_time Y 评估开始时间 00:00
 	* @param end_time 	Y 评估结束时间 00:00
+	* @param kind	 	Y 1 指标任务；2 诊断任务
 	* @param type	 	Y 1 前一天；2 前一自然周工作日/周末；3 前四个周*
 	* @param expect_exec_time	 	N 周期望开始时间 hh:mm:ss
 	* @return json
 	*/
 	public function createCycleTask(){
 		$user = 'admin';
-		$expect_exec_time = '02:00:00';
+		$expect_exec_time = '04:04:04';
 
 		$params = $this->input->post();
 
@@ -173,7 +174,6 @@ class Task extends MY_Controller {
 		$validate = Validate::make($params,
 			[
 				'city_id'		=> 'nullunable',
-				// 'dates'			=> 'nullunable',
 				'start_time'	=> 'nullunable',
 				'end_time'		=> 'nullunable',
 				'kind'			=> 'nullunable',
@@ -188,7 +188,6 @@ class Task extends MY_Controller {
 		$task = [
 			'user'		=> $user,
 			'city_id'	=> $params['city_id'],
-			// 'dates'	=> $params['dates'],
 			'start_time'=> $params['start_time'],
 			'end_time'	=> $params['end_time'],
 			'kind'		=> $params['kind'],
@@ -211,6 +210,45 @@ class Task extends MY_Controller {
 				'cycle_conf_id' => $iRet,
 			];
 		}
+	}
+
+	/**
+	* 获取最近执行成功的任务id
+	* @param city_id	Y 城市ID
+	* @return json
+	*/
+	public function getSuccTask() {
+		$user = 'admin';
+
+		$params = $this->input->post();
+
+		// 校验参数
+		$validate = Validate::make($params,
+			[
+				'city_id'		=> 'nullunable',
+			]
+		);
+
+		if(!$validate['status']){
+			return $this->response(array(), -1, $validate['errmsg']);
+		}
+
+		$city_id = $params['city_id'];
+
+		$tasks = array();
+		$types = [1 => 'last_day', 2 => 'last_week', 3 => 'last_month'];
+		foreach ($types as $task_type => $value) {
+			$aRet = $this->task_model->getSuccTask($user, $city_id, 1, 2, $task_type);
+			if (!empty($aRet)) {
+				$tasks[$value] = [
+					'task_id' => $aRet[0]['task_id'],
+					'dates' => explode(',', $aRet[0]['dates']),
+				];
+			} else {
+				$tasks[$value] = [];
+			}
+		}
+		$this->output_data = $tasks;
 	}
 
 	/**
@@ -238,13 +276,6 @@ class Task extends MY_Controller {
 		$task_id = $params['task_id'];
 		$rate = $params['rate'];
 
-		// $task = array();
-		// $keys = ['task_start_time', 'task_end_time', 'rate', 'status', 'task_comment'];
-		// foreach ($keys as $key) {
-		// 	if (isset($params[$key])) {
-		// 		$task[$key] = $params[$key];
-		// 	}
-		// }
 		$task = array();
 		$task['rate'] = $rate;
 		if (intval($rate == 100)) {
@@ -309,44 +340,5 @@ class Task extends MY_Controller {
 			$this->errno = -1;
 			$this->errmsg = '更新任务状态失败';
 		}
-	}
-
-	/**
-	* 获取最近执行成功的任务id
-	* @param city_id	Y 城市ID
-	* @return json
-	*/
-	public function getSuccTask() {
-		$user = 'admin';
-
-		$params = $this->input->post();
-
-		// 校验参数
-		$validate = Validate::make($params,
-			[
-				'city_id'		=> 'nullunable',
-			]
-		);
-
-		if(!$validate['status']){
-			return $this->response(array(), -1, $validate['errmsg']);
-		}
-
-		$city_id = $params['city_id'];
-
-		$tasks = array();
-		$types = [1 => 'last_day', 2 => 'last_week', 3 => 'last_month'];
-		foreach ($types as $task_type => $value) {
-			$aRet = $this->task_model->getSuccTask($user, $city_id, 1, 2, $task_type);
-			if (!empty($aRet)) {
-				$tasks[$value] = [
-					'task_id' => $aRet[0]['task_id'],
-					'dates' => explode(',', $aRet[0]['dates']),
-				];
-			} else {
-				$tasks[$value] = [];
-			}
-		}
-		$this->output_data = $tasks;
 	}
 }

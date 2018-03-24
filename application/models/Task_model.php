@@ -5,7 +5,7 @@ class Task_model extends CI_Model
 {
     private $_table = 'task_result';
 
-    private $max_try_times = 10;
+    private $max_try_times = 20;
     private $completed_status = 11;
 
     function __construct() {
@@ -34,7 +34,7 @@ class Task_model extends CI_Model
 
     function updateTaskStatus($task_id, $ider, $status, $comment = null) {
         try {
-            $this->its_tool->trans_start();
+            $this->its_tool->trans_begin();
 
             $sql = "select * from task_result where id = ? for update";
             $query = $this->its_tool->query($sql, array($task_id));
@@ -85,10 +85,9 @@ class Task_model extends CI_Model
     }
 
     function process() {
-        $now = time();
-        
         try {
             $this->its_tool->trans_begin();
+            $now = time();
 
             // 所有超过重试次数任务设置为失败
             // $query = $this->its_tool->where('try_times > ', $this->max_try_times)->update($this->_table, ['status' => -1, 'task_end_time' => $now, 'updated_at' => $now]);
