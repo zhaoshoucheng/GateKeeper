@@ -1,6 +1,6 @@
 <?php
 
-
+date_default_timezone_set('Asia/Shanghai');
 class Cycletask_model extends CI_Model
 {
     private $_table = 'cycle_task';
