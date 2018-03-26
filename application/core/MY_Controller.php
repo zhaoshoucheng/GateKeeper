@@ -20,6 +20,9 @@ class MY_Controller extends CI_Controller {
 		parent::__construct();
 		date_default_timezone_set('Asia/Shanghai');
 		$host = $_SERVER['HTTP_HOST'];
+		if($this->input->post('debug')){
+			$this->debug = true;
+		}
 		if ($host != '100.90.164.31:8088' && $host != 'www.itstool.com') {
 			$this->is_check_login = 1;
 
