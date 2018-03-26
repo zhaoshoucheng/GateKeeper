@@ -391,13 +391,4 @@ class Junction_model extends CI_Model {
 
 		return $result_data;
 	}
-
-	/*
-	* 测试
-	*/
-	public function testdata(){
-		$res = $this->db->select()->from($this->tb)->get()->result_array();
-
-		return $res;
-	}
 }
