@@ -8,10 +8,14 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Task extends MY_Controller {
+	private $to = 'lizhaohua@didichuxing.com';
+	private $subject = 'task scheduler';
+
 	public function __construct(){
 		parent::__construct();
 		// $this->config->load('nconf');
 		// $this->load->helper('http');
+		$this->load->helper('mail');
 
 		$this->load->model('cycletask_model');
 		$this->load->model('customtask_model');
@@ -280,6 +284,8 @@ class Task extends MY_Controller {
 		$task['rate'] = $rate;
 		if (intval($rate == 100)) {
 			$task['task_end_time'] = time();
+			$content = "{$task_id} succeed.";
+			sendMail($this->to, $this->subject, $content);
 		}
 		$bRet = $this->task_model->updateTask($task_id, $task);
 		if ($bRet === false) {
@@ -321,7 +327,15 @@ class Task extends MY_Controller {
 		} else {
 			$task_comment = null;
 		}
-		
+
+		if ($status = 2) {
+			if ($ider == 1) {
+				$content = "{$task_id} mapdata flow failed.";
+			} elseif ($ider == 2) {
+				$content = "{$task_id} calcute task failed.";
+			}
+			sendMail($this->to, $this->subject, $content);
+		}
 
 		// $ider_to_id = [
 		// 	'mapflow' => 0,
