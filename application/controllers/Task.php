@@ -328,7 +328,7 @@ class Task extends MY_Controller {
 			$task_comment = null;
 		}
 
-		if ($status = 2) {
+		if ($status == 2) {
 			if ($ider == 1) {
 				$content = "{$task_id} mapdata flow failed.";
 			} elseif ($ider == 2) {
