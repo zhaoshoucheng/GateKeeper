@@ -149,11 +149,11 @@ class Junction_model extends CI_Model {
 						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $v['flow_quota']);
 						// 诊断问题性质 1:高 2:中 3:低
 						if($res[$k] > $v['nature_threshold']['low'] && $res[$k] <= $v['nature_threshold']['mide_left']){
-							$res['diagnose_detail'][$k][$k . '_nature'] = 3;
+							$res['diagnose_detail'][$k]['nature'] = 3;
 						}else if($res[$k] > $v['nature_threshold']['mide_left'] && $res[$k] <= $v['nature_threshold']['mide_right']){
-							$res['diagnose_detail'][$k][$k . '_nature'] = 2;
+							$res['diagnose_detail'][$k]['nature'] = 2;
 						}else if($res[$k] > $v['nature_threshold']['mide_right'] && $res[$k] <= $v['nature_threshold']['high']){
-							$res['diagnose_detail'][$k][$k . '_nature'] = 1;
+							$res['diagnose_detail'][$k]['nature'] = 1;
 						}
 					}
 				}
