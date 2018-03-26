@@ -329,9 +329,9 @@ class Task extends MY_Controller {
 		}
 
 		if ($status == 2) {
-			if ($ider == 1) {
+			if ($ider == 0) {
 				$content = "{$task_id} mapdata flow failed.";
-			} elseif ($ider == 2) {
+			} elseif ($ider == 1) {
 				$content = "{$task_id} calcute task failed.";
 			}
 			sendMail($this->to, $this->subject, $content);
