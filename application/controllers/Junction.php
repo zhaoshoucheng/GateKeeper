@@ -306,9 +306,27 @@ class Junction extends MY_Controller {
 		}
 
 		// flow_id => flow_label
+		$position = ['东'=>1, '西'=>2, '南'=>3, '北'=>4];
+		$turn = ['直'=>1, '左'=>2, '右'=>3];
 		$phase_position = [];
+		$temp_arr = [];
 		foreach($timing['data']['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
-			$phase_position[$v[0]['flow_logic']['logic_flow_id']] = $v[0]['flow_logic']['comment'];
+			$comment = $v[0]['flow_logic']['comment'];
+			foreach($position as $k1=>$v1){
+				foreach($turn as $k2=>$v2){
+					if(stristr($comment, $k1.$k2) !== false){
+						$temp_arr[$k1][str_replace($k1.$k2, $v1.$v2, $comment)]['logic_flow_id'] = $v[0]['flow_logic']['logic_flow_id'];
+						$temp_arr[$k1][str_replace($k1.$k2, $v1.$v2, $comment)]['comment'] = $comment;
+					}
+				}
+			}
+		}
+
+		foreach ($temp_arr as $key => &$value) {
+			ksort($value);
+			reset($value);
+			$arr1 = current($value);
+			$phase_position[$arr1['logic_flow_id']] = $arr1['comment'];
 		}
 
 		// 获取路网数据
