@@ -328,6 +328,8 @@ class Junction extends MY_Controller {
 			return $this->response([], 100500, $map['errorMsg']);
 		}
 		if($this->debug){
+			echo "data = " . json_decode($data);
+			echo "<hr>url = " . $this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr';
 			echo "map_data = <pre>";print_r($map);
 		}
 		$result = [];
