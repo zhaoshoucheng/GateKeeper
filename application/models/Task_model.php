@@ -8,10 +8,14 @@ class Task_model extends CI_Model
     private $max_try_times = 20;
     private $completed_status = 11;
 
+    private $to = 'lizhaohua@didichuxing.com';
+    private $subject = 'task scheduler';
+
     function __construct() {
         parent::__construct();
         $this->its_tool = $this->load->database('default', true);
 
+        $this->load->helper('mail');
         $this->load->helper('http');
         $this->load->config('nconf');
     }
@@ -127,12 +131,16 @@ class Task_model extends CI_Model
                         'expect_try_time' => $now + 10 * 60,
                         'try_times' => intval($task['try_times']) + 1,
                     ));
+                    $content = "{$task_id} {$dates} mapversion unready.";
+                    sendMail($this->to, $this->subject, $content);
                 } else {
                     $this->updateTask($task_id, array(
                         'status' => -1,
                         'try_times' => intval($task['try_times']) + 1,
                         'task_end_time' => $now,
                     ));
+                    $content = "{$task_id} maptypeversion unready and failed.";
+                    sendMail($this->to, $this->subject, $content);
                 }
                 $this->its_tool->trans_commit();
                 return true;
