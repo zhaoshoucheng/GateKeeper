@@ -305,6 +305,10 @@ class Junction extends MY_Controller {
 			return $this->response([]);
 		}
 
+		if($this->debug){
+			echo "timing_data = <pre>";print_r($timing['data']['latest_plan']);
+		}
+
 		// flow_id => flow_label
 		$phase_position = [];
 		foreach($timing['data']['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
@@ -323,7 +327,9 @@ class Junction extends MY_Controller {
 		if($map['errorCode'] != 0){
 			return $this->response([], 100500, $map['errorMsg']);
 		}
-
+		if($this->debug){
+			echo "map_data = <pre>";print_r($map);
+		}
 		$result = [];
 		foreach($map['data'] as $k=>$v){
 			if(isset($phase_position[$v['logic_flow_id']]) && !empty($phase_position[$v['logic_flow_id']])){
@@ -333,8 +339,9 @@ class Junction extends MY_Controller {
 				$result[$k]['lat'] = $v['inlink_info']['s_node']['lat'];
 			}
 		}
-
-		//echo "<pre>";print_r($result);exit;
+		if($this->debug){
+			echo "result = <pre>";print_r($result);
+		}
 		return $this->response(array_values($result));
 
 	}
