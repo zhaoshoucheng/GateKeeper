@@ -126,40 +126,51 @@ class Junction_model extends CI_Model {
 			return [];
 		}
 
-		$phase_position = [];
-		foreach($timing['data']['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
-			$phase_position[$v[0]['flow_logic']['logic_flow_id']] = $v[0]['flow_logic']['comment'];
-		}
-
-		$res['movements'] = json_decode($res['movements'], true);
-
-		// 标注相位名称
-		foreach($res['movements'] as $k=>$v){
-			$res['movements'][$k]['comment'] = isset($phase_position[$v['movement_id']]) ? $phase_position[$v['movement_id']] : "";
-		}
-
-		$flow_quota_key = $this->config->item('flow_quota_key');
-		// 诊断详情
-		if((int)$data['type'] == 2){
-			foreach($diagnose_key_conf as $k=>$v){
-				if($res[$k] > $v['junction_threshold']){
-					$res['diagnose_detail'][$k]['name'] = $v['name'];
-					$res['diagnose_detail'][$k]['key'] = $k;
-					$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $v['flow_quota']);
-				}
+		if(count($res) >= 1){
+			$phase_position = [];
+			foreach($timing['data']['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
+				$phase_position[$v[0]['flow_logic']['logic_flow_id']] = $v[0]['flow_logic']['comment'];
 			}
 
-			// 组织每个问题的不同指标数据集合
-			if(isset($res['diagnose_detail'])){
-				foreach($res['diagnose_detail'] as $k=>$v){
-					foreach($res['movements'] as $k1=>$v1){
-						$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'', 'green_split'=>'', 'route_length'=>'']));
+			$res['movements'] = json_decode($res['movements'], true);
+
+			// 标注相位名称
+			foreach($res['movements'] as $k=>$v){
+				$res['movements'][$k]['comment'] = isset($phase_position[$v['movement_id']]) ? $phase_position[$v['movement_id']] : "";
+			}
+
+			$flow_quota_key = $this->config->item('flow_quota_key');
+			// 诊断详情
+			if((int)$data['type'] == 2 && count($res) >= 1){
+				foreach($diagnose_key_conf as $k=>$v){
+					if($res[$k] > $v['junction_threshold']){
+						$res['diagnose_detail'][$k]['name'] = $v['name'];
+						$res['diagnose_detail'][$k]['key'] = $k;
+						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $v['flow_quota']);
+						// 诊断问题性质 1:高 2:中 3:低
+						if($res[$k] > $v['nature_threshold']['low'] && $res[$k] <= $v['nature_threshold']['mide_left']){
+							$res['diagnose_detail'][$k][$k . '_nature'] = 3;
+						}else if($res[$k] > $v['nature_threshold']['mide_left'] && $res[$k] <= $v['nature_threshold']['mide_right']){
+							$res['diagnose_detail'][$k][$k . '_nature'] = 2;
+						}else if($res[$k] > $v['nature_threshold']['mide_right'] && $res[$k] <= $v['nature_threshold']['high']){
+							$res['diagnose_detail'][$k][$k . '_nature'] = 1;
+						}
+					}
+				}
+
+				// 组织每个问题的不同指标数据集合
+				if(isset($res['diagnose_detail'])){
+					foreach($res['diagnose_detail'] as $k=>$v){
+						foreach($res['movements'] as $k1=>$v1){
+							$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'', 'green_split'=>'', 'route_length'=>'']));
+						}
 					}
 				}
 			}
+
+			$res['flow_quota'] = $flow_quota_key;
 		}
 
-		$res['flow_quota'] = $flow_quota_key;
 		//echo "<pre>";print_r($res);exit;
 		return $res;
 	}
