@@ -82,4 +82,13 @@ class Cron extends CI_Controller {
 		];
 		$task->calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion);
 	}
+
+	public function mailTest() {
+		$this->load->helper('mail');
+		$to = 'lizhaohua@didichuxing.com';
+		$subject = 'for test';
+		$content = 'test helpser sendMail';
+		$ret = sendMail($to, $subject, $content);
+		var_dump($ret);
+	}
 }
