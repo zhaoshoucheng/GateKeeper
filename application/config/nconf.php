@@ -89,8 +89,14 @@ $config['flow_quota_key'] = [
 // 诊断问题
 $config['diagnose_key']	= [
 	'imbalance_index'=>[
-		'name'				=>'失衡',
-		'junction_threshold'=>0.5,
+		'name'				=> '失衡',
+		'junction_threshold'=> 0.5,
+		'nature_threshold'  => [
+			'high'       => 1,
+			'mide_right' => 0.6,
+			'mide_left'  => 0.3,
+			'low'        => 0
+		],
 		'flow_quota'=>[
 			'stop_time_cycle'=>[
 				'name'=>'停车周期次数',
@@ -109,6 +115,12 @@ $config['diagnose_key']	= [
 	'spillover_index'	=> [
 		'name'				=>'溢流',
 		'junction_threshold'=>0.5,
+		'nature_threshold'  => [
+			'high'       => 1,
+			'mide_right' => 0.6,
+			'mide_left'  => 0.3,
+			'low'        => 0
+		],
 		'flow_quota'=>[
 			'queue_position'=>[
 				'name'=>'排队长度',
@@ -131,6 +143,12 @@ $config['diagnose_key']	= [
 	'saturation_index'	=> [
 		'name'				=>'空放',
 		'junction_threshold'=>0.5,
+		'nature_threshold'  => [
+			'high'       => 1,
+			'mide_right' => 0.6,
+			'mide_left'  => 0.3,
+			'low'        => 0
+		],
 		'flow_quota'=>[
 			'stop_delay'=>[
 				'name'=>'停车延误',
