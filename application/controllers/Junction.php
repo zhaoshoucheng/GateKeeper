@@ -335,7 +335,7 @@ class Junction extends MY_Controller {
 		}
 
 		//echo "<pre>";print_r($result);exit;
-		return $this->response($result);
+		return $this->response(array_values($result));
 
 	}
 
