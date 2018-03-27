@@ -145,7 +145,7 @@ class Junction_model extends CI_Model {
 					if($this->compare($res[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
 						$res['diagnose_detail'][$k]['name'] = $v['name'];
 						$res['diagnose_detail'][$k]['key'] = $k;
-						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $v['flow_quota']);
+						$res['diagnose_detail'][$k]['flow_quota'] = array_merge(['route_length' => '路段长度(米)'], array_intersect_key($flow_quota_key, $v['flow_quota']));
 						// 诊断问题性质 1:重度 2:中度 3:轻度
 						if($res[$k] > $v['nature_threshold']['low'] && $res[$k] <= $v['nature_threshold']['mide_left']){
 							$res['diagnose_detail'][$k]['nature'] = 3;
@@ -161,7 +161,7 @@ class Junction_model extends CI_Model {
 				if(isset($res['diagnose_detail'])){
 					foreach($res['diagnose_detail'] as $k=>$v){
 						foreach($res['movements'] as $k1=>$v1){
-							$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'', 'green_split'=>'', 'route_length'=>'']));
+							$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'', 'green_split'=>'', 'route_length'=>'', 'route_length' => '路段长度(米)']));
 						}
 					}
 				}
