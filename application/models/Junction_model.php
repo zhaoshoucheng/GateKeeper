@@ -231,6 +231,7 @@ class Junction_model extends CI_Model {
 						->where($where)
 						->get()
 						->result_array();
+		echo "<pre>res = ";print_r($res);
 		echo "sql = " . $this->db->last_query();
 		$temp_diagnose_data = [];
 		foreach($res as $k=>$v){
@@ -247,7 +248,7 @@ class Junction_model extends CI_Model {
 
 		$result_data = $this->mergeAllJunctions($all_city_junctions, $temp_diagnose_data, 'diagnose_detail');
 
-		//echo "<pre>";print_r($result_data);exit;
+		echo "<pre>";print_r($result_data);exit;
 		return $result_data;
 	}
 
