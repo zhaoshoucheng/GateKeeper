@@ -401,7 +401,7 @@ class Junction_model extends CI_Model {
 			}
 		}
 
-		return $result_data;
+		return array_values($result_data);
 	}
 
 	/**
