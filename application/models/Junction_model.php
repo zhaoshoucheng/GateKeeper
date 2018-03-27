@@ -404,7 +404,7 @@ class Junction_model extends CI_Model {
 
 		$center_lat = 0;
 		$center_lng = 0;
-
+		$result_data['center'] = [];
 		if(count($temp_lat) >= 1 && count($temp_lng) >= 1){
 			asort($temp_lng);
 			asort($temp_lat);
@@ -418,10 +418,10 @@ class Junction_model extends CI_Model {
 
 			$center_lat = ($min_lat + $max_lat) / 2;
 			$center_lng = ($min_lng + $max_lng) / 2;
+			$result_data['center']['lng'] = $center_lng;
+			$result_data['center']['lat'] = $center_lat;
 		}
 
-		$result_data['center']['lng'] = $center_lng;
-		$result_data['center']['lat'] = $center_lat;
 		$result_data['dataList'] = array_values($result_data['dataList']);
 
 		return $result_data;
