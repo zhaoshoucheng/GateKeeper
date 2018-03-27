@@ -143,11 +143,11 @@ class Junction_model extends CI_Model {
 			// 诊断详情
 			if((int)$data['type'] == 2 && count($res) >= 1){
 				foreach($diagnose_key_conf as $k=>$v){
-					if($res[$k] > $v['junction_threshold']){
+					if($this->compare($res[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
 						$res['diagnose_detail'][$k]['name'] = $v['name'];
 						$res['diagnose_detail'][$k]['key'] = $k;
 						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $v['flow_quota']);
-						// 诊断问题性质 1:高 2:中 3:低
+						// 诊断问题性质 1:重度 2:中度 3:轻度
 						if($res[$k] > $v['nature_threshold']['low'] && $res[$k] <= $v['nature_threshold']['mide_left']){
 							$res['diagnose_detail'][$k]['nature'] = 3;
 						}else if($res[$k] > $v['nature_threshold']['mide_left'] && $res[$k] <= $v['nature_threshold']['mide_right']){
@@ -235,11 +235,12 @@ class Junction_model extends CI_Model {
 		foreach($res as $k=>$v){
 			foreach($data['diagnose_key'] as $val){
 				$temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
-				if($v[$val] <= $diagnose_key_conf[$val]['junction_threshold']){
-					$temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = 0;
-				}else{
-					$temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = 1;
+				$is_diagnose = 0;
+				if($this->compare($v[$val], $diagnose_key_conf[$val]['junction_threshold'], $diagnose_key_conf[$val]['junction_threshold_formula'])){
+					$is_diagnose = 1;
 				}
+
+				$temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = $is_diagnose;
 			}
 		}
 
@@ -263,7 +264,7 @@ class Junction_model extends CI_Model {
 		$where = 'task_id = ' . $data['task_id'] . " and type = 0 and time_point = '{$data["time_point"]}'";
 
 		$diagnose_key_conf = $this->config->item('diagnose_key');
-		$where .= " and {$data['diagnose_key']} > '{$diagnose_key_conf[$data['diagnose_key']]['junction_threshold']}'";
+		$where .= " and {$data['diagnose_key']} {$diagnose_key_conf[$data['diagnose_key']]['junction_threshold_formula']} '{$diagnose_key_conf[$data['diagnose_key']]['junction_threshold']}'";
 
 		$sort_conf = $this->config->item("sort_conf");
 
@@ -273,7 +274,7 @@ class Junction_model extends CI_Model {
 						->order_by($data['diagnose_key'], $sort_conf[$data['orderby']])
 						->get()
 						->result_array();
-
+		echo $this->db->last_query();
 		$logic_junction_ids = '';
 		if(count($res) >= 1){
 			foreach($res as $k=>$v){
@@ -391,15 +392,27 @@ class Junction_model extends CI_Model {
 	private function mergeAllJunctions($all_data, $data, $merge_key = 'detail'){
 		$result_data = [];
 		foreach($all_data as $k=>$v){
-			$result_data[$k]['logic_junction_id'] = $v['logic_junction_id'];
-			$result_data[$k]['name'] = $v['name'];
-			$result_data[$k]['lng'] = $v['lng'];
-			$result_data[$k]['lat'] = $v['lat'];
 			if(isset($data[$v['logic_junction_id']])){
+				$result_data[$k]['logic_junction_id'] = $v['logic_junction_id'];
+				$result_data[$k]['name'] = $v['name'];
+				$result_data[$k]['lng'] = $v['lng'];
+				$result_data[$k]['lat'] = $v['lat'];
 				$result_data[$k][$merge_key] = $data[$v['logic_junction_id']];
 			}
 		}
 
 		return $result_data;
+	}
+
+	/**
+	* 比较函数
+	*/
+	public function compare($val1, $val2, $symbol) {
+	    $compare = [
+	        '>' => function ($val1, $val2) { return $val1 > $val2; },
+	        '<' => function ($val1, $val2) { return $val1 < $val2; },
+	        '=' => function ($val1, $val2) { return $val1 == $val2;}
+	    ];
+	    return $compare[$symbol]($val1, $val2);
 	}
 }
