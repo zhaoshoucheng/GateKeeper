@@ -94,7 +94,7 @@ class Junction_model extends CI_Model {
 		foreach($diagnose_key_conf as $k=>$v){
 			$select_str .= empty($select_str) ? $k : ',' . $k;
 		}
-		$select = 'id, junction_id, ' . $select_str . ', movements';
+		$select = 'id, junction_id, ' . $select_str . ', movements, result_comment';
 		$time_point = trim($data['time_point']);
 		$where = 'task_id = ' . (int)$data['task_id']
 				. ' and junction_id = "' . trim($data['junction_id']) . '"'
@@ -105,7 +105,7 @@ class Junction_model extends CI_Model {
 						->where($where)
 						->get()
 						->row_array();
-
+		echo "sql = " . $this->db->last_query();
 		// 获取此路口相位名称
 		$this->load->helper('http');
 		$phase_data = [
@@ -231,6 +231,7 @@ class Junction_model extends CI_Model {
 						->where($where)
 						->get()
 						->result_array();
+		echo "sql = " . $this->db->last_query();
 		$temp_diagnose_data = [];
 		foreach($res as $k=>$v){
 			foreach($data['diagnose_key'] as $val){

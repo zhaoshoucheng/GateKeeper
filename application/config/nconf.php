@@ -78,14 +78,14 @@ $config['junction_quota_key'] = [
 
 // flow指标
 $config['flow_quota_key'] = [
-	'stop_delay'		=> '停车延误',
+	'route_length'      => '路段长度(米)',
+	'queue_position'	=> '排队长度(米)',
 	'saturation_degree'	=> '饱和度',
-	'queue_position'	=> '排队长度',
-	'stop_time_cycle'	=> '停车周期次数',
+	'stop_delay'		=> '停车延误(秒)',
+	'stop_time_cycle'	=> '停车周期次数(次)',
 	'spillover_rate'	=> '溢流比率',
 	'stop_rate'			=> '停车比率',
-	'route_length'      => '路段长度',
-	'green_split'       => '绿信比'
+	'confidence'        => '置信度'
 ];
 
 // 诊断问题
