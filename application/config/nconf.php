@@ -45,34 +45,34 @@ $config['confidence'] = [
 // 路口指标
 $config['junction_quota_key'] = [
 	'imbalance_index' => [
-		'name'		=>'失衡指数',
-		'status_max'=>'0.6',
-		'status_min'=>'0.1'
+		'name'		=> '失衡指数',
+		'status_max'=> 0.6,
+		'status_min'=> 0.1
 	],
 	'spillover_index' => [
-		'name'=>'溢流指数',
-		'status_max'=>'0.6',
-		'status_min'=>'0.1'
+		'name'      => '溢流指数',
+		'status_max'=> 0.6,
+		'status_min'=> 0.1
 	],
 	'incoordination_index' => [
-		'name'=>'失调指数',
-		'status_max'=>'0.6',
-		'status_min'=>'0.1'
+		'name'      => '失调指数',
+		'status_max'=> 0.6,
+		'status_min'=> 0.1
 	],
 	'saturation_index' => [
-		'name'=>'饱和指数',
-		'status_max'=>'0.6',
-		'status_min'=>'0.1'
+		'name'      => '饱和指数',
+		'status_max'=> 0.6,
+		'status_min'=> 0.1
 	],
 	'stop_cycle_time' => [
-		'name'=>'停车周期次数',
-		'status_max'=>'0.6',
-		'status_min'=>'0.1'
+		'name'      => '停车周期次数',
+		'status_max'=> 0.6,
+		'status_min'=> 0.1
 	],
 	'stop_delay' => [
-		'name'=>'停车延误',
-		'status_max'=>'0.6',
-		'status_min'=>'0.1'
+		'name'      => '停车延误',
+		'status_max'=> 0.6,
+		'status_min'=> 0.1
 	]
 ];
 
@@ -83,7 +83,9 @@ $config['flow_quota_key'] = [
 	'queue_position'	=> '排队长度',
 	'stop_time_cycle'	=> '停车周期次数',
 	'spillover_rate'	=> '溢流比率',
-	'stop_rate'			=> '停车比率'
+	'stop_rate'			=> '停车比率',
+	'route_length'      => '路段长度',
+	'green_split'       => '绿信比'
 ];
 
 // 诊断问题
