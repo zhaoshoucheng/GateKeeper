@@ -264,7 +264,7 @@ class Junction_model extends CI_Model {
 		$where = 'task_id = ' . $data['task_id'] . " and type = 0 and time_point = '{$data["time_point"]}'";
 
 		$diagnose_key_conf = $this->config->item('diagnose_key');
-		$where .= " and {$data['diagnose_key']} {$diagnose_key_conf[$data['diagnose_key']]['junction_threshold_formula']} '{$diagnose_key_conf[$data['diagnose_key']]['junction_threshold']}'";
+		$where .= " and {$data['diagnose_key']} {$diagnose_key_conf[$data['diagnose_key']]['junction_threshold_formula']} {$diagnose_key_conf[$data['diagnose_key']]['junction_threshold']}";
 
 		$sort_conf = $this->config->item("sort_conf");
 
