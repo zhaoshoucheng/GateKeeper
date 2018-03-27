@@ -68,17 +68,17 @@ class Cron extends CI_Controller {
 		$city_id = strval(12);
 		$trace_id = uniqid();
 		$task_id = '123456';
-		$start_time = '07:00:00';
-		$end_time = '09:00:00';
+		$start_time = '06:00:00';
+		$end_time = '10:00:00';
 		$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
 		$dateVersion = [
-			'2018-01-01' => '2017120116',
+			'2018-03-25' => '2018031110',
 		];
 
 		$task = new Task();
 		$task->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values($dateVersion));
 		$dateVersion = [
-			'20180101' => '2017120116',
+			'2018-03-25' => '2018031110',
 		];
 		$task->calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion);
 	}
