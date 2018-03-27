@@ -394,11 +394,11 @@ class Junction_model extends CI_Model {
 			if(isset($data[$v['logic_junction_id']])){
 				$temp_lng[$k] = $v['lng'];
 				$temp_lat[$k] = $v['lat'];
-				$result_data['list'][$k]['logic_junction_id'] = $v['logic_junction_id'];
-				$result_data['list'][$k]['name'] = $v['name'];
-				$result_data['list'][$k]['lng'] = $v['lng'];
-				$result_data['list'][$k]['lat'] = $v['lat'];
-				$result_data['list'][$k][$merge_key] = $data[$v['logic_junction_id']];
+				$result_data[$k]['list']['logic_junction_id'] = $v['logic_junction_id'];
+				$result_data[$k]['list']['name'] = $v['name'];
+				$result_data[$k]['list']['lng'] = $v['lng'];
+				$result_data[$k]['list']['lat'] = $v['lat'];
+				$result_data[$k]['list'][$merge_key] = $data[$v['logic_junction_id']];
 			}
 		}
 
@@ -419,9 +419,12 @@ class Junction_model extends CI_Model {
 			$center_lat = ($min_lat + $max_lat) / 2;
 			$center_lng = ($min_lng + $max_lng) / 2;
 		}
+
+		array_values($result_data);
+
 		$result_data['center']['lng'] = $center_lng;
 		$result_data['center']['lat'] = $center_lat;
-		$result_data['list'] = array_values($result_data['list']);
+
 		return $result_data;
 	}
 
