@@ -229,7 +229,7 @@ class Junction_model extends CI_Model {
 						->where($where)
 						->get()
 						->result_array();
-		echo "getJunctionsDiagnoseList sql = " . $this->db->last_query();
+		//echo "getJunctionsDiagnoseList sql = " . $this->db->last_query();
 		$temp_diagnose_data = [];
 		foreach($res as $k=>$v){
 			foreach($data['diagnose_key'] as $val){
@@ -244,7 +244,7 @@ class Junction_model extends CI_Model {
 		}
 
 		$result_data = $this->mergeAllJunctions($all_city_junctions, $temp_diagnose_data, 'diagnose_detail');
-		echo "getJunctionsDiagnoseList res = <pre>";print_r($result_data);
+		//echo "getJunctionsDiagnoseList res = <pre>";print_r($result_data);
 		return $result_data;
 	}
 
@@ -272,7 +272,7 @@ class Junction_model extends CI_Model {
 						->order_by($data['diagnose_key'], $sort_conf[$data['orderby']])
 						->get()
 						->result_array();
-		echo "getDiagnoseRankList sql = " . $this->db->last_query();
+		//echo "getDiagnoseRankList sql = " . $this->db->last_query();
 		$logic_junction_ids = '';
 		if(count($res) >= 1){
 			foreach($res as $k=>$v){
@@ -298,7 +298,7 @@ class Junction_model extends CI_Model {
 				$res[$k]['junction_label'] = isset($junction_id_name[$v['junction_id']]) ? $junction_id_name[$v['junction_id']] : '';
 			}
 		}
-		echo "getDiagnoseRankList res = <pre>";print_r($res);
+		//echo "getDiagnoseRankList res = <pre>";print_r($res);
 		return $res;
 	}
 
