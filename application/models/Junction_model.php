@@ -388,8 +388,8 @@ class Junction_model extends CI_Model {
 	*/
 	private function mergeAllJunctions($all_data, $data, $merge_key = 'detail'){
 		$result_data = [];
-		$temp_lng[$k] = [];
-		$temp_lat[$k] = [];
+		$temp_lng = [];
+		$temp_lat = [];
 		foreach($all_data as $k=>$v){
 			if(isset($data[$v['logic_junction_id']])){
 				$temp_lng[$k] = $v['lng'];
