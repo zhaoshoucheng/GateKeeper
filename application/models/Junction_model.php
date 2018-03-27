@@ -404,7 +404,7 @@ class Junction_model extends CI_Model {
 
 		$center_lat = 0;
 		$center_lng = 0;
-		$result_data['center'] = 'null';
+		$result_data['center'] = '';
 		if(count($temp_lat) >= 1 && count($temp_lng) >= 1){
 			asort($temp_lng);
 			asort($temp_lat);
