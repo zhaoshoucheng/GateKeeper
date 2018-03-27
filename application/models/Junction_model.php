@@ -274,7 +274,7 @@ class Junction_model extends CI_Model {
 						->order_by($data['diagnose_key'], $sort_conf[$data['orderby']])
 						->get()
 						->result_array();
-
+		echo $this->db->last_query();
 		$logic_junction_ids = '';
 		if(count($res) >= 1){
 			foreach($res as $k=>$v){
