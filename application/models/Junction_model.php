@@ -166,7 +166,6 @@ class Junction_model extends CI_Model {
 					}
 				}
 			}
-
 			$res['flow_quota'] = $flow_quota_key;
 		}
 
