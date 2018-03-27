@@ -157,17 +157,19 @@ class Task extends MY_Controller {
 
 		$taskRst = [
 		    'user' => $user,
-		    'city_id' => $city_id,
-		    'dates' => $dates,
-		    'start_time' => $start_time,
-		    'end_time' => $end_time,
+		    'city_id' => $params['city_id'],
+		    'dates' => $params['dates'],
+		    'start_time' => $params['start_time'],
+		    'end_time' => $params['end_time'],
 		    'type' => 2,
-		    'kind' => $kind,
+		    'kind' => $params['kind'],
 		    'conf_id' => $iRet,
 		    'rate' => 0,
 		    'status' => 0,
 		    'expect_try_time' => time(),
 		    'try_times' => 0,
+		    'created_at' => date('Y-m-d H:i:s'),
+		    'updated_at' => date('Y-m-d H:i:s'),
 		];
 		if (isset($params['junctions'])) {
 			$taskRst['junctions'] = $params['junctions'];
