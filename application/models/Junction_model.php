@@ -105,7 +105,6 @@ class Junction_model extends CI_Model {
 						->where($where)
 						->get()
 						->row_array();
-		echo "sql = " . $this->db->last_query();
 		// 获取此路口相位名称
 		$this->load->helper('http');
 		$phase_data = [
@@ -171,7 +170,6 @@ class Junction_model extends CI_Model {
 			$res['flow_quota'] = $flow_quota_key;
 		}
 
-		//echo "<pre>";print_r($res);exit;
 		return $res;
 	}
 
@@ -231,8 +229,6 @@ class Junction_model extends CI_Model {
 						->where($where)
 						->get()
 						->result_array();
-		echo "<pre>res = ";print_r($res);
-		echo "sql = " . $this->db->last_query();
 		$temp_diagnose_data = [];
 		foreach($res as $k=>$v){
 			foreach($data['diagnose_key'] as $val){
@@ -248,7 +244,6 @@ class Junction_model extends CI_Model {
 
 		$result_data = $this->mergeAllJunctions($all_city_junctions, $temp_diagnose_data, 'diagnose_detail');
 
-		echo "<pre>";print_r($result_data);exit;
 		return $result_data;
 	}
 
