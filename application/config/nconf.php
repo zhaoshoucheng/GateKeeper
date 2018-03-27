@@ -116,7 +116,7 @@ $config['diagnose_key']	= [
 		]
 	],
 	'spillover_index'	=> [
-		'name'				         =>'溢流',
+		'name'				         => '溢流',
 		'junction_threshold'         => 0,
 		'junction_threshold_formula' => '>',
 		'nature_threshold'  => [
@@ -145,8 +145,8 @@ $config['diagnose_key']	= [
 		]
 	],
 	'saturation_index'	=> [
-		'name'				         =>'空放',
-		'junction_threshold'         =>1,
+		'name'				         => '空放',
+		'junction_threshold'         => 0.5,
 		'junction_threshold_formula' => '<',
 		'nature_threshold'           => [
 			'high'       => 1,
