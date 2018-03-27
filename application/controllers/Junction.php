@@ -148,8 +148,9 @@ class Junction extends MY_Controller {
 
 		// 格式化配时数据
 		$timing_result = $this->formatTimingData($timing['data']);
-		echo "data = ". json_encode($data);
-		echo "<pre>";print_r($timing_result);exit;
+		echo "interface = " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
+		echo "<hr>data = ". json_encode($timing_data);
+		echo "<hr><pre>";print_r($timing_result);exit;
 		return $this->response($timing_result);
 	}
 
