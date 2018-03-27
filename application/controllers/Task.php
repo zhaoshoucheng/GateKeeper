@@ -142,18 +142,43 @@ class Task extends MY_Controller {
 			'start_time'=> $params['start_time'],
 			'end_time'	=> $params['end_time'],
 			'kind'		=> $params['kind'],
+			'status'    => 1,
 		];
 		if (isset($params['junctions'])) {
 			$task['junctions'] = $params['junctions'];
 		}
-
 		$iRet = $this->customtask_model->addTask($task);
+		if ($iRet === -1) {
+			$this->errno = -1;
+			$this->errmsg = '创建任务失败';
+			return;
+		}
+
+
+		$taskRst = [
+		    'user' => $user,
+		    'city_id' => $city_id,
+		    'dates' => $dates,
+		    'start_time' => $start_time,
+		    'end_time' => $end_time,
+		    'type' => 2,
+		    'kind' => $kind,
+		    'conf_id' => $iRet,
+		    'rate' => 0,
+		    'status' => 0,
+		    'expect_try_time' => time(),
+		    'try_times' => 0,
+		];
+		if (isset($params['junctions'])) {
+			$taskRst['junctions'] = $params['junctions'];
+		}
+		$iRet = $this->task_model->addTask($taskRst);
 		if ($iRet === -1) {
 			$this->errno = -1;
 			$this->errmsg = '创建任务失败';
 		} else {
 			$this->output_data = [
-				'custom_conf_id' => $iRet,
+				'task_id' => $iRet,
 			];
 		}
 	}
