@@ -422,7 +422,7 @@ class Junction_model extends CI_Model {
 
 		$result_data['center']['lng'] = $center_lng;
 		$result_data['center']['lat'] = $center_lat;
-		array_values($result_data['dataList']);
+		$result_data['dataList'] = array_values($result_data['dataList']);
 
 		return $result_data;
 	}
