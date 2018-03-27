@@ -112,6 +112,10 @@ $config['diagnose_key']	= [
 			'stop_delay'=>[
 				'name'=>'停车延误',
 				'threshold'=>0.5
+			],
+			'saturation_degree'=>[
+				'name'=>'饱和度',
+				'threshold'=>0.5
 			]
 		]
 	],
@@ -166,7 +170,7 @@ $config['diagnose_key']	= [
 			'saturation_degree'=>[
 				'name'=>'饱和度',
 				'threshold'=>0.5
-			],
+			]
 		]
 	]
 ];

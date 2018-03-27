@@ -388,8 +388,12 @@ class Junction_model extends CI_Model {
 	*/
 	private function mergeAllJunctions($all_data, $data, $merge_key = 'detail'){
 		$result_data = [];
+		$temp_lng[$k] = [];
+		$temp_lat[$k] = [];
 		foreach($all_data as $k=>$v){
 			if(isset($data[$v['logic_junction_id']])){
+				$temp_lng[$k] = $v['lng'];
+				$temp_lat[$k] = $v['lat'];
 				$result_data[$k]['logic_junction_id'] = $v['logic_junction_id'];
 				$result_data[$k]['name'] = $v['name'];
 				$result_data[$k]['lng'] = $v['lng'];
@@ -397,6 +401,27 @@ class Junction_model extends CI_Model {
 				$result_data[$k][$merge_key] = $data[$v['logic_junction_id']];
 			}
 		}
+
+		$center_lat = 0;
+		$center_lng = 0;
+
+		if(count($temp_lat) >= 1 && count($temp_lng) >= 1){
+			asort($temp_lng);
+			asort($temp_lat);
+
+			reset($temp_lat);
+			$min_lat = current($temp_lat);
+			$max_lat = end($temp_lat);
+			reset($temp_lng);
+			$min_lng = current($temp_lng);
+			$max_lng = end($temp_lng);
+
+			$center_lat = ($min_lat + $max_lat) / 2;
+			$center_lng = ($min_lng + $max_lng) / 2;
+		}
+
+		$result_data['center']['lng'] = $center_lng;
+		$result_data['center']['lat'] = $center_lat;
 
 		return array_values($result_data);
 	}
