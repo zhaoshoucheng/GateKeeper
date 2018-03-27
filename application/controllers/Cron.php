@@ -51,14 +51,14 @@ class Cron extends CI_Controller {
 					$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
 					$this->task_model->updateTask($task['id'], ['trace_id' => $trace_id]);
 					// process_flow
-					$taskService = new Task();
-					$response = $taskService->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values(array_unique($dateVersion)));
+					$task = new Task();
+					$response = $task->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values(array_unique($dateVersion)));
 					print_r($response);
 					// process_index
-					$response = $taskService->calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time . ':00', $end_time . ':00', $dateVersion);
+					$response = $task->calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time . ':00', $end_time . ':00', $dateVersion);
 					print_r($response);
 				} catch (\Exception $e) {
-					$this->task_model->updateTask($task['id'], ['status' => -1, 'task_end_time' => time()]);
+					$this->task_model->updateTask($task_id, ['status' => -1, 'task_end_time' => time()]);
 				}
 			}
 		}
