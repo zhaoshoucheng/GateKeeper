@@ -326,7 +326,7 @@ class Junction extends MY_Controller {
 			ksort($value);
 			reset($value);
 			$arr1 = current($value);
-			$phase_position[$arr1['logic_flow_id']] = $arr1['comment'];
+			$phase_position[$arr1['logic_flow_id']] = mb_substr($arr1['comment'], 0, 1, "utf-8");
 		}
 
 		// 获取路网数据
