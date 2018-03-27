@@ -102,19 +102,23 @@ $config['diagnose_key']	= [
 		],
 		'flow_quota'=>[
 			'stop_time_cycle'=>[
-				'name'=>'停车周期次数',
+				'name'=>'停车周期次数(次)',
 				'threshold'=>0.5
 			],
 			'queue_position'=>[
-				'name'=>'排队长度',
+				'name'=>'排队长度(米)',
 				'threshold'=>0.5
 			],
 			'stop_delay'=>[
-				'name'=>'停车延误',
+				'name'=>'停车延误(秒)',
 				'threshold'=>0.5
 			],
 			'saturation_degree'=>[
 				'name'=>'饱和度',
+				'threshold'=>0.5
+			],
+			'confidence'=>[
+				'name'=>'置信度',
 				'threshold'=>0.5
 			]
 		]
@@ -130,20 +134,28 @@ $config['diagnose_key']	= [
 			'low'        => 0
 		],
 		'flow_quota'=>[
+			'route_length'  => [
+				'name'=>'路段长度(米)',
+				'threshold' =>0.5
+			],
 			'queue_position'=>[
-				'name'=>'排队长度',
+				'name'=>'排队长度(米)',
 				'threshold'=>0.5
 			],
 			'stop_time_cycle'=>[
-				'name'=>'停车周期次数',
+				'name'=>'停车周期次数(次)',
 				'threshold'=>0.5
 			],
 			'stop_delay'=>[
-				'name'=>'停车延误',
+				'name'=>'停车延误(秒)',
 				'threshold'=>0.5
 			],
 			'spillover_rate'=>[
 				'name'=>'溢流比率',
+				'threshold'=>0.5
+			],
+			'confidence'=>[
+				'name'=>'置信度',
 				'threshold'=>0.5
 			]
 		]
@@ -160,15 +172,19 @@ $config['diagnose_key']	= [
 		],
 		'flow_quota'=>[
 			'stop_delay'=>[
-				'name'=>'停车延误',
+				'name'=>'停车延误(秒)',
 				'threshold'=>0.5
 			],
 			'stop_time_cycle'=>[
-				'name'=>'停车周期次数',
+				'name'=>'停车周期次数(次)',
 				'threshold'=>0.5
 			],
 			'saturation_degree'=>[
 				'name'=>'饱和度',
+				'threshold'=>0.5
+			],
+			'confidence'=>[
+				'name'=>'置信度',
 				'threshold'=>0.5
 			]
 		]
