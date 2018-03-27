@@ -161,7 +161,7 @@ class Junction_model extends CI_Model {
 				if(isset($res['diagnose_detail'])){
 					foreach($res['diagnose_detail'] as $k=>$v){
 						foreach($res['movements'] as $k1=>$v1){
-							$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'', 'green_split'=>'', 'route_length'=>'']));
+							$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'']));
 						}
 					}
 				}
