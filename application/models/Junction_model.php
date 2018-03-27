@@ -419,12 +419,9 @@ class Junction_model extends CI_Model {
 			$center_lat = ($min_lat + $max_lat) / 2;
 			$center_lng = ($min_lng + $max_lng) / 2;
 		}
-
-		array_values($result_data['list']);
-
 		$result_data['center']['lng'] = $center_lng;
 		$result_data['center']['lat'] = $center_lat;
-
+		$result_data['list'] = array_values($result_data['list']);
 		return $result_data;
 	}
 
