@@ -89,9 +89,10 @@ $config['flow_quota_key'] = [
 // 诊断问题
 $config['diagnose_key']	= [
 	'imbalance_index'=>[
-		'name'				=> '失衡',
-		'junction_threshold'=> 0.5,
-		'nature_threshold'  => [
+		'name'				         => '失衡',
+		'junction_threshold'         => 0,
+		'junction_threshold_formula' => '>',
+		'nature_threshold'           => [
 			'high'       => 1,
 			'mide_right' => 0.6,
 			'mide_left'  => 0.3,
@@ -113,8 +114,9 @@ $config['diagnose_key']	= [
 		]
 	],
 	'spillover_index'	=> [
-		'name'				=>'溢流',
-		'junction_threshold'=>0.5,
+		'name'				         =>'溢流',
+		'junction_threshold'         => 0,
+		'junction_threshold_formula' => '>',
 		'nature_threshold'  => [
 			'high'       => 1,
 			'mide_right' => 0.6,
@@ -141,9 +143,10 @@ $config['diagnose_key']	= [
 		]
 	],
 	'saturation_index'	=> [
-		'name'				=>'空放',
-		'junction_threshold'=>0.5,
-		'nature_threshold'  => [
+		'name'				         =>'空放',
+		'junction_threshold'         =>1,
+		'junction_threshold_formula' => '<',
+		'nature_threshold'           => [
 			'high'       => 1,
 			'mide_right' => 0.6,
 			'mide_left'  => 0.3,
