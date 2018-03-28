@@ -65,7 +65,7 @@ $config['junction_quota_key'] = [
 		'status_min'=> 0.1
 	],
 	'stop_cycle_time' => [
-		'name'      => '停车周期次数',
+		'name'      => '停车(周期)次数',
 		'status_max'=> 0.6,
 		'status_min'=> 0.1
 	],
@@ -82,7 +82,7 @@ $config['flow_quota_key'] = [
 	'queue_position'	=> '排队长度(米)',
 	'saturation_degree'	=> '饱和度',
 	'stop_delay'		=> '停车延误(秒)',
-	'stop_time_cycle'	=> '停车周期次数(次)',
+	'stop_time_cycle'	=> '停车(周期)次数(次)',
 	'spillover_rate'	=> '溢流比率',
 	'stop_rate'			=> '停车比率',
 	'confidence'        => '置信度'
@@ -102,7 +102,7 @@ $config['diagnose_key']	= [
 		],
 		'flow_quota'=>[
 			'stop_time_cycle'=>[
-				'name'=>'停车周期次数(次)',
+				'name'=>'停车(周期)次数(次)',
 				'threshold'=>0.5
 			],
 			'queue_position'=>[
@@ -143,7 +143,7 @@ $config['diagnose_key']	= [
 				'threshold'=>0.5
 			],
 			'stop_time_cycle'=>[
-				'name'=>'停车周期次数(次)',
+				'name'=>'停车(周期)次数(次)',
 				'threshold'=>0.5
 			],
 			'stop_delay'=>[
@@ -176,7 +176,7 @@ $config['diagnose_key']	= [
 				'threshold'=>0.5
 			],
 			'stop_time_cycle'=>[
-				'name'=>'停车周期次数(次)',
+				'name'=>'停车(周期)次数(次)',
 				'threshold'=>0.5
 			],
 			'saturation_degree'=>[
