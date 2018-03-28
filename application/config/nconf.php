@@ -101,6 +101,10 @@ $config['diagnose_key']	= [
 			'low'        => 0
 		],
 		'flow_quota'=>[
+			'route_length'  => [
+				'name'=>'路段长度(米)',
+				'threshold' =>0.5
+			],
 			'stop_time_cycle'=>[
 				'name'=>'停车(周期)次数(次)',
 				'threshold'=>0.5
