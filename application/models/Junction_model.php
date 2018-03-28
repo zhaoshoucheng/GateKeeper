@@ -21,7 +21,7 @@ class Junction_model extends CI_Model {
 	/**
 	* 获取全城路口信息
 	* @param data['task_id']    interger 任务ID
-	* @param data['type']       interger 计算指数类型 0：统合 1：时间点
+	* @param data['type']       interger 计算指数类型 1：统合 0：时间点
 	* @param data['city_id']    interger 城市ID
 	* @param data['time_point'] string   评估时间点 指标计算类型为1时非空
 	* @param data['confidence']	interger 置信度
@@ -38,12 +38,19 @@ class Junction_model extends CI_Model {
 		}
 
 		$selectstr = empty($this->selectColumns($quota_key)) ? '' : ',' . $this->selectColumns($quota_key);
-		$select = 'id, junction_id' . $selectstr;
+		if(empty($selectstr)){
+			return [];
+		}
+
+		$select = '';
+		if($type == 1){ // 综合
+			$select = "id, junction_id, max({$selectstr}) as {$selectstr}";
+		}else{
+			$select = 'id, junction_id' . $selectstr;
+		}
 
 		$where = 'task_id = ' . $data['task_id'];
-		if($data['type'] == 1){
-			$where .= " and type = " . $data['type'];
-		}else if($data['type'] == 0){
+		if($data['type'] == 0){
 			$where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
 		}
 
@@ -52,11 +59,13 @@ class Junction_model extends CI_Model {
 			$where .= ' and ' . $quota_key . '_confidence ' . $confidence_conf[$data['confidence']]['expression'];
 		}
 
-		$res = $this->db->select($select)
-						->from($this->tb)
-						->where($where)
-						->get()
-						->result_array();
+		$this->db->select($select);
+		$this->db->from($this->tb);
+		$this->db->where($where);
+		if($data['type'] == 1){
+			$this->db->group_by('junction_id');
+		}
+		$res = $this->db->get()->result_array();
 
 		// 指标状态 1：高 2：中 3：低
 		$quota_key_conf = $this->config->item('junction_quota_key');
@@ -194,6 +203,20 @@ class Junction_model extends CI_Model {
 		foreach($diagnose_key_conf as $k=>$v){
 			$select_quota_key[] = $k;
 		}
+
+		foreach($select_quota_key as $k=>$v){
+			$select = "id, junction_id, max({$v}) as {$v}";
+			$where = 'task_id = ' . $data['task_id'] . ' and type = 1';
+			$res = $this->db->select($select)
+						->from($this->tb)
+						->where($where)
+						->group_by('junction_id')
+						->get()
+						->result_array();
+			echo "<hr> sql = " . $this->db->last_query();
+			echo "<hr>{$v} = <pre>";print_r($res);
+		}
+		exit;
 
 		$selectstr = empty($this->selectColumns($select_quota_key)) ? '' : ',' . $this->selectColumns($select_quota_key);
 		$select = 'id, junction_id' . $selectstr;
