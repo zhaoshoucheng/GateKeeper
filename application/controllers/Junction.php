@@ -373,6 +373,7 @@ class Junction extends MY_Controller {
 		$result['center'] = '';
 		// 获取路口详情--获取路口中心点坐标
 		$junction_info = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/detail', ['logic_id'=>trim($params['junction_id']), 'token'=>$waymap_token]);
+		$junction_info = json_decode($junction_info, true);
 		if($junction_info['errorCode'] == 0 && count($junction_info['data']) >= 1){
 			$result['center']['lng'] = $junction_info['data']['lng'];
 			$result['center']['lat'] = $junction_info['data']['lat'];
