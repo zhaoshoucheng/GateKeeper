@@ -110,6 +110,7 @@ class Junction extends MY_Controller {
 	* @param dates        string Y 评估/诊断日期
 	* @param junction_id  string Y 路口ID
 	* @param time_point   string Y 时间点
+	* @param time_range   string Y 时间段
 	* @return json
 	*/
 	public function getJunctionTiming(){
@@ -118,7 +119,8 @@ class Junction extends MY_Controller {
 		$validate = Validate::make($params,
 			[
 				'junction_id' => 'nullunable',
-				'time_point'  => 'nullunable'
+				'time_point'  => 'nullunable',
+				'time_range'  => 'nullunable'
 			]
 		);
 		if(!$validate['status']){
@@ -129,13 +131,17 @@ class Junction extends MY_Controller {
 			return $this->response([], 100400, 'The dates cannot be empty and must be array.');
 		}
 
+		$time_range = array_filter(explode('-', trim($params['time_range'])));
+
 		$this->load->helper('http');
 
 		// 获取配时详情
 		$timing_data = [
 						'logic_junction_id'	=>trim($params['junction_id']),
-						'days'				=>trim(implode(',', $params['dates'])),
-						'time'				=>trim($params['time_point'])
+						'days'              =>trim(implode(',', $params['dates'])),
+						'time'              =>trim($params['time_point']),
+						'start_time'        =>trim($time_range[0]),
+						'end_time'          =>trim($time_range[1])
 					];
 		$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
 		if(!$timing){
