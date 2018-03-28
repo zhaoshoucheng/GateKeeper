@@ -343,10 +343,11 @@ class Junction extends MY_Controller {
 			$phase_position[$arr1['logic_flow_id']] = mb_substr($arr1['comment'], 0, 1, "utf-8");
 		}
 
+		$waymap_token = $this->config->item('waymap_token');
 		// 获取路网数据
 		$data['version'] = $timing['data']['map_version'];
 		$data['logic_junction_id'] = trim($params['junction_id']);
-		$data['token'] = $this->config->item('waymap_token');
+		$data['token'] = $waymap_token;
 		$map = httpGET($this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr', $data);
 		if(!$map){
 			return $this->response($data, 100500, 'Failed to connect to waymap service.');
@@ -362,15 +363,25 @@ class Junction extends MY_Controller {
 		$result = [];
 		foreach($map['data'] as $k=>$v){
 			if(isset($phase_position[$v['logic_flow_id']]) && !empty($phase_position[$v['logic_flow_id']])){
-				$result[$k]['logic_flow_id'] = $v['logic_flow_id'];
-				$result[$k]['flow_label'] = $phase_position[$v['logic_flow_id']];
-				$result[$k]['lng'] = $v['inlink_info']['s_node']['lng'];
-				$result[$k]['lat'] = $v['inlink_info']['s_node']['lat'];
+				$result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
+				$result['dataList'][$k]['flow_label'] = $phase_position[$v['logic_flow_id']];
+				$result['dataList'][$k]['lng'] = $v['inlink_info']['s_node']['lng'];
+				$result['dataList'][$k]['lat'] = $v['inlink_info']['s_node']['lat'];
 			}
 		}
 
-		return $this->response(array_values($result));
+		$result['center'] = '';
+		// 获取路口详情--获取路口中心点坐标
+		$junction_info = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/detail', ['logic_id'=>trim($params['junction_id']), 'token'=>$waymap_token]);
+		if($junction_info['errorCode'] == 0 && count($junction_info['data']) >= 1){
+			$result['center']['lng'] = $junction_info['data']['lng'];
+			$result['center']['lat'] = $junction_info['data']['lat'];
+		}
+		if(count($result['dataList']) >= 1){
+			$result['dataList'] = array_values($result['dataList']);
+		}
 
+		return $this->response($result);
 	}
 
 	/**
