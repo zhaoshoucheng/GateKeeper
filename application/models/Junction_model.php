@@ -204,7 +204,7 @@ class Junction_model extends CI_Model {
 			$select_quota_key[] = $k;
 		}
 
-		foreach($select_quota_key as $k=>$v){
+		/*foreach($select_quota_key as $k=>$v){
 			$select = "id, junction_id, max({$v}) as {$v}";
 			$where = 'task_id = ' . $data['task_id'] . ' and type = 1';
 			$res = $this->db->select($select)
@@ -216,7 +216,7 @@ class Junction_model extends CI_Model {
 			echo "<hr> sql = " . $this->db->last_query();
 			echo "<hr>{$v} = <pre>";print_r($res);
 		}
-		exit;
+		exit;*/
 
 		$selectstr = empty($this->selectColumns($select_quota_key)) ? '' : ',' . $this->selectColumns($select_quota_key);
 		$select = 'id, junction_id' . $selectstr;
