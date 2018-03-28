@@ -110,6 +110,7 @@ class Junction extends MY_Controller {
 	* @param dates        string Y 评估/诊断日期
 	* @param junction_id  string Y 路口ID
 	* @param time_point   string Y 时间点
+	* @param time_range   string Y 时间段
 	* @return json
 	*/
 	public function getJunctionTiming(){
@@ -118,7 +119,8 @@ class Junction extends MY_Controller {
 		$validate = Validate::make($params,
 			[
 				'junction_id' => 'nullunable',
-				'time_point'  => 'nullunable'
+				'time_point'  => 'nullunable',
+				'time_range'  => 'nullunable'
 			]
 		);
 		if(!$validate['status']){
@@ -129,13 +131,17 @@ class Junction extends MY_Controller {
 			return $this->response([], 100400, 'The dates cannot be empty and must be array.');
 		}
 
+		$time_range = array_filter(explode('-', trim($params['time_range'])));
+
 		$this->load->helper('http');
 
 		// 获取配时详情
 		$timing_data = [
 						'logic_junction_id'	=>trim($params['junction_id']),
-						'days'				=>trim(implode(',', $params['dates'])),
-						'time'				=>trim($params['time_point'])
+						'days'              =>trim(implode(',', $params['dates'])),
+						'time'              =>trim($params['time_point']),
+						'start_time'        =>trim($time_range[0]),
+						'end_time'          =>trim($time_range[1])
 					];
 		$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
 		if(!$timing){
@@ -148,6 +154,13 @@ class Junction extends MY_Controller {
 
 		// 格式化配时数据
 		$timing_result = $this->formatTimingData($timing['data']);
+		if($this->debug){
+			echo "interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
+			echo "<hr>data : " . json_encode($timing_data);
+			echo "<hr>return :" . json_encode($timing);
+			echo "<hr> result_data : ";print_r($timing_result);
+			exit;
+		}
 		return $this->response($timing_result);
 	}
 
@@ -297,6 +310,9 @@ class Junction extends MY_Controller {
 		}
 		$timing = json_decode($timing, true);
 		if($timing['errorCode'] != 0){
+			if($this->debug){
+				$timing['errorMsg'] = "interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint' . ' & data : ' . json_encode($phase_data) . ' & return : ' . json_encode($timing);
+			}
 			return $this->response([], 100500, $timing['errorMsg']);
 		}
 		if(count($timing['data']['latest_plan']) < 1){
@@ -327,31 +343,46 @@ class Junction extends MY_Controller {
 			$phase_position[$arr1['logic_flow_id']] = mb_substr($arr1['comment'], 0, 1, "utf-8");
 		}
 
+		$waymap_token = $this->config->item('waymap_token');
 		// 获取路网数据
 		$data['version'] = $timing['data']['map_version'];
 		$data['logic_junction_id'] = trim($params['junction_id']);
-		$data['token'] = $this->config->item('waymap_token');
+		$data['token'] = $waymap_token;
 		$map = httpGET($this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr', $data);
 		if(!$map){
 			return $this->response($data, 100500, 'Failed to connect to waymap service.');
 		}
 		$map = json_decode($map, true);
 		if($map['errorCode'] != 0){
+			if($this->debug){
+				$map['errorMsg'] = "map--interface : " . $this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr' . ' & data : ' . json_encode($data) . ' & return : ' . json_encode($map);
+			}
 			return $this->response([], 100500, $map['errorMsg']);
 		}
 
 		$result = [];
 		foreach($map['data'] as $k=>$v){
 			if(isset($phase_position[$v['logic_flow_id']]) && !empty($phase_position[$v['logic_flow_id']])){
-				$result[$k]['logic_flow_id'] = $v['logic_flow_id'];
-				$result[$k]['flow_label'] = $phase_position[$v['logic_flow_id']];
-				$result[$k]['lng'] = $v['inlink_info']['s_node']['lng'];
-				$result[$k]['lat'] = $v['inlink_info']['s_node']['lat'];
+				$result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
+				$result['dataList'][$k]['flow_label'] = $phase_position[$v['logic_flow_id']];
+				$result['dataList'][$k]['lng'] = $v['inlink_info']['s_node']['lng'];
+				$result['dataList'][$k]['lat'] = $v['inlink_info']['s_node']['lat'];
 			}
 		}
 
-		return $this->response(array_values($result));
+		$result['center'] = '';
+		// 获取路口详情--获取路口中心点坐标
+		$junction_info = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/detail', ['logic_id'=>trim($params['junction_id']), 'token'=>$waymap_token]);
+		$junction_info = json_decode($junction_info, true);
+		if($junction_info['errorCode'] == 0 && count($junction_info['data']) >= 1){
+			$result['center']['lng'] = $junction_info['data']['lng'];
+			$result['center']['lat'] = $junction_info['data']['lat'];
+		}
+		if(count($result['dataList']) >= 1){
+			$result['dataList'] = array_values($result['dataList']);
+		}
 
+		return $this->response($result);
 	}
 
 	/**
