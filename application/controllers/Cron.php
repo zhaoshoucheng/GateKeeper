@@ -91,4 +91,10 @@ class Cron extends CI_Controller {
 		$ret = sendMail($to, $subject, $content);
 		var_dump($ret);
 	}
+
+	public function logTest() {
+		log_message('error', "hello failed");
+		log_message('notice', "hello failed");
+		log_message('debug', "hello failed");
+	}
 }

@@ -74,34 +74,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
-$online_host = [
-    'ipd-cloud-server01.gz01'
-];
-$hostname = gethostname();
-$development = 1; //本地环境    2:server01环境
-if (in_array($hostname, $online_host)) {
-    $development = 2;
-}
-
 $username = 'root';
-$hostname = '127.0.0.1';
-$password = 'Ning123456!!';
-$database = 'itstool';
-
-if($development == 2){
-	$username = 'root';
-	$hostname = '100.90.164.31';
-	$password = 'Znjty@Didi@2017';
-	$database = 'its_tool';
-}
-
+$hostname = '100.90.164.31';
+$password = 'Znjty@Didi@2017';
+$database = 'its_tool';
+$port = 4002;
 
 $db['default'] = array(
     'dsn'   => '',
-    'username' => $username,
     'hostname' => $hostname,
+    'username' => $username,
     'password' => $password,
     'database' => $database,
+    'port'     => 4008,
     'dbdriver' => 'mysqli',
     'dbprefix' => '',
     'pconnect' => FALSE,

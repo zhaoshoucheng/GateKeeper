@@ -8,9 +8,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 
 // 路网接口服务器地址
-$waymap_server = 'data.sts.didichuxing.com';
+$waymap_server = '100.90.164.31';
 // 路网接口服务器端口
-$waymap_port = '80';
+$waymap_port = '8001';
 // 路网接口地址
 $config['waymap_interface'] = 'http://' . $waymap_server . ":" . $waymap_port;
 // 路网接口token
