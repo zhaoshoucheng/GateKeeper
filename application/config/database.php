@@ -74,9 +74,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
-$username = 'root';
-$hostname = '100.90.164.31';
-$password = 'Znjty@Didi@2017';
+$hostname = '100.69.238.94';
+$username = 'its_tool_its_tool_rw';
+$password = 'Oibvwqpc7zyUTQ2';
 $database = 'its_tool';
 $port = 4002;
 
@@ -86,7 +86,7 @@ $db['default'] = array(
     'username' => $username,
     'password' => $password,
     'database' => $database,
-    'port'     => 4008,
+    'port'     => $port,
     'dbdriver' => 'mysqli',
     'dbprefix' => '',
     'pconnect' => FALSE,
