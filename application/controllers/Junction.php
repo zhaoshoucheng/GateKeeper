@@ -348,7 +348,7 @@ class Junction extends MY_Controller {
 		$map = json_decode($map, true);
 		if($map['errorCode'] != 0){
 			if($this->debug){
-				$map['errorMsg'] = "map-interface : " . $this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr' . ' & data : ' . json_encode($data) . ' & return : ' . json_encode($map);
+				$map['errorMsg'] = "map--interface : " . $this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr' . ' & data : ' . json_encode($data) . ' & return : ' . json_encode($map);
 			}
 			return $this->response([], 100500, $map['errorMsg']);
 		}
