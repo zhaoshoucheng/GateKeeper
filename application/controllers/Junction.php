@@ -297,6 +297,9 @@ class Junction extends MY_Controller {
 		}
 		$timing = json_decode($timing, true);
 		if($timing['errorCode'] != 0){
+			if($this->debug){
+				$timing['errorMsg'] = "interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint' . ' & data : ' . json_encode($phase_data) . ' & return : ' . json_encode($timing);
+			}
 			return $this->response([], 100500, $timing['errorMsg']);
 		}
 		if(count($timing['data']['latest_plan']) < 1){
@@ -337,6 +340,9 @@ class Junction extends MY_Controller {
 		}
 		$map = json_decode($map, true);
 		if($map['errorCode'] != 0){
+			if($this->debug){
+				$map['errorMsg'] = "interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint' . ' & data : ' . json_encode($data) . ' & return : ' . json_encode($map);
+			}
 			return $this->response([], 100500, $map['errorMsg']);
 		}
 
