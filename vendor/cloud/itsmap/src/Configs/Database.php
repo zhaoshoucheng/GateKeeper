@@ -58,7 +58,30 @@ class Database
             ],
         ],
         ENV::ONLINE => [
-            // TODO:
+            'itsmap' => [
+                'driver' => 'mysql',
+                'host' => '100.69.238.94',
+                'port' => "4002",
+                'database' => 'its_mapdata',
+                'username' => 'its_mapdata_its_mapdata_rw',
+                'password' => 'fw7AjhtSvMJRgK9',
+            ],
+            'its' => [
+                'driver' => 'mysql',
+                'host' => '100.69.238.94',
+                'port' => "4008",
+                'database' => 'its',
+                'username' => 'its_rw',
+                'password' => 'iTsITs_Rw@0912',
+            ],
+            'traffic_timing_solve' => [
+                'driver' => 'mysql',
+                'host' => '100.69.238.94',
+                'port' => "4008",
+                'database' => 'traffic_timing_solve',
+                'username' => 'traffic_timing_solve_rw',
+                'password' => 'trAFfIcTs_rW@0912',
+            ],
         ],
     ];
 

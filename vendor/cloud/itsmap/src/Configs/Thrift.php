@@ -99,10 +99,6 @@ class Thrift
                         'host' => '100.90.165.26',
                         'port' => '50000',
                     ],
-                    [
-                        'host' => '100.90.204.12',
-                        'port' => '50000',
-                    ]
                 ],
                 'read_timeout' => 60,
                 'write_timeout' => 60,
