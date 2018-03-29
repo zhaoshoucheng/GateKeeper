@@ -81,7 +81,7 @@ $config['flow_quota_key'] = [
 	'route_length'      => '路段长度(米)',
 	'queue_position'	=> '排队长度(米)',
 	'saturation_degree'	=> '饱和度',
-	'stop_delay'		=> '停车延误(秒)',
+	'stop_delay'		=> '平均延误(秒)',
 	'stop_time_cycle'	=> '停车(周期)次数(次)',
 	'spillover_rate'	=> '溢流比率',
 	'stop_rate'			=> '停车比率',
@@ -113,7 +113,7 @@ $config['diagnose_key']	= [
 				'threshold'=>0.5
 			],
 			'stop_delay'=>[
-				'name'=>'停车延误(秒)',
+				'name'=>'平均延误(秒)',
 				'threshold'=>0.5
 			],
 			'saturation_degree'=>[
@@ -149,7 +149,7 @@ $config['diagnose_key']	= [
 				'threshold'=>0.5
 			],
 			'stop_delay'=>[
-				'name'=>'停车延误(秒)',
+				'name'=>'平均延误(秒)',
 				'threshold'=>0.5
 			],
 			'spillover_rate'=>[
@@ -173,7 +173,7 @@ $config['diagnose_key']	= [
 		],
 		'flow_quota'=>[
 			'stop_delay'=>[
-				'name'=>'停车延误(秒)',
+				'name'=>'平均延误(秒)',
 				'threshold'=>0.5
 			],
 			'stop_time_cycle'=>[
