@@ -305,7 +305,7 @@ class Junction_model extends CI_Model {
 				foreach($data['diagnose_key'] as $key){
 					$total += $v[$key];
 				}
-				if($total / $count <= 0.6){
+				if($total / $count <= $this->config->item('diagnose_confidence_threshold')){
 					unset($flag[$k]);
 				}
 			}
