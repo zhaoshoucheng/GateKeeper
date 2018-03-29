@@ -207,7 +207,10 @@ class Junction_model extends CI_Model {
 		}else{ // 时间点
 			$res = $this->getJunctionsDiagnoseByTimePoint($data);
 		}
-
+		if($this->debug){
+			echo "type = " . $data['type'];
+			echo "<hr><pre>";print_r($res);exit;
+		}
 		$diagnose_key_conf = $this->config->item('diagnose_key');
 		$temp_diagnose_data = [];
 		if(count($res) >= 1){
@@ -268,12 +271,21 @@ class Junction_model extends CI_Model {
 				$v = array_reduce($sql_data, function($carry, $item) use($k){
 					return array_merge($carry, $item[$k]);
 				}, []);
-				$total = 0;
-				foreach($data['diagnose_key'] as $key){
-					$total += $v[$key];
-				}
-				if($total / $count <= $diagnose_confidence_threshold){
-					unset($flag[$k]);
+				if((int)$data['confidence'] != 0){
+					$total = 0;
+					foreach($data['diagnose_key'] as $key){
+						$total += $v[$key];
+					}
+
+					if($data['confidence'] == 1){ // 置信：高 unset低的
+						if($total / $count <= $diagnose_confidence_threshold){
+							unset($flag[$k]);
+						}
+					}else if($data['confidence'] == 2){ // 置信：低 unset高的
+						if($total / $count > $diagnose_confidence_threshold){
+							unset($flag[$k]);
+						}
+					}
 				}
 			}
 		}
