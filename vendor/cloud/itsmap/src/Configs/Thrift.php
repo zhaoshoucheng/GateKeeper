@@ -91,7 +91,36 @@ class Thrift
             ],
         ],
         ENV::ONLINE => [
-            // TODO:
+            'inhert' => [
+                'host' => '10.94.105.126',
+                'port' => "3306",
+                'read_timeout' => 30,
+                'write_timeout' => 30,
+            ],
+            'inhert_to' => [
+                'address' => [
+                    [
+                        'host' => '100.90.165.26',
+                        'port' => '50000',
+                    ],
+                    [
+                        'host' => '100.90.204.12',
+                        'port' => '50000',
+                    ]
+                ],
+                'read_timeout' => 60,
+                'write_timeout' => 60,
+                'class' => '\DidiRoadNet\InheritServiceClient',
+                'transport' => 'Thrift\Transport\TFramedTransport',
+            ],
+            'caculator' => [
+                'host' => '10.93.94.36',
+                'port' => "8383",
+                'read_timeout' => 30,
+                'write_timeout' => 30,
+                'class' => '\StsData\CalculatorServiceClient',
+                'transport' => 'Thrift\Transport\TBufferedTransport',
+            ],
         ],
     ];
 
