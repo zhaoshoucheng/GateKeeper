@@ -203,9 +203,104 @@ class Junction_model extends CI_Model {
 		}
 
 		if($data['type'] == 1){ // 综合
-			return $this->getJunctionsDiagnoseBySynthesize($data);
+			$res = $this->getJunctionsDiagnoseBySynthesize($data);
+		}else{ // 时间点
+			$res = $this->getJunctionsDiagnoseByTimePoint($data);
 		}
 
+		$diagnose_key_conf = $this->config->item('diagnose_key');
+		$temp_diagnose_data = [];
+		if(count($res) >= 1){
+			foreach($res as $k=>$v){
+				foreach($data['diagnose_key'] as $val){
+					$temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
+					$is_diagnose = 0;
+					if($this->compare($v[$val], $diagnose_key_conf[$val]['junction_threshold'], $diagnose_key_conf[$val]['junction_threshold_formula'])){
+						$is_diagnose = 1;
+					}
+
+					$temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = $is_diagnose;
+				}
+			}
+		}
+
+		$result_data = $this->mergeAllJunctions($all_city_junctions, $temp_diagnose_data, 'diagnose_detail');
+		//echo "getJunctionsDiagnoseList res = <pre>";print_r($result_data);
+		return $result_data;
+	}
+
+	/**
+	* 查询综合类型全城路口诊断问题列表
+	* @param data['task_id']      interger 任务ID
+	* @param data['city_id']      interger 城市ID
+	* @param data['time_point']   string   时间点
+	* @param data['type']         interger 计算类型
+	* @param data['confidence']   interger 置信度
+	* @param data['diagnose_key'] array    诊断问题KEY
+	* @return array
+	*/
+	private function getJunctionsDiagnoseBySynthesize($data){
+		$sql_data = array_map(function($diagnose_key) use ($data){
+			$selectstr = "id, junction_id, max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
+			$where = 'task_id = ' . $data['task_id'] . ' and type = 1';
+			$temp_data = $this->db->select($selectstr)
+								->from($this->tb)
+								->where($where)
+								->group_by('junction_id')
+								->get()->result_array();
+			$new_data = [];
+			if(count($temp_data) >= 1){
+				foreach ($temp_data as $value) {
+					$new_data[$value['junction_id']] = $value;
+				}
+			}
+			return $new_data;
+		}, $data['diagnose_key']);
+
+		$count = count($data['diagnose_key']);
+
+		$diagnose_confidence_threshold = $this->config->item('diagnose_confidence_threshold');
+
+		$flag = [];
+		if(count($sql_data) >= 1){
+			$flag = $sql_data[0];
+			foreach($flag as $k=>&$v){
+				$v = array_reduce($sql_data, function($carry, $item) use($k){
+					return array_merge($carry, $item[$k]);
+				}, []);
+				if((int)$data['confidence'] != 0){
+					$total = 0;
+					foreach($data['diagnose_key'] as $key){
+						$total += $v[$key];
+					}
+
+					if($data['confidence'] == 1){ // 置信：高 unset低的
+						if($total / $count <= $diagnose_confidence_threshold){
+							unset($flag[$k]);
+						}
+					}else if($data['confidence'] == 2){ // 置信：低 unset高的
+						if($total / $count > $diagnose_confidence_threshold){
+							unset($flag[$k]);
+						}
+					}
+				}
+			}
+		}
+
+		return $flag;
+	}
+
+	/**
+	* 根据时间点查询全城路口诊断问题列表
+	* @param data['task_id']      interger 任务ID
+	* @param data['city_id']      interger 城市ID
+	* @param data['time_point']   string   时间点
+	* @param data['type']         interger 计算类型
+	* @param data['confidence']   interger 置信度
+	* @param data['diagnose_key'] array    诊断问题KEY
+	* @return array
+	*/
+	private function getJunctionsDiagnoseByTimePoint($data){
 		$diagnose_key_conf = $this->config->item('diagnose_key');
 		$select_quota_key = [];
 		foreach($diagnose_key_conf as $k=>$v){
@@ -239,79 +334,14 @@ class Junction_model extends CI_Model {
 		if($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)){
 			$where .= ' and ' . $temp_confidence_expression[$data['confidence']];
 		}
-
+		$res = [];
 		$res = $this->db->select($select)
 						->from($this->tb)
 						->where($where)
 						->get()
 						->result_array();
-		//echo "getJunctionsDiagnoseList sql = " . $this->db->last_query();
-		$temp_diagnose_data = [];
-		foreach($res as $k=>$v){
-			foreach($data['diagnose_key'] as $val){
-				$temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
-				$is_diagnose = 0;
-				if($this->compare($v[$val], $diagnose_key_conf[$val]['junction_threshold'], $diagnose_key_conf[$val]['junction_threshold_formula'])){
-					$is_diagnose = 1;
-				}
 
-				$temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = $is_diagnose;
-			}
-		}
-
-		$result_data = $this->mergeAllJunctions($all_city_junctions, $temp_diagnose_data, 'diagnose_detail');
-		//echo "getJunctionsDiagnoseList res = <pre>";print_r($result_data);
-		return $result_data;
-	}
-
-	/**
-	* 查询综合类型全城路口诊断问题列表
-	* @param data['task_id']      interger 任务ID
-	* @param data['city_id']      interger 城市ID
-	* @param data['time_point']   string   时间点
-	* @param data['type']         interger 计算类型
-	* @param data['confidence']   interger 置信度
-	* @param data['diagnose_key'] array    诊断问题KEY
-	* @return array
-	*/
-	private function getJunctionsDiagnoseBySynthesize(){
-		$sql_data = array_map(function($diagnose_key) {
-			$selectstr = "id, junction_id, max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
-			$where = 'task_id = ' . $data['task_id'] . ' and type = 1';
-			$temp_data = $this->db->select($selectstr)
-								->from($this->tb)
-								->where($where)
-								->group_by('junction_id')
-								->get()->result_array();
-			$new_data = [];
-			if(count($temp_data) >= 1){
-				foreach ($temp_data as $value) {
-					$new_data[$value['junction_id']] = $value;
-				}
-			}
-			return $new_data;
-		}, $data['diagnose_key']);
-
-		$count = count($data['diagnose_key']);
-
-		$flag = [];
-		if(count($sql_data) >= 1){
-			$flag = $sql_data[0];
-			foreach($flag as $k=>&$v){
-				$v = array_reduce($sql_data, function($carry, $item) use($k){
-					return array_merge($carry, $item[$k]);
-				}, []);
-				$total = 0;
-				foreach($data['diagnose_key'] as $key){
-					$total += $v[$key];
-				}
-				if($total / $count <= 0.6){
-					unset($flag[$k]);
-				}
-			}
-		}
-
-		return $flag;
+		return $res;
 	}
 
 	/**
