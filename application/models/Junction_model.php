@@ -90,11 +90,12 @@ class Junction_model extends CI_Model {
 
 	/**
 	* 获取路口指标详情
-	* @param data['task_id']		任务ID		interger
-	* @param data['time_point']		时间点		string
-	* @param data['junction_id']	逻辑路口ID	string
-	* @param data['dates']			评估/诊断日期	array
-	* @param data['type']			详情类型 1：指标详情页 2：诊断详情页
+	* @param data['task_id']		任务ID		                     interger
+	* @param data['time_point']		时间点		                     string
+	* @param data['junction_id']	逻辑路口ID	                     string
+	* @param data['dates']			评估/诊断日期	                     array
+	* @param data['type']			详情类型 1：指标详情页 2：诊断详情页  interger
+	* @param data['time_range']     评估/诊断时间段                    string
 	* @return array
 	*/
 	public function getFlowQuotas($data){
@@ -116,10 +117,13 @@ class Junction_model extends CI_Model {
 						->row_array();
 		// 获取此路口相位名称
 		$this->load->helper('http');
+		$time_range = array_filter(explode('-', trim($data['time_range'])));
 		$phase_data = [
 						'logic_junction_id'	=>trim($data['junction_id']),
 						'days'				=>trim(implode(',', $data['dates'])),
-						'time'				=>trim($data['time_point'])
+						'time'				=>trim($data['time_point']),
+						'start_time'        =>trim($time_range[0]),
+						'end_time'          =>trim($time_range[1])
 					];
 
 		$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $phase_data);
