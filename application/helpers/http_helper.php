@@ -29,7 +29,6 @@ if (!function_exists('httpGET')) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         }
         $ret = curl_exec($ch);
-        log_message('notice', "$url : $ret");
         if(curl_errno($ch)){
             $errmsg = curl_error($ch);
             log_message('error', "requesturi={$url}||errno=9999||{$errmsg}||{$ret}");
@@ -71,7 +70,6 @@ if (!function_exists('httpPOST')) {
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         $ret = curl_exec($ch);
-        log_message('notice', "$url : $ret");
         if(curl_errno($ch)){
             $errmsg = curl_error($ch);
             log_message('error', "requesturi=$url||errno=9999||$errmsg||$ret");
