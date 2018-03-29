@@ -396,16 +396,19 @@ class Junction extends MY_Controller {
 		$result['tod_end_time'] = $data['latest_plan'][0]['tod_end_time'];
 		$result['cycle'] = $data['latest_plan'][0]['plan_detail']['extra_timing']['cycle'];
 		$result['offset'] = $data['latest_plan'][0]['plan_detail']['extra_timing']['offset'];
-
-		foreach($data['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
-			$result['timing_detail'][$k]['logic_flow_id'] = $v[0]['flow_logic']['logic_flow_id'];
-			$result['timing_detail'][$k]['state'] = $v[0]['state'];
-			$result['timing_detail'][$k]['start_time'] = $v[0]['start_time'];
-			$result['timing_detail'][$k]['duration'] = $v[0]['duration'];
-			$result['timing_detail'][$k]['comment'] = $v[0]['flow_logic']['comment'];
+		if(isset($data['latest_plan']) && count($data['latest_plan'][0]['plan_detail']['movement_timing']) >= 1){
+			foreach($data['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
+				$result['timing_detail'][$k]['logic_flow_id'] = $v[0]['flow_logic']['logic_flow_id'];
+				$result['timing_detail'][$k]['state'] = $v[0]['state'];
+				$result['timing_detail'][$k]['start_time'] = $v[0]['start_time'];
+				$result['timing_detail'][$k]['duration'] = $v[0]['duration'];
+				$result['timing_detail'][$k]['comment'] = $v[0]['flow_logic']['comment'];
+			}
+		}
+		if(isset($result['timing_detail'])){
+			$result['timing_detail'] = array_values($result['timing_detail']);
 		}
 
-		$result['timing_detail'] = array_values($result['timing_detail']);
 		return $result;
 	}
 

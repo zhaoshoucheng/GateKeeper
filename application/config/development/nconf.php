@@ -6,20 +6,56 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | 对外API配置文件
 |-----------------------------------------------------
 */
+// 线上机器
+$online_host = array(
+    'ipd-cloud-web00.gz01',
+    'ipd-cloud-web01.gz01',
+    'ipd-cloud-preweb00.gz01',
+);
 
-// 路网接口服务器地址
-$waymap_server = '100.90.164.31';
-// 路网接口服务器端口
-$waymap_port = '8001';
+$hostname = gethostname();
+$development = 1; //开发环境
+if (in_array($hostname, $online_host)) {
+    $development = 2;
+}
+
+if($development == 2){
+	// 路网接口服务器地址
+	$waymap_server = 'data.sts.didichuxing.com';
+	// 路网接口服务器端口
+	$waymap_port = '80';
+
+	// 配时接口服务器地址
+	$timing_server = 'data.sts.didichuxing.com';
+	// 配时接口服务器端口
+	$timing_port = '80';
+
+	$config['redis'] = [
+		'host' => '100.69.139.14',
+		'port' => '3660'
+	];
+}else{
+	// 路网接口服务器地址
+	$waymap_server = '100.90.164.31';
+	// 路网接口服务器端口
+	$waymap_port = '8001';
+
+	// 配时接口服务器地址
+	$timing_server = '100.90.164.31';
+	// 配时接口服务器端口
+	$timing_port = '8006';
+
+	$config['redis'] = [
+		'host' => '127.0.0.1',
+		'port' => '6379'
+	];
+}
+
 // 路网接口地址
 $config['waymap_interface'] = 'http://' . $waymap_server . ":" . $waymap_port;
 // 路网接口token
 $config['waymap_token'] = '4c3e3b6a3588161128d0604daab528db';
 
-// 配时接口服务器地址
-$timing_server = '100.90.164.31';
-// 配时接口服务器端口
-$timing_port = '8006';
 // 配时接口地址
 $config['timing_interface'] = 'http://' . $timing_server . ":" . $timing_port;
 
@@ -47,32 +83,32 @@ $config['junction_quota_key'] = [
 	'imbalance_index' => [
 		'name'		=> '失衡指数',
 		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'status_min'=> 0.3
 	],
 	'spillover_index' => [
 		'name'      => '溢流指数',
-		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'status_max'=> 0.08,
+		'status_min'=> 0.04
 	],
 	'incoordination_index' => [
 		'name'      => '失调指数',
-		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'status_max'=> 0.7,
+		'status_min'=> 0.4
 	],
 	'saturation_index' => [
 		'name'      => '饱和指数',
-		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'status_max'=> 0.9,
+		'status_min'=> 0.3
 	],
 	'stop_cycle_time' => [
 		'name'      => '停车(周期)次数',
-		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'status_max'=> 2,
+		'status_min'=> 1
 	],
 	'stop_delay' => [
-		'name'      => '停车延误',
-		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'name'      => '平均延误',
+		'status_max'=> 40,
+		'status_min'=> 20
 	]
 ];
 
@@ -81,7 +117,7 @@ $config['flow_quota_key'] = [
 	'route_length'      => '路段长度(米)',
 	'queue_position'	=> '排队长度(米)',
 	'saturation_degree'	=> '饱和度',
-	'stop_delay'		=> '平均延误(秒)',
+	'stop_delay'		=> '平均(停车)延误(秒)',
 	'stop_time_cycle'	=> '停车(周期)次数(次)',
 	'spillover_rate'	=> '溢流比率',
 	'stop_rate'			=> '停车比率',
@@ -113,7 +149,7 @@ $config['diagnose_key']	= [
 				'threshold'=>0.5
 			],
 			'stop_delay'=>[
-				'name'=>'平均延误(秒)',
+				'name'=>'平均(停车)延误(秒)',
 				'threshold'=>0.5
 			],
 			'saturation_degree'=>[
@@ -149,7 +185,7 @@ $config['diagnose_key']	= [
 				'threshold'=>0.5
 			],
 			'stop_delay'=>[
-				'name'=>'平均延误(秒)',
+				'name'=>'平均(停车)延误(秒)',
 				'threshold'=>0.5
 			],
 			'spillover_rate'=>[
@@ -173,7 +209,7 @@ $config['diagnose_key']	= [
 		],
 		'flow_quota'=>[
 			'stop_delay'=>[
-				'name'=>'平均延误(秒)',
+				'name'=>'平均(停车)延误(秒)',
 				'threshold'=>0.5
 			],
 			'stop_time_cycle'=>[
