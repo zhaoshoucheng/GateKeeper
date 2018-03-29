@@ -146,9 +146,11 @@ class Junction_model extends CI_Model {
 
 			$res['movements'] = json_decode($res['movements'], true);
 
+			$confidence = $this->config->item('confidence');
 			// 标注相位名称
 			foreach($res['movements'] as $k=>$v){
 				$res['movements'][$k]['comment'] = isset($phase_position[$v['movement_id']]) ? $phase_position[$v['movement_id']] : "";
+				$res['movements'][$k]['confidence'] = $confidence[$v['confidence']]['name'];
 			}
 
 			$flow_quota_key = $this->config->item('flow_quota_key');
@@ -179,7 +181,6 @@ class Junction_model extends CI_Model {
 
 				// 组织每个问题的不同指标数据集合
 				if(isset($res['diagnose_detail'])){
-					$confidence = $this->config->item('confidence');
 					foreach($res['diagnose_detail'] as $k=>$v){
 						foreach($res['movements'] as $k1=>$v1){
 							$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'']));
