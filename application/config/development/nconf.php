@@ -7,19 +7,45 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |-----------------------------------------------------
 */
 
-// 路网接口服务器地址
-$waymap_server = '100.90.164.31';
-// 路网接口服务器端口
-$waymap_port = '8001';
+$online_host = array(
+    'ipd-cloud-web00.gz01',
+    'ipd-cloud-web01.gz01',
+    'ipd-cloud-preweb00.gz01',
+);
+
+$hostname = gethostname();
+$development = 1; //开发环境
+if (in_array($hostname, $online_host)) {
+    $development = 2;
+}
+
+if($development == 2){
+	// 路网接口服务器地址
+	$waymap_server = 'data.sts.didichuxing.com';
+	// 路网接口服务器端口
+	$waymap_port = '80';
+
+	// 配时接口服务器地址
+	$timing_server = 'data.sts.didichuxing.com';
+	// 配时接口服务器端口
+	$timing_port = '80';
+}else{
+	// 路网接口服务器地址
+	$waymap_server = '100.90.164.31';
+	// 路网接口服务器端口
+	$waymap_port = '8001';
+
+	// 配时接口服务器地址
+	$timing_server = '100.90.164.31';
+	// 配时接口服务器端口
+	$timing_port = '8006';
+}
+
 // 路网接口地址
 $config['waymap_interface'] = 'http://' . $waymap_server . ":" . $waymap_port;
 // 路网接口token
 $config['waymap_token'] = '4c3e3b6a3588161128d0604daab528db';
 
-// 配时接口服务器地址
-$timing_server = '100.90.164.31';
-// 配时接口服务器端口
-$timing_port = '8006';
 // 配时接口地址
 $config['timing_interface'] = 'http://' . $timing_server . ":" . $timing_port;
 
