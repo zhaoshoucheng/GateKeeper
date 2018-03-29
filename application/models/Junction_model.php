@@ -207,10 +207,7 @@ class Junction_model extends CI_Model {
 		}else{ // 时间点
 			$res = $this->getJunctionsDiagnoseByTimePoint($data);
 		}
-		if($this->debug){
-			echo "type = " . $data['type'];
-			echo "<hr><pre>";print_r($res);exit;
-		}
+
 		$diagnose_key_conf = $this->config->item('diagnose_key');
 		$temp_diagnose_data = [];
 		if(count($res) >= 1){
