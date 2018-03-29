@@ -73,6 +73,7 @@ class Junction extends MY_Controller {
 	* @param junction_id  string   Y 逻辑路口ID
 	* @param time_point   string   Y 时间点
 	* @param type         interger Y 详情类型 1：指标详情页 2：诊断详情页
+	* @param time_range   string   Y 评估/诊断时间段
 	* @return json
 	*/
 	public function getJunctionQuotaDetail(){
@@ -84,6 +85,7 @@ class Junction extends MY_Controller {
 				'task_id'     => 'min:1',
 				'junction_id' => 'nullunable',
 				'time_point'  => 'nullunable',
+				'time_range'  => 'nullunable',
 				'type'        => 'min:1'
 			]
 		);
