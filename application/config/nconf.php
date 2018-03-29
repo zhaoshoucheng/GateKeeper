@@ -167,9 +167,9 @@ $config['diagnose_key']	= [
 		'junction_threshold'         => 0.3,
 		'junction_threshold_formula' => '<',
 		'nature_threshold'           => [
-			'high'       => 0.1,
-			'mide'       => 0.2,
-			'low'        => 0.3
+			'high'       => 0.1 * -1,
+			'mide'       => 0.2 * -1,
+			'low'        => 0.3 * -1
 		],
 		'flow_quota'=>[
 			'stop_delay'=>[
