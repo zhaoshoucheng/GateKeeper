@@ -402,8 +402,6 @@ class Junction extends MY_Controller {
 			$result['timing_detail'][$k]['state'] = $v[0]['state'];
 			$result['timing_detail'][$k]['start_time'] = $v[0]['start_time'];
 			$result['timing_detail'][$k]['duration'] = $v[0]['duration'];
-			$result['timing_detail'][$k]['inlink_id'] = $v[0]['flow_logic']['inlink_id'];
-			$result['timing_detail'][$k]['outlink_id'] = $v[0]['flow_logic']['outlink_id'];
 			$result['timing_detail'][$k]['comment'] = $v[0]['flow_logic']['comment'];
 		}
 
