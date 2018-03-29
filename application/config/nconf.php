@@ -92,7 +92,7 @@ $config['flow_quota_key'] = [
 $config['diagnose_key']	= [
 	'imbalance_index'=>[
 		'name'				         => '失衡',
-		'junction_threshold'         => 0.005,
+		'junction_threshold'         => 0,
 		'junction_threshold_formula' => '>',
 		'nature_threshold'           => [
 			'high'       => 0.08,
@@ -128,7 +128,7 @@ $config['diagnose_key']	= [
 	],
 	'spillover_index'	=> [
 		'name'				         => '溢流',
-		'junction_threshold'         => 0,
+		'junction_threshold'         => 0.005,
 		'junction_threshold_formula' => '>',
 		'nature_threshold'  => [
 			'high'       => 0.6,
