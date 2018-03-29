@@ -157,7 +157,7 @@ class Junction_model extends CI_Model {
 						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $v['flow_quota']);
 						$compare_val = $res[$k];
 						if($k == 'saturation_index'){ // 空放问题，因为统一算法，空放的性质阈值设置为负数，所以当是空放问题时，传递负数进行比较
-							$compare_val = -$res[$k];
+							$compare_val = $res[$k] * -1;
 						}
 						// 诊断问题性质 1:重度 2:中度 3:轻度
 						if($compare_val > $v['nature_threshold']['high']){
