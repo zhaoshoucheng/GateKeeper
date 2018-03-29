@@ -158,6 +158,7 @@ class Junction extends MY_Controller {
 			echo "interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
 			echo "<hr>data : " . json_encode($timing_data);
 			echo "<hr>return :" . json_encode($timing);
+			echo "<hr>json_decode(return) : <pre>";print_r($timing);
 			echo "<hr> result_data : ";print_r($timing_result);
 			exit;
 		}
