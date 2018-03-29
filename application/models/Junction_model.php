@@ -192,7 +192,7 @@ class Junction_model extends CI_Model {
 	* @param data['time_point']   string   时间点
 	* @param data['type']         interger 计算类型
 	* @param data['confidence']   interger 置信度
-	* @param data['diagnose_key'] string   诊断问题KEY
+	* @param data['diagnose_key'] array    诊断问题KEY
 	* @return array
 	*/
 	public function getJunctionsDiagnoseList($data){
@@ -202,25 +202,15 @@ class Junction_model extends CI_Model {
 			return [];
 		}
 
+		if($data['type'] == 1){ // 综合
+			return $this->getJunctionsDiagnoseBySynthesize($data);
+		}
+
 		$diagnose_key_conf = $this->config->item('diagnose_key');
 		$select_quota_key = [];
 		foreach($diagnose_key_conf as $k=>$v){
 			$select_quota_key[] = $k;
 		}
-
-		/*foreach($select_quota_key as $k=>$v){
-			$select = "id, junction_id, max({$v}) as {$v}";
-			$where = 'task_id = ' . $data['task_id'] . ' and type = 1';
-			$res = $this->db->select($select)
-						->from($this->tb)
-						->where($where)
-						->group_by('junction_id')
-						->get()
-						->result_array();
-			echo "<hr> sql = " . $this->db->last_query();
-			echo "<hr>{$v} = <pre>";print_r($res);
-		}
-		exit;*/
 
 		$selectstr = empty($this->selectColumns($select_quota_key)) ? '' : ',' . $this->selectColumns($select_quota_key);
 		$select = 'id, junction_id' . $selectstr;
@@ -272,6 +262,56 @@ class Junction_model extends CI_Model {
 		$result_data = $this->mergeAllJunctions($all_city_junctions, $temp_diagnose_data, 'diagnose_detail');
 		//echo "getJunctionsDiagnoseList res = <pre>";print_r($result_data);
 		return $result_data;
+	}
+
+	/**
+	* 查询综合类型全城路口诊断问题列表
+	* @param data['task_id']      interger 任务ID
+	* @param data['city_id']      interger 城市ID
+	* @param data['time_point']   string   时间点
+	* @param data['type']         interger 计算类型
+	* @param data['confidence']   interger 置信度
+	* @param data['diagnose_key'] array    诊断问题KEY
+	* @return array
+	*/
+	private function getJunctionsDiagnoseBySynthesize(){
+		$sql_data = array_map(function($diagnose_key) {
+			$selectstr = "id, junction_id, max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
+			$where = 'task_id = ' . $data['task_id'] . ' and type = 1';
+			$temp_data = $this->db->select($selectstr)
+								->from($this->tb)
+								->where($where)
+								->group_by('junction_id')
+								->get()->result_array();
+			$new_data = [];
+			if(count($temp_data) >= 1){
+				foreach ($temp_data as $value) {
+					$new_data[$value['junction_id']] = $value;
+				}
+			}
+			return $new_data;
+		}, $data['diagnose_key']);
+
+		$count = count($data['diagnose_key']);
+
+		$flag = [];
+		if(count($sql_data) >= 1){
+			$flag = $sql_data[0];
+			foreach($flag as $k=>&$v){
+				$v = array_reduce($sql_data, function($carry, $item) use($k){
+					return array_merge($carry, $item[$k]);
+				}, []);
+				$total = 0;
+				foreach($data['diagnose_key'] as $key){
+					$total += $v[$key];
+				}
+				if($total / $count <= 0.6){
+					unset($flag[$k]);
+				}
+			}
+		}
+
+		return $flag;
 	}
 
 	/**

@@ -172,7 +172,7 @@ class Junction extends MY_Controller {
 	* @param type           interger  Y 指标计算类型 1：统合 0：时间点
 	* @param time_point     string    N 时间点 指标计算类型为1时非空
 	* @param confidence     interger  Y 置信度 0:全部 1:高 2:低
-	* @param diagnose_key	string    Y 诊断key
+	* @param diagnose_key	array     Y 诊断key
 	* @return json
 	*/
 	public function getAllCityJunctionsDiagnoseList(){
