@@ -274,7 +274,7 @@ class Junction_model extends CI_Model {
 	* @param data['diagnose_key'] array    诊断问题KEY
 	* @return array
 	*/
-	private function getJunctionsDiagnoseBySynthesize(){
+	private function getJunctionsDiagnoseBySynthesize($data){
 		$sql_data = array_map(function($diagnose_key) {
 			$selectstr = "id, junction_id, max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
 			$where = 'task_id = ' . $data['task_id'] . ' and type = 1';
