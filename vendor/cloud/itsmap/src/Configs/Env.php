@@ -17,8 +17,8 @@ class Env
     public static function init()
     {
         $hosts = [
-            'ipd-cloud-internal-web00.gz01' => self::ONLINE,
-            'ipd-cloud-internal-web01.gz01' => self::ONLINE,
+            'ipd-cloud-web00.gz01' => self::ONLINE,
+            'ipd-cloud-web01.gz01' => self::ONLINE,
 
             'localhost'                     => self::DEVELOPMENT,
 
