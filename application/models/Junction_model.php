@@ -452,7 +452,7 @@ class Junction_model extends CI_Model {
 		// 暂时定死一个中心点
 		$result_data['center']['lng'] = 117.033513;
 		$result_data['center']['lat'] = 36.663083;
-		if(count($result_data['dataList']) >= 1){
+		if(isset($result_data['dataList']) && count($result_data['dataList']) >= 1){
 			$result_data['dataList'] = array_values($result_data['dataList']);
 		}
 
