@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | 对外API配置文件
 |-----------------------------------------------------
 */
-
+// 线上机器
 $online_host = array(
     'ipd-cloud-web00.gz01',
     'ipd-cloud-web01.gz01',
