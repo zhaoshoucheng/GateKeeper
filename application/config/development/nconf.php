@@ -29,6 +29,11 @@ if($development == 2){
 	$timing_server = 'data.sts.didichuxing.com';
 	// 配时接口服务器端口
 	$timing_port = '80';
+
+	$config['redis'] = [
+		'host' => '100.69.139.14',
+		'port' => '3660'
+	];
 }else{
 	// 路网接口服务器地址
 	$waymap_server = '100.90.164.31';
@@ -39,6 +44,11 @@ if($development == 2){
 	$timing_server = '100.90.164.31';
 	// 配时接口服务器端口
 	$timing_port = '8006';
+
+	$config['redis'] = [
+		'host' => '127.0.0.1',
+		'port' => '6379'
+	];
 }
 
 // 路网接口地址
