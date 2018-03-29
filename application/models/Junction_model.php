@@ -203,59 +203,23 @@ class Junction_model extends CI_Model {
 		}
 
 		if($data['type'] == 1){ // 综合
-			return $this->getJunctionsDiagnoseBySynthesize($data);
+			$res = $this->getJunctionsDiagnoseBySynthesize($data);
+		}else{ // 时间点
+			$res = $this->getJunctionsDiagnoseByTimePoint($data);
 		}
 
-		$diagnose_key_conf = $this->config->item('diagnose_key');
-		$select_quota_key = [];
-		foreach($diagnose_key_conf as $k=>$v){
-			$select_quota_key[] = $k;
-		}
-
-		$selectstr = empty($this->selectColumns($select_quota_key)) ? '' : ',' . $this->selectColumns($select_quota_key);
-		$select = 'id, junction_id' . $selectstr;
-
-		$where = 'task_id = ' . $data['task_id'];
-		if($data['type'] == 1){
-			$where .= " and type = " . $data['type'];
-		}else if($data['type'] == 0){
-			$where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
-		}
-
-		// 诊断问题数
-		$diagnose_key_count = count($data['diagnose_key']);
-
-		$confidence_where = '';
-		foreach($data['diagnose_key'] as $v){
-			$confidence_where .= empty($confidence_where) ? $v . '_confidence' : '+' . $v . '_confidence';
-
-		}
-		$confidence_threshold = $this->config->item('diagnose_confidence_threshold');
-
-		$temp_confidence_expression[1] = '(' . $confidence_where . ') / ' . $diagnose_key_count . '>=' . $confidence_threshold;
-		$temp_confidence_expression[2] = '(' . $confidence_where . ') / ' . $diagnose_key_count . '<' . $confidence_threshold;
-
-		$confidence_conf = $this->config->item('confidence');
-		if($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)){
-			$where .= ' and ' . $temp_confidence_expression[$data['confidence']];
-		}
-
-		$res = $this->db->select($select)
-						->from($this->tb)
-						->where($where)
-						->get()
-						->result_array();
-		//echo "getJunctionsDiagnoseList sql = " . $this->db->last_query();
 		$temp_diagnose_data = [];
-		foreach($res as $k=>$v){
-			foreach($data['diagnose_key'] as $val){
-				$temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
-				$is_diagnose = 0;
-				if($this->compare($v[$val], $diagnose_key_conf[$val]['junction_threshold'], $diagnose_key_conf[$val]['junction_threshold_formula'])){
-					$is_diagnose = 1;
-				}
+		if(count($res) >= 1){
+			foreach($res as $k=>$v){
+				foreach($data['diagnose_key'] as $val){
+					$temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
+					$is_diagnose = 0;
+					if($this->compare($v[$val], $diagnose_key_conf[$val]['junction_threshold'], $diagnose_key_conf[$val]['junction_threshold_formula'])){
+						$is_diagnose = 1;
+					}
 
-				$temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = $is_diagnose;
+					$temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = $is_diagnose;
+				}
 			}
 		}
 
@@ -314,6 +278,60 @@ class Junction_model extends CI_Model {
 		}
 
 		return $flag;
+	}
+
+	/**
+	* 根据时间点查询全城路口诊断问题列表
+	* @param data['task_id']      interger 任务ID
+	* @param data['city_id']      interger 城市ID
+	* @param data['time_point']   string   时间点
+	* @param data['type']         interger 计算类型
+	* @param data['confidence']   interger 置信度
+	* @param data['diagnose_key'] array    诊断问题KEY
+	* @return array
+	*/
+	private function getJunctionsDiagnoseByTimePoint($data){
+		$diagnose_key_conf = $this->config->item('diagnose_key');
+		$select_quota_key = [];
+		foreach($diagnose_key_conf as $k=>$v){
+			$select_quota_key[] = $k;
+		}
+
+		$selectstr = empty($this->selectColumns($select_quota_key)) ? '' : ',' . $this->selectColumns($select_quota_key);
+		$select = 'id, junction_id' . $selectstr;
+
+		$where = 'task_id = ' . $data['task_id'];
+		if($data['type'] == 1){
+			$where .= " and type = " . $data['type'];
+		}else if($data['type'] == 0){
+			$where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
+		}
+
+		// 诊断问题数
+		$diagnose_key_count = count($data['diagnose_key']);
+
+		$confidence_where = '';
+		foreach($data['diagnose_key'] as $v){
+			$confidence_where .= empty($confidence_where) ? $v . '_confidence' : '+' . $v . '_confidence';
+
+		}
+		$confidence_threshold = $this->config->item('diagnose_confidence_threshold');
+
+		$temp_confidence_expression[1] = '(' . $confidence_where . ') / ' . $diagnose_key_count . '>=' . $confidence_threshold;
+		$temp_confidence_expression[2] = '(' . $confidence_where . ') / ' . $diagnose_key_count . '<' . $confidence_threshold;
+
+		$confidence_conf = $this->config->item('confidence');
+		if($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)){
+			$where .= ' and ' . $temp_confidence_expression[$data['confidence']];
+		}
+		$res = [];
+		$res = $this->db->select($select)
+						->from($this->tb)
+						->where($where)
+						->get()
+						->result_array();
+
+		return $res;
 	}
 
 	/**
