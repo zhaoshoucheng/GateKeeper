@@ -14,6 +14,7 @@ if (!function_exists('httpGET')) {
         }elseif (!empty($query)){
             $url = sprintf("%s?%s", $url, $query);
         }
+        log_message('notice', "httpGET $url");
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -28,6 +29,7 @@ if (!function_exists('httpGET')) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         }
         $ret = curl_exec($ch);
+        log_message('notice', "$url : $ret");
         if(curl_errno($ch)){
             $errmsg = curl_error($ch);
             log_message('error', "requesturi={$url}||errno=9999||{$errmsg}||{$ret}");
@@ -48,6 +50,7 @@ if (!function_exists('httpGET')) {
 if (!function_exists('httpPOST')) {
     function httpPOST($url, $data, $msTimeout = 0, $contentType='x-www-form-urlencoded'){
         $path = parse_url($url, PHP_URL_PATH);
+        log_message('notice', "httpGET $url");
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_ENCODING, "UTF-8");
         curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -68,6 +71,7 @@ if (!function_exists('httpPOST')) {
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         $ret = curl_exec($ch);
+        log_message('notice', "$url : $ret");
         if(curl_errno($ch)){
             $errmsg = curl_error($ch);
             log_message('error', "requesturi=$url||errno=9999||$errmsg||$ret");
