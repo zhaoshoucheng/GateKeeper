@@ -206,9 +206,8 @@ class Junction extends MY_Controller {
 		}
 		$data['confidence'] = $params['confidence'];
 
-		$data['diagnose_key'] = $params['diagnose_key'];
-		if(is_array($data['diagnose_key']) && count($data['diagnose_key']) >= 1){
-			foreach($data['diagnose_key'] as $v){
+		if(isset($params['diagnose_key']) && count($params['diagnose_key']) >= 1){
+			foreach($params['diagnose_key'] as $v){
 				if(!array_key_exists($v, $this->config->item('diagnose_key'))){
 					return $this->response([], 100400, 'The value of diagnose_key ' . $v . ' is wrong.');
 				}
@@ -216,6 +215,7 @@ class Junction extends MY_Controller {
 		}else{
 			return $this->response([], 100400, 'The diagnose_key cannot be empty and must be array.');
 		}
+		$data['diagnose_key'] = $params['diagnose_key'];
 
 		$res = $this->junction_model->getJunctionsDiagnoseList($data);
 
