@@ -404,6 +404,7 @@ class Junction_model extends CI_Model {
 	private function getJunctionInfo($ids){
 		$this->load->helper('http');
 		$data['logic_ids'] = $ids;
+		$data['token'] = $this->config->item('waymap_token');
 		$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/many', $data);
 		if(!$res){
 			return $this->response([], 100500, 'Failed to connect to waymap service.');
