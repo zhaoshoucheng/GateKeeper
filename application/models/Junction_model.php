@@ -152,6 +152,7 @@ class Junction_model extends CI_Model {
 			}
 
 			$flow_quota_key = $this->config->item('flow_quota_key');
+
 			// 诊断详情
 			if((int)$data['type'] == 2 && count($res) >= 1){
 				$result_comment_conf = $this->config->item('result_comment');
