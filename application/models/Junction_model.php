@@ -441,8 +441,9 @@ class Junction_model extends CI_Model {
 	private function getAllCityJunctions($city_id){
 		$redis = new redis();
 
-		if(!$redis->connect('127.0.0.1', 6379)){
-			return [];
+		$redis_conf = $this->config->item('redis');
+		if(!$redis->connect($redis_conf['host'], $redis_conf['port'])){
+			$city_junctions = json_decode($city_junctions, true);
 		}
 
 		$city_junctions = $redis->get("all_city_junctions_{$city_id}");
