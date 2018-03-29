@@ -135,6 +135,14 @@ class Task extends MY_Controller {
 			return $this->response(array(), $errno, $validate['errmsg']);
 		}
 
+		$st = strtotime('2000-01-01 ' . $params['start_time'] . ':00');
+		$et = strtotime('2000-01-01 ' . $params['end_time'] . ':00');
+		if ($st > $et or $et - $st < 1800 or $et - $st > 7200) {
+			$this->errno = -1;
+			$this->errmsg = '任务开始时间必须小于结束时间，最少30分钟，最多4个小时';
+			return;
+		}
+
 		$task = [
 			'user'		=> $user,
 			'city_id'	=> $params['city_id'],

@@ -63,8 +63,8 @@ class Database
                 'host' => '100.69.238.94',
                 'port' => "4002",
                 'database' => 'its_mapdata',
-                'username' => 'its_mapdata_its_mapdata_rw',
-                'password' => 'fw7AjhtSvMJRgK9',
+                'username' => 'its_mapdata_its_mapdata_r',
+                'password' => 'txCjmkfIvMX2Fzn',
             ],
             'its' => [
                 'driver' => 'mysql',
