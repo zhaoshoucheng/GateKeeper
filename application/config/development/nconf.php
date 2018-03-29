@@ -92,13 +92,12 @@ $config['flow_quota_key'] = [
 $config['diagnose_key']	= [
 	'imbalance_index'=>[
 		'name'				         => '失衡',
-		'junction_threshold'         => 0,
+		'junction_threshold'         => 0.005,
 		'junction_threshold_formula' => '>',
 		'nature_threshold'           => [
-			'high'       => 1,
-			'mide_right' => 0.6,
-			'mide_left'  => 0.3,
-			'low'        => 0
+			'high'       => 0.08,
+			'mide'       => 0.04,
+			'low'        => 0.005
 		],
 		'flow_quota'=>[
 			'route_length'  => [
@@ -132,9 +131,8 @@ $config['diagnose_key']	= [
 		'junction_threshold'         => 0,
 		'junction_threshold_formula' => '>',
 		'nature_threshold'  => [
-			'high'       => 1,
-			'mide_right' => 0.6,
-			'mide_left'  => 0.3,
+			'high'       => 0.6,
+			'mide'       => 0.3,
 			'low'        => 0
 		],
 		'flow_quota'=>[
@@ -166,13 +164,12 @@ $config['diagnose_key']	= [
 	],
 	'saturation_index'	=> [
 		'name'				         => '空放',
-		'junction_threshold'         => 0.5,
+		'junction_threshold'         => 0.3,
 		'junction_threshold_formula' => '<',
 		'nature_threshold'           => [
-			'high'       => 1,
-			'mide_right' => 0.6,
-			'mide_left'  => 0.3,
-			'low'        => 0
+			'high'       => 0.1,
+			'mide'       => 0.2,
+			'low'        => 0.3
 		],
 		'flow_quota'=>[
 			'stop_delay'=>[
@@ -204,6 +201,3 @@ $config['sort_conf'] = [
 	1	=> 'asc',
 	2	=> 'desc'
 ];
-
-
-
