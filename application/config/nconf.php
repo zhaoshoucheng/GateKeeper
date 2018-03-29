@@ -65,16 +65,20 @@ $confidence_threshold = 0.5;
 // 评估置信度
 $config['confidence'] = [
 	0=>[
-		'name'		=> '全部',
+		'name'      => '全部',
 		'expression'=> '> 0'
 	],
 	1=>[
-		'name'		=> '高',
+		'name'      => '高',
 		'expression'=> '>=' . $confidence_threshold
 	],
 	2=>[
-		'name'		=> '低',
+		'name'      => '低',
 		'expression'=> '<' . $confidence_threshold
+	],
+	3=>[
+		'name'      => '中',
+		'expression'=> '> 0'
 	]
 ];
 
@@ -236,6 +240,11 @@ $config['diagnose_confidence_threshold'] = 0.5;
 $config['sort_conf'] = [
 	1	=> 'asc',
 	2	=> 'desc'
+];
+
+// result_comment 配置
+$config['result_comment'] = [
+	'signal_mes_error' => '配时信息与实际车流不符'
 ];
 
 
