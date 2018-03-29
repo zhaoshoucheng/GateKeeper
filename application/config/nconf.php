@@ -21,14 +21,14 @@ if (in_array($hostname, $online_host)) {
 
 if($development == 2){
 	// 路网接口服务器地址
-	$waymap_server = 'data.sts.didichuxing.com';
+	$waymap_server = '100.90.227.60';
 	// 路网接口服务器端口
-	$waymap_port = '80';
+	$waymap_port = '8000';
 
 	// 配时接口服务器地址
-	$timing_server = 'data.sts.didichuxing.com';
+	$timing_server = '100.90.227.60';
 	// 配时接口服务器端口
-	$timing_port = '80';
+	$timing_port = '8000';
 
 	$config['redis'] = [
 		'host' => '100.69.139.14',
