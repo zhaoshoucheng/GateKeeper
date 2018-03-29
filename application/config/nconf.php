@@ -47,32 +47,32 @@ $config['junction_quota_key'] = [
 	'imbalance_index' => [
 		'name'		=> '失衡指数',
 		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'status_min'=> 0.3
 	],
 	'spillover_index' => [
 		'name'      => '溢流指数',
-		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'status_max'=> 0.08,
+		'status_min'=> 0.04
 	],
 	'incoordination_index' => [
 		'name'      => '失调指数',
-		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'status_max'=> 0.7,
+		'status_min'=> 0.4
 	],
 	'saturation_index' => [
 		'name'      => '饱和指数',
-		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'status_max'=> 0.9,
+		'status_min'=> 0.3
 	],
 	'stop_cycle_time' => [
 		'name'      => '停车(周期)次数',
-		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'status_max'=> 2,
+		'status_min'=> 1
 	],
 	'stop_delay' => [
-		'name'      => '停车延误',
-		'status_max'=> 0.6,
-		'status_min'=> 0.1
+		'name'      => '平均延误',
+		'status_max'=> 40,
+		'status_min'=> 20
 	]
 ];
 
