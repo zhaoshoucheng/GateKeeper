@@ -44,7 +44,7 @@ class Junction_model extends CI_Model {
 
 		$select = '';
 		if($data['type'] == 1){ // 综合
-			$select = "id, junction_id, max({$selectstr}) as {$selectstr}";
+			$select = "id, junction_id, max({$quota_key}) as {$quota_key}";
 		}else{
 			$select = 'id, junction_id' . $selectstr;
 		}
@@ -310,12 +310,7 @@ class Junction_model extends CI_Model {
 		$selectstr = empty($this->selectColumns($select_quota_key)) ? '' : ',' . $this->selectColumns($select_quota_key);
 		$select = 'id, junction_id' . $selectstr;
 
-		$where = 'task_id = ' . $data['task_id'];
-		if($data['type'] == 1){
-			$where .= " and type = " . $data['type'];
-		}else if($data['type'] == 0){
-			$where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
-		}
+		$where = "task_id = " . $data['task_id'] . " and type = 0 and time_point = '{$data['time_point']}'";
 
 		// 诊断问题数
 		$diagnose_key_count = count($data['diagnose_key']);
@@ -323,7 +318,6 @@ class Junction_model extends CI_Model {
 		$confidence_where = '';
 		foreach($data['diagnose_key'] as $v){
 			$confidence_where .= empty($confidence_where) ? $v . '_confidence' : '+' . $v . '_confidence';
-
 		}
 		$confidence_threshold = $this->config->item('diagnose_confidence_threshold');
 
