@@ -155,13 +155,17 @@ class Junction_model extends CI_Model {
 						$res['diagnose_detail'][$k]['name'] = $v['name'];
 						$res['diagnose_detail'][$k]['key'] = $k;
 						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $v['flow_quota']);
+						$compare_val = $res[$k];
+						if($k == 'saturation_index'){ // 空放问题，因为统一算法，空放的性质阈值设置为负数，所以当是空放问题时，传递负数进行比较
+							$compare_val = -$res[$k];
+						}
 						// 诊断问题性质 1:重度 2:中度 3:轻度
-						if($res[$k] > $v['nature_threshold']['low'] && $res[$k] <= $v['nature_threshold']['mide_left']){
-							$res['diagnose_detail'][$k]['nature'] = 3;
-						}else if($res[$k] > $v['nature_threshold']['mide_left'] && $res[$k] <= $v['nature_threshold']['mide_right']){
-							$res['diagnose_detail'][$k]['nature'] = 2;
-						}else if($res[$k] > $v['nature_threshold']['mide_right'] && $res[$k] <= $v['nature_threshold']['high']){
+						if($compare_val > $v['nature_threshold']['high']){
 							$res['diagnose_detail'][$k]['nature'] = 1;
+						}else if($compare_val > $v['nature_threshold']['mide'] && $compare_val <= $v['nature_threshold']['high']){
+							$res['diagnose_detail'][$k]['nature'] = 2;
+						}else if($compare_val > $v['nature_threshold']['low'] && $compare_val <= $v['nature_threshold']['mide']){
+							$res['diagnose_detail'][$k]['nature'] = 3;
 						}
 					}
 				}
