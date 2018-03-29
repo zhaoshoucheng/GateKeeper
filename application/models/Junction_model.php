@@ -208,6 +208,7 @@ class Junction_model extends CI_Model {
 			$res = $this->getJunctionsDiagnoseByTimePoint($data);
 		}
 
+		$diagnose_key_conf = $this->config->item('diagnose_key');
 		$temp_diagnose_data = [];
 		if(count($res) >= 1){
 			foreach($res as $k=>$v){
