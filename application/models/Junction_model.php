@@ -43,7 +43,7 @@ class Junction_model extends CI_Model {
 		}
 
 		$select = '';
-		if($type == 1){ // 综合
+		if($data['type'] == 1){ // 综合
 			$select = "id, junction_id, max({$selectstr}) as {$selectstr}";
 		}else{
 			$select = 'id, junction_id' . $selectstr;
