@@ -161,7 +161,6 @@ class Junction_model extends CI_Model {
 
 			// 诊断详情
 			if((int)$data['type'] == 2){
-				$res['diagnose_detail'] = [];
 				foreach($diagnose_key_conf as $k=>$v){
 					if($this->compare($res[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
 						$res['diagnose_detail'][$k]['name'] = $v['name'];
@@ -183,7 +182,7 @@ class Junction_model extends CI_Model {
 				}
 
 				// 组织每个问题的不同指标数据集合
-				if(count($res['diagnose_detail']) >= 1){
+				if(isset($res['diagnose_detail']) && count($res['diagnose_detail']) >= 1){
 					foreach($res['diagnose_detail'] as $k=>$v){
 						foreach($res['movements'] as $k1=>$v1){
 							$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'']));
