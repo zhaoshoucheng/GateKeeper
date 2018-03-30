@@ -153,13 +153,14 @@ class Junction_model extends CI_Model {
 				$res['movements'][$k]['confidence'] = isset($confidence[$v['confidence']]['name']) ? $confidence[$v['confidence']]['name'] : '';
 			}
 
+			$result_comment_conf = $this->config->item('result_comment');
+			$result_comment_view = isset($result_comment_conf[$res['result_comment']]) ? $result_comment_conf[$res['result_comment']] : '';
+			$res['result_comment'] = $result_comment_view;
+
 			$flow_quota_key = $this->config->item('flow_quota_key');
 
 			// 诊断详情
-			if((int)$data['type'] == 2 && count($res) >= 1){
-				$result_comment_conf = $this->config->item('result_comment');
-				$result_comment_view = isset($result_comment_conf[$res['result_comment']]) ? $result_comment_conf[$res['result_comment']] : '';
-				$res['result_comment'] = $result_comment_view;
+			if((int)$data['type'] == 2){
 				$res['diagnose_detail'] = [];
 				foreach($diagnose_key_conf as $k=>$v){
 					if($this->compare($res[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
