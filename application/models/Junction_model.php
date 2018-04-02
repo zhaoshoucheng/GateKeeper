@@ -150,7 +150,10 @@ class Junction_model extends CI_Model {
 			// 标注相位名称
 			foreach($res['movements'] as $k=>$v){
 				$res['movements'][$k]['comment'] = isset($phase_position[$v['movement_id']]) ? $phase_position[$v['movement_id']] : "";
-				$res['movements'][$k]['confidence'] = isset($confidence[$v['confidence']]['name']) ? $confidence[$v['confidence']]['name'] : '';
+				$res['movements'][$k]['confidence'] = '';
+				if(isset($v['confidence'])){
+					$res['movements'][$k]['confidence'] = isset($confidence[$v['confidence']]['name']) ? $confidence[$v['confidence']]['name'] : '';
+				}
 			}
 
 			$result_comment_conf = $this->config->item('result_comment');
