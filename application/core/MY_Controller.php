@@ -15,7 +15,6 @@ class MY_Controller extends CI_Controller {
     public $username = 'unknown';
 	protected $debug = false;
 	protected $is_check_login = 0;
-    protected $debug_token_conf = '11aa8de085c51405e70e5ffced834c2b';
 
 	public function __construct(){
 		parent::__construct();
@@ -24,8 +23,7 @@ class MY_Controller extends CI_Controller {
 		if($this->input->post('debug')){
 			$this->debug = true;
 		}
-        $debug_token = $this->input->get_post('debug_token');
-		if ($host != '100.90.164.31:8088' && $host != 'www.itstool.com' && $debug_token != $this->debug_token_conf) {
+		if ($host != '100.90.164.31:8088' && $host != 'www.itstool.com') {
 			$this->is_check_login = 1;
 
 			$this->load->model('user/user', 'user');
