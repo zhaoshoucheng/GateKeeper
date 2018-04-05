@@ -15,6 +15,12 @@ class Junction_model_bak extends CI_Model {
 			$this->db = $this->load->database('default', true);
 		}
 
+		$is_existed = $this->db->table_exists($this->tb);
+		if (!$is_existed) {
+			// 添加日志
+			return [];
+		}
+
 		$this->load->config('nconf');
 	}
 
@@ -55,7 +61,7 @@ class Junction_model_bak extends CI_Model {
 		}
 
 		$confidence_conf = $this->config->item('confidence');
-		if($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)){
+		if(isset($data['confidence']) && (int)$data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)){
 			$where .= ' and ' . $quota_key . '_confidence ' . $confidence_conf[$data['confidence']]['expression'];
 		}
 
@@ -70,7 +76,7 @@ class Junction_model_bak extends CI_Model {
 		// 指标状态 1：高 2：中 3：低
 		$quota_key_conf = $this->config->item('junction_quota_key');
 		$temp_quota_data = [];
-		foreach($res as $k=>&$v){
+		foreach($res as &$v){
 			if($v[$quota_key] > $quota_key_conf[$quota_key]['status_max']){
 				$v['quota_status'] = 1;
 			}else if($v[$quota_key] <= $quota_key_conf[$quota_key]['status_max'] && $v[$quota_key] > $quota_key_conf[$quota_key]['status_min']){
@@ -502,6 +508,10 @@ class Junction_model_bak extends CI_Model {
 	* 将查询出来的评估/诊断数据合并到全城路口模板中
 	*/
 	private function mergeAllJunctions($all_data, $data, $merge_key = 'detail'){
+		if(!is_array($all_data) || count($all_data) < 1 || !is_array($data) || count($data) < 1){
+			return [];
+		}
+
 		$result_data = [];
 		$temp_lng = [];
 		$temp_lat = [];
