@@ -2,7 +2,7 @@
 /********************************************
 # desc:    路口数据模型
 # author:  ningxiangbing@didichuxing.com
-# date:    2018-03-05
+# date:    2018-04-08
 ********************************************/
 
 class Timing_model extends CI_Model {
@@ -51,11 +51,11 @@ class Timing_model extends CI_Model {
 
 		// 获取配时详情
 		$timing_data = [
-						'logic_junction_id'	=>trim($data['junction_id']),
-						'days'              =>trim(implode(',', $data['dates'])),
-						'time'              =>trim($data['time_point']),
-						'start_time'        =>trim($time_range[0]),
-						'end_time'          =>trim($time_range[1])
+						'logic_junction_id'	=> trim($data['junction_id']),
+						'days'              => trim(implode(',', $data['dates'])),
+						'time'              => trim($data['time_point']),
+						'start_time'        => trim($time_range[0]),
+						'end_time'          => trim($time_range[1])
 					];
 		try {
 			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
