@@ -254,6 +254,7 @@ class Junction_bak extends MY_Controller {
 		$diagnose_key = $params['diagnose_key'];
 		$diagnose_key_conf = $this->config->item('diagnose_key');
 		if(is_array($diagnose_key) && count($diagnose_key) >= 1){
+			$diagnose_key = array_filter($diagnose_key);
 			foreach($diagnose_key as $k=>$v){
 				if(!array_key_exists($v, $diagnose_key_conf)){
 					$this->errno = ERR_PARAMETERS;
