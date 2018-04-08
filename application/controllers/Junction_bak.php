@@ -244,16 +244,10 @@ class Junction_bak extends MY_Controller {
 			]
 		);
 		if(!$validate['status']){
-			return $this->response([], 100400, $validate['errmsg']);
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = $validate['errmsg'];
+			return;
 		}
-
-		$data['orderby'] = 2;
-		if(isset($params['orderby']) && (int)$params['orderby'] == 1){
-			$data['orderby'] = 1;
-		}
-
-		$data['task_id'] = (int)$params['task_id'];
-		$data['time_point'] = trim($params['time_point']);
 
 		$res = [];
 
@@ -262,15 +256,18 @@ class Junction_bak extends MY_Controller {
 		if(is_array($diagnose_key) && count($diagnose_key) >= 1){
 			foreach($diagnose_key as $k=>$v){
 				if(!array_key_exists($v, $diagnose_key_conf)){
-					return $this->response([], 100400, 'The value of diagnose_key ' . $v . ' is wrong.');
+					$this->errno = ERR_PARAMETERS;
+					$this->errmsg = 'The value of diagnose_key ' . $v . ' is wrong.';
+					return;
 				}
-				$data['diagnose_key'] = $v;
-				$res[$v] = $this->junction_model->getDiagnoseRankList($data);
 			}
 		}else{
-			return $this->response([], 100400, 'The diagnose_key cannot be empty and must be array.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The diagnose_key cannot be empty and must be array.';
+			return;
 		}
 
+		$res[$v] = $this->junction_model->getDiagnoseRankList($params);
 		return $this->response($res);
 	}
 
