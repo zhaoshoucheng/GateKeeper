@@ -228,8 +228,9 @@ class Junction_bak extends MY_Controller {
 	* @param task_id       interger Y 任务ID
 	* @param city_id       interger Y 城市ID
 	* @param time_point    string   Y 时间点
-	* @param diagnose_key  string   Y 诊断key
-	* @param orderby       interger N 诊断问题排序 1：正序 2：倒序 默认2
+	* @param diagnose_key  array    Y 诊断key
+	* @param confidence    interger Y 置信度
+	* @param orderby       interger N 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
 	* @return json
 	*/
 	public function getDiagnoseRankList(){
