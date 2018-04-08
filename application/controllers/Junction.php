@@ -11,11 +11,12 @@ class Junction extends MY_Controller {
 	public function __construct(){
 		parent::__construct();
 		$this->load->model('junction_model');
+		$this->load->model('timing_model');
 		$this->load->config('nconf');
 	}
 
 	/**
-	* 评估-获取全城路口信息
+	* 评估-获取全城路口指标信息
 	* @param task_id     interger  Y 任务ID
 	* @param city_id     interger  Y 城市ID
 	* @param type        interger  Y 指标计算类型 1：统合 0：时间点
@@ -37,30 +38,42 @@ class Junction extends MY_Controller {
 			]
 		);
 		if(!$validate['status']){
-			return $this->response([], 100400, $validate['errmsg']);
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = $validate['errmsg'];
+			return;
 		}
 
 		$data['task_id'] = (int)$params['task_id'];
 		$data['type'] = (int)$params['type'];
 		$data['city_id'] = $params['city_id'];
 
+		// type == 0时 time_point为必传项
 		if($data['type'] == 0 && (!isset($params['time_point']) || empty(trim($params['time_point'])))){
-			return $this->response([], 100400, 'The time_point cannot be empty.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The time_point cannot be empty.';
+			return;
 		}
 		if($data['type'] == 0){
 			$data['time_point'] = trim($params['time_point']);
 		}
 
+		// 判断置信度是否存在
 		if(!array_key_exists($params['confidence'], $this->config->item('confidence'))){
-			return $this->response([], 100400, 'The value of confidence ' . $params['confidence'] . ' is wrong.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The value of confidence ' . $params['confidence'] . ' is wrong.';
+			return;
 		}
 		$data['confidence'] = $params['confidence'];
 
+		// 判断指标KEY是否正确
 		$data['quota_key'] = strtolower(trim($params['quota_key']));
 		if(!array_key_exists($data['quota_key'], $this->config->item('junction_quota_key'))){
-			return $this->response([], 100400, 'The value of quota_key ' . $data['quota_key'] . ' is wrong.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The value of quota_key ' . $data['quota_key'] . ' is wrong.';
+			return;
 		}
 
+		// 获取全城路口指标信息
 		$data = $this->junction_model->getAllCityJunctionInfo($data);
 
 		return $this->response($data);
@@ -126,45 +139,20 @@ class Junction extends MY_Controller {
 			]
 		);
 		if(!$validate['status']){
-			return $this->response([], 100400, $validate['errmsg']);
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = $validate['errmsg'];
+			return;
 		}
 
 		if(!is_array($params['dates']) || count($params['dates']) < 1){
-			return $this->response([], 100400, 'The dates cannot be empty and must be array.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The dates cannot be empty and must be array.';
+			return;
 		}
 
-		$time_range = array_filter(explode('-', trim($params['time_range'])));
+		$timing = $this->timing_model->getJunctionsTimingInfo($params);
 
-		$this->load->helper('http');
-
-		// 获取配时详情
-		$timing_data = [
-						'logic_junction_id'	=>trim($params['junction_id']),
-						'days'              =>trim(implode(',', $params['dates'])),
-						'time'              =>trim($params['time_point']),
-						'start_time'        =>trim($time_range[0]),
-						'end_time'          =>trim($time_range[1])
-					];
-		$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
-		if(!$timing){
-			return $this->response([], 100500, 'Failed to connect to timing service.');
-		}
-		$timing = json_decode($timing, true);
-		if($timing['errorCode'] != 0){
-			return $this->response([], 100500, $timing['errorMsg']);
-		}
-
-		// 格式化配时数据
-		$timing_result = $this->formatTimingData($timing['data']);
-		if($this->debug){
-			echo "interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
-			echo "<hr>data : " . json_encode($timing_data);
-			echo "<hr>return :" . json_encode($timing);
-			echo "<hr>json_decode(return) : <pre>";print_r($timing);
-			echo "<hr> result_data : ";print_r($timing_result);
-			exit;
-		}
-		return $this->response($timing_result);
+		return $this->response($timing);
 	}
 
 	/**
@@ -189,7 +177,9 @@ class Junction extends MY_Controller {
 			]
 		);
 		if(!$validate['status']){
-			return $this->response([], 100400, $validate['errmsg']);
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = $validate['errmsg'];
+			return;
 		}
 
 		$data['task_id'] = (int)$params['task_id'];
@@ -197,25 +187,33 @@ class Junction extends MY_Controller {
 		$data['type'] = (int)$params['type'];
 
 		if($data['type'] == 0 && (!isset($params['time_point']) || empty(trim($params['time_point'])))){
-			return $this->response([], 100400, 'The time_point cannot be empty.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The time_point cannot be empty.';
+			return;
 		}
 		if($data['type'] == 0){
 			$data['time_point'] = trim($params['time_point']);
 		}
 
 		if(!array_key_exists($params['confidence'], $this->config->item('confidence'))){
-			return $this->response([], 100400, 'The value of confidence ' . $params['confidence'] . ' is wrong.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The value of confidence ' . $params['confidence'] . ' is wrong.';
+			return;
 		}
 		$data['confidence'] = $params['confidence'];
 
 		if(isset($params['diagnose_key']) && count($params['diagnose_key']) >= 1){
 			foreach($params['diagnose_key'] as $v){
 				if(!array_key_exists($v, $this->config->item('diagnose_key'))){
-					return $this->response([], 100400, 'The value of diagnose_key ' . $v . ' is wrong.');
+					$this->errno = ERR_PARAMETERS;
+					$this->errmsg = 'The value of diagnose_key ' . $v . ' is wrong.';
+					return;
 				}
 			}
 		}else{
-			return $this->response([], 100400, 'The diagnose_key cannot be empty and must be array.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The diagnose_key cannot be empty and must be array.';
+			return;
 		}
 		$data['diagnose_key'] = $params['diagnose_key'];
 
@@ -230,8 +228,9 @@ class Junction extends MY_Controller {
 	* @param task_id       interger Y 任务ID
 	* @param city_id       interger Y 城市ID
 	* @param time_point    string   Y 时间点
-	* @param diagnose_key  string   Y 诊断key
-	* @param orderby       interger N 诊断问题排序 1：正序 2：倒序 默认2
+	* @param diagnose_key  array    Y 诊断key
+	* @param confidence    interger Y 置信度
+	* @param orderby       interger N 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
 	* @return json
 	*/
 	public function getDiagnoseRankList(){
@@ -245,33 +244,31 @@ class Junction extends MY_Controller {
 			]
 		);
 		if(!$validate['status']){
-			return $this->response([], 100400, $validate['errmsg']);
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = $validate['errmsg'];
+			return;
 		}
-
-		$data['orderby'] = 2;
-		if(isset($params['orderby']) && (int)$params['orderby'] == 1){
-			$data['orderby'] = 1;
-		}
-
-		$data['task_id'] = (int)$params['task_id'];
-		$data['time_point'] = trim($params['time_point']);
 
 		$res = [];
 
 		$diagnose_key = $params['diagnose_key'];
 		$diagnose_key_conf = $this->config->item('diagnose_key');
 		if(is_array($diagnose_key) && count($diagnose_key) >= 1){
+			$diagnose_key = array_filter($diagnose_key);
 			foreach($diagnose_key as $k=>$v){
 				if(!array_key_exists($v, $diagnose_key_conf)){
-					return $this->response([], 100400, 'The value of diagnose_key ' . $v . ' is wrong.');
+					$this->errno = ERR_PARAMETERS;
+					$this->errmsg = 'The value of diagnose_key ' . $v . ' is wrong.';
+					return;
 				}
-				$data['diagnose_key'] = $v;
-				$res[$v] = $this->junction_model->getDiagnoseRankList($data);
 			}
 		}else{
-			return $this->response([], 100400, 'The diagnose_key cannot be empty and must be array.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The diagnose_key cannot be empty and must be array.';
+			return;
 		}
 
+		$res = $this->junction_model->getDiagnoseRankList($params);
 		return $this->response($res);
 	}
 
@@ -391,32 +388,6 @@ class Junction extends MY_Controller {
 		}
 
 		return $this->response($result);
-	}
-
-	/**
-	* 格式化配时数据
-	*/
-	private function formatTimingData($data){
-		$result = [];
-		$result['total_plan'] = $data['total_plan'];
-		$result['tod_start_time'] = $data['latest_plan'][0]['tod_start_time'];
-		$result['tod_end_time'] = $data['latest_plan'][0]['tod_end_time'];
-		$result['cycle'] = $data['latest_plan'][0]['plan_detail']['extra_timing']['cycle'];
-		$result['offset'] = $data['latest_plan'][0]['plan_detail']['extra_timing']['offset'];
-		if(isset($data['latest_plan']) && count($data['latest_plan'][0]['plan_detail']['movement_timing']) >= 1){
-			foreach($data['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
-				$result['timing_detail'][$k]['logic_flow_id'] = $v[0]['flow_logic']['logic_flow_id'];
-				$result['timing_detail'][$k]['state'] = $v[0]['state'];
-				$result['timing_detail'][$k]['start_time'] = $v[0]['start_time'];
-				$result['timing_detail'][$k]['duration'] = $v[0]['duration'];
-				$result['timing_detail'][$k]['comment'] = $v[0]['flow_logic']['comment'];
-			}
-		}
-		if(isset($result['timing_detail'])){
-			$result['timing_detail'] = array_values($result['timing_detail']);
-		}
-
-		return $result;
 	}
 
 	/**
