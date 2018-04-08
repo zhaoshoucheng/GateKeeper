@@ -430,6 +430,10 @@ class Junction_model_bak extends CI_Model {
 				$result_data[$k][$k1]['junction_label'] = isset($junction_id_name[$k1]) ? $junction_id_name[$k1] : '';
 				$result_data[$k][$k1]['$k'] = $v1;
 			}
+
+			if(isset($result_data[$k]) && !empty($result_data[$k])){
+				$result_data[$k] = array_values($result_data[$k]);
+			}
 		}
 
 		return $result_data;
