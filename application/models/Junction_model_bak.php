@@ -361,7 +361,7 @@ class Junction_model_bak extends CI_Model {
 	* 诊断-诊断问题排序列表
 	* @param data['task_id']      interger 任务ID
 	* @param data['time_point']   string   时间点
-	* @param data['diagnose_key'] string   诊断问题KEY
+	* @param data['diagnose_key'] array    诊断问题KEY
 	* @param data['confidence']   interger 置信度
 	* @param data['orderby']      interger 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
 	* @return array
