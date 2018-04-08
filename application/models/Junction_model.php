@@ -367,21 +367,6 @@ class Junction_model extends CI_Model {
 	* @return array
 	*/
 	public function getDiagnoseRankList($data){
-		/*$select = 'junction_id, ' . $data['diagnose_key'];
-
-		$where = 'task_id = ' . $data['task_id'] . " and type = 0 and time_point = '{$data["time_point"]}'";
-
-		$diagnose_key_conf = $this->config->item('diagnose_key');
-		$where .= " and {$data['diagnose_key']} {$diagnose_key_conf[$data['diagnose_key']]['junction_threshold_formula']} {$diagnose_key_conf[$data['diagnose_key']]['junction_threshold']}";
-
-		$sort_conf = $this->config->item("sort_conf");
-
-		$res = $this->db->select($select)
-						->from($this->tb)
-						->where($where)
-						->order_by($data['diagnose_key'], $sort_conf[$data['orderby']])
-						->get()
-						->result_array();*/
 		$res = $this->getJunctionsDiagnoseByTimePoint($data);
 		if(!$res || empty($res)){
 			return [];
