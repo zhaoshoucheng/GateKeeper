@@ -168,7 +168,7 @@ class Junction_model extends CI_Model {
 					if($this->compare($res[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
 						$res['diagnose_detail'][$k]['name'] = $v['name'];
 						$res['diagnose_detail'][$k]['key'] = $k;
-						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $v['flow_quota']);
+						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, array_merge($v['flow_quota'], ['confidence'=>'置信度']) );
 						$compare_val = $res[$k];
 						if($k == 'saturation_index'){ // 空放问题，因为统一算法，空放的性质阈值设置为负数，所以当是空放问题时，传递负数进行比较
 							$compare_val = $res[$k] * -1;
@@ -188,7 +188,7 @@ class Junction_model extends CI_Model {
 				if(isset($res['diagnose_detail']) && count($res['diagnose_detail']) >= 1){
 					foreach($res['diagnose_detail'] as $k=>$v){
 						foreach($res['movements'] as $k1=>$v1){
-							$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'', 'confidence'=>'']));
+							$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'']));
 						}
 					}
 				}
