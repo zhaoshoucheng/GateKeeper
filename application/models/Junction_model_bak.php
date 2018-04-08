@@ -394,14 +394,22 @@ class Junction_model_bak extends CI_Model {
 		$result = [];
 		$logic_junction_ids = '';
 		foreach($res as $k=>$v){
-			//$res[$k][$data['diagnose_key']] = round($v[$data['diagnose_key']], 5);
 			foreach($data['diagnose_key'] as $k1=>$v1){
 				if($this->compare($v[$v1], $diagnose_key_conf[$v1]['junction_threshold'], $diagnose_key_conf[$v1]['junction_threshold_formula'])){
-					$result[$v1][$k]['junction_id'] = $v['junction_id'];
-					$result[$v1][$k][$v1] = round($v[$v1], 5);
+					$result[$v1][$v['junction_id']] = round($v[$v1], 5);
 				}
 			}
 			$logic_junction_ids .= empty($logic_junction_ids) ? $v['junction_id'] : ',' . $v['junction_id'];
+		}
+
+		if(empty($result)){
+			return [];
+		}
+
+		foreach($data['diagnose_key'] as $v){
+			if(isset($result[$v]) && empty($result[$v])){
+				arsort($result[$v]);
+			}
 		}
 
 		echo "<hr>result = <pre>";print_r($result);exit;
