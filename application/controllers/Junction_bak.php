@@ -268,7 +268,7 @@ class Junction_bak extends MY_Controller {
 			return;
 		}
 
-		$res[$v] = $this->junction_model->getDiagnoseRankList($params);
+		$res = $this->junction_model->getDiagnoseRankList($params);
 		return $this->response($res);
 	}
 
