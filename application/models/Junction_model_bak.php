@@ -428,7 +428,7 @@ class Junction_model_bak extends CI_Model {
 			foreach($v as $k1=>$v1){
 				$result_data[$k][$k1]['junction_id'] = $k1;
 				$result_data[$k][$k1]['junction_label'] = isset($junction_id_name[$k1]) ? $junction_id_name[$k1] : '';
-				$result_data[$k][$k1]['$k'] = $v1;
+				$result_data[$k][$k1][$k] = $v1;
 			}
 
 			if(isset($result_data[$k]) && !empty($result_data[$k])){
