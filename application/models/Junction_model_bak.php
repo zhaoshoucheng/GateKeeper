@@ -174,7 +174,8 @@ class Junction_model_bak extends CI_Model {
 					if($this->compare($res[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
 						$res['diagnose_detail'][$k]['name'] = $v['name'];
 						$res['diagnose_detail'][$k]['key'] = $k;
-						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, array_merge($v['flow_quota'], ['confidence'=>'置信度']));
+						$temp_arr = array_merge($v['flow_quota'], ['confidence'=>'置信度']);
+						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $temp_arr);
 						$compare_val = $res[$k];
 						if($k == 'saturation_index'){ // 空放问题，因为统一算法，空放的性质阈值设置为负数，所以当是空放问题时，传递负数进行比较
 							$compare_val = $res[$k] * -1;
@@ -313,9 +314,7 @@ class Junction_model_bak extends CI_Model {
 	/**
 	* 根据时间点查询全城路口诊断问题列表
 	* @param data['task_id']      interger 任务ID
-	* @param data['city_id']      interger 城市ID
 	* @param data['time_point']   string   时间点
-	* @param data['type']         interger 计算类型
 	* @param data['confidence']   interger 置信度
 	* @param data['diagnose_key'] array    诊断问题KEY
 	* @return array
@@ -360,14 +359,15 @@ class Junction_model_bak extends CI_Model {
 
 	/**
 	* 诊断-诊断问题排序列表
-	* @param data['task_id']		任务ID		interger
-	* @param data['time_point']		时间点		string
-	* @param data['diagnose_key']	诊断问题KEY	string
-	* @param data['orderby']		排序			interger
+	* @param data['task_id']      interger 任务ID
+	* @param data['time_point']   string   时间点
+	* @param data['diagnose_key'] string   诊断问题KEY
+	* @param data['confidence']   interger 置信度
+	* @param data['orderby']      interger 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
 	* @return array
 	*/
 	public function getDiagnoseRankList($data){
-		$select = 'junction_id, ' . $data['diagnose_key'];
+		/*$select = 'junction_id, ' . $data['diagnose_key'];
 
 		$where = 'task_id = ' . $data['task_id'] . " and type = 0 and time_point = '{$data["time_point"]}'";
 
@@ -381,14 +381,16 @@ class Junction_model_bak extends CI_Model {
 						->where($where)
 						->order_by($data['diagnose_key'], $sort_conf[$data['orderby']])
 						->get()
-						->result_array();
-		//echo "getDiagnoseRankList sql = " . $this->db->last_query();
+						->result_array();*/
+		$res = $this->getJunctionsDiagnoseByTimePoint($data);
+		echo "<pre>";print_r($res);exit;
+		if(!$res || empty($res)){
+			return [];
+		}
 		$logic_junction_ids = '';
-		if(count($res) >= 1){
-			foreach($res as $k=>$v){
-				$res[$k][$data['diagnose_key']] = round($v[$data['diagnose_key']], 5);
-				$logic_junction_ids .= empty($logic_junction_ids) ? $v['junction_id'] : ',' . $v['junction_id'];
-			}
+		foreach($res as $k=>$v){
+			$res[$k][$data['diagnose_key']] = round($v[$data['diagnose_key']], 5);
+			$logic_junction_ids .= empty($logic_junction_ids) ? $v['junction_id'] : ',' . $v['junction_id'];
 		}
 
 		$junction_info = [];
@@ -403,12 +405,10 @@ class Junction_model_bak extends CI_Model {
 			}
 		}
 
-		if(count($res) >= 1){
-			foreach($res as $k=>$v){
-				$res[$k]['junction_label'] = isset($junction_id_name[$v['junction_id']]) ? $junction_id_name[$v['junction_id']] : '';
-			}
+		foreach($res as $k=>$v){
+			$res[$k]['junction_label'] = isset($junction_id_name[$v['junction_id']]) ? $junction_id_name[$v['junction_id']] : '';
 		}
-		//echo "getDiagnoseRankList res = <pre>";print_r($res);
+
 		return $res;
 	}
 
@@ -421,16 +421,21 @@ class Junction_model_bak extends CI_Model {
 		$this->load->helper('http');
 		$data['logic_ids'] = $ids;
 		$data['token'] = $this->config->item('waymap_token');
-		$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/many', $data);
-		if(!$res){
-			return $this->response([], 100500, 'Failed to connect to waymap service.');
-		}
-		$res = json_decode($res, true);
-		if($res['errorCode'] != 0){
-			return $this->response([], 100500, $res['errorMsg']);
-		}
 
-		return $res['data'];
+		try {
+			$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/many', $data);
+			if(!$res){
+				// 日志
+				return [];
+			}
+			$res = json_decode($res, true);
+			if($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])){
+				return [];
+			}
+			return $res['data'];
+		} catch (Exception $e) {
+			return [];
+		}
 	}
 
 	/**
@@ -527,28 +532,12 @@ class Junction_model_bak extends CI_Model {
 			}
 		}
 
-		$center_lat = 0;
-		$center_lng = 0;
-		$result_data['center'] = '';
-		/*if(count($temp_lat) >= 1 && count($temp_lng) >= 1){
-			asort($temp_lng);
-			asort($temp_lat);
-
-			reset($temp_lat);
-			$min_lat = current($temp_lat);
-			$max_lat = end($temp_lat);
-			reset($temp_lng);
-			$min_lng = current($temp_lng);
-			$max_lng = end($temp_lng);
-
-			$center_lat = ($min_lat + $max_lat) / 2;
-			$center_lng = ($min_lng + $max_lng) / 2;
-			$result_data['center']['lng'] = $center_lng;
-			$result_data['center']['lat'] = $center_lat;
-		}*/
 		// 暂时定死一个中心点
-		$result_data['center']['lng'] = 117.033513;
-		$result_data['center']['lat'] = 36.663083;
+		$center_lat = 36.663083;
+		$center_lng = 117.033513;
+		$result_data['center'] = '';
+		$result_data['center']['lng'] = $center_lng;
+		$result_data['center']['lat'] = $center_lat;
 		if(isset($result_data['dataList']) && count($result_data['dataList']) >= 1){
 			$result_data['dataList'] = array_values($result_data['dataList']);
 		}
