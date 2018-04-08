@@ -15,6 +15,12 @@ class Junction_model extends CI_Model {
 			$this->db = $this->load->database('default', true);
 		}
 
+		$is_existed = $this->db->table_exists($this->tb);
+		if (!$is_existed) {
+			// 添加日志
+			return [];
+		}
+
 		$this->load->config('nconf');
 	}
 
@@ -55,7 +61,7 @@ class Junction_model extends CI_Model {
 		}
 
 		$confidence_conf = $this->config->item('confidence');
-		if($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)){
+		if(isset($data['confidence']) && (int)$data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)){
 			$where .= ' and ' . $quota_key . '_confidence ' . $confidence_conf[$data['confidence']]['expression'];
 		}
 
@@ -70,7 +76,7 @@ class Junction_model extends CI_Model {
 		// 指标状态 1：高 2：中 3：低
 		$quota_key_conf = $this->config->item('junction_quota_key');
 		$temp_quota_data = [];
-		foreach($res as $k=>&$v){
+		foreach($res as &$v){
 			if($v[$quota_key] > $quota_key_conf[$quota_key]['status_max']){
 				$v['quota_status'] = 1;
 			}else if($v[$quota_key] <= $quota_key_conf[$quota_key]['status_max'] && $v[$quota_key] > $quota_key_conf[$quota_key]['status_min']){
@@ -168,7 +174,8 @@ class Junction_model extends CI_Model {
 					if($this->compare($res[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
 						$res['diagnose_detail'][$k]['name'] = $v['name'];
 						$res['diagnose_detail'][$k]['key'] = $k;
-						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, array_merge($v['flow_quota'], ['confidence'=>'置信度']) );
+						$temp_arr = array_merge($v['flow_quota'], ['confidence'=>'置信度']);
+						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $temp_arr);
 						$compare_val = $res[$k];
 						if($k == 'saturation_index'){ // 空放问题，因为统一算法，空放的性质阈值设置为负数，所以当是空放问题时，传递负数进行比较
 							$compare_val = $res[$k] * -1;
@@ -307,9 +314,7 @@ class Junction_model extends CI_Model {
 	/**
 	* 根据时间点查询全城路口诊断问题列表
 	* @param data['task_id']      interger 任务ID
-	* @param data['city_id']      interger 城市ID
 	* @param data['time_point']   string   时间点
-	* @param data['type']         interger 计算类型
 	* @param data['confidence']   interger 置信度
 	* @param data['diagnose_key'] array    诊断问题KEY
 	* @return array
@@ -354,14 +359,15 @@ class Junction_model extends CI_Model {
 
 	/**
 	* 诊断-诊断问题排序列表
-	* @param data['task_id']		任务ID		interger
-	* @param data['time_point']		时间点		string
-	* @param data['diagnose_key']	诊断问题KEY	string
-	* @param data['orderby']		排序			interger
+	* @param data['task_id']      interger 任务ID
+	* @param data['time_point']   string   时间点
+	* @param data['diagnose_key'] array    诊断问题KEY
+	* @param data['confidence']   interger 置信度
+	* @param data['orderby']      interger 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
 	* @return array
 	*/
 	public function getDiagnoseRankList($data){
-		$select = 'junction_id, ' . $data['diagnose_key'];
+		/*$select = 'junction_id, ' . $data['diagnose_key'];
 
 		$where = 'task_id = ' . $data['task_id'] . " and type = 0 and time_point = '{$data["time_point"]}'";
 
@@ -375,13 +381,33 @@ class Junction_model extends CI_Model {
 						->where($where)
 						->order_by($data['diagnose_key'], $sort_conf[$data['orderby']])
 						->get()
-						->result_array();
-		//echo "getDiagnoseRankList sql = " . $this->db->last_query();
+						->result_array();*/
+		$res = $this->getJunctionsDiagnoseByTimePoint($data);
+		if(!$res || empty($res)){
+			return [];
+		}
+
+		$diagnose_key_conf = $this->config->item('diagnose_key');
+
+		// 按诊断问题组织数组 且 获取路口ID串
+		$result = [];
 		$logic_junction_ids = '';
-		if(count($res) >= 1){
-			foreach($res as $k=>$v){
-				$res[$k][$data['diagnose_key']] = round($v[$data['diagnose_key']], 5);
-				$logic_junction_ids .= empty($logic_junction_ids) ? $v['junction_id'] : ',' . $v['junction_id'];
+		foreach($res as $k=>$v){
+			foreach($data['diagnose_key'] as $k1=>$v1){
+				if($this->compare($v[$v1], $diagnose_key_conf[$v1]['junction_threshold'], $diagnose_key_conf[$v1]['junction_threshold_formula'])){
+					$result[$v1][$v['junction_id']] = round($v[$v1], 5);
+				}
+			}
+			$logic_junction_ids .= empty($logic_junction_ids) ? $v['junction_id'] : ',' . $v['junction_id'];
+		}
+
+		if(empty($result)){
+			return [];
+		}
+
+		foreach($data['diagnose_key'] as $v){
+			if(isset($result[$v]) && !empty($result[$v])){
+				arsort($result[$v]);
 			}
 		}
 
@@ -397,13 +423,20 @@ class Junction_model extends CI_Model {
 			}
 		}
 
-		if(count($res) >= 1){
-			foreach($res as $k=>$v){
-				$res[$k]['junction_label'] = isset($junction_id_name[$v['junction_id']]) ? $junction_id_name[$v['junction_id']] : '';
+		$result_data = [];
+		foreach($result as $k=>$v){
+			foreach($v as $k1=>$v1){
+				$result_data[$k][$k1]['junction_id'] = $k1;
+				$result_data[$k][$k1]['junction_label'] = isset($junction_id_name[$k1]) ? $junction_id_name[$k1] : '';
+				$result_data[$k][$k1][$k] = $v1;
+			}
+
+			if(isset($result_data[$k]) && !empty($result_data[$k])){
+				$result_data[$k] = array_values($result_data[$k]);
 			}
 		}
-		//echo "getDiagnoseRankList res = <pre>";print_r($res);
-		return $res;
+
+		return $result_data;
 	}
 
 	/**
@@ -415,16 +448,21 @@ class Junction_model extends CI_Model {
 		$this->load->helper('http');
 		$data['logic_ids'] = $ids;
 		$data['token'] = $this->config->item('waymap_token');
-		$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/many', $data);
-		if(!$res){
-			return $this->response([], 100500, 'Failed to connect to waymap service.');
-		}
-		$res = json_decode($res, true);
-		if($res['errorCode'] != 0){
-			return $this->response([], 100500, $res['errorMsg']);
-		}
 
-		return $res['data'];
+		try {
+			$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/many', $data);
+			if(!$res){
+				// 日志
+				return [];
+			}
+			$res = json_decode($res, true);
+			if($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])){
+				return [];
+			}
+			return $res['data'];
+		} catch (Exception $e) {
+			return [];
+		}
 	}
 
 	/**
@@ -454,14 +492,18 @@ class Junction_model extends CI_Model {
 	* @return array
 	*/
 	private function getAllCityJunctions($city_id){
-		$redis = new redis();
-
-		$redis_conf = $this->config->item('redis');
-		if(!$redis->connect($redis_conf['host'], $redis_conf['port'])){
-			$city_junctions = json_decode($city_junctions, true);
+		if((int)$city_id < 1){
+			return false;
 		}
 
-		$city_junctions = $redis->get("all_city_junctions_{$city_id}");
+		/*---------------------------------------------------
+		| 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
+		-----------------------------------------------------*/
+		$this->load->model('redis_model');
+		$redis_key = "all_city_junctions_{$city_id}";
+
+		// 获取redis中数据
+		$city_junctions = $this->redis_model->getData($redis_key);
 		if(!$city_junctions){
 			$this->load->helper('http');
 
@@ -471,19 +513,22 @@ class Junction_model extends CI_Model {
 						'offset'	=> 0,
 						'count'		=> 10000
 					];
-
-			$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/getList', $data);
-			if(!$res){
-				return $this->response([], 100500, 'Failed to connect to waymap service.');
+			try {
+				$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/getList', $data);
+				if(!$res){
+					// 添加日志、发送邮件
+					return false;
+				}
+				$res = json_decode($res, true);
+				if(isset($res['errorCode']) && $res['errorCode'] == 0 && isset($res['data']) && count($res['data']) >= 1){
+					$this->redis_model->deleteData($redis_key);
+					$this->redis_model->setData($redis_key, json_encode($res['data']));
+					$this->redis_model->setExpire($redis_key, 3600 * 24);
+					$city_junctions = $res['data'];
+				}
+			} catch (Exception $e) {
+				return false;
 			}
-			$res = json_decode($res, true);
-			if($res['errorCode'] != 0){
-				return $this->response([], 100500, $res['errorMsg']);
-			}
-			$city_junctions = $res['data'];
-			$redis->delete("all_city_junctions_{$city_id}");
-			$redis->set("all_city_junctions_{$city_id}", json_encode($city_junctions));
-			$redis->expire("all_city_junctions_{$city_id}", 3600 * 24);
 		}else{
 			$city_junctions = json_decode($city_junctions, true);
 		}
@@ -495,6 +540,10 @@ class Junction_model extends CI_Model {
 	* 将查询出来的评估/诊断数据合并到全城路口模板中
 	*/
 	private function mergeAllJunctions($all_data, $data, $merge_key = 'detail'){
+		if(!is_array($all_data) || count($all_data) < 1 || !is_array($data) || count($data) < 1){
+			return [];
+		}
+
 		$result_data = [];
 		$temp_lng = [];
 		$temp_lat = [];
@@ -510,28 +559,12 @@ class Junction_model extends CI_Model {
 			}
 		}
 
-		$center_lat = 0;
-		$center_lng = 0;
-		$result_data['center'] = '';
-		/*if(count($temp_lat) >= 1 && count($temp_lng) >= 1){
-			asort($temp_lng);
-			asort($temp_lat);
-
-			reset($temp_lat);
-			$min_lat = current($temp_lat);
-			$max_lat = end($temp_lat);
-			reset($temp_lng);
-			$min_lng = current($temp_lng);
-			$max_lng = end($temp_lng);
-
-			$center_lat = ($min_lat + $max_lat) / 2;
-			$center_lng = ($min_lng + $max_lng) / 2;
-			$result_data['center']['lng'] = $center_lng;
-			$result_data['center']['lat'] = $center_lat;
-		}*/
 		// 暂时定死一个中心点
-		$result_data['center']['lng'] = 117.033513;
-		$result_data['center']['lat'] = 36.663083;
+		$center_lat = 36.663083;
+		$center_lng = 117.033513;
+		$result_data['center'] = '';
+		$result_data['center']['lng'] = $center_lng;
+		$result_data['center']['lat'] = $center_lat;
 		if(isset($result_data['dataList']) && count($result_data['dataList']) >= 1){
 			$result_data['dataList'] = array_values($result_data['dataList']);
 		}
