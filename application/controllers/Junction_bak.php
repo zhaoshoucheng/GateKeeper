@@ -16,7 +16,7 @@ class Junction_bak extends MY_Controller {
 	}
 
 	/**
-	* 评估-获取全城路口信息
+	* 评估-获取全城路口指标信息
 	* @param task_id     interger  Y 任务ID
 	* @param city_id     interger  Y 城市ID
 	* @param type        interger  Y 指标计算类型 1：统合 0：时间点
@@ -177,7 +177,9 @@ class Junction_bak extends MY_Controller {
 			]
 		);
 		if(!$validate['status']){
-			return $this->response([], 100400, $validate['errmsg']);
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = $validate['errmsg'];
+			return;
 		}
 
 		$data['task_id'] = (int)$params['task_id'];
@@ -185,25 +187,33 @@ class Junction_bak extends MY_Controller {
 		$data['type'] = (int)$params['type'];
 
 		if($data['type'] == 0 && (!isset($params['time_point']) || empty(trim($params['time_point'])))){
-			return $this->response([], 100400, 'The time_point cannot be empty.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The time_point cannot be empty.';
+			return;
 		}
 		if($data['type'] == 0){
 			$data['time_point'] = trim($params['time_point']);
 		}
 
 		if(!array_key_exists($params['confidence'], $this->config->item('confidence'))){
-			return $this->response([], 100400, 'The value of confidence ' . $params['confidence'] . ' is wrong.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The value of confidence ' . $params['confidence'] . ' is wrong.';
+			return;
 		}
 		$data['confidence'] = $params['confidence'];
 
 		if(isset($params['diagnose_key']) && count($params['diagnose_key']) >= 1){
 			foreach($params['diagnose_key'] as $v){
 				if(!array_key_exists($v, $this->config->item('diagnose_key'))){
-					return $this->response([], 100400, 'The value of diagnose_key ' . $v . ' is wrong.');
+					$this->errno = ERR_PARAMETERS;
+					$this->errmsg = 'The value of diagnose_key ' . $v . ' is wrong.';
+					return;
 				}
 			}
 		}else{
-			return $this->response([], 100400, 'The diagnose_key cannot be empty and must be array.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The diagnose_key cannot be empty and must be array.';
+			return;
 		}
 		$data['diagnose_key'] = $params['diagnose_key'];
 

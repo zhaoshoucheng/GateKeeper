@@ -2,7 +2,7 @@
 /********************************************
 # desc:    路口数据模型
 # author:  ningxiangbing@didichuxing.com
-# date:    2018-03-05
+# date:    2018-04-08
 ********************************************/
 
 class Timing_model extends CI_Model {
@@ -51,18 +51,17 @@ class Timing_model extends CI_Model {
 
 		// 获取配时详情
 		$timing_data = [
-						'logic_junction_id'	=>trim($data['junction_id']),
-						'days'              =>trim(implode(',', $data['dates'])),
-						'time'              =>trim($data['time_point']),
-						'start_time'        =>trim($time_range[0]),
-						'end_time'          =>trim($time_range[1])
+						'logic_junction_id'	=> trim($data['junction_id']),
+						'days'              => trim(implode(',', $data['dates'])),
+						'time'              => trim($data['time_point']),
+						'start_time'        => trim($time_range[0]),
+						'end_time'          => trim($time_range[1])
 					];
 		try {
 			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
 			$timing = json_decode($timing, true);
 			if(isset($timing['errorCode']) && $timing['errorCode'] != 0){
 				// 日志
-				throw new Exception("url = " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint' . ' ____data = ' . json_encode($timing_data), 1);
 				return [];
 			}
 		} catch (Exception $e) {
@@ -73,7 +72,6 @@ class Timing_model extends CI_Model {
 		if(isset($timing['data']) && count($timing['data'] >= 1)){
 			$timing = $this->formatTimingData($timing['data']);
 		}else{
-			echo "timing['data'] is empty.";
 			return [];
 		}
 

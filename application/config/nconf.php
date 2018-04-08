@@ -159,10 +159,6 @@ $config['diagnose_key']	= [
 			'saturation_degree'=>[
 				'name'=>'饱和度',
 				'threshold'=>0.5
-			],
-			'confidence'=>[
-				'name'=>'置信度',
-				'threshold'=>0.5
 			]
 		]
 	],
@@ -195,10 +191,6 @@ $config['diagnose_key']	= [
 			'spillover_rate'=>[
 				'name'=>'溢流比率',
 				'threshold'=>0.5
-			],
-			'confidence'=>[
-				'name'=>'置信度',
-				'threshold'=>0.5
 			]
 		]
 	],
@@ -222,10 +214,6 @@ $config['diagnose_key']	= [
 			],
 			'saturation_degree'=>[
 				'name'=>'饱和度',
-				'threshold'=>0.5
-			],
-			'confidence'=>[
-				'name'=>'置信度',
 				'threshold'=>0.5
 			]
 		]
