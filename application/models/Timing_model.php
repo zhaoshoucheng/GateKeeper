@@ -46,7 +46,7 @@ class Timing_model extends CI_Model {
 			return [];
 		}
 
-		$time_range = array_filter(explode('-', trim($params['time_range'])));
+		$time_range = array_filter(explode('-', trim($data['time_range'])));
 		$this->load->helper('http');
 
 		// 获取配时详情
