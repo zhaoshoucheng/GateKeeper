@@ -383,7 +383,6 @@ class Junction_model_bak extends CI_Model {
 						->get()
 						->result_array();*/
 		$res = $this->getJunctionsDiagnoseByTimePoint($data);
-		echo "res = <pre>";print_r($res);
 		if(!$res || empty($res)){
 			return [];
 		}
@@ -407,12 +406,14 @@ class Junction_model_bak extends CI_Model {
 		}
 
 		foreach($data['diagnose_key'] as $v){
-			if(isset($result[$v]) && empty($result[$v])){
+			if(isset($result[$v]) && !empty($result[$v])){
 				arsort($result[$v]);
 			}
 		}
 
-		echo "<hr>result = <pre>";print_r($result);exit;
+		echo "<hr>result = <pre>";print_r($result);
+		echo "<hr>res = <pre>";print_r($res);
+		exit;
 
 		$junction_info = [];
 		if(!empty($logic_junction_ids)){
