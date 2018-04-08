@@ -388,14 +388,18 @@ class Junction_model_bak extends CI_Model {
 			return [];
 		}
 
+		$diagnose_key_conf = $this->config->item('diagnose_key');
+
 		// 按诊断问题组织数组 且 获取路口ID串
 		$result = [];
 		$logic_junction_ids = '';
 		foreach($res as $k=>$v){
 			//$res[$k][$data['diagnose_key']] = round($v[$data['diagnose_key']], 5);
 			foreach($data['diagnose_key'] as $k1=>$v1){
-				$result[$v1][$k]['junction_id'] = $v['junction_id'];
-				$result[$v1][$k][$v1] = round($v[$v1], 5);
+				if($this->compare($v[$v1], $diagnose_key_conf[$v1]['junction_threshold'], $diagnose_key_conf[$v1]['junction_threshold_formula'])){
+					$result[$v1][$k]['junction_id'] = $v['junction_id'];
+					$result[$v1][$k][$v1] = round($v[$v1], 5);
+				}
 			}
 			$logic_junction_ids .= empty($logic_junction_ids) ? $v['junction_id'] : ',' . $v['junction_id'];
 		}
