@@ -62,7 +62,6 @@ class Timing_model extends CI_Model {
 			$timing = json_decode($timing, true);
 			if(isset($timing['errorCode']) && $timing['errorCode'] != 0){
 				// 日志
-				throw new Exception("url = " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint' . ' ____data = ' . json_encode($timing_data), 1);
 				return [];
 			}
 		} catch (Exception $e) {
@@ -73,7 +72,6 @@ class Timing_model extends CI_Model {
 		if(isset($timing['data']) && count($timing['data'] >= 1)){
 			$timing = $this->formatTimingData($timing['data']);
 		}else{
-			echo "timing['data'] is empty.";
 			return [];
 		}
 
