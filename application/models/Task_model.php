@@ -40,7 +40,7 @@ class Task_model extends CI_Model
         try {
             $this->its_tool->trans_begin();
 
-            $sql = "select * from task_result where id = ? for update";
+            $sql = "select * from task_result where id = ? and status != -1 for update";
             $query = $this->its_tool->query($sql, array($task_id));
             $result = $query->result_array();
             if (empty($result)) {
