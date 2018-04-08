@@ -240,7 +240,8 @@ class Junction extends MY_Controller {
 			[
 				'task_id'    => 'min:1',
 				'time_point' => 'nullunable',
-				'city_id'    => 'min:1'
+				'city_id'    => 'min:1',
+				'confidence' => 'min:0'
 			]
 		);
 		if(!$validate['status']){
