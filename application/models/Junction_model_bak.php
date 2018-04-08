@@ -411,10 +411,6 @@ class Junction_model_bak extends CI_Model {
 			}
 		}
 
-		echo "<hr>result = <pre>";print_r($result);
-		echo "<hr>res = <pre>";print_r($res);
-		exit;
-
 		$junction_info = [];
 		if(!empty($logic_junction_ids)){
 			$junction_info = $this->getJunctionInfo($logic_junction_ids);
@@ -427,11 +423,16 @@ class Junction_model_bak extends CI_Model {
 			}
 		}
 
-		foreach($res as $k=>$v){
-			$res[$k]['junction_label'] = isset($junction_id_name[$v['junction_id']]) ? $junction_id_name[$v['junction_id']] : '';
+		$result_data = [];
+		foreach($result as $k=>$v){
+			foreach($v as $k1=>$v1){
+				$result_data[$k][$k1]['junction_id'] = $k1;
+				$result_data[$k][$k1]['junction_label'] = isset($junction_id_name[$k1]) ? $junction_id_name[$k1] : '';
+				$result_data[$k][$k1]['$k'] = $v1;
+			}
 		}
 
-		return $res;
+		return $result_data;
 	}
 
 	/**
