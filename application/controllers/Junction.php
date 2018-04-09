@@ -104,11 +104,15 @@ class Junction extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response([], 100400, $validate['errmsg']);
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = $validate['errmsg'];
+			return;
 		}
 
 		if(!is_array($params['dates']) || count($params['dates']) < 1){
-			return $this->response([], 100400, 'The dates cannot be empty and must be array.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The dates cannot be empty and must be array.';
+			return;
 		}
 
 		// 获取路口指标详情
