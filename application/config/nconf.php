@@ -125,7 +125,6 @@ $config['flow_quota_key'] = [
 	'stop_time_cycle'	=> '停车(周期)次数(次)',
 	'spillover_rate'	=> '溢流比率',
 	'stop_rate'			=> '停车比率',
-	'confidence'        => '置信度'
 ];
 
 // 诊断问题

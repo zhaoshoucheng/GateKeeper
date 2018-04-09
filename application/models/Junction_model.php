@@ -97,19 +97,19 @@ class Junction_model extends CI_Model {
 
 	/**
 	* 获取路口指标详情
-	* @param data['task_id']		任务ID		                     interger
-	* @param data['time_point']		时间点		                     string
-	* @param data['junction_id']	逻辑路口ID	                     string
-	* @param data['dates']			评估/诊断日期	                     array
-	* @param data['type']			详情类型 1：指标详情页 2：诊断详情页  interger
-	* @param data['time_range']     评估/诊断时间段                    string
+	* @param data['task_id']     interger 任务ID
+	* @param data['time_point']  string   时间点
+	* @param data['junction_id'] string   逻辑路口ID
+	* @param data['dates']       array    评估/诊断日期
+	* @param data['type']        interger 详情类型 1：指标详情页 2：诊断详情页
+	* @param data['time_range']  string   评估/诊断时间段
 	* @return array
 	*/
 	public function getFlowQuotas($data){
 		$diagnose_key_conf = $this->config->item('diagnose_key');
-		$select_str = '';
-		foreach($diagnose_key_conf as $k=>$v){
-			$select_str .= empty($select_str) ? $k : ',' . $k;
+		$select_str = $this->selectColumns($diagnose_key_conf);
+		if(empty($select_str)){
+			return [];
 		}
 		$select = 'id, junction_id, ' . $select_str . ', movements, result_comment';
 		$time_point = trim($data['time_point']);
@@ -454,8 +454,9 @@ class Junction_model extends CI_Model {
 			}
 		}
 		if(is_array($key)){ // 诊断问题， 多选
+			$diagnose_key_conf = $this->config->item('diagnose_key');
 			foreach($key as $v){
-				if(array_key_exists($v, $this->config->item('diagnose_key'))){
+				if(array_key_exists($v, $diagnose_key_conf)){
 					$select .= empty($select) ? $v : ',' . $v;
 				}
 			}

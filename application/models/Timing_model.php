@@ -27,7 +27,7 @@ class Timing_model extends CI_Model {
 		}
 
 		// 获取配时数据
-		$timing = $this->getTimingData($data);
+		$timing = $this->getTimingData($data, $data['time_range']);
 
 		// 对返回数据格式化,返回需要的格式
 		if(count($timing >= 1)){
@@ -44,7 +44,15 @@ class Timing_model extends CI_Model {
 	* @param $data
 	* @return array
 	*/
-	private function formatTimingData($data){
+	private function formatTimingData($data, $time_range){
+		// 任务最小时间、最大时间
+		$time_range = array_filter(explode('-', $time_range));
+		if(empty($time_range[0]) || empty($time_range[1])){
+			return [];
+		}
+		$task_min_time = strtotime($time_range[0]);
+		$task_max_time = strtotime($time_range[1]);
+
 		$result = [];
 		// 方案总数
 		$result['total_plan'] = isset($data['total_plan']) ? $data['total_plan'] : 0;
@@ -53,9 +61,9 @@ class Timing_model extends CI_Model {
 		if(isset($data['latest_plan']) && !empty($data['latest_plan'])){
 			foreach($data['latest_plan'] as $k=>$v){
 				// 方案列表
-				$result['plan_list'][$k]['id'] = $v['time_plan_id'];
-				$result['plan_list'][$k]['start_time'] = $v['tod_start_time'];
-				$result['plan_list'][$k]['end_time'] = $v['tod_end_time'];
+				$result['plan_list'][strtotime($v['tod_start_time'])]['id'] = $v['time_plan_id'];
+				$result['plan_list'][strtotime($v['tod_start_time'])]['start_time'] = $v['tod_start_time'];
+				$result['plan_list'][strtotime($v['tod_start_time'])]['end_time'] = $v['tod_end_time'];
 
 				// 每个方案对应的详情配时详情
 				if(isset($v['plan_detail']['extra_timing']['cycle']) && isset($v['plan_detail']['extra_timing']['offset'])){
@@ -81,6 +89,20 @@ class Timing_model extends CI_Model {
 				if(!empty($result['timing_detail'][$v['time_plan_id']]['timing'])){
                     $result['timing_detail'][$v['time_plan_id']]['timing'] = array_values($result['timing_detail'][$v['time_plan_id']]['timing']);
                 }
+			}
+
+			if(!empty($result['plan_list'])){
+				ksort($result['plan_list']);
+				$first = current($result['plan_list']);
+				$end = end($result['plan_list']);
+				$plan_min_time = strtotime($first['start_time']);
+				$plan_max_time = strtotime($end['end_time']);
+				if($plan_min_time > $task_min_time || $plan_min_time < $task_min_time){
+					$result['plan_list'][strtotime($first['start_time'])]['start_time'] = $task_min_time;
+				}
+				if($plan_max_time > $task_max_time || $plan_max_time < $task_max_time){
+					$result['plan_list'][strtotime($end['start_time'])]['end_time'] = $task_max_time;
+				}
 			}
 		}
 
