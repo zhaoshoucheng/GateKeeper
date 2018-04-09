@@ -1,6 +1,6 @@
 <?php
 /********************************************
-# desc:    路口数据模型
+# desc:    配时数据模型
 # author:  ningxiangbing@didichuxing.com
 # date:    2018-04-08
 ********************************************/
@@ -23,26 +23,6 @@ class Timing_model extends CI_Model {
 	*/
 	public function getJunctionsTimingInfo($data){
 		if(count($data) < 1){
-			return [];
-		}
-
-		// 时间段
-		if(!isset($data['time_range']) || empty($data['time_range'])){
-			return [];
-		}
-
-		// 逻辑路口ID
-		if(!isset($data['junction_id']) || empty($data['junction_id'])){
-			return [];
-		}
-
-		// 评估/诊断日期
-		if(!isset($data['dates']) || empty($data['dates'])){
-			return [];
-		}
-
-		// 时间点
-		if(!isset($data['time_point']) || empty($data['time_point'])){
 			return [];
 		}
 

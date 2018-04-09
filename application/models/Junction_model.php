@@ -22,6 +22,7 @@ class Junction_model extends CI_Model {
 		}
 
 		$this->load->config('nconf');
+		$this->load->model('waymap_model');
 	}
 
 	/**
@@ -38,7 +39,7 @@ class Junction_model extends CI_Model {
 		$quota_key = $data['quota_key'];
 
 		// 获取全城路口模板 没有模板就没有lng、lat = 画不了图
-		$all_city_junctions = $this->getAllCityJunctions($data['city_id']);
+		$all_city_junctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
 		if(count($all_city_junctions) < 1 || !$all_city_junctions){
 			return [];
 		}
@@ -218,7 +219,7 @@ class Junction_model extends CI_Model {
 	*/
 	public function getJunctionsDiagnoseList($data){
 		// 获取全城路口模板 没有模板就没有lng、lat = 画不了图
-		$all_city_junctions = $this->getAllCityJunctions($data['city_id']);
+		$all_city_junctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
 		if(count($all_city_junctions) < 1 || !$all_city_junctions){
 			return [];
 		}
@@ -246,7 +247,7 @@ class Junction_model extends CI_Model {
 		}
 
 		$result_data = $this->mergeAllJunctions($all_city_junctions, $temp_diagnose_data, 'diagnose_detail');
-		//echo "getJunctionsDiagnoseList res = <pre>";print_r($result_data);
+
 		return $result_data;
 	}
 
@@ -295,11 +296,11 @@ class Junction_model extends CI_Model {
 						$total += $v[$key];
 					}
 
-					if($data['confidence'] == 1){ // 置信：高 unset低的
+					if($data['confidence'] == 1){ // 置信度：高 unset低的
 						if($total / $count <= $diagnose_confidence_threshold){
 							unset($flag[$k]);
 						}
-					}else if($data['confidence'] == 2){ // 置信：低 unset高的
+					}else if($data['confidence'] == 2){ // 置信度：低 unset高的
 						if($total / $count > $diagnose_confidence_threshold){
 							unset($flag[$k]);
 						}
@@ -367,6 +368,10 @@ class Junction_model extends CI_Model {
 	* @return array
 	*/
 	public function getDiagnoseRankList($data){
+		if(!is_array($data['diagnose_key']) || empty($data['diagnose_key'])){
+			return [];
+		}
+		// PM规定页面左侧列表与右侧地图数据一致，而且只在概览页有此列表，固使用 根据时间点查询全城路口诊断问题列表 接口获取初始数据
 		$res = $this->getJunctionsDiagnoseByTimePoint($data);
 		if(!$res || empty($res)){
 			return [];
@@ -379,10 +384,12 @@ class Junction_model extends CI_Model {
 		$logic_junction_ids = '';
 		foreach($res as $k=>$v){
 			foreach($data['diagnose_key'] as $k1=>$v1){
+				// 列表只展示有问题的路口 组织新数据 junction_id=>指标值 因为排序方便
 				if($this->compare($v[$v1], $diagnose_key_conf[$v1]['junction_threshold'], $diagnose_key_conf[$v1]['junction_threshold_formula'])){
 					$result[$v1][$v['junction_id']] = round($v[$v1], 5);
 				}
 			}
+			// 组织路口ID串，用于获取路口名称
 			$logic_junction_ids .= empty($logic_junction_ids) ? $v['junction_id'] : ',' . $v['junction_id'];
 		}
 
@@ -390,17 +397,28 @@ class Junction_model extends CI_Model {
 			return [];
 		}
 
+		// 排序默认 2
+		if(!isset($data['orderby']) || !array_key_exists((int)$data['orderby'], $this->config->item('sort_conf'))){
+			$data['orderby'] = 2;
+		}
+		// 排序
 		foreach($data['diagnose_key'] as $v){
 			if(isset($result[$v]) && !empty($result[$v])){
-				arsort($result[$v]);
+				if((int)$data['orderby'] == 1){
+					asort($result[$v]);
+				}else{
+					arsort($result[$v]);
+				}
 			}
 		}
 
+		// 获取路口名称
 		$junction_info = [];
 		if(!empty($logic_junction_ids)){
-			$junction_info = $this->getJunctionInfo($logic_junction_ids);
+			$junction_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
 		}
 
+		// 组织 junction_id=>name 数组 用于匹配路口名称
 		$junction_id_name = [];
 		if(count($junction_info) >= 1){
 			foreach($junction_info as $v){
@@ -408,12 +426,13 @@ class Junction_model extends CI_Model {
 			}
 		}
 
+		// 组织最终返回数据结构 ['quota_key'=>['junction_id'=>'xx','junction_label'=>'xxx', 'value'=>0], ......]
 		$result_data = [];
 		foreach($result as $k=>$v){
 			foreach($v as $k1=>$v1){
 				$result_data[$k][$k1]['junction_id'] = $k1;
 				$result_data[$k][$k1]['junction_label'] = isset($junction_id_name[$k1]) ? $junction_id_name[$k1] : '';
-				$result_data[$k][$k1][$k] = $v1;
+				$result_data[$k][$k1]['value'] = $v1;
 			}
 
 			if(isset($result_data[$k]) && !empty($result_data[$k])){
@@ -422,32 +441,6 @@ class Junction_model extends CI_Model {
 		}
 
 		return $result_data;
-	}
-
-	/**
-	* 批量获取路口信息
-	* @param logic_junction_ids 	逻辑路口ID串 	string
-	* @return array
-	*/
-	private function getJunctionInfo($ids){
-		$this->load->helper('http');
-		$data['logic_ids'] = $ids;
-		$data['token'] = $this->config->item('waymap_token');
-
-		try {
-			$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/many', $data);
-			if(!$res){
-				// 日志
-				return [];
-			}
-			$res = json_decode($res, true);
-			if($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])){
-				return [];
-			}
-			return $res['data'];
-		} catch (Exception $e) {
-			return [];
-		}
 	}
 
 	/**
@@ -469,56 +462,6 @@ class Junction_model extends CI_Model {
 		}
 
 		return $select;
-	}
-
-	/**
-	* 获取全城路口
-	* @param city_id 		Y 城市ID
-	* @return array
-	*/
-	private function getAllCityJunctions($city_id){
-		if((int)$city_id < 1){
-			return false;
-		}
-
-		/*---------------------------------------------------
-		| 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
-		-----------------------------------------------------*/
-		$this->load->model('redis_model');
-		$redis_key = "all_city_junctions_{$city_id}";
-
-		// 获取redis中数据
-		$city_junctions = $this->redis_model->getData($redis_key);
-		if(!$city_junctions){
-			$this->load->helper('http');
-
-			$data = [
-						'city_id'	=> $city_id,
-						'token'		=> $this->config->item('waymap_token'),
-						'offset'	=> 0,
-						'count'		=> 10000
-					];
-			try {
-				$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/getList', $data);
-				if(!$res){
-					// 添加日志、发送邮件
-					return false;
-				}
-				$res = json_decode($res, true);
-				if(isset($res['errorCode']) && $res['errorCode'] == 0 && isset($res['data']) && count($res['data']) >= 1){
-					$this->redis_model->deleteData($redis_key);
-					$this->redis_model->setData($redis_key, json_encode($res['data']));
-					$this->redis_model->setExpire($redis_key, 3600 * 24);
-					$city_junctions = $res['data'];
-				}
-			} catch (Exception $e) {
-				return false;
-			}
-		}else{
-			$city_junctions = json_decode($city_junctions, true);
-		}
-
-		return $city_junctions;
 	}
 
 	/**
