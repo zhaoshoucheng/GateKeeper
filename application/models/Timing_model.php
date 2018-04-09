@@ -27,11 +27,11 @@ class Timing_model extends CI_Model {
 		}
 
 		// 获取配时数据
-		$timing = $this->getTimingData($data, $data['time_range']);
+		$timing = $this->getTimingData($data);
 
 		// 对返回数据格式化,返回需要的格式
 		if(count($timing >= 1)){
-			$timing = $this->formatTimingData($timing);
+			$timing = $this->formatTimingData($timing, $data['time_range']);
 		}else{
 			return [];
 		}
