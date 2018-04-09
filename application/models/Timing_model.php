@@ -91,6 +91,7 @@ class Timing_model extends CI_Model {
                 }
 			}
 
+			// 对方案按时间正序排序并对配时方案开始结束时间对应任务开始结束时间
 			if(!empty($result['plan_list'])){
 				ksort($result['plan_list']);
 				$first = current($result['plan_list']);
@@ -98,10 +99,10 @@ class Timing_model extends CI_Model {
 				$plan_min_time = strtotime($first['start_time']);
 				$plan_max_time = strtotime($end['end_time']);
 				if($plan_min_time > $task_min_time || $plan_min_time < $task_min_time){
-					$result['plan_list'][strtotime($first['start_time'])]['start_time'] = date("H:s", $task_min_time);
+					$result['plan_list'][strtotime($first['start_time'])]['start_time'] = date("H:i:s", $task_min_time);
 				}
 				if($plan_max_time > $task_max_time || $plan_max_time < $task_max_time){
-					$result['plan_list'][strtotime($end['start_time'])]['end_time'] = date("H:s", $task_max_time);
+					$result['plan_list'][strtotime($end['start_time'])]['end_time'] = date("H:i:s", $task_max_time);
 				}
 
 				$result['plan_list'] = array_values($result['plan_list']);
