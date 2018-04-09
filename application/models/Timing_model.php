@@ -65,22 +65,37 @@ class Timing_model extends CI_Model {
 	*/
 	private function formatTimingData($data){
 		$result = [];
-		$result['total_plan'] = $data['total_plan'];
-		$result['tod_start_time'] = $data['latest_plan'][0]['tod_start_time'];
-		$result['tod_end_time'] = $data['latest_plan'][0]['tod_end_time'];
-		$result['cycle'] = $data['latest_plan'][0]['plan_detail']['extra_timing']['cycle'];
-		$result['offset'] = $data['latest_plan'][0]['plan_detail']['extra_timing']['offset'];
-		if(isset($data['latest_plan']) && count($data['latest_plan'][0]['plan_detail']['movement_timing']) >= 1){
-			foreach($data['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
-				$result['timing_detail'][$k]['logic_flow_id'] = $v[0]['flow_logic']['logic_flow_id'];
-				$result['timing_detail'][$k]['state'] = $v[0]['state'];
-				$result['timing_detail'][$k]['start_time'] = $v[0]['start_time'];
-				$result['timing_detail'][$k]['duration'] = $v[0]['duration'];
-				$result['timing_detail'][$k]['comment'] = $v[0]['flow_logic']['comment'];
+		// 方案总数
+		$result['total_plan'] = isset($data['total_plan']) ? $data['total_plan'] : 0;
+
+		if(isset($data['data']['latest_plan']) && !empty($data['data']['latest_plan'])){
+			foreach($data['data']['latest_plan'] as $k=>$v){
+				// 方案列表
+				$result['plan_list'][$k]['id'] = $v['time_plan_id'];
+				$result['plan_list'][$k]['start_time'] = $v['tod_start_time'];
+				$result['plan_list'][$k]['end_time'] = $v['tod_end_time'];
+
+				// 每个方案对应的详情配时详情
+				if(isset($v['plan_detail']['extra_timing']['cycle']) && isset($v['plan_detail']['extra_timing']['offset'])){
+					$result['timing_detail'][$v['time_plan_id']]['cycle'] = $v['plan_detail']['extra_timing']['cycle'];
+					$result['timing_detail'][$v['time_plan_id']]['offset'] = $v['plan_detail']['extra_timing']['offset'];
+				}
+
+				if(isset($v['plan_detail']['movement_timing']) && !empty($v['plan_detail']['movement_timing'])){
+					foreach($v['plan_detail']['movement_timing'] as $k1=>$v1){
+						// 信号灯状态 1=绿灯
+						$result['timing_detail'][$v['time_plan_id']]['state'] = isset($v1[0]['state']) ? $v1[0]['state'] : 0;
+						// 绿灯开始时间
+						$result['timing_detail'][$v['time_plan_id']]['start_time'] = isset($v1[0]['start_time']) ? $v1[0]['start_time'] : 0;
+						// 绿灯结束时间
+						$result['timing_detail'][$v['time_plan_id']]['duration'] = isset($v1[0]['duration']) ? $v1[0]['duration'] : 0;
+						// 逻辑flow id
+						$result['timing_detail'][$v['time_plan_id']]['logic_flow_id'] = isset($v1[0]['flow_logic']['logic_flow_id']) ? $v1[0]['flow_logic']['logic_flow_id'] : 0;
+						// flow 描述
+						$result['timing_detail'][$v['time_plan_id']]['comment'] = isset($v1[0]['flow_logic']['comment']) ? $v1[0]['flow_logic']['comment'] : '';
+					}
+				}
 			}
-		}
-		if(isset($result['timing_detail'])){
-			$result['timing_detail'] = array_values($result['timing_detail']);
 		}
 
 		return $result;
