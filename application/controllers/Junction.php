@@ -151,7 +151,9 @@ class Junction extends MY_Controller {
 		}
 
 		$timing = $this->timing_model->getJunctionsTimingInfo($params);
-
+		if($this->debug){
+			echo "timing = <pre>";print_r($timing);exit;
+		}
 		return $this->response($timing);
 	}
 
