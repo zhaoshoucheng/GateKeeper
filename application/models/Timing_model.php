@@ -48,6 +48,7 @@ class Timing_model extends CI_Model {
 		$result = [];
 		// 方案总数
 		$result['total_plan'] = isset($data['total_plan']) ? $data['total_plan'] : 0;
+		$result['map_version'] = isset($data['map_version']) ? $data['map_version'] : 0;
 
 		if(isset($data['latest_plan']) && !empty($data['latest_plan'])){
 			foreach($data['latest_plan'] as $k=>$v){
