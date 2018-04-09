@@ -26,31 +26,12 @@ class Timing_model extends CI_Model {
 			return [];
 		}
 
-		$time_range = array_filter(explode('-', trim($data['time_range'])));
-		$this->load->helper('http');
-
-		// 获取配时详情
-		$timing_data = [
-						'logic_junction_id'	=> trim($data['junction_id']),
-						'days'              => trim(implode(',', $data['dates'])),
-						'time'              => trim($data['time_point']),
-						'start_time'        => trim($time_range[0]),
-						'end_time'          => trim($time_range[1])
-					];
-		try {
-			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
-			$timing = json_decode($timing, true);
-			if(isset($timing['errorCode']) && $timing['errorCode'] != 0){
-				// 日志
-				return [];
-			}
-		} catch (Exception $e) {
-			return [];
-		}
+		// 获取配时数据
+		$timing = $this->getTimingData($data);
 
 		// 对返回数据格式化,返回需要的格式
-		if(isset($timing['data']) && count($timing['data'] >= 1)){
-			$timing = $this->formatTimingData($timing['data']);
+		if(count($timing >= 1)){
+			$timing = $this->formatTimingData($timing);
 		}else{
 			return [];
 		}
@@ -103,5 +84,43 @@ class Timing_model extends CI_Model {
 		}
 
 		return $result;
+	}
+
+	/**
+	* 获取配时数据
+	* @param $data['junction_id'] string 逻辑路口ID
+	* @param $data['dates']       array  评估/诊断日期
+	* @param $data['time_point']  string 时间点
+	* @param $data['time_range']  string 时间段 00:00-00:30
+	* @return array
+	*/
+	private function getTimingData($data){
+		$time_range = array_filter(explode('-', trim($data['time_range'])));
+		$this->load->helper('http');
+
+		// 获取配时详情
+		$timing_data = [
+						'logic_junction_id'	=> trim($data['junction_id']),
+						'days'              => trim(implode(',', $data['dates'])),
+						'time'              => trim($data['time_point']),
+						'start_time'        => trim($time_range[0]),
+						'end_time'          => trim($time_range[1])
+					];
+		try {
+			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
+			$timing = json_decode($timing, true);
+			if(isset($timing['errorCode']) && $timing['errorCode'] != 0){
+				// 日志
+				return [];
+			}
+		} catch (Exception $e) {
+			return [];
+		}
+
+		if(isset($timing['data']) && count($timing['data'] >= 1)){
+			return $timing['data'];
+		}else{
+			return [];
+		}
 	}
 }
