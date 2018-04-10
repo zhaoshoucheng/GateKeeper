@@ -97,111 +97,29 @@ class Junction_model extends CI_Model {
 
 	/**
 	* 获取路口指标详情
-	* @param data['task_id']     interger 任务ID
-	* @param data['time_point']  string   时间点
-	* @param data['junction_id'] string   逻辑路口ID
-	* @param data['dates']       array    评估/诊断日期
-	* @param data['type']        interger 详情类型 1：指标详情页 2：诊断详情页
-	* @param data['time_range']  string   评估/诊断时间段
+	* @param $data['task_id']         interger 任务ID
+	* @param $data['junction_id']     string   逻辑路口ID
+	* @param $data['dates']           array    评估/诊断日期
+	* @param $data['search_type']     interger 查询类型 1：按方案查询 0：按时间点查询
+	* @param $data['time_point']      string   时间点 当search_type = 0 时 必传
+	* @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
+	* @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
+	* @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
 	* @return array
 	*/
 	public function getFlowQuotas($data){
-		$diagnose_key_conf = $this->config->item('diagnose_key');
-		$select_str = $this->selectColumns($diagnose_key_conf);
-		if(empty($select_str)){
-			return [];
-		}
-		$select = 'id, junction_id, ' . $select_str . ', movements, result_comment';
-		$time_point = trim($data['time_point']);
-		$where = 'task_id = ' . (int)$data['task_id']
-				. ' and junction_id = "' . trim($data['junction_id']) . '"'
-				. " and type = 0 and time_point = '{$time_point}'";
-
-		$res = $this->db->select($select)
-						->from($this->tb)
-						->where($where)
-						->get()
-						->row_array();
-		// 获取此路口相位名称
-		$this->load->helper('http');
-		$time_range = array_filter(explode('-', trim($data['time_range'])));
-		$phase_data = [
-						'logic_junction_id'	=>trim($data['junction_id']),
-						'days'				=>trim(implode(',', $data['dates'])),
-						'time'				=>trim($data['time_point']),
-						'start_time'        =>trim($time_range[0]),
-						'end_time'          =>trim($time_range[1])
-					];
-
-		$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $phase_data);
-		if(!$timing){
-			return [];
-		}
-		$timing = json_decode($timing, true);
-		if($timing['errorCode'] != 0){
-			return [];
-		}
-		if(count($timing['data']['latest_plan']) < 1){
+		if(!isset($data['type']) || empty($data) || !in_array((int)$data['type'], [1, 2], true)){
 			return [];
 		}
 
-		if(count($res) >= 1){
-			$phase_position = [];
-			foreach($timing['data']['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
-				$phase_position[$v[0]['flow_logic']['logic_flow_id']] = $v[0]['flow_logic']['comment'];
-			}
+		if((int)$data['type'] == 2){ // 诊断详情页
+			$res = $this->getDiagnoseJunctionDetail($data);
+		}else{ // 指标详情页
+			$res = $this->getQuotaJunctionDetail($data);
+		}
 
-			$res['movements'] = json_decode($res['movements'], true);
-
-			$confidence = $this->config->item('confidence');
-			// 标注相位名称
-			foreach($res['movements'] as $k=>$v){
-				$res['movements'][$k]['comment'] = isset($phase_position[$v['movement_id']]) ? $phase_position[$v['movement_id']] : "";
-				$res['movements'][$k]['confidence'] = '';
-				if(isset($v['confidence'])){
-					$res['movements'][$k]['confidence'] = isset($confidence[$v['confidence']]['name']) ? $confidence[$v['confidence']]['name'] : '';
-				}
-			}
-
-			$result_comment_conf = $this->config->item('result_comment');
-			$result_comment_view = isset($result_comment_conf[$res['result_comment']]) ? $result_comment_conf[$res['result_comment']] : '';
-			$res['result_comment'] = $result_comment_view;
-
-			$flow_quota_key = $this->config->item('flow_quota_key');
-
-			// 诊断详情
-			if((int)$data['type'] == 2){
-				foreach($diagnose_key_conf as $k=>$v){
-					if($this->compare($res[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
-						$res['diagnose_detail'][$k]['name'] = $v['name'];
-						$res['diagnose_detail'][$k]['key'] = $k;
-						$temp_arr = array_merge($v['flow_quota'], ['confidence'=>'置信度']);
-						$res['diagnose_detail'][$k]['flow_quota'] = array_intersect_key($flow_quota_key, $temp_arr);
-						$compare_val = $res[$k];
-						if($k == 'saturation_index'){ // 空放问题，因为统一算法，空放的性质阈值设置为负数，所以当是空放问题时，传递负数进行比较
-							$compare_val = $res[$k] * -1;
-						}
-						// 诊断问题性质 1:重度 2:中度 3:轻度
-						if($compare_val > $v['nature_threshold']['high']){
-							$res['diagnose_detail'][$k]['nature'] = 1;
-						}else if($compare_val > $v['nature_threshold']['mide'] && $compare_val <= $v['nature_threshold']['high']){
-							$res['diagnose_detail'][$k]['nature'] = 2;
-						}else if($compare_val > $v['nature_threshold']['low'] && $compare_val <= $v['nature_threshold']['mide']){
-							$res['diagnose_detail'][$k]['nature'] = 3;
-						}
-					}
-				}
-
-				// 组织每个问题的不同指标数据集合
-				if(isset($res['diagnose_detail']) && count($res['diagnose_detail']) >= 1){
-					foreach($res['diagnose_detail'] as $k=>$v){
-						foreach($res['movements'] as $k1=>$v1){
-							$res['diagnose_detail'][$k]['movements'][$k1] = array_intersect_key($v1, array_merge($v['flow_quota'], ['movement_id'=>'', 'comment'=>'']));
-						}
-					}
-				}
-			}
-			$res['flow_quota'] = $flow_quota_key;
+		if(!$res || empty($res)){
+			return [];
 		}
 
 		return $res;
@@ -441,6 +359,72 @@ class Junction_model extends CI_Model {
 		}
 
 		return $result_data;
+	}
+
+	/**
+	* 获取诊断详情页数据
+	* @param $data['task_id']         interger 任务ID
+	* @param $data['junction_id']     string   逻辑路口ID
+	* @param $data['dates']           array    评估/诊断日期
+	* @param $data['search_type']     interger 查询类型 1：按方案查询 0：按时间点查询
+	* @param $data['time_point']      string   时间点 当search_type = 0 时 必传
+	* @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
+	* @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
+	* @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+	* @return array
+	*/
+	private function getDiagnoseJunctionDetail($data) {
+		$diagnose_key_conf = $this->config->item('diagnose_key');
+		// 组织select 需要的字段
+		$select_str = $this->selectColumns($diagnose_key_conf);
+		$select = "id, junction_id, {$select_str}, result_comment, movements";
+
+		// 组织where条件
+		$where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
+
+		if((int)$data['search_type'] == 1){ // 按方案查询
+			$select .= ', start_time, end_time';
+			// 综合查询
+			$time_range = array_filter(explode('-', $data['time_range']));
+			$where  .= ' and type = 1';
+			$where	.= ' and start_time = "' . trim($time_range[0]) . '"';
+			$where  .= ' and end_time = "' . trim($time_range[1]) . '"';;
+		}else{ // 按时间点查询
+			$select .= ', time_point';
+			$where  .= ' and type = 0';
+			$where  .= ' and time_point = "' . trim($data['time_point']) . '"';
+		}
+
+		$res = $this->db->select($select)
+						->from($this->tb)
+						->where($where)
+						->get();
+		echo 'sql = ' . $this->db->last_query();
+		$res = $res->result_array();
+		echo "<hr>data = <pre>";print_r($res);exit;
+		if(!$res || empty($res)){
+			return [];
+		}
+
+		$result = $res->result_array();
+
+		return $result;
+	}
+
+	/**
+	* 获取指标详情页数据
+	* @param $data['task_id']         interger 任务ID
+	* @param $data['junction_id']     string   逻辑路口ID
+	* @param $data['dates']           array    评估/诊断日期
+	* @param $data['search_type']     interger 查询类型 1：按方案查询 0：按时间点查询
+	* @param $data['time_point']      string   时间点 当search_type = 0 时 必传
+	* @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
+	* @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
+	* @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+	* @return array
+	*/
+	private function getQuotaJunctionDetail($data) {
+
 	}
 
 	/**
