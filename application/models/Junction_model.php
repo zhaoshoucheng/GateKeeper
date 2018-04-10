@@ -451,7 +451,13 @@ class Junction_model extends CI_Model {
 			'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60)
 		];
 		$flow_id_name = $this->timing_model->getFlowIdToName($timing_data);
-		echo "<hr>flow_id_name = <pre>";print_r($flow_id_name);exit;
+
+		// 匹配相位名称
+		if(!empty($data['movements'])){
+			foreach($data['movements'] as &$v){
+				$v['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
+			}
+		}
 
 		$result_comment_conf = $this->config->item('result_comment');
 		$data['result_comment'] = isset($result_comment_conf[$data['result_comment']]) ? $result_comment_conf[$data['result_comment']] : '';
@@ -478,8 +484,10 @@ class Junction_model extends CI_Model {
 						$data['diagnose_detail'][$k]['nature'] = 3;
 					}
 
+					// 匹配每个问题指标
+					$temp_merge = array_merge($v['flow_quota'], ['movement_id'=>'logic_flow_id', 'comment'=>'name', 'confidence'=>'置信度']);
 					foreach($data['movements'] as $kk=>$vv){
-						$data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, array_merge($v['flow_quota'], ['confidence'=>'置信度']));
+						$data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, $temp_merge);
 					}
 				}
 			}
