@@ -427,7 +427,7 @@ class Junction_model extends CI_Model {
 	* @return array
 	*/
 	private function getQuotaJunctionDetail($data) {
-		$select = 'id, junction_id, satrt_time, end_time, result_comment, movements';
+		$select = 'id, junction_id, start_time, end_time, result_comment, movements';
 
 		// 组织where条件
 		$where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
