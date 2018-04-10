@@ -492,8 +492,9 @@ class Junction_model extends CI_Model {
 				if($result_type == 1){ // 指标详情页，组织每个指标对应各相位集合
 					$flow_quota_key_conf = $this->config->item('flow_quota_key');
 					foreach($flow_quota_key_conf as $key=>$val){
-						$data['flow_quota_all'][$key][$k]['id'] = $v['movement_id'];
-						$data['flow_quota_all'][$key][$k]['value'] = $v[$key];
+						$data['flow_quota_all'][$key][$k]['name'] = $val;
+						$data['flow_quota_all'][$key][$k]['movements']['id'] = $v['movement_id'];
+						$data['flow_quota_all'][$key][$k]['movements']['value'] = $v[$key];
 					}
 				}
 			}
