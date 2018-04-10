@@ -404,13 +404,13 @@ class Junction_model extends CI_Model {
 						->where($where)
 						->get();
 		echo 'sql = ' . $this->db->last_query();
-		$res = $res->result_array();
-		echo "<hr>data = <pre>";print_r($res);exit;
+		$res = $res->row_array();
+		echo "<hr>data = <pre>";print_r($res);
 		if(!$res || empty($res)){
 			return [];
 		}
 
-		$result = $res->result_array();
+		$result = $this->formatJunctionDetailData($res->row_array(), 2);
 
 		return $result;
 	}
@@ -429,6 +429,50 @@ class Junction_model extends CI_Model {
 	*/
 	private function getQuotaJunctionDetail($data) {
 
+	}
+
+	/**
+	* 格式化路口详情数据
+	* @param $data        路口详情数据
+	* @param $result_type 数据返回类型 1：指标详情页 2：诊断详情页
+	*/
+	private function formatJunctionDetailData($data, $result_type){
+		if(empty($data)){
+			return [];
+		}
+
+		$data['movements'] = json_encode($data['movements'], true);
+		$result_comment_conf = $this->config->item('result_comment');
+		$data['result_comment'] = isset($result_comment_conf[$data['result_comment']]) ? $result_comment_conf[$data['result_comment']] : '';
+
+		if($result_type == 2){ // 诊断详情页
+			$diagnose_key_conf = $this->config->item('diagnose_key');
+			foreach($diagnose_key_conf as $k=>$v){
+				if($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
+					$data['diagnose_detail'][$k]['name'] = $v['name'];
+					$data['diagnose_detail'][$k]['key'] = $k;
+					$data['diagnose_detail'][$k]['flow_quota'] = $v['flow_quota'];
+					$data['diagnose_detail'][$k]['movements'] = $data['movements'];
+
+					// 计算性质程度
+					$compare_val = $data[$k];
+					if($k == 'saturation_index'){ // 空放问题，因为统一算法，空放的性质阈值设置为负数，所以当是空放问题时，传递负数进行比较
+						$compare_val = $data[$k] * -1;
+					}
+					// 诊断问题性质 1:重度 2:中度 3:轻度
+					if($compare_val > $v['nature_threshold']['high']){
+						$data['diagnose_detail'][$k]['nature'] = 1;
+					}else if($compare_val > $v['nature_threshold']['mide'] && $compare_val <= $v['nature_threshold']['high']){
+						$data['diagnose_detail'][$k]['nature'] = 2;
+					}else if($compare_val > $v['nature_threshold']['low'] && $compare_val <= $v['nature_threshold']['mide']){
+						$data['diagnose_detail'][$k]['nature'] = 3;
+					}
+				}
+			}
+		}
+
+		echo "<hr>format_data = <pre>";print_r($data);exit;
+		return $data;
 	}
 
 	/**
