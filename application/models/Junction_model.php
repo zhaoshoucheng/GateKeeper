@@ -455,7 +455,7 @@ class Junction_model extends CI_Model {
 		// 匹配相位名称
 		if(!empty($data['movements'])){
 			foreach($data['movements'] as $k=>$v){
-				$data[$k]['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
+				$data['movements'][$k]['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
 			}
 		}
 
