@@ -468,7 +468,6 @@ class Junction_model extends CI_Model {
 				if($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
 					$data['diagnose_detail'][$k]['name'] = $v['name'];
 					$data['diagnose_detail'][$k]['key'] = $k;
-					$data['diagnose_detail'][$k]['flow_quota'] = $v['flow_quota'];
 
 					// 计算性质程度
 					$compare_val = $data[$k];
@@ -488,6 +487,11 @@ class Junction_model extends CI_Model {
 					$temp_merge = array_merge($v['flow_quota'], ['movement_id'=>'logic_flow_id', 'comment'=>'name', 'confidence'=>'置信度']);
 					foreach($data['movements'] as $kk=>$vv){
 						$data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, $temp_merge);
+						foreach($v['flow_quota'] as $key=>$val){
+							$data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
+							$data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id'] = $vv['movement_id'];
+							$data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value'] = $vv[$key];
+						}
 					}
 				}
 			}
