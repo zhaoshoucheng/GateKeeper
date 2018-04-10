@@ -452,7 +452,6 @@ class Junction_model extends CI_Model {
 					$data['diagnose_detail'][$k]['name'] = $v['name'];
 					$data['diagnose_detail'][$k]['key'] = $k;
 					$data['diagnose_detail'][$k]['flow_quota'] = $v['flow_quota'];
-					$data['diagnose_detail'][$k]['movements'] = $data['movements'];
 
 					// 计算性质程度
 					$compare_val = $data[$k];
@@ -466,6 +465,10 @@ class Junction_model extends CI_Model {
 						$data['diagnose_detail'][$k]['nature'] = 2;
 					}else if($compare_val > $v['nature_threshold']['low'] && $compare_val <= $v['nature_threshold']['mide']){
 						$data['diagnose_detail'][$k]['nature'] = 3;
+					}
+
+					foreach($data['movements'] as $kk=>$vv){
+						$data['diagnose_detail'][$k]['movements'][$kk] = array_merge(array_intersect_key($vv, $v['flow_quota']), ['confidence'=>'置信度']);
 					}
 				}
 			}
