@@ -402,13 +402,13 @@ class Junction_model extends CI_Model {
 						->from($this->tb)
 						->where($where)
 						->get();
-		echo 'sql = ' . $this->db->last_query();
+		//echo 'sql = ' . $this->db->last_query();
 
 		if(!$res || empty($res)){
 			return [];
 		}
 		$result = $res->row_array();
-		echo "<hr>data = <pre>";print_r($result);
+		//echo "<hr>data = <pre>";print_r($result);
 		$result = $this->formatJunctionDetailData($result, $data['dates'], 2);
 
 		return $result;
@@ -497,7 +497,11 @@ class Junction_model extends CI_Model {
 			}
 		}
 
-		echo "<hr>format_data = <pre>";print_r($data);exit;
+		$data['flow_quota_all'] = $this->config->item('flow_quota_key');
+
+		// 因为详情页地图下方列表所有相位都有 置信度字段，而置信度不属于指标，固将此放到扩展指标集合中
+		$data['extend_flow_quota']['confidence'] = '置信度';
+
 		return $data;
 	}
 
