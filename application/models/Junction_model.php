@@ -409,7 +409,7 @@ class Junction_model extends CI_Model {
 		}
 		$result = $res->row_array();
 		echo "<hr>data = <pre>";print_r($result);
-		$result = $this->formatJunctionDetailData($result, 2);
+		$result = $this->formatJunctionDetailData($result, $data['dates'], 2);
 
 		return $result;
 	}
@@ -433,10 +433,11 @@ class Junction_model extends CI_Model {
 	/**
 	* 格式化路口详情数据
 	* @param $data        路口详情数据
+	* @param $dates       评估/诊断日期
 	* @param $result_type 数据返回类型 1：指标详情页 2：诊断详情页
 	*/
-	private function formatJunctionDetailData($data, $result_type){
-		if(empty($data)){
+	private function formatJunctionDetailData($data, $dates, $result_type){
+		if(empty($data) || empty($dates) || (int)$result_type < 1){
 			return [];
 		}
 
@@ -446,7 +447,7 @@ class Junction_model extends CI_Model {
 		$this->load->model('timing_model');
 		$timing_data = [
 			'junction_id' => trim($data['junction_id']),
-			'dates'       => $data['dates'],
+			'dates'       => $dates,
 			'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60)
 		];
 		$flow_id_name = $this->timing_model->getFlowIdToName($timing_data);
