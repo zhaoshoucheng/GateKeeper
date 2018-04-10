@@ -494,7 +494,7 @@ class Junction_model extends CI_Model {
 					foreach($flow_quota_key_conf as $key=>$val){
 						$data['flow_quota_all'][$key][$k]['name'] = $val;
 						$data['flow_quota_all'][$key][$k]['movements']['id'] = $v['movement_id'];
-						$data['flow_quota_all'][$key][$k]['movements']['value'] = $v[$key];
+						$data['flow_quota_all'][$key][$k]['movements']['value'] = round($v[$key], 5);
 					}
 				}
 			}
@@ -535,7 +535,7 @@ class Junction_model extends CI_Model {
 						foreach($v['flow_quota'] as $key=>$val){
 							$data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
 							$data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id'] = $vv['movement_id'];
-							$data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value'] = $vv[$key];
+							$data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value'] = round($vv[$key], 5);
 						}
 					}
 				}
