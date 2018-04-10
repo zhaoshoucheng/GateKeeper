@@ -52,7 +52,6 @@ class Timing_model extends CI_Model {
 
 		// 获取配时数据
 		$timing = $this->getTimingData($data);
-		echo "<hr>timing = <pre>";print_r($timing);exit;
 
 		// 对返回数据格式化,返回需要的格式
 		if(count($timing >= 1)){
@@ -131,6 +130,28 @@ class Timing_model extends CI_Model {
 				}
 
 				$result['plan_list'] = array_values($result['plan_list']);
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	* 格式化配时数据 返回flow_id=>name结构
+	* @param $data
+	* @return array
+	*/
+	private function formatTimingIdToName($data){
+		if(empty($data)){
+			return [];
+		}
+
+		$result = [];
+		if(!empty($data['latest_plan'][0]['plan_detail']['movement_timing'])){
+			foreach($data['latest_plan'][0]['plan_detail']['movement_timing'] as $v){
+				if(!empty($v[0]['flow_logic']['logic_flow_id']) && !empty($v[0]['flow_logic']['comment'])){
+					$result[$v[0]['flow_logic']['logic_flow_id']] = $v[0]['flow_logic']['comment'];
+				}
 			}
 		}
 
