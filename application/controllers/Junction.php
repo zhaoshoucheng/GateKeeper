@@ -128,7 +128,6 @@ class Junction extends MY_Controller {
 	* 获取配时方案及配时详情
 	* @param dates        string Y 评估/诊断日期
 	* @param junction_id  string Y 路口ID
-	* @param time_point   string Y 时间点
 	* @param time_range   string Y 时间段
 	* @return json
 	*/
