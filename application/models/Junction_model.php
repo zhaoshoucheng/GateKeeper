@@ -441,7 +441,7 @@ class Junction_model extends CI_Model {
 			return [];
 		}
 
-		$data['movements'] = json_encode($data['movements'], true);
+		$data['movements'] = json_decode($data['movements'], true);
 		$result_comment_conf = $this->config->item('result_comment');
 		$data['result_comment'] = isset($result_comment_conf[$data['result_comment']]) ? $result_comment_conf[$data['result_comment']] : '';
 
