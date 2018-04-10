@@ -17,7 +17,6 @@ class Timing_model extends CI_Model {
 	* 获取路口配时信息
 	* @param $data['junction_id'] string 逻辑路口ID
 	* @param $data['dates']       array  评估/诊断日期
-	* @param $data['time_point']  string 时间点
 	* @param $data['time_range']  string 时间段 00:00-00:30
 	* @return array
 	*/
@@ -116,7 +115,6 @@ class Timing_model extends CI_Model {
 	* 获取配时数据
 	* @param $data['junction_id'] string 逻辑路口ID
 	* @param $data['dates']       array  评估/诊断日期
-	* @param $data['time_point']  string 时间点
 	* @param $data['time_range']  string 时间段 00:00-00:30
 	* @return array
 	*/
@@ -128,7 +126,6 @@ class Timing_model extends CI_Model {
 		$timing_data = [
 						'logic_junction_id'	=> trim($data['junction_id']),
 						'days'              => trim(implode(',', $data['dates'])),
-						'time'              => trim($data['time_point']),
 						'start_time'        => trim($time_range[0]),
 						'end_time'          => trim($time_range[1])
 					];
