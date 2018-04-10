@@ -404,13 +404,13 @@ class Junction_model extends CI_Model {
 						->where($where)
 						->get();
 		echo 'sql = ' . $this->db->last_query();
-		$res = $res->row_array();
-		echo "<hr>data = <pre>";print_r($res);
+
 		if(!$res || empty($res)){
 			return [];
 		}
-
-		$result = $this->formatJunctionDetailData($res->row_array(), 2);
+		$result = $res->row_array();
+		echo "<hr>data = <pre>";print_r($result);
+		$result = $this->formatJunctionDetailData($result, 2);
 
 		return $result;
 	}
