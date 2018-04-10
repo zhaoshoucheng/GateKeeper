@@ -81,12 +81,14 @@ class Junction extends MY_Controller {
 
 	/**
 	* 获取路口指标详情
-	* @param task_id      interger Y 任务ID
-	* @param dates        string   Y 评估/诊断日期
-	* @param junction_id  string   Y 逻辑路口ID
-	* @param time_point   string   Y 时间点
-	* @param type         interger Y 详情类型 1：指标详情页 2：诊断详情页
-	* @param time_range   string   Y 评估/诊断时间段
+	* @param task_id         interger Y 任务ID
+	* @param dates           array    Y 评估/诊断日期 [20180102,20180103,....]
+	* @param junction_id     string   Y 逻辑路口ID
+	* @param search_type     interger Y 查询类型 1：按方案查询 0：按时间点查询
+	* @param time_point      string   N 时间点 当search_type = 0 时 必传
+	* @param time_range      string   N 方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
+	* @param type            interger Y 详情类型 1：指标详情页 2：诊断详情页
+	* @param task_time_range string   Y 评估/诊断任务开始结束时间 格式："06:00-09:00"
 	* @return json
 	*/
 	public function getJunctionQuotaDetail(){
@@ -95,17 +97,49 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'task_id'     => 'min:1',
-				'junction_id' => 'nullunable',
-				'time_point'  => 'nullunable',
-				'time_range'  => 'nullunable',
-				'type'        => 'min:1'
+				'task_id'          => 'min:1',
+				'junction_id'      => 'nullunable',
+				'task_time_range'  => 'nullunable',
+				'type'             => 'min:1',
+				'search_type'      => 'min:0'
 			]
 		);
 
 		if(!$validate['status']){
 			$this->errno = ERR_PARAMETERS;
 			$this->errmsg = $validate['errmsg'];
+			return;
+		}
+
+		if((int)$params['search_type'] == 1){ // 按方案查询
+			if(empty($params['time_range'])){
+				$this->errno = ERR_PARAMETERS;
+				$this->errmsg = 'The time_range cannot be empty.';
+				return;
+			}
+			$time_range = array_filter(explode('-', $params['time_range']));
+			if(empty($time_range[0]) || empty($time_range[1])){
+				$this->errno = ERR_PARAMETERS;
+				$this->errmsg = 'The time_range is wrong.';
+				return;
+			}
+		}else{
+			if(empty($params['time_point'])){
+				$this->errno = ERR_PARAMETERS;
+				$this->errmsg = 'The time_point cannot be empty.';
+				return;
+			}
+		}
+
+		if(empty($params['task_time_range'])){
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The task_time_range cannot be empty.';
+			return;
+		}
+		$task_time_range = array_filter(explode('-', $params['task_time_range']));
+		if(empty($task_time_range[0]) || empty($task_time_range[1])){
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The task_time_range is wrong.';
 			return;
 		}
 
@@ -117,9 +151,6 @@ class Junction extends MY_Controller {
 
 		// 获取路口指标详情
 		$res = $this->junction_model->getFlowQuotas($params);
-		if(count($res) < 1){
-			return [];
-		}
 
 		return $this->response($res);
 	}
