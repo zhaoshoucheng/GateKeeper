@@ -39,6 +39,32 @@ class Timing_model extends CI_Model {
 	}
 
 	/**
+	* 获取flow_id对应名称的数组，用于匹配相位名称
+	* @param $data['junction_id'] string 逻辑路口ID
+	* @param $data['dates']       array  评估/诊断日期
+	* @param $data['time_range']  string 时间段 00:00-00:30
+	* @return array
+	*/
+	public function getFlowIdToName($data){
+		if(count($data) < 1){
+			return [];
+		}
+
+		// 获取配时数据
+		$timing = $this->getTimingData($data);
+		echo "<hr>timing = <pre>";print_r($timing);exit;
+
+		// 对返回数据格式化,返回需要的格式
+		if(count($timing >= 1)){
+			$timing = $this->formatTimingIdToName($timing);
+		}else{
+			return [];
+		}
+
+		return $timing;
+	}
+
+	/**
 	* 格式化配时数据
 	* @param $data
 	* @return array

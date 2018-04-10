@@ -381,13 +381,12 @@ class Junction_model extends CI_Model {
 		foreach($diagnose_key_conf as $k=>$v){
 			$select_str .= empty($select_str) ? $k : ',' . $k;
 		}
-		$select = "id, junction_id, {$select_str}, result_comment, movements";
+		$select = "id, junction_id, {$select_str}, result_comment, movements, start_time, end_time";
 
 		// 组织where条件
 		$where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
 
 		if((int)$data['search_type'] == 1){ // 按方案查询
-			$select .= ', start_time, end_time';
 			// 综合查询
 			$time_range = array_filter(explode('-', $data['time_range']));
 			$where  .= ' and type = 1';
@@ -442,6 +441,16 @@ class Junction_model extends CI_Model {
 		}
 
 		$data['movements'] = json_decode($data['movements'], true);
+
+		// 获取flow_id=>name数组
+		$this->load->model('timing_model');
+		$timing_data = [
+			'junction_id' => trim($data['junction_id']),
+			'dates'       => $data['dates'],
+			'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60)
+		];
+		$flow_id_name = $this->timing_model->getFlowIdToName($timing_data);
+
 		$result_comment_conf = $this->config->item('result_comment');
 		$data['result_comment'] = isset($result_comment_conf[$data['result_comment']]) ? $result_comment_conf[$data['result_comment']] : '';
 
@@ -468,7 +477,7 @@ class Junction_model extends CI_Model {
 					}
 
 					foreach($data['movements'] as $kk=>$vv){
-						$data['diagnose_detail'][$k]['movements'][$kk] = array_merge(array_intersect_key($vv, $v['flow_quota']), ['confidence'=>'置信度']);
+						$data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, array_merge($v['flow_quota'], ['confidence'=>'置信度']));
 					}
 				}
 			}
