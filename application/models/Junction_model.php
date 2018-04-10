@@ -375,8 +375,12 @@ class Junction_model extends CI_Model {
 	*/
 	private function getDiagnoseJunctionDetail($data) {
 		$diagnose_key_conf = $this->config->item('diagnose_key');
+
 		// 组织select 需要的字段
-		$select_str = $this->selectColumns($diagnose_key_conf);
+		$select_str = '';
+		foreach($diagnose_key_conf as $k=>$v){
+			$select_str .= empty($select_str) ? $k : ',' . $k;
+		}
 		$select = "id, junction_id, {$select_str}, result_comment, movements";
 
 		// 组织where条件
