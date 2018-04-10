@@ -381,7 +381,7 @@ class Junction_model extends CI_Model {
 		foreach($diagnose_key_conf as $k=>$v){
 			$select_str .= empty($select_str) ? $k : ',' . $k;
 		}
-		$select = "id, junction_id, {$select_str}, result_comment, movements, start_time, end_time";
+		$select = "id, junction_id, {$select_str}, start_time, end_time, result_comment, movements";
 
 		// 组织where条件
 		$where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
@@ -427,6 +427,36 @@ class Junction_model extends CI_Model {
 	* @return array
 	*/
 	private function getQuotaJunctionDetail($data) {
+		$select = 'id, junction_id, satrt_time, end_time, result_comment, movements';
+
+		// 组织where条件
+		$where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
+
+		if((int)$data['search_type'] == 1){ // 按方案查询
+			// 综合查询
+			$time_range = array_filter(explode('-', $data['time_range']));
+			$where  .= ' and type = 1';
+			$where	.= ' and start_time = "' . trim($time_range[0]) . '"';
+			$where  .= ' and end_time = "' . trim($time_range[1]) . '"';;
+		}else{ // 按时间点查询
+			$select .= ', time_point';
+			$where  .= ' and type = 0';
+			$where  .= ' and time_point = "' . trim($data['time_point']) . '"';
+		}
+
+		$res = $this->db->select($select)
+						->from($this->tb)
+						->where($where)
+						->get();
+
+		if(!$res || empty($res)){
+			return [];
+		}
+		$result = $res->row_array();
+		//echo "<hr>data = <pre>";print_r($result);
+		$result = $this->formatJunctionDetailData($result, $data['dates'], 1);
+
+		return $result;
 
 	}
 
@@ -440,6 +470,9 @@ class Junction_model extends CI_Model {
 		if(empty($data) || empty($dates) || (int)$result_type < 1){
 			return [];
 		}
+
+		// 因为详情页地图下方列表所有相位都有 置信度字段，而置信度不属于指标，固将此放到扩展指标集合中
+		$data['extend_flow_quota']['confidence'] = '置信度';
 
 		$data['movements'] = json_decode($data['movements'], true);
 
@@ -456,6 +489,13 @@ class Junction_model extends CI_Model {
 		if(!empty($data['movements'])){
 			foreach($data['movements'] as $k=>$v){
 				$data['movements'][$k]['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
+				if($result_type == 1){ // 指标详情页，组织每个指标对应各相位集合
+					$flow_quota_key_conf = $this->config->item('flow_quota_key');
+					foreach($flow_quota_key_conf as $key=>$val){
+						$data['flow_quota_all'][$key][$k]['id'] = $v['movement_id'];
+						$data['flow_quota_all'][$key][$k]['value'] = $v[$key];
+					}
+				}
 			}
 		}
 
@@ -463,6 +503,10 @@ class Junction_model extends CI_Model {
 		$data['result_comment'] = isset($result_comment_conf[$data['result_comment']]) ? $result_comment_conf[$data['result_comment']] : '';
 
 		if($result_type == 2){ // 诊断详情页
+			// flow级别所有指标集合
+			$data['flow_quota_all'] = $this->config->item('flow_quota_key');
+
+			// 组织问题集合
 			$diagnose_key_conf = $this->config->item('diagnose_key');
 			foreach($diagnose_key_conf as $k=>$v){
 				if($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
@@ -496,11 +540,6 @@ class Junction_model extends CI_Model {
 				}
 			}
 		}
-
-		$data['flow_quota_all'] = $this->config->item('flow_quota_key');
-
-		// 因为详情页地图下方列表所有相位都有 置信度字段，而置信度不属于指标，固将此放到扩展指标集合中
-		$data['extend_flow_quota']['confidence'] = '置信度';
 
 		return $data;
 	}
