@@ -562,6 +562,8 @@ class Junction_model extends CI_Model {
 
 		$junction_id = trim($data['junction_id']);
 
+		$result = [];
+
 		// 获取配时数据 地图底图数据源用配时的
 		$timing_data = [
 			'junction_id'     => $junction_id,
