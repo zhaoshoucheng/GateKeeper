@@ -431,11 +431,11 @@ class Task extends MY_Controller {
 				foreach ($dateVersion as $date => $version) {
 					$res[$city_id][$date] = $version;
 				}
+				$res[$city_id]['hdfs_dir'] = $hdfs_dir;
+				$res[$city_id]['task_id'] = $task_id;
+				$res[$city_id]['trace_id'] = $trace_id;
 			}
-			$this->output_data = array (
-				'data' => $res,
-				'hdfs_dir' => $hdfs_dir,
-			);
+			$this->output_data = $res;
 			
 		} catch (Exception $e) {
 			$this->errno = -1;
