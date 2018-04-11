@@ -560,9 +560,11 @@ class Junction_model extends CI_Model {
 			return [];
 		}
 
+		$junction_id = trim($data['junction_id']);
+
 		// 获取配时数据 地图底图数据源用配时的
 		$timing_data = [
-			'junction_id'     => trim($data['junction_id']),
+			'junction_id'     => $junction_id,
 			'dates'           => $data['dates']
 		];
 		if((int)$data['search_type'] == 1){ // 按方案查询
@@ -585,12 +587,36 @@ class Junction_model extends CI_Model {
 		if(empty($timing['map_version'])){
 			return [];
 		}
-		// 组织路网接口所需数据
+		// 获取路网路口各相位坐标
 		$waymap_data = [
-			'map_version' => trim($timing['map_version']),
-			'junction_id' => trim($data['junction_id'])
+			'version'           => trim($timing['map_version']),
+			'logic_junction_id' => $junction_id
 		];
 		$waymap = $this->waymap_model->getJunctionFlowAndCenterLngLat($waymap_data);
+		if(!$waymap || empty($waymap)){
+			return [];
+		}
+		foreach($waymap as $k=>$v){
+			if(!empty($timing['list'][$v['logic_flow_id']])){
+				$result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
+				$result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
+				$result['dataList'][$k]['lng'] = $v['lng'];
+				$result['dataList'][$k]['lat'] = $v['lat'];
+			}
+		}
+
+		// 获取路口中心坐标
+		$result['center'] = '';
+		$center_data['logic_id'] = $junction_id;
+		$center = $this->waymap_model->getJunctionCenterCoords($center_data);
+
+		$result['center'] = $center;
+
+		if(count($result['dataList']) >= 1){
+			$result['dataList'] = array_values($result['dataList']);
+		}
+
+		return $result;
 	}
 
 	/**
