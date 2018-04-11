@@ -10,20 +10,26 @@ class Thrift
     private static $configs = [
         ENV::DEVELOPMENT => [
             'inhert' => [
-                'host' => '10.94.105.126',
-                'port' => "3306",
+                'address' => [
+                    [
+                        'host' => '100.90.165.26',
+                        'port' => '50005',
+                    ],
+                    [
+                        'host' => '100.90.165.26',
+                        'port' => '50000',
+                    ]
+                ],
                 'read_timeout' => 30,
                 'write_timeout' => 30,
+                'class' => '\DidiRoadNet\InheritServiceClient',
+                'transport' => 'Thrift\Transport\TFramedTransport',
             ],
             'inhert_to' => [
                 'address' => [
                     [
                         'host' => '100.90.165.26',
-                        'port' => '50000',
-                    ],
-                    [
-                        'host' => '100.90.204.12',
-                        'port' => '50000',
+                        'port' => '50100',
                     ]
                 ],
                 'read_timeout' => 60,
@@ -31,8 +37,16 @@ class Thrift
                 'class' => '\DidiRoadNet\InheritServiceClient',
                 'transport' => 'Thrift\Transport\TFramedTransport',
             ],
+            'shmdata' => [
+                'host' => '100.90.165.26',
+                'port' => "50001",
+                'read_timeout' => 30,
+                'write_timeout' => 30,
+                'class' => '\DidiRoadNet\ShmDataServiceClient',
+                'transport' => 'Thrift\Transport\TFramedTransport',
+            ],
             'caculator' => [
-                'host' => '10.93.94.36',
+                'host' => '100.90.164.31',
                 'port' => "8383",
                 'read_timeout' => 30,
                 'write_timeout' => 30,
@@ -88,10 +102,20 @@ class Thrift
         ],
         ENV::ONLINE => [
             'inhert' => [
-                'host' => '10.94.105.126',
-                'port' => "3306",
+                'address' => [
+                    [
+                        'host' => '100.90.165.26',
+                        'port' => '50000',
+                    ],
+                    [
+                        'host' => '10.89.236.26',
+                        'port' => '50000',
+                    ]
+                ],
                 'read_timeout' => 30,
                 'write_timeout' => 30,
+                'class' => '\DidiRoadNet\InheritServiceClient',
+                'transport' => 'Thrift\Transport\TFramedTransport',
             ],
             'inhert_to' => [
                 'address' => [
@@ -99,10 +123,30 @@ class Thrift
                         'host' => '100.90.165.26',
                         'port' => '50000',
                     ],
+                    [
+                        'host' => '10.89.236.26',
+                        'port' => '50000',
+                    ],
                 ],
                 'read_timeout' => 60,
                 'write_timeout' => 60,
                 'class' => '\DidiRoadNet\InheritServiceClient',
+                'transport' => 'Thrift\Transport\TFramedTransport',
+            ],
+            'shmdata' => [
+                'address' => [
+                    [
+                        'host' => '100.90.165.26',
+                        'port' => '50001',
+                    ],
+                    [
+                        'host' => '100.90.204.12',
+                        'port' => '50001',
+                    ]
+                ],
+                'read_timeout' => 30,
+                'write_timeout' => 30,
+                'class' => '\DidiRoadNet\ShmDataServiceClient',
                 'transport' => 'Thrift\Transport\TFramedTransport',
             ],
             'caculator' => [
