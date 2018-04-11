@@ -7,7 +7,7 @@
 
 class Timing_model extends CI_Model {
 
-	public function __construct(){
+	public function __construct() {
 		parent::__construct();
 
 		$this->load->config('nconf');
@@ -20,7 +20,7 @@ class Timing_model extends CI_Model {
 	* @param $data['time_range']  string 时间段 00:00-00:30
 	* @return array
 	*/
-	public function getJunctionsTimingInfo($data){
+	public function getJunctionsTimingInfo($data) {
 		if(count($data) < 1){
 			return [];
 		}
@@ -45,7 +45,7 @@ class Timing_model extends CI_Model {
 	* @param $data['time_range']  string 时间段 00:00-00:30
 	* @return array
 	*/
-	public function getFlowIdToName($data){
+	public function getFlowIdToName($data) {
 		if(count($data) < 1){
 			return [];
 		}
@@ -70,11 +70,51 @@ class Timing_model extends CI_Model {
 	* @param $data['time_range']      string 时间段
 	* @param $data['time_point']      string 时间点 PS:按时间点查询有此参数 可用于判断按哪种方式查询配时方案
 	*/
-	public function getTimingDataForJunctionMap($data){
+	public function getTimingDataForJunctionMap($data) {
+		if(empty($data)){
+			return [];
+		}
 		// 获取配时数据
 		$timing = $this->getTimingData($data);
+		if(!$timing || empty($timing)){
+			return [];
+		}
 
-		echo "<pre>timing = ";print_r($timing);exit;
+		if(!isset($data['time_point'])){ // 按方案查询
+			$result = $this->formartTimingDataByPlan($timing);
+		}else{ // 按时间点查询
+			$result = $this->formartTimingDataByTimePoint($timing);
+		}
+
+		echo "<pre>result = ";print_r($result);exit;
+		return $result;
+	}
+
+	/**
+	* 格式配时数据 返回按方案查询 路口地图底图所需数据格式
+	* @param $data
+	* @return array
+	*/
+	private function formartTimingDataByPlan($data) {
+		if(empty($data)){
+			return [];
+		}
+
+		$result = [];
+		if(!empty($data['latest_plan'][0]['plan_detail']['movement_timing'])){
+			foreach($data['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v){
+				if(!empty($v[0]['flow_logic']['logic_flow_id']) && !empty($v[0]['flow_logic']['comment'])){
+					$result[$k]['logic_flow_id'] = $v[0]['flow_logic']['logic_flow_id'];
+					$result[$k]['comment'] = $v[0]['flow_logic']['comment'];
+				}
+			}
+		}
+
+		if(!empty($result)){
+			$result['map_version'] = $data['map_version'];
+		}
+
+		return $result;
 	}
 
 	/**
@@ -82,7 +122,7 @@ class Timing_model extends CI_Model {
 	* @param $data
 	* @return array
 	*/
-	private function formatTimingData($data, $time_range){
+	private function formatTimingData($data, $time_range) {
 		// 任务最小时间、最大时间
 		$time_range = array_filter(explode('-', $time_range));
 		if(empty($time_range[0]) || empty($time_range[1])){
@@ -155,7 +195,7 @@ class Timing_model extends CI_Model {
 	* @param $data
 	* @return array
 	*/
-	private function formatTimingIdToName($data){
+	private function formatTimingIdToName($data) {
 		if(empty($data)){
 			return [];
 		}
@@ -179,7 +219,7 @@ class Timing_model extends CI_Model {
 	* @param $data['time_range']  string 时间段 00:00-00:30
 	* @return array
 	*/
-	private function getTimingData($data){
+	private function getTimingData($data) {
 		$time_range = array_filter(explode('-', trim($data['time_range'])));
 		$this->load->helper('http');
 
