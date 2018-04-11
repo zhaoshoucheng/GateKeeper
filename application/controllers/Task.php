@@ -424,16 +424,18 @@ class Task extends MY_Controller {
 			$trace_id = uniqid();
 			$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
 			$dateVersion = $ret['data'];
+			$res['errno'] = 0;
+			$res['errmsg'] = '';
 			foreach ($dateVersion as $date => $version) {
-				$res[$city_id][$date] = $version;
+				$res['dateversion'][$date] = $version;
 			}
-			$res[$city_id]['hdfs_dir'] = $hdfs_dir;
-			$res[$city_id]['task_id'] = $task_id;
-			$res[$city_id]['trace_id'] = $trace_id;
+			$res['hdfs_dir'] = $hdfs_dir;
+			$res['task_id'] = $task_id;
+			$res['trace_id'] = $trace_id;
 			print(json_encode($res));
 			$this->output_data = $res;
 			fastcgi_finish_request();
-			
+
 			$taskService = new TaskService();
 			$response = $taskService->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values(array_unique($dateVersion)));
 		} catch (Exception $e) {
