@@ -86,9 +86,14 @@ class Timing_model extends CI_Model {
 			$result = $this->formartTimingDataByTimePoint($timing, $data['time_point']);
 		}
 
-		echo "<pre>result = ";print_r($result);
+		if(!empty($result)){
+			$result['map_version'] = $timing['map_version'];
+			$result_data = $this->formatTimingDataResult($result);
+		}
+		echo "<pre>result_data = ";print_r($result_data);
+		echo "<hr><pre>result = ";print_r($result);
 		echo "<hr><pre>timing = ";print_r($timing);exit;
-		return $result;
+		return $result_data;
 	}
 
 	/**
@@ -142,6 +147,43 @@ class Timing_model extends CI_Model {
 		}
 
 		return $result;
+	}
+
+	/**
+	* 格式化配时数据，返回地图底图所需格式
+	* 每个方向取一，即 东直、东左 取东直且只备注为 东
+	* @param $data
+	* @return array
+	*/
+	private function formatTimingDataResult($data) {
+		if(empty($data)){
+			return [];
+		}
+
+		$position = ['东'=>1, '西'=>2, '南'=>3, '北'=>4];
+		$turn = ['直'=>1, '左'=>2, '右'=>3];
+		$phase_position = [];
+		$temp_arr = [];
+		foreach($data as $k=>$v){
+			$comment = $v['comment'];
+			foreach($position as $k1=>$v1){
+				foreach($turn as $k2=>$v2){
+					if(stristr($comment, $k1.$k2) !== false){
+						$temp_arr[$k1][str_replace($k1.$k2, $v1.$v2, $comment)]['logic_flow_id'] = $v['logic_flow_id'];
+						$temp_arr[$k1][str_replace($k1.$k2, $v1.$v2, $comment)]['comment'] = $comment;
+					}
+				}
+			}
+		}
+
+		foreach ($temp_arr as $key => &$value) {
+			ksort($value);
+			reset($value);
+			$arr1 = current($value);
+			$phase_position[$arr1['logic_flow_id']] = mb_substr($arr1['comment'], 0, 1, "utf-8");
+		}
+
+		return $phase_position;
 	}
 
 	/**
