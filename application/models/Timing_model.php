@@ -64,6 +64,20 @@ class Timing_model extends CI_Model {
 	}
 
 	/**
+	* 获取详情页地图底图所需路口配时数据
+	* @param $data['junction_id']     string 逻辑路口ID
+	* @param $data['dates']           array  评估/诊断任务日期
+	* @param $data['time_range']      string 时间段
+	* @param $data['time_point']      string 时间点 PS:按时间点查询有此参数 可用于判断按哪种方式查询配时方案
+	*/
+	public function getTimingDataForJunctionMap($data){
+		// 获取配时数据
+		$timing = $this->getTimingData($data);
+
+		echo "<pre>timing = ";print_r($timing);exit;
+	}
+
+	/**
 	* 格式化配时数据
 	* @param $data
 	* @return array

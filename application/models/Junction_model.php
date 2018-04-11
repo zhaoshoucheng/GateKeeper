@@ -546,6 +546,37 @@ class Junction_model extends CI_Model {
 	}
 
 	/**
+	* 获取路口地图底图数据
+	* @param $data['junction_id']     string   Y 逻辑路口ID
+	* @param $data['dates']           string   Y 评估/诊断任务日期 ['20180102','20180103']
+	* @param $data['search_type']     interger Y 查询类型 1：按方案查询 0：按时间点查询
+	* @param $data['time_point']      string   N 时间点 格式 00:00 PS:当search_type = 0 时 必传
+	* @param $data['time_range']      string   N 方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传 时间段
+	* @param $data['task_time_range'] string   Y 评估/诊断任务开始结束时间 格式 00:00-24:00
+	* @return array
+	*/
+	public function getJunctionMapData($data){
+		if(empty($data)){
+			return [];
+		}
+
+		// 获取配时数据 地图底图数据源用配时的
+		$timing_data = [
+			'junction_id'     => trim($data['junction_id']),
+			'dates'           => $data['dates']
+		];
+		if((int)$data['search_type'] == 1){ // 按方案查询
+			$time_range = array_filter(explode('-', $data['time_range']));
+			$timing_data['time_range'] = trim($time_range[0]) . '-' . date("H:i", strtotime($time_range[1]) - 60);
+		}else{ // 按时间点查询
+			$timing_data['time_point'] = trim($data['time_point']);
+			$timing_data['time_range'] = trim($data['task_time_range']);
+		}
+
+		$timing = $this->timing_model->getTimingDataForJunctionMap($timing_data);
+	}
+
+	/**
 	* 组织select 字段
 	*/
 	private function selectColumns($key){
