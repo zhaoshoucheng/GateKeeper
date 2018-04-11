@@ -399,7 +399,7 @@ class Task extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'city_ids'		=> 'nullunable',
+				'city_id'		=> 'nullunable',
 				'dates'			=> 'nullunable',
 			]
 		);
@@ -410,9 +410,8 @@ class Task extends MY_Controller {
 
 		try {
 			$res = array();
-			$city_ids = $params['city_ids'];
+			$city_id = $params['city_id'];
 			$dates = $params['dates'];
-			$city_ids = explode(',', $city_ids);
 			$ret = $this->task_model->getDateVersion($dates);
 			$ret = json_decode($ret, true);
 			if ($ret['errorCode'] == -1) {
@@ -421,22 +420,22 @@ class Task extends MY_Controller {
 			    $this->errmsg = 'maptypeversion unready';
 			    return;
 			}
-			foreach ($city_ids as $city_id) {
-				$task_id = "CT{$city_id}";
-				$trace_id = uniqid();
-				$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
-				$dateVersion = $ret['data'];
-				$taskService = new TaskService();
-				$response = $taskService->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values(array_unique($dateVersion)));
-				foreach ($dateVersion as $date => $version) {
-					$res[$city_id][$date] = $version;
-				}
-				$res[$city_id]['hdfs_dir'] = $hdfs_dir;
-				$res[$city_id]['task_id'] = $task_id;
-				$res[$city_id]['trace_id'] = $trace_id;
+			$task_id = "CT{$city_id}";
+			$trace_id = uniqid();
+			$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
+			$dateVersion = $ret['data'];
+			foreach ($dateVersion as $date => $version) {
+				$res[$city_id][$date] = $version;
 			}
+			$res[$city_id]['hdfs_dir'] = $hdfs_dir;
+			$res[$city_id]['task_id'] = $task_id;
+			$res[$city_id]['trace_id'] = $trace_id;
+			print(json_encode($res));
 			$this->output_data = $res;
+			fastcgi_finish_request();
 			
+			$taskService = new TaskService();
+			$response = $taskService->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values(array_unique($dateVersion)));
 		} catch (Exception $e) {
 			$this->errno = -1;
 			$this->errmsg = 'areaFlowProcess failed.';
