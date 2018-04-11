@@ -111,10 +111,6 @@ class Timing_model extends CI_Model {
 			}
 		}
 
-		if(!empty($result)){
-			$result['map_version'] = $data['map_version'];
-		}
-
 		return $result;
 	}
 
@@ -128,9 +124,24 @@ class Timing_model extends CI_Model {
 			return [];
 		}
 
+		$time_point = strtotime($time_point);
 		$result = [];
+		if(!empty($data['latest_plan'])){
+			foreach($data['latest_plan'] as $k=>$v){
+				$st = strtotime($v['tod_start_time']);
+				$et = strtotime($v['tod_end_time']);
+				if($time_point >= $st && $time_point < $et && !empty($v['plan_detail']['movement_timing'])){
+					foreach($v['plan_detail']['movement_timing'] as $kk=>$vv){
+						if(!empty($vv[0]['flow_logic']['logic_flow_id']) && !empty($vv[0]['flow_logic']['comment'])){
+							$result[$kk]['logic_flow_id'] = $vv[0]['flow_logic']['logic_flow_id'];
+							$result[$kk]['comment'] = $vv[0]['flow_logic']['comment'];
+						}
+					}
+				}
+			}
+		}
 
-		return $result[];
+		return $result;
 	}
 
 	/**
