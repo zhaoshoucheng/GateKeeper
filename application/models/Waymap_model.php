@@ -78,7 +78,6 @@ class Waymap_model extends CI_Model {
 			$result[$k]['lat'] = $v['inlink_info']['s_node']['lat'];
 		}
 
-		echo "<pre>map_data = ";print_r($result);
 		return $result;
 	}
 
