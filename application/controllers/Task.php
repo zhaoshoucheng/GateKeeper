@@ -7,6 +7,8 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Didi\Cloud\ItsMap\Task as TaskService;
+
 class Task extends MY_Controller {
 	private $to = 'lizhaohua@didichuxing.com';
 	private $subject = 'task scheduler';
@@ -389,5 +391,56 @@ class Task extends MY_Controller {
 			$this->errno = -1;
 			$this->errmsg = '更新任务状态失败';
 		}
+	}
+
+	public function areaFlowProcess() {
+		$params = $this->input->get();
+
+		// 校验参数
+		$validate = Validate::make($params,
+			[
+				'city_ids'		=> 'nullunable',
+				'dates'			=> 'nullunable',
+			]
+		);
+
+		if(!$validate['status']){
+			return $this->response(array(), -1, $validate['errmsg']);
+		}
+
+		try {
+			$res = array();
+			$city_ids = $params['city_ids'];
+			$dates = $params['dates'];
+			$city_ids = explode(',', $city_ids);
+			$ret = $this->getDateVersion($dates);
+			$ret = json_decode($ret, true);
+			if ($ret['errorCode'] == -1) {
+			    // maptypeversion unready
+			    $this->errno = -1;
+			    $this->errmsg = 'maptypeversion unready';
+			    return;
+			}
+			foreach ($city_ids as $city_id) {
+				$task_id = "CT{$city_id}";
+				$trace_id = uniqid();
+				$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
+				$dateVersion = $ret['data'];
+				$taskService = new TaskService();
+				$response = $taskService->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values(array_unique($dateVersion)));
+				foreach ($dateVersion as $date => $version) {
+					$res[$city_id][$date] = $version;
+				}
+			}
+			$this->output_data = array (
+				'data' => $res,
+				'hdfs_dir' => $hdfs_dir,
+			);
+			
+		} catch (Exception $e) {
+			$this->errno = -1;
+			$this->errmsg = 'areaFlowProcess failed.';
+		}
+
 	}
 }
