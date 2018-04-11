@@ -413,7 +413,7 @@ class Task extends MY_Controller {
 			$city_ids = $params['city_ids'];
 			$dates = $params['dates'];
 			$city_ids = explode(',', $city_ids);
-			$ret = $this->getDateVersion($dates);
+			$ret = $this->task_model->getDateVersion($dates);
 			$ret = json_decode($ret, true);
 			if ($ret['errorCode'] == -1) {
 			    // maptypeversion unready
