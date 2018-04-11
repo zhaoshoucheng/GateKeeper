@@ -42,8 +42,9 @@ class Waymap_model extends CI_Model {
 	}
 
 	/**
-	* 获取路口各相位lng、lat及路口中心lng、lat
-	* @param $data
+	* 获取路口各相位lng、lat及
+	* @param $data['version']           路网版本
+	* @param $data['logic_junction_id'] 逻辑路口ID
 	* @return array
 	*/
 	public function getJunctionFlowAndCenterLngLat($data) {
@@ -51,14 +52,12 @@ class Waymap_model extends CI_Model {
 			return [];
 		}
 
-		$waymap_data = [
-			'version'           => $data['map_version'],
-			'logic_junction_id' => $data['junction_id'],
-			'token'             => $this->token
-		];
+		$data['token'] = $this->token;
+
+		$map_data = [];
 
 		try {
-			$map_data = httpGET($this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr', $waymap_data);
+			$map_data = httpGET($this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr', $data);
 			if(!$map_data){
 				// 日志
 				return [];
@@ -73,8 +72,46 @@ class Waymap_model extends CI_Model {
 			return [];
 		}
 
-		echo "<pre>map_data = ";print_r($map_data);exit;
+		foreach($map_data['data'] as $k=>$v){
+			$result[$k]['logic_flow_id'] = $v['logic_flow_id'];
+			$result[$k]['lng'] = $v['inlink_info']['s_node']['lng'];
+			$result[$k]['lat'] = $v['inlink_info']['s_node']['lat'];
+		}
 
+		echo "<pre>map_data = ";print_r($result);
+		return $result;
+	}
+
+	/**
+	* 获取路口中心点坐标
+	* @param $data['logic_id']  逻辑路口ID
+	* @return array
+	*/
+	public function getJunctionCenterCoords($data) {
+		if(empty($data)){
+			return [];
+		}
+
+		$data['token'] = $this->token;
+
+		try {
+			$junction_info = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/detail', $data);
+			if(!$junction_info){
+				return [];
+			}
+
+			$junction_info = json_decode($junction_info, true);
+			if($junction_info['errorCode'] != 0 || empty($junction_info['data'])){
+				return [];
+			}
+		} catch (Exception $e) {
+			return [];
+		}
+
+		$result['lng'] = isset($junction_info['data']['lng']) ? $junction_info['data']['lng'] : '';
+		$result['lat'] = isset($junction_info['data']['lat']) ? $junction_info['data']['lat'] : '';
+
+		return $result;
 	}
 
 	/**
