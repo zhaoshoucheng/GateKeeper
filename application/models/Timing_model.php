@@ -91,8 +91,6 @@ class Timing_model extends CI_Model {
 			$result_data['map_version'] = $timing['map_version'];
 		}
 		echo "<pre>result_data = ";print_r($result_data);
-		echo "<hr><pre>result = ";print_r($result);
-		echo "<hr><pre>timing = ";print_r($timing);exit;
 		return $result_data;
 	}
 

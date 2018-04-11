@@ -574,6 +574,23 @@ class Junction_model extends CI_Model {
 		}
 
 		$timing = $this->timing_model->getTimingDataForJunctionMap($timing_data);
+		if(!$timing || empty($timing)){
+			return [];
+		}
+
+		/*------------------------------------
+		| 获取路网路口各相位经纬度及路口中心经纬度 |
+		-------------------------------------*/
+		// 是否有地图版本
+		if(empty($timing['map_version'])){
+			return [];
+		}
+		// 组织路网接口所需数据
+		$waymap_data = [
+			'map_version' => trim($timing['map_version']),
+			'junction_id' => trim($data['junction_id'])
+		];
+		$waymap = $this->waymap_model->getJunctionFlowAndCenterLngLat($waymap_data);
 	}
 
 	/**
