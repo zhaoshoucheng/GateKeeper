@@ -131,11 +131,6 @@ class Junction extends MY_Controller {
 			}
 		}
 
-		if(empty($params['task_time_range'])){
-			$this->errno = ERR_PARAMETERS;
-			$this->errmsg = 'The task_time_range cannot be empty.';
-			return;
-		}
 		$task_time_range = array_filter(explode('-', $params['task_time_range']));
 		if(empty($task_time_range[0]) || empty($task_time_range[1])){
 			$this->errno = ERR_PARAMETERS;
@@ -159,7 +154,7 @@ class Junction extends MY_Controller {
 	* 获取配时方案及配时详情
 	* @param dates        string Y 评估/诊断日期
 	* @param junction_id  string Y 路口ID
-	* @param time_range   string Y 时间段
+	* @param time_range   string Y 任务时间段
 	* @return json
 	*/
 	public function getJunctionTiming(){
@@ -308,10 +303,12 @@ class Junction extends MY_Controller {
 
 	/**
 	* 获取路口地图绘制数据
-	* @param junction_id  string Y 逻辑路口ID
-	* @param dates        string Y 评估/诊断时间
-	* @param time_point   string Y 时间点
-	* @param time_range   string Y 时间段
+	* @param junction_id     string   Y 逻辑路口ID
+	* @param dates           string   Y 评估/诊断任务日期 ['20180102','20180103']
+	* @param search_type     interger Y 查询类型 1：按方案查询 0：按时间点查询
+	* @param time_point      string   N 时间点 格式 00:00 PS:当search_type = 0 时 必传
+	* @param time_range      string   N 方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传 时间段
+	* @param task_time_range string   Y 评估/诊断任务开始结束时间 格式 00:00-24:00
 	* @return json
 	*/
 	public function getJunctionMapData(){
@@ -319,19 +316,53 @@ class Junction extends MY_Controller {
 		// 校验参数
 		$validate = Validate::make($params,
 			[
-				'junction_id' => 'nullunable',
-				'time_point'  => 'nullunable',
-				'time_range'  => 'nullunable'
+				'junction_id'     => 'nullunable',
+				'search_type'     => 'min:0',
+				'task_time_range' => 'nullunable'
 			]
 		);
 		if(!$validate['status']){
-			return $this->response([], 100400, $validate['errmsg']);
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = $validate['errmsg'];
+			return;
+		}
+
+		if((int)$params['search_type'] == 1){ // 按方案查询
+			if(empty($params['time_range'])){
+				$this->errno = ERR_PARAMETERS;
+				$this->errmsg = 'The time_range cannot be empty.';
+				return;
+			}
+			$time_range = array_filter(explode('-', $params['time_range']));
+			if(empty($time_range[0]) || empty($time_range[1])){
+				$this->errno = ERR_PARAMETERS;
+				$this->errmsg = 'The time_range is wrong.';
+				return;
+			}
+		}else{
+			if(empty($params['time_point'])){
+				$this->errno = ERR_PARAMETERS;
+				$this->errmsg = 'The time_point cannot be empty.';
+				return;
+			}
+		}
+
+		$task_time_range = array_filter(explode('-', $params['task_time_range']));
+		if(empty($task_time_range[0]) || empty($task_time_range[1])){
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The task_time_range is wrong.';
+			return;
 		}
 
 		if(!is_array($params['dates']) || count($params['dates']) < 1){
-			return $this->response([], 100400, 'The dates cannot be empty and must be array.');
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = 'The dates cannot be empty and must be array.';
+			return;
 		}
 
+		$result = $this->junction_model->getJunctionMapData($params);
+
+		return $this->response($result);
 		$time_range = array_filter(explode('-', trim($params['time_range'])));
 		// 获取配时信息，组织地图version flow_id=>flow_label
 		$this->load->helper('http');
