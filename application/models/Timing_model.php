@@ -83,10 +83,11 @@ class Timing_model extends CI_Model {
 		if(!isset($data['time_point'])){ // 按方案查询
 			$result = $this->formartTimingDataByPlan($timing);
 		}else{ // 按时间点查询
-			$result = $this->formartTimingDataByTimePoint($timing);
+			$result = $this->formartTimingDataByTimePoint($timing, $data['time_point']);
 		}
 
-		echo "<pre>result = ";print_r($result);exit;
+		echo "<pre>result = ";print_r($result);
+		echo "<hr><pre>timing = ";print_r($timing);exit;
 		return $result;
 	}
 
@@ -118,8 +119,24 @@ class Timing_model extends CI_Model {
 	}
 
 	/**
-	* 格式化配时数据
+	* 格式配时数据 返回按时间点查询 路口地图底图所需数据格式
 	* @param $data
+	* @param $time_point 时间点
+	*/
+	private function formartTimingDataByTimePoint($data, $time_point) {
+		if(empty($data) || empty($time_point)){
+			return [];
+		}
+
+		$result = [];
+
+		return $result[];
+	}
+
+	/**
+	* 格式化配时数据 用于返回详情页右侧数据
+	* @param $data
+	* @param $time_range 任务完整时间段
 	* @return array
 	*/
 	private function formatTimingData($data, $time_range) {
