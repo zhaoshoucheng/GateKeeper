@@ -6,11 +6,14 @@
 ********************************************/
 
 class Waymap_model extends CI_Model {
+	protected $token;
 
 	public function __construct(){
 		parent::__construct();
 
 		$this->load->config('nconf');
+		$this->load->helper('http');
+		$this->token = $this->config->item('waymap_token');
 	}
 
 	/**
@@ -19,9 +22,8 @@ class Waymap_model extends CI_Model {
 	* @return array
 	*/
 	public function getJunctionInfo($ids){
-		$this->load->helper('http');
 		$data['logic_ids'] = $ids;
-		$data['token'] = $this->config->item('waymap_token');
+		$data['token'] = $this->token;
 
 		try {
 			$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/many', $data);
@@ -37,6 +39,42 @@ class Waymap_model extends CI_Model {
 		} catch (Exception $e) {
 			return [];
 		}
+	}
+
+	/**
+	* 获取路口各相位lng、lat及路口中心lng、lat
+	* @param $data
+	* @return array
+	*/
+	public function getJunctionFlowAndCenterLngLat($data) {
+		if(empty($data)){
+			return [];
+		}
+
+		$waymap_data = [
+			'version'           => $data['map_version'],
+			'logic_junction_id' => $data['junction_id'],
+			'token'             => $this->token
+		];
+
+		try {
+			$map_data = httpGET($this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr', $waymap_data);
+			if(!$map_data){
+				// 日志
+				return [];
+			}
+			$map_data = json_decode($map_data, true);
+			if($map_data['errorCode'] != 0 || empty($map_data['data'])){
+				// 日志
+				return [];
+			}
+		} catch (Exception $e) {
+			// 日志
+			return [];
+		}
+
+		echo "<pre>map_data = ";print_r($map_data);exit;
+
 	}
 
 	/**
@@ -58,11 +96,9 @@ class Waymap_model extends CI_Model {
 		// 获取redis中数据
 		$city_junctions = $this->redis_model->getData($redis_key);
 		if(!$city_junctions){
-			$this->load->helper('http');
-
 			$data = [
 						'city_id'	=> $city_id,
-						'token'		=> $this->config->item('waymap_token'),
+						'token'		=> $this->token,
 						'offset'	=> 0,
 						'count'		=> 10000
 					];
