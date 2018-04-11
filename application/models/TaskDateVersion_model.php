@@ -5,19 +5,9 @@ class Taskdateversion_model extends CI_Model
 {
     private $_table = 'task_date_version';
 
-    private $max_try_times = 20;
-    private $completed_status = 11;
-
-    private $to = 'lizhaohua@didichuxing.com';
-    private $subject = 'task scheduler';
-
     function __construct() {
         parent::__construct();
         $this->its_tool = $this->load->database('default', true);
-
-        $this->load->helper('mail');
-        $this->load->helper('http');
-        $this->load->config('nconf');
     }
 
     function insert_batch($task_dates) {
