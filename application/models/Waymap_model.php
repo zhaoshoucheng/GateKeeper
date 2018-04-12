@@ -133,11 +133,11 @@ class Waymap_model extends CI_Model {
 		$city_junctions = $this->redis_model->getData($redis_key);
 		if(!$city_junctions){
 			$data = [
-						'city_id'	=> $city_id,
-						'token'		=> $this->token,
-						'offset'	=> 0,
-						'count'		=> 10000
-					];
+				'city_id' => $city_id,
+				'token'   => $this->token,
+				'offset'  => 0,
+				'count'   => 10000
+			];
 			try {
 				$res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/getList', $data);
 				if(!$res){
