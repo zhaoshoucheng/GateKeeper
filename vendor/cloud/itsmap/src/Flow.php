@@ -10,6 +10,7 @@ use Didi\Cloud\ItsMap\Models\City as CityModel;
 use Didi\Cloud\ItsMap\Models\FlowLogic;
 use Didi\Cloud\ItsMap\Services\RoadNet;
 use Didi\Cloud\ItsMap\Supports\Coordinate;
+use Didi\Cloud\ItsMap\Supports\FlowShift;
 
 class Flow implements FlowInterface
 {
@@ -103,5 +104,22 @@ class Flow implements FlowInterface
             $ret[] = $tmp;
         }
         return $ret;
+    }
+
+    public function simplifyFlows($logic_junction_id, $version, $logic_flow_ids)
+    {
+        if ($logic_flow_ids === NULL or $logic_flow_ids === '' or empty($logic_flow_ids)) {
+            $flowLogicMaps = FlowLogic::where('logic_junction_id', $logic_junction_id)->rangeVersion($version)->get();
+            $flows = $flowLogicMaps->toArray();
+        } else {
+            // $logic_flow_ids = explode(',', $logic_flow_ids);
+            $flowLogicMaps = FlowLogic::whereIn('logic_flow_id', $logic_flow_ids)->rangeVersion($version)->get();
+            $flows = $flowLogicMaps->toArray();
+        }
+        if (empty($flows)) {
+            return array();
+        }
+        $flowShift = new FlowShift();
+        return $flowShift->func($flows, $version);
     }
 }
