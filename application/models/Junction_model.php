@@ -613,6 +613,7 @@ class Junction_model extends CI_Model {
 		$center = $this->waymap_model->getJunctionCenterCoords($center_data);
 
 		$result['center'] = $center;
+		$result['map_version'] = $timing['map_version'];
 
 		if(count($result['dataList']) >= 1){
 			$result['dataList'] = array_values($result['dataList']);
