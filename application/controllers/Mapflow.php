@@ -27,7 +27,7 @@ class Mapflow extends MY_Controller
         $logic_flow_ids = $this->input->get_post('logic_flow_ids');
         try {
             $data = [
-                        'logic_junction_id' => $date,
+                        'logic_junction_id' => $logic_junction_id,
                         'version' => $version,
                         'logic_flow_ids' => $logic_flow_ids,
                         'token'     => $this->config->item('waymap_token'),
