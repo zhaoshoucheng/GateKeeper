@@ -36,7 +36,11 @@ class Task
     public function areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, $versions) {
         $roadNetService = new RoadNet();
         $response = $roadNetService->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, $versions);
+<<<<<<< HEAD
         // print_r($response);
+=======
+        print_r($response);
+>>>>>>> itstool/dabing
     }
 
     public function calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion) {

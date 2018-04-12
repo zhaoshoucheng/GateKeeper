@@ -217,7 +217,7 @@ class Timing_model extends CI_Model {
 					$result['timing_detail'][$v['time_plan_id']]['offset'] = $v['plan_detail']['extra_timing']['offset'];
 				}
 
-				if(isset($v['plan_detail']['movement_timing']) && !empty($v['plan_detail']['movement_timing'])){
+				if(!empty($v['plan_detail']['movement_timing'])){
 					foreach($v['plan_detail']['movement_timing'] as $k1=>$v1){
 						// 信号灯状态 1=绿灯
 						$result['timing_detail'][$v['time_plan_id']]['timing'][$k1]['state'] = isset($v1[0]['state']) ? $v1[0]['state'] : 0;
