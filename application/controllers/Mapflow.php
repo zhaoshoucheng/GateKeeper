@@ -15,7 +15,7 @@ class Mapflow extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        \Didi\Cloud\ItsMap\User::register($this->user->username);
+        \Didi\Cloud\ItsMap\User::register($this->username);
         $logger = & load_class('Log', 'core');
         \Didi\Cloud\ItsMap\Services\Log::registerLogger($logger);
     }
