@@ -15,107 +15,9 @@ class Mapflow extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        \Didi\Cloud\ItsMap\User::register($this->username);
-        $logger = & load_class('Log', 'core');
-        \Didi\Cloud\ItsMap\Services\Log::registerLogger($logger);
-    }
 
-
-    public function findSimpleByMainNode()
-    {
-        $version = $this->input->get('version');
-        $mainNodeId = $this->input->get('main_node_id');
-
-        try {
-            $junctionService = new Junction();
-            $this->outputData = $junctionService->findByMainNodeId($mainNodeId, $version);
-        } catch (\Exception $e) {
-            $this->errorCode = $e->getCode();
-            $this->errorMessage = $e->getMessage();
-        }
-    }
-
-    public function findSimpleFlowByInoutLink()
-    {
-        $version = $this->input->get('version');
-        $mainNodeId = $this->input->get('main_node_id');
-        $inLink = $this->input->get('in_link');
-        $outLink = $this->input->get('out_link');
-
-        try {
-            $flowService = new FlowService();
-            $this->outputData = $flowService->findByMainNodeIdInoutLink($mainNodeId, $inLink, $outLink, $version);
-        } catch (\Exception $e) {
-            $this->errorCode = $e->getCode();
-            $this->errorMessage = $e->getMessage();
-        }
-    }
-
-    public function flowsByJunction()
-    {
-        $version = $this->input->get('version');
-        $logicJunctionId = $this->input->get('logic_junction_id');
-
-        try {
-            $flowService = new FlowService();
-            $flows = $flowService->allByJunction($logicJunctionId, $version);
-            $this->outputData = $flows;
-        } catch (\Exception $e) {
-            $this->errorCode = $e->getCode();
-            $this->errorMessage = $e->getMessage();
-        }
-    }
-
-    public function flowsByJunctions()
-    {
-        $version = $this->input->get('version');
-        $logicJunctionIds = $this->input->get('logic_junction_ids');
-        $logicJunctionIds = explode(',', $logicJunctionIds);
-
-        try {
-            $flowService = new FlowService();
-            $flows = $flowService->allByJunctions($logicJunctionIds, $version);
-            $this->outputData = $flows;
-        } catch (\Exception $e) {
-            $this->errorCode = $e->getCode();
-            $this->errorMessage = $e->getMessage();
-        }
-    }
-
-    public function findComplexFlowByInoutLink()
-    {
-        $version = $this->input->get('version');
-        $logicJunctionId = $this->input->get('logic_junction_id');
-        $inLink = $this->input->get('in_link');
-        $outLink = $this->input->get('out_link');
-
-        try {
-            $flowService = new FlowService();
-            $flows = $flowService->allByJunction($logicJunctionId, $version);
-            foreach ($flows as $flow) {
-                if ($flow['inlink'] == $inLink && $flow['outlink'] == $outLink) {
-                    $this->outputData = $flow;
-                    return;
-                }
-            }
-        } catch (\Exception $e) {
-            $this->errorCode = $e->getCode();
-            $this->errorMessage = $e->getMessage();
-        }
-    }
-
-    public function allByJunctionWithLinkAttr()
-    {
-        $version = $this->input->get('version');
-        $logicJunctionId = $this->input->get('logic_junction_id');
-
-        try {
-            $flowService = new FlowService();
-            $this->outputData = $flowService->allByJunctionWithLinkAttr($logicJunctionId, $version);
-        } catch (\Exception $e) {
-            $this->errorCode = $e->getCode();
-            $this->errorMessage = $e->getMessage();
-        }
+        $this->load->helper('http');
+        $this->load->config('nconf');
     }
 
     public function simplifyFlows()
@@ -124,8 +26,20 @@ class Mapflow extends MY_Controller
         $version = $this->input->get_post('version');
         $logic_flow_ids = $this->input->get_post('logic_flow_ids');
         try {
-            $flowService = new FlowService();
-            $this->output_data = $flowService->simplifyFlows($logic_junction_id, $version, $logic_flow_ids);
+            $data = [
+                        'logic_junction_id' => $date,
+                        'version' => $version,
+                        'logic_flow_ids' => $logic_flow_ids,
+                        'token'     => $this->config->item('waymap_token'),
+                    ];
+            $ret = httpPOST($this->config->item('waymap_interface') . '/flow-duration/MapFlow/simplifyFlows', $data);
+            $ret = json_decode($ret, true);
+            if ($ret['errorCode'] == -1) {
+                $this->errno = -1;
+                $this->errmsg = 'simplifyFlows error';
+                return;
+            }
+            $this->output_data = $ret['data'];
         } catch (Exception $e) {
             $this->errorCode = $e->getCode();
             $this->errorMessage = $e->getMessage();
