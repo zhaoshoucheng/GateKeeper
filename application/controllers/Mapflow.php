@@ -125,7 +125,7 @@ class Mapflow extends MY_Controller
         $logic_flow_ids = $this->input->get_post('logic_flow_ids');
         try {
             $flowService = new FlowService();
-            $this->outputData = $flowService->simplifyFlows($logic_junction_id, $version, $logic_flow_ids);
+            $this->output_data = $flowService->simplifyFlows($logic_junction_id, $version, $logic_flow_ids);
         } catch (Exception $e) {
             $this->errorCode = $e->getCode();
             $this->errorMessage = $e->getMessage();
