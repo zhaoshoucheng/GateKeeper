@@ -37,7 +37,7 @@ class Track_vendor {
                 ]
             ],
             'x'   => 200 * -1,
-            'Y'   => 230,
+            'y'   => 230,
             'num' => 100
         ];
         $mtrajService = new RoadNet();
