@@ -10,19 +10,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 use Didi\Cloud\ItsMap\Track as Track_mtraj;
 
 class Track extends MY_Controller {
-	private $tarck_mtraj;
+	private $track_mtraj;
 
 	public function __construct(){
 		parent::__construct();
 
-		$this->tarck_mtraj = new Track_mtraj();
+		$this->track_mtraj = new Track_mtraj();
 	}
 
 	/**
 	* 获取散点图
 	*/
 	public function getScatterPlot() {
-		$res = $this->tarck_mtraj->getScatterMtraj();
+		$res = $this->track_mtraj->getScatterMtraj();
 		var_dump($res);
 	}
 }
