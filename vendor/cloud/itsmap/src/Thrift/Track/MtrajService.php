@@ -30,7 +30,7 @@ interface MtrajServiceIf {
 }
 
 
-class MtrajServiceClient implements \MtrajServiceIf {
+class MtrajServiceClient implements \Track\MtrajServiceIf {
   protected $input_ = null;
   protected $output_ = null;
 
