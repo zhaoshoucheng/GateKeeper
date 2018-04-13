@@ -36,6 +36,7 @@ use DidiRoadNet\AreaFlowResponse;
 use StsData\RoadVersionRuntime;
 
 use Track\Request as mtraj_request;
+use Track\Rtime;
 
 /*
  * 导航路网提供的相关继承服务
@@ -437,7 +438,7 @@ class RoadNet
         $mtraj_request->junctionId = $data['junctionId'];
         $mtraj_request->flowId = $data['flowId'];
         foreach($data['rtimeVec'] as $v){
-            $mtraj_request->rtimeVec[] = new Track\Rtime($v);
+            $mtraj_request->rtimeVec[] = new Rtime($v);
         }
         $mtraj_request->x = $data['x'];
         $mtraj_request->y = $data['y'];
