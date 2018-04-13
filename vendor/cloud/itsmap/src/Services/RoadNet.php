@@ -7,6 +7,8 @@ require_once __DIR__ . '/../Thrift/RoadNet/InheritService.php';
 require_once __DIR__ . '/../Thrift/RoadNet/Types.php';
 require_once __DIR__ . '/../Thrift/StsData/CalculatorService.php';
 require_once __DIR__ . '/../Thrift/StsData/Types.php';
+require_once __DIR__ . '/../Thrift/Track/MtrajService.php';
+require_once __DIR__ . '/../Thrift/Track/Types.php';
 
 
 use Didi\Cloud\ItsMap\Configs\Thrift;
@@ -57,6 +59,7 @@ class RoadNet
             $loader->registerNamespace('Thrift', __DIR__ . '/');
             $loader->registerDefinition('RoadNet', __DIR__ . '/../Thrift/RoadNet/');
             $loader->registerDefinition('StsData', __DIR__ . '/../Thrift/StsData/');
+            $loader->registerDefinition('Track', __DIR__ . '/../Thrift/Track/');
             $loader->register();
 
             $this->service = $service;
@@ -420,6 +423,18 @@ class RoadNet
         if ($response === '' or intval($response) !== 0) {
             throw new \Exceptions();
         }
+        return $response;
+    }
+
+    /**
+    * 获取散点图
+    */
+    public function getScatterMtraj($data) {
+
+        $this->start('getScatterMtraj');
+        $response = $this->call('getScatterMtraj', $data);
+        $this->close();
+
         return $response;
     }
 }
