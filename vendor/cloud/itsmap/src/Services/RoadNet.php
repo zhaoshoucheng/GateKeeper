@@ -431,7 +431,7 @@ class RoadNet
     */
     public function getScatterMtraj($data) {
 
-        $this->start('getScatterMtraj');
+        $this->start('mtraj');
         $response = $this->call('getScatterMtraj', $data);
         $this->close();
 
