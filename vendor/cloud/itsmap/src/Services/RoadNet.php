@@ -436,7 +436,9 @@ class RoadNet
 
         $mtraj_request->junctionId = $data['junctionId'];
         $mtraj_request->flowId = $data['flowId'];
-        $mtraj_request->rtimeVec = $data['rtimeVec'];
+        foreach($data['rtimeVec'] as $v){
+            $mtraj_request->rtimeVec[] = new Track\Rtime($v);
+        }
         $mtraj_request->x = $data['x'];
         $mtraj_request->y = $data['y'];
         $mtraj_request->num = $data['num'];
