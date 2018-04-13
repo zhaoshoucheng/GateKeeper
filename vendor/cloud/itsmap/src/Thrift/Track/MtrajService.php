@@ -21,12 +21,12 @@ interface MtrajServiceIf {
    * @param \Request $request
    * @return \ScatterResponse
    */
-  public function getScatterMtraj(\Request $request);
+  public function getScatterMtraj(Track\Request $request);
   /**
    * @param \Request $request
    * @return \SpaceTimeResponse
    */
-  public function getSpaceTimeMtraj(\Request $request);
+  public function getSpaceTimeMtraj(Track\Request $request);
 }
 
 
@@ -41,13 +41,13 @@ class MtrajServiceClient implements \Track\MtrajServiceIf {
     $this->output_ = $output ? $output : $input;
   }
 
-  public function getScatterMtraj(\Request $request)
+  public function getScatterMtraj(Track\Request $request)
   {
     $this->send_getScatterMtraj($request);
     return $this->recv_getScatterMtraj();
   }
 
-  public function send_getScatterMtraj(\Request $request)
+  public function send_getScatterMtraj(Track\Request $request)
   {
     $args = new \MtrajService_getScatterMtraj_args();
     $args->request = $request;
