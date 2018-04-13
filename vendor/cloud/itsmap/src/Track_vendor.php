@@ -6,7 +6,6 @@ require_once __DIR__ . '/Thrift/Track/Types.php';
 
 use Didi\Cloud\ItsMap\Configs\Env;
 use Didi\Cloud\ItsMap\Services\RoadNet;
-use Track\Request;
 
 class Track_vendor {
 	public function __construct() {
@@ -41,9 +40,8 @@ class Track_vendor {
             'Y'   => 230,
             'num' => 100
         ];
-        $request = new Request($vals);
         $mtrajService = new RoadNet();
-        $response = $mtrajService->getScatterMtraj([$request]);
+        $response = $mtrajService->getScatterMtraj($vals);
 
         return $response;
     }

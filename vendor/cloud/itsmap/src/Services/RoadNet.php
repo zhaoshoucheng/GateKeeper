@@ -35,6 +35,8 @@ use DidiRoadNet\AreaFlowResponse;
 
 use StsData\RoadVersionRuntime;
 
+use Track\Request as mtraj_request;
+
 /*
  * 导航路网提供的相关继承服务
  */
@@ -430,9 +432,17 @@ class RoadNet
     * 获取散点图
     */
     public function getScatterMtraj($data) {
+        $mtraj_request = new mtraj_request();
+
+        $mtraj_request->junctionId = $data['junctionId'];
+        $mtraj_request->flowId = $data['flowId'];
+        $mtraj_request->rtimeVec = $data['rtimeVec'];
+        $mtraj_request->x = $data['x'];
+        $mtraj_request->y = $data['y'];
+        $mtraj_request->num = $data['num'];
 
         $this->start('mtraj');
-        $response = $this->call('getScatterMtraj', $data);
+        $response = $this->call('getScatterMtraj', [$mtraj_request]);
         $this->close();
 
         return $response;
