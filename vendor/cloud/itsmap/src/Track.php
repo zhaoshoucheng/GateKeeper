@@ -5,6 +5,7 @@ require_once __DIR__ . '/Thrift/Track/MtrajService.php';
 require_once __DIR__ . '/Thrift/Track/Types.php';
 
 use Didi\Cloud\ItsMap\Configs\Env;
+use Didi\Cloud\ItsMap\Services\RoadNet;
 
 class Track {
 	public function __construct() {
