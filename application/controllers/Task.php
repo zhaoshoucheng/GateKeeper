@@ -22,6 +22,7 @@ class Task extends MY_Controller {
 		$this->load->model('cycletask_model');
 		$this->load->model('customtask_model');
 		$this->load->model('task_model');
+		$this->load->model('taskdateversion_model');
 	}
 
 	/**
@@ -441,6 +442,29 @@ class Task extends MY_Controller {
 		} catch (Exception $e) {
 			$this->errno = -1;
 			$this->errmsg = 'areaFlowProcess failed.';
+		}
+
+	}
+
+	public function mapVersionCB() {
+		$data = $this->input->raw_input_stream;
+        if ($data === null) {
+            return;
+        }
+        $data = @json_decode($data, true);
+        if ($data === null or empty($data)) {
+            $this->errno = -1;
+            $this->errmsg = '参数错误';
+            return;
+        }
+
+		try {
+			$task_id = $data[0]['task_id'];
+			$this->taskdateversion_model->delete($task_id);
+			$this->taskdateversion_model->insert_batch($task_dates);
+		} catch (Exception $e) {
+			$this->errno = -1;
+			$this->errmsg = 'mapVersionCB failed.';
 		}
 
 	}
