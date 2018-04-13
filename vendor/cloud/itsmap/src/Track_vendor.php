@@ -6,6 +6,7 @@ require_once __DIR__ . '/Thrift/Track/Types.php';
 
 use Didi\Cloud\ItsMap\Configs\Env;
 use Didi\Cloud\ItsMap\Services\RoadNet;
+use Track\Request;
 
 class Track_vendor {
 	public function __construct() {
@@ -13,9 +14,34 @@ class Track_vendor {
     }
 
     /**
-    * 获取时空图
+    * 获取散点图
     */
-    public function getSpaceTimeMtraj() {
+    public function getScatterMtraj() {
+        $vals = [
+            'junctionId' => '123213123123',
+            'flowId'     => 'klasdjflkdajflka',
+            'rtimeVec'   => [
+                [
+                    'mapVersion' => '2039403242',
+                    'startTS'    => '2321312312312',
+                    'endTS'      => '2342343242432'
+                ],
+                [
+                    'mapVersion' => '2039403242',
+                    'startTS'    => '2321312312312',
+                    'endTS'      => '2342343242432'
+                ],
+                [
+                    'mapVersion' => '2039403242',
+                    'startTS'    => '2321312312312',
+                    'endTS'      => '2342343242432'
+                ]
+            ],
+            'x'   => 200 * -1,
+            'Y'   => 230,
+            'num' => 100
+        ];
+        $request = new Request($vals);
         $mtrajService = new RoadNet();
         $data = [];
         $response = $mtrajService->getScatterMtraj($data);
