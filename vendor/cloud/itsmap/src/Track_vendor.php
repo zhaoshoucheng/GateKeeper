@@ -41,9 +41,9 @@ class Track_vendor {
             'Y'   => 230,
             'num' => 100
         ];
-        //$request = new Request($vals);
+        $request = new Request($vals);
         $mtrajService = new RoadNet();
-        $response = $mtrajService->getScatterMtraj($vals);
+        $response = $mtrajService->getScatterMtraj([$request]);
 
         return $response;
     }
