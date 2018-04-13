@@ -461,7 +461,7 @@ class Task extends MY_Controller {
 		try {
 			$task_id = $data[0]['task_id'];
 			$this->taskdateversion_model->delete($task_id);
-			$this->taskdateversion_model->insert_batch($task_dates);
+			$this->taskdateversion_model->insert_batch($data);
 		} catch (Exception $e) {
 			$this->errno = -1;
 			$this->errmsg = 'mapVersionCB failed.';
