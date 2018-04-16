@@ -193,11 +193,10 @@ class Track extends MY_Controller {
 				$temp_time = date_parse(date("H:i:s", $vv['timestamp']));
 				$temp_second = $temp_time['hour'] * 3600 + $temp_time['minute'] * 60 + $temp_time['second'];
 				$result[$k]['list'][$kk]['second'] = $temp_second;
-				$map_value = 0;
 				// 找到第一个大于的通过路口距离，以此为标准映射到周期内
-				if($vv['stopLineDistance'] > 0 && $result[$k]['first_pass_time'] == 0){
+				if($vv['stopLineDistance'] > 0 && $result[$k]['base']['time'] == 0){
 					$result[$k]['base']['time'] = $vv['timestamp'];
-					$result[$k]['base']['second'] = $vv['second'];
+					$result[$k]['base']['second'] = $result[$k]['list'][$kk]['second'];
 					$result[$k]['base']['map_second'] = $vv['second'] % $timing['cycle'] + $new_offset;
 				}
 
@@ -206,11 +205,11 @@ class Track extends MY_Controller {
 			}
 		}
 
-		foreach($result as $k=>$v){
+		/*foreach($result as $k=>$v){
 			foreach($v as $kk=>$vv){
 				$result[$k][$kk]['map_second'] = $vv['second'] - $v['second'] - $v['map_second'];
 			}
-		}
+		}*/
 		echo "<pre>vals = ";print_r($vals);
 		echo "<hr><pre>";print_r($result);
 		echo "<hr><pre>junction_info = ";print_r($junction_info);
