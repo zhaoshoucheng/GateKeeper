@@ -55,8 +55,8 @@ class Track extends MY_Controller {
                     'endTS'      => '1522339200'
                 ]
             ],
-            'x'   => -100,
-            'y'   => 100,
+            'x'   => -50,
+            'y'   => 50,
             'num' => 10
         ];
 

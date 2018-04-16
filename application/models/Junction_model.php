@@ -151,12 +151,14 @@ class Junction_model extends CI_Model {
 		$diagnose_key_conf = $this->config->item('diagnose_key');
 		$temp_diagnose_data = [];
 		if(count($res) >= 1){
-			foreach($res as $k=>$v){
-				foreach($data['diagnose_key'] as $val){
+			foreach($data['diagnose_key'] as $val){
+				$temp_diagnose_data[$val . '_count'] = 0;
+				foreach($res as $k=>$v){
 					$temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
 					$is_diagnose = 0;
 					if($this->compare($v[$val], $diagnose_key_conf[$val]['junction_threshold'], $diagnose_key_conf[$val]['junction_threshold_formula'])){
 						$is_diagnose = 1;
+						$temp_diagnose_data[$val . '_count'] += 1;
 					}
 
 					$temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = $is_diagnose;
