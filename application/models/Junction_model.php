@@ -152,13 +152,13 @@ class Junction_model extends CI_Model {
 		$temp_diagnose_data = [];
 		if(count($res) >= 1){
 			foreach($data['diagnose_key'] as $val){
-				$temp_diagnose_data[$val . '_count'] = 0;
+				$temp_diagnose_data['count'][$val] = 0;
 				foreach($res as $k=>$v){
 					$temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
 					$is_diagnose = 0;
 					if($this->compare($v[$val], $diagnose_key_conf[$val]['junction_threshold'], $diagnose_key_conf[$val]['junction_threshold_formula'])){
 						$is_diagnose = 1;
-						$temp_diagnose_data[$val . '_count'] += 1;
+						$temp_diagnose_data['count'][$val] += 1;
 					}
 
 					$temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = $is_diagnose;
@@ -657,6 +657,7 @@ class Junction_model extends CI_Model {
 		$result_data = [];
 		$temp_lng = [];
 		$temp_lat = [];
+		$result_data['count'] = $data['count'];
 		foreach($all_data as $k=>$v){
 			if(isset($data[$v['logic_junction_id']])){
 				$temp_lng[$k] = $v['lng'];
@@ -675,7 +676,7 @@ class Junction_model extends CI_Model {
 		$result_data['center'] = '';
 		$result_data['center']['lng'] = $center_lng;
 		$result_data['center']['lat'] = $center_lat;
-		if(isset($result_data['dataList']) && count($result_data['dataList']) >= 1){
+		if(!empty($result_data['dataList'])){
 			$result_data['dataList'] = array_values($result_data['dataList']);
 		}
 
