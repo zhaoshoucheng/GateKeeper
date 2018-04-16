@@ -625,6 +625,47 @@ class Junction_model extends CI_Model {
 	}
 
 	/**
+	* 获取路口信息用于轨迹
+	* @param $data['task_id']     interger 任务ID
+	* @param $data['junction_id'] string   路口ID
+	* @param $data['search_type'] interger 搜索类型 1：按方案时间段 0：按时间点
+	* @param $data['time_point']  string   时间点 当search_type = 0 时有此参数
+	* @param $data['time_range']  string   时间段 当search_type = 1 时有此参数
+	* @return array
+	*/
+	public function getJunctionInfoForTheTrack($data){
+		if(empty($data)){
+			return [];
+		}
+
+		$result = [];
+
+		$select = 'task_id, junction_id, dates, start_time, end_time, clock_shift, movements';
+		$where  = "task_id = {$data['task_id']} and junction_id = '{$data['junction_id']}'";
+		if((int)$data['search_type'] == 1){
+			$time_range = explode('-', $data['time_range']);
+			$where .= " and type = 1 and start_time = '{$time_range[0]}' and end_time = '{$data[1]}'";
+		}else{
+			$where .= " and type = 0 and time_point = '{$data['time_point']}'";
+		}
+
+		$result = $this->db->select($select)
+							->from($this->tb)
+							->where($where)
+							->get();
+		if(!$result || empty($result)){
+			return [];
+		}
+
+		$result = $result->row_array();
+		if(isset($result['movements'])){
+			$result['movements'] = json_decode($result['movements'], true);
+		}
+
+		return $result;
+	}
+
+	/**
 	* 组织select 字段
 	*/
 	private function selectColumns($key){
