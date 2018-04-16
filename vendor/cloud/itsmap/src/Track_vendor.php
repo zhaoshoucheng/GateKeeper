@@ -22,8 +22,8 @@ class Track_vendor {
             'rtimeVec'   => [
                 [
                     'mapVersion' => 'c25101a793840cc6abf3819813823d82',
-                    'startTS'    => '15222528000',
-                    'endTS'      => '15223392000'
+                    'startTS'    => '1522252800',
+                    'endTS'      => '1522339200'
                 ]
             ],
             'x'   => 1,
@@ -31,7 +31,31 @@ class Track_vendor {
             'num' => 10
         ];
         $mtrajService = new RoadNet();
-        $response = $mtrajService->getScatterMtraj($vals);
+        $response = $mtrajService->getMtrajData($vals, 'getScatterMtraj');
+
+        return $response;
+    }
+
+    /**
+    * 获取时空图
+    */
+    public function getSpaceTimeMtraj() {
+        $vals = [
+            'junctionId' => '2017030116_4875814',
+            'flowId'     => '2017030116_i_490122360_2017030116_o_64019800',
+            'rtimeVec'   => [
+                [
+                    'mapVersion' => 'c25101a793840cc6abf3819813823d82',
+                    'startTS'    => '1522252800',
+                    'endTS'      => '1522339200'
+                ]
+            ],
+            'x'   => 1,
+            'y'   => -1,
+            'num' => 10
+        ];
+        $mtrajService = new RoadNet();
+        $response = $mtrajService->getMtrajData($vals, 'getSpaceTimeMtraj');
 
         return $response;
     }

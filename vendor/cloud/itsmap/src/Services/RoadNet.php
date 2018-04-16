@@ -430,9 +430,9 @@ class RoadNet
     }
 
     /**
-    * 获取散点图
+    * 获取时空图、散点图
     */
-    public function getScatterMtraj($data) {
+    public function getMtrajData($data, $type) {
         $mtraj_request = new mtraj_request();
 
         $mtraj_request->junctionId = $data['junctionId'];
@@ -445,7 +445,7 @@ class RoadNet
         $mtraj_request->num = $data['num'];
 
         $this->start('mtraj');
-        $response = $this->call('getScatterMtraj', [$mtraj_request]);
+        $response = $this->call($type, [$mtraj_request]);
         $this->close();
 
         return $response;
