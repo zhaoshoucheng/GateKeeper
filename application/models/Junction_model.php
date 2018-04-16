@@ -628,6 +628,7 @@ class Junction_model extends CI_Model {
 	* 获取路口信息用于轨迹
 	* @param $data['task_id']     interger 任务ID
 	* @param $data['junction_id'] string   路口ID
+	* @param $data['flow_id']     string   flow_id
 	* @param $data['search_type'] interger 搜索类型 1：按方案时间段 0：按时间点
 	* @param $data['time_point']  string   时间点 当search_type = 0 时有此参数
 	* @param $data['time_range']  string   时间段 当search_type = 1 时有此参数
@@ -660,6 +661,12 @@ class Junction_model extends CI_Model {
 		$result = $result->row_array();
 		if(isset($result['movements'])){
 			$result['movements'] = json_decode($result['movements'], true);
+			foreach($result['movements'] as $v){
+				if($v['movement_id'] == trim($data['flow_id'])){
+					$result['flow'] = $v;
+					unset($result['movements']);
+				}
+			}
 		}
 
 		return $result;
