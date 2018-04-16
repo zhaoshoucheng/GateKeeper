@@ -20,7 +20,19 @@ class Track extends MY_Controller {
 	public function getScatterPlot() {
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getScatterMtraj();
-		//$res = (array)$res;
+		$res = (array)$res;
+		$res = (array)$res['scatterPoints'];
+		echo "<pre>";print_r($res);
+		exit;
+	}
+
+	/**
+	* 获取时空图
+	*/
+	public function getSpaceTimeMtraj() {
+		$track_mtraj = new Track_vendor();
+		$res = $track_mtraj->getSpaceTimeMtraj();
+		$res = (array)$res;
 		$res = (array)$res['scatterPoints'];
 		echo "<pre>";print_r($res);
 		exit;
