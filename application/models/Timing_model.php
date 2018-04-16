@@ -115,9 +115,48 @@ class Timing_model extends CI_Model {
 		if(!$timing){
 			return [];
 		}
+		if(empty($timing['latest_plan'][0]['plan_detail'])){
+			return [];
+		}
 
-		return $timing;
+		$result = $this->formatTimingDataForTrack($timing['latest_plan'][0]['plan_detail'], trim($data['flow_id']));
 
+		return $result;
+
+	}
+
+	/**
+	* 格式配时数据 返回轨迹所需数据格式
+	* @param $data
+	* @param $flow_id
+	* @return array
+	*/
+	private function formatTimingDataForTrack($data, $flow_id) {
+		if(empty($data) || empty($flow_id)){
+			return [];
+		}
+
+		$res = [];
+
+		if(empty($data['extra_timing']['cycle']) || empty($data['extra_timing']['offset'])){
+			return [];
+		}
+		$res['cycle'] = $data['extra_timing']['cycle'];
+		$res['offset'] = $data['extra_timing']['offset'];
+
+		if(empty($data['movement_timing'])){
+			return [];
+		}
+
+		foreach($data['movement_timing'] as $k=>$v){
+			if(!empty($v[0]['flow_logic']['logic_flow_id']) && $v[0]['flow_logic']['logic_flow_id'] == $flow_id){
+				$res['state'] = $v[0]['state'];
+				$res['start_time'] = $v[0]['start_time'];
+				$res['duration'] = $v[0]['duration'];
+			}
+		}
+
+		return $res;
 	}
 
 	/**
