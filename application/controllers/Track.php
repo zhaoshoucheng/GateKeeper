@@ -21,5 +21,6 @@ class Track extends MY_Controller {
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getScatterMtraj();
 		var_dump($res);
+		exit;
 	}
 }
