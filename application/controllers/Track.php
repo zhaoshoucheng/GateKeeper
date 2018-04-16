@@ -178,14 +178,23 @@ class Track extends MY_Controller {
             'num' => 10
         ];
 
+        // 新的相位差
+        $new_offset = ($timing['offset'] + $junction_info['clock_shift']) % $timing['cycle'];
+        $cycle_start_time = $new_offset;
+        $cycle_end_time = $timing['cycle'] + $new_offset;
+
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getSpaceTimeMtraj($vals);
 		$res = (array)$res;
-		foreach($res as $k=>$v){
+		foreach($res['matchPoints'] as $k=>$v){
+			$result[$k]['first_pass_time'] = 0;
 			foreach($v as $kk=>&$vv){
 				$vv = (array)$vv;
-				$result[$k][$kk]['value'] = $vv['stopLineDistance'];
-				$result[$k][$kk]['time'] = $vv['timestamp'];
+				if($vv['stopLineDistance'] > 0 && $result[$k]['first_pass_time'] == 0){
+					$result[$k]['first_pass_time'] = $vv['timestamp'];
+				}
+				$result[$k]['list'][$kk]['value'] = $vv['stopLineDistance'];
+				$result[$k]['list'][$kk]['time'] = $vv['timestamp'];
 			}
 		}
 		echo "<pre>vals = ";print_r($vals);
