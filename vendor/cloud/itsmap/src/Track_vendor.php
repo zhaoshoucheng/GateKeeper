@@ -15,23 +15,9 @@ class Track_vendor {
     /**
     * 获取散点图
     */
-    public function getScatterMtraj() {
-        $vals = [
-            'junctionId' => '2017030116_4875814',
-            'flowId'     => '2017030116_i_490122360_2017030116_o_64019800',
-            'rtimeVec'   => [
-                [
-                    'mapVersion' => 'c25101a793840cc6abf3819813823d82',
-                    'startTS'    => '1522252800',
-                    'endTS'      => '1522339200'
-                ]
-            ],
-            'x'   => 1,
-            'y'   => -1,
-            'num' => 10
-        ];
+    public function getScatterMtraj($data) {
         $mtrajService = new RoadNet();
-        $response = $mtrajService->getMtrajData($vals, 'getScatterMtraj');
+        $response = $mtrajService->getMtrajData($data, 'getScatterMtraj');
 
         return $response;
     }
@@ -39,23 +25,9 @@ class Track_vendor {
     /**
     * 获取时空图
     */
-    public function getSpaceTimeMtraj() {
-        $vals = [
-            'junctionId' => '2017030116_4875814',
-            'flowId'     => '2017030116_i_490122360_2017030116_o_64019800',
-            'rtimeVec'   => [
-                [
-                    'mapVersion' => 'c25101a793840cc6abf3819813823d82',
-                    'startTS'    => '1522252800',
-                    'endTS'      => '1522339200'
-                ]
-            ],
-            'x'   => 1,
-            'y'   => -1,
-            'num' => 10
-        ];
+    public function getSpaceTimeMtraj($data) {
         $mtrajService = new RoadNet();
-        $response = $mtrajService->getMtrajData($vals, 'getSpaceTimeMtraj');
+        $response = $mtrajService->getMtrajData($data, 'getSpaceTimeMtraj');
 
         return $response;
     }
