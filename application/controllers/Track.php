@@ -213,7 +213,30 @@ class Track extends MY_Controller {
 				$result_data['dataList'][$k][$kk]['time'] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
 			}
 		}
-		$result_data['cycle_range'] = [$cycle_start_time, $cycle_end_time];
+		$result_data['signal_range'] = [];
+		if($timing['state'] == 1){ // 绿灯
+			// 绿灯开始时间
+			$green_signal_start = $cycle_start_time + $timing['start_time'];
+			// 绿灯结束时间
+			$green_signal_end = $green_signal_start + $timing['duration'];
+
+			if($green_signal_start > $cycle_start_time){
+				$result_data['signal_range']['type'] = 0;
+				$result_data['signal_range']['from'] = $cycle_start_time;
+				$result_data['signal_range']['to'] = $green_signal_start;
+			}
+
+			$result_data['signal_range']['type'] = 1;
+			$result_data['signal_range']['from'] = $green_signal_start;
+			$result_data['signal_range']['to'] = $green_signal_end;
+
+			if($cycle_end_time > $green_signal_end){
+				$result_data['signal_range']['type'] = 0;
+				$result_data['signal_range']['from'] = $green_signal_end;
+				$result_data['signal_range']['to'] = $cycle_end_time;
+			}
+		}
+		$result_data['info']['comment'] = $timing['comment'];
 		//echo "<pre>vals = ";print_r($vals);
 		echo "<hr><pre>";print_r($result_data);
 		echo "<hr><pre>junction_info = ";print_r($junction_info);
