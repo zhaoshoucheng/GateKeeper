@@ -187,14 +187,28 @@ class Track extends MY_Controller {
 		$res = $track_mtraj->getSpaceTimeMtraj($vals);
 		$res = (array)$res;
 		foreach($res['matchPoints'] as $k=>$v){
-			$result[$k]['first_pass_time'] = 0;
+			$result[$k]['base']['time'] = 0;
 			foreach($v as $kk=>&$vv){
 				$vv = (array)$vv;
+				$temp_time = date_parse(date("H:i:s", $vv['timestamp']));
+				$temp_second = $temp_time['hour'] * 3600 + $temp_time['minute'] * 60 + $temp_time['second'];
+				$result[$k]['list'][$kk]['second'] = $temp_second;
+				$map_value = 0;
+				// 找到第一个大于的通过路口距离，以此为标准映射到周期内
 				if($vv['stopLineDistance'] > 0 && $result[$k]['first_pass_time'] == 0){
-					$result[$k]['first_pass_time'] = $vv['timestamp'];
+					$result[$k]['base']['time'] = $vv['timestamp'];
+					$result[$k]['base']['second'] = $vv['second'];
+					$result[$k]['base']['map_second'] = $vv['second'] % $timing['cycle'] + $new_offset;
 				}
+
 				$result[$k]['list'][$kk]['value'] = $vv['stopLineDistance'];
 				$result[$k]['list'][$kk]['time'] = $vv['timestamp'];
+			}
+		}
+
+		foreach($result as $k=>$v){
+			foreach($v as $kk=>$vv){
+				$result[$k][$kk]['map_second'] = $vv['second'] - $v['second'] - $v['map_second'];
 			}
 		}
 		echo "<pre>vals = ";print_r($vals);
