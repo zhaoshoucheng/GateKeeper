@@ -154,20 +154,16 @@ class Track extends MY_Controller {
 		];
 		$timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
 
-		echo "<pre>junction_info = ";print_r($junction_info);
-		echo "<hr>mapVersion = ";print_r($mapversions);
-		echo "<hr>timing = ";print_r($timing);exit;
+		foreach($mapversions as $k=>$v){
+			$rtimeVec[$k]['mapVersion'] = $v['map_version_md5'];
+			$rtimeVec[$k]['startTS'] = strtotime($v['date'] . ' ' . $junction_info['start_time']);
+			$rtimeVec[$k]['endTS'] = strtotime($v['date'] . ' ' . $junction_info['end_time']);
+		}
 
 		$vals = [
-            'junctionId' => '2017030116_4875814',
-            'flowId'     => '2017030116_i_490122360_2017030116_o_64019800',
-            'rtimeVec'   => [
-                [
-                    'mapVersion' => 'c25101a793840cc6abf3819813823d82',
-                    'startTS'    => '1522252800',
-                    'endTS'      => '1522339200'
-                ]
-            ],
+            'junctionId' => trim($junction_info['junction_id']),
+            'flowId'     => trim($params['flow_id']),
+            'rtimeVec'   => $rtimeVec,
             'x'   => -50,
             'y'   => 50,
             'num' => 10
@@ -176,8 +172,11 @@ class Track extends MY_Controller {
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getSpaceTimeMtraj($vals);
 		$res = (array)$res;
-		//$res = (array)$res['scatterPoints'];
-		echo "<pre>";print_r($res);
+		echo "<pre>vals = ";print_r($vals);
+		echo "<hr><pre>";print_r($res);
+		echo "<hr><pre>junction_info = ";print_r($junction_info);
+		echo "<hr>mapVersion = ";print_r($mapversions);
+		echo "<hr>timing = ";print_r($timing);exit;
 		exit;
 	}
 }
