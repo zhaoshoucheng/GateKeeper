@@ -149,10 +149,11 @@ class Timing_model extends CI_Model {
 		}
 
 		foreach($data['movement_timing'] as $k=>$v){
-			if(!empty($v[0]['flow_logic']['logic_flow_id']) && $v[0]['flow_logic']['logic_flow_id'] == $flow_id){
+			if(!empty($v[0]['flow_logic']) && $v[0]['flow_logic']['logic_flow_id'] == $flow_id){
 				$res['state'] = $v[0]['state'];
 				$res['start_time'] = $v[0]['start_time'];
 				$res['duration'] = $v[0]['duration'];
+				$res['comment'] = $v[0]['flow_logic']['comment'];
 			}
 		}
 
