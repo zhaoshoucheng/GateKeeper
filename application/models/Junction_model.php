@@ -663,7 +663,9 @@ class Junction_model extends CI_Model {
 			$result['movements'] = json_decode($result['movements'], true);
 			foreach($result['movements'] as $v){
 				if($v['movement_id'] == trim($data['flow_id'])){
-					$result['flow'] = $v;
+					$result['flow_id'] = $v['movement_id'];
+					$result['af_condition'] = $v['af_condition'];
+					$result['bf_condition'] = $v['bf_condition'];
 					unset($result['movements']);
 				}
 			}
