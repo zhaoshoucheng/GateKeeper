@@ -204,20 +204,22 @@ class Track extends MY_Controller {
 				}
 
 				$result[$k]['list'][$kk]['value'] = $vv['stopLineDistance'];
-				$result[$k]['list'][$kk]['time'] = $vv['timestamp'];
 			}
 		}
 
 		foreach($result as $k=>$v){
 			foreach($v['list'] as $kk=>$vv){
-				$result[$k]['list'][$kk]['map_second'] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
+				$result_data['dataList'][$k][$kk]['value'] = round($vv['value'], 5) * -1;
+				$result_data['dataList'][$k][$kk]['time'] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
 			}
 		}
-		echo "<pre>vals = ";print_r($vals);
-		echo "<hr><pre>";print_r($result);
+		$result_data['cycle_range'] = [$cycle_start_time, $cycle_range];
+		//echo "<pre>vals = ";print_r($vals);
+		echo "<hr><pre>";print_r($result_data);
 		echo "<hr><pre>junction_info = ";print_r($junction_info);
 		echo "<hr>mapVersion = ";print_r($mapversions);
-		echo "<hr>timing = ";print_r($timing);exit;
-		exit;
+		echo "<hr>timing = ";print_r($timing);
+
+		return $this->response($result_data);
 	}
 }
