@@ -147,9 +147,10 @@ class Track extends MY_Controller {
 
 		// 获取 配时信息 周期 相位差 绿灯开始结束时间
 		$timing_data = [
-			'junciton_id' => $junction_info['junction_id'],
+			'junction_id' => $junction_info['junction_id'],
 			'dates'       => explode(',', $junction_info['dates']),
-			'time_range'  => $junction_info['start_time'] . '-' . date("H:i", strtotime($junction_info['end_time']) - 60),
+			//'time_range'  => $junction_info['start_time'] . '-' . date("H:i", strtotime($junction_info['end_time']) - 60),
+			'time_range'  => '00:00-24:00',
 			'flow_id'	  => trim($params['flow_id'])
 		];
 		$timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);

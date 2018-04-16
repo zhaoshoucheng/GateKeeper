@@ -152,7 +152,7 @@ $config['diagnose_key']	= [
 				'name'=>'停车(周期)次数/次'
 			],
 			'route_length'  => [
-				'name'=>'路段长度(米)'
+				'name'=>'路段长度/米'
 			]
 		]
 	],
