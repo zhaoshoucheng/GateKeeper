@@ -14,6 +14,7 @@ class Track extends MY_Controller {
 		parent::__construct();
 		$this->load->model('junction_model');
 		$this->load->model('taskdateversion_model');
+		$this->load->model('timing_model');
 	}
 
 	/**
@@ -144,8 +145,18 @@ class Track extends MY_Controller {
 			return;
 		}
 
+		// 获取 配时信息 周期 相位差 绿灯开始结束时间
+		$timing_data = [
+			'junciton_id' => $junction_info['junction_id'],
+			'dates'       => explode(',', $junction_info['dates']),
+			'time_range'  => $junction_info['start_time'] . '-' . date("H:i", strtotime($junction_info['end_time']) - 60),
+			'flow_id'	  => trim($params['flow_id'])
+		];
+		$timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
+
 		echo "<pre>junction_info = ";print_r($junction_info);
-		echo "<hr>mapVersion = ";print_r($mapversions);exit;
+		echo "<hr>mapVersion = ";print_r($mapversions);
+		echo "<hr>timing = ";print_r($timing);exit;
 
 		$vals = [
             'junctionId' => '2017030116_4875814',

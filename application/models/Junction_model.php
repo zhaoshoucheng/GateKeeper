@@ -557,7 +557,7 @@ class Junction_model extends CI_Model {
 	* @param $data['task_time_range'] string   Y 评估/诊断任务开始结束时间 格式 00:00-24:00
 	* @return array
 	*/
-	public function getJunctionMapData($data){
+	public function getJunctionMapData($data) {
 		if(empty($data)){
 			return [];
 		}
@@ -633,7 +633,7 @@ class Junction_model extends CI_Model {
 	* @param $data['time_range']  string   时间段 当search_type = 1 时有此参数
 	* @return array
 	*/
-	public function getJunctionInfoForTheTrack($data){
+	public function getJunctionInfoForTheTrack($data) {
 		if(empty($data)){
 			return [];
 		}
@@ -644,7 +644,7 @@ class Junction_model extends CI_Model {
 		$where  = "task_id = {$data['task_id']} and junction_id = '{$data['junction_id']}'";
 		if((int)$data['search_type'] == 1){
 			$time_range = explode('-', $data['time_range']);
-			$where .= " and type = 1 and start_time = '{$time_range[0]}' and end_time = '{$data[1]}'";
+			$where .= " and type = 1 and start_time = '{$time_range[0]}' and end_time = '{$time_range[1]}'";
 		}else{
 			$where .= " and type = 0 and time_point = '{$data['time_point']}'";
 		}
@@ -653,7 +653,7 @@ class Junction_model extends CI_Model {
 							->from($this->tb)
 							->where($where)
 							->get();
-		if(!$result || empty($result)){
+		if(!$result){
 			return [];
 		}
 
