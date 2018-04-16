@@ -181,8 +181,15 @@ class Track extends MY_Controller {
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getSpaceTimeMtraj($vals);
 		$res = (array)$res;
+		foreach($res as $k=>$v){
+			foreach($v as $kk=>&$vv){
+				$vv = (array)$vv;
+				$result[$k][$kk]['value'] = $vv['stopLineDistance'];
+				$result[$k][$kk]['time'] = $vv['timestamp'];
+			}
+		}
 		echo "<pre>vals = ";print_r($vals);
-		echo "<hr><pre>";print_r($res);
+		echo "<hr><pre>";print_r($result);
 		echo "<hr><pre>junction_info = ";print_r($junction_info);
 		echo "<hr>mapVersion = ";print_r($mapversions);
 		echo "<hr>timing = ";print_r($timing);exit;
