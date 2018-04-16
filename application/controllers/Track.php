@@ -209,8 +209,10 @@ class Track extends MY_Controller {
 
 		foreach($result as $k=>$v){
 			foreach($v['list'] as $kk=>$vv){
-				$result_data['dataList'][$k][$kk]['value'] = round($vv['value'], 5) * -1;
-				$result_data['dataList'][$k][$kk]['time'] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
+				// 值
+				$result_data['dataList'][$k][$kk][0] = round($vv['value'], 5) * -1;
+				// 时间
+				$result_data['dataList'][$k][$kk][1] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
 			}
 		}
 		$result_data['signal_range'] = [];
@@ -236,7 +238,7 @@ class Track extends MY_Controller {
 				$result_data['signal_range'][$green_signal_end]['to'] = $cycle_end_time;
 			}
 		}
-		if(empty($result_data['signal_range'])){
+		if(!empty($result_data['signal_range'])){
 			$result_data['signal_range'] = array_values($result_data['signal_range']);
 		}
 		$result_data['info']['id'] = trim($params['flow_id']);
