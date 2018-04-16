@@ -186,7 +186,10 @@ class Track extends MY_Controller {
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getSpaceTimeMtraj($vals);
 		$res = (array)$res;
-		foreach($res['matchPoints'] as $k=>$v){
+		for($i=0; $i < 100; $i++){
+			$temp_res = $res['matchPoints'][$i];
+		}
+		foreach($temp_res['matchPoints'] as $k=>$v){
 			$result[$k]['base']['time'] = 0;
 			foreach($v as $kk=>&$vv){
 				$vv = (array)$vv;
@@ -206,8 +209,8 @@ class Track extends MY_Controller {
 		}
 
 		foreach($result as $k=>$v){
-			foreach($v as $kk=>$vv){
-				$result[$k][$kk]['map_second'] = $vv['second'] - ($v['second'] - $v['map_second']);
+			foreach($v['list'] as $kk=>$vv){
+				$result[$k]['list'][$kk]['map_second'] = $vv['second'] - ($v['second'] - $v['map_second']);
 			}
 		}
 		echo "<pre>vals = ";print_r($vals);
