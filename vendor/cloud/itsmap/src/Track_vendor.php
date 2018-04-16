@@ -17,28 +17,18 @@ class Track_vendor {
     */
     public function getScatterMtraj() {
         $vals = [
-            'junctionId' => '123213123123',
-            'flowId'     => 'klasdjflkdajflka',
+            'junctionId' => '2017030116_4875814',
+            'flowId'     => '2017030116_i_490122360_2017030116_o_64019800',
             'rtimeVec'   => [
                 [
-                    'mapVersion' => '2039403242',
-                    'startTS'    => '2321312312312',
-                    'endTS'      => '2342343242432'
-                ],
-                [
-                    'mapVersion' => '2039403242',
-                    'startTS'    => '2321312312312',
-                    'endTS'      => '2342343242432'
-                ],
-                [
-                    'mapVersion' => '2039403242',
-                    'startTS'    => '2321312312312',
-                    'endTS'      => '2342343242432'
+                    'mapVersion' => 'c25101a793840cc6abf3819813823d82',
+                    'startTS'    => '1522252800l',
+                    'endTS'      => '1522339200l'
                 ]
             ],
-            'x'   => 200 * -1,
-            'y'   => 230,
-            'num' => 100
+            'x'   => 1,
+            'y'   => -1,
+            'num' => 10
         ];
         $mtrajService = new RoadNet();
         $response = $mtrajService->getScatterMtraj($vals);
