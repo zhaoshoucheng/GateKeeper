@@ -20,7 +20,9 @@ class Track extends MY_Controller {
 	public function getScatterPlot() {
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getScatterMtraj();
-		var_dump($res);
+		//$res = (array)$res;
+		$res = (array)$res['scatterPoints'];
+		echo "<pre>";print_r($res);
 		exit;
 	}
 }

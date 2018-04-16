@@ -22,8 +22,8 @@ class Track_vendor {
             'rtimeVec'   => [
                 [
                     'mapVersion' => 'c25101a793840cc6abf3819813823d82',
-                    'startTS'    => '1522252800l',
-                    'endTS'      => '1522339200l'
+                    'startTS'    => '15222528000',
+                    'endTS'      => '15223392000'
                 ]
             ],
             'x'   => 1,
