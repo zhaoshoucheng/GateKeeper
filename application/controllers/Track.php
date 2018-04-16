@@ -197,7 +197,7 @@ class Track extends MY_Controller {
 				if($vv['stopLineDistance'] > 0 && $result[$k]['base']['time'] == 0){
 					$result[$k]['base']['time'] = $vv['timestamp'];
 					$result[$k]['base']['second'] = $result[$k]['list'][$kk]['second'];
-					$result[$k]['base']['map_second'] = $vv['second'] % $timing['cycle'] + $new_offset;
+					$result[$k]['base']['map_second'] = $result[$k]['list'][$kk]['second'] % $timing['cycle'] + $new_offset;
 				}
 
 				$result[$k]['list'][$kk]['value'] = $vv['stopLineDistance'];
@@ -205,11 +205,11 @@ class Track extends MY_Controller {
 			}
 		}
 
-		/*foreach($result as $k=>$v){
+		foreach($result as $k=>$v){
 			foreach($v as $kk=>$vv){
-				$result[$k][$kk]['map_second'] = $vv['second'] - $v['second'] - $v['map_second'];
+				$result[$k][$kk]['map_second'] = $vv['second'] - ($v['second'] - $v['map_second']);
 			}
-		}*/
+		}
 		echo "<pre>vals = ";print_r($vals);
 		echo "<hr><pre>";print_r($result);
 		echo "<hr><pre>junction_info = ";print_r($junction_info);
