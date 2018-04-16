@@ -139,20 +139,20 @@ $config['diagnose_key']	= [
 			'low'        => 0.005
 		],
 		'flow_quota'=>[
-			'route_length'  => [
-				'name'=>'路段长度(米)'
-			],
-			'stop_time_cycle'=>[
-				'name'=>'停车(周期)次数(次)'
-			],
-			'queue_position'=>[
-				'name'=>'排队长度(米)'
-			],
-			'stop_delay'=>[
-				'name'=>'平均(停车)延误(秒)'
-			],
 			'saturation_degree'=>[
 				'name'=>'饱和度'
+			],
+			'queue_position'=>[
+				'name'=>'排队长度/米'
+			],
+			'stop_delay'=>[
+				'name'=>'平均(停车)延误/秒'
+			],
+			'stop_time_cycle'=>[
+				'name'=>'停车(周期)次数/次'
+			],
+			'route_length'  => [
+				'name'=>'路段长度(米)'
 			]
 		]
 	],
@@ -166,21 +166,21 @@ $config['diagnose_key']	= [
 			'low'        => 0
 		],
 		'flow_quota'=>[
-			'route_length'  => [
-				'name'=>'路段长度(米)'
-			],
-			'queue_position'=>[
-				'name'=>'排队长度(米)'
-			],
-			'stop_time_cycle'=>[
-				'name'=>'停车(周期)次数(次)'
-			],
-			'stop_delay'=>[
-				'name'=>'平均(停车)延误(秒)'
-			],
 			'spillover_rate'=>[
 				'name'=>'溢流比率'
-			]
+			],
+			'queue_position'=>[
+				'name'=>'排队长度/米'
+			],
+			'stop_delay'=>[
+				'name'=>'平均(停车)延误/秒'
+			],
+			'stop_time_cycle'=>[
+				'name'=>'停车(周期)次数/次'
+			],
+			'route_length'  => [
+				'name'=>'路段长度/米'
+			],
 		]
 	],
 	'saturation_index'	=> [
@@ -193,14 +193,14 @@ $config['diagnose_key']	= [
 			'low'        => 0.3 * -1
 		],
 		'flow_quota'=>[
-			'stop_delay'=>[
-				'name'=>'平均(停车)延误(秒)'
-			],
-			'stop_time_cycle'=>[
-				'name'=>'停车(周期)次数(次)'
-			],
 			'saturation_degree'=>[
 				'name'=>'饱和度'
+			],
+			'stop_delay'=>[
+				'name'=>'平均(停车)延误/秒'
+			],
+			'stop_time_cycle'=>[
+				'name'=>'停车(周期)次数/次'
 			]
 		]
 	]

@@ -76,10 +76,11 @@ class Timing_model extends CI_Model {
 		}
 		// 获取配时数据
 		$timing = $this->getTimingData($data);
-		if(!$timing || empty($timing)){
+		if(!$timing){
 			return [];
 		}
 
+		$result = [];
 		if(!isset($data['time_point'])){ // 按方案查询
 			$result = $this->formartTimingDataByPlan($timing);
 		}else{ // 按时间点查询
@@ -92,6 +93,31 @@ class Timing_model extends CI_Model {
 		}
 
 		return $result_data;
+	}
+
+	/**
+	* 获取某一相位的配时信息
+	* @param $data['junction_id'] string 逻辑路口ID
+	* @param $data['dates']       array  评估/诊断日期
+	* @param $data['time_range']  string 时间段 00:00-00:30
+	* @param $data['flow_id']     string 相位ID
+	* @return array
+	*/
+	public function getFlowTimingInfoForTheTrack($data) {
+		if(empty($data)){
+			return [];
+		}
+
+		$result = [];
+
+		// 获取配时数据
+		$timing = $this->getTimingData($data);
+		if(!$timing){
+			return [];
+		}
+
+		return $timing;
+
 	}
 
 	/**
