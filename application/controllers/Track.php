@@ -239,6 +239,7 @@ class Track extends MY_Controller {
 		if(empty($result_data['signal_range'])){
 			$result_data['signal_range'] = array_values($result_data['signal_range']);
 		}
+		$result_data['info']['id'] = trim($params['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
 		//echo "<pre>vals = ";print_r($vals);
 		echo "<hr><pre>";print_r($result_data);
