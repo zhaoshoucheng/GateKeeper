@@ -149,8 +149,7 @@ class Track extends MY_Controller {
 		$timing_data = [
 			'junction_id' => $junction_info['junction_id'],
 			'dates'       => explode(',', $junction_info['dates']),
-			//'time_range'  => $junction_info['start_time'] . '-' . date("H:i", strtotime($junction_info['end_time']) - 60),
-			'time_range'  => '00:00-24:00',
+			'time_range'  => $junction_info['start_time'] . '-' . date("H:i", strtotime($junction_info['end_time']) - 60),
 			'flow_id'	  => trim($params['flow_id'])
 		];
 		$timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);

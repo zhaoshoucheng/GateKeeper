@@ -334,7 +334,6 @@ class Timing_model extends CI_Model {
 		} catch (Exception $e) {
 			return [];
 		}
-
 		if(isset($timing['data']) && count($timing['data'] >= 1)){
 			return $timing['data'];
 		}else{
