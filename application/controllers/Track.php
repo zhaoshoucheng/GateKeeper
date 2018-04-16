@@ -200,7 +200,7 @@ class Track extends MY_Controller {
 				if($vv['stopLineDistance'] > 0 && $result[$k]['base']['time'] == 0){
 					$result[$k]['base']['time'] = $vv['timestamp'];
 					$result[$k]['base']['second'] = $result[$k]['list'][$kk]['second'];
-					$result[$k]['base']['map_second'] = $result[$k]['list'][$kk]['second'] % $timing['cycle'] + $new_offset;
+					$result[$k]['base']['map_second'] = ($result[$k]['list'][$kk]['second'] - $new_offset) % $timing['cycle'] + $new_offset;
 				}
 
 				$result[$k]['list'][$kk]['value'] = $vv['stopLineDistance'];
