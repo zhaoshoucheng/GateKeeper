@@ -221,20 +221,23 @@ class Track extends MY_Controller {
 			$green_signal_end = $green_signal_start + $timing['duration'];
 
 			if($green_signal_start > $cycle_start_time){
-				$result_data['signal_range']['type'] = 0;
-				$result_data['signal_range']['from'] = $cycle_start_time;
-				$result_data['signal_range']['to'] = $green_signal_start;
+				$result_data['signal_range'][$cycle_start_time]['type'] = 0;
+				$result_data['signal_range'][$cycle_start_time]['from'] = $cycle_start_time;
+				$result_data['signal_range'][$cycle_start_time]['to'] = $green_signal_start;
 			}
 
-			$result_data['signal_range']['type'] = 1;
-			$result_data['signal_range']['from'] = $green_signal_start;
-			$result_data['signal_range']['to'] = $green_signal_end;
+			$result_data['signal_range'][$green_signal_start]['type'] = 1;
+			$result_data['signal_range'][$green_signal_start]['from'] = $green_signal_start;
+			$result_data['signal_range'][$green_signal_start]['to'] = $green_signal_end;
 
 			if($cycle_end_time > $green_signal_end){
-				$result_data['signal_range']['type'] = 0;
-				$result_data['signal_range']['from'] = $green_signal_end;
-				$result_data['signal_range']['to'] = $cycle_end_time;
+				$result_data['signal_range'][$green_signal_end]['type'] = 0;
+				$result_data['signal_range'][$green_signal_end]['from'] = $green_signal_end;
+				$result_data['signal_range'][$green_signal_end]['to'] = $cycle_end_time;
 			}
+		}
+		if(empty($result_data['signal_range'])){
+			$result_data['signal_range'] = array_values($result_data['signal_range']);
 		}
 		$result_data['info']['comment'] = $timing['comment'];
 		//echo "<pre>vals = ";print_r($vals);
