@@ -213,7 +213,7 @@ class Track extends MY_Controller {
 				$result_data['dataList'][$k][$kk]['time'] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
 			}
 		}
-		$result_data['cycle_range'] = [$cycle_start_time, $cycle_range];
+		$result_data['cycle_range'] = [$cycle_start_time, $cycle_end_time];
 		//echo "<pre>vals = ";print_r($vals);
 		echo "<hr><pre>";print_r($result_data);
 		echo "<hr><pre>junction_info = ";print_r($junction_info);
