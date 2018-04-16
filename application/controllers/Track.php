@@ -161,9 +161,18 @@ class Track extends MY_Controller {
 		}
 
 		$vals = [
-            'junctionId' => trim($junction_info['junction_id']),
+            /*'junctionId' => trim($junction_info['junction_id']),
             'flowId'     => trim($params['flow_id']),
-            'rtimeVec'   => $rtimeVec,
+            'rtimeVec'   => $rtimeVec,*/
+            'junctionId' => '2017030116_4875814',
+            'flowId'     => '2017030116_i_490122360_2017030116_o_64019800',
+            'rtimeVec'   => [
+                [
+                    'mapVersion' => 'c25101a793840cc6abf3819813823d82',
+                    'startTS'    => '1522252800',
+                    'endTS'      => '1522339200'
+                ]
+            ],
             'x'   => -50,
             'y'   => 50,
             'num' => 10
