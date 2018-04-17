@@ -23,6 +23,7 @@ class Junction_model extends CI_Model {
 
 		$this->load->config('nconf');
 		$this->load->model('waymap_model');
+		$this->load->model('timing_model');
 	}
 
 	/**
@@ -479,7 +480,6 @@ class Junction_model extends CI_Model {
 		$data['movements'] = json_decode($data['movements'], true);
 
 		// 获取flow_id=>name数组
-		$this->load->model('timing_model');
 		$timing_data = [
 			'junction_id' => trim($data['junction_id']),
 			'dates'       => $dates,

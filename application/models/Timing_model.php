@@ -15,9 +15,9 @@ class Timing_model extends CI_Model {
 
 	/**
 	* 获取路口配时信息
-	* @param $data['junction_id']      string 逻辑路口ID
-	* @param $data['dates']            array  评估/诊断日期
-	* @param $data['task_time_range']  string 时间段 00:00-00:30
+	* @param $data['junction_id'] string 逻辑路口ID
+	* @param $data['dates']       array  评估/诊断日期
+	* @param $data['time_range']  string 时间段 00:00-00:30
 	* @return array
 	*/
 	public function getJunctionsTimingInfo($data) {
@@ -30,7 +30,7 @@ class Timing_model extends CI_Model {
 
 		// 对返回数据格式化,返回需要的格式
 		if(count($timing >= 1)){
-			$timing = $this->formatTimingData($timing, $data['task_time_range']);
+			$timing = $this->formatTimingData($timing, $data['time_range']);
 		}else{
 			return [];
 		}
