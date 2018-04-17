@@ -160,6 +160,32 @@ class Track extends MY_Controller {
 			$rtimeVec[$k]['endTS'] = strtotime($v['date'] . ' ' . $junction_info['end_time']);
 		}
 
+		$af_condition = [];
+		$bf_condition = [];
+		$num = [];
+		if(!empty($junction_info['af_condition'])){
+			$af_condition = explode(',', trim($junction_info['af_condition']));
+		}
+		if(!empty($junction_info['bf_condition'])){
+			$bf_condition = explode(',', trim($junction_info['bf_condition']));
+		}
+		if(!empty($junction_info['num'])){
+			$num = explode(',', trim($junction_info['num']));
+		}
+
+		$sample_data = [];
+		if(!empty($bf_condition) && !empty($af_condition) && !empty($num)){
+			foreach($bf_condition as $k=>$v){
+				$sample_data[$k]['x'] = $v;
+				$sample_data[$k]['y'] = $af_condition[$k];
+				$sample_data[$k]['n'] = $num[$k];
+			}
+		}
+
+		echo "<pre> sample_data = ";print_r($sample_data);
+		echo "<hr><pre>junction_info = ";print_r($junction_info);exit;
+
+
 		$vals = [
             /*'junctionId' => trim($junction_info['junction_id']),
             'flowId'     => trim($params['flow_id']),
@@ -173,9 +199,92 @@ class Track extends MY_Controller {
                     'endTS'      => '1522339200'
                 ]
             ],
-            'x'   => -50,
-            'y'   => 50,
-            'num' => 10
+            'x' => [
+            	[
+            		'xType'	=> 1,
+            		'xData' => [
+            			'all' => true,
+            			'num' => 7
+            		]
+            	],
+            	[
+            		'xType'	=> 2,
+            		'xData' => [
+            			'noStop' => 1,
+            			'num' => 7
+            		]
+            	],
+            	[
+            		'xType'	=> 3,
+            		'xData' => [
+            			'lR' => -185.0,
+            			'rR' => -65.0,
+            			'num' => 7
+            		]
+            	],
+            	[
+            		'xType'	=> 3,
+            		'xData' => [
+            			'lR'     => -65.0,
+            			'rR'     => -49.0,
+            			'num' => 7
+            		]
+            	],
+            	[
+            		'xType'	=> 3,
+            		'xData' => [
+            			'lR'     => -49.0,
+            			'rR'     => 0,
+            			'num' => 7
+            		]
+            	]
+            ],
+            'y'   => [
+            	[
+            		'yType' => 4,
+            		'yData' => [
+            			'noStop' => -1,
+            			'lR'     => 31,
+            			'rR'     => 421.0,
+            			'num' => 7
+            		]
+            	],
+            	[
+            		'yType' => 4,
+            		'yData' => [
+            			'noStop' => -1,
+            			'lR'     => 31,
+            			'rR'     => 421.0,
+            			'num' => 7
+            		]
+            	],
+            	[
+            		'yType' => 4,
+            		'yData' => [
+            			'noStop' => -1,
+            			'lR'     => 31,
+            			'rR'     => 421.0,
+            			'num' => 7
+            		]
+            	],
+            	[
+            		'yType' => 4,
+            		'yData' => [
+            			'noStop' => -1,
+            			'lR'     => 31,
+            			'rR'     => 421.0,
+            			'num' => 7
+            		]
+            	],
+            	[
+            		'yType' => 3,
+            		'yData' => [
+            			'lR'     => 0,
+            			'rR'     => 31,
+            			'num' => 7
+            		]
+            	]
+            ]
         ];
 
         // 新的相位差 用任务结果中的clock_shift + 配时的相位差
