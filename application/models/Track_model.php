@@ -135,7 +135,16 @@ class Track_model extends CI_Model {
             'filterData' => $sample_data
         ];
 
-        // 新的相位差 用任务结果中的clock_shift + 配时的相位差
+        $result_data = $this->$type($vals, $timing, $junction_info);
+
+		return $result_data;
+	}
+
+	/**
+	* 获取时间空轨迹数据
+	*/
+	private function getSpaceTimeMtraj($vals, $timing, $junction_info) {
+		// 新的相位差 用任务结果中的clock_shift + 配时的相位差
         $new_offset = ($timing['offset'] + $junction_info['clock_shift']) % $timing['cycle'];
         $cycle_start_time = $new_offset;
         $cycle_end_time = $timing['cycle'] + $new_offset;
@@ -143,10 +152,7 @@ class Track_model extends CI_Model {
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getSpaceTimeMtraj($vals);
 		$res = (array)$res;
-		for($i=0; $i < 100; $i++){
-			$temp_res['matchPoints'][$i] = $res['matchPoints'][$i];
-		}
-		foreach($temp_res['matchPoints'] as $k=>$v){
+		foreach($res['matchPoints'] as $k=>$v){
 			$tem_result[$k]['base']['time'] = 0;
 			foreach($v as $kk=>&$vv){
 				$vv = (array)$vv;
@@ -212,7 +218,18 @@ class Track_model extends CI_Model {
 		echo "<hr>timing = ";print_r($timing);
 		echo "<hr><pre>result = ";print_r($result);
 		echo "<hr><pre>result = ";print_r($result_data);*/
-
 		return $result_data;
+	}
+
+	/**
+	* 获取散点图轨迹数据
+	*/
+	private function getScatterMtraj($vals, $timing, $junction_info) {
+		$track_mtraj = new Track_vendor();
+		$res = $track_mtraj->getScatterMtraj($vals);
+		$res = (array)$res;
+
+		echo "<pre>res = ";print_r($res);exit;
+		return $res;
 	}
 }
