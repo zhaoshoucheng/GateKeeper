@@ -119,8 +119,6 @@ class Track_model extends CI_Model {
 			}
 		}
 		echo "<pre> sample_data = ";print_r($sample_data);
-		echo "<hr><pre>junction_info = ";print_r($junction_info);
-
 
 		$vals = [
             'junctionId' => trim($junction_info['junction_id']),
@@ -150,21 +148,25 @@ class Track_model extends CI_Model {
 			$temp_res['matchPoints'][$i] = $res['matchPoints'][$i];
 		}
 		foreach($temp_res['matchPoints'] as $k=>$v){
-			$result[$k]['base']['time'] = 0;
+			$tem_result[$k]['base']['time'] = 0;
 			foreach($v as $kk=>&$vv){
 				$vv = (array)$vv;
 				$temp_time = date_parse(date("H:i:s", $vv['timestamp']));
 				$temp_second = $temp_time['hour'] * 3600 + $temp_time['minute'] * 60 + $temp_time['second'];
-				$result[$k]['list'][$temp_second]['second'] = $temp_second;
+				$tem_result[$k]['list'][$temp_second]['second'] = $temp_second;
 				// 找到第一个大于的通过路口距离，以此为标准映射到周期内
-				if($vv['stopLineDistance'] > 0 && $result[$k]['base']['time'] == 0){
-					$result[$k]['base']['time'] = $vv['timestamp'];
-					$result[$k]['base']['second'] = $temp_second;
-					$result[$k]['base']['map_second'] = ($result[$k]['list'][$kk]['second'] - $new_offset) % $timing['cycle'] + $new_offset;
+				if($vv['stopLineDistance'] > 0 && $tem_result[$k]['base']['time'] == 0){
+					$tem_result[$k]['base']['time'] = $vv['timestamp'];
+					$tem_result[$k]['base']['second'] = $temp_second;
+					$tem_result[$k]['base']['map_second'] = ($tem_result[$k]['list'][$temp_second]['second'] - $new_offset) % $timing['cycle'] + $new_offset;
 				}
 
-				$result[$k]['list'][$temp_second]['value'] = $vv['stopLineDistance'];
+				$tem_result[$k]['list'][$temp_second]['value'] = $vv['stopLineDistance'];
 			}
+			$tem_result[$k]['list'] = ksort($tem_result[$k]['list']);
+			$first = current($tem_result[$k]['list']);
+			$result[$first['second']]['base'] = $tem_result[$k]['base'];
+			$result[$first['second']]['list'] = array_values($tem_result[$k]['list']);
 		}
 		echo "<hr><pre>junction_info = ";print_r($junction_info);
 		echo "<hr>mapVersion = ";print_r($mapversions);
