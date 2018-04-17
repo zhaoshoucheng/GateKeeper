@@ -707,7 +707,9 @@ class Junction_model extends CI_Model {
 		$result_data = [];
 		$temp_lng = [];
 		$temp_lat = [];
-		$result_data['count'] = $data['count'];
+		if(isset($data['count'])){
+			$result_data['count'] = $data['count'];
+		}
 		foreach($all_data as $k=>$v){
 			if(isset($data[$v['logic_junction_id']])){
 				$temp_lng[$k] = $v['lng'];
