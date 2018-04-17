@@ -666,6 +666,7 @@ class Junction_model extends CI_Model {
 					$result['flow_id'] = $v['movement_id'];
 					$result['af_condition'] = $v['af_condition'];
 					$result['bf_condition'] = $v['bf_condition'];
+					$result['num'] = $v['num'];
 					unset($result['movements']);
 				}
 			}
