@@ -209,7 +209,7 @@ class Track_model extends CI_Model {
 		if(!empty($result_data['signal_range'])){
 			$result_data['signal_range'] = array_values($result_data['signal_range']);
 		}
-		$result_data['info']['id'] = trim($data['flow_id']);
+		$result_data['info']['id'] = trim($junction_info['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
 
 		/*echo "<pre> sample_data = ";print_r($sample_data);
