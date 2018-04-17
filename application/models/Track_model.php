@@ -163,7 +163,7 @@ class Track_model extends CI_Model {
 
 				$tem_result[$k]['list'][$temp_second]['value'] = $vv['stopLineDistance'];
 			}
-			$tem_result[$k]['list'] = ksort($tem_result[$k]['list']);
+			ksort($tem_result[$k]['list']);
 			$first = current($tem_result[$k]['list']);
 			$result[$first['second']]['base'] = $tem_result[$k]['base'];
 			$result[$first['second']]['list'] = array_values($tem_result[$k]['list']);
