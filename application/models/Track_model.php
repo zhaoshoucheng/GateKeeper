@@ -228,8 +228,20 @@ class Track_model extends CI_Model {
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getScatterMtraj($vals);
 		$res = (array)$res;
+		foreach($res['scatterPoints'] as $k=>&$v){
+			$v = (array)$v;
+			$temp_time = date_parse(date("H:i:s", $v['stopLineTimestamp']));
+			$temp_second = $temp_time['hour'] * 3600 + $temp_time['minute'] * 60 + $temp_time['second'];
+			// 时间
+			$result_data['dataList'][$k][0] = $temp_second;
+			// 值
+			$result_data['dataList'][$k][1] = round($v['stopDelayBefore']);
+		}
 
-		echo "<pre>res = ";print_r($res);exit;
-		return $res;
+		$result_data['info']['id'] = trim($junction_info['flow_id']);
+		$result_data['info']['comment'] = $timing['comment'];
+
+		echo "<pre>result_data = ";print_r($result_data);
+		return $result_data;
 	}
 }
