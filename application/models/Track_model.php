@@ -1,5 +1,7 @@
 <?php
 
+use Didi\Cloud\ItsMap\Track_vendor;
+
 class Track_model extends CI_Model {
 
 	public function __construct() {

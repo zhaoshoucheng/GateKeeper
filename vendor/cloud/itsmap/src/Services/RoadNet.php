@@ -37,6 +37,8 @@ use StsData\RoadVersionRuntime;
 
 use Track\Request as mtraj_request;
 use Track\Rtime;
+use Track\TypeData;
+use Track\FilterData;
 
 /*
  * 导航路网提供的相关继承服务
@@ -440,9 +442,11 @@ class RoadNet
         foreach($data['rtimeVec'] as $v){
             $mtraj_request->rtimeVec[] = new Rtime($v);
         }
-        $mtraj_request->x = $data['x'];
-        $mtraj_request->y = $data['y'];
-        $mtraj_request->num = $data['num'];
+        foreach($data['filterData'] as $k=>&$v){
+            $v['xData'] = new TypeData($v['xData']);
+            $v['yData'] = new TypeData($v['yData']);
+            $mtraj_request->filterDataVec[] = new FilterData($v);
+        }
 
         $this->start('mtraj');
         $response = $this->call($type, [$mtraj_request]);
