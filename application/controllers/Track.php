@@ -98,6 +98,67 @@ class Track extends MY_Controller {
 	*/
 	public function getSpaceTimeMtraj() {
 		$params = $this->input->post();
+		// 校验参数
+		$validate = Validate::make($params,
+			[
+				'task_id'     => 'min:1',
+				'junction_id' => 'nullunable',
+				'search_type' => 'min:0',
+				'flow_id'     => 'nullunable'
+			]
+		);
+		if(!$validate['status']){
+			$this->errno = ERR_PARAMETERS;
+			$this->errmsg = $validate['errmsg'];
+			return;
+		}
+
+		if((int)$params['search_type'] == 0){
+			if(empty($params['time_point'])){
+				$this->errno = ERR_PARAMETERS;
+				$this->errmsg = 'The time_point cannot be empty.';
+				return;
+			}
+		}else{
+			if(empty($params['time_range'])){
+				$this->errno = ERR_PARAMETERS;
+				$this->errmsg = 'The time_range cannot be empty.';
+				return;
+			}
+			$time_range = array_filter(explode('-', $params['time_range']));
+			if(empty($time_range[0]) || empty($time_range[1])){
+				$this->errno = ERR_PARAMETERS;
+				$this->errmsg = 'The time_range is wrong.';
+				return;
+			}
+		}
+
+		// 获取路口详情 dates start_time end_time movements
+		$junction_info = $this->junction_model->getJunctionInfoForTheTrack($params);
+		if(!$junction_info){
+			return;
+		}
+
+		// 获取 mapversion
+		$mapversions = $this->taskdateversion_model->select($junction_info['task_id'], $junction_info['dates']);
+		if(!$mapversions){
+			return;
+		}
+
+		// 获取 配时信息 周期 相位差 绿灯开始结束时间
+		$timing_data = [
+			'junction_id' => $junction_info['junction_id'],
+			'dates'       => explode(',', $junction_info['dates']),
+			'time_range'  => $junction_info['start_time'] . '-' . date("H:i", strtotime($junction_info['end_time']) - 60),
+			'flow_id'	  => trim($params['flow_id'])
+		];
+		$timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
+
+		foreach($mapversions as $k=>$v){
+			$rtimeVec[$k]['mapVersion'] = $v['map_version_md5'];
+			$rtimeVec[$k]['startTS'] = strtotime($v['date'] . ' ' . $junction_info['start_time']);
+			$rtimeVec[$k]['endTS'] = strtotime($v['date'] . ' ' . $junction_info['end_time']);
+		}
 
 		$vals = [
             /*'junctionId' => trim($junction_info['junction_id']),
@@ -145,7 +206,7 @@ class Track extends MY_Controller {
 				$result[$k]['list'][$kk]['value'] = $vv['stopLineDistance'];
 			}
 		}
-
+		echo "<pre>result = ";print_r($result);exit;
 		foreach($result as $k=>$v){
 			foreach($v['list'] as $kk=>$vv){
 				// 时间
@@ -189,74 +250,5 @@ class Track extends MY_Controller {
 		echo "<hr>timing = ";print_r($timing);
 
 		return $this->response($result_data);
-	}
-
-	/**
-	* 数据处理
-	* @param $data   array  前端参数
-	* @return array
-	*/
-	private function manageData($data) {
-		// 校验参数
-		$validate = Validate::make($data,
-			[
-				'task_id'     => 'min:1',
-				'junction_id' => 'nullunable',
-				'search_type' => 'min:0',
-				'flow_id'     => 'nullunable'
-			]
-		);
-		if(!$validate['status']){
-			$this->errno = ERR_PARAMETERS;
-			$this->errmsg = $validate['errmsg'];
-			return;
-		}
-
-		if((int)$data['search_type'] == 0){
-			if(empty($data['time_point'])){
-				$this->errno = ERR_PARAMETERS;
-				$this->errmsg = 'The time_point cannot be empty.';
-				return;
-			}
-		}else{
-			if(empty($data['time_range'])){
-				$this->errno = ERR_PARAMETERS;
-				$this->errmsg = 'The time_range cannot be empty.';
-				return;
-			}
-			$time_range = array_filter(explode('-', $data['time_range']));
-			if(empty($time_range[0]) || empty($time_range[1])){
-				$this->errno = ERR_PARAMETERS;
-				$this->errmsg = 'The time_range is wrong.';
-				return;
-			}
-		}
-
-		// 获取路口详情 dates start_time end_time movements
-		$junction_info = $this->junction_model->getJunctionInfoForTheTrack($data);
-		if(!$junction_info){
-			return;
-		}
-
-		// 获取 mapversion
-		$mapversions = $this->taskdateversion_model->select($junction_info['task_id'], $junction_info['dates']);
-		if(!$mapversions){
-			return;
-		}
-
-		// 获取 配时信息 周期 相位差 绿灯开始结束时间
-		$timing_data = [
-			'junction_id' => $junction_info['junction_id'],
-			'dates'       => explode(',', $junction_info['dates']),
-			'time_range'  => $junction_info['start_time'] . '-' . date("H:i", strtotime($junction_info['end_time']) - 60),
-			'flow_id'	  => trim($params['flow_id'])
-		];
-		$timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
-
-		foreach($mapversions as $k=>$v){
-			$rtimeVec[$k]['mapVersion'] = $v['map_version_md5'];
-			$rtimeVec[$k]['startTS'] = strtotime($v['date'] . ' ' . $junction_info['start_time']);
-			$rtimeVec[$k]['endTS'] = strtotime($v['date'] . ' ' . $junction_info['end_time']);
-		}
 	}
 }
