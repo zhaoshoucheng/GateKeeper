@@ -176,8 +176,46 @@ class Track extends MY_Controller {
 		$sample_data = [];
 		if(!empty($bf_condition) && !empty($af_condition) && !empty($num)){
 			foreach($bf_condition as $k=>$v){
-				$sample_data[$k]['x'] = $v;
-				$sample_data[$k]['y'] = $af_condition[$k];
+				// X
+				if(trim($v) === 'no_stop'){
+					$sample_data[$k]['xType'] = 2;
+					$sample_data[$k]['xData']['noStop'] = 1;
+				}else if(strstr($v, '|') !== false && strstr($v, '#') === false){
+					$temp_arr = explode("|", $v);
+					$sample_data[$k]['xType'] = 3;
+					$sample_data[$k]['xType']['xData']['lR'] = $temp_arr[0];
+					$sample_data[$k]['xType']['xData']['rR'] = $temp_arr[1];
+				}else if(strstr($v, '|') !== false && strstr($v, '#') !== false){
+					$temp_arr = explode('#', $v);
+					$temp_val = explode('|', $temp_arr[1]);
+					$sample_data[$k]['xType'] = 4;
+					$sample_data[$k]['xData']['noStop'] = 1;
+					$sample_data[$k]['xType']['xData']['lR'] = $temp_val[0];
+					$sample_data[$k]['xType']['xData']['rR'] = $temp_val[1];
+				}else{
+					$sample_data[$k]['xType'] = 1;
+					$sample_data[$k]['xData']['all'] = true;
+				}
+				// Y
+				if(trim($af_condition[$k]) === 'no_stop'){
+					$sample_data[$k]['yType'] = 2;
+					$sample_data[$k]['yData']['noStop'] = 1;
+				}else if(strstr($af_condition[$k], '|') !== false && strstr($af_condition[$k], '#') === false){
+					$temp_arr = explode("|", $af_condition[$k]);
+					$sample_data[$k]['yType'] = 3;
+					$sample_data[$k]['yType']['yData']['lR'] = $temp_arr[0];
+					$sample_data[$k]['yType']['yData']['rR'] = $temp_arr[1];
+				}else if(strstr($af_condition[$k], '|') !== false && strstr($af_condition[$k], '#') !== false){
+					$temp_arr = explode('#', $af_condition[$k]);
+					$temp_val = explode('|', $temp_arr[1]);
+					$sample_data[$k]['yType'] = 4;
+					$sample_data[$k]['yData']['noStop'] = 1;
+					$sample_data[$k]['yType']['yData']['lR'] = $temp_val[0];
+					$sample_data[$k]['yType']['yData']['rR'] = $temp_val[1];
+				}else{
+					$sample_data[$k]['yType'] = 1;
+					$sample_data[$k]['yData']['all'] = true;
+				}
 				$sample_data[$k]['n'] = $num[$k];
 			}
 		}
