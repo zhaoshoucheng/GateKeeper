@@ -60,7 +60,7 @@ class Track extends MY_Controller {
 			}
 		}
 
-		$result_data = $this->track_model->getTrackData($params, 'getSpaceTimeMtraj');
+		$result_data = $this->track_model->getTrackData($params, 'getScatterMtraj');
 
 		return $this->response($result_data);
 	}
