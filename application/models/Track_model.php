@@ -155,15 +155,15 @@ class Track_model extends CI_Model {
 				$vv = (array)$vv;
 				$temp_time = date_parse(date("H:i:s", $vv['timestamp']));
 				$temp_second = $temp_time['hour'] * 3600 + $temp_time['minute'] * 60 + $temp_time['second'];
-				$result[$k]['list'][$kk]['second'] = $temp_second;
+				$result[$k]['list'][$temp_second]['second'] = $temp_second;
 				// 找到第一个大于的通过路口距离，以此为标准映射到周期内
 				if($vv['stopLineDistance'] > 0 && $result[$k]['base']['time'] == 0){
 					$result[$k]['base']['time'] = $vv['timestamp'];
-					$result[$k]['base']['second'] = $result[$k]['list'][$kk]['second'];
+					$result[$k]['base']['second'] = $temp_second;
 					$result[$k]['base']['map_second'] = ($result[$k]['list'][$kk]['second'] - $new_offset) % $timing['cycle'] + $new_offset;
 				}
 
-				$result[$k]['list'][$kk]['value'] = $vv['stopLineDistance'];
+				$result[$k]['list'][$temp_second]['value'] = $vv['stopLineDistance'];
 			}
 		}
 		echo "<hr><pre>junction_info = ";print_r($junction_info);
