@@ -89,7 +89,7 @@ class Track extends MY_Controller {
 	/**
 	* 获取时空图
 	* @param task_id     interger 任务ID
-	* @param junction_id string   城市ID
+	* @param junction_id string   路口ID
 	* @param flow_id     string   相位ID （flow_id）
 	* @param search_type interger 搜索类型 查询类型 1：按方案查询 0：按时间点查询
 	* @param time_point  string   时间点 当search_type = 0 时 必传 格式：00:00
@@ -209,10 +209,10 @@ class Track extends MY_Controller {
 
 		foreach($result as $k=>$v){
 			foreach($v['list'] as $kk=>$vv){
-				// 值
-				$result_data['dataList'][$k][$kk][0] = round($vv['value'], 5) * -1;
 				// 时间
-				$result_data['dataList'][$k][$kk][1] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
+				$result_data['dataList'][$k][$kk][0] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
+				// 值
+				$result_data['dataList'][$k][$kk][1] = round($vv['value'], 5) * -1;
 			}
 		}
 		$result_data['signal_range'] = [];
