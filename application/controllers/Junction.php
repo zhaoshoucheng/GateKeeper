@@ -177,7 +177,7 @@ class Junction extends MY_Controller {
 			$this->errmsg = 'The dates cannot be empty and must be array.';
 			return;
 		}
-
+		$params['time_range'] = $params['task_time_range'];
 		$timing = $this->timing_model->getJunctionsTimingInfo($params);
 
 		return $this->response($timing);
