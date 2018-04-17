@@ -118,7 +118,6 @@ class Track_model extends CI_Model {
 				$sample_data[$k]['num'] = $num[$k];
 			}
 		}
-		echo "<pre> sample_data = ";print_r($sample_data);
 
 		$vals = [
             'junctionId' => trim($junction_info['junction_id']),
@@ -168,10 +167,8 @@ class Track_model extends CI_Model {
 			$result[$first['second']]['base'] = $tem_result[$k]['base'];
 			$result[$first['second']]['list'] = array_values($tem_result[$k]['list']);
 		}
-		echo "<hr><pre>junction_info = ";print_r($junction_info);
-		echo "<hr>mapVersion = ";print_r($mapversions);
-		echo "<hr>timing = ";print_r($timing);
-		echo "<hr><pre>result = ";print_r($result);
+		ksort($result);
+		$result = array_values($result);
 		foreach($result as $k=>$v){
 			foreach($v['list'] as $kk=>$vv){
 				// 时间
@@ -209,7 +206,12 @@ class Track_model extends CI_Model {
 		$result_data['info']['id'] = trim($data['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
 
-		echo "<hr><pre>result = ";print_r($result_data);exit;
+		/*echo "<pre> sample_data = ";print_r($sample_data);
+		echo "<hr><pre>junction_info = ";print_r($junction_info);
+		echo "<hr>mapVersion = ";print_r($mapversions);
+		echo "<hr>timing = ";print_r($timing);
+		echo "<hr><pre>result = ";print_r($result);
+		echo "<hr><pre>result = ";print_r($result_data);*/
 
 		return $result_data;
 	}
