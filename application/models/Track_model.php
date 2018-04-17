@@ -44,7 +44,7 @@ class Track_model extends CI_Model {
 			'junction_id' => $junction_info['junction_id'],
 			'dates'       => explode(',', $junction_info['dates']),
 			'time_range'  => $junction_info['start_time'] . '-' . date("H:i", strtotime($junction_info['end_time']) - 60),
-			'flow_id'	  => trim($params['flow_id'])
+			'flow_id'	  => trim($data['flow_id'])
 		];
 		$timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
 		if(!$timing){
@@ -124,7 +124,7 @@ class Track_model extends CI_Model {
 
 		$vals = [
             'junctionId' => trim($junction_info['junction_id']),
-            'flowId'     => trim($params['flow_id']),
+            'flowId'     => trim($data['flow_id']),
             'rtimeVec'   => $rtimeVec,
             /*'junctionId' => '2017030116_4875814',
             'flowId'     => '2017030116_i_490122360_2017030116_o_64019800',
@@ -204,7 +204,7 @@ class Track_model extends CI_Model {
 		if(!empty($result_data['signal_range'])){
 			$result_data['signal_range'] = array_values($result_data['signal_range']);
 		}
-		$result_data['info']['id'] = trim($params['flow_id']);
+		$result_data['info']['id'] = trim($data['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
 
 		echo "<hr><pre>result = ";print_r($result_data);exit;

@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Track extends MY_Controller {
 	public function __construct(){
 		parent::__construct();
-		$this->load->model('Track_model');
+		$this->load->model('track_model');
 	}
 
 	/**
@@ -129,7 +129,7 @@ class Track extends MY_Controller {
 			}
 		}
 
-		$result_data = $this->track_model->getTrackData($data, 'getSpaceTimeMtraj');
+		$result_data = $this->track_model->getTrackData($params, 'getSpaceTimeMtraj');
 
 		return $this->response($result_data);
 	}
