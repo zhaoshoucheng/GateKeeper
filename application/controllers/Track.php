@@ -206,7 +206,10 @@ class Track extends MY_Controller {
 				$result[$k]['list'][$kk]['value'] = $vv['stopLineDistance'];
 			}
 		}
-		echo "<pre>result = ";print_r($result);exit;
+		echo "<hr><pre>junction_info = ";print_r($junction_info);
+		echo "<hr>mapVersion = ";print_r($mapversions);
+		echo "<hr>timing = ";print_r($timing);
+		echo "<hr><pre>result = ";print_r($result);
 		foreach($result as $k=>$v){
 			foreach($v['list'] as $kk=>$vv){
 				// 时间
@@ -215,6 +218,7 @@ class Track extends MY_Controller {
 				$result_data['dataList'][$k][$kk][1] = round($vv['value'], 5) * -1;
 			}
 		}
+		echo "<hr><pre>result = ";print_r($result_data);exit;
 		$result_data['signal_range'] = [];
 		if($timing['state'] == 1){ // 绿灯
 			// 绿灯开始时间
@@ -244,10 +248,7 @@ class Track extends MY_Controller {
 		$result_data['info']['id'] = trim($params['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
 		//echo "<pre>vals = ";print_r($vals);
-		echo "<hr><pre>";print_r($result_data);
-		echo "<hr><pre>junction_info = ";print_r($junction_info);
-		echo "<hr>mapVersion = ";print_r($mapversions);
-		echo "<hr>timing = ";print_r($timing);
+		
 
 		return $this->response($result_data);
 	}
