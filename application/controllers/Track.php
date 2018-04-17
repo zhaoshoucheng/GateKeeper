@@ -206,7 +206,7 @@ class Track extends MY_Controller {
 				$result[$k]['list'][$kk]['value'] = $vv['stopLineDistance'];
 			}
 		}
-		echo "<pre>result = ";print_r($result);exit;
+		echo "<pre>result = ";print_r($result);
 		foreach($result as $k=>$v){
 			foreach($v['list'] as $kk=>$vv){
 				// 时间
@@ -215,6 +215,7 @@ class Track extends MY_Controller {
 				$result_data['dataList'][$k][$kk][1] = round($vv['value'], 5) * -1;
 			}
 		}
+		echo "<hr><pre>result = ";print_r($result_data);exit;
 		$result_data['signal_range'] = [];
 		if($timing['state'] == 1){ // 绿灯
 			// 绿灯开始时间
