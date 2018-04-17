@@ -282,21 +282,9 @@ class TypeData {
 
 }
 
-class Request {
+class FilterData {
   static $_TSPEC;
 
-  /**
-   * @var string
-   */
-  public $junctionId = null;
-  /**
-   * @var string
-   */
-  public $flowId = null;
-  /**
-   * @var \Track\Rtime[]
-   */
-  public $rtimeVec = null;
   /**
    * @var int
    */
@@ -322,6 +310,179 @@ class Request {
     if (!isset(self::$_TSPEC)) {
       self::$_TSPEC = array(
         1 => array(
+          'var' => 'xType',
+          'type' => TType::I32,
+          ),
+        2 => array(
+          'var' => 'xData',
+          'type' => TType::STRUCT,
+          'class' => '\Track\TypeData',
+          ),
+        3 => array(
+          'var' => 'yType',
+          'type' => TType::I32,
+          ),
+        4 => array(
+          'var' => 'yData',
+          'type' => TType::STRUCT,
+          'class' => '\Track\TypeData',
+          ),
+        5 => array(
+          'var' => 'num',
+          'type' => TType::I32,
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['xType'])) {
+        $this->xType = $vals['xType'];
+      }
+      if (isset($vals['xData'])) {
+        $this->xData = $vals['xData'];
+      }
+      if (isset($vals['yType'])) {
+        $this->yType = $vals['yType'];
+      }
+      if (isset($vals['yData'])) {
+        $this->yData = $vals['yData'];
+      }
+      if (isset($vals['num'])) {
+        $this->num = $vals['num'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'FilterData';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 1:
+          if ($ftype == TType::I32) {
+            $xfer += $input->readI32($this->xType);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRUCT) {
+            $this->xData = new \Track\TypeData();
+            $xfer += $this->xData->read($input);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 3:
+          if ($ftype == TType::I32) {
+            $xfer += $input->readI32($this->yType);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 4:
+          if ($ftype == TType::STRUCT) {
+            $this->yData = new \Track\TypeData();
+            $xfer += $this->yData->read($input);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 5:
+          if ($ftype == TType::I32) {
+            $xfer += $input->readI32($this->num);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('FilterData');
+    if ($this->xType !== null) {
+      $xfer += $output->writeFieldBegin('xType', TType::I32, 1);
+      $xfer += $output->writeI32($this->xType);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->xData !== null) {
+      if (!is_object($this->xData)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('xData', TType::STRUCT, 2);
+      $xfer += $this->xData->write($output);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->yType !== null) {
+      $xfer += $output->writeFieldBegin('yType', TType::I32, 3);
+      $xfer += $output->writeI32($this->yType);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->yData !== null) {
+      if (!is_object($this->yData)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('yData', TType::STRUCT, 4);
+      $xfer += $this->yData->write($output);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->num !== null) {
+      $xfer += $output->writeFieldBegin('num', TType::I32, 5);
+      $xfer += $output->writeI32($this->num);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
+class Request {
+  static $_TSPEC;
+
+  /**
+   * @var string
+   */
+  public $junctionId = null;
+  /**
+   * @var string
+   */
+  public $flowId = null;
+  /**
+   * @var \Track\Rtime[]
+   */
+  public $rtimeVec = null;
+  /**
+   * @var \Track\FilterData[]
+   */
+  public $filterDataVec = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        1 => array(
           'var' => 'junctionId',
           'type' => TType::STRING,
           ),
@@ -339,26 +500,13 @@ class Request {
             ),
           ),
         4 => array(
-          'var' => 'xType',
-          'type' => TType::I32,
-          ),
-        5 => array(
-          'var' => 'xData',
-          'type' => TType::STRUCT,
-          'class' => '\Track\TypeData',
-          ),
-        6 => array(
-          'var' => 'yType',
-          'type' => TType::I32,
-          ),
-        7 => array(
-          'var' => 'yData',
-          'type' => TType::STRUCT,
-          'class' => '\Track\TypeData',
-          ),
-        8 => array(
-          'var' => 'num',
-          'type' => TType::I32,
+          'var' => 'filterDataVec',
+          'type' => TType::LST,
+          'etype' => TType::STRUCT,
+          'elem' => array(
+            'type' => TType::STRUCT,
+            'class' => '\Track\FilterData',
+            ),
           ),
         );
     }
@@ -372,20 +520,8 @@ class Request {
       if (isset($vals['rtimeVec'])) {
         $this->rtimeVec = $vals['rtimeVec'];
       }
-      if (isset($vals['xType'])) {
-        $this->xType = $vals['xType'];
-      }
-      if (isset($vals['xData'])) {
-        $this->xData = $vals['xData'];
-      }
-      if (isset($vals['yType'])) {
-        $this->yType = $vals['yType'];
-      }
-      if (isset($vals['yData'])) {
-        $this->yData = $vals['yData'];
-      }
-      if (isset($vals['num'])) {
-        $this->num = $vals['num'];
+      if (isset($vals['filterDataVec'])) {
+        $this->filterDataVec = $vals['filterDataVec'];
       }
     }
   }
@@ -442,38 +578,19 @@ class Request {
           }
           break;
         case 4:
-          if ($ftype == TType::I32) {
-            $xfer += $input->readI32($this->xType);
-          } else {
-            $xfer += $input->skip($ftype);
-          }
-          break;
-        case 5:
-          if ($ftype == TType::STRUCT) {
-            $this->xData = new \Track\TypeData();
-            $xfer += $this->xData->read($input);
-          } else {
-            $xfer += $input->skip($ftype);
-          }
-          break;
-        case 6:
-          if ($ftype == TType::I32) {
-            $xfer += $input->readI32($this->yType);
-          } else {
-            $xfer += $input->skip($ftype);
-          }
-          break;
-        case 7:
-          if ($ftype == TType::STRUCT) {
-            $this->yData = new \Track\TypeData();
-            $xfer += $this->yData->read($input);
-          } else {
-            $xfer += $input->skip($ftype);
-          }
-          break;
-        case 8:
-          if ($ftype == TType::I32) {
-            $xfer += $input->readI32($this->num);
+          if ($ftype == TType::LST) {
+            $this->filterDataVec = array();
+            $_size6 = 0;
+            $_etype9 = 0;
+            $xfer += $input->readListBegin($_etype9, $_size6);
+            for ($_i10 = 0; $_i10 < $_size6; ++$_i10)
+            {
+              $elem11 = null;
+              $elem11 = new \Track\FilterData();
+              $xfer += $elem11->read($input);
+              $this->filterDataVec []= $elem11;
+            }
+            $xfer += $input->readListEnd();
           } else {
             $xfer += $input->skip($ftype);
           }
@@ -509,44 +626,30 @@ class Request {
       {
         $output->writeListBegin(TType::STRUCT, count($this->rtimeVec));
         {
-          foreach ($this->rtimeVec as $iter6)
+          foreach ($this->rtimeVec as $iter12)
           {
-            $xfer += $iter6->write($output);
+            $xfer += $iter12->write($output);
           }
         }
         $output->writeListEnd();
       }
       $xfer += $output->writeFieldEnd();
     }
-    if ($this->xType !== null) {
-      $xfer += $output->writeFieldBegin('xType', TType::I32, 4);
-      $xfer += $output->writeI32($this->xType);
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($this->xData !== null) {
-      if (!is_object($this->xData)) {
+    if ($this->filterDataVec !== null) {
+      if (!is_array($this->filterDataVec)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('xData', TType::STRUCT, 5);
-      $xfer += $this->xData->write($output);
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($this->yType !== null) {
-      $xfer += $output->writeFieldBegin('yType', TType::I32, 6);
-      $xfer += $output->writeI32($this->yType);
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($this->yData !== null) {
-      if (!is_object($this->yData)) {
-        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      $xfer += $output->writeFieldBegin('filterDataVec', TType::LST, 4);
+      {
+        $output->writeListBegin(TType::STRUCT, count($this->filterDataVec));
+        {
+          foreach ($this->filterDataVec as $iter13)
+          {
+            $xfer += $iter13->write($output);
+          }
+        }
+        $output->writeListEnd();
       }
-      $xfer += $output->writeFieldBegin('yData', TType::STRUCT, 7);
-      $xfer += $this->yData->write($output);
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($this->num !== null) {
-      $xfer += $output->writeFieldBegin('num', TType::I32, 8);
-      $xfer += $output->writeI32($this->num);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
@@ -895,15 +998,15 @@ class MatchTraj {
         case 6:
           if ($ftype == TType::LST) {
             $this->points = array();
-            $_size7 = 0;
-            $_etype10 = 0;
-            $xfer += $input->readListBegin($_etype10, $_size7);
-            for ($_i11 = 0; $_i11 < $_size7; ++$_i11)
+            $_size14 = 0;
+            $_etype17 = 0;
+            $xfer += $input->readListBegin($_etype17, $_size14);
+            for ($_i18 = 0; $_i18 < $_size14; ++$_i18)
             {
-              $elem12 = null;
-              $elem12 = new \Track\MatchPoint();
-              $xfer += $elem12->read($input);
-              $this->points []= $elem12;
+              $elem19 = null;
+              $elem19 = new \Track\MatchPoint();
+              $xfer += $elem19->read($input);
+              $this->points []= $elem19;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -959,9 +1062,9 @@ class MatchTraj {
       {
         $output->writeListBegin(TType::STRUCT, count($this->points));
         {
-          foreach ($this->points as $iter13)
+          foreach ($this->points as $iter20)
           {
-            $xfer += $iter13->write($output);
+            $xfer += $iter20->write($output);
           }
         }
         $output->writeListEnd();
@@ -1026,15 +1129,15 @@ class ScatterResponse {
         case 1:
           if ($ftype == TType::LST) {
             $this->scatterPoints = array();
-            $_size14 = 0;
-            $_etype17 = 0;
-            $xfer += $input->readListBegin($_etype17, $_size14);
-            for ($_i18 = 0; $_i18 < $_size14; ++$_i18)
+            $_size21 = 0;
+            $_etype24 = 0;
+            $xfer += $input->readListBegin($_etype24, $_size21);
+            for ($_i25 = 0; $_i25 < $_size21; ++$_i25)
             {
-              $elem19 = null;
-              $elem19 = new \Track\ScatterPoint();
-              $xfer += $elem19->read($input);
-              $this->scatterPoints []= $elem19;
+              $elem26 = null;
+              $elem26 = new \Track\ScatterPoint();
+              $xfer += $elem26->read($input);
+              $this->scatterPoints []= $elem26;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1062,9 +1165,9 @@ class ScatterResponse {
       {
         $output->writeListBegin(TType::STRUCT, count($this->scatterPoints));
         {
-          foreach ($this->scatterPoints as $iter20)
+          foreach ($this->scatterPoints as $iter27)
           {
-            $xfer += $iter20->write($output);
+            $xfer += $iter27->write($output);
           }
         }
         $output->writeListEnd();
@@ -1133,25 +1236,25 @@ class SpaceTimeResponse {
         case 1:
           if ($ftype == TType::LST) {
             $this->matchPoints = array();
-            $_size21 = 0;
-            $_etype24 = 0;
-            $xfer += $input->readListBegin($_etype24, $_size21);
-            for ($_i25 = 0; $_i25 < $_size21; ++$_i25)
+            $_size28 = 0;
+            $_etype31 = 0;
+            $xfer += $input->readListBegin($_etype31, $_size28);
+            for ($_i32 = 0; $_i32 < $_size28; ++$_i32)
             {
-              $elem26 = null;
-              $elem26 = array();
-              $_size27 = 0;
-              $_etype30 = 0;
-              $xfer += $input->readListBegin($_etype30, $_size27);
-              for ($_i31 = 0; $_i31 < $_size27; ++$_i31)
+              $elem33 = null;
+              $elem33 = array();
+              $_size34 = 0;
+              $_etype37 = 0;
+              $xfer += $input->readListBegin($_etype37, $_size34);
+              for ($_i38 = 0; $_i38 < $_size34; ++$_i38)
               {
-                $elem32 = null;
-                $elem32 = new \Track\MatchPoint();
-                $xfer += $elem32->read($input);
-                $elem26 []= $elem32;
+                $elem39 = null;
+                $elem39 = new \Track\MatchPoint();
+                $xfer += $elem39->read($input);
+                $elem33 []= $elem39;
               }
               $xfer += $input->readListEnd();
-              $this->matchPoints []= $elem26;
+              $this->matchPoints []= $elem33;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1179,14 +1282,14 @@ class SpaceTimeResponse {
       {
         $output->writeListBegin(TType::LST, count($this->matchPoints));
         {
-          foreach ($this->matchPoints as $iter33)
+          foreach ($this->matchPoints as $iter40)
           {
             {
-              $output->writeListBegin(TType::STRUCT, count($iter33));
+              $output->writeListBegin(TType::STRUCT, count($iter40));
               {
-                foreach ($iter33 as $iter34)
+                foreach ($iter40 as $iter41)
                 {
-                  $xfer += $iter34->write($output);
+                  $xfer += $iter41->write($output);
                 }
               }
               $output->writeListEnd();

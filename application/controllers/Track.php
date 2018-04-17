@@ -7,8 +7,6 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use Didi\Cloud\ItsMap\Track_vendor;
-
 class Track extends MY_Controller {
 	public function __construct(){
 		parent::__construct();
