@@ -55,7 +55,7 @@ class Thrift
             ],
             'mtraj' => [
                 'host' => '100.90.164.32',
-                'port' => "9889",
+                'port' => "8084",
                 'read_timeout' => 30,
                 'write_timeout' => 30,
                 'class' => '\Track\MtrajServiceClient',
@@ -109,7 +109,7 @@ class Thrift
             ],
             'mtraj' => [
                 'host' => '100.90.164.32',
-                'port' => "9889",
+                'port' => "8084",
                 'read_timeout' => 30,
                 'write_timeout' => 30,
                 'class' => '\Track\MtrajServiceClient',
@@ -173,6 +173,14 @@ class Thrift
                 'class' => '\StsData\CalculatorServiceClient',
                 'transport' => 'Thrift\Transport\TBufferedTransport',
             ],
+            'mtraj' => [
+                'host' => '100.90.164.32',
+                'port' => "8084",
+                'read_timeout' => 30,
+                'write_timeout' => 30,
+                'class' => '\Track\MtrajServiceClient',
+                'transport' => 'Thrift\Transport\TBufferedTransport',
+            ]
         ],
     ];
 
