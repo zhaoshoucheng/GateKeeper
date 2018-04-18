@@ -151,16 +151,20 @@ class Timing_model extends CI_Model {
 		}
 
 		foreach($data['movement_timing'] as $k=>$v){
-			foreach($v as $kk=>$vv){
-				if(isset($vv['state']) && isset($vv['start_time']) && isset($vv['duration'])){
-					$res['signal'][$vv['start_time']]['state'] = $vv['state'];
-					$res['signal'][$vv['start_time']]['start_time'] = $vv['start_time'];
-					$res['signal'][$vv['start_time']]['duration'] = $vv['duration'];
+			if(!empty($v[0]['flow_logic']['logic_flow_id']) && $v[0]['flow_logic']['logic_flow_id'] == $flow_id){
+				foreach($v as $kk=>$vv){
+					if(isset($vv['state']) && isset($vv['start_time']) && isset($vv['duration'])){
+						$res['signal'][$vv['start_time']]['state'] = $vv['state'];
+						$res['signal'][$vv['start_time']]['start_time'] = $vv['start_time'];
+						$res['signal'][$vv['start_time']]['duration'] = $vv['duration'];
+					}
 				}
+				$res['comment'] = $v[0]['flow_logic']['comment'];
 			}
-			$res['comment'] = $v[0]['flow_logic']['comment'];
 		}
-		ksort($res['signal']);
+		if(!empty($res['signal'])){
+			ksort($res['signal']);
+		}
 
 		return $res;
 	}
