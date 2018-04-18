@@ -115,6 +115,8 @@ class Timing_model extends CI_Model {
 		if(!$timing){
 			return [];
 		}
+		$json = '{"total_plan":1,"latest_plan":[{"time_plan_id":"4152","tod_start_time":"09:00:00","tod_end_time":"16:00:00","plan_id":"3660","plan_detail":{"extra_timing":{"cycle":"160","offset":"1"},"movement_timing":{"14420":[{"state":"1","start_time":"0","duration":"88","movement_id":"14420","flow_logic":{"logic_flow_id":"2017030116_i_603227960_2017030116_o_603415190","comment":"\u5357\u76f4","flow_id":"503206"}}],"14422":[{"state":"1","start_time":"88","duration":"18","movement_id":"14422","flow_logic":{"logic_flow_id":"2017030116_i_603227960_2017030116_o_63461761","comment":"\u5357\u5de6","flow_id":"503208"}}],"14426":[{"state":"1","start_time":"50","duration":"11","movement_id":"14426","flow_logic":{"logic_flow_id":"2017030116_i_63461760_2017030116_o_603415190","comment":"\u897f\u5de6","flow_id":"503212"}},{"state":"1","start_time":"60","duration":"40","movement_id":"14426","flow_logic":{"logic_flow_id":"2017030116_i_63461760_2017030116_o_603415190","comment":"\u897f\u5de6","flow_id":"503212"}}],"14424":[{"state":"1","start_time":"106","duration":"54","movement_id":"14424","flow_logic":{"logic_flow_id":"2017030116_i_63461760_2017030116_o_63896860","comment":"\u897f\u76f4","flow_id":"503220"}}],"14428":[{"state":"1","start_time":"106","duration":"54","movement_id":"14428","flow_logic":{"logic_flow_id":"2017030116_i_63896861_2017030116_o_63461761","comment":"\u4e1c\u76f4","flow_id":"503224"}}],"14430":[{"state":"1","start_time":"106","duration":"54","movement_id":"14430","flow_logic":{"logic_flow_id":"2017030116_i_63896861_2017030116_o_63461810","comment":"\u4e1c\u5de6","flow_id":"503226"}}],"14416":[{"state":"1","start_time":"0","duration":"88","movement_id":"14416","flow_logic":{"logic_flow_id":"2017030116_i_63165040_2017030116_o_63461810","comment":"\u5317\u76f4","flow_id":"503234"}}],"14418":[{"state":"1","start_time":"88","duration":"18","movement_id":"14418","flow_logic":{"logic_flow_id":"2017030116_i_63165040_2017030116_o_63896860","comment":"\u5317\u5de6","flow_id":"503236"}}]}}}],"map_version":"2018011219"}';
+		$timing = json_decode($json, true);
 		if(empty($timing['latest_plan'][0]['plan_detail'])){
 			return [];
 		}
@@ -149,14 +151,16 @@ class Timing_model extends CI_Model {
 		}
 
 		foreach($data['movement_timing'] as $k=>$v){
-			if(!empty($v[0]['flow_logic']) && $v[0]['flow_logic']['logic_flow_id'] == $flow_id){
-				$res['state'] = $v[0]['state'];
-				$res['start_time'] = $v[0]['start_time'];
-				$res['duration'] = $v[0]['duration'];
-				$res['comment'] = $v[0]['flow_logic']['comment'];
+			foreach($v as $kk=>$vv){
+				if(isset($vv['state']) && isset($vv['start_time']) && isset($vv['duration'])){
+					$res['signal'][$vv['start_time']]['state'] = $vv['state'];
+					$res['signal'][$vv['start_time']]['start_time'] = $vv['start_time'];
+					$res['signal'][$vv['start_time']]['duration'] = $vv['duration'];
+				}
 			}
+			$res['comment'] = $v[0]['flow_logic']['comment'];
 		}
-
+		ksort($res['signal']);
 		return $res;
 	}
 
