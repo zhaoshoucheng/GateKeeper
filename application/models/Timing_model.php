@@ -287,15 +287,15 @@ class Timing_model extends CI_Model {
 					foreach($v['plan_detail']['movement_timing'] as $k1=>$v1){
 						foreach($v1 as $key=>$val){
 							// 信号灯状态 1=绿灯
-							$result['timing_detail'][$v['time_plan_id']]['timing'][$key]['state'] = isset($val['state']) ? $val['state'] : 0;
+							$result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['state'] = isset($val['state']) ? $val['state'] : 0;
 							// 绿灯开始时间
-							$result['timing_detail'][$v['time_plan_id']]['timing'][$key]['start_time'] = isset($val['start_time']) ? $val['start_time'] : 0;
+							$result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['start_time'] = isset($val['start_time']) ? $val['start_time'] : 0;
 							// 绿灯结束时间
-							$result['timing_detail'][$v['time_plan_id']]['timing'][$key]['duration'] = isset($val['duration']) ? $val['duration'] : 0;
+							$result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['duration'] = isset($val['duration']) ? $val['duration'] : 0;
 							// 逻辑flow id
-							$result['timing_detail'][$v['time_plan_id']]['timing'][$key]['logic_flow_id'] = isset($val['flow_logic']['logic_flow_id']) ? $val['flow_logic']['logic_flow_id'] : 0;
+							$result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['logic_flow_id'] = isset($val['flow_logic']['logic_flow_id']) ? $val['flow_logic']['logic_flow_id'] : 0;
 							// flow 描述
-							$result['timing_detail'][$v['time_plan_id']]['timing'][$key]['comment'] = isset($val['flow_logic']['comment']) ? $val['flow_logic']['comment'] : '';
+							$result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['comment'] = isset($val['flow_logic']['comment']) ? $val['flow_logic']['comment'] : '';
 						}
 					}
 				}
@@ -376,7 +376,9 @@ class Timing_model extends CI_Model {
 		} catch (Exception $e) {
 			return [];
 		}
-
+		if($data['debug']){
+			echo "<pre>";print_r($timing['data']);
+		}
 		if(isset($timing['data']) && count($timing['data'] >= 1)){
 			return $timing['data'];
 		}else{
