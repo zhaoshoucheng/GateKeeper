@@ -143,38 +143,46 @@ class Track_model extends CI_Model {
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getSpaceTimeMtraj($vals);
 		$res = (array)$res;
-		foreach($res['matchPoints'] as $k=>$v){
-			$tem_result[$k]['base']['time'] = 0;
-			foreach($v as $kk=>&$vv){
-				$vv = (array)$vv;
-				$temp_time = date_parse(date("H:i:s", $vv['timestamp']));
-				$temp_second = $temp_time['hour'] * 3600 + $temp_time['minute'] * 60 + $temp_time['second'];
-				$tem_result[$k]['list'][$temp_second]['second'] = $temp_second;
-				// 找到第一个大于的通过路口距离，以此为标准映射到周期内
-				if($vv['stopLineDistance'] > 0 && $tem_result[$k]['base']['time'] == 0){
-					$tem_result[$k]['base']['time'] = $vv['timestamp'];
-					$tem_result[$k]['base']['second'] = $temp_second;
-					$tem_result[$k]['base']['map_second'] = ($tem_result[$k]['list'][$temp_second]['second'] - $new_offset) % $timing['cycle'] + $new_offset;
+		if($res['errno'] != 0){
+			return [];
+		}
+		$result = [];
+		if(!empty($res['matchPoints'])){
+			foreach($res['matchPoints'] as $k=>$v){
+				$tem_result[$k]['base']['time'] = 0;
+				foreach($v as $kk=>&$vv){
+					$vv = (array)$vv;
+					$temp_time = date_parse(date("H:i:s", $vv['timestamp']));
+					$temp_second = $temp_time['hour'] * 3600 + $temp_time['minute'] * 60 + $temp_time['second'];
+					$tem_result[$k]['list'][$temp_second]['second'] = $temp_second;
+					// 找到第一个大于的通过路口距离，以此为标准映射到周期内
+					if($vv['stopLineDistance'] > 0 && $tem_result[$k]['base']['time'] == 0){
+						$tem_result[$k]['base']['time'] = $vv['timestamp'];
+						$tem_result[$k]['base']['second'] = $temp_second;
+						$tem_result[$k]['base']['map_second'] = ($tem_result[$k]['list'][$temp_second]['second'] - $new_offset) % $timing['cycle'] + $new_offset;
+					}
+
+					$tem_result[$k]['list'][$temp_second]['value'] = $vv['stopLineDistance'];
 				}
-
-				$tem_result[$k]['list'][$temp_second]['value'] = $vv['stopLineDistance'];
-			}
-			ksort($tem_result[$k]['list']);
-			$first = current($tem_result[$k]['list']);
-			$result[$first['second']]['base'] = $tem_result[$k]['base'];
-			$result[$first['second']]['list'] = array_values($tem_result[$k]['list']);
-		}
-		ksort($result);
-		$result = array_values($result);
-		foreach($result as $k=>$v){
-			foreach($v['list'] as $kk=>$vv){
-				// 时间
-				$result_data['dataList'][$k][$kk][0] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
-				// 值
-				$result_data['dataList'][$k][$kk][1] = round($vv['value'], 5) * -1;
+				ksort($tem_result[$k]['list']);
+				$first = current($tem_result[$k]['list']);
+				$result[$first['second']]['base'] = $tem_result[$k]['base'];
+				$result[$first['second']]['list'] = array_values($tem_result[$k]['list']);
 			}
 		}
+		if(!empty($result)){
+			ksort($result);
+			$result = array_values($result);
 
+			foreach($result as $k=>$v){
+				foreach($v['list'] as $kk=>$vv){
+					// 时间
+					$result_data['dataList'][$k][$kk][0] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
+					// 值
+					$result_data['dataList'][$k][$kk][1] = round($vv['value'], 5) * -1;
+				}
+			}
+		}
 		// 组织信号灯区间
 		$result_data['signal_range'] = [];
 		$bf_green_end = $cycle_start_time;
@@ -230,12 +238,6 @@ class Track_model extends CI_Model {
 		$result_data['info']['id'] = trim($junction_info['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
 
-		/*echo "<pre> sample_data = ";print_r($sample_data);
-		echo "<hr><pre>junction_info = ";print_r($junction_info);
-		echo "<hr>mapVersion = ";print_r($mapversions);
-		echo "<hr>timing = ";print_r($timing);
-		echo "<hr><pre>result = ";print_r($result);
-		echo "<hr><pre>result = ";print_r($result_data);*/
 		return $result_data;
 	}
 
@@ -246,14 +248,19 @@ class Track_model extends CI_Model {
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getScatterMtraj($vals);
 		$res = (array)$res;
-		foreach($res['scatterPoints'] as $k=>&$v){
-			$v = (array)$v;
-			$time = $v['stopLineTimestamp'];
-			$temp_time = date("H:i:s", $time);
-			// 时间
-			$result_data['dataList'][$time][0] = $temp_time;
-			// 值
-			$result_data['dataList'][$time][1] = round($v['stopDelayBefore']);
+		if($res['errno'] != 0){
+			return [];
+		}
+		if(!empty($res['scatterPoints'])){
+			foreach($res['scatterPoints'] as $k=>&$v){
+				$v = (array)$v;
+				$time = $v['stopLineTimestamp'];
+				$temp_time = date("H:i:s", $time);
+				// 时间
+				$result_data['dataList'][$time][0] = $temp_time;
+				// 值
+				$result_data['dataList'][$time][1] = round($v['stopDelayBefore']);
+			}
 		}
 
 		if(!empty($result_data['dataList'])){
