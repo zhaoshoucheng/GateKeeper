@@ -253,12 +253,12 @@ class Track_model extends CI_Model {
 		$result_data['info']['id'] = trim($junction_info['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
 
-		echo "<pre> sample_data = ";print_r($sample_data);
+		/*echo "<pre> sample_data = ";print_r($sample_data);
 		echo "<hr><pre>junction_info = ";print_r($junction_info);
 		echo "<hr>mapVersion = ";print_r($mapversions);
 		echo "<hr>timing = ";print_r($timing);
 		echo "<hr><pre>result = ";print_r($result);
-		echo "<hr><pre>result = ";print_r($result_data);
+		echo "<hr><pre>result = ";print_r($result_data);*/
 		return $result_data;
 	}
 
