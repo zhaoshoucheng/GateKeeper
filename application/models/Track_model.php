@@ -183,8 +183,51 @@ class Track_model extends CI_Model {
 				$result_data['dataList'][$k][$kk][1] = round($vv['value'], 5) * -1;
 			}
 		}
+
+		// 组织信号灯区间
 		$result_data['signal_range'] = [];
-		if($timing['state'] == 1){ // 绿灯
+		$bf_green_start = 0;
+		$bf_green_end = 0;
+		// 剩余时间 默认整个周期
+		$surplus_time = $timing['cycle'];
+
+		foreach($timing['signal'] as $k=>$v){
+			if($v['state'] == 1){ // 绿灯
+				// 与上次绿灯结束时间比较 如果大于且小于周期结束时间，则标记红灯 PS:$timing['signal']已按时间正序排列
+				if($v['start_time'] > $bf_green_end && $v['start_time'] < $cycle_end_time){
+					// 信号灯状态 0 红灯 1绿灯
+					$result_data['signal_range'][$bf_green_end]['type'] = 0;
+					// 红灯开始时间 上次绿灯结束时间
+					$result_data['signal_range'][$bf_green_end]['from'] = $bf_green_end;
+					// 红灯结束时间 本次绿灯开始时间
+					$result_data['signal_range'][$bf_green_end]['to'] = $v['start_time'];
+
+					// 更新上一次绿灯开始结束时间
+					$bf_green_start = $v['start_time'];
+					$bf_green_end = $v['start_time'] + $v['duration'];
+
+					// 信号灯状态 0 红灯 1绿灯
+					$result_data['signal_range'][$v['start_time']]['type'] = 1;
+					// 本次绿灯开始时间
+					$result_data['signal_range'][$v['start_time']]['from'] = $v['start_time'];
+					// 本次绿灯结束时间
+					$result_data['signal_range'][$v['start_time']]['to'] = $v['start_time'] + $v['duration'];
+
+					// 更新剩余时间
+					$surplus_time = $surplus_time - $v['start_time'] + $v['duration'];
+				}
+			}
+		}
+		if($surplus_time > 0){
+			// 信号灯状态 0 红灯 1绿灯
+			$result_data['signal_range'][$bf_green_end]['type'] = 0;
+			// 红灯开始时间 上次绿灯结束时间
+			$result_data['signal_range'][$bf_green_end]['from'] = $bf_green_end;
+			// 红灯结束时间 本次绿灯开始时间
+			$result_data['signal_range'][$bf_green_end]['to'] = $bf_green_end + $surplus_time;
+		}
+
+		/*if($timing['state'] == 1){ // 绿灯
 			// 绿灯开始时间
 			$green_signal_start = $cycle_start_time + $timing['start_time'];
 			// 绿灯结束时间
@@ -205,7 +248,7 @@ class Track_model extends CI_Model {
 				$result_data['signal_range'][$green_signal_end]['from'] = $green_signal_end;
 				$result_data['signal_range'][$green_signal_end]['to'] = $cycle_end_time;
 			}
-		}
+		}*/
 		if(!empty($result_data['signal_range'])){
 			$result_data['signal_range'] = array_values($result_data['signal_range']);
 		}
