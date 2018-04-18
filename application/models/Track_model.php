@@ -233,7 +233,7 @@ class Track_model extends CI_Model {
 			$time = $v['stopLineTimestamp'];
 			$temp_time = date("H:i:s", $time);
 			// 时间
-			$result_data['dataList'][$time][0] = $temp_second;
+			$result_data['dataList'][$time][0] = $temp_time;
 			// 值
 			$result_data['dataList'][$time][1] = round($v['stopDelayBefore']);
 		}
