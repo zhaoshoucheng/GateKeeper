@@ -377,7 +377,8 @@ class Timing_model extends CI_Model {
 			return [];
 		}
 		if($data['debug']){
-			echo "<pre>";print_r($timing['data']);
+			echo json_encode($timing['data']);
+			echo "<hr><pre>";print_r($timing['data']);
 		}
 		if(isset($timing['data']) && count($timing['data'] >= 1)){
 			return $timing['data'];
