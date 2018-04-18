@@ -233,40 +233,18 @@ class Track_model extends CI_Model {
 			$result_data['signal_range'][$bf_green_end]['to'] = $bf_green_end + $surplus_time;
 		}
 
-		/*if($timing['state'] == 1){ // 绿灯
-			// 绿灯开始时间
-			$green_signal_start = $cycle_start_time + $timing['start_time'];
-			// 绿灯结束时间
-			$green_signal_end = $green_signal_start + $timing['duration'];
-
-			if($green_signal_start > $cycle_start_time){
-				$result_data['signal_range'][$cycle_start_time]['type'] = 0;
-				$result_data['signal_range'][$cycle_start_time]['from'] = $cycle_start_time;
-				$result_data['signal_range'][$cycle_start_time]['to'] = $green_signal_start;
-			}
-
-			$result_data['signal_range'][$green_signal_start]['type'] = 1;
-			$result_data['signal_range'][$green_signal_start]['from'] = $green_signal_start;
-			$result_data['signal_range'][$green_signal_start]['to'] = $green_signal_end;
-
-			if($cycle_end_time > $green_signal_end){
-				$result_data['signal_range'][$green_signal_end]['type'] = 0;
-				$result_data['signal_range'][$green_signal_end]['from'] = $green_signal_end;
-				$result_data['signal_range'][$green_signal_end]['to'] = $cycle_end_time;
-			}
-		}*/
 		if(!empty($result_data['signal_range'])){
 			$result_data['signal_range'] = array_values($result_data['signal_range']);
 		}
 		$result_data['info']['id'] = trim($junction_info['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
 
-		echo "<pre> sample_data = ";print_r($sample_data);
+		/*echo "<pre> sample_data = ";print_r($sample_data);
 		echo "<hr><pre>junction_info = ";print_r($junction_info);
 		echo "<hr>mapVersion = ";print_r($mapversions);
 		echo "<hr>timing = ";print_r($timing);
 		echo "<hr><pre>result = ";print_r($result);
-		echo "<hr><pre>result = ";print_r($result_data);
+		echo "<hr><pre>result = ";print_r($result_data);*/
 		return $result_data;
 	}
 
@@ -292,9 +270,16 @@ class Track_model extends CI_Model {
 			$result_data['dataList'] = array_values($result_data['dataList']);
 		}
 
+		// 绿灯时长
+		$green_time = 0;
+		foreach($timing['signal'] as $k=>$v){
+			if($v['state'] == 1){ // 绿灯
+				$green_time += $v['duration'];
+			}
+		}
 		$result_data['signal_detail']['cycle'] = (int)$timing['cycle'];
-		$result_data['signal_detail']['red_duration'] = (int)$timing['cycle'] - (int)$timing['duration'];
-		$result_data['signal_detail']['green_duration'] = (int)$timing['duration'];
+		$result_data['signal_detail']['red_duration'] = (int)$timing['cycle'] - $green_time;
+		$result_data['signal_detail']['green_duration'] = $green_time;
 
 		$result_data['info']['id'] = trim($junction_info['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
