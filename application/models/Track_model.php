@@ -193,8 +193,17 @@ class Track_model extends CI_Model {
 		foreach($timing['signal'] as $k=>$v){
 			if($v['state'] == 1){ // 绿灯
 				$green_start = $v['start_time'] + $cycle_start_time;
+				// 当绿灯开始时间 == 周期开始时间
+				if($green_start == $cycle_start_time){
+					// 信号灯状态 0 红灯 1绿灯
+					$result_data['signal_range'][$green_start]['type'] = 1;
+					// 本次绿灯开始时间
+					$result_data['signal_range'][$green_start]['from'] = $green_start;
+					// 本次绿灯结束时间
+					$result_data['signal_range'][$green_start]['to'] = $green_start + $v['duration'];
+				}
 				// 与上次绿灯结束时间比较 如果大于且小于周期结束时间，则标记红灯 PS:$timing['signal']已按时间正序排列
-				if( $green_start > $bf_green_end && $green_start < $cycle_end_time){
+				if($green_start > $bf_green_end && $green_start < $cycle_end_time){
 					// 信号灯状态 0 红灯 1绿灯
 					$result_data['signal_range'][$bf_green_end]['type'] = 0;
 					// 红灯开始时间 上次绿灯结束时间
@@ -206,11 +215,11 @@ class Track_model extends CI_Model {
 					$bf_green_end = $green_start + $v['duration'];
 
 					// 信号灯状态 0 红灯 1绿灯
-					$result_data['signal_range'][$v['start_time']]['type'] = 1;
+					$result_data['signal_range'][$green_start]['type'] = 1;
 					// 本次绿灯开始时间
-					$result_data['signal_range'][$v['start_time']]['from'] = $green_start;
+					$result_data['signal_range'][$green_start]['from'] = $green_start;
 					// 本次绿灯结束时间
-					$result_data['signal_range'][$v['start_time']]['to'] = $green_start + $v['duration'];
+					$result_data['signal_range'][$green_start]['to'] = $green_start + $v['duration'];
 
 					// 更新剩余时间
 					$surplus_time = $cycle_end_time - ($green_start + $v['duration']);
