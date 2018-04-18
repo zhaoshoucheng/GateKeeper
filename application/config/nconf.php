@@ -21,14 +21,18 @@ if (in_array($hostname, $online_host)) {
 
 if($development == 2){
 	// 路网接口服务器地址
-	$waymap_server = '100.90.227.60';
+	$waymap_server = '100.69.238.11';
 	// 路网接口服务器端口
 	$waymap_port = '8000';
+	// 路网接口前缀
+	$waymap_ext = '/its';
 
 	// 配时接口服务器地址
-	$timing_server = '100.90.227.60';
+	$timing_server = '100.69.238.11';
 	// 配时接口服务器端口
 	$timing_port = '8000';
+	// 配时接口前缀
+	$timing_ext = '/its';
 
 	$config['redis'] = [
 		'host' => '100.69.139.14',
@@ -39,11 +43,15 @@ if($development == 2){
 	$waymap_server = '100.90.164.31';
 	// 路网接口服务器端口
 	$waymap_port = '8001';
+	// 路网接口前缀
+	$waymap_ext = '';
 
 	// 配时接口服务器地址
 	$timing_server = '100.90.164.31';
 	// 配时接口服务器端口
 	$timing_port = '8006';
+	// 配时接口前缀
+	$timing_ext = '';
 
 	$config['redis'] = [
 		'host' => '127.0.0.1',
@@ -51,13 +59,15 @@ if($development == 2){
 	];
 }
 
+$temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
+$temp_timing_port = !empty($timing_port) ? ":" . $timing_port : "";
 // 路网接口地址
-$config['waymap_interface'] = 'http://' . $waymap_server . ":" . $waymap_port;
+$config['waymap_interface'] = 'http://' . $waymap_server . $temp_waymap_port . $waymap_ext;
 // 路网接口token
 $config['waymap_token'] = '4c3e3b6a3588161128d0604daab528db';
 
 // 配时接口地址
-$config['timing_interface'] = 'http://' . $timing_server . ":" . $timing_port;
+$config['timing_interface'] = 'http://' . $timing_server . $temp_timing_port . $timing_ext;
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;
