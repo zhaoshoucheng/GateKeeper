@@ -161,6 +161,7 @@ class Timing_model extends CI_Model {
 			$res['comment'] = $v[0]['flow_logic']['comment'];
 		}
 		ksort($res['signal']);
+
 		return $res;
 	}
 
