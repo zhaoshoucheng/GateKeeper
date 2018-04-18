@@ -243,9 +243,9 @@ class Track_model extends CI_Model {
 			$result_data['dataList'] = array_values($result_data['dataList']);
 		}
 
-		$result_data['signal_detail']['cycle'] = $timing['cycle'];
-		$result_data['signal_detail']['red_duration'] = $timing['cycle'] - $timing['duration'];
-		$result_data['signal_detail']['green_duration'] = $timing['duration'];
+		$result_data['signal_detail']['cycle'] = (int)$timing['cycle'];
+		$result_data['signal_detail']['red_duration'] = (int)$timing['cycle'] - (int)$timing['duration'];
+		$result_data['signal_detail']['green_duration'] = (int)$timing['duration'];
 
 		$result_data['info']['id'] = trim($junction_info['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
