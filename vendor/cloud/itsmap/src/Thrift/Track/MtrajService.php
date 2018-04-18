@@ -19,14 +19,16 @@ use Thrift\Exception\TApplicationException;
 interface MtrajServiceIf {
   /**
    * @param \Track\Request $request
+   * @param string $accessPara
    * @return \Track\ScatterResponse
    */
-  public function getScatterMtraj(\Track\Request $request);
+  public function getScatterMtraj(\Track\Request $request, $accessPara);
   /**
    * @param \Track\Request $request
+   * @param string $accessPara
    * @return \Track\SpaceTimeResponse
    */
-  public function getSpaceTimeMtraj(\Track\Request $request);
+  public function getSpaceTimeMtraj(\Track\Request $request, $accessPara);
 }
 
 
@@ -41,16 +43,17 @@ class MtrajServiceClient implements \Track\MtrajServiceIf {
     $this->output_ = $output ? $output : $input;
   }
 
-  public function getScatterMtraj(\Track\Request $request)
+  public function getScatterMtraj(\Track\Request $request, $accessPara)
   {
-    $this->send_getScatterMtraj($request);
+    $this->send_getScatterMtraj($request, $accessPara);
     return $this->recv_getScatterMtraj();
   }
 
-  public function send_getScatterMtraj(\Track\Request $request)
+  public function send_getScatterMtraj(\Track\Request $request, $accessPara)
   {
     $args = new \Track\MtrajService_getScatterMtraj_args();
     $args->request = $request;
+    $args->accessPara = $accessPara;
     $bin_accel = ($this->output_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
     if ($bin_accel)
     {
@@ -92,16 +95,17 @@ class MtrajServiceClient implements \Track\MtrajServiceIf {
     throw new \Exception("getScatterMtraj failed: unknown result");
   }
 
-  public function getSpaceTimeMtraj(\Track\Request $request)
+  public function getSpaceTimeMtraj(\Track\Request $request, $accessPara)
   {
-    $this->send_getSpaceTimeMtraj($request);
+    $this->send_getSpaceTimeMtraj($request, $accessPara);
     return $this->recv_getSpaceTimeMtraj();
   }
 
-  public function send_getSpaceTimeMtraj(\Track\Request $request)
+  public function send_getSpaceTimeMtraj(\Track\Request $request, $accessPara)
   {
     $args = new \Track\MtrajService_getSpaceTimeMtraj_args();
     $args->request = $request;
+    $args->accessPara = $accessPara;
     $bin_accel = ($this->output_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
     if ($bin_accel)
     {
@@ -155,6 +159,10 @@ class MtrajService_getScatterMtraj_args {
    * @var \Track\Request
    */
   public $request = null;
+  /**
+   * @var string
+   */
+  public $accessPara = null;
 
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
@@ -164,11 +172,18 @@ class MtrajService_getScatterMtraj_args {
           'type' => TType::STRUCT,
           'class' => '\Track\Request',
           ),
+        2 => array(
+          'var' => 'accessPara',
+          'type' => TType::STRING,
+          ),
         );
     }
     if (is_array($vals)) {
       if (isset($vals['request'])) {
         $this->request = $vals['request'];
+      }
+      if (isset($vals['accessPara'])) {
+        $this->accessPara = $vals['accessPara'];
       }
     }
   }
@@ -200,6 +215,13 @@ class MtrajService_getScatterMtraj_args {
             $xfer += $input->skip($ftype);
           }
           break;
+        case 2:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->accessPara);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
         default:
           $xfer += $input->skip($ftype);
           break;
@@ -219,6 +241,11 @@ class MtrajService_getScatterMtraj_args {
       }
       $xfer += $output->writeFieldBegin('request', TType::STRUCT, 1);
       $xfer += $this->request->write($output);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->accessPara !== null) {
+      $xfer += $output->writeFieldBegin('accessPara', TType::STRING, 2);
+      $xfer += $output->writeString($this->accessPara);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
@@ -315,6 +342,10 @@ class MtrajService_getSpaceTimeMtraj_args {
    * @var \Track\Request
    */
   public $request = null;
+  /**
+   * @var string
+   */
+  public $accessPara = null;
 
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
@@ -324,11 +355,18 @@ class MtrajService_getSpaceTimeMtraj_args {
           'type' => TType::STRUCT,
           'class' => '\Track\Request',
           ),
+        2 => array(
+          'var' => 'accessPara',
+          'type' => TType::STRING,
+          ),
         );
     }
     if (is_array($vals)) {
       if (isset($vals['request'])) {
         $this->request = $vals['request'];
+      }
+      if (isset($vals['accessPara'])) {
+        $this->accessPara = $vals['accessPara'];
       }
     }
   }
@@ -360,6 +398,13 @@ class MtrajService_getSpaceTimeMtraj_args {
             $xfer += $input->skip($ftype);
           }
           break;
+        case 2:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->accessPara);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
         default:
           $xfer += $input->skip($ftype);
           break;
@@ -379,6 +424,11 @@ class MtrajService_getSpaceTimeMtraj_args {
       }
       $xfer += $output->writeFieldBegin('request', TType::STRUCT, 1);
       $xfer += $this->request->write($output);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->accessPara !== null) {
+      $xfer += $output->writeFieldBegin('accessPara', TType::STRING, 2);
+      $xfer += $output->writeString($this->accessPara);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();

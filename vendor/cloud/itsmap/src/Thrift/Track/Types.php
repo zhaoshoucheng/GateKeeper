@@ -1082,6 +1082,18 @@ class ScatterResponse {
   static $_TSPEC;
 
   /**
+   * @var string
+   */
+  public $errno = null;
+  /**
+   * @var string
+   */
+  public $errmsg = null;
+  /**
+   * @var int
+   */
+  public $size = null;
+  /**
    * @var \Track\ScatterPoint[]
    */
   public $scatterPoints = null;
@@ -1090,6 +1102,18 @@ class ScatterResponse {
     if (!isset(self::$_TSPEC)) {
       self::$_TSPEC = array(
         1 => array(
+          'var' => 'errno',
+          'type' => TType::STRING,
+          ),
+        2 => array(
+          'var' => 'errmsg',
+          'type' => TType::STRING,
+          ),
+        3 => array(
+          'var' => 'size',
+          'type' => TType::I32,
+          ),
+        4 => array(
           'var' => 'scatterPoints',
           'type' => TType::LST,
           'etype' => TType::STRUCT,
@@ -1101,6 +1125,15 @@ class ScatterResponse {
         );
     }
     if (is_array($vals)) {
+      if (isset($vals['errno'])) {
+        $this->errno = $vals['errno'];
+      }
+      if (isset($vals['errmsg'])) {
+        $this->errmsg = $vals['errmsg'];
+      }
+      if (isset($vals['size'])) {
+        $this->size = $vals['size'];
+      }
       if (isset($vals['scatterPoints'])) {
         $this->scatterPoints = $vals['scatterPoints'];
       }
@@ -1127,6 +1160,27 @@ class ScatterResponse {
       switch ($fid)
       {
         case 1:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->errno);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->errmsg);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 3:
+          if ($ftype == TType::I32) {
+            $xfer += $input->readI32($this->size);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 4:
           if ($ftype == TType::LST) {
             $this->scatterPoints = array();
             $_size21 = 0;
@@ -1157,11 +1211,26 @@ class ScatterResponse {
   public function write($output) {
     $xfer = 0;
     $xfer += $output->writeStructBegin('ScatterResponse');
+    if ($this->errno !== null) {
+      $xfer += $output->writeFieldBegin('errno', TType::STRING, 1);
+      $xfer += $output->writeString($this->errno);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->errmsg !== null) {
+      $xfer += $output->writeFieldBegin('errmsg', TType::STRING, 2);
+      $xfer += $output->writeString($this->errmsg);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->size !== null) {
+      $xfer += $output->writeFieldBegin('size', TType::I32, 3);
+      $xfer += $output->writeI32($this->size);
+      $xfer += $output->writeFieldEnd();
+    }
     if ($this->scatterPoints !== null) {
       if (!is_array($this->scatterPoints)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('scatterPoints', TType::LST, 1);
+      $xfer += $output->writeFieldBegin('scatterPoints', TType::LST, 4);
       {
         $output->writeListBegin(TType::STRUCT, count($this->scatterPoints));
         {
@@ -1185,6 +1254,18 @@ class SpaceTimeResponse {
   static $_TSPEC;
 
   /**
+   * @var string
+   */
+  public $errno = null;
+  /**
+   * @var string
+   */
+  public $errmsg = null;
+  /**
+   * @var int
+   */
+  public $size = null;
+  /**
    * @var (\Track\MatchPoint[])[]
    */
   public $matchPoints = null;
@@ -1193,6 +1274,18 @@ class SpaceTimeResponse {
     if (!isset(self::$_TSPEC)) {
       self::$_TSPEC = array(
         1 => array(
+          'var' => 'errno',
+          'type' => TType::STRING,
+          ),
+        2 => array(
+          'var' => 'errmsg',
+          'type' => TType::STRING,
+          ),
+        3 => array(
+          'var' => 'size',
+          'type' => TType::I32,
+          ),
+        4 => array(
           'var' => 'matchPoints',
           'type' => TType::LST,
           'etype' => TType::LST,
@@ -1208,6 +1301,15 @@ class SpaceTimeResponse {
         );
     }
     if (is_array($vals)) {
+      if (isset($vals['errno'])) {
+        $this->errno = $vals['errno'];
+      }
+      if (isset($vals['errmsg'])) {
+        $this->errmsg = $vals['errmsg'];
+      }
+      if (isset($vals['size'])) {
+        $this->size = $vals['size'];
+      }
       if (isset($vals['matchPoints'])) {
         $this->matchPoints = $vals['matchPoints'];
       }
@@ -1234,6 +1336,27 @@ class SpaceTimeResponse {
       switch ($fid)
       {
         case 1:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->errno);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->errmsg);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 3:
+          if ($ftype == TType::I32) {
+            $xfer += $input->readI32($this->size);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 4:
           if ($ftype == TType::LST) {
             $this->matchPoints = array();
             $_size28 = 0;
@@ -1274,11 +1397,26 @@ class SpaceTimeResponse {
   public function write($output) {
     $xfer = 0;
     $xfer += $output->writeStructBegin('SpaceTimeResponse');
+    if ($this->errno !== null) {
+      $xfer += $output->writeFieldBegin('errno', TType::STRING, 1);
+      $xfer += $output->writeString($this->errno);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->errmsg !== null) {
+      $xfer += $output->writeFieldBegin('errmsg', TType::STRING, 2);
+      $xfer += $output->writeString($this->errmsg);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->size !== null) {
+      $xfer += $output->writeFieldBegin('size', TType::I32, 3);
+      $xfer += $output->writeI32($this->size);
+      $xfer += $output->writeFieldEnd();
+    }
     if ($this->matchPoints !== null) {
       if (!is_array($this->matchPoints)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('matchPoints', TType::LST, 1);
+      $xfer += $output->writeFieldBegin('matchPoints', TType::LST, 4);
       {
         $output->writeListBegin(TType::LST, count($this->matchPoints));
         {
