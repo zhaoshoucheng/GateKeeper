@@ -447,9 +447,9 @@ class RoadNet
             $v['yData'] = new TypeData($v['yData']);
             $mtraj_request->filterDataVec[] = new FilterData($v);
         }
-
+        $accessPara = json_encode(['source'=>'signal_pro', 'transMode'=>'thrift', 'userId'=>'web-api']);
         $this->start('mtraj');
-        $response = $this->call($type, [$mtraj_request]);
+        $response = $this->call($type, [$mtraj_request, $accessPara]);
         $this->close();
 
         return $response;
