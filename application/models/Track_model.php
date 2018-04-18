@@ -186,10 +186,9 @@ class Track_model extends CI_Model {
 
 		// 组织信号灯区间
 		$result_data['signal_range'] = [];
-		$bf_green_start = 0;
-		$bf_green_end = 0;
+		$bf_green_end = $cycle_start_time;
 		// 剩余时间 默认整个周期
-		$surplus_time = $timing['cycle'];
+		$surplus_time = $cycle_end_time;
 
 		foreach($timing['signal'] as $k=>$v){
 			if($v['state'] == 1){ // 绿灯
@@ -202,8 +201,7 @@ class Track_model extends CI_Model {
 					// 红灯结束时间 本次绿灯开始时间
 					$result_data['signal_range'][$bf_green_end]['to'] = $v['start_time'];
 
-					// 更新上一次绿灯开始结束时间
-					$bf_green_start = $v['start_time'];
+					// 更新上一次绿灯结束时间
 					$bf_green_end = $v['start_time'] + $v['duration'];
 
 					// 信号灯状态 0 红灯 1绿灯
@@ -214,7 +212,7 @@ class Track_model extends CI_Model {
 					$result_data['signal_range'][$v['start_time']]['to'] = $v['start_time'] + $v['duration'];
 
 					// 更新剩余时间
-					$surplus_time = $surplus_time - $v['start_time'] + $v['duration'];
+					$surplus_time = $cycle_end_time - ($v['start_time'] + $v['duration']);
 				}
 			}
 		}
