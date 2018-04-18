@@ -123,15 +123,6 @@ class Track_model extends CI_Model {
             'junctionId' => trim($junction_info['junction_id']),
             'flowId'     => trim($data['flow_id']),
             'rtimeVec'   => $rtimeVec,
-            /*'junctionId' => '2017030116_4875814',
-            'flowId'     => '2017030116_i_490122360_2017030116_o_64019800',
-            'rtimeVec'   => [
-                [
-                    'mapVersion' => 'c25101a793840cc6abf3819813823d82',
-                    'startTS'    => '1522252800',
-                    'endTS'      => '1522339200'
-                ]
-            ],*/
             'filterData' => $sample_data
         ];
 
@@ -283,7 +274,6 @@ class Track_model extends CI_Model {
 
 		$result_data['info']['id'] = trim($junction_info['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
-
 		return $result_data;
 	}
 }
