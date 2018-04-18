@@ -285,16 +285,18 @@ class Timing_model extends CI_Model {
 
 				if(!empty($v['plan_detail']['movement_timing'])){
 					foreach($v['plan_detail']['movement_timing'] as $k1=>$v1){
-						// 信号灯状态 1=绿灯
-						$result['timing_detail'][$v['time_plan_id']]['timing'][$k1]['state'] = isset($v1[0]['state']) ? $v1[0]['state'] : 0;
-						// 绿灯开始时间
-						$result['timing_detail'][$v['time_plan_id']]['timing'][$k1]['start_time'] = isset($v1[0]['start_time']) ? $v1[0]['start_time'] : 0;
-						// 绿灯结束时间
-						$result['timing_detail'][$v['time_plan_id']]['timing'][$k1]['duration'] = isset($v1[0]['duration']) ? $v1[0]['duration'] : 0;
-						// 逻辑flow id
-						$result['timing_detail'][$v['time_plan_id']]['timing'][$k1]['logic_flow_id'] = isset($v1[0]['flow_logic']['logic_flow_id']) ? $v1[0]['flow_logic']['logic_flow_id'] : 0;
-						// flow 描述
-						$result['timing_detail'][$v['time_plan_id']]['timing'][$k1]['comment'] = isset($v1[0]['flow_logic']['comment']) ? $v1[0]['flow_logic']['comment'] : '';
+						foreach($v1 as $key=>$val){
+							// 信号灯状态 1=绿灯
+							$result['timing_detail'][$v['time_plan_id']]['timing'][$key]['state'] = isset($val['state']) ? $val['state'] : 0;
+							// 绿灯开始时间
+							$result['timing_detail'][$v['time_plan_id']]['timing'][$key]['start_time'] = isset($val['start_time']) ? $val['start_time'] : 0;
+							// 绿灯结束时间
+							$result['timing_detail'][$v['time_plan_id']]['timing'][$key]['duration'] = isset($val['duration']) ? $val['duration'] : 0;
+							// 逻辑flow id
+							$result['timing_detail'][$v['time_plan_id']]['timing'][$key]['logic_flow_id'] = isset($val['flow_logic']['logic_flow_id']) ? $val['flow_logic']['logic_flow_id'] : 0;
+							// flow 描述
+							$result['timing_detail'][$v['time_plan_id']]['timing'][$key]['comment'] = isset($val['flow_logic']['comment']) ? $val['flow_logic']['comment'] : '';
+						}
 					}
 				}
 
@@ -374,9 +376,7 @@ class Timing_model extends CI_Model {
 		} catch (Exception $e) {
 			return [];
 		}
-		if($data['debug']){
-			echo "<pre>timing = ";print_r($timing['data']);exit;
-		}
+
 		if(isset($timing['data']) && count($timing['data'] >= 1)){
 			return $timing['data'];
 		}else{
