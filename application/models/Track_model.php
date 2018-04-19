@@ -28,18 +28,25 @@ class Track_model extends CI_Model {
 		}
 
 		// 获取路口详情 dates start_time end_time movements
+		$st = microtime(true);
 		$junction_info = $this->junction_model->getJunctionInfoForTheTrack($data);
+		$et = microtime(true);
+		$result_data['获取路口详情 junction_model->getJunctionInfoForTheTrack 耗时：'] = ($et - $st). '秒';
 		if(!$junction_info){
 			return [];
 		}
 
 		// 获取 mapversion
+		$st = microtime(true);
 		$mapversions = $this->taskdateversion_model->select($junction_info['task_id'], $junction_info['dates']);
+		$et = microtime(true);
+		$result_data['获取mapversion taskdateversion_model->select 耗时：'] = $et - $st . '秒';
 		if(!$mapversions){
 			return [];
 		}
 
 		// 获取 配时信息 周期 相位差 绿灯开始结束时间
+		$st = microtime(true);
 		$timing_data = [
 			'junction_id' => $junction_info['junction_id'],
 			'dates'       => explode(',', $junction_info['dates']),
@@ -47,6 +54,8 @@ class Track_model extends CI_Model {
 			'flow_id'	  => trim($data['flow_id'])
 		];
 		$timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
+		$et = microtime(true);
+		$result_data['获取配时信息 timing_model->getFlowTimingInfoForTheTrack 耗时：'] = $et - $st . '秒';
 		if(!$timing){
 			return [];
 		}
@@ -58,6 +67,7 @@ class Track_model extends CI_Model {
 			$rtimeVec[$k]['endTS'] = strtotime($v['date'] . ' ' . $junction_info['end_time']);
 		}
 
+		$st = microtime(true);
 		// 组织thrift所需filterData数组
 		$af_condition = [];
 		$bf_condition = [];
@@ -125,23 +135,32 @@ class Track_model extends CI_Model {
             'rtimeVec'   => $rtimeVec,
             'filterData' => $sample_data
         ];
+        $et = microtime(true);
+        $result_data['组织thrift所需参数耗时：'] = $et - $st . '秒';
 
+        $st = microtime(true);
         $result_data = $this->$type($vals, $timing, $junction_info);
+        $et = microtime(true);
+        $result_data['$this->' . $type . '耗时：'] = $et - $st . '秒';
 
 		return $result_data;
 	}
 
 	/**
-	* 获取时间空轨迹数据
+	* 获取时空图轨迹数据
 	*/
 	private function getSpaceTimeMtraj($vals, $timing, $junction_info) {
 		// 新的相位差 用任务结果中的clock_shift + 配时的相位差
         $new_offset = ($timing['offset'] + $junction_info['clock_shift']) % $timing['cycle'];
         $cycle_start_time = $new_offset;
         $cycle_end_time = $timing['cycle'] + $new_offset;
-
+        $st = microtime(true);
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getSpaceTimeMtraj($vals);
+		$et = microtime(true);
+		$result_data['调用thrift接口getSpaceTimeMtraj耗时：'] = $et - $st . '秒';
+
+		$st = microtime(true);
 		$res = (array)$res;
 		if($res['errno'] != 0){
 			return [];
@@ -237,7 +256,8 @@ class Track_model extends CI_Model {
 		}
 		$result_data['info']['id'] = trim($junction_info['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
-
+		$et = microtime(true);
+		$result_data['处理thrift返回数据耗时：'] = $et - $st . '秒';
 		return $result_data;
 	}
 
