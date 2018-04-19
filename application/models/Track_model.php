@@ -33,7 +33,7 @@ class Track_model extends CI_Model {
 		$et = microtime(true);
 		$result_data['获取路口详情 junction_model->getJunctionInfoForTheTrack 耗时：'] = ($et - $st). '秒';
 		if(!$junction_info){
-			return [];
+			return ['获取路口详情 junction_model->getJunctionInfoForTheTrack 耗时：' => ($et - $st). '秒'];
 		}
 
 		// 获取 mapversion
@@ -42,7 +42,7 @@ class Track_model extends CI_Model {
 		$et = microtime(true);
 		$result_data['获取mapversion taskdateversion_model->select 耗时：'] = $et - $st . '秒';
 		if(!$mapversions){
-			return [];
+			return ['获取mapversion taskdateversion_model->select 耗时：' => $et - $st . '秒'];
 		}
 
 		// 获取 配时信息 周期 相位差 绿灯开始结束时间
@@ -57,7 +57,7 @@ class Track_model extends CI_Model {
 		$et = microtime(true);
 		$result_data['获取配时信息 timing_model->getFlowTimingInfoForTheTrack 耗时：'] = $et - $st . '秒';
 		if(!$timing){
-			return [];
+			return ['获取配时信息 timing_model->getFlowTimingInfoForTheTrack 耗时：' => $et - $st . '秒'];
 		}
 
 		// 组织thrift所需rtimeVec数组
@@ -163,7 +163,8 @@ class Track_model extends CI_Model {
 		$st = microtime(true);
 		$res = (array)$res;
 		if($res['errno'] != 0){
-			return [];
+			$et = microtime(true);
+			return ['调用thrift接口getSpaceTimeMtraj耗时：' => $et - $st . '秒'];
 		}
 		$result = [];
 		if(!empty($res['matchPoints'])){
