@@ -379,6 +379,7 @@ class Timing_model extends CI_Model {
 			return [];
 		}
 		if($data['debug'] == 'ningxiangbing'){
+			echo json_encode($timing);
 			echo json_encode($timing['data']);
 			echo "<hr><pre>";print_r($timing['data']);
 		}
