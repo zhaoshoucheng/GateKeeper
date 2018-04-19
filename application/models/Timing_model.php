@@ -376,10 +376,6 @@ class Timing_model extends CI_Model {
 					];
 		try {
 			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
-			$et = microtime(true);
-			echo '<hr>timing_model->getTimingData 耗时:' . $et - $st . '秒<hr>';
-			echo 'form_data :' . json_encode($timing_data);
-			echo '<hr>interface :' . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
 			$timing = json_decode($timing, true);
 			if(isset($timing['errorCode']) && $timing['errorCode'] != 0){
 				// 日志
