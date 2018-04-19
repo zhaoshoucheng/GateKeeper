@@ -76,6 +76,7 @@ class Track extends MY_Controller {
 	* @return json
 	*/
 	public function getSpaceTimeMtraj() {
+		$st = microtime(true);
 		$params = $this->input->post();
 		// 校验参数
 		$validate = Validate::make($params,
@@ -113,6 +114,9 @@ class Track extends MY_Controller {
 		}
 
 		$result_data = $this->track_model->getTrackData($params, 'getSpaceTimeMtraj');
+		$et = microtime(true);
+
+		$this->errmsg = '耗时：' . ($et - $st) * 1000 . ' ms';
 
 		return $this->response($result_data);
 	}
