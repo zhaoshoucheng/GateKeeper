@@ -31,7 +31,7 @@ class Track_model extends CI_Model {
 		$st = microtime(true);
 		$junction_info = $this->junction_model->getJunctionInfoForTheTrack($data);
 		$et = microtime(true);
-		$result_data['获取路口详情 junction_model->getJunctionInfoForTheTrack 耗时：'] = ($et - $st). '秒';
+		//$result_data['获取路口详情 junction_model->getJunctionInfoForTheTrack 耗时：'] = ($et - $st). '秒';
 		if(!$junction_info){
 			return ['获取路口详情 junction_model->getJunctionInfoForTheTrack 耗时：' => ($et - $st). '秒'];
 		}
@@ -40,7 +40,7 @@ class Track_model extends CI_Model {
 		$st = microtime(true);
 		$mapversions = $this->taskdateversion_model->select($junction_info['task_id'], $junction_info['dates']);
 		$et = microtime(true);
-		$result_data['获取mapversion taskdateversion_model->select 耗时：'] = $et - $st . '秒';
+		//$result_data['获取mapversion taskdateversion_model->select 耗时：'] = $et - $st . '秒';
 		if(!$mapversions){
 			return ['获取mapversion taskdateversion_model->select 耗时：' => $et - $st . '秒'];
 		}
@@ -55,7 +55,7 @@ class Track_model extends CI_Model {
 		];
 		$timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
 		$et = microtime(true);
-		$result_data['获取配时信息 timing_model->getFlowTimingInfoForTheTrack 耗时：'] = $et - $st . '秒';
+		//$result_data['获取配时信息 timing_model->getFlowTimingInfoForTheTrack 耗时：'] = $et - $st . '秒';
 		if(!$timing){
 			return ['获取配时信息 timing_model->getFlowTimingInfoForTheTrack 耗时：' => $et - $st . '秒'];
 		}
@@ -136,7 +136,7 @@ class Track_model extends CI_Model {
             'filterData' => $sample_data
         ];
         $et = microtime(true);
-        $result_data['组织thrift所需参数耗时：'] = $et - $st . '秒';
+        //$result_data['组织thrift所需参数耗时：'] = $et - $st . '秒';
 
         $st = microtime(true);
         $result_data = $this->$type($vals, $timing, $junction_info);
