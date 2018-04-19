@@ -130,7 +130,8 @@ class Timing_model extends CI_Model {
 		if(empty($data) || empty($flow_id)){
 			return [];
 		}
-
+		echo "flow_id = ". $flow_id . '<hr>';
+		echo "<pr>timing = ";print_r($data);
 		$res = [];
 
 		if(empty($data['extra_timing']['cycle']) || empty($data['extra_timing']['offset'])){
@@ -369,7 +370,7 @@ class Timing_model extends CI_Model {
 						'end_time'          => trim($time_range[1])
 					];
 		try {
-			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data, 3000);
+			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
 			$timing = json_decode($timing, true);
 			if(isset($timing['errorCode']) && $timing['errorCode'] != 0){
 				// 日志
