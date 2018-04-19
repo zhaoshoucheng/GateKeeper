@@ -109,18 +109,13 @@ class Timing_model extends CI_Model {
 		}
 
 		$result = [];
-		$st = microtime(true);
 		// 获取配时数据
 		$timing = $this->getTimingData($data);
-		$et = microtime(true);
 		if(!$timing || empty($timing['latest_plan'][0]['plan_detail'])){
 			return [];
 		}
 
-		$st = microtime(true);
 		$result = $this->formatTimingDataForTrack($timing['latest_plan'][0]['plan_detail'], trim($data['flow_id']));
-		$et = microtime(true);
-		$result['处理配时数据耗时：'] = $et - $st . '秒';
 		return $result;
 
 	}
@@ -363,7 +358,6 @@ class Timing_model extends CI_Model {
 	* @return array
 	*/
 	private function getTimingData($data) {
-		$st = microtime(true);
 		$time_range = array_filter(explode('-', trim($data['time_range'])));
 		$this->load->helper('http');
 
@@ -382,10 +376,6 @@ class Timing_model extends CI_Model {
 				return [];
 			}
 		} catch (Exception $e) {
-			$et = microtime(true);
-			echo '<hr>timing_model->getTimingData 耗时:' . $et - $st . '秒<hr>';
-			echo 'form_data :' . json_encode($timing_data);
-			echo '<hr>interface :' . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
 			return [];
 		}
 		if($data['debug'] == 'ningxiangbing'){
