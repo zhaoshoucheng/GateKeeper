@@ -369,7 +369,7 @@ class Timing_model extends CI_Model {
 						'end_time'          => trim($time_range[1])
 					];
 		try {
-			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data, 1500);
+			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data, 2000);
 			$timing = json_decode($timing, true);
 			if(isset($timing['errorCode']) && $timing['errorCode'] != 0){
 				// 日志
