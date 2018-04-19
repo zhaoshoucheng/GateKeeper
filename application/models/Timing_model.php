@@ -116,6 +116,7 @@ class Timing_model extends CI_Model {
 		}
 
 		$result = $this->formatTimingDataForTrack($timing['latest_plan'][0]['plan_detail'], trim($data['flow_id']));
+		echo "<pre> result = ";print_r($result);
 		return $result;
 
 	}
@@ -134,18 +135,20 @@ class Timing_model extends CI_Model {
 		echo "<pre>timing = ";print_r($data);
 		$res = [];
 
-		if(empty($data['extra_timing']['cycle']) || empty($data['extra_timing']['offset'])){
+		if(!isset($data['extra_timing']['cycle']) || !isset($data['extra_timing']['offset'])){
+			echo "到这就没了！";
 			return [];
 		}
 		$res['cycle'] = $data['extra_timing']['cycle'];
 		$res['offset'] = $data['extra_timing']['offset'];
 
 		if(empty($data['movement_timing'])){
+			echo "movement_timing == null";
 			return [];
 		}
 
 		foreach($data['movement_timing'] as $k=>$v){
-			if(trim($v[0]['flow_logic']['logic_flow_id']) == trim($flow_id)){
+			if(trim($v[0]['flow_logic']['logic_flow_id']) == $flow_id){
 				foreach($v as $kk=>$vv){
 					if(isset($vv['state']) && isset($vv['start_time']) && isset($vv['duration'])){
 						$res['signal'][$vv['start_time']]['state'] = $vv['state'];
