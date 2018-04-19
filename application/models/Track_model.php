@@ -141,7 +141,7 @@ class Track_model extends CI_Model {
         $st = microtime(true);
         $result_data = $this->$type($vals, $timing, $junction_info);
         $et = microtime(true);
-        $result_data['$this->' . $type . '耗时：'] = $et - $st . '秒';
+        //$result_data['$this->' . $type . '耗时：'] = $et - $st . '秒';
 
 		return $result_data;
 	}
@@ -158,7 +158,7 @@ class Track_model extends CI_Model {
 		$track_mtraj = new Track_vendor();
 		$res = $track_mtraj->getSpaceTimeMtraj($vals);
 		$et = microtime(true);
-		$result_data['调用thrift接口getSpaceTimeMtraj耗时：'] = $et - $st . '秒';
+		//$result_data['调用thrift接口getSpaceTimeMtraj耗时：'] = $et - $st . '秒';
 
 		$st = microtime(true);
 		$res = (array)$res;
@@ -258,7 +258,7 @@ class Track_model extends CI_Model {
 		$result_data['info']['id'] = trim($junction_info['flow_id']);
 		$result_data['info']['comment'] = $timing['comment'];
 		$et = microtime(true);
-		$result_data['处理thrift返回数据耗时：'] = $et - $st . '秒';
+		//$result_data['处理thrift返回数据耗时：'] = $et - $st . '秒';
 		return $result_data;
 	}
 
