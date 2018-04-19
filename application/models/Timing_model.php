@@ -369,23 +369,25 @@ class Timing_model extends CI_Model {
 						'end_time'          => trim($time_range[1])
 					];
 		try {
-			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data, 2000);
+			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data, 3000);
 			$timing = json_decode($timing, true);
 			if(isset($timing['errorCode']) && $timing['errorCode'] != 0){
 				// 日志
+				echo "data = " . json_encode($timing_data);
+				echo "<hr>interface = " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
+				echo "<pre> timing = ";print_r($timing);
 				return [];
 			}
 		} catch (Exception $e) {
 			return [];
 		}
-		if($data['debug'] == 'ningxiangbing'){
-			echo json_encode($timing);
-			echo json_encode($timing['data']);
-			echo "<hr><pre>";print_r($timing['data']);
-		}
+
 		if(isset($timing['data']) && count($timing['data'] >= 1)){
 			return $timing['data'];
 		}else{
+			echo "data = " . json_encode($timing_data);
+			echo "<hr>interface = " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
+			echo "<pre> timing = ";print_r($timing);
 			return [];
 		}
 	}
