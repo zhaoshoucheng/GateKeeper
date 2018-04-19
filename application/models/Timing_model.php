@@ -131,7 +131,7 @@ class Timing_model extends CI_Model {
 			return [];
 		}
 		echo "flow_id = ". $flow_id . '<hr>';
-		echo "<pr>timing = ";print_r($data);
+		echo "<pre>timing = ";print_r($data);
 		$res = [];
 
 		if(empty($data['extra_timing']['cycle']) || empty($data['extra_timing']['offset'])){
@@ -145,7 +145,7 @@ class Timing_model extends CI_Model {
 		}
 
 		foreach($data['movement_timing'] as $k=>$v){
-			if(!empty($v[0]['flow_logic']['logic_flow_id']) && $v[0]['flow_logic']['logic_flow_id'] == $flow_id){
+			if(trim($v[0]['flow_logic']['logic_flow_id']) == trim($flow_id)){
 				foreach($v as $kk=>$vv){
 					if(isset($vv['state']) && isset($vv['start_time']) && isset($vv['duration'])){
 						$res['signal'][$vv['start_time']]['state'] = $vv['state'];
