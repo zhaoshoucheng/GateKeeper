@@ -116,8 +116,6 @@ class Track extends MY_Controller {
 		$result_data = $this->track_model->getTrackData($params, 'getSpaceTimeMtraj');
 		$et = microtime(true);
 
-		$this->errmsg = '耗时：' . ($et - $st) * 1000 . ' ms';
-
-		return $this->response($result_data);
+		return $this->response($result_data, 0, '耗时：' . ($et - $st) * 1000 . ' ms');
 	}
 }
