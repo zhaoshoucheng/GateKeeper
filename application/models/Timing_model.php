@@ -109,18 +109,22 @@ class Timing_model extends CI_Model {
 		}
 
 		$result = [];
-
+		$st = microtime(true);
 		// 获取配时数据
 		$timing = $this->getTimingData($data);
-		if(!$timing){
-			return [];
+		$et = microtime(true);
+		if(!$timing || empty($timing['latest_plan'][0]['plan_detail'])){
+			return [
+					'timing_model->getTimingData 耗时：' . $et - $st . '秒',
+					'form_data :' => json_encode($data),
+					'interface :' => $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint'
+					];
 		}
 
-		if(empty($timing['latest_plan'][0]['plan_detail'])){
-			return [];
-		}
+		$st = microtime(true);
 		$result = $this->formatTimingDataForTrack($timing['latest_plan'][0]['plan_detail'], trim($data['flow_id']));
-
+		$et = microtime(true);
+		$result['处理配时数据耗时：'] = $et - $st . '秒';
 		return $result;
 
 	}
