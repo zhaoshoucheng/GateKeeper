@@ -116,9 +116,8 @@ class Timing_model extends CI_Model {
 		}
 
 		$result = $this->formatTimingDataForTrack($timing['latest_plan'][0]['plan_detail'], trim($data['flow_id']));
-		echo "<pre> result = ";print_r($result);
-		return $result;
 
+		return $result;
 	}
 
 	/**
@@ -131,19 +130,16 @@ class Timing_model extends CI_Model {
 		if(empty($data) || empty($flow_id)){
 			return [];
 		}
-		echo "flow_id = ". $flow_id . '<hr>';
-		echo "<pre>timing = ";print_r($data);
+
 		$res = [];
 
 		if(!isset($data['extra_timing']['cycle']) || !isset($data['extra_timing']['offset'])){
-			echo "到这就没了！";
 			return [];
 		}
 		$res['cycle'] = $data['extra_timing']['cycle'];
 		$res['offset'] = $data['extra_timing']['offset'];
 
 		if(empty($data['movement_timing'])){
-			echo "movement_timing == null";
 			return [];
 		}
 
@@ -377,9 +373,6 @@ class Timing_model extends CI_Model {
 			$timing = json_decode($timing, true);
 			if(isset($timing['errorCode']) && $timing['errorCode'] != 0){
 				// 日志
-				echo "data = " . json_encode($timing_data);
-				echo "<hr>interface = " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
-				echo "<pre> timing = ";print_r($timing);
 				return [];
 			}
 		} catch (Exception $e) {
@@ -389,9 +382,6 @@ class Timing_model extends CI_Model {
 		if(isset($timing['data']) && count($timing['data'] >= 1)){
 			return $timing['data'];
 		}else{
-			echo "data = " . json_encode($timing_data);
-			echo "<hr>interface = " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
-			echo "<pre> timing = ";print_r($timing);
 			return [];
 		}
 	}
