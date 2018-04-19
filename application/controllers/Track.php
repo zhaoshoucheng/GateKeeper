@@ -62,7 +62,7 @@ class Track extends MY_Controller {
 
 		$result_data = $this->track_model->getTrackData($params, 'getScatterMtraj');
 
-		return $this->response($result_data);
+		return $this->response($result_data, 0, '耗时：' . ($et - $st) . '秒');
 	}
 
 	/**
@@ -76,7 +76,6 @@ class Track extends MY_Controller {
 	* @return json
 	*/
 	public function getSpaceTimeMtraj() {
-		$st = microtime(true);
 		$params = $this->input->post();
 		// 校验参数
 		$validate = Validate::make($params,
@@ -114,7 +113,6 @@ class Track extends MY_Controller {
 		}
 
 		$result_data = $this->track_model->getTrackData($params, 'getSpaceTimeMtraj');
-		$et = microtime(true);
 
 		return $this->response($result_data, 0, '耗时：' . ($et - $st) . '秒');
 	}
