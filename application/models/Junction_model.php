@@ -487,10 +487,28 @@ class Junction_model extends CI_Model {
 		];
 		$flow_id_name = $this->timing_model->getFlowIdToName($timing_data);
 
-		// 匹配相位名称
+		// 匹配相位名称 并按 南左、北直、西左、东直、北左、南直、东左、西直 进行排序
 		if(!empty($data['movements'])){
-			foreach($data['movements'] as $k=>$v){
-				$data['movements'][$k]['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
+			$phase = [
+				'南左' => 10,
+				'北直' => 20,
+				'西左' => 30,
+				'东直' => 40,
+				'北左' => 50,
+				'南直' => 60,
+				'东左' => 70,
+				'西直' => 80
+			];
+			$temp_movements = [];
+			foreach($data['movements'] as $k=>&$v){
+				$v['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
+				foreach($phase as $kk=>$vv){
+					if(!empty($v['comment']) && strpos($v['comment'], $kk) !== false){
+						$temp_movements[str_replace($kk, $vv, $v['comment'])] = $v;
+					}else{
+						$temp_movements[mt_rand(100, 999)] = $v;
+					}
+				}
 				if($result_type == 1){ // 指标详情页，组织每个指标对应各相位集合
 					$flow_quota_key_conf = $this->config->item('flow_quota_key');
 					foreach($flow_quota_key_conf as $key=>$val){
@@ -499,6 +517,11 @@ class Junction_model extends CI_Model {
 						$data['flow_quota_all'][$key]['movements'][$k]['value'] = round($v[$key], 5);
 					}
 				}
+			}
+
+			if(!empty($temp_movements)){
+				ksort($temp_movements);
+				$data['movements'] = array_values($temp_movements);
 			}
 		}
 
