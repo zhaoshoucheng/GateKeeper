@@ -1,4 +1,9 @@
 <?php
+/********************************************
+# desc:    轨迹数据模型
+# author:  ningxiangbing@didichuxing.com
+# date:    2018-04-13
+********************************************/
 
 use Didi\Cloud\ItsMap\Track_vendor;
 
@@ -79,12 +84,12 @@ class Track_model extends CI_Model {
 				if(trim($v) === 'no_stop'){
 					$sample_data[$k]['xType'] = 2;
 					$sample_data[$k]['xData']['noStop'] = 1;
-				}else if(strstr($v, '|') !== false && strstr($v, '#') === false){
+				}else if(strpos($v, '|') !== false && strpos($v, '#') === false){
 					$temp_arr = explode("|", $v);
 					$sample_data[$k]['xType'] = 3;
 					$sample_data[$k]['xData']['lR'] = $temp_arr[0];
 					$sample_data[$k]['xData']['rR'] = $temp_arr[1];
-				}else if(strstr($v, '|') !== false && strstr($v, '#') !== false){
+				}else if(strpos($v, '|') !== false && strpos($v, '#') !== false){
 					$temp_arr = explode('#', $v);
 					$temp_val = explode('|', $temp_arr[1]);
 					$sample_data[$k]['xType'] = 4;
@@ -99,12 +104,12 @@ class Track_model extends CI_Model {
 				if(trim($af_condition[$k]) === 'no_stop'){
 					$sample_data[$k]['yType'] = 2;
 					$sample_data[$k]['yData']['noStop'] = -1;
-				}else if(strstr($af_condition[$k], '|') !== false && strstr($af_condition[$k], '#') === false){
+				}else if(strpos($af_condition[$k], '|') !== false && strpos($af_condition[$k], '#') === false){
 					$temp_arr = explode("|", $af_condition[$k]);
 					$sample_data[$k]['yType'] = 3;
 					$sample_data[$k]['yData']['lR'] = $temp_arr[0];
 					$sample_data[$k]['yData']['rR'] = $temp_arr[1];
-				}else if(strstr($af_condition[$k], '|') !== false && strstr($af_condition[$k], '#') !== false){
+				}else if(strpos($af_condition[$k], '|') !== false && strpos($af_condition[$k], '#') !== false){
 					$temp_arr = explode('#', $af_condition[$k]);
 					$temp_val = explode('|', $temp_arr[1]);
 					$sample_data[$k]['yType'] = 4;
