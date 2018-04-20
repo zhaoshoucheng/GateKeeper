@@ -505,9 +505,10 @@ class Junction_model extends CI_Model {
 				foreach($phase as $kk=>$vv){
 					if(!empty($v['comment']) && strpos($v['comment'], $kk) !== false){
 						$temp_movements[str_replace($kk, $vv, $v['comment'])] = $v;
-					}else{
-						$temp_movements[mt_rand(100, 999)] = $v;
 					}
+				}
+				if(empty($v['comment'])){
+					$temp_movements[mt_rand(100, 999)] = $v;
 				}
 				if($result_type == 1){ // 指标详情页，组织每个指标对应各相位集合
 					$flow_quota_key_conf = $this->config->item('flow_quota_key');
@@ -518,6 +519,7 @@ class Junction_model extends CI_Model {
 					}
 				}
 			}
+
 			unset($data['movements']);
 			if(!empty($temp_movements)){
 				ksort($temp_movements);
