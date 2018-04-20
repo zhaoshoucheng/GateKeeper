@@ -518,7 +518,7 @@ class Junction_model extends CI_Model {
 					}
 				}
 			}
-
+			unset($data['movements']);
 			if(!empty($temp_movements)){
 				ksort($temp_movements);
 				$data['movements'] = array_values($temp_movements);
