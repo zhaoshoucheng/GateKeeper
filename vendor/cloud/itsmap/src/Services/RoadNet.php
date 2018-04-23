@@ -407,7 +407,7 @@ class RoadNet
     /*
     * 启动计算任务
     */
-    public function calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion) {
+    public function calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion, $timingType) {
         $roadVersionRuntime = array();
 
         foreach ($dateVersion as $date => $version) {
@@ -422,7 +422,7 @@ class RoadNet
 
         $this->start('caculator');
 
-        $response = $this->call('calculate', [$trace_id, $task_id, $city_id, $hdfs_dir, $roadVersionRuntime]);
+        $response = $this->call('calculate', [$trace_id, $task_id, $city_id, $hdfs_dir, $roadVersionRuntime, $timingType]);
 
         $this->close();
         if ($response === '' or intval($response) !== 0) {

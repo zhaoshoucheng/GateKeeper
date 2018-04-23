@@ -39,9 +39,9 @@ class Task
         // print_r($response);
     }
 
-    public function calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion) {
+    public function calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion, $timingType) {
         $roadNetService = new RoadNet();
-        $response = $roadNetService->calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion);
+        $response = $roadNetService->calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion, $timingType);
         print_r($response);
     }
 }
