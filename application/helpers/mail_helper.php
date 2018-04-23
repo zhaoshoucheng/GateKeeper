@@ -19,7 +19,6 @@ if (!function_exists('sendMail')) {
         $CI->email->to($to);
         $CI->email->subject($subject);
         $CI->email->message($content);
-
         return $CI->email->send();
     }
 }
