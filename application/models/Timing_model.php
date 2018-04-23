@@ -6,7 +6,7 @@
 ********************************************/
 
 class Timing_model extends CI_Model {
-
+	private $email_to = 'ningxiangbing@didichuxing.com';
 	public function __construct() {
 		parent::__construct();
 
@@ -372,7 +372,10 @@ class Timing_model extends CI_Model {
 			$timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
 			$timing = json_decode($timing, true);
 			if(isset($timing['errorCode']) && $timing['errorCode'] != 0){
-				// 日志
+				$content = "form_data : " . json_encode($data);
+				$content .= "<br>interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
+				$content .= '<br> result : ' . json_encode($timing);
+				sendMail($this->email_to, '获取配时数据', $content);
 				return [];
 			}
 		} catch (Exception $e) {
@@ -382,6 +385,7 @@ class Timing_model extends CI_Model {
 		if(isset($timing['data']) && count($timing['data'] >= 1)){
 			return $timing['data'];
 		}else{
+			sendMail($this->email_to, '获取配时数据', 'timing[\'data\'] is null');
 			return [];
 		}
 	}
