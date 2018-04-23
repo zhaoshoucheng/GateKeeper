@@ -503,6 +503,9 @@ class Junction_model extends CI_Model {
 			$temp_movements = [];
 			foreach($data['movements'] as $k=>&$v){
 				$v['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
+				foreach($flow_quota_key_conf as $kkk=>$vvv){
+					$v[$kkk] = round($v[$kkk], $vvv['round_num']);
+				}
 				foreach($phase as $kk=>$vv){
 					if(!empty($v['comment']) && strpos($v['comment'], $kk) !== false){
 						$temp_movements[str_replace($kk, $vv, $v['comment'])] = $v;
