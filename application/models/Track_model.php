@@ -9,6 +9,7 @@ use Didi\Cloud\ItsMap\Track_vendor;
 
 class Track_model extends CI_Model {
 
+	private $email_to = 'ningxiangbing@didichuxing.com';
 	public function __construct() {
 		parent::__construct();
 		$this->load->model('junction_model');
@@ -35,12 +36,16 @@ class Track_model extends CI_Model {
 		// 获取路口详情 dates start_time end_time movements
 		$junction_info = $this->junction_model->getJunctionInfoForTheTrack($data);
 		if(!$junction_info){
+			$content = "form_data = " . json_encode($data);
+			sendMail($this->email_to, '获取时空/散点图（'.$type.'）->获取路口详情为空', $content);
 			return [];
 		}
 
 		// 获取 mapversion
 		$mapversions = $this->taskdateversion_model->select($junction_info['task_id'], $junction_info['dates']);
 		if(!$mapversions){
+			$content = "form_data = " . json_encode(['task_id'=>$junction_info['task_id'], 'dates'=>$junction_info['dates']]);
+			sendMail($this->email_to, '获取时空/散点图（'.$type.'）->获取mapversion为空', $content);
 			return [];
 		}
 
