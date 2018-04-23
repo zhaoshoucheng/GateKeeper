@@ -42,7 +42,7 @@ class Track_model extends CI_Model {
 		}
 
 		// 获取 mapversion
-		$mapversions = $this->taskdateversion_model->select($junction_info['task_id'], $junction_info['dates']);
+		$mapversions = $this->taskdateversion_model->select($junction_info['task_id'], explode(',', $junction_info['dates']));
 		if(!$mapversions){
 			$content = "form_data = " . json_encode(['task_id'=>$junction_info['task_id'], 'dates'=>$junction_info['dates']]);
 			sendMail($this->email_to, '获取时空/散点图（'.$type.'）->获取mapversion为空', $content);

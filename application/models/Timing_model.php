@@ -378,7 +378,7 @@ class Timing_model extends CI_Model {
 				$content = "form_data : " . json_encode($data);
 				$content .= "<br>interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
 				$content .= '<br> result : ' . json_encode($timing);
-				sendMail($this->email_to, '获取配时数据', $content);
+				sendMail($this->email_to, 'logs: 获取配时数据', $content);
 				return [];
 			}
 		} catch (Exception $e) {
@@ -388,7 +388,7 @@ class Timing_model extends CI_Model {
 		if(isset($timing['data']) && count($timing['data'] >= 1)){
 			return $timing['data'];
 		}else{
-			sendMail($this->email_to, '获取配时数据', 'timing[\'data\'] is null');
+			sendMail($this->email_to, 'logs: 获取配时数据', 'timing[\'data\'] is null');
 			return [];
 		}
 	}
