@@ -488,6 +488,7 @@ class Junction_model extends CI_Model {
 		$flow_id_name = $this->timing_model->getFlowIdToName($timing_data);
 
 		$flow_quota_key_conf = $this->config->item('flow_quota_key');
+		$confidence_conf = $this->config->item('confidence');
 		// 匹配相位名称 并按 南左、北直、西左、东直、北左、南直、东左、西直 进行排序
 		if(!empty($data['movements'])){
 			$phase = [
@@ -503,6 +504,7 @@ class Junction_model extends CI_Model {
 			$temp_movements = [];
 			foreach($data['movements'] as $k=>&$v){
 				$v['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
+				$v['confidence'] = !empty($confidence_conf[$v['confidence']]) ? $confidence_conf[$v['confidence']] : '';
 				foreach($flow_quota_key_conf as $kkk=>$vvv){
 					$v[$kkk] = round($v[$kkk], $vvv['round_num']);
 				}
