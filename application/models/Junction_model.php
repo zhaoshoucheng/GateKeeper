@@ -504,7 +504,7 @@ class Junction_model extends CI_Model {
 			$temp_movements = [];
 			foreach($data['movements'] as $k=>&$v){
 				$v['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
-				$v['confidence'] = !empty($confidence_conf[$v['confidence']]) ? $confidence_conf[$v['confidence']] : '';
+				$v['confidence'] = !empty($confidence_conf[$v['confidence']]['name']) ? $confidence_conf[$v['confidence']]['name'] : '';
 				foreach($flow_quota_key_conf as $kkk=>$vvv){
 					$v[$kkk] = round($v[$kkk], $vvv['round_num']);
 				}
