@@ -262,14 +262,6 @@ class Timing_model extends CI_Model {
 	* @return array
 	*/
 	private function formatTimingData($data, $time_range) {
-		// 任务最小时间、最大时间
-		$time_range = array_filter(explode('-', $time_range));
-		if(empty($time_range[0]) || empty($time_range[1])){
-			return [];
-		}
-		$task_min_time = strtotime($time_range[0]);
-		$task_max_time = strtotime($time_range[1]);
-
 		$result = [];
 		// 方案总数
 		$result['total_plan'] = isset($data['total_plan']) ? $data['total_plan'] : 0;
@@ -310,20 +302,9 @@ class Timing_model extends CI_Model {
                 }
 			}
 
-			// 对方案按时间正序排序并对配时方案开始结束时间对应任务开始结束时间
+			// 对方案按时间正序排序
 			if(!empty($result['plan_list'])){
 				ksort($result['plan_list']);
-				$first = current($result['plan_list']);
-				$end = end($result['plan_list']);
-				$plan_min_time = strtotime($first['start_time']);
-				$plan_max_time = strtotime($end['end_time']);
-				if($plan_min_time > $task_min_time || $plan_min_time < $task_min_time){
-					$result['plan_list'][strtotime($first['start_time'])]['start_time'] = date("H:i:s", $task_min_time);
-				}
-				if($plan_max_time > $task_max_time || $plan_max_time < $task_max_time){
-					$result['plan_list'][strtotime($end['start_time'])]['end_time'] = date("H:i:s", $task_max_time);
-				}
-
 				$result['plan_list'] = array_values($result['plan_list']);
 			}
 		}
