@@ -27,6 +27,9 @@ class Timing_model extends CI_Model {
 
 		// 获取配时数据
 		$timing = $this->getTimingData($data);
+		if($data['debug'] == 'ningxiangbing'){
+			echo "<pre>timing = ";print_r($timing);
+		}
 
 		// 对返回数据格式化,返回需要的格式
 		if(count($timing >= 1)){

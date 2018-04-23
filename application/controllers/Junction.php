@@ -8,6 +8,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Junction extends MY_Controller {
+	private $eamil_to = 'ningxiangbing@didichuxing.com';
 	public function __construct(){
 		parent::__construct();
 		$this->load->model('junction_model');
@@ -370,6 +371,7 @@ class Junction extends MY_Controller {
 	*/
 	public function testLogin(){
 		echo "welcome!";
+		sendMail($this->eamil_to, '测试', 'yeah');
 		exit;
 	}
 }
