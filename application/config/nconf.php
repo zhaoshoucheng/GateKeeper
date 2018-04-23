@@ -128,13 +128,34 @@ $config['junction_quota_key'] = [
 
 // flow指标
 $config['flow_quota_key'] = [
-	'route_length'      => '路段长度(米)',
-	'queue_position'	=> '排队长度(米)',
-	'saturation_degree'	=> '饱和度',
-	'stop_delay'		=> '平均(停车)延误(秒)',
-	'stop_time_cycle'	=> '停车(周期)次数(次)',
-	'spillover_rate'	=> '溢流比率',
-	'stop_rate'			=> '停车比率',
+	'route_length' => [
+		'name'      => '路段长度/米', // 中文名称
+		'round_num' => 0            // 取小数点后几位
+	],
+	'queue_position' => [
+		'name'      =>'排队长度/米',
+		'round_num' => 0
+	],
+	'saturation_degree'	=> [
+		'name'      =>'饱和度',
+		'round_num' => 2
+	],
+	'stop_delay' => [
+		'name'      => '平均(停车)延误/秒',
+		'round_num' => 2
+	],
+	'stop_time_cycle' => [
+		'name'      =>'停车(周期)次数/次',
+		'round_num' => 2
+	],
+	'spillover_rate' => [
+		'name'      => '溢流比率',
+		'round_num' => 5
+	],
+	'stop_rate' => [
+		'name'      => '停车比率',
+		'round_num' => 2
+	]
 ];
 
 // 诊断问题

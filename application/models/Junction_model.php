@@ -487,6 +487,7 @@ class Junction_model extends CI_Model {
 		];
 		$flow_id_name = $this->timing_model->getFlowIdToName($timing_data);
 
+		$flow_quota_key_conf = $this->config->item('flow_quota_key');
 		// 匹配相位名称 并按 南左、北直、西左、东直、北左、南直、东左、西直 进行排序
 		if(!empty($data['movements'])){
 			$phase = [
@@ -511,11 +512,10 @@ class Junction_model extends CI_Model {
 					$temp_movements[mt_rand(100, 900) + mt_rand(1, 99)] = $v;
 				}
 				if($result_type == 1){ // 指标详情页，组织每个指标对应各相位集合
-					$flow_quota_key_conf = $this->config->item('flow_quota_key');
 					foreach($flow_quota_key_conf as $key=>$val){
-						$data['flow_quota_all'][$key]['name'] = $val;
+						$data['flow_quota_all'][$key]['name'] = $val['name'];
 						$data['flow_quota_all'][$key]['movements'][$k]['id'] = $v['movement_id'];
-						$data['flow_quota_all'][$key]['movements'][$k]['value'] = round($v[$key], 5);
+						$data['flow_quota_all'][$key]['movements'][$k]['value'] = round($v[$key], $val['round_num']);
 					}
 				}
 			}
@@ -532,7 +532,9 @@ class Junction_model extends CI_Model {
 
 		if($result_type == 2){ // 诊断详情页
 			// flow级别所有指标集合
-			$data['flow_quota_all'] = $this->config->item('flow_quota_key');
+			foreach($flow_quota_key_conf as $k=>$v){
+				$data['flow_quota_all'][$k] = $v['name'];
+			}
 
 			// 组织问题集合
 			$diagnose_key_conf = $this->config->item('diagnose_key');
@@ -562,7 +564,7 @@ class Junction_model extends CI_Model {
 						foreach($v['flow_quota'] as $key=>$val){
 							$data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
 							$data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id'] = $vv['movement_id'];
-							$data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value'] = round($vv[$key], 5);
+							$data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value'] = round($vv[$key], $flow_quota_key_conf[$key]['round_num']);
 						}
 					}
 				}
