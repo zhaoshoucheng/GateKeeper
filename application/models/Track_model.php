@@ -36,8 +36,6 @@ class Track_model extends CI_Model {
         // 获取路口详情 dates start_time end_time movements
         $junction_info = $this->junction_model->getJunctionInfoForTheTrack($data);
         if(!$junction_info){
-            $content = "form_data = " . json_encode($data);
-            sendMail($this->email_to, 'logs: 获取时空/散点图（'.$type.'）->获取路口详情为空', $content);
             return [];
         }
 

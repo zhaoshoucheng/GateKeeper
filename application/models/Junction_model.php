@@ -687,6 +687,10 @@ class Junction_model extends CI_Model {
                             ->where($where)
                             ->get();
         if(!$result){
+            $content = "form_data = " . json_encode($data);
+            $content .= "<br>sql = " . $this->db->last_query();
+            $content .= "<br>result = " . $result;
+            sendMail($this->email_to, 'logs: 获取时空/散点图（'.$type.'）->获取路口详情为空', $content);
             return [];
         }
 
