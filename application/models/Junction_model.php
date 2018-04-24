@@ -8,6 +8,7 @@
 class Junction_model extends CI_Model {
     private $tb = 'junction_index';
     private $db = '';
+    private $email_to = 'ningxiangbing@didichuxing.com';
 
     public function __construct(){
         parent::__construct();
