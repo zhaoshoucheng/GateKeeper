@@ -292,7 +292,8 @@ class Junction_model extends CI_Model
     * @param data['orderby']      interger 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
     * @return array
     */
-    public function getDiagnoseRankList($data){
+    public function getDiagnoseRankList($data)
+    {
         if (!is_array($data['diagnose_key']) || empty($data['diagnose_key'])) return [];
 
         // PM规定页面左侧列表与右侧地图数据一致，而且只在概览页有此列表，固使用 根据时间点查询全城路口诊断问题列表 接口获取初始数据
