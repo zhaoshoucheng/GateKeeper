@@ -17,7 +17,6 @@ if (!function_exists('sendMail')) {
         $CI->email->initialize($mail_config);
         $CI->email->from('sts_traffic@didichuxing.com', '智慧交通信号灯项目');
         $CI->email->to($to);
-        $subject = '评估报表';
         $CI->email->subject($subject);
         $CI->email->message($content);
         return $CI->email->send();

@@ -8,7 +8,7 @@ use Didi\Cloud\ItsMap\Configs\Env;
 use Didi\Cloud\ItsMap\Services\RoadNet;
 
 class Track_vendor {
-	public function __construct() {
+    public function __construct() {
         Env::init();
     }
 
