@@ -350,7 +350,7 @@ class Timing_model extends CI_Model {
                         'logic_junction_id' => trim($data['junction_id']),
                         'days'              => trim(implode(',', $data['dates'])),
                         'start_time'        => trim($time_range[0]),
-                        'end_time'          => trim($time_range[1])
+                        'end_time'          => date('H:i', strtotime(trim($time_range[1])) - 60)
                     ];
         try {
             $timing = httpGET($this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint', $timing_data);
