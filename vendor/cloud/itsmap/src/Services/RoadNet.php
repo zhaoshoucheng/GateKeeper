@@ -55,6 +55,12 @@ class RoadNet
 
     private $config = null;
 
+    public function __construct()
+    {
+        $logger = & load_class('Log', 'core');
+        \Didi\Cloud\ItsMap\Services\Log::registerLogger($logger);
+    }
+
     // 启动 thrift
     public function start($service = "inhert")
     {
