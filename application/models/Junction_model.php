@@ -5,14 +5,16 @@
 # date:    2018-03-05
 ********************************************/
 
-class Junction_model extends CI_Model {
+class Junction_model extends CI_Model
+{
     private $tb = 'junction_index';
     private $db = '';
     private $email_to = 'ningxiangbing@didichuxing.com';
 
-    public function __construct(){
+    public function __construct()
+    {
         parent::__construct();
-        if(empty($this->db)){
+        if (empty($this->db)) {
             $this->db = $this->load->database('default', true);
         }
 
@@ -37,54 +39,51 @@ class Junction_model extends CI_Model {
     * @param data['quota_key']  string   指标key
     * @return array
     */
-    public function getAllCityJunctionInfo($data){
+    public function getAllCityJunctionInfo($data)
+    {
         $quota_key = $data['quota_key'];
 
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
         $all_city_junctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
-        if(count($all_city_junctions) < 1 || !$all_city_junctions){
-            return [];
-        }
+        if (count($all_city_junctions) < 1 || !$all_city_junctions) return [];
 
         $selectstr = empty($this->selectColumns($quota_key)) ? '' : ',' . $this->selectColumns($quota_key);
-        if(empty($selectstr)){
-            return [];
-        }
+        if (empty($selectstr)) return [];
 
         $select = '';
-        if($data['type'] == 1){ // 综合
+        if ($data['type'] == 1) { // 综合
             $select = "id, junction_id, max({$quota_key}) as {$quota_key}";
-        }else{
+        } else {
             $select = 'id, junction_id' . $selectstr;
         }
 
         $where = 'task_id = ' . $data['task_id'];
-        if($data['type'] == 0){
-            $where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
-        }
+        if ($data['type'] == 0) $where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
 
         $confidence_conf = $this->config->item('confidence');
-        if(isset($data['confidence']) && (int)$data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)){
+        if (isset($data['confidence'])
+            && (int)$data['confidence'] >= 1
+            && array_key_exists($data['confidence'], $confidence_conf)) {
             $where .= ' and ' . $quota_key . '_confidence ' . $confidence_conf[$data['confidence']]['expression'];
         }
 
         $this->db->select($select);
         $this->db->from($this->tb);
         $this->db->where($where);
-        if($data['type'] == 1){
-            $this->db->group_by('junction_id');
-        }
+        if ($data['type'] == 1) $this->db->group_by('junction_id');
+
         $res = $this->db->get()->result_array();
 
         // 指标状态 1：高 2：中 3：低
         $quota_key_conf = $this->config->item('junction_quota_key');
         $temp_quota_data = [];
-        foreach($res as &$v){
-            if($v[$quota_key] > $quota_key_conf[$quota_key]['status_max']){
+        foreach ($res as &$v) {
+            if ($v[$quota_key] > $quota_key_conf[$quota_key]['status_max']) {
                 $v['quota_status'] = 1;
-            }else if($v[$quota_key] <= $quota_key_conf[$quota_key]['status_max'] && $v[$quota_key] > $quota_key_conf[$quota_key]['status_min']){
+            } elseif ($v[$quota_key] <= $quota_key_conf[$quota_key]['status_max']
+                    && $v[$quota_key] > $quota_key_conf[$quota_key]['status_min']) {
                 $v['quota_status'] = 2;
-            }else{
+            } else {
                 $v['quota_status'] = 3;
             }
             $v[$quota_key] = round($v[$quota_key], 5);
@@ -109,20 +108,17 @@ class Junction_model extends CI_Model {
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
     * @return array
     */
-    public function getFlowQuotas($data){
-        if(!isset($data['type']) || empty($data) || !in_array((int)$data['type'], [1, 2], true)){
-            return [];
-        }
+    public function getFlowQuotas($data)
+    {
+        if (!isset($data['type']) || empty($data) || !in_array((int)$data['type'], [1, 2], true)) return [];
 
-        if((int)$data['type'] == 2){ // 诊断详情页
+        if ((int)$data['type'] == 2) { // 诊断详情页
             $res = $this->getDiagnoseJunctionDetail($data);
-        }else{ // 指标详情页
+        } else { // 指标详情页
             $res = $this->getQuotaJunctionDetail($data);
         }
 
-        if(!$res || empty($res)){
-            return [];
-        }
+        if (!$res || empty($res)) return [];
 
         return $res;
     }
@@ -137,28 +133,31 @@ class Junction_model extends CI_Model {
     * @param data['diagnose_key'] array    诊断问题KEY
     * @return array
     */
-    public function getJunctionsDiagnoseList($data){
+    public function getJunctionsDiagnoseList($data)
+    {
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
         $all_city_junctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
-        if(count($all_city_junctions) < 1 || !$all_city_junctions){
-            return [];
-        }
+        if (count($all_city_junctions) < 1 || !$all_city_junctions) return [];
 
-        if($data['type'] == 1){ // 综合
+        if ($data['type'] == 1) { // 综合
             $res = $this->getJunctionsDiagnoseBySynthesize($data);
-        }else{ // 时间点
+        } else { // 时间点
             $res = $this->getJunctionsDiagnoseByTimePoint($data);
         }
 
         $diagnose_key_conf = $this->config->item('diagnose_key');
         $temp_diagnose_data = [];
-        if(count($res) >= 1){
-            foreach($data['diagnose_key'] as $val){
+        if (count($res) >= 1) {
+            foreach ($data['diagnose_key'] as $val) {
                 $temp_diagnose_data['count'][$val] = 0;
-                foreach($res as $k=>$v){
+                foreach ($res as $k=>$v) {
                     $temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
                     $is_diagnose = 0;
-                    if($this->compare($v[$val], $diagnose_key_conf[$val]['junction_threshold'], $diagnose_key_conf[$val]['junction_threshold_formula'])){
+                    if ($this->compare(
+                                        $v[$val],
+                                        $diagnose_key_conf[$val]['junction_threshold'],
+                                        $diagnose_key_conf[$val]['junction_threshold_formula']
+                                    )) {
                         $is_diagnose = 1;
                         $temp_diagnose_data['count'][$val] += 1;
                     }
@@ -183,9 +182,16 @@ class Junction_model extends CI_Model {
     * @param data['diagnose_key'] array    诊断问题KEY
     * @return array
     */
-    private function getJunctionsDiagnoseBySynthesize($data){
-        $sql_data = array_map(function($diagnose_key) use ($data){
-            $selectstr = "id, junction_id, max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
+    private function getJunctionsDiagnoseBySynthesize($data)
+    {
+        $sql_data = array_map(function($diagnose_key) use ($data) {
+            if ($diagnose_key == 'saturation_index') {
+                // 空放问题 因为空放问题是取的最小的
+                $selectstr = "id, junction_id, min({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
+            } else {
+                $selectstr = "id, junction_id, max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
+            }
+
             $where = 'task_id = ' . $data['task_id'] . ' and type = 1';
             $temp_data = $this->db->select($selectstr)
                                 ->from($this->tb)
@@ -193,7 +199,7 @@ class Junction_model extends CI_Model {
                                 ->group_by('junction_id')
                                 ->get()->result_array();
             $new_data = [];
-            if(count($temp_data) >= 1){
+            if (count($temp_data) >= 1) {
                 foreach ($temp_data as $value) {
                     $new_data[$value['junction_id']] = $value;
                 }
@@ -206,26 +212,22 @@ class Junction_model extends CI_Model {
         $diagnose_confidence_threshold = $this->config->item('diagnose_confidence_threshold');
 
         $flag = [];
-        if(count($sql_data) >= 1){
+        if (count($sql_data) >= 1) {
             $flag = $sql_data[0];
-            foreach($flag as $k=>&$v){
-                $v = array_reduce($sql_data, function($carry, $item) use($k){
+            foreach ($flag as $k=>&$v) {
+                $v = array_reduce($sql_data, function($carry, $item) use ($k) {
                     return array_merge($carry, $item[$k]);
                 }, []);
-                if((int)$data['confidence'] != 0){
+                if ((int)$data['confidence'] != 0) {
                     $total = 0;
-                    foreach($data['diagnose_key'] as $key){
+                    foreach ($data['diagnose_key'] as $key) {
                         $total += $v[$key];
                     }
 
-                    if($data['confidence'] == 1){ // 置信度：高 unset低的
-                        if($total / $count <= $diagnose_confidence_threshold){
-                            unset($flag[$k]);
-                        }
-                    }else if($data['confidence'] == 2){ // 置信度：低 unset高的
-                        if($total / $count > $diagnose_confidence_threshold){
-                            unset($flag[$k]);
-                        }
+                    if ($data['confidence'] == 1) { // 置信度：高 unset低的
+                        if ($total / $count <= $diagnose_confidence_threshold) unset($flag[$k]);
+                    } elseif ($data['confidence'] == 2) { // 置信度：低 unset高的
+                        if($total / $count > $diagnose_confidence_threshold) unset($flag[$k]);
                     }
                 }
             }
@@ -242,10 +244,11 @@ class Junction_model extends CI_Model {
     * @param data['diagnose_key'] array    诊断问题KEY
     * @return array
     */
-    private function getJunctionsDiagnoseByTimePoint($data){
+    private function getJunctionsDiagnoseByTimePoint($data)
+    {
         $diagnose_key_conf = $this->config->item('diagnose_key');
         $select_quota_key = [];
-        foreach($diagnose_key_conf as $k=>$v){
+        foreach ($diagnose_key_conf as $k=>$v) {
             $select_quota_key[] = $k;
         }
 
@@ -258,7 +261,7 @@ class Junction_model extends CI_Model {
         $diagnose_key_count = count($data['diagnose_key']);
 
         $confidence_where = '';
-        foreach($data['diagnose_key'] as $v){
+        foreach ($data['diagnose_key'] as $v) {
             $confidence_where .= empty($confidence_where) ? $v . '_confidence' : '+' . $v . '_confidence';
         }
         $confidence_threshold = $this->config->item('diagnose_confidence_threshold');
@@ -267,7 +270,7 @@ class Junction_model extends CI_Model {
         $temp_confidence_expression[2] = '(' . $confidence_where . ') / ' . $diagnose_key_count . '<' . $confidence_threshold;
 
         $confidence_conf = $this->config->item('confidence');
-        if($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)){
+        if ($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidence_conf)) {
             $where .= ' and ' . $temp_confidence_expression[$data['confidence']];
         }
         $res = [];
@@ -290,24 +293,25 @@ class Junction_model extends CI_Model {
     * @return array
     */
     public function getDiagnoseRankList($data){
-        if(!is_array($data['diagnose_key']) || empty($data['diagnose_key'])){
-            return [];
-        }
+        if (!is_array($data['diagnose_key']) || empty($data['diagnose_key'])) return [];
+
         // PM规定页面左侧列表与右侧地图数据一致，而且只在概览页有此列表，固使用 根据时间点查询全城路口诊断问题列表 接口获取初始数据
         $res = $this->getJunctionsDiagnoseByTimePoint($data);
-        if(!$res || empty($res)){
-            return [];
-        }
+        if (!$res || empty($res)) return [];
 
         $diagnose_key_conf = $this->config->item('diagnose_key');
 
         // 按诊断问题组织数组 且 获取路口ID串
         $result = [];
         $logic_junction_ids = '';
-        foreach($res as $k=>$v){
-            foreach($data['diagnose_key'] as $k1=>$v1){
+        foreach ($res as $k=>$v) {
+            foreach ($data['diagnose_key'] as $k1=>$v1) {
                 // 列表只展示有问题的路口 组织新数据 junction_id=>指标值 因为排序方便
-                if($this->compare($v[$v1], $diagnose_key_conf[$v1]['junction_threshold'], $diagnose_key_conf[$v1]['junction_threshold_formula'])){
+                if ($this->compare(
+                                    $v[$v1],
+                                    $diagnose_key_conf[$v1]['junction_threshold'],
+                                    $diagnose_key_conf[$v1]['junction_threshold_formula']
+                                )) {
                     $result[$v1][$v['junction_id']] = round($v[$v1], 5);
                 }
             }
@@ -315,20 +319,18 @@ class Junction_model extends CI_Model {
             $logic_junction_ids .= empty($logic_junction_ids) ? $v['junction_id'] : ',' . $v['junction_id'];
         }
 
-        if(empty($result)){
-            return [];
-        }
+        if (empty($result)) return [];
 
         // 排序默认 2
-        if(!isset($data['orderby']) || !array_key_exists((int)$data['orderby'], $this->config->item('sort_conf'))){
+        if (!isset($data['orderby']) || !array_key_exists((int)$data['orderby'], $this->config->item('sort_conf'))) {
             $data['orderby'] = 2;
         }
         // 排序
-        foreach($data['diagnose_key'] as $v){
-            if(isset($result[$v]) && !empty($result[$v])){
-                if((int)$data['orderby'] == 1){
+        foreach ($data['diagnose_key'] as $v) {
+            if (isset($result[$v]) && !empty($result[$v])) {
+                if ((int)$data['orderby'] == 1) {
                     asort($result[$v]);
-                }else{
+                } else {
                     arsort($result[$v]);
                 }
             }
@@ -336,28 +338,28 @@ class Junction_model extends CI_Model {
 
         // 获取路口名称
         $junction_info = [];
-        if(!empty($logic_junction_ids)){
+        if (!empty($logic_junction_ids)) {
             $junction_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
         }
 
         // 组织 junction_id=>name 数组 用于匹配路口名称
         $junction_id_name = [];
-        if(count($junction_info) >= 1){
-            foreach($junction_info as $v){
+        if (count($junction_info) >= 1) {
+            foreach ($junction_info as $v) {
                 $junction_id_name[$v['logic_junction_id']] = $v['name'];
             }
         }
 
         // 组织最终返回数据结构 ['quota_key'=>['junction_id'=>'xx','junction_label'=>'xxx', 'value'=>0], ......]
         $result_data = [];
-        foreach($result as $k=>$v){
-            foreach($v as $k1=>$v1){
+        foreach ($result as $k=>$v) {
+            foreach ($v as $k1=>$v1) {
                 $result_data[$k][$k1]['junction_id'] = $k1;
                 $result_data[$k][$k1]['junction_label'] = isset($junction_id_name[$k1]) ? $junction_id_name[$k1] : '';
                 $result_data[$k][$k1]['value'] = $v1;
             }
 
-            if(isset($result_data[$k]) && !empty($result_data[$k])){
+            if (isset($result_data[$k]) && !empty($result_data[$k])) {
                 $result_data[$k] = array_values($result_data[$k]);
             }
         }
@@ -377,12 +379,13 @@ class Junction_model extends CI_Model {
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
     * @return array
     */
-    private function getDiagnoseJunctionDetail($data) {
+    private function getDiagnoseJunctionDetail($data)
+    {
         $diagnose_key_conf = $this->config->item('diagnose_key');
 
         // 组织select 需要的字段
         $select_str = '';
-        foreach($diagnose_key_conf as $k=>$v){
+        foreach ($diagnose_key_conf as $k=>$v) {
             $select_str .= empty($select_str) ? $k : ',' . $k;
         }
         $select = "id, junction_id, {$select_str}, start_time, end_time, result_comment, movements";
@@ -390,13 +393,13 @@ class Junction_model extends CI_Model {
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
 
-        if((int)$data['search_type'] == 1){ // 按方案查询
+        if ((int)$data['search_type'] == 1) { // 按方案查询
             // 综合查询
             $time_range = array_filter(explode('-', $data['time_range']));
             $where  .= ' and type = 1';
             $where  .= ' and start_time = "' . trim($time_range[0]) . '"';
             $where  .= ' and end_time = "' . trim($time_range[1]) . '"';;
-        }else{ // 按时间点查询
+        } else { // 按时间点查询
             $select .= ', time_point';
             $where  .= ' and type = 0';
             $where  .= ' and time_point = "' . trim($data['time_point']) . '"';
@@ -408,9 +411,8 @@ class Junction_model extends CI_Model {
                         ->get();
         //echo 'sql = ' . $this->db->last_query();
 
-        if(!$res || empty($res)){
-            return [];
-        }
+        if (!$res || empty($res)) return [];
+
         $result = $res->row_array();
         //echo "<hr>data = <pre>";print_r($result);
         $result = $this->formatJunctionDetailData($result, $data['dates'], 2);
@@ -430,19 +432,20 @@ class Junction_model extends CI_Model {
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
     * @return array
     */
-    private function getQuotaJunctionDetail($data) {
+    private function getQuotaJunctionDetail($data)
+    {
         $select = 'id, junction_id, start_time, end_time, result_comment, movements';
 
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
 
-        if((int)$data['search_type'] == 1){ // 按方案查询
+        if ((int)$data['search_type'] == 1) { // 按方案查询
             // 综合查询
             $time_range = array_filter(explode('-', $data['time_range']));
             $where  .= ' and type = 1';
             $where  .= ' and start_time = "' . trim($time_range[0]) . '"';
             $where  .= ' and end_time = "' . trim($time_range[1]) . '"';;
-        }else{ // 按时间点查询
+        } else { // 按时间点查询
             $select .= ', time_point';
             $where  .= ' and type = 0';
             $where  .= ' and time_point = "' . trim($data['time_point']) . '"';
@@ -453,9 +456,8 @@ class Junction_model extends CI_Model {
                         ->where($where)
                         ->get();
 
-        if(!$res || empty($res)){
-            return [];
-        }
+        if (!$res || empty($res)) return [];
+
         $result = $res->row_array();
         //echo "<hr>data = <pre>";print_r($result);
         $result = $this->formatJunctionDetailData($result, $data['dates'], 1);
@@ -470,10 +472,9 @@ class Junction_model extends CI_Model {
     * @param $dates       评估/诊断日期
     * @param $result_type 数据返回类型 1：指标详情页 2：诊断详情页
     */
-    private function formatJunctionDetailData($data, $dates, $result_type){
-        if(empty($data) || empty($dates) || (int)$result_type < 1){
-            return [];
-        }
+    private function formatJunctionDetailData($data, $dates, $result_type)
+    {
+        if (empty($data) || empty($dates) || (int)$result_type < 1) return [];
 
         // 因为详情页地图下方列表所有相位都有 置信度字段，而置信度不属于指标，固将此放到扩展指标集合中
         $data['extend_flow_quota']['confidence'] = '置信度';
@@ -491,7 +492,7 @@ class Junction_model extends CI_Model {
         $flow_quota_key_conf = $this->config->item('flow_quota_key');
         $confidence_conf = $this->config->item('confidence');
         // 匹配相位名称 并按 南左、北直、西左、东直、北左、南直、东左、西直 进行排序
-        if(!empty($data['movements'])){
+        if (!empty($data['movements'])) {
             $phase = [
                 '南左' => 10,
                 '北直' => 20,
@@ -503,22 +504,24 @@ class Junction_model extends CI_Model {
                 '西直' => 80
             ];
             $temp_movements = [];
-            foreach($data['movements'] as $k=>&$v){
+            foreach ($data['movements'] as $k=>&$v) {
                 $v['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
-                $v['confidence'] = !empty($confidence_conf[$v['confidence']]['name']) ? $confidence_conf[$v['confidence']]['name'] : '';
-                foreach($flow_quota_key_conf as $kkk=>$vvv){
+                $v['confidence'] = !empty($confidence_conf[$v['confidence']]['name'])
+                                    ? $confidence_conf[$v['confidence']]['name']
+                                    : '';
+                foreach ($flow_quota_key_conf as $kkk=>$vvv) {
                     $v[$kkk] = round($v[$kkk], $vvv['round_num']);
                 }
-                foreach($phase as $kk=>$vv){
-                    if(!empty($v['comment']) && strpos($v['comment'], $kk) !== false){
+                foreach ($phase as $kk=>$vv) {
+                    if (!empty($v['comment']) && strpos($v['comment'], $kk) !== false) {
                         $temp_movements[str_replace($kk, $vv, $v['comment'])] = $v;
                     }
                 }
-                if(empty($v['comment'])){
+                if (empty($v['comment'])) {
                     $temp_movements[mt_rand(100, 900) + mt_rand(1, 99)] = $v;
                 }
-                if($result_type == 1){ // 指标详情页，组织每个指标对应各相位集合
-                    foreach($flow_quota_key_conf as $key=>$val){
+                if ($result_type == 1) { // 指标详情页，组织每个指标对应各相位集合
+                    foreach ($flow_quota_key_conf as $key=>$val) {
                         $data['flow_quota_all'][$key]['name'] = $val['name'];
                         $data['flow_quota_all'][$key]['movements'][$k]['id'] = $v['movement_id'];
                         $data['flow_quota_all'][$key]['movements'][$k]['value'] = round($v[$key], $val['round_num']);
@@ -526,7 +529,7 @@ class Junction_model extends CI_Model {
                 }
             }
 
-            if(!empty($temp_movements)){
+            if (!empty($temp_movements)) {
                 unset($data['movements']);
                 ksort($temp_movements);
                 $data['movements'] = array_values($temp_movements);
@@ -536,38 +539,42 @@ class Junction_model extends CI_Model {
         $result_comment_conf = $this->config->item('result_comment');
         $data['result_comment'] = isset($result_comment_conf[$data['result_comment']]) ? $result_comment_conf[$data['result_comment']] : '';
 
-        if($result_type == 2){ // 诊断详情页
+        if ($result_type == 2) { // 诊断详情页
             // flow级别所有指标集合
-            foreach($flow_quota_key_conf as $k=>$v){
+            foreach ($flow_quota_key_conf as $k=>$v) {
                 $data['flow_quota_all'][$k] = $v['name'];
             }
 
             // 组织问题集合
             $diagnose_key_conf = $this->config->item('diagnose_key');
-            foreach($diagnose_key_conf as $k=>$v){
-                if($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])){
+            foreach ($diagnose_key_conf as $k=>$v) {
+                if ($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
                     $data['diagnose_detail'][$k]['name'] = $v['name'];
                     $data['diagnose_detail'][$k]['key'] = $k;
 
                     // 计算性质程度
                     $compare_val = $data[$k];
-                    if($k == 'saturation_index'){ // 空放问题，因为统一算法，空放的性质阈值设置为负数，所以当是空放问题时，传递负数进行比较
+                    if ($k == 'saturation_index') {
+                        // 空放问题，因为统一算法，空放的性质阈值设置为负数，所以当是空放问题时，传递负数进行比较
                         $compare_val = $data[$k] * -1;
                     }
                     // 诊断问题性质 1:重度 2:中度 3:轻度
-                    if($compare_val > $v['nature_threshold']['high']){
+                    if ($compare_val > $v['nature_threshold']['high']) {
                         $data['diagnose_detail'][$k]['nature'] = 1;
-                    }else if($compare_val > $v['nature_threshold']['mide'] && $compare_val <= $v['nature_threshold']['high']){
+                    } elseif ($compare_val > $v['nature_threshold']['mide']
+                            && $compare_val <= $v['nature_threshold']['high']) {
                         $data['diagnose_detail'][$k]['nature'] = 2;
-                    }else if($compare_val > $v['nature_threshold']['low'] && $compare_val <= $v['nature_threshold']['mide']){
+                    }else if($compare_val > $v['nature_threshold']['low']
+                            && $compare_val <= $v['nature_threshold']['mide']) {
                         $data['diagnose_detail'][$k]['nature'] = 3;
                     }
 
                     // 匹配每个问题指标
-                    $temp_merge = array_merge($v['flow_quota'], ['movement_id'=>'logic_flow_id', 'comment'=>'name', 'confidence'=>'置信度']);
-                    foreach($data['movements'] as $kk=>$vv){
+                    $temp_arr = ['movement_id'=>'logic_flow_id', 'comment'=>'name', 'confidence'=>'置信度'];
+                    $temp_merge = array_merge($v['flow_quota'], $temp_arr);
+                    foreach ($data['movements'] as $kk=>$vv) {
                         $data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, $temp_merge);
-                        foreach($v['flow_quota'] as $key=>$val){
+                        foreach ($v['flow_quota'] as $key=>$val) {
                             $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
                             $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id'] = $vv['movement_id'];
                             $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value'] = round($vv[$key], $flow_quota_key_conf[$key]['round_num']);
@@ -590,10 +597,9 @@ class Junction_model extends CI_Model {
     * @param $data['task_time_range'] string   Y 评估/诊断任务开始结束时间 格式 00:00-24:00
     * @return array
     */
-    public function getJunctionMapData($data) {
-        if(empty($data)){
-            return [];
-        }
+    public function getJunctionMapData($data)
+    {
+        if (empty($data)) return [];
 
         $junction_id = trim($data['junction_id']);
 
@@ -604,37 +610,32 @@ class Junction_model extends CI_Model {
             'junction_id'     => $junction_id,
             'dates'           => $data['dates']
         ];
-        if((int)$data['search_type'] == 1){ // 按方案查询
+        if ((int)$data['search_type'] == 1) { // 按方案查询
             $time_range = array_filter(explode('-', $data['time_range']));
             $timing_data['time_range'] = trim($time_range[0]) . '-' . date("H:i", strtotime($time_range[1]) - 60);
-        }else{ // 按时间点查询
+        } else { // 按时间点查询
             $timing_data['time_point'] = trim($data['time_point']);
             $timing_data['time_range'] = trim($data['task_time_range']);
         }
 
         $timing = $this->timing_model->getTimingDataForJunctionMap($timing_data);
-        if(!$timing || empty($timing)){
-            return [];
-        }
+        if (!$timing || empty($timing)) return [];
 
         /*------------------------------------
         | 获取路网路口各相位经纬度及路口中心经纬度 |
         -------------------------------------*/
         // 是否有地图版本
-        if(empty($timing['map_version'])){
-            return [];
-        }
+        if (empty($timing['map_version'])) return [];
         // 获取路网路口各相位坐标
         $waymap_data = [
             'version'           => trim($timing['map_version']),
             'logic_junction_id' => $junction_id
         ];
         $waymap = $this->waymap_model->getJunctionFlowAndCenterLngLat($waymap_data);
-        if(!$waymap || empty($waymap)){
-            return [];
-        }
-        foreach($waymap as $k=>$v){
-            if(!empty($timing['list'][$v['logic_flow_id']])){
+        if (!$waymap || empty($waymap)) return [];
+
+        foreach ($waymap as $k=>$v) {
+            if (!empty($timing['list'][$v['logic_flow_id']])) {
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
                 $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
                 $result['dataList'][$k]['lng'] = $v['lng'];
@@ -650,7 +651,7 @@ class Junction_model extends CI_Model {
         $result['center'] = $center;
         $result['map_version'] = $timing['map_version'];
 
-        if(count($result['dataList']) >= 1){
+        if (count($result['dataList']) >= 1) {
             $result['dataList'] = array_values($result['dataList']);
         }
 
@@ -667,19 +668,18 @@ class Junction_model extends CI_Model {
     * @param $data['time_range']  string   时间段 当search_type = 1 时有此参数
     * @return array
     */
-    public function getJunctionInfoForTheTrack($data) {
-        if(empty($data)){
-            return [];
-        }
+    public function getJunctionInfoForTheTrack($data)
+    {
+        if (empty($data)) return [];
 
         $result = [];
 
         $select = 'task_id, junction_id, dates, start_time, end_time, clock_shift, movements';
         $where  = "task_id = {$data['task_id']} and junction_id = '{$data['junction_id']}'";
-        if((int)$data['search_type'] == 1){
+        if ((int)$data['search_type'] == 1) {
             $time_range = explode('-', $data['time_range']);
             $where .= " and type = 1 and start_time = '{$time_range[0]}' and end_time = '{$time_range[1]}'";
-        }else{
+        } else {
             $where .= " and type = 0 and time_point = '{$data['time_point']}'";
         }
 
@@ -687,7 +687,7 @@ class Junction_model extends CI_Model {
                             ->from($this->tb)
                             ->where($where)
                             ->get();
-        if(!$result){
+        if (!$result) {
             $content = "form_data = " . json_encode($data);
             $content .= "<br>sql = " . $this->db->last_query();
             $content .= "<br>result = " . $result;
@@ -696,10 +696,10 @@ class Junction_model extends CI_Model {
         }
 
         $result = $result->row_array();
-        if(isset($result['movements'])){
+        if (isset($result['movements'])) {
             $result['movements'] = json_decode($result['movements'], true);
-            foreach($result['movements'] as $v){
-                if($v['movement_id'] == trim($data['flow_id'])){
+            foreach ($result['movements'] as $v) {
+                if ($v['movement_id'] == trim($data['flow_id'])) {
                     $result['flow_id'] = $v['movement_id'];
                     $result['af_condition'] = $v['af_condition'];
                     $result['bf_condition'] = $v['bf_condition'];
@@ -715,17 +715,18 @@ class Junction_model extends CI_Model {
     /**
     * 组织select 字段
     */
-    private function selectColumns($key){
+    private function selectColumns($key)
+    {
         $select = '';
-        if(is_string($key)){ // 评估，单选
-            if(array_key_exists($key, $this->config->item('junction_quota_key'))){
+        if (is_string($key)) { // 评估，单选
+            if (array_key_exists($key, $this->config->item('junction_quota_key'))) {
                 $select = $key;
             }
         }
-        if(is_array($key)){ // 诊断问题， 多选
+        if (is_array($key)) { // 诊断问题， 多选
             $diagnose_key_conf = $this->config->item('diagnose_key');
-            foreach($key as $v){
-                if(array_key_exists($v, $diagnose_key_conf)){
+            foreach ($key as $v) {
+                if (array_key_exists($v, $diagnose_key_conf)) {
                     $select .= empty($select) ? $v : ',' . $v;
                 }
             }
@@ -737,19 +738,18 @@ class Junction_model extends CI_Model {
     /**
     * 将查询出来的评估/诊断数据合并到全城路口模板中
     */
-    private function mergeAllJunctions($all_data, $data, $merge_key = 'detail'){
-        if(!is_array($all_data) || count($all_data) < 1 || !is_array($data) || count($data) < 1){
-            return [];
-        }
+    private function mergeAllJunctions($all_data, $data, $merge_key = 'detail')
+    {
+        if (!is_array($all_data) || count($all_data) < 1 || !is_array($data) || count($data) < 1) return [];
 
         $result_data = [];
         $temp_lng = [];
         $temp_lat = [];
-        if(isset($data['count'])){
+        if (isset($data['count'])) {
             $result_data['count'] = $data['count'];
         }
-        foreach($all_data as $k=>$v){
-            if(isset($data[$v['logic_junction_id']])){
+        foreach ($all_data as $k=>$v) {
+            if (isset($data[$v['logic_junction_id']])) {
                 $temp_lng[$k] = $v['lng'];
                 $temp_lat[$k] = $v['lat'];
                 $result_data['dataList'][$k]['logic_junction_id'] = $v['logic_junction_id'];
@@ -766,7 +766,7 @@ class Junction_model extends CI_Model {
         $result_data['center'] = '';
         $result_data['center']['lng'] = $center_lng;
         $result_data['center']['lat'] = $center_lat;
-        if(!empty($result_data['dataList'])){
+        if (!empty($result_data['dataList'])) {
             $result_data['dataList'] = array_values($result_data['dataList']);
         }
 
@@ -776,7 +776,8 @@ class Junction_model extends CI_Model {
     /**
     * 比较函数
     */
-    public function compare($val1, $val2, $symbol) {
+    public function compare($val1, $val2, $symbol)
+    {
         $compare = [
             '>' => function ($val1, $val2) { return $val1 > $val2; },
             '<' => function ($val1, $val2) { return $val1 < $val2; },

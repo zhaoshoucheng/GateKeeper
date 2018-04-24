@@ -1,9 +1,16 @@
 <?php
+/********************************************
+# desc:    redis缓存
+# author:  ningxiangbing@didichuxing.com
+# date:    2018-04-03
+********************************************/
 
-class Redis_model extends CI_Model {
+class Redis_model extends CI_Model
+{
     private $redis = false;
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $this->redis = new Redis();
@@ -20,9 +27,14 @@ class Redis_model extends CI_Model {
         }
     }
 
-
-    public function getData($key) {
-        if(!$this->redis){
+    /**
+    * 获取数据
+    * @param $key  string key
+    * @return array
+    */
+    public function getData($key)
+    {
+        if (!$this->redis) {
             return false;
         }
 
@@ -37,7 +49,14 @@ class Redis_model extends CI_Model {
         return $res;
     }
 
-    public function setData($key, $value) {
+    /**
+    * 存储数据
+    * @param $key    string key
+    * @param $value  json   value
+    * @return bool
+    */
+    public function setData($key, $value)
+    {
         if (!$this->redis) {
             return false;
         }
@@ -49,7 +68,14 @@ class Redis_model extends CI_Model {
         return $res;
     }
 
-    public function setExpire($key, $time) {
+    /**
+    * 设置时效
+    * @param $key   string   key
+    * @param $time  interger 秒
+    * @return bool
+    */
+    public function setExpire($key, $time)
+    {
         if (!$this->redis) {
             return false;
         }
@@ -61,7 +87,13 @@ class Redis_model extends CI_Model {
         return true;
     }
 
-    public function deleteData($key) {
+    /**
+    * 删除数据
+    * @param $key  string key
+    * @return bool
+    */
+    public function deleteData($key)
+    {
         if (!$this->redis) {
             return false;
         }
