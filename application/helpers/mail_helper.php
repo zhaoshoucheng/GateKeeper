@@ -20,7 +20,6 @@ if (!function_exists('sendMail')) {
         $subject = '评估报表';
         $CI->email->subject($subject);
         $CI->email->message($content);
-        // $CI->email->attach($report_file_name_, 'attachment', 'roaddata-' . $date . '.csv');
-        // return $CI->email->send();
+        return $CI->email->send();
     }
 }
