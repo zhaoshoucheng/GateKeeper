@@ -7,9 +7,11 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Junction extends MY_Controller {
+class Junction extends MY_Controller
+{
     private $eamil_to = 'ningxiangbing@didichuxing.com';
-    public function __construct(){
+    public function __construct()
+    {
         parent::__construct();
         $this->load->model('junction_model');
         $this->load->model('timing_model');
@@ -26,7 +28,8 @@ class Junction extends MY_Controller {
     * @param quota_key   string    Y 指标key
     * @return json
     */
-    public function getAllCityJunctionInfo(){
+    public function getAllCityJunctionInfo()
+    {
         $params = $this->input->post();
         // 校验参数
         $validate = Validate::make($params,
@@ -38,7 +41,7 @@ class Junction extends MY_Controller {
                 'confidence' => 'min:0'
             ]
         );
-        if(!$validate['status']){
+        if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = $validate['errmsg'];
             return;
@@ -49,17 +52,17 @@ class Junction extends MY_Controller {
         $data['city_id'] = $params['city_id'];
 
         // type == 0时 time_point为必传项
-        if($data['type'] == 0 && (!isset($params['time_point']) || empty(trim($params['time_point'])))){
+        if ($data['type'] == 0 && (!isset($params['time_point']) || empty(trim($params['time_point'])))) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The time_point cannot be empty.';
             return;
         }
-        if($data['type'] == 0){
+        if ($data['type'] == 0) {
             $data['time_point'] = trim($params['time_point']);
         }
 
         // 判断置信度是否存在
-        if(!array_key_exists($params['confidence'], $this->config->item('confidence'))){
+        if (!array_key_exists($params['confidence'], $this->config->item('confidence'))) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The value of confidence ' . $params['confidence'] . ' is wrong.';
             return;
@@ -68,7 +71,7 @@ class Junction extends MY_Controller {
 
         // 判断指标KEY是否正确
         $data['quota_key'] = strtolower(trim($params['quota_key']));
-        if(!array_key_exists($data['quota_key'], $this->config->item('junction_quota_key'))){
+        if (!array_key_exists($data['quota_key'], $this->config->item('junction_quota_key'))) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The value of quota_key ' . $data['quota_key'] . ' is wrong.';
             return;
@@ -92,7 +95,8 @@ class Junction extends MY_Controller {
     * @param task_time_range string   Y 评估/诊断任务开始结束时间 格式："06:00-09:00"
     * @return json
     */
-    public function getJunctionQuotaDetail(){
+    public function getJunctionQuotaDetail()
+    {
         $params = $this->input->post();
 
         // 校验参数
@@ -106,26 +110,26 @@ class Junction extends MY_Controller {
             ]
         );
 
-        if(!$validate['status']){
+        if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = $validate['errmsg'];
             return;
         }
 
-        if((int)$params['search_type'] == 1){ // 按方案查询
+        if ((int)$params['search_type'] == 1) { // 按方案查询
             if(empty($params['time_range'])){
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_range cannot be empty.';
                 return;
             }
             $time_range = array_filter(explode('-', $params['time_range']));
-            if(empty($time_range[0]) || empty($time_range[1])){
+            if (empty($time_range[0]) || empty($time_range[1])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_range is wrong.';
                 return;
             }
-        }else{
-            if(empty($params['time_point'])){
+        } else {
+            if (empty($params['time_point'])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_point cannot be empty.';
                 return;
@@ -133,13 +137,13 @@ class Junction extends MY_Controller {
         }
 
         $task_time_range = array_filter(explode('-', $params['task_time_range']));
-        if(empty($task_time_range[0]) || empty($task_time_range[1])){
+        if (empty($task_time_range[0]) || empty($task_time_range[1])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The task_time_range is wrong.';
             return;
         }
 
-        if(!is_array($params['dates']) || count($params['dates']) < 1){
+        if (!is_array($params['dates']) || count($params['dates']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
@@ -158,7 +162,8 @@ class Junction extends MY_Controller {
     * @param task_time_range string Y 任务时间段
     * @return json
     */
-    public function getJunctionTiming(){
+    public function getJunctionTiming()
+    {
         $params = $this->input->post();
         // 校验参数
         $validate = Validate::make($params,
@@ -167,13 +172,13 @@ class Junction extends MY_Controller {
                 'task_time_range'  => 'nullunable'
             ]
         );
-        if(!$validate['status']){
+        if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = $validate['errmsg'];
             return;
         }
 
-        if(!is_array($params['dates']) || count($params['dates']) < 1){
+        if (!is_array($params['dates']) || count($params['dates']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
@@ -194,7 +199,8 @@ class Junction extends MY_Controller {
     * @param diagnose_key   array     Y 诊断key
     * @return json
     */
-    public function getAllCityJunctionsDiagnoseList(){
+    public function getAllCityJunctionsDiagnoseList()
+    {
         $params = $this->input->post();
         // 校验参数
         $validate = Validate::make($params,
@@ -205,7 +211,7 @@ class Junction extends MY_Controller {
                 'confidence' => 'min:0'
             ]
         );
-        if(!$validate['status']){
+        if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = $validate['errmsg'];
             return;
@@ -215,31 +221,31 @@ class Junction extends MY_Controller {
         $data['city_id'] = $params['city_id'];
         $data['type'] = (int)$params['type'];
 
-        if($data['type'] == 0 && (!isset($params['time_point']) || empty(trim($params['time_point'])))){
+        if ($data['type'] == 0 && (!isset($params['time_point']) || empty(trim($params['time_point'])))) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The time_point cannot be empty.';
             return;
         }
-        if($data['type'] == 0){
+        if ($data['type'] == 0) {
             $data['time_point'] = trim($params['time_point']);
         }
 
-        if(!array_key_exists($params['confidence'], $this->config->item('confidence'))){
+        if (!array_key_exists($params['confidence'], $this->config->item('confidence'))) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The value of confidence ' . $params['confidence'] . ' is wrong.';
             return;
         }
         $data['confidence'] = $params['confidence'];
 
-        if(isset($params['diagnose_key']) && count($params['diagnose_key']) >= 1){
-            foreach($params['diagnose_key'] as $v){
-                if(!array_key_exists($v, $this->config->item('diagnose_key'))){
+        if (isset($params['diagnose_key']) && count($params['diagnose_key']) >= 1) {
+            foreach ($params['diagnose_key'] as $v) {
+                if (!array_key_exists($v, $this->config->item('diagnose_key'))) {
                     $this->errno = ERR_PARAMETERS;
                     $this->errmsg = 'The value of diagnose_key ' . $v . ' is wrong.';
                     return;
                 }
             }
-        }else{
+        } else {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The diagnose_key cannot be empty and must be array.';
             return;
@@ -262,7 +268,8 @@ class Junction extends MY_Controller {
     * @param orderby       interger N 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
     * @return json
     */
-    public function getDiagnoseRankList(){
+    public function getDiagnoseRankList()
+    {
         $params = $this->input->post();
         // 校验参数
         $validate = Validate::make($params,
@@ -273,7 +280,7 @@ class Junction extends MY_Controller {
                 'confidence' => 'min:0'
             ]
         );
-        if(!$validate['status']){
+        if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = $validate['errmsg'];
             return;
@@ -283,16 +290,16 @@ class Junction extends MY_Controller {
 
         $diagnose_key = $params['diagnose_key'];
         $diagnose_key_conf = $this->config->item('diagnose_key');
-        if(is_array($diagnose_key) && count($diagnose_key) >= 1){
+        if (is_array($diagnose_key) && count($diagnose_key) >= 1) {
             $diagnose_key = array_filter($diagnose_key);
-            foreach($diagnose_key as $k=>$v){
-                if(!array_key_exists($v, $diagnose_key_conf)){
+            foreach ($diagnose_key as $k=>$v) {
+                if (!array_key_exists($v, $diagnose_key_conf)) {
                     $this->errno = ERR_PARAMETERS;
                     $this->errmsg = 'The value of diagnose_key ' . $v . ' is wrong.';
                     return;
                 }
             }
-        }else{
+        } else {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The diagnose_key cannot be empty and must be array.';
             return;
@@ -312,7 +319,8 @@ class Junction extends MY_Controller {
     * @param task_time_range string   Y 评估/诊断任务开始结束时间 格式 00:00-24:00
     * @return json
     */
-    public function getJunctionMapData(){
+    public function getJunctionMapData()
+    {
         $params = $this->input->post();
         // 校验参数
         $validate = Validate::make($params,
@@ -322,26 +330,26 @@ class Junction extends MY_Controller {
                 'task_time_range' => 'nullunable'
             ]
         );
-        if(!$validate['status']){
+        if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = $validate['errmsg'];
             return;
         }
 
-        if((int)$params['search_type'] == 1){ // 按方案查询
-            if(empty($params['time_range'])){
+        if ((int)$params['search_type'] == 1) { // 按方案查询
+            if (empty($params['time_range'])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_range cannot be empty.';
                 return;
             }
             $time_range = array_filter(explode('-', $params['time_range']));
-            if(empty($time_range[0]) || empty($time_range[1])){
+            if (empty($time_range[0]) || empty($time_range[1])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_range is wrong.';
                 return;
             }
-        }else{
-            if(empty($params['time_point'])){
+        } else {
+            if (empty($params['time_point'])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_point cannot be empty.';
                 return;
@@ -349,13 +357,13 @@ class Junction extends MY_Controller {
         }
 
         $task_time_range = array_filter(explode('-', $params['task_time_range']));
-        if(empty($task_time_range[0]) || empty($task_time_range[1])){
+        if (empty($task_time_range[0]) || empty($task_time_range[1])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The task_time_range is wrong.';
             return;
         }
 
-        if(!is_array($params['dates']) || count($params['dates']) < 1){
+        if (!is_array($params['dates']) || count($params['dates']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
@@ -369,7 +377,8 @@ class Junction extends MY_Controller {
     /**
     * 测试登录
     */
-    public function testLogin(){
+    public function testLogin()
+    {
         echo "welcome!";
         sendMail($this->eamil_to, '测试', 'yeah');
         exit;
