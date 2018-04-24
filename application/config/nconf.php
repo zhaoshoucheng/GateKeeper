@@ -251,6 +251,3 @@ $config['sort_conf'] = [
 $config['result_comment'] = [
 	'signal_mes_error' => '配时信息与实际车流不符'
 ];
-
-
-
