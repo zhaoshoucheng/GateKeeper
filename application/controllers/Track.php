@@ -7,8 +7,10 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Track extends MY_Controller {
-    public function __construct(){
+class Track extends MY_Controller
+{
+    public function __construct()
+    {
         parent::__construct();
         $this->load->model('track_model');
     }
@@ -23,7 +25,8 @@ class Track extends MY_Controller {
     * @param time_range  string   时间段 当search_type = 1 时 必传 格式：00:00-00:30
     * @return json
     */
-    public function getScatterMtraj() {
+    public function getScatterMtraj()
+    {
         $params = $this->input->post();
         // 校验参数
         $validate = Validate::make($params,
@@ -34,26 +37,26 @@ class Track extends MY_Controller {
                 'flow_id'     => 'nullunable'
             ]
         );
-        if(!$validate['status']){
+        if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = $validate['errmsg'];
             return;
         }
 
-        if((int)$params['search_type'] == 0){
-            if(empty($params['time_point'])){
+        if ((int)$params['search_type'] == 0) {
+            if (empty($params['time_point'])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_point cannot be empty.';
                 return;
             }
-        }else{
-            if(empty($params['time_range'])){
+        } else {
+            if (empty($params['time_range'])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_range cannot be empty.';
                 return;
             }
             $time_range = array_filter(explode('-', $params['time_range']));
-            if(empty($time_range[0]) || empty($time_range[1])){
+            if (empty($time_range[0]) || empty($time_range[1])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_range is wrong.';
                 return;
@@ -75,7 +78,8 @@ class Track extends MY_Controller {
     * @param time_range  string   时间段 当search_type = 1 时 必传 格式：00:00-00:30
     * @return json
     */
-    public function getSpaceTimeMtraj() {
+    public function getSpaceTimeMtraj()
+    {
         $params = $this->input->post();
         // 校验参数
         $validate = Validate::make($params,
@@ -86,26 +90,26 @@ class Track extends MY_Controller {
                 'flow_id'     => 'nullunable'
             ]
         );
-        if(!$validate['status']){
+        if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = $validate['errmsg'];
             return;
         }
 
-        if((int)$params['search_type'] == 0){
-            if(empty($params['time_point'])){
+        if ((int)$params['search_type'] == 0) {
+            if (empty($params['time_point'])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_point cannot be empty.';
                 return;
             }
-        }else{
-            if(empty($params['time_range'])){
+        } else {
+            if (empty($params['time_range'])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_range cannot be empty.';
                 return;
             }
             $time_range = array_filter(explode('-', $params['time_range']));
-            if(empty($time_range[0]) || empty($time_range[1])){
+            if (empty($time_range[0]) || empty($time_range[1])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_range is wrong.';
                 return;
