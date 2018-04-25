@@ -516,12 +516,9 @@ class Junction_model extends CI_Model
                 foreach ($flow_quota_key_conf as $kkk=>$vvv) {
                     $v[$kkk] = round($v[$kkk], $vvv['round_num']);
                 }
-                foreach ($phase as $kk=>$vv) {
-                    if (!empty($v['comment']) && strpos($v['comment'], $kk) !== false) {
-                        $temp_movements[str_replace($kk, $vv, $v['comment'])] = $v;
-                    }
-                }
-                if (empty($v['comment'])) {
+                if (array_key_exists(trim($v['comment']), $phase)) {
+                    $temp_movements[str_replace($kk, $vv, $v['comment'])] = $v;
+                } else {
                     $temp_movements[mt_rand(100, 900) + mt_rand(1, 99)] = $v;
                 }
                 if ($result_type == 1) { // 指标详情页，组织每个指标对应各相位集合
@@ -570,8 +567,10 @@ class Junction_model extends CI_Model
                             $data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, $temp_merge);
                             foreach ($v['flow_quota'] as $key=>$val) {
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
-                                $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id'] = $vv['movement_id'];
-                                $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value'] = round($vv[$key], $flow_quota_key_conf[$key]['round_num']);
+                                $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id']
+                                    = $vv['movement_id'];
+                                $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value']
+                                    = round($vv[$key], $flow_quota_key_conf[$key]['round_num']);
                             }
                         }
                     }
