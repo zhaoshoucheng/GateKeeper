@@ -530,6 +530,12 @@ class Junction_model extends CI_Model
                 }
             }
 
+            if (!empty($temp_movements)) {
+                unset($data['movements']);
+                ksort($temp_movements);
+                $data['movements'] = array_values($temp_movements);
+            }
+
             if ($result_type == 2) { // 诊断详情页
                 // flow级别所有指标集合
                 foreach ($flow_quota_key_conf as $k=>$v) {
@@ -575,12 +581,6 @@ class Junction_model extends CI_Model
                         }
                     }
                 }
-            }
-
-            if (!empty($temp_movements)) {
-                unset($data['movements']);
-                ksort($temp_movements);
-                $data['movements'] = array_values($temp_movements);
             }
         }
 
