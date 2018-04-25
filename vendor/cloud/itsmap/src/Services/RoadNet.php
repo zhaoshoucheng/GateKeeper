@@ -455,7 +455,7 @@ class RoadNet
             sendMail(
                     'ningxiangbing@didichuxing.com',
                     'logs: 调用thrift接口获取数据',
-                    'data: '.json_encode([$mtraj_request, $accessPara]).'<hr>result：' . $response
+                    'data: '.json_encode([$mtraj_request, $accessPara]).'<br>result：' . $response
                 );
 
         }
