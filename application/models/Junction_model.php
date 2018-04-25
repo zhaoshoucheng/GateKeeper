@@ -279,7 +279,10 @@ class Junction_model extends CI_Model
                         ->where($where)
                         ->get()
                         ->result_array();
-
+        if(!$res){
+            $content = 'sql = ' . $this->db->last_query();
+            sendMail($this->email_to, 'logs: 获取全城路口诊断问题列表为空', $content);
+        }
         return $res;
     }
 
