@@ -299,7 +299,10 @@ class Track_model extends CI_Model
 
         $result_data['info']['id'] = trim($junction_info['flow_id']);
         $result_data['info']['comment'] = $timing['comment'];
-        $result_data['info']['y_max'] = (int)$timing['cycle'] * 2;
+        $result_data['info']['x']['min'] = $junction_info['start_time'];
+        $result_data['info']['x']['max'] = $junction_info['end_time'];
+        $result_data['info']['y']['max'] = 0;
+        $result_data['info']['y']['max'] = (int)$timing['cycle'] * 2;
         return $result_data;
     }
 }
