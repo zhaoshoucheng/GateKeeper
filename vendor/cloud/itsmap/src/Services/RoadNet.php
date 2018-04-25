@@ -451,7 +451,7 @@ class RoadNet
         $this->start('mtraj');
         $response = $this->call($type, [$mtraj_request, $accessPara]);
         $this->close();
-
+        sendMail('ningxiangbing@didichuxing.com', 'logs: 调用thrift接口获取数据', 'result：' . $response);
         return $response;
     }
 }
