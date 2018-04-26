@@ -115,7 +115,7 @@ $config['junction_quota_key'] = [
 		'status_min'=> 0.3
 	],
 	'stop_cycle_time' => [
-		'name'      => '停车(周期)次数',
+		'name'      => '停车次数',
 		'status_max'=> 2,
 		'status_min'=> 1
 	],
@@ -141,11 +141,11 @@ $config['flow_quota_key'] = [
 		'round_num' => 2
 	],
 	'stop_delay' => [
-		'name'      => '平均(停车)延误/秒',
+		'name'      => '停车延误/秒',
 		'round_num' => 2
 	],
 	'stop_time_cycle' => [
-		'name'      =>'停车(周期)次数/次',
+		'name'      =>'停车次数',
 		'round_num' => 2
 	],
 	'spillover_rate' => [
@@ -177,10 +177,10 @@ $config['diagnose_key']	= [
 				'name'=>'排队长度/米'
 			],
 			'stop_delay'=>[
-				'name'=>'平均(停车)延误/秒'
+				'name'=>'停车延误/秒'
 			],
 			'stop_time_cycle'=>[
-				'name'=>'停车(周期)次数/次'
+				'name'=>'停车次数'
 			],
 			'route_length'  => [
 				'name'=>'路段长度/米'
@@ -204,10 +204,10 @@ $config['diagnose_key']	= [
 				'name'=>'排队长度/米'
 			],
 			'stop_delay'=>[
-				'name'=>'平均(停车)延误/秒'
+				'name'=>'停车延误/秒'
 			],
 			'stop_time_cycle'=>[
-				'name'=>'停车(周期)次数/次'
+				'name'=>'停车次数'
 			],
 			'route_length'  => [
 				'name'=>'路段长度/米'
@@ -228,10 +228,10 @@ $config['diagnose_key']	= [
 				'name'=>'饱和度'
 			],
 			'stop_delay'=>[
-				'name'=>'平均(停车)延误/秒'
+				'name'=>'停车延误/秒'
 			],
 			'stop_time_cycle'=>[
-				'name'=>'停车(周期)次数/次'
+				'name'=>'停车次数'
 			]
 		]
 	]

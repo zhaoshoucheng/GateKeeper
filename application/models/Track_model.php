@@ -187,9 +187,19 @@ class Track_model extends CI_Model
                 foreach($v['list'] as $kk=>$vv){
                     // 时间
                     $result_data['dataList'][$k][$kk][0] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
+                    $temp_x[$kk] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
                     // 值
                     $result_data['dataList'][$k][$kk][1] = round($vv['value'], 5) * -1;
+                    $temp_y[$kk] = round($vv['value'], 5) * -1;
                 }
+            }
+            if(!empty($temp_x) && !empty($temp_y)){
+                asort($temp_x);
+                $result_data['info']['x']['min'] = current($temp_x);
+                $result_data['info']['x']['max'] = end($temp_x);
+                asort($temp_y);
+                $result_data['info']['y']['min'] = current($temp_y);
+                $result_data['info']['y']['max'] = end($temp_y);
             }
         }
         // 组织信号灯区间
@@ -289,6 +299,10 @@ class Track_model extends CI_Model
 
         $result_data['info']['id'] = trim($junction_info['flow_id']);
         $result_data['info']['comment'] = $timing['comment'];
+        $result_data['info']['x']['min'] = $junction_info['start_time'];
+        $result_data['info']['x']['max'] = $junction_info['end_time'];
+        $result_data['info']['y']['min'] = 0;
+        $result_data['info']['y']['max'] = (int)$timing['cycle'] * 2;
         return $result_data;
     }
 }

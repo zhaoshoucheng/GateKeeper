@@ -8,6 +8,7 @@
 class Waymap_model extends CI_Model
 {
     protected $token;
+    private $email_to = 'ningxiangbing@didichuxing.com';
 
     public function __construct()
     {
@@ -142,6 +143,9 @@ class Waymap_model extends CI_Model
                 $res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/getList', $data);
                 if (!$res) {
                     // 添加日志、发送邮件
+                    $content = 'data = ' . json_encode($data)
+                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/flow-duration/map/getList';
+                    sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                     return false;
                 }
                 $res = json_decode($res, true);
@@ -155,6 +159,9 @@ class Waymap_model extends CI_Model
                     $city_junctions = $res['data'];
                 }
             } catch (Exception $e) {
+                $content = 'data = ' . json_encode($data)
+                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/flow-duration/map/getList';
+                sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return false;
             }
         } else {
