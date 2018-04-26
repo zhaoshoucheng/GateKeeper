@@ -517,7 +517,7 @@ class Junction_model extends CI_Model
                     $v[$kkk] = round($v[$kkk], $vvv['round_num']);
                 }
                 if (array_key_exists(trim($v['comment']), $phase)) {
-                    $temp_movements[str_replace($kk, $vv, $v['comment'])] = $v;
+                    $temp_movements[$phase[trim($v['comment'])]] = $v;
                 } else {
                     $temp_movements[mt_rand(100, 900) + mt_rand(1, 99)] = $v;
                 }
