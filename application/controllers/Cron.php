@@ -49,9 +49,9 @@ class Cron extends CI_Controller {
 					$start_time = $task['start_time'];
 					$end_time = $task['end_time'];
 					$user = $task['user'];
-					$timingType = '0';
+					$timingType = '1';
 					if (in_array($user, array('unknown', 'zhuyewei', 'liuminjun', 'zhaoyuezhaoyue', 'tianshanshan'))) {
-						$timingType = '1';
+						$timingType = '2';
 					}
 					$dateVersion = $task['dateVersion'];
 					$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
