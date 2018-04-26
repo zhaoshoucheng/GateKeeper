@@ -68,10 +68,20 @@ class Waymap_model extends CI_Model
             $map_data = json_decode($map_data, true);
             if ($map_data['errorCode'] != 0 || empty($map_data['data'])) {
                 // 日志
+                $content = 'data = ' . json_encode($data)
+                        . ' \r\n interface = '
+                        . $this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr'
+                        . '\r\n result = ' . json_encode($map_data);
+                sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return [];
             }
         } catch (Exception $e) {
             // 日志
+            $content = 'data = ' . json_encode($data)
+                    . ' \r\n interface = '
+                    . $this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr'
+                    . '\r\n result = ' . json_encode($map_data);
+            sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
             return [];
         }
 
@@ -103,9 +113,19 @@ class Waymap_model extends CI_Model
 
             $junction_info = json_decode($junction_info, true);
             if ($junction_info['errorCode'] != 0 || empty($junction_info['data'])) {
+                $content = 'data = ' . json_encode($data)
+                        . ' \r\n interface = '
+                        . $this->config->item('waymap_interface') . '/flow-duration/map/detail'
+                        . '\r\n result = ' . json_encode($junction_info);
+                sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return [];
             }
         } catch (Exception $e) {
+            $content = 'data = ' . json_encode($data)
+                    . ' \r\n interface = '
+                    . $this->config->item('waymap_interface') . '/flow-duration/map/detail'
+                    . '\r\n result = ' . json_encode($junction_info);
+            sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
             return [];
         }
 
