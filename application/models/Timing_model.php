@@ -250,6 +250,10 @@ class Timing_model extends CI_Model
     */
     private function formatTimingData($data, $time_range)
     {
+        $task_time_range = explode('-', $time_range);
+        $task_start_time = $task_time_range[0];
+        $task_end_time = $task_time_range[1];
+
         $result = [];
         // 方案总数
         $result['total_plan'] = isset($data['total_plan']) ? $data['total_plan'] : 0;
@@ -259,8 +263,16 @@ class Timing_model extends CI_Model
             foreach ($data['latest_plan'] as $k=>$v) {
                 // 方案列表
                 $result['plan_list'][strtotime($v['tod_start_time'])]['id'] = $v['time_plan_id'];
-                $result['plan_list'][strtotime($v['tod_start_time'])]['start_time'] = $v['tod_start_time'];
-                $result['plan_list'][strtotime($v['tod_start_time'])]['end_time'] = $v['tod_end_time'];
+                $tod_start_time = $v['tod_start_time'];
+                if (strtotime($task_start_time) > strtotime($tod_start_time)) {
+                    $tod_start_time = $task_start_time;
+                }
+                $result['plan_list'][strtotime($v['tod_start_time'])]['start_time'] = $tod_start_time;
+                $tod_end_time = $v['tod_end_time'];
+                if (strtotime($tod_end_time) > strtotime($task_end_time)) {
+                    $tod_end_time = $task_end_time;
+                }
+                $result['plan_list'][strtotime($v['tod_start_time'])]['end_time'] = $tod_end_time;
 
                 // 每个方案对应的详情配时详情
                 if (isset($v['plan_detail']['extra_timing']['cycle'])
