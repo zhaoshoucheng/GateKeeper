@@ -264,11 +264,11 @@ class Timing_model extends CI_Model
                 // 方案列表
                 $tod_start_time = $v['tod_start_time'];
                 if (strtotime($task_start_time) > strtotime($tod_start_time)) {
-                    $tod_start_time = $task_start_time;
+                    $tod_start_time = date("H:i:s", strtotime($task_start_time));
                 }
                 $tod_end_time = $v['tod_end_time'];
                 if (strtotime($tod_end_time) > strtotime($task_end_time)) {
-                    $tod_end_time = $task_end_time;
+                    $tod_end_time = date("H:i:s", strtotime($task_end_time));
                 }
                 $result['plan_list'][strtotime($tod_start_time)]['id'] = $v['time_plan_id'];
                 $result['plan_list'][strtotime($tod_start_time)]['start_time'] = $tod_start_time;
