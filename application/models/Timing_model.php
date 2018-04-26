@@ -262,16 +262,16 @@ class Timing_model extends CI_Model
         if (isset($data['latest_plan']) && !empty($data['latest_plan'])) {
             foreach ($data['latest_plan'] as $k=>$v) {
                 // 方案列表
-                $result['plan_list'][strtotime($tod_start_time)]['id'] = $v['time_plan_id'];
                 $tod_start_time = $v['tod_start_time'];
                 if (strtotime($task_start_time) > strtotime($tod_start_time)) {
                     $tod_start_time = $task_start_time;
                 }
-                $result['plan_list'][strtotime($tod_start_time)]['start_time'] = $tod_start_time;
                 $tod_end_time = $v['tod_end_time'];
                 if (strtotime($tod_end_time) > strtotime($task_end_time)) {
                     $tod_end_time = $task_end_time;
                 }
+                $result['plan_list'][strtotime($tod_start_time)]['id'] = $v['time_plan_id'];
+                $result['plan_list'][strtotime($tod_start_time)]['start_time'] = $tod_start_time;
                 $result['plan_list'][strtotime($tod_start_time)]['end_time'] = $tod_end_time;
 
                 // 每个方案对应的详情配时详情
