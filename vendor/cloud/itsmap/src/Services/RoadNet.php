@@ -452,6 +452,7 @@ class RoadNet
         $response = $this->call($type, [$mtraj_request, $accessPara]);
         $this->close();
         if(!$response || $response == 'null'){
+            echo "data=".json_encode([$mtraj_request, $accessPara]).'\r\n result = '. $response;
             sendMail(
                     'ningxiangbing@didichuxing.com',
                     'logs: 调用thrift接口获取数据',
