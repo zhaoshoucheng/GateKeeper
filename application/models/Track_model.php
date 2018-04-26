@@ -195,8 +195,11 @@ class Track_model extends CI_Model
             }
             if(!empty($temp_x) && !empty($temp_y)){
                 asort($temp_x);
-                $result_data['info']['x']['min'] = current($temp_x);
-                $result_data['info']['x']['max'] = end($temp_x);
+                /*$result_data['info']['x']['min'] = current($temp_x);
+                $result_data['info']['x']['max'] = end($temp_x);*/
+                // 暂时写死X轴
+                $result_data['info']['x']['min'] = -400;
+                $result_data['info']['x']['max'] = 400;
                 asort($temp_y);
                 $result_data['info']['y']['min'] = current($temp_y);
                 $result_data['info']['y']['max'] = end($temp_y);
