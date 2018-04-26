@@ -262,7 +262,7 @@ class Timing_model extends CI_Model
         if (isset($data['latest_plan']) && !empty($data['latest_plan'])) {
             foreach ($data['latest_plan'] as $k=>$v) {
                 // 方案列表
-                $result['plan_list'][strtotime($v['tod_start_time'])]['id'] = $v['time_plan_id'];
+                $result['plan_list'][strtotime($tod_start_time)]['id'] = $v['time_plan_id'];
                 $tod_start_time = $v['tod_start_time'];
                 if (strtotime($task_start_time) > strtotime($tod_start_time)) {
                     $tod_start_time = $task_start_time;
