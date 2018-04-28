@@ -17,9 +17,10 @@ class Timing_model extends CI_Model
 
     /**
     * 获取路口配时信息
-    * @param $data['junction_id'] string 逻辑路口ID
-    * @param $data['dates']       array  评估/诊断日期
-    * @param $data['time_range']  string 时间段 00:00-00:30
+    * @param $data['junction_id'] string   逻辑路口ID
+    * @param $data['dates']       array    评估/诊断日期
+    * @param $data['time_range']  string   时间段 00:00-00:30
+    * @param $data['timingType']  interger 配时数据源 0，全部；1，人工；2，配时反推；3，信号机上报
     * @return array
     */
     public function getJunctionsTimingInfo($data)
@@ -342,9 +343,10 @@ class Timing_model extends CI_Model
 
     /**
     * 获取配时数据
-    * @param $data['junction_id'] string 逻辑路口ID
-    * @param $data['dates']       array  评估/诊断日期
-    * @param $data['time_range']  string 时间段 00:00-00:30
+    * @param $data['junction_id'] string   逻辑路口ID
+    * @param $data['dates']       array    评估/诊断日期
+    * @param $data['time_range']  string   时间段 00:00-00:30
+    * @param $data['timingType']  interger 配时数据源 0，全部；1，人工；2，配时反推；3，信号机上报
     * @return array
     */
     private function getTimingData($data)
@@ -354,20 +356,21 @@ class Timing_model extends CI_Model
 
         // 获取配时详情
         $timing_data = [
-                        'logic_junction_id' => trim($data['junction_id']),
+                        'junction_ids'      => trim($data['junction_id']),
                         'days'              => trim(implode(',', $data['dates'])),
                         'start_time'        => trim($time_range[0]),
-                        'end_time'          => date('H:i', strtotime(trim($time_range[1])) - 60)
+                        'end_time'          => date('H:i', strtotime(trim($time_range[1])) - 60),
+                        'source'            => $data['timingType']
                     ];
         try {
             $timing = httpGET(
-                $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint',
+                $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingVersionBatch',
                 $timing_data
             );
             $timing = json_decode($timing, true);
             if (isset($timing['errorCode']) && $timing['errorCode'] != 0) {
                 $content = "form_data : " . json_encode($data);
-                $content .= "<br>interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingByTimePoint';
+                $content .= "<br>interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingVersionBatch';
                 $content .= '<br> result : ' . json_encode($timing);
                 sendMail($this->email_to, 'logs: 获取配时数据', $content);
                 return [];
