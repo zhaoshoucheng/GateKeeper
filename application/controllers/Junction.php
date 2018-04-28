@@ -184,6 +184,7 @@ class Junction extends MY_Controller
             return;
         }
         $params['time_range'] = $params['task_time_range'];
+        $params['timingType'] = $this->timingType;
         $timing = $this->timing_model->getJunctionsTimingInfo($params);
 
         return $this->response($timing);

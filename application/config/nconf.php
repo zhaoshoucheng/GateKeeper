@@ -251,3 +251,12 @@ $config['sort_conf'] = [
 $config['result_comment'] = [
 	'signal_mes_error' => '配时信息与实际车流不符'
 ];
+
+// 反推配时名单
+$config['back_timing_roll'] = [
+	'zhuyewei',
+	'liuminjun',
+	'zhaoyuezhaoyue',
+	'tianshanshan',
+	'ningxiangbing'
+];
