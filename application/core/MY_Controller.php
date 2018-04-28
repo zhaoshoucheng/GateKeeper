@@ -21,10 +21,7 @@ class MY_Controller extends CI_Controller {
 		parent::__construct();
 		date_default_timezone_set('Asia/Shanghai');
 		$host = $_SERVER['HTTP_HOST'];
-		if($this->input->post_get('debug')){
-            echo "username = " . $username;
-			$this->debug = true;
-		}
+
 		if ($host != 'www.itstool.com') {
 			$this->is_check_login = 1;
 
@@ -65,8 +62,13 @@ class MY_Controller extends CI_Controller {
 	            }
 
                 $back_timing_roll = $this->config->item('back_timing_roll');
-                if (in_array($username, $back_timing_roll, true)) {
-                    $timingType = 2;
+                if (in_array($this->username, $back_timing_roll, true)) {
+                    $this->timingType = 2;
+                }
+
+                if($this->input->post_get('debug')){
+                    echo "username = " . $this->username . '<br> timingType = ' . $this->timingType;
+                    $this->debug = true;
                 }
 	        }
 		}
