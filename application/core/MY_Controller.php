@@ -22,6 +22,7 @@ class MY_Controller extends CI_Controller {
 		date_default_timezone_set('Asia/Shanghai');
 		$host = $_SERVER['HTTP_HOST'];
 
+        $this->load->config('nconf');
         $back_timing_roll = $this->config->item('back_timing_roll');
         if (in_array($this->username, $back_timing_roll, true)) {
             $this->timingType = 2;
