@@ -254,6 +254,7 @@ $config['result_comment'] = [
 
 // 反推配时名单
 $config['back_timing_roll'] = [
+	'unknown',
 	'zhuyewei',
 	'liuminjun',
 	'zhaoyuezhaoyue',
