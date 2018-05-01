@@ -69,10 +69,12 @@ class Timing_model extends CI_Model
 
     /**
     * 获取详情页地图底图所需路口配时数据
-    * @param $data['junction_id']     string 逻辑路口ID
-    * @param $data['dates']           array  评估/诊断任务日期
-    * @param $data['time_range']      string 时间段
-    * @param $data['time_point']      string 时间点 PS:按时间点查询有此参数 可用于判断按哪种方式查询配时方案
+    * @param $data['junction_id']     string   逻辑路口ID
+    * @param $data['dates']           array    评估/诊断任务日期
+    * @param $data['time_range']      string   时间段
+    * @param $data['time_point']      string   时间点 PS:按时间点查询有此参数 可用于判断按哪种方式查询配时方案
+    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
+    * @return array
     */
     public function getTimingDataForJunctionMap($data)
     {
@@ -90,7 +92,6 @@ class Timing_model extends CI_Model
 
         if (!empty($result)) {
             $result_data['list'] = $this->formatTimingDataResult($result);
-            $result_data['map_version'] = $timing['map_version'];
         }
 
         return $result_data;
@@ -111,9 +112,9 @@ class Timing_model extends CI_Model
         $result = [];
         // 获取配时数据
         $timing = $this->getTimingData($data);
-        if (!$timing || empty($timing['latest_plan'][0]['plan_detail'])) return [];
+        if (!$timing || empty($timing['latest_plan']['time_plan'][0]['plan_detail'])) return [];
 
-        $result = $this->formatTimingDataForTrack($timing['latest_plan'][0]['plan_detail'], trim($data['flow_id']));
+        $result = $this->formatTimingDataForTrack($timing['latest_plan']['time_plan'][0]['plan_detail'], trim($data['flow_id']));
 
         return $result;
     }
@@ -166,8 +167,8 @@ class Timing_model extends CI_Model
         if (empty($data)) return [];
 
         $result = [];
-        if (!empty($data['latest_plan'][0]['plan_detail']['movement_timing'])) {
-            foreach ($data['latest_plan'][0]['plan_detail']['movement_timing'] as $k=>$v) {
+        if (!empty($data['latest_plan']['time_plan'][0]['plan_detail']['movement_timing'])) {
+            foreach ($data['latest_plan']['time_plan'][0]['plan_detail']['movement_timing'] as $k=>$v) {
                 if (!empty($v[0]['flow_logic']['logic_flow_id']) && !empty($v[0]['flow_logic']['comment'])) {
                     $result[$k]['logic_flow_id'] = $v[0]['flow_logic']['logic_flow_id'];
                     $result[$k]['comment'] = $v[0]['flow_logic']['comment'];
@@ -189,8 +190,8 @@ class Timing_model extends CI_Model
 
         $time_point = strtotime($time_point);
         $result = [];
-        if (!empty($data['latest_plan'])) {
-            foreach ($data['latest_plan'] as $k=>$v) {
+        if (!empty($data['latest_plan']['time_plan'])) {
+            foreach ($data['latest_plan']['time_plan'] as $k=>$v) {
                 $st = strtotime($v['tod_start_time']);
                 $et = strtotime($v['tod_end_time']);
                 if ($time_point >= $st && $time_point < $et && !empty($v['plan_detail']['movement_timing'])) {
@@ -329,8 +330,8 @@ class Timing_model extends CI_Model
         if (empty($data)) return [];
 
         $result = [];
-        if (!empty($data['latest_plan'][0]['plan_detail']['movement_timing'])) {
-            foreach ($data['latest_plan'][0]['plan_detail']['movement_timing'] as $v) {
+        if (!empty($data['latest_plan']['time_plan'][0]['plan_detail']['movement_timing'])) {
+            foreach ($data['latest_plan']['time_plan'][0]['plan_detail']['movement_timing'] as $v) {
                 if (!empty($v[0]['flow_logic']['logic_flow_id']) && !empty($v[0]['flow_logic']['comment'])) {
                     $result[$v[0]['flow_logic']['logic_flow_id']] = $v[0]['flow_logic']['comment'];
                 }

@@ -370,6 +370,8 @@ class Junction extends MY_Controller
             return;
         }
 
+        $params['timingType'] = $this->timingType;
+
         $result = $this->junction_model->getJunctionMapData($params);
 
         return $this->response($result);
