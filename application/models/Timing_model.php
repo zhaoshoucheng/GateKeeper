@@ -356,7 +356,7 @@ class Timing_model extends CI_Model
 
         // 获取配时详情
         $timing_data = [
-                        'junction_ids'      => trim($data['junction_id']),
+                        'logic_junction_id' => trim($data['junction_id']),
                         'days'              => trim(implode(',', $data['dates'])),
                         'start_time'        => trim($time_range[0]),
                         'end_time'          => date('H:i', strtotime(trim($time_range[1])) - 60),
@@ -364,13 +364,13 @@ class Timing_model extends CI_Model
                     ];
         try {
             $timing = httpGET(
-                $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingVersionBatch',
+                $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingVersion',
                 $timing_data
             );
             $timing = json_decode($timing, true);
             if (isset($timing['errorCode']) && $timing['errorCode'] != 0) {
-                $content = "form_data : " . json_encode($data);
-                $content .= "<br>interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingVersionBatch';
+                $content = "form_data : " . json_encode($timing_data);
+                $content .= "<br>interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingVersion';
                 $content .= '<br> result : ' . json_encode($timing);
                 sendMail($this->email_to, 'logs: 获取配时数据', $content);
                 return [];
