@@ -598,6 +598,7 @@ class Junction_model extends CI_Model
     * @param $data['time_point']      string   N 时间点 格式 00:00 PS:当search_type = 0 时 必传
     * @param $data['time_range']      string   N 方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传 时间段
     * @param $data['task_time_range'] string   Y 评估/诊断任务开始结束时间 格式 00:00-24:00
+    * @param $data['timingType']      interger Y 配时来源 1：人工 2：反推
     * @return array
     */
     public function getJunctionMapData($data)
@@ -610,8 +611,9 @@ class Junction_model extends CI_Model
 
         // 获取配时数据 地图底图数据源用配时的
         $timing_data = [
-            'junction_id'     => $junction_id,
-            'dates'           => $data['dates']
+            'junction_id' => $junction_id,
+            'dates'       => $data['dates'],
+            'timingType'  => $data['timingType']
         ];
         if ((int)$data['search_type'] == 1) { // 按方案查询
             $time_range = array_filter(explode('-', $data['time_range']));
