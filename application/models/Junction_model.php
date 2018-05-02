@@ -106,6 +106,7 @@ class Junction_model extends CI_Model
     * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
     * @return array
     */
     public function getFlowQuotas($data)
@@ -381,6 +382,7 @@ class Junction_model extends CI_Model
     * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
     * @return array
     */
     private function getDiagnoseJunctionDetail($data)
@@ -419,7 +421,7 @@ class Junction_model extends CI_Model
 
         $result = $res->row_array();
         //echo "<hr>data = <pre>";print_r($result);
-        $result = $this->formatJunctionDetailData($result, $data['dates'], 2);
+        $result = $this->formatJunctionDetailData($result, $data['dates'], 2, $data['timingType']);
 
         return $result;
     }
@@ -434,6 +436,7 @@ class Junction_model extends CI_Model
     * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
     * @return array
     */
     private function getQuotaJunctionDetail($data)
@@ -464,7 +467,7 @@ class Junction_model extends CI_Model
 
         $result = $res->row_array();
         //echo "<hr>data = <pre>";print_r($result);
-        $result = $this->formatJunctionDetailData($result, $data['dates'], 1);
+        $result = $this->formatJunctionDetailData($result, $data['dates'], 1, $data['timingType']);
 
         return $result;
 
@@ -475,8 +478,9 @@ class Junction_model extends CI_Model
     * @param $data        路口详情数据
     * @param $dates       评估/诊断日期
     * @param $result_type 数据返回类型 1：指标详情页 2：诊断详情页
+    * @param $timingType  配时数据来源 1：人工 2：反推
     */
-    private function formatJunctionDetailData($data, $dates, $result_type)
+    private function formatJunctionDetailData($data, $dates, $result_type, $timingType)
     {
         if (empty($data) || empty($dates) || (int)$result_type < 1) return [];
 
@@ -489,7 +493,8 @@ class Junction_model extends CI_Model
         $timing_data = [
             'junction_id' => trim($data['junction_id']),
             'dates'       => $dates,
-            'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60)
+            'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60),
+            'timingType'  => $timingType
         ];
         $flow_id_name = $this->timing_model->getFlowIdToName($timing_data);
 
