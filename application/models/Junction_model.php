@@ -629,11 +629,13 @@ class Junction_model extends CI_Model
         /*------------------------------------
         | 获取路网路口各相位经纬度及路口中心经纬度 |
         -------------------------------------*/
-        // 是否有地图版本
-        if (empty($timing['map_version'])) return [];
+        // 获取地图版本
+        $map_version = $this->waymap_model->getMapVersion($data['dates']);
+        if (empty($map_version)) return [];
+
         // 获取路网路口各相位坐标
         $waymap_data = [
-            'version'           => trim($timing['map_version']),
+            'version'           => trim($map_version),
             'logic_junction_id' => $junction_id
         ];
         $waymap = $this->waymap_model->getJunctionFlowAndCenterLngLat($waymap_data);
