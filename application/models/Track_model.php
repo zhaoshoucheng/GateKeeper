@@ -27,6 +27,7 @@ class Track_model extends CI_Model
     * @param $data['search_type'] interger 搜索类型 查询类型 1：按方案查询 0：按时间点查询
     * @param $data['time_point']  string   时间点 当search_type = 0 时 必传 格式：00:00
     * @param $data['time_range']  string   时间段 当search_type = 1 时 必传 格式：00:00-00:30
+    * @param $data['timingType']  interger 配时来源 1：人工 2：反推
     * @param $type                string   获取轨迹类型
     * @return json
     */
@@ -51,7 +52,8 @@ class Track_model extends CI_Model
             'junction_id' => $junction_info['junction_id'],
             'dates'       => explode(',', $junction_info['dates']),
             'time_range'  => $junction_info['start_time'] . '-' . date("H:i", strtotime($junction_info['end_time']) - 60),
-            'flow_id'     => trim($data['flow_id'])
+            'flow_id'     => trim($data['flow_id']),
+            'timingType'  => $data['timingType']
         ];
         $timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
         if (!$timing) return [];

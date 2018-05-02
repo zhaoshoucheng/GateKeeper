@@ -63,6 +63,7 @@ class Track extends MY_Controller
             }
         }
 
+        $params['timingType'] = $this->timingType;
         $result_data = $this->track_model->getTrackData($params, 'getScatterMtraj');
 
         return $this->response($result_data);
@@ -115,7 +116,7 @@ class Track extends MY_Controller
                 return;
             }
         }
-
+        $params['timingType'] = $this->timingType;
         $result_data = $this->track_model->getTrackData($params, 'getSpaceTimeMtraj');
 
         return $this->response($result_data);
