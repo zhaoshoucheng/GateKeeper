@@ -149,6 +149,8 @@ class Junction extends MY_Controller
             return;
         }
 
+        $params['timingType'] = $this->timingType;
+
         // 获取路口指标详情
         $res = $this->junction_model->getFlowQuotas($params);
 
