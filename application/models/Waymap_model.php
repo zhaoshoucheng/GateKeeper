@@ -30,7 +30,7 @@ class Waymap_model extends CI_Model
         $data['token'] = $this->token;
 
         try {
-            $res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/many', $data);
+            $res = httpGET($this->config->item('waymap_interface') . '/signal-map/map/many', $data);
             if(!$res){
                 // 日志
                 return [];
@@ -60,7 +60,7 @@ class Waymap_model extends CI_Model
         $map_data = [];
 
         try {
-            $map_data = httpGET($this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr', $data);
+            $map_data = httpGET($this->config->item('waymap_interface') . '/signal-map/mapFlow/AllByJunctionWithLinkAttr', $data);
             if (!$map_data) {
                 // 日志
                 return [];
@@ -70,7 +70,7 @@ class Waymap_model extends CI_Model
                 // 日志
                 $content = 'data = ' . json_encode($data)
                         . ' \r\n interface = '
-                        . $this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr'
+                        . $this->config->item('waymap_interface') . '/signal-map/mapFlow/AllByJunctionWithLinkAttr'
                         . '\r\n result = ' . json_encode($map_data);
                 sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return [];
@@ -79,7 +79,7 @@ class Waymap_model extends CI_Model
             // 日志
             $content = 'data = ' . json_encode($data)
                     . ' \r\n interface = '
-                    . $this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr'
+                    . $this->config->item('waymap_interface') . '/signal-map/mapFlow/AllByJunctionWithLinkAttr'
                     . '\r\n result = ' . json_encode($map_data);
             sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
             return [];
@@ -106,7 +106,7 @@ class Waymap_model extends CI_Model
         $data['token'] = $this->token;
 
         try {
-            $junction_info = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/detail', $data);
+            $junction_info = httpGET($this->config->item('waymap_interface') . '/signal-map/map/detail', $data);
             if (!$junction_info) {
                 return [];
             }
@@ -115,7 +115,7 @@ class Waymap_model extends CI_Model
             if ($junction_info['errorCode'] != 0 || empty($junction_info['data'])) {
                 $content = 'data = ' . json_encode($data)
                         . ' \r\n interface = '
-                        . $this->config->item('waymap_interface') . '/flow-duration/map/detail'
+                        . $this->config->item('waymap_interface') . '/signal-map/map/detail'
                         . '\r\n result = ' . json_encode($junction_info);
                 sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return [];
@@ -123,7 +123,7 @@ class Waymap_model extends CI_Model
         } catch (Exception $e) {
             $content = 'data = ' . json_encode($data)
                     . ' \r\n interface = '
-                    . $this->config->item('waymap_interface') . '/flow-duration/map/detail'
+                    . $this->config->item('waymap_interface') . '/signal-map/map/detail'
                     . '\r\n result = ' . json_encode($junction_info);
             sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
             return [];
@@ -160,11 +160,11 @@ class Waymap_model extends CI_Model
                 'count'   => 10000
             ];
             try {
-                $res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/getList', $data);
+                $res = httpGET($this->config->item('waymap_interface') . '/signal-map/map/getList', $data);
                 if (!$res) {
                     // 添加日志、发送邮件
                     $content = 'data = ' . json_encode($data)
-                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/flow-duration/map/getList';
+                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/signal-map/map/getList';
                     sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                     return false;
                 }
@@ -180,7 +180,7 @@ class Waymap_model extends CI_Model
                 }
             } catch (Exception $e) {
                 $content = 'data = ' . json_encode($data)
-                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/flow-duration/map/getList';
+                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/signal-map/map/getList';
                 sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return false;
             }
@@ -210,7 +210,7 @@ class Waymap_model extends CI_Model
 
         $map_version = [];
         try {
-            $map_version = httpPOST($this->config->item('waymap_interface') . '/flow-duration/map/getDateVersion', $wdata);
+            $map_version = httpPOST($this->config->item('waymap_interface') . '/signal-map/map/getDateVersion', $wdata);
             $map_version = json_decode($map_version, true);
             if (!$map_version) return [];
         } catch (Exception $e) {
