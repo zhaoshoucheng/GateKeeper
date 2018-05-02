@@ -190,4 +190,34 @@ class Waymap_model extends CI_Model
 
         return $city_junctions;
     }
+
+    /**
+    * 获取最新地图版本号
+    * @param $dates array 日期 ['20180102', '20180103']
+    * @return array
+    */
+    public function getMapVersion($dates)
+    {
+        if (!is_array($dates) || empty($dates)) return [];
+
+        $maxdate = max($dates);
+        $maxdate = date('Y-m-d', strtotime($maxdate));
+
+        $wdata = [
+            'date'  => $maxdate,
+            'token' => $this->token
+        ];
+
+        $map_version = [];
+        try {
+            $map_version = httpPOST($this->config->item('waymap_interface') . '/flow-duration/map/getDateVersion', $data);
+            $map_version = json_decode($map_version, true);
+            if (!$map_version) return [];
+        } catch (Exception $e) {
+            return [];
+        }
+        echo "<pre>";print_r($map_version);exit;
+        return $map_version;
+
+    }
 }
