@@ -210,13 +210,17 @@ class Waymap_model extends CI_Model
 
         $map_version = [];
         try {
-            $map_version = httpPOST($this->config->item('waymap_interface') . '/flow-duration/map/getDateVersion', $data);
+            $map_version = httpPOST($this->config->item('waymap_interface') . '/flow-duration/map/getDateVersion', $wdata);
             $map_version = json_decode($map_version, true);
             if (!$map_version) return [];
         } catch (Exception $e) {
             return [];
         }
-        echo "<pre>";print_r($map_version);exit;
+        if (!empty($map_version['data'])) {
+            foreach ($map_version['data'] as $k=>$v) {
+                $map_version = $v;
+            }
+        }
         return $map_version;
 
     }
