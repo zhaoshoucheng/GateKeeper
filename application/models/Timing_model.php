@@ -99,10 +99,11 @@ class Timing_model extends CI_Model
 
     /**
     * 获取某一相位的配时信息
-    * @param $data['junction_id'] string 逻辑路口ID
-    * @param $data['dates']       array  评估/诊断日期
-    * @param $data['time_range']  string 时间段 00:00-00:30
-    * @param $data['flow_id']     string 相位ID
+    * @param $data['junction_id'] string   逻辑路口ID
+    * @param $data['dates']       array    评估/诊断日期
+    * @param $data['time_range']  string   时间段 00:00-00:30
+    * @param $data['timingType']  interger 配时来源 1：人工 2：反推
+    * @param $data['flow_id']     string   相位ID
     * @return array
     */
     public function getFlowTimingInfoForTheTrack($data)
