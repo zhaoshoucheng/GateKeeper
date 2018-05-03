@@ -65,7 +65,7 @@ $temp_timing_port = !empty($timing_port) ? ":" . $timing_port : "";
 $config['waymap_interface'] = 'http://' . $waymap_server . $temp_waymap_port . $waymap_ext;
 // 路网接口token
 $config['waymap_token'] = '4c3e3b6a3588161128d0604daab528db';
-
+$config['waymap_userid'] = 'signalPro';
 // 配时接口地址
 $config['timing_interface'] = 'http://' . $timing_server . $temp_timing_port . $timing_ext;
 
@@ -250,4 +250,14 @@ $config['sort_conf'] = [
 // result_comment配置
 $config['result_comment'] = [
 	'signal_mes_error' => '配时信息与实际车流不符'
+];
+
+// 反推配时名单
+$config['back_timing_roll'] = [
+	'unknown',
+	'zhuyewei',
+	'liuminjun',
+	'zhaoyuezhaoyue',
+	'tianshanshan',
+	'ningxiangbing'
 ];

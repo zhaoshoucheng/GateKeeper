@@ -90,6 +90,7 @@ class Task_model extends CI_Model
 
     function process() {
         try {
+            $this->its_tool->reconnect();
             $this->its_tool->trans_begin();
             $now = time();
 
@@ -162,8 +163,9 @@ class Task_model extends CI_Model
                     // 'date'  => '2017-06-01,2017-10-10,2018-03-10',
                     'date' => $date,
                     'token'     => $this->config->item('waymap_token'),
+                    'user_id'   => $this->config->item('waymap_userid'),
                 ];
-        $res = httpPOST($this->config->item('waymap_interface') . '/flow-duration/map/getDateVersion', $data);
+        $res = httpPOST($this->config->item('waymap_interface') . '/signal-map/map/getDateVersion', $data);
         return $res;
     }
 }

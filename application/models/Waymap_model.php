@@ -9,7 +9,7 @@ class Waymap_model extends CI_Model
 {
     protected $token;
     private $email_to = 'ningxiangbing@didichuxing.com';
-
+    protected $userid = '';
     public function __construct()
     {
         parent::__construct();
@@ -17,6 +17,7 @@ class Waymap_model extends CI_Model
         $this->load->config('nconf');
         $this->load->helper('http');
         $this->token = $this->config->item('waymap_token');
+        $this->userid = $this->config->item('waymap_userid');
     }
 
     /**
@@ -28,9 +29,10 @@ class Waymap_model extends CI_Model
     {
         $data['logic_ids'] = $ids;
         $data['token'] = $this->token;
+        $data['user_id'] = $this->userid;
 
         try {
-            $res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/many', $data);
+            $res = httpGET($this->config->item('waymap_interface') . '/signal-map/map/many', $data);
             if(!$res){
                 // 日志
                 return [];
@@ -56,11 +58,12 @@ class Waymap_model extends CI_Model
         if (empty($data)) return [];
 
         $data['token'] = $this->token;
+        $data['user_id'] = $this->userid;
 
         $map_data = [];
 
         try {
-            $map_data = httpGET($this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr', $data);
+            $map_data = httpGET($this->config->item('waymap_interface') . '/signal-map/mapFlow/AllByJunctionWithLinkAttr', $data);
             if (!$map_data) {
                 // 日志
                 return [];
@@ -70,7 +73,7 @@ class Waymap_model extends CI_Model
                 // 日志
                 $content = 'data = ' . json_encode($data)
                         . ' \r\n interface = '
-                        . $this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr'
+                        . $this->config->item('waymap_interface') . '/signal-map/mapFlow/AllByJunctionWithLinkAttr'
                         . '\r\n result = ' . json_encode($map_data);
                 sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return [];
@@ -79,7 +82,7 @@ class Waymap_model extends CI_Model
             // 日志
             $content = 'data = ' . json_encode($data)
                     . ' \r\n interface = '
-                    . $this->config->item('waymap_interface') . '/flow-duration/mapFlow/AllByJunctionWithLinkAttr'
+                    . $this->config->item('waymap_interface') . '/signal-map/mapFlow/AllByJunctionWithLinkAttr'
                     . '\r\n result = ' . json_encode($map_data);
             sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
             return [];
@@ -104,9 +107,10 @@ class Waymap_model extends CI_Model
         if (empty($data)) return [];
 
         $data['token'] = $this->token;
+        $data['user_id'] = $this->userid;
 
         try {
-            $junction_info = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/detail', $data);
+            $junction_info = httpGET($this->config->item('waymap_interface') . '/signal-map/map/detail', $data);
             if (!$junction_info) {
                 return [];
             }
@@ -115,7 +119,7 @@ class Waymap_model extends CI_Model
             if ($junction_info['errorCode'] != 0 || empty($junction_info['data'])) {
                 $content = 'data = ' . json_encode($data)
                         . ' \r\n interface = '
-                        . $this->config->item('waymap_interface') . '/flow-duration/map/detail'
+                        . $this->config->item('waymap_interface') . '/signal-map/map/detail'
                         . '\r\n result = ' . json_encode($junction_info);
                 sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return [];
@@ -123,7 +127,7 @@ class Waymap_model extends CI_Model
         } catch (Exception $e) {
             $content = 'data = ' . json_encode($data)
                     . ' \r\n interface = '
-                    . $this->config->item('waymap_interface') . '/flow-duration/map/detail'
+                    . $this->config->item('waymap_interface') . '/signal-map/map/detail'
                     . '\r\n result = ' . json_encode($junction_info);
             sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
             return [];
@@ -156,15 +160,16 @@ class Waymap_model extends CI_Model
             $data = [
                 'city_id' => $city_id,
                 'token'   => $this->token,
+                'user_id' => $this->userid,
                 'offset'  => 0,
                 'count'   => 10000
             ];
             try {
-                $res = httpGET($this->config->item('waymap_interface') . '/flow-duration/map/getList', $data);
+                $res = httpGET($this->config->item('waymap_interface') . '/signal-map/map/getList', $data);
                 if (!$res) {
                     // 添加日志、发送邮件
                     $content = 'data = ' . json_encode($data)
-                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/flow-duration/map/getList';
+                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/signal-map/map/getList';
                     sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                     return false;
                 }
@@ -180,7 +185,7 @@ class Waymap_model extends CI_Model
                 }
             } catch (Exception $e) {
                 $content = 'data = ' . json_encode($data)
-                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/flow-duration/map/getList';
+                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/signal-map/map/getList';
                 sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return false;
             }
@@ -189,5 +194,40 @@ class Waymap_model extends CI_Model
         }
 
         return $city_junctions;
+    }
+
+    /**
+    * 获取最新地图版本号
+    * @param $dates array 日期 ['20180102', '20180103']
+    * @return array
+    */
+    public function getMapVersion($dates)
+    {
+        if (!is_array($dates) || empty($dates)) return [];
+
+        $maxdate = max($dates);
+        $maxdate = date('Y-m-d', strtotime($maxdate));
+
+        $wdata = [
+            'date'  => $maxdate,
+            'token' => $this->token,
+            'user_id' => $this->userid,
+        ];
+
+        $map_version = [];
+        try {
+            $map_version = httpPOST($this->config->item('waymap_interface') . '/signal-map/map/getDateVersion', $wdata);
+            $map_version = json_decode($map_version, true);
+            if (!$map_version) return [];
+        } catch (Exception $e) {
+            return [];
+        }
+        if (!empty($map_version['data'])) {
+            foreach ($map_version['data'] as $k=>$v) {
+                $map_version = $v;
+            }
+        }
+        return $map_version;
+
     }
 }
