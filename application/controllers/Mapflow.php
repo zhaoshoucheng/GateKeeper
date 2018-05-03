@@ -32,7 +32,7 @@ class Mapflow extends MY_Controller
                         'logic_flow_ids' => $logic_flow_ids,
                         'token'     => $this->config->item('waymap_token'),
                     ];
-            $ret = httpPOST($this->config->item('waymap_interface') . '/flow-duration/MapFlow/simplifyFlows', $data);
+            $ret = httpPOST($this->config->item('waymap_interface') . '/signal-map/MapFlow/simplifyFlows', $data);
             $ret = json_decode($ret, true);
             if ($ret['errorCode'] == -1) {
                 $this->errno = -1;

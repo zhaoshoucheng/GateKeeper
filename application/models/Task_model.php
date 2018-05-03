@@ -164,7 +164,7 @@ class Task_model extends CI_Model
                     'date' => $date,
                     'token'     => $this->config->item('waymap_token'),
                 ];
-        $res = httpPOST($this->config->item('waymap_interface') . '/flow-duration/map/getDateVersion', $data);
+        $res = httpPOST($this->config->item('waymap_interface') . '/signal-map/map/getDateVersion', $data);
         return $res;
     }
 }
