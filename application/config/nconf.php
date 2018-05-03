@@ -158,7 +158,7 @@ $config['flow_quota_key'] = [
 	],
 	'flow_num' => [
 		'name'      => '流量',
-		'round_num' => 2
+		'round_num' => 0
 	]
 ];
 
