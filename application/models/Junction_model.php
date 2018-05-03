@@ -590,7 +590,9 @@ class Junction_model extends CI_Model
         }
 
         $result_comment_conf = $this->config->item('result_comment');
-        $data['result_comment'] = isset($result_comment_conf[$data['result_comment']]) ? $result_comment_conf[$data['result_comment']] : '';
+        $data['result_comment'] = isset($result_comment_conf[$data['result_comment']])
+                                    ? $result_comment_conf[$data['result_comment']]
+                                    : '';
 
         return $data;
     }
@@ -755,15 +757,15 @@ class Junction_model extends CI_Model
         if (!is_array($all_data) || count($all_data) < 1 || !is_array($data) || count($data) < 1) return [];
 
         $result_data = [];
-        $temp_lng = [];
-        $temp_lat = [];
+        $count_lng = 0;
+        $count_lat = 0;
         if (isset($data['count'])) {
             $result_data['count'] = $data['count'];
         }
         foreach ($all_data as $k=>$v) {
             if (isset($data[$v['logic_junction_id']])) {
-                $temp_lng[$k] = $v['lng'];
-                $temp_lat[$k] = $v['lat'];
+                $count_lng += $v['lng'];
+                $count_lat += $v['lat'];
                 $result_data['dataList'][$k]['logic_junction_id'] = $v['logic_junction_id'];
                 $result_data['dataList'][$k]['name'] = $v['name'];
                 $result_data['dataList'][$k]['lng'] = $v['lng'];
@@ -773,14 +775,19 @@ class Junction_model extends CI_Model
         }
 
         // 暂时定死一个中心点
-        $center_lat = 36.663083;
-        $center_lng = 117.033513;
-        $result_data['center'] = '';
-        $result_data['center']['lng'] = $center_lng;
-        $result_data['center']['lat'] = $center_lat;
+        $count = 0;
         if (!empty($result_data['dataList'])) {
+            $count = count($result_data['dataList']);
             $result_data['dataList'] = array_values($result_data['dataList']);
         }
+        if($count >= 1){
+            $center_lng = round($count_lng / $count, 6);
+            $center_lat = round($count_lat / $count, 6);
+        }
+        /*$center_lat = 36.663083;
+        $center_lng = 117.033513;*/
+        $result_data['center']['lng'] = $center_lng;
+        $result_data['center']['lat'] = $center_lat;
 
         return $result_data;
     }
