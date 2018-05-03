@@ -37,6 +37,8 @@ class Task extends MY_Controller {
 
 		$params = $this->input->post();
 
+        log_request();
+
 		// 校验参数
 		$validate = Validate::make($params,
 			[
