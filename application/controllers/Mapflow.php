@@ -31,6 +31,7 @@ class Mapflow extends MY_Controller
                         'version' => $version,
                         'logic_flow_ids' => $logic_flow_ids,
                         'token'     => $this->config->item('waymap_token'),
+                        'user_id'   => $this->config->item('waymap_userid'),
                     ];
             $ret = httpPOST($this->config->item('waymap_interface') . '/signal-map/MapFlow/simplifyFlows', $data);
             $ret = json_decode($ret, true);

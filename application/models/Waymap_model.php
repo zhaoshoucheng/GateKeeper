@@ -9,7 +9,7 @@ class Waymap_model extends CI_Model
 {
     protected $token;
     private $email_to = 'ningxiangbing@didichuxing.com';
-
+    protected $userid = '';
     public function __construct()
     {
         parent::__construct();
@@ -17,6 +17,7 @@ class Waymap_model extends CI_Model
         $this->load->config('nconf');
         $this->load->helper('http');
         $this->token = $this->config->item('waymap_token');
+        $this->userid = $this->config->item('waymap_userid');
     }
 
     /**
@@ -28,6 +29,7 @@ class Waymap_model extends CI_Model
     {
         $data['logic_ids'] = $ids;
         $data['token'] = $this->token;
+        $data['user_id'] = $this->userid;
 
         try {
             $res = httpGET($this->config->item('waymap_interface') . '/signal-map/map/many', $data);
@@ -56,6 +58,7 @@ class Waymap_model extends CI_Model
         if (empty($data)) return [];
 
         $data['token'] = $this->token;
+        $data['user_id'] = $this->userid;
 
         $map_data = [];
 
@@ -104,6 +107,7 @@ class Waymap_model extends CI_Model
         if (empty($data)) return [];
 
         $data['token'] = $this->token;
+        $data['user_id'] = $this->userid;
 
         try {
             $junction_info = httpGET($this->config->item('waymap_interface') . '/signal-map/map/detail', $data);
@@ -156,6 +160,7 @@ class Waymap_model extends CI_Model
             $data = [
                 'city_id' => $city_id,
                 'token'   => $this->token,
+                'user_id' => $this->userid,
                 'offset'  => 0,
                 'count'   => 10000
             ];
@@ -205,7 +210,8 @@ class Waymap_model extends CI_Model
 
         $wdata = [
             'date'  => $maxdate,
-            'token' => $this->token
+            'token' => $this->token,
+            'user_id' => $this->userid,
         ];
 
         $map_version = [];
