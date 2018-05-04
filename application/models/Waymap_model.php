@@ -10,6 +10,7 @@ class Waymap_model extends CI_Model
     protected $token;
     private $email_to = 'ningxiangbing@didichuxing.com';
     protected $userid = '';
+
     public function __construct()
     {
         parent::__construct();
