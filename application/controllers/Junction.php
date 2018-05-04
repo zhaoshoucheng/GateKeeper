@@ -149,6 +149,8 @@ class Junction extends MY_Controller
             return;
         }
 
+        $params['timingType'] = $this->timingType;
+
         // 获取路口指标详情
         $res = $this->junction_model->getFlowQuotas($params);
 
@@ -184,6 +186,7 @@ class Junction extends MY_Controller
             return;
         }
         $params['time_range'] = $params['task_time_range'];
+        $params['timingType'] = $this->timingType;
         $timing = $this->timing_model->getJunctionsTimingInfo($params);
 
         return $this->response($timing);
@@ -368,6 +371,8 @@ class Junction extends MY_Controller
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
         }
+
+        $params['timingType'] = $this->timingType;
 
         $result = $this->junction_model->getJunctionMapData($params);
 

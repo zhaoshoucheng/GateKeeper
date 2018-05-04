@@ -106,6 +106,7 @@ class Junction_model extends CI_Model
     * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
     * @return array
     */
     public function getFlowQuotas($data)
@@ -381,6 +382,7 @@ class Junction_model extends CI_Model
     * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
     * @return array
     */
     private function getDiagnoseJunctionDetail($data)
@@ -419,7 +421,7 @@ class Junction_model extends CI_Model
 
         $result = $res->row_array();
         //echo "<hr>data = <pre>";print_r($result);
-        $result = $this->formatJunctionDetailData($result, $data['dates'], 2);
+        $result = $this->formatJunctionDetailData($result, $data['dates'], 2, $data['timingType']);
 
         return $result;
     }
@@ -434,6 +436,7 @@ class Junction_model extends CI_Model
     * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
     * @return array
     */
     private function getQuotaJunctionDetail($data)
@@ -464,7 +467,7 @@ class Junction_model extends CI_Model
 
         $result = $res->row_array();
         //echo "<hr>data = <pre>";print_r($result);
-        $result = $this->formatJunctionDetailData($result, $data['dates'], 1);
+        $result = $this->formatJunctionDetailData($result, $data['dates'], 1, $data['timingType']);
 
         return $result;
 
@@ -475,8 +478,9 @@ class Junction_model extends CI_Model
     * @param $data        路口详情数据
     * @param $dates       评估/诊断日期
     * @param $result_type 数据返回类型 1：指标详情页 2：诊断详情页
+    * @param $timingType  配时数据来源 1：人工 2：反推
     */
-    private function formatJunctionDetailData($data, $dates, $result_type)
+    private function formatJunctionDetailData($data, $dates, $result_type, $timingType)
     {
         if (empty($data) || empty($dates) || (int)$result_type < 1) return [];
 
@@ -489,7 +493,8 @@ class Junction_model extends CI_Model
         $timing_data = [
             'junction_id' => trim($data['junction_id']),
             'dates'       => $dates,
-            'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60)
+            'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60),
+            'timingType'  => $timingType
         ];
         $flow_id_name = $this->timing_model->getFlowIdToName($timing_data);
 
@@ -585,7 +590,9 @@ class Junction_model extends CI_Model
         }
 
         $result_comment_conf = $this->config->item('result_comment');
-        $data['result_comment'] = isset($result_comment_conf[$data['result_comment']]) ? $result_comment_conf[$data['result_comment']] : '';
+        $data['result_comment'] = isset($result_comment_conf[$data['result_comment']])
+                                    ? $result_comment_conf[$data['result_comment']]
+                                    : '';
 
         return $data;
     }
@@ -598,6 +605,7 @@ class Junction_model extends CI_Model
     * @param $data['time_point']      string   N 时间点 格式 00:00 PS:当search_type = 0 时 必传
     * @param $data['time_range']      string   N 方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传 时间段
     * @param $data['task_time_range'] string   Y 评估/诊断任务开始结束时间 格式 00:00-24:00
+    * @param $data['timingType']      interger Y 配时来源 1：人工 2：反推
     * @return array
     */
     public function getJunctionMapData($data)
@@ -610,8 +618,9 @@ class Junction_model extends CI_Model
 
         // 获取配时数据 地图底图数据源用配时的
         $timing_data = [
-            'junction_id'     => $junction_id,
-            'dates'           => $data['dates']
+            'junction_id' => $junction_id,
+            'dates'       => $data['dates'],
+            'timingType'  => $data['timingType']
         ];
         if ((int)$data['search_type'] == 1) { // 按方案查询
             $time_range = array_filter(explode('-', $data['time_range']));
@@ -627,11 +636,13 @@ class Junction_model extends CI_Model
         /*------------------------------------
         | 获取路网路口各相位经纬度及路口中心经纬度 |
         -------------------------------------*/
-        // 是否有地图版本
-        if (empty($timing['map_version'])) return [];
+        // 获取地图版本
+        $map_version = $this->waymap_model->getMapVersion($data['dates']);
+        if (empty($map_version)) return [];
+
         // 获取路网路口各相位坐标
         $waymap_data = [
-            'version'           => trim($timing['map_version']),
+            'version'           => trim($map_version),
             'logic_junction_id' => $junction_id
         ];
         $waymap = $this->waymap_model->getJunctionFlowAndCenterLngLat($waymap_data);
@@ -652,7 +663,7 @@ class Junction_model extends CI_Model
         $center = $this->waymap_model->getJunctionCenterCoords($center_data);
 
         $result['center'] = $center;
-        $result['map_version'] = $timing['map_version'];
+        $result['map_version'] = $map_version;
 
         if (count($result['dataList']) >= 1) {
             $result['dataList'] = array_values($result['dataList']);
@@ -746,15 +757,15 @@ class Junction_model extends CI_Model
         if (!is_array($all_data) || count($all_data) < 1 || !is_array($data) || count($data) < 1) return [];
 
         $result_data = [];
-        $temp_lng = [];
-        $temp_lat = [];
+        $count_lng = 0;
+        $count_lat = 0;
         if (isset($data['count'])) {
             $result_data['count'] = $data['count'];
         }
         foreach ($all_data as $k=>$v) {
             if (isset($data[$v['logic_junction_id']])) {
-                $temp_lng[$k] = $v['lng'];
-                $temp_lat[$k] = $v['lat'];
+                $count_lng += $v['lng'];
+                $count_lat += $v['lat'];
                 $result_data['dataList'][$k]['logic_junction_id'] = $v['logic_junction_id'];
                 $result_data['dataList'][$k]['name'] = $v['name'];
                 $result_data['dataList'][$k]['lng'] = $v['lng'];
@@ -764,14 +775,19 @@ class Junction_model extends CI_Model
         }
 
         // 暂时定死一个中心点
-        $center_lat = 36.663083;
-        $center_lng = 117.033513;
-        $result_data['center'] = '';
-        $result_data['center']['lng'] = $center_lng;
-        $result_data['center']['lat'] = $center_lat;
+        $count = 0;
         if (!empty($result_data['dataList'])) {
+            $count = count($result_data['dataList']);
             $result_data['dataList'] = array_values($result_data['dataList']);
         }
+        if($count >= 1){
+            $center_lng = round($count_lng / $count, 6);
+            $center_lat = round($count_lat / $count, 6);
+        }
+        /*$center_lat = 36.663083;
+        $center_lng = 117.033513;*/
+        $result_data['center']['lng'] = $center_lng;
+        $result_data['center']['lat'] = $center_lat;
 
         return $result_data;
     }
