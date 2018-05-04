@@ -65,6 +65,7 @@ $temp_timing_port = !empty($timing_port) ? ":" . $timing_port : "";
 $config['waymap_interface'] = 'http://' . $waymap_server . $temp_waymap_port . $waymap_ext;
 // 路网接口token
 $config['waymap_token'] = '4c3e3b6a3588161128d0604daab528db';
+$config['waymap_userid'] = 'signalPro';
 
 // 配时接口地址
 $config['timing_interface'] = 'http://' . $timing_server . $temp_timing_port . $timing_ext;
