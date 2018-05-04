@@ -23,8 +23,9 @@ interface CalculatorServiceIf {
    * @param string $cityId
    * @param string $roadDataPath
    * @param \StsData\RoadVersionRuntime[] $roadVerRuntimeList
+   * @param string $timingType
    */
-  public function calculate($traceId, $taskId, $cityId, $roadDataPath, array $roadVerRuntimeList);
+  public function calculate($traceId, $taskId, $cityId, $roadDataPath, array $roadVerRuntimeList, $timingType);
 }
 
 class CalculatorServiceClient implements \StsData\CalculatorServiceIf {
@@ -38,12 +39,12 @@ class CalculatorServiceClient implements \StsData\CalculatorServiceIf {
     $this->output_ = $output ? $output : $input;
   }
 
-  public function calculate($traceId, $taskId, $cityId, $roadDataPath, array $roadVerRuntimeList)
+  public function calculate($traceId, $taskId, $cityId, $roadDataPath, array $roadVerRuntimeList, $timingType)
   {
-    $this->send_calculate($traceId, $taskId, $cityId, $roadDataPath, $roadVerRuntimeList);
+    $this->send_calculate($traceId, $taskId, $cityId, $roadDataPath, $roadVerRuntimeList, $timingType);
   }
 
-  public function send_calculate($traceId, $taskId, $cityId, $roadDataPath, array $roadVerRuntimeList)
+  public function send_calculate($traceId, $taskId, $cityId, $roadDataPath, array $roadVerRuntimeList, $timingType)
   {
     $args = new \StsData\CalculatorService_calculate_args();
     $args->traceId = $traceId;
@@ -51,6 +52,7 @@ class CalculatorServiceClient implements \StsData\CalculatorServiceIf {
     $args->cityId = $cityId;
     $args->roadDataPath = $roadDataPath;
     $args->roadVerRuntimeList = $roadVerRuntimeList;
+    $args->timingType = $timingType;
     $bin_accel = ($this->output_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
     if ($bin_accel)
     {
@@ -91,6 +93,10 @@ class CalculatorService_calculate_args {
    * @var \StsData\RoadVersionRuntime[]
    */
   public $roadVerRuntimeList = null;
+  /**
+   * @var string
+   */
+  public $timingType = null;
 
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
@@ -120,6 +126,10 @@ class CalculatorService_calculate_args {
             'class' => '\StsData\RoadVersionRuntime',
             ),
           ),
+        6 => array(
+          'var' => 'timingType',
+          'type' => TType::STRING,
+          ),
         );
     }
     if (is_array($vals)) {
@@ -137,6 +147,9 @@ class CalculatorService_calculate_args {
       }
       if (isset($vals['roadVerRuntimeList'])) {
         $this->roadVerRuntimeList = $vals['roadVerRuntimeList'];
+      }
+      if (isset($vals['timingType'])) {
+        $this->timingType = $vals['timingType'];
       }
     }
   }
@@ -206,6 +219,13 @@ class CalculatorService_calculate_args {
             $xfer += $input->skip($ftype);
           }
           break;
+        case 6:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->timingType);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
         default:
           $xfer += $input->skip($ftype);
           break;
@@ -254,6 +274,11 @@ class CalculatorService_calculate_args {
         }
         $output->writeListEnd();
       }
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->timingType !== null) {
+      $xfer += $output->writeFieldBegin('timingType', TType::STRING, 6);
+      $xfer += $output->writeString($this->timingType);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();

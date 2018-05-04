@@ -55,6 +55,12 @@ class RoadNet
 
     private $config = null;
 
+    public function __construct()
+    {
+        $logger = & load_class('Log', 'core');
+        \Didi\Cloud\ItsMap\Services\Log::registerLogger($logger);
+    }
+
     // 启动 thrift
     public function start($service = "inhert")
     {
@@ -335,7 +341,8 @@ class RoadNet
     * 生成全城flow
     */
     public function areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, $versions) {  
-        ini_set('memory_limit', '2048M');      
+        ini_set('memory_limit', '2048M');
+        set_time_limit(0);
         $areaFlowVersionReq = array();
         foreach ($versions as $version) {
             $junction = new Junction();
@@ -407,7 +414,7 @@ class RoadNet
     /*
     * 启动计算任务
     */
-    public function calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion) {
+    public function calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time, $end_time, $dateVersion, $timingType) {
         $roadVersionRuntime = array();
 
         foreach ($dateVersion as $date => $version) {
@@ -422,7 +429,7 @@ class RoadNet
 
         $this->start('caculator');
 
-        $response = $this->call('calculate', [$trace_id, $task_id, $city_id, $hdfs_dir, $roadVersionRuntime]);
+        $response = $this->call('calculate', [$trace_id, $task_id, $city_id, $hdfs_dir, $roadVersionRuntime, $timingType]);
 
         $this->close();
         if ($response === '' or intval($response) !== 0) {
