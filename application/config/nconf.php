@@ -131,7 +131,7 @@ $config['junction_quota_key'] = [
 $config['flow_quota_key'] = [
 	'route_length' => [
 		'name'      => '路段长度/米', // 中文名称
-		'round_num' => 0            // 取小数点后几位
+		'round_num' => 0            // 取小数点位数
 	],
 	'queue_position' => [
 		'name'      =>'排队长度/米',
@@ -156,6 +156,10 @@ $config['flow_quota_key'] = [
 	'stop_rate' => [
 		'name'      => '停车比率',
 		'round_num' => 2
+	],
+	'flow_num' => [
+		'name'      => '流量',
+		'round_num' => 0
 	]
 ];
 
