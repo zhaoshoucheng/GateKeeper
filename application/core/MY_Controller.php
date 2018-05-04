@@ -7,99 +7,99 @@
 
 class MY_Controller extends CI_Controller {
 
-	public $errno = 0;
-	public $errmsg = '';
-	public $output_data=array();
-	public $templates = array();
-	public $routerUri = '';
+    public $errno = 0;
+    public $errmsg = '';
+    public $output_data=array();
+    public $templates = array();
+    public $routerUri = '';
     public $username = 'unknown';
-	protected $debug = false;
-	protected $is_check_login = 0;
+    protected $debug = false;
+    protected $is_check_login = 0;
     protected $timingType = 1; // 0，全部；1，人工；2，配时反推；3，信号机上报
 
-	public function __construct(){
-		parent::__construct();
-		date_default_timezone_set('Asia/Shanghai');
-		$host = $_SERVER['HTTP_HOST'];
+    public function __construct(){
+        parent::__construct();
+        date_default_timezone_set('Asia/Shanghai');
+        $host = $_SERVER['HTTP_HOST'];
 
-		if ( $host != '100.90.164.31:8088' && $host != 'www.itstool.com') {
-			$this->is_check_login = 1;
+        if ( $host != '100.90.164.31:8088' && $host != 'www.itstool.com') {
+            $this->is_check_login = 1;
 
-			$this->load->model('user/user', 'user');
-	        // 此处采用appid+appkey的验证
-	        if (isset($_REQUEST['app_id']) && isset($_REQUEST['sign'])) {
-	            if (!$this->_checkAuthorizedApp()) {
-	                $this->_output();
-	                exit();
-	            }
-	        } elseif (isset($_REQUEST['token']) && (in_array($_REQUEST['token'], [
+            $this->load->model('user/user', 'user');
+            // 此处采用appid+appkey的验证
+            if (isset($_REQUEST['app_id']) && isset($_REQUEST['sign'])) {
+                if (!$this->_checkAuthorizedApp()) {
+                    $this->_output();
+                    exit();
+                }
+            } elseif (isset($_REQUEST['token']) && (in_array($_REQUEST['token'], [
                     "aedadf3e3795b933db2883bd02f31e1d", ])) ) {
                 return;
             } else {
-	            if(!$this->_checkUser()) {
-	                $currentUrl = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; //线上是https, 获取当前页面的地址
-	                if( (isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) == "xmlhttprequest")
-	                    || (isset($_SERVER["HTTP_ACCEPT"]) && strstr($_SERVER["HTTP_ACCEPT"], 'application/json')) ) {
-	                        $this->_output();
-	                        exit();
-	                    }else{
-	                        // 页面请求
-	                        $redirect = $this->user->getLoginUrl() . '&jumpto='.urlencode($currentUrl);
-	                        header("location: " . $redirect);
-	                        exit();
-	                    };
-	            }
-	            // 目前还未按照接口设置权限，所以暂时注释掉
-	           /*
-	            if(!$this->_validateURI()){
-	                $this->_output();
-	                exit();
-	            }*/
+                if(!$this->_checkUser()) {
+                    $currentUrl = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; //线上是https, 获取当前页面的地址
+                    if( (isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) == "xmlhttprequest")
+                        || (isset($_SERVER["HTTP_ACCEPT"]) && strstr($_SERVER["HTTP_ACCEPT"], 'application/json')) ) {
+                            $this->_output();
+                            exit();
+                        }else{
+                            // 页面请求
+                            $redirect = $this->user->getLoginUrl() . '&jumpto='.urlencode($currentUrl);
+                            header("location: " . $redirect);
+                            exit();
+                        };
+                }
+                // 目前还未按照接口设置权限，所以暂时注释掉
+               /*
+                if(!$this->_validateURI()){
+                    $this->_output();
+                    exit();
+                }*/
 
-	            if(isset($_REQUEST['city_id']) && !$this->_validateCity($_REQUEST['city_id'])){
-	                $this->_output();
-	                exit();
-	            }
-	        }
-		}
+                if(isset($_REQUEST['city_id']) && !$this->_validateCity($_REQUEST['city_id'])){
+                    $this->_output();
+                    exit();
+                }
+            }
+        }
 
         $this->load->config('nconf');
         $back_timing_roll = $this->config->item('back_timing_roll');
         if (in_array($this->username, $back_timing_roll, true)) {
             $this->timingType = 2;
         }
-	}
+    }
 
-	public function response($data, $errno = 0, $errmsg = '') {
-		$this->output_data = $data;
-		$this->errno = $errno;
-		$this->errmsg = $errmsg;
-		$this->output->set_content_type('application/json');
-	}
+    public function response($data, $errno = 0, $errmsg = '') {
+        $this->output_data = $data;
+        $this->errno = $errno;
+        $this->errmsg = $errmsg;
+        $this->output->set_content_type('application/json');
+    }
 
-	public function _output(){
-		if($this->errno >0 && empty($this->errmsg)){
-			$errmsgMap = $this->config->item('errmsg');
-			$this->errmsg = $errmsgMap[$this->errno];
-		}
-		if(!empty($this->templates)){
-			foreach ($this->templates as $t){
-				echo $this->load->view($t, array(), true);
-			}
-		} else {
-			$output = array(
-				'errno' => $this->errno,
-				'errmsg' => $this->errmsg,
-				'data' => $this->output_data
-			);
-			echo json_encode($output);
-		}
-	}
+    public function _output(){
+        if($this->errno >0 && empty($this->errmsg)){
+            $errmsgMap = $this->config->item('errmsg');
+            $this->errmsg = $errmsgMap[$this->errno];
+        }
+        if(!empty($this->templates)){
+            foreach ($this->templates as $t){
+                echo $this->load->view($t, array(), true);
+            }
+        } else {
+            $output = array(
+                'errno' => $this->errno,
+                'errmsg' => $this->errmsg,
+                'data' => $this->output_data
+            );
+            echo json_encode($output);
+        }
+    }
 
-	private function _checkAuthorizedApp() {
-		if($this->is_check_login == 0){
-			return true;
-		}
+    private function _checkAuthorizedApp() {
+        if($this->is_check_login == 0){
+            return true;
+        }
         // 获取所有的参数
         $params = $this->input->post();
         unset($params['sign']);
@@ -142,9 +142,9 @@ class MY_Controller extends CI_Controller {
     }
 
     private function _checkUser(){
-    	if($this->is_check_login == 0){
-			return true;
-		}
+        if($this->is_check_login == 0){
+            return true;
+        }
         $ret = $this->user->isUserLogin();
         if(!$ret) {
             $this->errno = ERR_AUTH_LOGIN;
@@ -156,9 +156,9 @@ class MY_Controller extends CI_Controller {
     }
 
     private function _validateURI(){
-    	if($this->is_check_login == 0){
-			return true;
-		}
+        if($this->is_check_login == 0){
+            return true;
+        }
         $ret = $this->user->isAuthorizedUri($this->routerUri);
         if (!$ret) {
             $this->errno = ERR_AUTH_URI;
@@ -168,9 +168,9 @@ class MY_Controller extends CI_Controller {
     }
 
     private function _validateCity($area) {
-    	if($this->is_check_login == 0){
-			return true;
-		}
+        if($this->is_check_login == 0){
+            return true;
+        }
         $ret = $this->user->getAuthorizedCityid();
         //$ret = $this->user->getCityAuth();
         if(empty($ret)){
