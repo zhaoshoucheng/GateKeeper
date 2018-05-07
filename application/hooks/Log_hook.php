@@ -43,9 +43,7 @@ function get_logid()
 }
 
 
-/**
- * 记录请求log,至少包括time url post logid
- */
+/*
 function log_request()
 {
     $post_arr = array();
@@ -124,4 +122,4 @@ function log_finish($input)
             )
     );
 }
-?>
+*/

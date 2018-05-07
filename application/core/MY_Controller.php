@@ -22,7 +22,7 @@ class MY_Controller extends CI_Controller {
         date_default_timezone_set('Asia/Shanghai');
         $host = $_SERVER['HTTP_HOST'];
 
-        if ( $host != '100.90.164.31:8088' && $host != 'www.itstool.com') {
+        if ( $host != '100.90.164.31:8088' && $host != 'www.itstool.com' && $host != '100.90.164.31:8089') {
             $this->is_check_login = 1;
 
             $this->load->model('user/user', 'user');
