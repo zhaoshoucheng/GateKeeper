@@ -12,6 +12,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 
+/*
 $hook['pre_system'][] = array(
     'function' => 'init_logid',
     'filename' => 'Log_hook.php',
@@ -22,3 +23,4 @@ $hook['pre_system'][] = array(
     'filename' => 'Log_hook.php',
     'filepath' => 'hooks'
 );
+*/
