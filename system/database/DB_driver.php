@@ -650,8 +650,6 @@ abstract class CI_DB_driver {
 		// Start the Query Timer
 		$time_start = microtime(TRUE);
 
-        com_log_strace('_com_mysql_success', array('host'=>$this->hostname, 'port'=>$this->port, "oper_type"=>"query", 'sql'=>$sql));
-
 		// Run the Query
 		if (FALSE === ($this->result_id = $this->simple_query($sql)))
 		{
@@ -705,7 +703,7 @@ abstract class CI_DB_driver {
 			$this->query_times[] = $time_end - $time_start;
 		}
 
-        com_log_strace('_com_mysql_success', array('host'=>$this->hostname, 'port'=>$this->port, "oper_type"=>"query", 'sql'=>$sql, 'query_times' => json_encode($this->query_times)));
+        com_log_strace('_com_mysql_success', array('host'=>$this->hostname, 'port'=>$this->port, "oper_type"=>"query", 'sql'=>json_encode($sql), 'proc_time' => ($time_end - $time_start)));
 
 		// Increment the query counter
 		$this->query_count++;
