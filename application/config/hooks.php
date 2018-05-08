@@ -12,15 +12,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 
-/*
+
 $hook['pre_system'][] = array(
-    'function' => 'init_logid',
-    'filename' => 'Log_hook.php',
-    'filepath' => 'hooks'
+    'function' => 'gen_logid',
+    'filename' => 'log_helper.php',
+    'filepath' => 'helpers'
 );
+
+$hook['pre_system'][] = array(
+    'function' => 'gen_traceid',
+    'filename' => 'log_helper.php',
+    'filepath' => 'helpers'
+);
+
 $hook['pre_system'][] = array(
     'function' => 'log_request',
-    'filename' => 'Log_hook.php',
-    'filepath' => 'hooks'
+    'filename' => 'log_helper.php',
+    'filepath' => 'helpers'
 );
-*/
