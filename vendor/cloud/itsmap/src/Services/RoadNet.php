@@ -342,7 +342,7 @@ class RoadNet
     */
     public function areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, $versions) {  
         ini_set('memory_limit', '2048M');
-        set_time_limit(0);   
+        set_time_limit(0);
         $areaFlowVersionReq = array();
         foreach ($versions as $version) {
             $junction = new Junction();

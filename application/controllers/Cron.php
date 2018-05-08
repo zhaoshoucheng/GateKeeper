@@ -50,8 +50,9 @@ class Cron extends CI_Controller {
 					$end_time = $task['end_time'];
 					$user = $task['user'];
 					$timingType = '1';
-					if (in_array($user, array('unknown', 'zhuyewei', 'liuminjun', 'zhaoyuezhaoyue', 'tianshanshan'))) {
-						$timingType = '2';
+					$back_timing_roll = $this->config->item('back_timing_roll');
+					if (in_array($user, $back_timing_roll)) {
+					    $timingType = '2';
 					}
 					$dateVersion = $task['dateVersion'];
 					$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
