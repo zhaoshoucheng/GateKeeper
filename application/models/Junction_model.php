@@ -779,6 +779,7 @@ class Junction_model extends CI_Model
             $result_data['dataList'] = array_values($result_data['dataList']);
         }
         if ($count >= 1) {
+            $diagnoseKeyConf = $this->config->item('diagnose_key');
             $result_data['junctionTotal'] = $count;
 
             // 计算地图中心坐标
@@ -789,9 +790,12 @@ class Junction_model extends CI_Model
                 foreach ($data['count'] as $k=>$v) {
                     // 此问题的路口个数
                     $result_data['count'][$k]['num'] = $v;
+                    // 问题中文名称
+                    $result_data['count'][$k]['name'] = $diagnoseKeyConf[$k]['name'];
                     // 此问题的路口所占百分比
-                    $percent = ($v / $count) * 100;
+                    $percent = round(($v / $count) * 100, 2);
                     $result_data['count'][$k]['percent'] = $percent . '%';
+                    // 对应不占百分比
                     $result_data['count'][$k]['other'] = (100 - $percent) . '%';
                 }
             }
