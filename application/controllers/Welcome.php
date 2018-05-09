@@ -54,8 +54,15 @@ class Welcome extends CI_Controller {
         */
 
         // thrift
+        /*
         $flowService = new Didi\Cloud\ItsMap\Flow();
         $response = $flowService->allByJunctionWithLinkAttr('2017030116_103472', '2017030116');
+        */
+
+        // redis
+        $this->load->helper('redis');
+        $redis = RedisMgr::getInstance('default');
+        $val = $redis->get("test.key");
 
         echo json_encode("ok");
     }
