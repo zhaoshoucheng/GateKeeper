@@ -267,7 +267,7 @@ class Junction extends MY_Controller
     */
     public function getQuestionTrend()
     {
-        $params = $this->input->post('task_id');
+        $params = $this->input->post();
         if ($params['task_id'] < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The task_id is error.';
