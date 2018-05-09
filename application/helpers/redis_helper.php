@@ -21,6 +21,7 @@ if (!class_exists('RedisEx')) {
         public function connect()
         {
             try {
+                $this->redisInstance = new Redis();
                 if (isset($this->config['socket'])) {
                     $this->redisInstance->connect($this->config['socket']);
                 } else {
