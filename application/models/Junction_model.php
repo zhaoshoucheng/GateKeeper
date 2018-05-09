@@ -176,9 +176,6 @@ class Junction_model extends CI_Model
                     $temp_diagnose_data[$v['junction_id']]['info']['quota']['avg_speed']['unit']
                         = $junctionQuotaKeyConf['avg_speed']['unit'];
 
-                    // hover:路口问题
-                    $temp_diagnose_data[$v['junction_id']]['info']['question'] = ['无'];
-
                     $temp_diagnose_data[$v['junction_id']]['questionList'][$val] = round($v[$val], 5);
                     $is_diagnose = 0;
                     if ($this->compare(
@@ -190,6 +187,7 @@ class Junction_model extends CI_Model
                         $is_diagnose = 1;
                         // 统计有问题的路口数
                         $temp_diagnose_data['count'][$val] += 1;
+                        // hover:路口存在的问题名称
                         $temp_diagnose_data[$v['junction_id']]['info']['question'][$val]
                             = $diagnose_key_conf[$val]['name'];
                     }
@@ -804,10 +802,19 @@ class Junction_model extends CI_Model
                 $result_data['dataList'][$k]['lng'] = $v['lng'];
                 $result_data['dataList'][$k]['lat'] = $v['lat'];
                 $result_data['dataList'][$k][$merge_key] = $data[$v['logic_junction_id']]['questionList'];
-                $data[$v['logic_junction_id']]['info']['quota']
-                    = array_values($data[$v['logic_junction_id']]['info']['quota']);
-                $data[$v['logic_junction_id']]['info']['question']
-                    = array_values($data[$v['logic_junction_id']]['info']['question']);
+                if (isset($data[$v['logic_junction_id']]['info']['quota'])) {
+                    $data[$v['logic_junction_id']]['info']['quota']
+                        = array_values($data[$v['logic_junction_id']]['info']['quota']);
+                } else {
+                    $data[$v['logic_junction_id']]['info']['quota'] = [];
+                }
+                if (isset($data[$v['logic_junction_id']]['info']['question'])) {
+                    $data[$v['logic_junction_id']]['info']['question']
+                        = array_values($data[$v['logic_junction_id']]['info']['question']);
+                } else {
+                    $data[$v['logic_junction_id']]['info']['question'] = ['无'];
+                }
+
                 $result_data['dataList'][$k]['info'] = $data[$v['logic_junction_id']]['info'];
             }
         }
