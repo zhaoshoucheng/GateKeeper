@@ -6,6 +6,7 @@ if (!class_exists('RedisEx')) {
     {
         private $config;
         private $connected_server;
+        private $redisInstance;
 
         public function setConfig($config)
         {
@@ -21,73 +22,26 @@ if (!class_exists('RedisEx')) {
         {
             try {
                 if (isset($this->config['socket'])) {
-                    $success = parent::connect($this->config['socket']);
+                    $this->redisInstance = Redis::connect($this->config['socket']);
                 } else {
-                    $success = parent::connect($this->config['server']['host'], $this->config['server']['port'], $this->config['timeout']);
+                    $this->redisInstance = Redis::connect($this->config['server']['host'], $this->config['server']['port'], $this->config['timeout']);
                 }
                 $this->connected_server = "{$this->config['server']['host']}|{$this->config['server']['port']}";
-                if (!$success) {
-                    //Connection timed out
-                    return false;
-                }
+
             } catch (RedisException $e) {
                 return false;
             }
 
-            if (isset($config['password']) && (false === parent::auth($config['password']))) {
+            if (isset($config['password']) && (false === $this->redisInstance->auth($config['password']))) {
                 return false;
             }
             return true;
         }
 
-        /*
-        public function setEx($key, $value, $ttl = 60)
-        {
-            if ($ttl < 0) {
-                $ttl = 60;
-            }
-            try {
-                $ret = parent::setEx($key, $ttl, $value);
-            }catch (RedisException $ex){
-                $ret = false;
-            }
-            return $ret;
-        }
-
-        public function set($key, $value)
-        {
-            try {
-                $ret = parent::set($key, $value);
-            }catch (RedisException $ex){
-                $ret = false;
-            }
-            return $ret;
-        }
-
-        public function get($key)
-        {
-            try {
-                $ret = parent::get($key);
-            }catch (RedisException $ex){
-                $ret = false;
-            }
-            return $ret;
-        }
-
-        public function getMultiple($keyArr) {
-            try {
-                $ret = parent::getMultiple($keyArr);
-            }catch (RedisException $ex){
-                $ret = false;
-            }
-            return $ret;
-        }
-        */
-
         public function isAvailable()
         {
             try {
-                $res = $this->ping();
+                $res = $this->redisInstance->ping();
                 if ($res == '+PONG') {
                     return true;
                 } else {
@@ -100,14 +54,9 @@ if (!class_exists('RedisEx')) {
 
         public function __call($name, $arguments)
         {
-            // TODO: Implement __call() method.
-            if(!method_exists(get_parent_class(), $name)){
-                return false;
-            }
-
             $start_time = microtime(TRUE);
             try {
-                $ret = call_user_func_array(array(get_parent_class(),$name), $arguments);
+                $ret = call_user_func_array(array($this->redisInstance, $name), $arguments);
 
                 $proc_time = microtime(TRUE) - $start_time;
                 com_log_strace('_com_redis_success', array("host"=>$this->config['server']['host'], "port"=>$this->config['server']['port'], "method"=>$name, "args"=>json_encode($arguments), "result"=>$ret, 'proc_time'=>$proc_time));
