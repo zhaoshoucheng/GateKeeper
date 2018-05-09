@@ -330,32 +330,28 @@ class Junction_model extends CI_Model
         if (empty($data)) return [];
 
         $diagnoseKeyConf = $this->config->item('diagnose_key');
-        $selectQuotaKey = [];
-        foreach ($diagnoseKeyConf as $k=>$v) {
-            $selectQuotaKey[] = $k;
-        }
-
-        $selectstr = empty($this->selectColumns($selectQuotaKey)) ? '' : ',' . $this->selectColumns($selectQuotaKey);
 
         $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
-        $diagnoseWhere = '';
+
+        // 获取此任务路口总数
+        $junctinTotal = $this->db->select('count(id)')
+                                    ->from($this->tb)
+                                    ->wehre($where)
+                                    ->get();
+        echo "junctionTotal = ";var_dump($junctinTotal);
+
+        // 循环获取每种问题各时间点路口总数
         foreach ($diagnoseKeyConf as $k=>$v) {
-            $diagnoseWhere .= empty($diagnoseWhere)
-                            ? $k . $v['junction_threshold_formula'] . $v['junction_threshold']
-                            : ' or ' . $k . $v['junction_threshold_formula'] . $v['junction_threshold'];
+            $where .= ' and ' . $k . $v['junction_threshold_formula'] . $v['junction_threshold'];
+            $tempRes[$k] = $this->db->select('count(id), time_point')
+                                    ->from($this->tb)
+                                    ->where($where)
+                                    ->get()
+                                    ->result_array();
+            echo "<hr>sql = " . $this->db->last_query() . "<hr>";
         }
-        $where .= " and ({$diagnoseWhere})";
 
-        $res = $this->db->select("junction_id, time_point {$selectstr}")
-                        ->from($this->tb)
-                        ->where($where)
-                        ->get();
-        if (!$res) return [];
-
-        $res = $res->result_array();
-
-        echo "<hr>sql = " . $this->db->last_query() . "<hr>";
-        echo "<pre>";print_r($res);exit;
+        echo "<pre>";print_r($tempRes);exit;
 
     }
 
