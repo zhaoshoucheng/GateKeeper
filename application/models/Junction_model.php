@@ -321,6 +321,37 @@ class Junction_model extends CI_Model
     }
 
     /**
+    * 获取问题趋势
+    * @param $data['task_id']  interger Y 任务ID
+    * @return array
+    */
+    public function getQuestionTrend($data)
+    {
+        if (empty($data)) return [];
+
+        $diagnoseKeyConf = $this->config->item('diagnose_key');
+        $selectQuotaKey = [];
+        foreach ($diagnoseKeyConf as $k=>$v) {
+            $selectQuotaKey[] = $k;
+        }
+
+        $selectstr = empty($this->selectColumns($selectQuotaKey)) ? '' : ',' . $this->selectColumns($selectQuotaKey);
+
+        $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
+
+        $res = $this->db->select("junction_id, time_point {$selectstr}")
+                        ->from($this->tb)
+                        ->where($where)
+                        ->get();
+        if (!$res) return [];
+
+        $res = $res->result_array();
+
+        echo "<pre>";print_r($res);exit;
+
+    }
+
+    /**
     * 诊断-诊断问题排序列表
     * @param data['task_id']      interger 任务ID
     * @param data['time_point']   string   时间点
