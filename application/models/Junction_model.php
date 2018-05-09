@@ -779,19 +779,21 @@ class Junction_model extends CI_Model
             $result_data['dataList'] = array_values($result_data['dataList']);
         }
         if ($count >= 1) {
+            $result_data['junctionTotal'] = $count;
+
+            // 计算地图中心坐标
             $center_lng = round($count_lng / $count, 6);
             $center_lat = round($count_lat / $count, 6);
 
             if (isset($data['count'])) {
                 foreach ($data['count'] as $k=>$v) {
-                    $result_data['count']['junctionTotal'] = $count;
-                    // 有问题的路口个数
+                    // 此问题的路口个数
                     $result_data['count'][$k]['num'] = $v;
-                    // 有问题的路口百分比
-                    $result_data['count'][$k]['percent'] = ($v / $count) * 100 . '%';
+                    // 此问题的路口所占百分比
+                    $percent = ($v / $count) * 100;
+                    $result_data['count'][$k]['percent'] = $percent . '%';
+                    $result_data['count'][$k]['other'] = (100 - $percent) . '%';
                 }
-
-                $result_data['count'] = $data['count'];
             }
         }
 
