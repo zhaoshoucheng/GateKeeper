@@ -804,6 +804,10 @@ class Junction_model extends CI_Model
                 $result_data['dataList'][$k]['lng'] = $v['lng'];
                 $result_data['dataList'][$k]['lat'] = $v['lat'];
                 $result_data['dataList'][$k][$merge_key] = $data[$v['logic_junction_id']]['questionList'];
+                $data[$v['logic_junction_id']]['info']['quota']
+                    = array_values($data[$v['logic_junction_id']]['info']['quota']);
+                $data[$v['logic_junction_id']]['info']['question']
+                    = array_values($data[$v['logic_junction_id']]['info']['question']);
                 $result_data['dataList'][$k]['info'] = $data[$v['logic_junction_id']]['info'];
             }
         }
