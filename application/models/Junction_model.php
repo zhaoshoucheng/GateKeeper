@@ -804,4 +804,17 @@ class Junction_model extends CI_Model
         ];
         return $compare[$symbol]($val1, $val2);
     }
+
+    /**
+    * 获取任务创建用户 暂时这么做
+    */
+    public function getTaskUser($taskId)
+    {
+        $this->db->select('user');
+        $this->db->from('task_result');
+        $this->db->where('id', $taskId);
+        $result = $this->db->get()->row_array();
+
+        return $result['user'];
+    }
 }
