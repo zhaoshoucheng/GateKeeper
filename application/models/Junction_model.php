@@ -160,7 +160,7 @@ class Junction_model extends CI_Model
                     // 统计平均速度总数
                     $countAvgSpeed += $v['avg_speed'];
 
-                    // 路口平均延误
+                    // hover:路口平均延误
                     $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['value']
                         = round($v['stop_delay'], 5);
                     $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['name']
@@ -168,8 +168,18 @@ class Junction_model extends CI_Model
                     $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['unit']
                         = $junctionQuotaKeyConf['stop_delay']['unit'];
 
+                    // hover:路口平均速度
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['avg_speed']['value']
+                        = round($v['avg_speed'], 5);
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['avg_speed']['name']
+                        = $junctionQuotaKeyConf['avg_speed']['name'];
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['avg_speed']['unit']
+                        = $junctionQuotaKeyConf['avg_speed']['unit'];
 
-                    $temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
+                    // hover:路口问题
+                    $temp_diagnose_data[$v['junction_id']]['info']['question'] = ['无'];
+
+                    $temp_diagnose_data[$v['junction_id']]['questionList'][$val] = round($v[$val], 5);
                     $is_diagnose = 0;
                     if ($this->compare(
                                         $v[$val],
@@ -184,7 +194,7 @@ class Junction_model extends CI_Model
                             = $diagnose_key_conf[$val]['name'];
                     }
 
-                    $temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = $is_diagnose;
+                    $temp_diagnose_data[$v['junction_id']]['questionList'][$val . '_diagnose'] = $is_diagnose;
                 }
             }
             $temp_diagnose_data['quotaCount']['stop_delay'] = $countStopDelay;
@@ -793,7 +803,8 @@ class Junction_model extends CI_Model
                 $result_data['dataList'][$k]['name'] = $v['name'];
                 $result_data['dataList'][$k]['lng'] = $v['lng'];
                 $result_data['dataList'][$k]['lat'] = $v['lat'];
-                $result_data['dataList'][$k][$merge_key] = $data[$v['logic_junction_id']];
+                $result_data['dataList'][$k][$merge_key] = $data[$v['logic_junction_id']]['questionList'];
+                $result_data['dataList'][$k]['info'] = $data[$v['logic_junction_id']]['info'];
             }
         }
 
