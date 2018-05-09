@@ -793,7 +793,7 @@ class Junction_model extends CI_Model
             if (isset($data['quotaCount'])) {
                 foreach ($data['quotaCount'] as $k=>$v) {
                     $result_data['quotaCount'][$k]['name'] = $junctionQuotaKeyConf[$v]['name'];
-                    $result_data['quotaCount'][$k]['value'] = $v;
+                    $result_data['quotaCount'][$k]['value'] = round(($v / $count), 2);
                     $result_data['quotaCount'][$k]['unit'] = $junctionQuotaKeyConf[$v]['unit'];
                 }
             }
@@ -820,6 +820,8 @@ class Junction_model extends CI_Model
         if (isset($result_data['quotaCount'])) {
             $result_data['quotaCount'] = array_values($result_data['quotaCount']);
         }
+
+        $result_data['junctionTotal'] = $count;
 
         /*$center_lat = 36.663083;
         $center_lng = 117.033513;*/
