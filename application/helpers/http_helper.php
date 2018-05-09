@@ -43,7 +43,7 @@ if (!function_exists('httpGET')) {
         if($errno = curl_errno($ch)){
             $errmsg = curl_error($ch);
 
-            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$spanId, "url"=>$originUrl, "args"=>$query));
+            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$spanId, "url"=>$originUrl, "args"=>http_build_query($query)));
 
             curl_close($ch);
             return false;
@@ -51,11 +51,11 @@ if (!function_exists('httpGET')) {
         $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         if($responseCode != 200){
-            com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$spanId, "url"=>$originUrl, "args"=>$query));
+            com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$spanId, "url"=>$originUrl, "args"=>http_build_query($query)));
             return false;
         }
 
-        com_log_notice('_com_http_success', ["cspanid"=>$spanId, "url"=>$url, "args"=>$query, "response"=>$ret, "errno"=>$responseCode, 'proc_time'=> $totalTime]);
+        com_log_notice('_com_http_success', ["cspanid"=>$spanId, "url"=>$url, "args"=>http_build_query($query), "response"=>$ret, "errno"=>$responseCode, 'proc_time'=> $totalTime]);
         return $ret;
     }
 }
