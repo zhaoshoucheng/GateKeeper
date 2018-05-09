@@ -33,7 +33,7 @@ class Welcome extends CI_Controller {
 	}
 
 
-    public function straceDemo()
+    public function demo()
     {
         // mysql
         /*
@@ -60,9 +60,15 @@ class Welcome extends CI_Controller {
         */
 
         // redis
+        /*
         $this->load->helper('redis');
         $redis = RedisMgr::getInstance('default');
         $val = $redis->get("test.key");
+        */
+
+        // common
+        com_log_notice('_itstool_welcome_demo_restart', ['a' => 1, 'b' => 2]);
+        com_log_warning('_itstool_welcome_demo_id_error', ['id' => 1]);
 
         echo json_encode("ok");
     }
