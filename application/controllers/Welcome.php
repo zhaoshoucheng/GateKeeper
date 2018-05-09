@@ -1,6 +1,8 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Didi\Cloud\ItsMap\City as CityService;
+
 class Welcome extends CI_Controller {
 
     public function __construct(){
@@ -36,8 +38,17 @@ class Welcome extends CI_Controller {
         // mysql
         $aRet = $this->task_model->getTask("demo", 1, 1, 1);
 
+        // http
         $ret = httpPOST('http://www.didichuxing.com', ['a' => 1]);
         $ret = httpGET('http://www.didichuxing.com', ['b' => 2]);
+
+        // laravel orm
+        \Illuminate\Support\Facades\DB::connection()->enableQueryLog();
+
+        $cityService = new CityService();
+        $response = $cityService->all();
+        
+        $queries = \Illuminate\Support\Facades\DB::getQueryLog();
 
         $this->output_data = [
             'cycle_task' => $cycle_task,

@@ -110,7 +110,7 @@ if (!function_exists('httpPOST')) {
             return false;
         }
 
-        com_log_notice('_com_http_success', ["cspanid"=>$spanId, "url"=>$url, "args"=>$data, "response"=>$ret, "errno"=>$responseCode, 'proc_time'=> $totalTime]);
+        com_log_notice('_com_http_success', ["cspanid"=>$spanId, "url"=>$url, "args"=>$data, "errno"=>$responseCode, 'proc_time'=> $totalTime]);
         return $ret;
     }
 }
