@@ -3,7 +3,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Welcome extends CI_Controller {
 
-	/**
+    public function __construct(){
+        parent::__construct();
+        $this->load->helper('http');
+        $this->load->model('task_model');
+    }
+
+
+    /**
 	 * Index Page for this controller.
 	 *
 	 * Maps to the following URL
@@ -22,4 +29,18 @@ class Welcome extends CI_Controller {
 	{
 		$this->load->view('welcome_message');
 	}
+
+
+    public function straceDemo()
+    {
+        // mysql
+        $aRet = $this->task_model->getTask("demo", 1, 1, 1);
+
+        $ret = httpPOST('http://www.didichuxing.com', []);
+
+        $this->output_data = [
+            'cycle_task' => $cycle_task,
+            'custom_task' => $custom_task,
+        ];
+    }
 }
