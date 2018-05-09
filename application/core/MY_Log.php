@@ -251,8 +251,8 @@ class MY_Log extends CI_Log {
                 $str .= sprintf("traceid=%s||pspanid=%s||spanid=%s||logid=%s||", $strTraceid, $strPSpanid, $strSpanid, $strLogid);
             }
 
-            $strOrderid = isset($this->basic_info['order_id']) ? $this->basic_info['order_id'] : '';
-            $strSOrderid = isset($this->basic_info['s_order_id']) ? $this->basic_info['s_order_id'] : '';
+            $strOrderId = isset($this->basic_info['order_id']) ? $this->basic_info['order_id'] : '';
+            $strSOrderId = isset($this->basic_info['s_order_id']) ? $this->basic_info['s_order_id'] : '';
             $strPassengerId = isset($this->basic_info['passenger_id']) ? $this->basic_info['passenger_id'] : '';
             $strPassengerPhone = isset($this->basic_info['passenger_phone']) ? $this->basic_info['passenger_phone'] : '';
             $strDriverId = isset($this->basic_info['driver_id']) ? $this->basic_info['driver_id'] : '';

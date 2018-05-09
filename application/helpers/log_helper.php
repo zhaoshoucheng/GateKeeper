@@ -163,6 +163,13 @@ if( ! function_exists('t_gen_random_id'))
     }
 }
 
+if (! function_exists('gen_span_id') ) {
+    function gen_span_id()
+    {
+        return t_gen_random_id();
+    }
+}
+
 /**
  * int to hex string
  */
