@@ -347,6 +347,7 @@ class Junction_model extends CI_Model
 
         $res = $res->result_array();
 
+        echo "<hr>sql = " . $this->db->last_query() . "<hr>";
         echo "<pre>";print_r($res);exit;
 
     }
