@@ -40,6 +40,7 @@ if (!class_exists('RedisEx')) {
             return true;
         }
 
+        /*
         public function setEx($key, $value, $ttl = 60)
         {
             if ($ttl < 0) {
@@ -81,6 +82,7 @@ if (!class_exists('RedisEx')) {
             }
             return $ret;
         }
+        */
 
         public function isAvailable()
         {
@@ -102,10 +104,18 @@ if (!class_exists('RedisEx')) {
             if(!method_exists(get_parent_class(), $name)){
                 return false;
             }
+
+            $start_time = microtime(TRUE);
             try {
                 $ret = call_user_func_array(array(get_parent_class(),$name), $arguments);
+
+                $proc_time = microtime(TRUE) - $start_time;
+                com_log_strace('_com_redis_success', array("host"=>$this->config['server']['host'], "port"=>$this->config['server']['port'], "method"=>$name, "args"=>json_encode($arguments), "result"=>$ret, 'proc_time'=>$proc_time));
+
             }catch (RedisException $ex){
                 $ret = false;
+
+                com_log_warning('_com_redis_failure', '', 'Redis call_fail', array('method'=>$name, 'args'=>$arguments));
             }
             return $ret;
         }
