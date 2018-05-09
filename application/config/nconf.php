@@ -264,5 +264,6 @@ $config['back_timing_roll'] = [
 	'liuminjun',
 	'zhaoyuezhaoyue',
 	'tianshanshan',
-	'ningxiangbing'
+	'ningxiangbing',
+	'hanyuhan','umzhaoyan_i','yangjianhao','wangxingmin_i','larrymeiyu_i','mengyuan','wangzihao_i','liuminjun','zhengjianfeng','tianshanshan','wangshengguang',
 ];
