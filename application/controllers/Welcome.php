@@ -39,20 +39,14 @@ class Welcome extends CI_Controller {
         $aRet = $this->task_model->getTask("demo", 1, 1, 1);
 
         // http
-        $ret = httpPOST('http://www.didichuxing.com', ['a' => 1]);
-        $ret = httpGET('http://www.didichuxing.com', ['b' => 2]);
+        $ret = httpPOST('http://100.90.164.31:8089/signalpro/api/task/getList', ['a' => 1]);
+        $ret = httpGET('http://100.90.164.31:8089/signalpro/api/task/getList', ['b' => 2]);
 
-        // laravel orm
-        \Illuminate\Support\Facades\DB::connection()->enableQueryLog();
-
+        // eloquent orm
         $cityService = new CityService();
         $response = $cityService->all();
-        
-        $queries = \Illuminate\Support\Facades\DB::getQueryLog();
+        \Didi\Cloud\ItsMap\MapManager::queryLog();
 
-        $this->output_data = [
-            'cycle_task' => $cycle_task,
-            'custom_task' => $custom_task,
-        ];
+        echo json_encode("ok");
     }
 }

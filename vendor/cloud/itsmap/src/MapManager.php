@@ -19,7 +19,14 @@ class MapManager
             $capsule->addConnection($dbConnection);
             $capsule->bootEloquent();
             $capsule->setAsGlobal();
+            $capsule->getConnection()->enableQueryLog();
             self::$capsule = $capsule;
         }
+    }
+
+    public static function queryLog()
+    {
+        $connection = self::$capsule->getConnection();
+        $logs = $connection->getQueryLog();
     }
 }
