@@ -338,6 +338,9 @@ class Junction_model extends CI_Model
         $selectstr = empty($this->selectColumns($selectQuotaKey)) ? '' : ',' . $this->selectColumns($selectQuotaKey);
 
         $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
+        foreach ($diagnoseKeyConf as $k=>$v) {
+            $where .=  ' and ' . $k . $v['junction_threshold_formula'] . $v['junction_threshold'];
+        }
 
         $res = $this->db->select("junction_id, time_point {$selectstr}")
                         ->from($this->tb)
