@@ -36,7 +36,8 @@ class Welcome extends CI_Controller {
         // mysql
         $aRet = $this->task_model->getTask("demo", 1, 1, 1);
 
-        $ret = httpPOST('http://www.didichuxing.com', []);
+        $ret = httpPOST('http://www.didichuxing.com', ['a' => 1]);
+        $ret = httpGET('http://www.didichuxing.com', ['b' => 2]);
 
         $this->output_data = [
             'cycle_task' => $cycle_task,
