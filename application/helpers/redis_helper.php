@@ -2,7 +2,7 @@
 
 if (!class_exists('RedisEx')) {
     //这里面的方法会抛异常RedisException!!!需要上层自己捕获
-    class RedisEx extends Redis
+    class RedisEx
     {
         private $config;
         private $connected_server;
@@ -22,9 +22,9 @@ if (!class_exists('RedisEx')) {
         {
             try {
                 if (isset($this->config['socket'])) {
-                    $this->redisInstance = Redis::connect($this->config['socket']);
+                    $this->redisInstance->connect($this->config['socket']);
                 } else {
-                    $this->redisInstance = Redis::connect($this->config['server']['host'], $this->config['server']['port'], $this->config['timeout']);
+                    $this->redisInstance->connect($this->config['server']['host'], $this->config['server']['port'], $this->config['timeout']);
                 }
                 $this->connected_server = "{$this->config['server']['host']}|{$this->config['server']['port']}";
 
