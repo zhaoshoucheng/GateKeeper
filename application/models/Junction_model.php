@@ -147,6 +147,7 @@ class Junction_model extends CI_Model
         }
 
         $diagnose_key_conf = $this->config->item('diagnose_key');
+        $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
         $temp_diagnose_data = [];
         if (count($res) >= 1) {
             $countStopDelay = 0;
@@ -154,17 +155,33 @@ class Junction_model extends CI_Model
             foreach ($data['diagnose_key'] as $val) {
                 $temp_diagnose_data['count'][$val] = 0;
                 foreach ($res as $k=>$v) {
+                    // 统计停车(平均)延误总数
                     $countStopDelay += $v['stop_delay'];
+                    // 统计平均速度总数
                     $countAvgSpeed += $v['avg_speed'];
+
+                    // 路口平均延误
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['value']
+                        = round($v['stop_delay'], 5);
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['name']
+                        = $junctionQuotaKeyConf['stop_delay']['name'];
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['unit']
+                        = $junctionQuotaKeyConf['stop_delay']['unit'];
+
+
                     $temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
                     $is_diagnose = 0;
                     if ($this->compare(
                                         $v[$val],
                                         $diagnose_key_conf[$val]['junction_threshold'],
                                         $diagnose_key_conf[$val]['junction_threshold_formula']
-                                    )) {
+                                    )
+                    ) {
                         $is_diagnose = 1;
+                        // 统计有问题的路口数
                         $temp_diagnose_data['count'][$val] += 1;
+                        $temp_diagnose_data[$v['junction_id']]['info']['question'][$val]
+                            = $diagnose_key_conf[$val]['name'];
                     }
 
                     $temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = $is_diagnose;
@@ -792,9 +809,9 @@ class Junction_model extends CI_Model
 
             if (isset($data['quotaCount'])) {
                 foreach ($data['quotaCount'] as $k=>$v) {
-                    $result_data['quotaCount'][$k]['name'] = $junctionQuotaKeyConf[$v]['name'];
+                    $result_data['quotaCount'][$k]['name'] = $junctionQuotaKeyConf[$k]['name'];
                     $result_data['quotaCount'][$k]['value'] = round(($v / $count), 2);
-                    $result_data['quotaCount'][$k]['unit'] = $junctionQuotaKeyConf[$v]['unit'];
+                    $result_data['quotaCount'][$k]['unit'] = $junctionQuotaKeyConf[$k]['unit'];
                 }
             }
 
