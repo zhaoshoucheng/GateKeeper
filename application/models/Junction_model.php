@@ -149,9 +149,13 @@ class Junction_model extends CI_Model
         $diagnose_key_conf = $this->config->item('diagnose_key');
         $temp_diagnose_data = [];
         if (count($res) >= 1) {
+            $countStopDelay = 0;
+            $countAvgSpeed = 0;
             foreach ($data['diagnose_key'] as $val) {
                 $temp_diagnose_data['count'][$val] = 0;
                 foreach ($res as $k=>$v) {
+                    $countStopDelay += $v['stop_delay'];
+                    $countAvgSpeed += $v['avg_speed'];
                     $temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
                     $is_diagnose = 0;
                     if ($this->compare(
@@ -166,6 +170,8 @@ class Junction_model extends CI_Model
                     $temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = $is_diagnose;
                 }
             }
+            $temp_diagnose_data['quotaCount']['stop_delay'] = $countStopDelay;
+            $temp_diagnose_data['quotaCount']['avg_speed'] = $countAvgSpeed;
         }
 
         $result_data = $this->mergeAllJunctions($all_city_junctions, $temp_diagnose_data, 'diagnose_detail');
@@ -188,9 +194,11 @@ class Junction_model extends CI_Model
         $sql_data = array_map(function($diagnose_key) use ($data) {
             if ($diagnose_key == 'saturation_index') {
                 // 空放问题 因为空放问题是取的最小的
-                $selectstr = "id, junction_id, min({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
+                $selectstr = "id, junction_id, stop_delay, avg_speed,";
+                $selectstr .= " min({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
             } else {
-                $selectstr = "id, junction_id, max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
+                $selectstr = "id, junction_id, stop_delay, avg_speed,";
+                $selectstr .= " max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
             }
 
             $where = 'task_id = ' . $data['task_id'] . ' and type = 1';
@@ -254,7 +262,7 @@ class Junction_model extends CI_Model
         }
 
         $selectstr = empty($this->selectColumns($select_quota_key)) ? '' : ',' . $this->selectColumns($select_quota_key);
-        $select = 'id, junction_id' . $selectstr;
+        $select = 'id, junction_id, stop_delay, avg_speed' . $selectstr;
 
         $where = "task_id = " . $data['task_id'] . " and type = 0 and time_point = '{$data['time_point']}'";
 
@@ -780,7 +788,15 @@ class Junction_model extends CI_Model
         }
         if ($count >= 1) {
             $diagnoseKeyConf = $this->config->item('diagnose_key');
-            $result_data['junctionTotal'] = $count;
+            $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
+
+            if (isset($data['quotaCount'])) {
+                foreach ($data['quotaCount'] as $k=>$v) {
+                    $result_data['quotaCount'][$k]['name'] = $junctionQuotaKeyConf[$v]['name'];
+                    $result_data['quotaCount'][$k]['value'] = round(($v / $count), 2);
+                    $result_data['quotaCount'][$k]['unit'] = $junctionQuotaKeyConf[$v]['unit'];
+                }
+            }
 
             // 计算地图中心坐标
             $center_lng = round($count_lng / $count, 6);
@@ -800,6 +816,12 @@ class Junction_model extends CI_Model
                 }
             }
         }
+
+        if (isset($result_data['quotaCount'])) {
+            $result_data['quotaCount'] = array_values($result_data['quotaCount']);
+        }
+
+        $result_data['junctionTotal'] = $count;
 
         /*$center_lat = 36.663083;
         $center_lng = 117.033513;*/
