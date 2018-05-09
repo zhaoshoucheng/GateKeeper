@@ -759,9 +759,7 @@ class Junction_model extends CI_Model
         $result_data = [];
         $count_lng = 0;
         $count_lat = 0;
-        if (isset($data['count'])) {
-            $result_data['count'] = $data['count'];
-        }
+
         foreach ($all_data as $k=>$v) {
             if (isset($data[$v['logic_junction_id']])) {
                 $count_lng += $v['lng'];
@@ -780,10 +778,23 @@ class Junction_model extends CI_Model
             $count = count($result_data['dataList']);
             $result_data['dataList'] = array_values($result_data['dataList']);
         }
-        if($count >= 1){
+        if ($count >= 1) {
             $center_lng = round($count_lng / $count, 6);
             $center_lat = round($count_lat / $count, 6);
+
+            if (isset($data['count'])) {
+                foreach ($data['count'] as $k=>$v) {
+                    $result_data['count']['junctionTotal'] = $count;
+                    // 有问题的路口个数
+                    $result_data['count'][$k]['num'] = $v;
+                    // 有问题的路口百分比
+                    $result_data['count'][$k]['percent'] = ($v / $count) * 100 . '%';
+                }
+
+                $result_data['count'] = $data['count'];
+            }
         }
+
         /*$center_lat = 36.663083;
         $center_lng = 117.033513;*/
         $result_data['center']['lng'] = $center_lng;

@@ -67,10 +67,12 @@ class MY_Controller extends CI_Controller {
         // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时
         $this->load->config('nconf');
         $back_timing_roll = $this->config->item('back_timing_roll');
-        // 暂时先这么做
-        $taskUser = $this->junction_model->getTaskUser($this->input->get_post('task_id'));
 
-        if ($taskUser == $this->username && in_array($taskUser, $back_timing_roll, true)) {
+        $taskId = $this->input->get_post('task_id');
+        // 暂时先这么做
+        $taskUser = $this->junction_model->getTaskUser($taskId);
+
+        if (in_array($taskUser, $back_timing_roll, true)) {
             $this->timingType = 2;
         }
     }
