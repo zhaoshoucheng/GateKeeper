@@ -342,10 +342,10 @@ class Junction_model extends CI_Model
 
         // 循环获取每种问题各时间点路口总数
         foreach ($diagnoseKeyConf as $k=>$v) {
-            $where .= ' and ' . $k . $v['junction_threshold_formula'] . $v['junction_threshold'];
+            $nWhere = $where . ' and ' . $k . $v['junction_threshold_formula'] . $v['junction_threshold'];
             $tempRes[$k] = $this->db->select('count(id), time_point')
                                     ->from($this->tb)
-                                    ->where($where)
+                                    ->where($nWhere)
                                     ->get()
                                     ->result_array();
             echo "<hr>sql = " . $this->db->last_query() . "<hr>";
