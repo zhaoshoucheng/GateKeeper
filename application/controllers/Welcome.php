@@ -36,16 +36,26 @@ class Welcome extends CI_Controller {
     public function straceDemo()
     {
         // mysql
+        /*
         $aRet = $this->task_model->getTask("demo", 1, 1, 1);
+        */
 
         // http
-        $ret = httpPOST('http://100.90.164.31:8089/signalpro/api/task/getList', ['a' => 1]);
-        $ret = httpGET('http://100.90.164.31:8089/signalpro/api/task/getList', ['b' => 2]);
+        /*
+        $ret = httpPOST('http://100.90.164.31:8088/signalpro/api/task/getList', ['a' => 1]);
+        $ret = httpGET('http://100.90.164.31:8088/signalpro/api/task/getList', ['b' => 2]);
+        */
 
         // eloquent orm
+        /*
         $cityService = new CityService();
         $response = $cityService->all();
         \Didi\Cloud\ItsMap\MapManager::queryLog();
+        */
+
+        // thrift
+        $flowService = new Didi\Cloud\ItsMap\Flow();
+        $response = $flowService->allByJunctionWithLinkAttr('2017030116_103472', '2017030116');
 
         echo json_encode("ok");
     }
