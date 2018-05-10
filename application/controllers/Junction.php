@@ -278,7 +278,7 @@ class Junction extends MY_Controller
 
         $result = $this->junction_model->getQuestionTrend($params);
 
-        return $result;
+        return $this->response($result);
     }
 
     /**

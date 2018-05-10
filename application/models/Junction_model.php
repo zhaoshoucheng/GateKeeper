@@ -360,15 +360,17 @@ class Junction_model extends CI_Model
                                     ->result_array();
         }
 
+        $result = [];
         if (!empty($res)) {
-            foreach ($res as &$v) {
-                foreach ($v as &$vv) {
-                    $vv['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
+            foreach ($res as $k=>$v) {
+                foreach ($v as $kk=>$vv) {
+                    $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
+                    $result[$k]['list']['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
                 }
             }
         }
 
-        return $res;
+        return $result;
 
     }
 
