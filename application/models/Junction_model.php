@@ -342,7 +342,7 @@ class Junction_model extends CI_Model
 
         // 获取此任务路口总数
         $junctionTotal = 0;
-        $allJunction = $this->db->select('count(id) as count')
+        $allJunction = $this->db->select('count(DISTINCT junction_id) as count')
                                     ->from($this->tb)
                                     ->where($where)
                                     ->get()
