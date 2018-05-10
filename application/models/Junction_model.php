@@ -345,16 +345,21 @@ class Junction_model extends CI_Model
         // 循环获取每种问题各时间点路口总数
         foreach ($diagnoseKeyConf as $k=>$v) {
             $nWhere = $where . ' and ' . $k . $v['junction_threshold_formula'] . $v['junction_threshold'];
-            $tempRes[$k] = $this->db->select("count(id) as {$k}Count , time_point")
+            $Res[$k] = $this->db->select("count(id) as num , time_point as hour")
                                     ->from($this->tb)
                                     ->where($nWhere)
-                                    ->get()
                                     ->group_by('time_point')
+                                    ->get()
                                     ->result_array();
-            echo "<hr>sql = " . $this->db->last_query() . "<hr>";
         }
 
-        echo "<pre>";print_r($tempRes);exit;
+        if (!empty($Res)) {
+            foreach ($Res as $k=>&$v) {
+                $v['percent'] = round(($v['num'] / $junctionTotal), 2) . '%';
+            }
+        }
+
+        echo "<pre>";print_r($Res);exit;
 
     }
 
