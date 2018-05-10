@@ -196,15 +196,12 @@ class Track_model extends CI_Model
                 }
             }
             if(!empty($temp_x) && !empty($temp_y)){
-                asort($temp_x);
-                /*$result_data['info']['x']['min'] = current($temp_x);
-                $result_data['info']['x']['max'] = end($temp_x);*/
                 // 暂时写死X轴
                 $result_data['info']['x']['min'] = $new_offset - 1.5 * $timing['cycle'];
                 $result_data['info']['x']['max'] = $new_offset + 2.5 * $timing['cycle'];
-                asort($temp_y);
-                $result_data['info']['y']['min'] = current($temp_y);
-                $result_data['info']['y']['max'] = end($temp_y);
+                //asort($temp_y);
+                $result_data['info']['y']['min'] = min($temp_y);
+                $result_data['info']['y']['max'] = max($temp_y);
             }
         }
         // 组织信号灯区间
