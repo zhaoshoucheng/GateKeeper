@@ -334,19 +334,22 @@ class Junction_model extends CI_Model
         $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
 
         // 获取此任务路口总数
-        $junctinTotal = $this->db->select('count(id)')
+        $junctionTotal = 0;
+        $allJunction = $this->db->select('count(id) as count')
                                     ->from($this->tb)
-                                    ->wehre($where)
-                                    ->get();
-        echo "junctionTotal = ";var_dump($junctinTotal);
+                                    ->where($where)
+                                    ->get()
+                                    ->row_array();
+        $junctionTotal = $allJunction['count'];
 
         // 循环获取每种问题各时间点路口总数
         foreach ($diagnoseKeyConf as $k=>$v) {
             $nWhere = $where . ' and ' . $k . $v['junction_threshold_formula'] . $v['junction_threshold'];
-            $tempRes[$k] = $this->db->select('count(id), time_point')
+            $tempRes[$k] = $this->db->select("count(id) as {$k}Count , time_point")
                                     ->from($this->tb)
                                     ->where($nWhere)
                                     ->get()
+                                    ->group_by('time_point')
                                     ->result_array();
             echo "<hr>sql = " . $this->db->last_query() . "<hr>";
         }
