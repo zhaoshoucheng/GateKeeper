@@ -354,8 +354,10 @@ class Junction_model extends CI_Model
         }
 
         if (!empty($Res)) {
-            foreach ($Res as $k=>&$v) {
-                $v['percent'] = round(($v['num'] / $junctionTotal), 2) . '%';
+            foreach ($Res as $k=>$v) {
+                foreach ($v as $kk=>&$vv) {
+                    $vv['percent'] = round(($vv['num'] / $junctionTotal), 2) . '%';
+                }
             }
         }
 
