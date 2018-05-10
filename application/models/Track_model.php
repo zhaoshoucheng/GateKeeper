@@ -192,14 +192,13 @@ class Track_model extends CI_Model
                     $temp_x[$kk] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
                     // 值
                     $result_data['dataList'][$k][$kk][1] = round($vv['value'], 5) * -1;
-                    $temp_y[$kk] = round($vv['value'], 5) * -1;
+                    $temp_y[$kk+$k] = round($vv['value'], 5) * -1;
                 }
             }
             if(!empty($temp_x) && !empty($temp_y)){
                 // 暂时写死X轴
                 $result_data['info']['x']['min'] = $new_offset - 1.5 * $timing['cycle'];
                 $result_data['info']['x']['max'] = $new_offset + 2.5 * $timing['cycle'];
-                //asort($temp_y);
                 $result_data['info']['y']['min'] = min($temp_y);
                 $result_data['info']['y']['max'] = max($temp_y);
             }
