@@ -21,6 +21,7 @@ class MY_Controller extends CI_Controller {
         parent::__construct();
         date_default_timezone_set('Asia/Shanghai');
         $host = $_SERVER['HTTP_HOST'];
+        $this->load->model('junction_model');
 
         if ( $host != '100.90.164.31:8088' && $host != 'www.itstool.com' && $host != '100.90.164.31:8089') {
             $this->is_check_login = 1;
@@ -63,9 +64,13 @@ class MY_Controller extends CI_Controller {
             }
         }
 
+        // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时
         $this->load->config('nconf');
         $back_timing_roll = $this->config->item('back_timing_roll');
-        if (in_array($this->username, $back_timing_roll, true)) {
+        // 暂时先这么做
+        $taskUser = $this->junction_model->getTaskUser($this->input->get_post('task_id'));
+
+        if ($taskUser == $this->username && in_array($taskUser, $back_timing_roll, true)) {
             $this->timingType = 2;
         }
     }
