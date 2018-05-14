@@ -119,6 +119,7 @@ class RoadNet
     public function call($method, $args)
     {
         $retry = 2;
+        $spanId = gen_span_id();
 
         $response = null;
         while ($retry) {
@@ -136,6 +137,8 @@ class RoadNet
                     'e' => $e->getMessage(),
                     'retry' => $retry,
                 ]));
+                com_log_notice("_com_thrift_success", array("cspanid"=>$spanId, "config"=> json_encode($this->config), 'method' => $method, "args"=> json_encode($args), 'e' => $e->getMessage(), 'retry' => $retry));
+
                 $retry--;
                 $this->close();
                 $this->start($this->service);
@@ -145,7 +148,8 @@ class RoadNet
         }
 
         $config = $this->config;
-        Log::notice(json_encode([compact('config', 'method', 'args', 'response', 'retry')]));
+        com_log_notice("_com_thrift_success", array("cspanid"=>$spanId, "config"=> json_encode($config), 'method' => $method, "args"=> json_encode($args), 'response' => json_encode($response), 'retry' => $retry));
+        //Log::notice(json_encode([compact('config', 'method', 'args', 'response', 'retry')]));
         return $response;
     }
 
