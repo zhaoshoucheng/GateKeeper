@@ -262,7 +262,8 @@ class Junction extends MY_Controller
 
     /**
     * 获取问题趋势
-    * @param task_id  interger Y 任务ID
+    * @param task_id    interger Y 任务ID
+    * @param confidence interger Y 置信度
     * @return json
     */
     public function getQuestionTrend()
@@ -273,10 +274,12 @@ class Junction extends MY_Controller
             $this->errmsg = 'The task_id is error.';
             return;
         }
+        $data['task_id'] = intval($params['task_id']);
+        $data['confidence'] = intval($params['confidence']);
 
         $result = [];
 
-        $result = $this->junction_model->getQuestionTrend($params);
+        $result = $this->junction_model->getQuestionTrend($data);
 
         return $this->response($result);
     }
