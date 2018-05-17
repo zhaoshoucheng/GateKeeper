@@ -87,8 +87,8 @@ class Junction_model extends CI_Model
                 $v['quota_status'] = 3;
             }
             $v[$quota_key] = round($v[$quota_key], 5);
-            $temp_quota_data[$v['junction_id']][$quota_key] = $v[$quota_key];
-            $temp_quota_data[$v['junction_id']]['quota_status'] = $v['quota_status'];
+            $temp_quota_data[$v['junction_id']]['list'][$quota_key] = $v[$quota_key];
+            $temp_quota_data[$v['junction_id']]['list']['quota_status'] = $v['quota_status'];
         }
 
         $result_data = $this->mergeAllJunctions($all_city_junctions, $temp_quota_data, 'quota_detail');
@@ -176,7 +176,7 @@ class Junction_model extends CI_Model
                     $temp_diagnose_data[$v['junction_id']]['info']['quota']['avg_speed']['unit']
                         = $junctionQuotaKeyConf['avg_speed']['unit'];
 
-                    $temp_diagnose_data[$v['junction_id']]['questionList'][$val] = round($v[$val], 5);
+                    $temp_diagnose_data[$v['junction_id']]['list'][$val] = round($v[$val], 5);
                     $is_diagnose = 0;
                     if ($this->compare(
                                         $v[$val],
@@ -192,7 +192,7 @@ class Junction_model extends CI_Model
                             = $diagnose_key_conf[$val]['name'];
                     }
 
-                    $temp_diagnose_data[$v['junction_id']]['questionList'][$val . '_diagnose'] = $is_diagnose;
+                    $temp_diagnose_data[$v['junction_id']]['list'][$val . '_diagnose'] = $is_diagnose;
                 }
             }
             // 统计所有问题总数
@@ -934,24 +934,26 @@ class Junction_model extends CI_Model
                 $result_data['dataList'][$k]['name'] = $v['name'];
                 $result_data['dataList'][$k]['lng'] = $v['lng'];
                 $result_data['dataList'][$k]['lat'] = $v['lat'];
-                $result_data['dataList'][$k][$merge_key] = $data[$v['logic_junction_id']]['questionList'];
+                $result_data['dataList'][$k][$merge_key] = $data[$v['logic_junction_id']]['list'];
 
                 // 去除quota的key
-                if (isset($data[$v['logic_junction_id']]['info']['quota'])) {
-                    $data[$v['logic_junction_id']]['info']['quota']
-                        = array_values($data[$v['logic_junction_id']]['info']['quota']);
-                } else {
-                    $data[$v['logic_junction_id']]['info']['quota'] = [];
-                }
-                // 去除question的key并设置默认值
-                if (isset($data[$v['logic_junction_id']]['info']['question'])) {
-                    $data[$v['logic_junction_id']]['info']['question']
-                        = array_values($data[$v['logic_junction_id']]['info']['question']);
-                } else {
-                    $data[$v['logic_junction_id']]['info']['question'] = ['无'];
-                }
+                if (isset($data[$v['logic_junction_id']]['info'])) {
+                    if (isset($data[$v['logic_junction_id']]['info']['quota'])) {
+                        $data[$v['logic_junction_id']]['info']['quota']
+                            = array_values($data[$v['logic_junction_id']]['info']['quota']);
+                    } else {
+                        $data[$v['logic_junction_id']]['info']['quota'] = [];
+                    }
+                    // 去除question的key并设置默认值
+                    if (isset($data[$v['logic_junction_id']]['info']['question'])) {
+                        $data[$v['logic_junction_id']]['info']['question']
+                            = array_values($data[$v['logic_junction_id']]['info']['question']);
+                    } else {
+                        $data[$v['logic_junction_id']]['info']['question'] = ['无'];
+                    }
 
-                $result_data['dataList'][$k]['info'] = $data[$v['logic_junction_id']]['info'];
+                    $result_data['dataList'][$k]['info'] = $data[$v['logic_junction_id']]['info'];
+                }
             }
         }
 
