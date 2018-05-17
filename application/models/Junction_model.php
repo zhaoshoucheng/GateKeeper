@@ -329,7 +329,8 @@ class Junction_model extends CI_Model
 
     /**
     * 获取问题趋势
-    * @param $data['task_id']  interger Y 任务ID
+    * @param $data['task_id']    interger Y 任务ID
+    * @param $data['confidence'] interger Y 置信度
     * @return array
     */
     public function getQuestionTrend($data)
@@ -352,6 +353,10 @@ class Junction_model extends CI_Model
         // 循环获取每种问题各时间点路口总数
         foreach ($diagnoseKeyConf as $k=>$v) {
             $nWhere = $where . ' and ' . $k . $v['junction_threshold_formula'] . $v['junction_threshold'];
+            $confidenceThreshold = $this->config->item('confidence');
+            if ($data['confidence'] > 1) {
+                $nWhere .= ' and ' . $k . '_confidence' . $confidenceThreshold[$data['confidence']]['expression'];
+            }
             $res[$k] = $this->db->select("count(id) as num , time_point as hour")
                                     ->from($this->tb)
                                     ->where($nWhere)
