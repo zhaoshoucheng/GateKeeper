@@ -351,10 +351,10 @@ class Junction_model extends CI_Model
         $junctionTotal = $allJunction['count'];
 
         // 循环获取每种问题各时间点路口总数
+        $confidenceThreshold = $this->config->item('confidence');
         foreach ($diagnoseKeyConf as $k=>$v) {
             $nWhere = $where . ' and ' . $k . $v['junction_threshold_formula'] . $v['junction_threshold'];
-            $confidenceThreshold = $this->config->item('confidence');
-            if ($data['confidence'] > 1) {
+            if ($data['confidence'] >= 1) {
                 $nWhere .= ' and ' . $k . '_confidence' . $confidenceThreshold[$data['confidence']]['expression'];
             }
             $res[$k] = $this->db->select("count(id) as num , time_point as hour")
