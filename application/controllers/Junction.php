@@ -258,7 +258,27 @@ class Junction extends MY_Controller
         $res = $this->junction_model->getJunctionsDiagnoseList($data);
 
         return $this->response($res);
+    }
 
+    /**
+    * 获取问题趋势
+    * @param task_id  interger Y 任务ID
+    * @return json
+    */
+    public function getQuestionTrend()
+    {
+        $params = $this->input->post();
+        if ($params['task_id'] < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The task_id is error.';
+            return;
+        }
+
+        $result = [];
+
+        $result = $this->junction_model->getQuestionTrend($params);
+
+        return $this->response($result);
     }
 
     /**

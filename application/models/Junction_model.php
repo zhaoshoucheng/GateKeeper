@@ -147,25 +147,63 @@ class Junction_model extends CI_Model
         }
 
         $diagnose_key_conf = $this->config->item('diagnose_key');
+        $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
         $temp_diagnose_data = [];
         if (count($res) >= 1) {
+            $countStopDelay = 0;
+            $countAvgSpeed = 0;
             foreach ($data['diagnose_key'] as $val) {
                 $temp_diagnose_data['count'][$val] = 0;
                 foreach ($res as $k=>$v) {
-                    $temp_diagnose_data[$v['junction_id']][$val] = round($v[$val], 5);
+                    // 统计停车(平均)延误总数
+                    $countStopDelay += $v['stop_delay'];
+                    // 统计平均速度总数
+                    $countAvgSpeed += $v['avg_speed'];
+
+                    // hover:路口平均延误
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['value']
+                        = round($v['stop_delay'], 5);
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['name']
+                        = $junctionQuotaKeyConf['stop_delay']['name'];
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['unit']
+                        = $junctionQuotaKeyConf['stop_delay']['unit'];
+
+                    // hover:路口平均速度
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['avg_speed']['value']
+                        = round($v['avg_speed'], 5);
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['avg_speed']['name']
+                        = $junctionQuotaKeyConf['avg_speed']['name'];
+                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['avg_speed']['unit']
+                        = $junctionQuotaKeyConf['avg_speed']['unit'];
+
+                    $temp_diagnose_data[$v['junction_id']]['questionList'][$val] = round($v[$val], 5);
                     $is_diagnose = 0;
                     if ($this->compare(
                                         $v[$val],
                                         $diagnose_key_conf[$val]['junction_threshold'],
                                         $diagnose_key_conf[$val]['junction_threshold_formula']
-                                    )) {
+                                    )
+                    ) {
                         $is_diagnose = 1;
+                        // 统计有问题的路口数
                         $temp_diagnose_data['count'][$val] += 1;
+                        // hover:路口存在的问题名称
+                        $temp_diagnose_data[$v['junction_id']]['info']['question'][$val]
+                            = $diagnose_key_conf[$val]['name'];
                     }
 
-                    $temp_diagnose_data[$v['junction_id']][$val . '_diagnose'] = $is_diagnose;
+                    $temp_diagnose_data[$v['junction_id']]['questionList'][$val . '_diagnose'] = $is_diagnose;
                 }
             }
+            // 统计所有问题总数
+            $temp_diagnose_data['diagnose_count'] = 0;
+            if (!empty($temp_diagnose_data['count'])) {
+                foreach ($temp_diagnose_data['count'] as $v) {
+                    $temp_diagnose_data['diagnose_count'] += $v;
+                }
+            }
+            $temp_diagnose_data['quotaCount']['stop_delay'] = $countStopDelay;
+            $temp_diagnose_data['quotaCount']['avg_speed'] = $countAvgSpeed;
         }
 
         $result_data = $this->mergeAllJunctions($all_city_junctions, $temp_diagnose_data, 'diagnose_detail');
@@ -188,9 +226,11 @@ class Junction_model extends CI_Model
         $sql_data = array_map(function($diagnose_key) use ($data) {
             if ($diagnose_key == 'saturation_index') {
                 // 空放问题 因为空放问题是取的最小的
-                $selectstr = "id, junction_id, min({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
+                $selectstr = "id, junction_id, stop_delay, avg_speed,";
+                $selectstr .= " min({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
             } else {
-                $selectstr = "id, junction_id, max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
+                $selectstr = "id, junction_id, stop_delay, avg_speed,";
+                $selectstr .= " max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
             }
 
             $where = 'task_id = ' . $data['task_id'] . ' and type = 1';
@@ -254,7 +294,7 @@ class Junction_model extends CI_Model
         }
 
         $selectstr = empty($this->selectColumns($select_quota_key)) ? '' : ',' . $this->selectColumns($select_quota_key);
-        $select = 'id, junction_id' . $selectstr;
+        $select = 'id, junction_id, stop_delay, avg_speed' . $selectstr;
 
         $where = "task_id = " . $data['task_id'] . " and type = 0 and time_point = '{$data['time_point']}'";
 
@@ -285,6 +325,55 @@ class Junction_model extends CI_Model
             sendMail($this->email_to, 'logs: 获取全城路口诊断问题列表为空', $content);
         }
         return $res;
+    }
+
+    /**
+    * 获取问题趋势
+    * @param $data['task_id']  interger Y 任务ID
+    * @return array
+    */
+    public function getQuestionTrend($data)
+    {
+        if (empty($data)) return [];
+
+        $diagnoseKeyConf = $this->config->item('diagnose_key');
+
+        $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
+
+        // 获取此任务路口总数
+        $junctionTotal = 0;
+        $allJunction = $this->db->select('count(DISTINCT junction_id) as count')
+                                    ->from($this->tb)
+                                    ->where($where)
+                                    ->get()
+                                    ->row_array();
+        $junctionTotal = $allJunction['count'];
+
+        // 循环获取每种问题各时间点路口总数
+        foreach ($diagnoseKeyConf as $k=>$v) {
+            $nWhere = $where . ' and ' . $k . $v['junction_threshold_formula'] . $v['junction_threshold'];
+            $res[$k] = $this->db->select("count(id) as num , time_point as hour")
+                                    ->from($this->tb)
+                                    ->where($nWhere)
+                                    ->group_by('time_point')
+                                    ->get()
+                                    ->result_array();
+        }
+
+        $result = [];
+        if (!empty($res)) {
+            foreach ($res as $k=>$v) {
+                foreach ($v as $kk=>$vv) {
+                    $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
+                    $result[$k]['list'][$vv['hour']]['hour'] = $vv['hour'];
+                    $result[$k]['list'][$vv['hour']]['num'] = $vv['num'];
+                    $result[$k]['list'][$vv['hour']]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
+                }
+            }
+        }
+
+        return $result;
+
     }
 
     /**
@@ -759,9 +848,7 @@ class Junction_model extends CI_Model
         $result_data = [];
         $count_lng = 0;
         $count_lat = 0;
-        if (isset($data['count'])) {
-            $result_data['count'] = $data['count'];
-        }
+
         foreach ($all_data as $k=>$v) {
             if (isset($data[$v['logic_junction_id']])) {
                 $count_lng += $v['lng'];
@@ -770,22 +857,76 @@ class Junction_model extends CI_Model
                 $result_data['dataList'][$k]['name'] = $v['name'];
                 $result_data['dataList'][$k]['lng'] = $v['lng'];
                 $result_data['dataList'][$k]['lat'] = $v['lat'];
-                $result_data['dataList'][$k][$merge_key] = $data[$v['logic_junction_id']];
+                $result_data['dataList'][$k][$merge_key] = $data[$v['logic_junction_id']]['questionList'];
+
+                // 去除quota的key
+                if (isset($data[$v['logic_junction_id']]['info']['quota'])) {
+                    $data[$v['logic_junction_id']]['info']['quota']
+                        = array_values($data[$v['logic_junction_id']]['info']['quota']);
+                } else {
+                    $data[$v['logic_junction_id']]['info']['quota'] = [];
+                }
+                // 去除question的key并设置默认值
+                if (isset($data[$v['logic_junction_id']]['info']['question'])) {
+                    $data[$v['logic_junction_id']]['info']['question']
+                        = array_values($data[$v['logic_junction_id']]['info']['question']);
+                } else {
+                    $data[$v['logic_junction_id']]['info']['question'] = ['无'];
+                }
+
+                $result_data['dataList'][$k]['info'] = $data[$v['logic_junction_id']]['info'];
             }
         }
 
-        // 暂时定死一个中心点
+        // 统计路口总数、去除dataList的key
         $count = 0;
         if (!empty($result_data['dataList'])) {
             $count = count($result_data['dataList']);
             $result_data['dataList'] = array_values($result_data['dataList']);
         }
-        if($count >= 1){
+        if ($count >= 1) {
+            $diagnoseKeyConf = $this->config->item('diagnose_key');
+            $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
+
+            // 统计指标（平均延误、平均速度）平均值
+            if (isset($data['quotaCount'])) {
+                foreach ($data['quotaCount'] as $k=>$v) {
+                    $result_data['quotaCount'][$k]['name'] = $junctionQuotaKeyConf[$k]['name'];
+                    $result_data['quotaCount'][$k]['value'] = round(($v / $count), 2);
+                    $result_data['quotaCount'][$k]['unit'] = $junctionQuotaKeyConf[$k]['unit'];
+                }
+            }
+
+            // 计算地图中心坐标
             $center_lng = round($count_lng / $count, 6);
             $center_lat = round($count_lat / $count, 6);
+
+            // 柱状图
+            if (isset($data['count']) && $data['diagnose_count'] >= 1) {
+                foreach ($data['count'] as $k=>$v) {
+                    // 此问题的路口个数
+                    $result_data['count'][$k]['num'] = $v;
+                    // 问题中文名称
+                    $result_data['count'][$k]['name'] = $diagnoseKeyConf[$k]['name'];
+                    // 此问题占所有问题的百分比
+                    $percent = round(($v / $data['diagnose_count']) * 100, 2);
+                    $result_data['count'][$k]['percent'] = $percent . '%';
+                    // 对应不占百分比
+                    $result_data['count'][$k]['other'] = (100 - $percent) . '%';
+                }
+            }
         }
+
+        // 去除quotaCount的key
+        if (isset($result_data['quotaCount'])) {
+            $result_data['quotaCount'] = array_values($result_data['quotaCount']);
+        }
+        // 路口总数
+        $result_data['junctionTotal'] = $count;
+
         /*$center_lat = 36.663083;
         $center_lng = 117.033513;*/
+        // 中心坐标
         $result_data['center']['lng'] = $center_lng;
         $result_data['center']['lat'] = $center_lat;
 
