@@ -63,8 +63,18 @@ class Track extends MY_Controller
             }
         }
 
+        $data = [
+            'task_id'         => intval($params['task_id']),
+            'junction_id'     => strip_tags(trim($params['junction_id'])),
+            'flow_id'         => strip_tags(trim($params['flow_id'])),
+            'search_type'     => intval($params['search_type']),
+            'time_point'      => strip_tags(trim($params['time_point'])),
+            'time_range'      => strip_tags(trim($params['time_range'])),
+            'timingType'      => $this->timingType
+        ];
+
         $params['timingType'] = $this->timingType;
-        $result_data = $this->track_model->getTrackData($params, 'getScatterMtraj');
+        $result_data = $this->track_model->getTrackData($data, 'getScatterMtraj');
 
         return $this->response($result_data);
     }
@@ -116,8 +126,17 @@ class Track extends MY_Controller
                 return;
             }
         }
-        $params['timingType'] = $this->timingType;
-        $result_data = $this->track_model->getTrackData($params, 'getSpaceTimeMtraj');
+
+        $data = [
+            'task_id'         => intval($params['task_id']),
+            'junction_id'     => strip_tags(trim($params['junction_id'])),
+            'flow_id'         => strip_tags(trim($params['flow_id'])),
+            'search_type'     => intval($params['search_type']),
+            'time_point'      => strip_tags(trim($params['time_point'])),
+            'time_range'      => strip_tags(trim($params['time_range'])),
+            'timingType'      => $this->timingType
+        ];
+        $result_data = $this->track_model->getTrackData($data, 'getSpaceTimeMtraj');
 
         return $this->response($result_data);
     }

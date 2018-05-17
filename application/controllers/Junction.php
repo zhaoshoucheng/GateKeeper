@@ -416,9 +416,17 @@ class Junction extends MY_Controller
             return;
         }
 
-        $params['timingType'] = $this->timingType;
+        $data = [
+            'dates'           => $params['dates'],
+            'junction_id'     => strip_tags(trim($params['junction_id'])),
+            'search_type'     => intval($params['search_type']),
+            'time_point'      => strip_tags(trim($params['time_point'])),
+            'time_range'      => strip_tags(trim($params['time_range'])),
+            'task_time_range' => strip_tags(trim($params['task_time_range'])),
+            'timingType'      => $this->timingType
+        ];
 
-        $result = $this->junction_model->getJunctionMapData($params);
+        $result = $this->junction_model->getJunctionMapData($data);
 
         return $this->response($result);
     }
