@@ -169,7 +169,7 @@ class Junction extends MY_Controller
 
     /**
     * 获取配时方案及配时详情
-    * @param dates           string Y 评估/诊断日期
+    * @param dates           array  Y 评估/诊断日期
     * @param junction_id     string Y 路口ID
     * @param task_time_range string Y 任务时间段
     * @return json
@@ -195,7 +195,7 @@ class Junction extends MY_Controller
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
         }
-        $data['dates'] = strip_tags(trim($params['dates']));
+        $data['dates'] = $params['dates'];
         $data['junction_id'] = strip_tags(trim($params['junction_id']));
         $data['time_range'] = strip_tags(trim($params['task_time_range']));
         $data['timingType'] = $this->timingType;
