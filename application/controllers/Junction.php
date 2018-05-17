@@ -149,10 +149,20 @@ class Junction extends MY_Controller
             return;
         }
 
-        $params['timingType'] = $this->timingType;
+        $data = [
+            'task_id'         => intval($params['task_id']),
+            'dates'           => $params['dates'],
+            'junction_id'     => strip_tags(trim($params['junction_id'])),
+            'search_type'     => intval($params['search_type']),
+            'time_point'      => strip_tags(trim($params['time_point'])),
+            'time_range'      => strip_tags(trim($params['time_range'])),
+            'type'            => intval($params['type']),
+            'task_time_range' => strip_tags(trim($params['task_time_range'])),
+            'timingType'      => $this->timingType
+        ];
 
         // 获取路口指标详情
-        $res = $this->junction_model->getFlowQuotas($params);
+        $res = $this->junction_model->getFlowQuotas($data);
 
         return $this->response($res);
     }
@@ -185,9 +195,11 @@ class Junction extends MY_Controller
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
         }
-        $params['time_range'] = $params['task_time_range'];
-        $params['timingType'] = $this->timingType;
-        $timing = $this->timing_model->getJunctionsTimingInfo($params);
+        $data['dates'] = strip_tags(trim($params['dates']));
+        $data['junction_id'] = strip_tags(trim($params['junction_id']));
+        $data['time_range'] = strip_tags(trim($params['task_time_range']));
+        $data['timingType'] = $this->timingType;
+        $timing = $this->timing_model->getJunctionsTimingInfo($data);
 
         return $this->response($timing);
     }
@@ -331,7 +343,16 @@ class Junction extends MY_Controller
             return;
         }
 
-        $res = $this->junction_model->getDiagnoseRankList($params);
+        $data = [
+            'task_id'      => intval($params['task_id']),
+            'city_id'      => intval($params['city_id']),
+            'time_point'   => strip_tags(trim($params['time_point'])),
+            'diagnose_key' => $params['diagnose_key'],
+            'confidence'   => intval($params['confidence']),
+            'orderby'      => intval($params['orderby'])
+        ];
+
+        $res = $this->junction_model->getDiagnoseRankList($data);
         return $this->response($res);
     }
 
