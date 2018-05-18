@@ -702,70 +702,6 @@ class Junction_model extends CI_Model
     * @param $data['timingType']      interger Y 配时来源 1：人工 2：反推
     * @return array
     */
-    public function getJunctionMapDataOld($data)
-    {
-        if (empty($data)) return [];
-
-        $junction_id = trim($data['junction_id']);
-
-        $result = [];
-
-        // 获取配时数据 地图底图数据源用配时的
-        $timing_data = [
-            'junction_id' => $junction_id,
-            'dates'       => $data['dates'],
-            'timingType'  => $data['timingType']
-        ];
-        if ((int)$data['search_type'] == 1) { // 按方案查询
-            $time_range = array_filter(explode('-', $data['time_range']));
-            $timing_data['time_range'] = trim($time_range[0]) . '-' . date("H:i", strtotime($time_range[1]) - 60);
-        } else { // 按时间点查询
-            $timing_data['time_point'] = trim($data['time_point']);
-            $timing_data['time_range'] = trim($data['task_time_range']);
-        }
-
-        $timing = $this->timing_model->getTimingDataForJunctionMap($timing_data);
-        if (!$timing || empty($timing)) return [];
-
-        /*------------------------------------
-        | 获取路网路口各相位经纬度及路口中心经纬度 |
-        -------------------------------------*/
-        // 获取地图版本
-        $map_version = $this->waymap_model->getMapVersion($data['dates']);
-        if (empty($map_version)) return [];
-
-        // 获取路网路口各相位坐标
-        $waymap_data = [
-            'version'           => trim($map_version),
-            'logic_junction_id' => $junction_id
-        ];
-        $waymap = $this->waymap_model->getJunctionFlowAndCenterLngLat($waymap_data);
-        if (!$waymap || empty($waymap)) return [];
-
-        foreach ($waymap as $k=>$v) {
-            if (!empty($timing['list'][$v['logic_flow_id']])) {
-                $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
-                $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
-                $result['dataList'][$k]['lng'] = $v['lng'];
-                $result['dataList'][$k]['lat'] = $v['lat'];
-            }
-        }
-
-        // 获取路口中心坐标
-        $result['center'] = '';
-        $center_data['logic_id'] = $junction_id;
-        $center = $this->waymap_model->getJunctionCenterCoords($center_data);
-
-        $result['center'] = $center;
-        $result['map_version'] = $map_version;
-
-        if (count($result['dataList']) >= 1) {
-            $result['dataList'] = array_values($result['dataList']);
-        }
-
-        return $result;
-    }
-
     public function getJunctionMapData($data)
     {
         if (empty($data)) return [];
@@ -803,9 +739,9 @@ class Junction_model extends CI_Model
             $waymap_data = [
                 'version'           => trim($map_version),
                 'logic_junction_id' => $junction_id,
-                'logic_flow_ids' => array_keys($timing['list']),
-                'token'     => $this->config->item('waymap_token'),
-                'user_id'   => $this->config->item('waymap_userid'),
+                'logic_flow_ids'    => array_keys($timing['list']),
+                'token'             => $this->config->item('waymap_token'),
+                'user_id'           => $this->config->item('waymap_userid'),
             ];
             $ret = httpPOST($this->config->item('waymap_interface') . '/signal-map/MapFlow/simplifyFlows', $waymap_data);
             $ret = json_decode($ret, true);
