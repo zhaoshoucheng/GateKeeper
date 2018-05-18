@@ -45,10 +45,14 @@ class Junction_model extends CI_Model
 
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
         $all_city_junctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
-        if (count($all_city_junctions) < 1 || !$all_city_junctions) return [];
+        if (count($all_city_junctions) < 1 || !$all_city_junctions) {
+            return [];
+        }
 
         $selectstr = empty($this->selectColumns($quota_key)) ? '' : ',' . $this->selectColumns($quota_key);
-        if (empty($selectstr)) return [];
+        if (empty($selectstr)) {
+            return [];
+        }
 
         $select = '';
         if ($data['type'] == 1) { // 综合
@@ -58,7 +62,9 @@ class Junction_model extends CI_Model
         }
 
         $where = 'task_id = ' . $data['task_id'];
-        if ($data['type'] == 0) $where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
+        if ($data['type'] == 0) {
+            $where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
+        }
 
         $confidence_conf = $this->config->item('confidence');
         if (isset($data['confidence'])
@@ -70,7 +76,9 @@ class Junction_model extends CI_Model
         $this->db->select($select);
         $this->db->from($this->tb);
         $this->db->where($where);
-        if ($data['type'] == 1) $this->db->group_by('junction_id');
+        if ($data['type'] == 1) {
+            $this->db->group_by('junction_id');
+        }
 
         $res = $this->db->get()->result_array();
 
@@ -111,7 +119,9 @@ class Junction_model extends CI_Model
     */
     public function getFlowQuotas($data)
     {
-        if (!isset($data['type']) || empty($data) || !in_array((int)$data['type'], [1, 2], true)) return [];
+        if (!isset($data['type']) || empty($data) || !in_array((int)$data['type'], [1, 2], true)) {
+            return [];
+        }
 
         if ((int)$data['type'] == 2) { // 诊断详情页
             $res = $this->getDiagnoseJunctionDetail($data);
@@ -119,7 +129,9 @@ class Junction_model extends CI_Model
             $res = $this->getQuotaJunctionDetail($data);
         }
 
-        if (!$res || empty($res)) return [];
+        if (!$res || empty($res)) {
+            return [];
+        }
 
         return $res;
     }
@@ -138,7 +150,9 @@ class Junction_model extends CI_Model
     {
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
         $all_city_junctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
-        if (count($all_city_junctions) < 1 || !$all_city_junctions) return [];
+        if (count($all_city_junctions) < 1 || !$all_city_junctions) {
+            return [];
+        }
 
         if ($data['type'] == 1) { // 综合
             $res = $this->getJunctionsDiagnoseBySynthesize($data);
@@ -167,14 +181,6 @@ class Junction_model extends CI_Model
                         = $junctionQuotaKeyConf['stop_delay']['name'];
                     $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['unit']
                         = $junctionQuotaKeyConf['stop_delay']['unit'];
-
-                    // hover:路口平均速度
-                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['avg_speed']['value']
-                        = round($v['avg_speed'], 5);
-                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['avg_speed']['name']
-                        = $junctionQuotaKeyConf['avg_speed']['name'];
-                    $temp_diagnose_data[$v['junction_id']]['info']['quota']['avg_speed']['unit']
-                        = $junctionQuotaKeyConf['avg_speed']['unit'];
 
                     $temp_diagnose_data[$v['junction_id']]['list'][$val] = round($v[$val], 5);
                     $is_diagnose = 0;
@@ -320,7 +326,7 @@ class Junction_model extends CI_Model
                         ->where($where)
                         ->get()
                         ->result_array();
-        if(!$res){
+        if (!$res) {
             $content = 'sql = ' . $this->db->last_query();
             sendMail($this->email_to, 'logs: 获取全城路口诊断问题列表为空', $content);
         }
@@ -335,7 +341,9 @@ class Junction_model extends CI_Model
     */
     public function getQuestionTrend($data)
     {
-        if (empty($data)) return [];
+        if (empty($data)) {
+            return [];
+        }
 
         $diagnoseKeyConf = $this->config->item('diagnose_key');
 
@@ -392,11 +400,15 @@ class Junction_model extends CI_Model
     */
     public function getDiagnoseRankList($data)
     {
-        if (!is_array($data['diagnose_key']) || empty($data['diagnose_key'])) return [];
+        if (!is_array($data['diagnose_key']) || empty($data['diagnose_key'])) {
+            return [];
+        }
 
         // PM规定页面左侧列表与右侧地图数据一致，而且只在概览页有此列表，固使用 根据时间点查询全城路口诊断问题列表 接口获取初始数据
         $res = $this->getJunctionsDiagnoseByTimePoint($data);
-        if (!$res || empty($res)) return [];
+        if (!$res || empty($res)) {
+            return [];
+        }
 
         $diagnose_key_conf = $this->config->item('diagnose_key');
 
@@ -418,7 +430,9 @@ class Junction_model extends CI_Model
             $logic_junction_ids .= empty($logic_junction_ids) ? $v['junction_id'] : ',' . $v['junction_id'];
         }
 
-        if (empty($result)) return [];
+        if (empty($result)) {
+            return [];
+        }
 
         // 排序默认 2
         if (!isset($data['orderby']) || !array_key_exists((int)$data['orderby'], $this->config->item('sort_conf'))) {
@@ -511,7 +525,9 @@ class Junction_model extends CI_Model
                         ->get();
         //echo 'sql = ' . $this->db->last_query();
 
-        if (!$res || empty($res)) return [];
+        if (!$res || empty($res)) {
+            return [];
+        }
 
         $result = $res->row_array();
         //echo "<hr>data = <pre>";print_r($result);
@@ -557,7 +573,9 @@ class Junction_model extends CI_Model
                         ->where($where)
                         ->get();
 
-        if (!$res || empty($res)) return [];
+        if (!$res || empty($res)) {
+            return [];
+        }
 
         $result = $res->row_array();
         //echo "<hr>data = <pre>";print_r($result);
@@ -576,7 +594,9 @@ class Junction_model extends CI_Model
     */
     private function formatJunctionDetailData($data, $dates, $result_type, $timingType)
     {
-        if (empty($data) || empty($dates) || (int)$result_type < 1) return [];
+        if (empty($data) || empty($dates) || (int)$result_type < 1) {
+            return [];
+        }
 
         // 因为详情页地图下方列表所有相位都有 置信度字段，而置信度不属于指标，固将此放到扩展指标集合中
         $data['extend_flow_quota']['confidence'] = '置信度';
@@ -704,7 +724,9 @@ class Junction_model extends CI_Model
     */
     public function getJunctionMapData($data)
     {
-        if (empty($data)) return [];
+        if (empty($data)) {
+            return [];
+        }
 
         $junction_id = trim($data['junction_id']);
 
@@ -725,14 +747,18 @@ class Junction_model extends CI_Model
         }
 
         $timing = $this->timing_model->getTimingDataForJunctionMap($timing_data);
-        if (!$timing || empty($timing)) return [];
+        if (!$timing || empty($timing)) {
+            return [];
+        }
 
         /*------------------------------------
         | 获取路网路口各相位经纬度及路口中心经纬度 |
         -------------------------------------*/
         // 获取地图版本
         $map_version = $this->waymap_model->getMapVersion($data['dates']);
-        if (empty($map_version)) return [];
+        if (empty($map_version)) {
+            return [];
+        }
 
         // 获取路网路口各相位坐标
         try {
@@ -786,7 +812,9 @@ class Junction_model extends CI_Model
     */
     public function getJunctionInfoForTheTrack($data)
     {
-        if (empty($data)) return [];
+        if (empty($data)) {
+            return [];
+        }
 
         $result = [];
 
@@ -856,7 +884,9 @@ class Junction_model extends CI_Model
     */
     private function mergeAllJunctions($all_data, $data, $merge_key = 'detail')
     {
-        if (!is_array($all_data) || count($all_data) < 1 || !is_array($data) || count($data) < 1) return [];
+        if (!is_array($all_data) || count($all_data) < 1 || !is_array($data) || count($data) < 1) {
+            return [];
+        }
 
         $result_data = [];
         $count_lng = 0;

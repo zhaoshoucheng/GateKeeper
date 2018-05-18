@@ -34,7 +34,7 @@ class Waymap_model extends CI_Model
 
         try {
             $res = httpGET($this->config->item('waymap_interface') . '/signal-map/map/many', $data);
-            if(!$res){
+            if (!$res) {
                 // 日志
                 return [];
             }
@@ -56,7 +56,9 @@ class Waymap_model extends CI_Model
     */
     public function getJunctionFlowAndCenterLngLat($data)
     {
-        if (empty($data)) return [];
+        if (empty($data)) {
+            return [];
+        }
 
         $data['token'] = $this->token;
         $data['user_id'] = $this->userid;
@@ -105,7 +107,9 @@ class Waymap_model extends CI_Model
     */
     public function getJunctionCenterCoords($data)
     {
-        if (empty($data)) return [];
+        if (empty($data)) {
+            return [];
+        }
 
         $data['token'] = $this->token;
         $data['user_id'] = $this->userid;
@@ -147,7 +151,9 @@ class Waymap_model extends CI_Model
     */
     public function getAllCityJunctions($city_id)
     {
-        if ((int)$city_id < 1) return false;
+        if ((int)$city_id < 1) {
+            return false;
+        }
 
         /*---------------------------------------------------
         | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
@@ -204,7 +210,9 @@ class Waymap_model extends CI_Model
     */
     public function getMapVersion($dates)
     {
-        if (!is_array($dates) || empty($dates)) return [];
+        if (!is_array($dates) || empty($dates)) {
+            return [];
+        }
 
         $maxdate = max($dates);
         $maxdate = date('Y-m-d', strtotime($maxdate));

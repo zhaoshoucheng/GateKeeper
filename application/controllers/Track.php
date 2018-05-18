@@ -73,7 +73,6 @@ class Track extends MY_Controller
             'timingType'      => $this->timingType
         ];
 
-        $params['timingType'] = $this->timingType;
         $result_data = $this->track_model->getTrackData($data, 'getScatterMtraj');
 
         return $this->response($result_data);

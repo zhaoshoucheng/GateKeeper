@@ -33,11 +33,15 @@ class Track_model extends CI_Model
     */
     public function getTrackData($data, $type)
     {
-        if (empty($data) || empty($type)) return [];
+        if (empty($data) || empty($type)) {
+            return [];
+        }
 
         // 获取路口详情 dates start_time end_time movements
         $junction_info = $this->junction_model->getJunctionInfoForTheTrack($data);
-        if (!$junction_info) return [];
+        if (!$junction_info) {
+            return [];
+        }
 
         // 获取 mapversion
         $mapversions = $this->taskdateversion_model->select($junction_info['task_id'], explode(',', $junction_info['dates']));
@@ -56,7 +60,9 @@ class Track_model extends CI_Model
             'timingType'  => $data['timingType']
         ];
         $timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
-        if (!$timing) return [];
+        if (!$timing) {
+            return [];
+        }
 
         // 组织thrift所需rtimeVec数组
         foreach ($mapversions as $k=>$v) {
@@ -155,7 +161,9 @@ class Track_model extends CI_Model
         $res = $track_mtraj->getSpaceTimeMtraj($vals);
 
         $res = (array)$res;
-        if ($res['errno'] != 0) return [];
+        if ($res['errno'] != 0) {
+            return [];
+        }
 
         $result = [];
         if (!empty($res['matchPoints'])) {
@@ -185,8 +193,8 @@ class Track_model extends CI_Model
             ksort($result);
             $result = array_values($result);
 
-            foreach($result as $k=>$v){
-                foreach($v['list'] as $kk=>$vv){
+            foreach ($result as $k=>$v) {
+                foreach ($v['list'] as $kk=>$vv) {
                     // 时间
                     $result_data['dataList'][$k][$kk][0] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
                     $temp_x[$kk] = $vv['second'] - ($v['base']['second'] - $v['base']['map_second']);
@@ -195,7 +203,7 @@ class Track_model extends CI_Model
                     $temp_y[$kk+$k] = round($vv['value'], 5) * -1;
                 }
             }
-            if(!empty($temp_x) && !empty($temp_y)){
+            if (!empty($temp_x) && !empty($temp_y)) {
                 // 暂时写死X轴
                 $result_data['info']['x']['min'] = $new_offset - 1.5 * $timing['cycle'];
                 $result_data['info']['x']['max'] = $new_offset + 2.5 * $timing['cycle'];
@@ -269,7 +277,9 @@ class Track_model extends CI_Model
         $track_mtraj = new Track_vendor();
         $res = $track_mtraj->getScatterMtraj($vals);
         $res = (array)$res;
-        if ($res['errno'] != 0) return [];
+        if ($res['errno'] != 0) {
+            return [];
+        }
 
         if (!empty($res['scatterPoints'])) {
             foreach ($res['scatterPoints'] as $k=>&$v) {
