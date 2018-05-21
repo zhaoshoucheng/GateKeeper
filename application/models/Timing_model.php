@@ -25,13 +25,12 @@ class Timing_model extends CI_Model
     */
     public function getJunctionsTimingInfo($data)
     {
-        if (count($data) < 1) return [];
+        if (count($data) < 1) {
+            return [];
+        }
 
         // 获取配时数据
         $timing = $this->getTimingData($data);
-        if ($data['debug'] == 'ningxiangbing') {
-            echo "<pre>timing = ";print_r($timing);
-        }
 
         // 对返回数据格式化,返回需要的格式
         if (count($timing >= 1)) {
@@ -52,7 +51,9 @@ class Timing_model extends CI_Model
     */
     public function getFlowIdToName($data)
     {
-        if (count($data) < 1) return [];
+        if (count($data) < 1) {
+            return [];
+        }
 
         // 获取配时数据
         $timing = $this->getTimingData($data);
@@ -78,10 +79,14 @@ class Timing_model extends CI_Model
     */
     public function getTimingDataForJunctionMap($data)
     {
-        if (empty($data)) return [];
+        if (empty($data)) {
+            return [];
+        }
         // 获取配时数据
         $timing = $this->getTimingData($data);
-        if (!$timing) return [];
+        if (!$timing) {
+            return [];
+        }
 
         $result = [];
         if (!isset($data['time_point'])) { // 按方案查询
@@ -108,12 +113,16 @@ class Timing_model extends CI_Model
     */
     public function getFlowTimingInfoForTheTrack($data)
     {
-        if (empty($data)) return [];
+        if (empty($data)) {
+            return [];
+        }
 
         $result = [];
         // 获取配时数据
         $timing = $this->getTimingData($data);
-        if (!$timing || empty($timing['latest_plan']['time_plan'][0]['plan_detail'])) return [];
+        if (!$timing || empty($timing['latest_plan']['time_plan'][0]['plan_detail'])) {
+            return [];
+        }
 
         $result = $this->formatTimingDataForTrack($timing['latest_plan']['time_plan'][0]['plan_detail'], trim($data['flow_id']));
 
@@ -128,16 +137,22 @@ class Timing_model extends CI_Model
     */
     private function formatTimingDataForTrack($data, $flow_id)
     {
-        if (empty($data) || empty($flow_id)) return [];
+        if (empty($data) || empty($flow_id)) {
+            return [];
+        }
 
         $res = [];
 
-        if (!isset($data['extra_timing']['cycle']) || !isset($data['extra_timing']['offset'])) return [];
+        if (!isset($data['extra_timing']['cycle']) || !isset($data['extra_timing']['offset'])) {
+            return [];
+        }
 
         $res['cycle'] = $data['extra_timing']['cycle'];
         $res['offset'] = $data['extra_timing']['offset'];
 
-        if (empty($data['movement_timing'])) return [];
+        if (empty($data['movement_timing'])) {
+            return [];
+        }
 
         foreach ($data['movement_timing'] as $k=>$v) {
             if (trim($v[0]['flow_logic']['logic_flow_id']) == $flow_id) {
@@ -165,7 +180,9 @@ class Timing_model extends CI_Model
     */
     private function formartTimingDataByPlan($data)
     {
-        if (empty($data)) return [];
+        if (empty($data)) {
+            return [];
+        }
 
         $result = [];
         if (!empty($data['latest_plan']['time_plan'][0]['plan_detail']['movement_timing'])) {
@@ -187,7 +204,9 @@ class Timing_model extends CI_Model
     */
     private function formartTimingDataByTimePoint($data, $time_point)
     {
-        if (empty($data) || empty($time_point)) return [];
+        if (empty($data) || empty($time_point)) {
+            return [];
+        }
 
         $time_point = strtotime($time_point);
         $result = [];
@@ -217,7 +236,9 @@ class Timing_model extends CI_Model
     */
     private function formatTimingDataResult($data)
     {
-        if (empty($data)) return [];
+        if (empty($data)) {
+            return [];
+        }
 
         $position = ['东'=>1, '西'=>2, '南'=>3, '北'=>4];
         $turn = ['直'=>1, '左'=>2, '右'=>3];
@@ -328,7 +349,9 @@ class Timing_model extends CI_Model
     */
     private function formatTimingIdToName($data)
     {
-        if (empty($data)) return [];
+        if (empty($data)) {
+            return [];
+        }
 
         $result = [];
         if (!empty($data['latest_plan']['time_plan'][0]['plan_detail']['movement_timing'])) {

@@ -23,7 +23,7 @@ class MY_Controller extends CI_Controller {
         $host = $_SERVER['HTTP_HOST'];
         $this->load->model('junction_model');
 
-        if ($host != '100.90.164.31:8088' && $host != 'www.itstool.com' && $host != '100.90.164.31:8089') {
+        if ( $host != '100.90.164.31:8088' && $host != 'www.itstool.com' && $host != '100.90.164.31:8089') {
             $this->is_check_login = 1;
 
             $this->load->model('user/user', 'user');

@@ -149,17 +149,27 @@ class Junction extends MY_Controller
             return;
         }
 
-        $params['timingType'] = $this->timingType;
+        $data = [
+            'task_id'         => intval($params['task_id']),
+            'dates'           => $params['dates'],
+            'junction_id'     => strip_tags(trim($params['junction_id'])),
+            'search_type'     => intval($params['search_type']),
+            'time_point'      => strip_tags(trim($params['time_point'])),
+            'time_range'      => strip_tags(trim($params['time_range'])),
+            'type'            => intval($params['type']),
+            'task_time_range' => strip_tags(trim($params['task_time_range'])),
+            'timingType'      => $this->timingType
+        ];
 
         // 获取路口指标详情
-        $res = $this->junction_model->getFlowQuotas($params);
+        $res = $this->junction_model->getFlowQuotas($data);
 
         return $this->response($res);
     }
 
     /**
     * 获取配时方案及配时详情
-    * @param dates           string Y 评估/诊断日期
+    * @param dates           array  Y 评估/诊断日期
     * @param junction_id     string Y 路口ID
     * @param task_time_range string Y 任务时间段
     * @return json
@@ -185,9 +195,11 @@ class Junction extends MY_Controller
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
         }
-        $params['time_range'] = $params['task_time_range'];
-        $params['timingType'] = $this->timingType;
-        $timing = $this->timing_model->getJunctionsTimingInfo($params);
+        $data['dates'] = $params['dates'];
+        $data['junction_id'] = strip_tags(trim($params['junction_id']));
+        $data['time_range'] = strip_tags(trim($params['task_time_range']));
+        $data['timingType'] = $this->timingType;
+        $timing = $this->timing_model->getJunctionsTimingInfo($data);
 
         return $this->response($timing);
     }
@@ -262,7 +274,8 @@ class Junction extends MY_Controller
 
     /**
     * 获取问题趋势
-    * @param task_id  interger Y 任务ID
+    * @param task_id    interger Y 任务ID
+    * @param confidence interger Y 置信度
     * @return json
     */
     public function getQuestionTrend()
@@ -273,10 +286,12 @@ class Junction extends MY_Controller
             $this->errmsg = 'The task_id is error.';
             return;
         }
+        $data['task_id'] = intval($params['task_id']);
+        $data['confidence'] = intval($params['confidence']);
 
         $result = [];
 
-        $result = $this->junction_model->getQuestionTrend($params);
+        $result = $this->junction_model->getQuestionTrend($data);
 
         return $this->response($result);
     }
@@ -328,7 +343,16 @@ class Junction extends MY_Controller
             return;
         }
 
-        $res = $this->junction_model->getDiagnoseRankList($params);
+        $data = [
+            'task_id'      => intval($params['task_id']),
+            'city_id'      => intval($params['city_id']),
+            'time_point'   => strip_tags(trim($params['time_point'])),
+            'diagnose_key' => $params['diagnose_key'],
+            'confidence'   => intval($params['confidence']),
+            'orderby'      => intval($params['orderby'])
+        ];
+
+        $res = $this->junction_model->getDiagnoseRankList($data);
         return $this->response($res);
     }
 
@@ -392,9 +416,17 @@ class Junction extends MY_Controller
             return;
         }
 
-        $params['timingType'] = $this->timingType;
+        $data = [
+            'dates'           => $params['dates'],
+            'junction_id'     => strip_tags(trim($params['junction_id'])),
+            'search_type'     => intval($params['search_type']),
+            'time_point'      => strip_tags(trim($params['time_point'])),
+            'time_range'      => strip_tags(trim($params['time_range'])),
+            'task_time_range' => strip_tags(trim($params['task_time_range'])),
+            'timingType'      => $this->timingType
+        ];
 
-        $result = $this->junction_model->getJunctionMapData($params);
+        $result = $this->junction_model->getJunctionMapData($data);
 
         return $this->response($result);
     }

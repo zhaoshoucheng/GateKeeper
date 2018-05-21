@@ -19,7 +19,20 @@ class MapManager
             $capsule->addConnection($dbConnection);
             $capsule->bootEloquent();
             $capsule->setAsGlobal();
+            $capsule->getConnection()->enableQueryLog();
             self::$capsule = $capsule;
         }
+    }
+
+    public static function queryLog()
+    {
+        $connection = self::$capsule->getConnection();
+        $logs = $connection->getQueryLog();
+
+        foreach ($logs as $log) {
+            com_log_strace('_com_mysql_success', array('host'=>$connection->getConfig('host'), 'port'=>$connection->getConfig('port'), "oper_type"=>"query", 'table'=>'', "sql"=> $log['query'], 'bindings' => json_encode($log['bindings']), 'proc_time' => $log['time'] / 1000));
+        }
+
+        $connection->flushQueryLog();
     }
 }

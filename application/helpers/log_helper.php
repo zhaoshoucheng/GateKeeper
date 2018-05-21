@@ -105,6 +105,19 @@ if( ! function_exists('gen_traceid'))
             $_global_trace_id = $_SERVER['HTTP_DIDI_HEADER_RID'];
             return $_global_trace_id;
         }
+
+
+        // add by yejianfeng@didichuxing.com
+        $uuid = sprintf(
+            '%04x%04x%04x%04x%04x%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
+        $_global_trace_id = $uuid;
+        return $_global_trace_id;
     }
 
 }
@@ -160,6 +173,13 @@ if( ! function_exists('t_gen_random_id'))
         $ip = ip2long($reqip);
         $random_id = t_id_to_hex($ip ^ $time) ."".t_id_to_hex($rand);
         return $random_id;
+    }
+}
+
+if (! function_exists('gen_span_id') ) {
+    function gen_span_id()
+    {
+        return t_gen_random_id();
     }
 }
 
