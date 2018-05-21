@@ -379,7 +379,7 @@ class Junction_model extends CI_Model
         $start = strotime('00:00');
         $end = strotime('24:00');
         for ($i = $start; $i < $end; $i+= 15 * 60) {
-            $timeRange[] = data('H:i', $i);
+            $timeRange[] = date('H:i', $i);
         }
         if (!empty($res)) {
             foreach ($res as $k=>$v) {
