@@ -382,13 +382,13 @@ class Junction_model extends CI_Model
             $timeRange[] = date('H:i', $i);
         }
         if (!empty($res)) {
-            foreach ($timeRange as $hour) {
-                foreach ($res as $k=>$v) {
+            foreach ($res as $k=>$v) {
+                foreach ($timeRange as $hour) {
+                    $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
+                    $result[$k]['list'][$hour]['hour'] = $hour;
+                    $result[$k]['list'][$hour]['num'] = 0;
+                    $result[$k]['list'][$hour]['percent'] = 0 . '%';
                     foreach ($v as $kk=>$vv) {
-                        $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
-                        $result[$k]['list'][$hour]['hour'] = $hour;
-                        $result[$k]['list'][$hour]['num'] = 0;
-                        $result[$k]['list'][$hour]['percent'] = 0 . '%';
                         if ($vv['hour'] == $hour) {
                             $result[$k]['list'][$hour]['hour'] = $vv['hour'];
                             $result[$k]['list'][$hour]['num'] = $vv['num'];
