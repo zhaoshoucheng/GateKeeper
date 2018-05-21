@@ -55,14 +55,14 @@ class Task_model extends CI_Model
             $weight = pow(10, $ider);
             $bit_value = $task_status / $weight % 10;
             $task['status'] = $task_status - $bit_value * $weight + $status * $weight;
-            
+
 
             if ($comment !== null) {
                 if ($task_comment === null or $task_comment === '') {
-                    $data[$ider][$status] = $comment;
+                    $data[$ider] = $comment;
                 } else {
                     $data = json_decode($task_comment, true);
-                    $data[$ider][$status] = $comment;
+                    $data[$ider] = $comment;
                 }
                 $task['task_comment'] = json_encode($data);
             }
