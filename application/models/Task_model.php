@@ -56,7 +56,7 @@ class Task_model extends CI_Model
             $weight = pow(10, $ider);
             $bit_value = $task_status / $weight % 10;
             $task['status'] = $task_status - $bit_value * $weight + $status * $weight;
-            $task['task_comment'] = $task_comment;
+            $task['task_comment'] = $comment;
 
             // if ($comment !== null) {
             //     if ($task_comment === null or $task_comment === '') {
