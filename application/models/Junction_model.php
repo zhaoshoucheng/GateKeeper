@@ -386,9 +386,15 @@ class Junction_model extends CI_Model
                 foreach ($res as $k=>$v) {
                     foreach ($v as $kk=>$vv) {
                         $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
-                        $result[$k]['list'][$hour]['hour'] = $vv['hour'];
-                        $result[$k]['list'][$hour]['num'] = $vv['num'];
-                        $result[$k]['list'][$hour]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
+                        if (isset($vv[$hour])) {
+                            $result[$k]['list'][$hour]['hour'] = $vv['hour'];
+                            $result[$k]['list'][$hour]['num'] = $vv['num'];
+                            $result[$k]['list'][$hour]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
+                        } else {
+                            $result[$k]['list'][$hour]['hour'] = $hour;
+                            $result[$k]['list'][$hour]['num'] = 0;
+                            $result[$k]['list'][$hour]['percent'] = 0 . '%';
+                        }
                     }
                 }
             }
