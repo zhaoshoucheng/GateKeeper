@@ -90,6 +90,15 @@ class Task extends MY_Controller {
 		$custom_task = array();
 		$run_status = [0, 1, 10, 11];
 		foreach ($cycle_task_tmp as $task) {
+			$reason = '';
+			if ($task['task_comment'] != '' and $task['task_comment'] != null) {
+				$i = intval($task['task_comment']);
+				if (isset($this->task_result[$i])) {
+					$reason = $this->task_result[$i];
+				} else {
+					$reason = $task['task_comment'];
+				}
+			}
 			$cycle_task[] = array(
 				'task_id' => $task['id'],
 				'dates' => explode(',', $task['dates']),
@@ -97,6 +106,7 @@ class Task extends MY_Controller {
 				'junctions' => ($task['junctions'] === '' or $task['junctions'] === null) ? '全城' : '路口',
 				'status' => (in_array($task['status'], $run_status)) ? $task['rate'] . '%' : '失败',
 				'exec_date' => date('m.d', $task['task_start_time']),
+				'reason' => $reason,
 			);
 		}
 		foreach ($custom_task_tmp as $task) {
