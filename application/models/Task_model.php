@@ -11,6 +11,7 @@ class Task_model extends CI_Model
     private $to = 'lizhaohua@didichuxing.com';
     private $subject = 'task scheduler';
 
+
     function __construct() {
         parent::__construct();
         $this->its_tool = $this->load->database('default', true);
@@ -55,17 +56,17 @@ class Task_model extends CI_Model
             $weight = pow(10, $ider);
             $bit_value = $task_status / $weight % 10;
             $task['status'] = $task_status - $bit_value * $weight + $status * $weight;
+            $task['task_comment'] = $task_comment;
 
-
-            if ($comment !== null) {
-                if ($task_comment === null or $task_comment === '') {
-                    $data[$ider] = $comment;
-                } else {
-                    $data = json_decode($task_comment, true);
-                    $data[$ider] = $comment;
-                }
-                $task['task_comment'] = json_encode($data);
-            }
+            // if ($comment !== null) {
+            //     if ($task_comment === null or $task_comment === '') {
+            //         $data[$ider] = $comment;
+            //     } else {
+            //         $data = json_decode($task_comment, true);
+            //         $data[$ider] = $comment;
+            //     }
+            //     $task['task_comment'] = json_encode($data);
+            // }
 
             $this->updateTask($task_id, $task);
             $this->its_tool->trans_commit();

@@ -13,6 +13,12 @@ class Task extends MY_Controller {
 	private $to = 'lizhaohua@didichuxing.com';
 	private $subject = 'task scheduler';
 
+	private $task_result = array(
+	    101 => '轨迹报错',
+	    102 => '配时报错',
+	    103 => '配时超时',
+	);
+
 	public function __construct(){
 		parent::__construct();
 		// $this->config->load('nconf');
@@ -94,6 +100,15 @@ class Task extends MY_Controller {
 			);
 		}
 		foreach ($custom_task_tmp as $task) {
+			$reason = '';
+			if ($task['task_comment'] != '' and $task['task_comment'] != null) {
+				$i = intval($task['task_comment']);
+				if (isset($this->task_result[$i])) {
+					$reason = $this->task_result[$i];
+				} else {
+					$reason = $task['task_comment'];
+				}
+			}
 			$custom_task[] = array(
 				'task_id' => $task['id'],
 				'dates' => explode(',', $task['dates']),
@@ -101,6 +116,7 @@ class Task extends MY_Controller {
 				'junctions' => ($task['junctions'] === '' or $task['junctions'] === null) ? '全城' : '路口',
 				'status' => (in_array($task['status'], $run_status)) ? $task['rate'] . '%' : '失败',
 				'exec_date' => date('m.d', $task['task_start_time']),
+				'reason' => $reason,
 			);
 		}
 		$this->output_data = [
