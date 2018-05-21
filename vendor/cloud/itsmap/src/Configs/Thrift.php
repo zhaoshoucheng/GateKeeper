@@ -55,7 +55,7 @@ class Thrift
             ],
             'mtraj' => [
                 'host' => '100.90.164.32',
-                'port' => "8084",
+                'port' => "8085",
                 'read_timeout' => 30,
                 'write_timeout' => 30,
                 'class' => '\Track\MtrajServiceClient',
@@ -109,7 +109,7 @@ class Thrift
             ],
             'mtraj' => [
                 'host' => '100.90.164.32',
-                'port' => "8084",
+                'port' => "8085",
                 'read_timeout' => 30,
                 'write_timeout' => 30,
                 'class' => '\Track\MtrajServiceClient',
