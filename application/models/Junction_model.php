@@ -374,13 +374,27 @@ class Junction_model extends CI_Model
         }
 
         $result = [];
+        // X轴时间0-24点时间点，15分钟为一刻度 设置这个是因为可能会有某个时间是没有问题的，导致时间不连续
+        $timeRange = [];
+        $start = strtotime('00:00');
+        $end = strtotime('24:00');
+        for ($i = $start; $i < $end; $i += 15 * 60) {
+            $timeRange[] = date('H:i', $i);
+        }
         if (!empty($res)) {
             foreach ($res as $k=>$v) {
-                foreach ($v as $kk=>$vv) {
+                foreach ($timeRange as $hour) {
                     $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
-                    $result[$k]['list'][$vv['hour']]['hour'] = $vv['hour'];
-                    $result[$k]['list'][$vv['hour']]['num'] = $vv['num'];
-                    $result[$k]['list'][$vv['hour']]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
+                    $result[$k]['list'][$hour]['hour'] = $hour;
+                    $result[$k]['list'][$hour]['num'] = 0;
+                    $result[$k]['list'][$hour]['percent'] = 0 . '%';
+                    foreach ($v as $kk=>$vv) {
+                        if ($vv['hour'] == $hour) {
+                            $result[$k]['list'][$hour]['hour'] = $vv['hour'];
+                            $result[$k]['list'][$hour]['num'] = $vv['num'];
+                            $result[$k]['list'][$hour]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
+                        }
+                    }
                 }
             }
         }
