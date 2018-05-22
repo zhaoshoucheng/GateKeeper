@@ -649,7 +649,9 @@ class Junction_model extends CI_Model
                 foreach ($flow_quota_key_conf as $kkk=>$vvv) {
                     $v[$kkk] = round($v[$kkk], $vvv['round_num']);
                 }
-                if (array_key_exists(trim($v['comment']), $phase)) {
+                if (array_key_exists(trim($v['comment']), $phase)
+                    && !array_key_exists($phase[trim($v['comment'])], $temp_movements)
+                ) {
                     $temp_movements[$phase[trim($v['comment'])]] = $v;
                 } else {
                     $temp_movements[mt_rand(100, 900) + mt_rand(1, 99)] = $v;
