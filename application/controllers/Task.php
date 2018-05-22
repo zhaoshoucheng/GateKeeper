@@ -90,8 +90,9 @@ class Task extends MY_Controller {
 		$custom_task = array();
 		$run_status = [0, 1, 10, 11];
 		foreach ($cycle_task_tmp as $task) {
-			$reason = '手动排查';
+			$reason = '';
 			if (! in_array($task['status'], $run_status)) {
+				$reason = '手动排查';
 				// 如果任务状态异常
 				if ($task['task_comment'] != '' and $task['task_comment'] != null) {
 					// 有状态
@@ -112,8 +113,9 @@ class Task extends MY_Controller {
 			);
 		}
 		foreach ($custom_task_tmp as $task) {
-			$reason = '手动排查';
+			$reason = '';
 			if (! in_array($task['status'], $run_status)) {
+				$reason = '手动排查';
 				// 如果任务状态异常
 				if ($task['task_comment'] != '' and $task['task_comment'] != null) {
 					// 有状态
