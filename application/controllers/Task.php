@@ -90,13 +90,15 @@ class Task extends MY_Controller {
 		$custom_task = array();
 		$run_status = [0, 1, 10, 11];
 		foreach ($cycle_task_tmp as $task) {
-			$reason = '';
-			if ($task['task_comment'] != '' and $task['task_comment'] != null) {
-				$i = intval($task['task_comment']);
-				if (isset($this->task_result[$i])) {
-					$reason = $this->task_result[$i];
-				} else {
-					$reason = $task['task_comment'];
+			$reason = '手动排查';
+			if (! in_array($task['status'], $run_status)) {
+				// 如果任务状态异常
+				if ($task['task_comment'] != '' and $task['task_comment'] != null) {
+					// 有状态
+					$i = intval($task['task_comment']);
+					if (isset($this->task_result[$i])) {
+						$reason = $this->task_result[$i];
+					}
 				}
 			}
 			$cycle_task[] = array(
@@ -110,13 +112,15 @@ class Task extends MY_Controller {
 			);
 		}
 		foreach ($custom_task_tmp as $task) {
-			$reason = '';
-			if ($task['task_comment'] != '' and $task['task_comment'] != null) {
-				$i = intval($task['task_comment']);
-				if (isset($this->task_result[$i])) {
-					$reason = $this->task_result[$i];
-				} else {
-					$reason = $task['task_comment'];
+			$reason = '手动排查';
+			if (! in_array($task['status'], $run_status)) {
+				// 如果任务状态异常
+				if ($task['task_comment'] != '' and $task['task_comment'] != null) {
+					// 有状态
+					$i = intval($task['task_comment']);
+					if (isset($this->task_result[$i])) {
+						$reason = $this->task_result[$i];
+					}
 				}
 			}
 			$custom_task[] = array(
