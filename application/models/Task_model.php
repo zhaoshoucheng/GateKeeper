@@ -11,6 +11,9 @@ class Task_model extends CI_Model
     private $to = 'lizhaohua@didichuxing.com';
     private $subject = 'task scheduler';
 
+    private $failed_status = [2, 12, 22, 20, 21, 22];
+    private $run_status = [0, 1, 10, 11];
+
 
     function __construct() {
         parent::__construct();
@@ -41,7 +44,7 @@ class Task_model extends CI_Model
         try {
             $this->its_tool->trans_begin();
 
-            $sql = "select * from task_result where id = ? and status != -1 for update";
+            $sql = "select * from task_result where id = ? for update";
             $query = $this->its_tool->query($sql, array($task_id));
             $result = $query->result_array();
             if (empty($result)) {
@@ -53,10 +56,19 @@ class Task_model extends CI_Model
             $task_status = intval($task['status']);
             $task_comment = $task['task_comment'];
 
+
+            // 如果已经失败了，但是状态更新不是失败，不更新
+            if (in_array($task_status, $this->failed_status) and $status != 2) {
+                return false;
+            }
+
             $weight = pow(10, $ider);
             $bit_value = $task_status / $weight % 10;
             $task['status'] = $task_status - $bit_value * $weight + $status * $weight;
-            $task['task_comment'] = $comment;
+            // 如果comment为空，不更新task_comment
+            if ($comment != '' and $comment != '') {
+                $task['task_comment'] = $comment;
+            }
 
             // if ($comment !== null) {
             //     if ($task_comment === null or $task_comment === '') {
