@@ -14,9 +14,9 @@ class Task extends MY_Controller {
 	private $subject = 'task scheduler';
 
 	private $task_result = array(
-	    101 => '轨迹报错',
-	    102 => '配时报错',
-	    103 => '配时超时',
+	    101 => '轨迹出错',
+	    102 => '配时出错',
+	    103 => '任务超时',
 	);
 
 	public function __construct(){
@@ -92,7 +92,7 @@ class Task extends MY_Controller {
 		foreach ($cycle_task_tmp as $task) {
 			$reason = '';
 			if (! in_array($task['status'], $run_status)) {
-				$reason = '手动排查';
+				$reason = '原因未知';
 				// 如果任务状态异常
 				if ($task['task_comment'] != '' and $task['task_comment'] != null) {
 					// 有状态
@@ -115,7 +115,7 @@ class Task extends MY_Controller {
 		foreach ($custom_task_tmp as $task) {
 			$reason = '';
 			if (! in_array($task['status'], $run_status)) {
-				$reason = '手动排查';
+				$reason = '原因未知';
 				// 如果任务状态异常
 				if ($task['task_comment'] != '' and $task['task_comment'] != null) {
 					// 有状态
