@@ -277,6 +277,7 @@ $config['back_timing_roll'] = [
 	'zhaoyuezhaoyue',
 	'tianshanshan',
 	'ningxiangbing',
+	'algorithm_group_sts_p',
 	'lixiaolx_v', 'duzelong', 'wangzhimingjay','tanchenxi', 'tjlifuliang_i',
 	'hanyuhan','umzhaoyan_i','yangjianhao','wangxingmin_i','larrymeiyu_i','mengyuan','wangzihao_i','liuminjun','zhengjianfeng','tianshanshan','wangshengguang',
 ];
