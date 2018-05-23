@@ -160,6 +160,16 @@ class Junction_model extends CI_Model
             $res = $this->getJunctionsDiagnoseByTimePoint($data);
         }
 
+        // 获取此任务路口总数
+        $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
+        $junctionTotal = 0;
+        $allJunction = $this->db->select('count(DISTINCT junction_id) as count')
+                                    ->from($this->tb)
+                                    ->where($where)
+                                    ->get()
+                                    ->row_array();
+        $junctionTotal = $allJunction['count'];
+
         $diagnose_key_conf = $this->config->item('diagnose_key');
         $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
         $temp_diagnose_data = [];
@@ -211,6 +221,7 @@ class Junction_model extends CI_Model
             $temp_diagnose_data['quotaCount']['stop_delay'] = $countStopDelay;
             $temp_diagnose_data['quotaCount']['avg_speed'] = $countAvgSpeed;
         }
+        $temp_diagnose_data['junctionTotal'] = $junctionTotal;
 
         $result_data = $this->mergeAllJunctions($all_city_junctions, $temp_diagnose_data, 'diagnose_detail');
 
@@ -940,12 +951,13 @@ class Junction_model extends CI_Model
         }
 
         // 统计路口总数、去除dataList的key
-        $count = 0;
+        $count = !empty($data['junctionTotal']) ? $data['junctionTotal'] : 0;
+        $qcount = 0;
         if (!empty($result_data['dataList'])) {
-            $count = count($result_data['dataList']);
+            $qcount = count($result_data['dataList']);
             $result_data['dataList'] = array_values($result_data['dataList']);
         }
-        if ($count >= 1) {
+        if ($count >= 1 || $qcount >= 1) {
             $diagnoseKeyConf = $this->config->item('diagnose_key');
             $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
 
@@ -959,11 +971,11 @@ class Junction_model extends CI_Model
             }
 
             // 计算地图中心坐标
-            $center_lng = round($count_lng / $count, 6);
-            $center_lat = round($count_lat / $count, 6);
+            $center_lng = round($count_lng / $qcount, 6);
+            $center_lat = round($count_lat / $qcount, 6);
 
             // 柱状图
-            if (!empty($data['count'])) {
+            if (!empty($data['count']) && $count >= 1) {
                 foreach ($data['count'] as $k=>$v) {
                     // 此问题的路口个数
                     $result_data['count'][$k]['num'] = $v;
@@ -982,8 +994,9 @@ class Junction_model extends CI_Model
         if (isset($result_data['quotaCount'])) {
             $result_data['quotaCount'] = array_values($result_data['quotaCount']);
         }
-        // 路口总数
-        $result_data['junctionTotal'] = $count;
+        if ($count >= 1) {
+            $result_data['junctionTotal'] = $count;
+        }
 
         /*$center_lat = 36.663083;
         $center_lng = 117.033513;*/
