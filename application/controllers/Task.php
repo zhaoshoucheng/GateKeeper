@@ -92,7 +92,7 @@ class Task extends MY_Controller {
 		foreach ($cycle_task_tmp as $task) {
 			$reason = '';
 			if (! in_array($task['status'], $run_status)) {
-				$reason = '原因未知';
+				$reason = '未知原因';
 				// 如果任务状态异常
 				if ($task['task_comment'] != '' and $task['task_comment'] != null) {
 					// 有状态
@@ -115,7 +115,7 @@ class Task extends MY_Controller {
 		foreach ($custom_task_tmp as $task) {
 			$reason = '';
 			if (! in_array($task['status'], $run_status)) {
-				$reason = '原因未知';
+				$reason = '未知原因';
 				// 如果任务状态异常
 				if ($task['task_comment'] != '' and $task['task_comment'] != null) {
 					// 有状态
