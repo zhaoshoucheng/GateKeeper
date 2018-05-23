@@ -68,7 +68,7 @@ class MY_Controller extends CI_Controller {
         $this->load->config('nconf');
         $back_timing_roll = $this->config->item('back_timing_roll');
 
-        $taskId = $this->input->get_post('task_id');
+        $taskId = $this->input->get_post('task_id', true);
         // 暂时先这么做
         $taskUser = $this->junction_model->getTaskUser($taskId);
 
