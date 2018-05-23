@@ -963,14 +963,14 @@ class Junction_model extends CI_Model
             $center_lat = round($count_lat / $count, 6);
 
             // 柱状图
-            if (isset($data['count']) && $data['diagnose_count'] >= 1) {
+            if (!empty($data['count'])) {
                 foreach ($data['count'] as $k=>$v) {
                     // 此问题的路口个数
                     $result_data['count'][$k]['num'] = $v;
                     // 问题中文名称
                     $result_data['count'][$k]['name'] = $diagnoseKeyConf[$k]['name'];
                     // 此问题占所有问题的百分比
-                    $percent = round(($v / $data['diagnose_count']) * 100, 2);
+                    $percent = round(($v / $count) * 100, 2);
                     $result_data['count'][$k]['percent'] = $percent . '%';
                     // 对应不占百分比
                     $result_data['count'][$k]['other'] = (100 - $percent) . '%';
