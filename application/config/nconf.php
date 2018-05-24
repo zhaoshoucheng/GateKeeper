@@ -270,14 +270,10 @@ $config['result_comment'] = [
 ];
 
 // 反推配时名单
+
 $config['back_timing_roll'] = [
 	'unknown',
-	'zhuyewei',
-	'liuminjun',
-	'zhaoyuezhaoyue',
-	'tianshanshan',
-	'ningxiangbing',
 	'algorithm_group_sts_p',
 	'lixiaolx_v', 'duzelong', 'wangzhimingjay','tanchenxi', 'tjlifuliang_i',
-	'hanyuhan','umzhaoyan_i','yangjianhao','wangxingmin_i','larrymeiyu_i','mengyuan','wangzihao_i','liuminjun','zhengjianfeng','tianshanshan','wangshengguang',
+	'hanyuhan','umzhaoyan_i','yangjianhao','wangxingmin_i','larrymeiyu_i','mengyuan','wangzihao_i','zhengjianfeng','tianshanshan','wangshengguang',
 ];
