@@ -13,7 +13,7 @@ use Didi\Cloud\ItsMap\Flow as FlowService;
 /*
  * 临时为自适应设置的
  */
-class Proxy extends CI_Controller
+class Proxy extends MY_Controller
 {
     private $proxyUrl = "100.70.160.62:8000/";
 
