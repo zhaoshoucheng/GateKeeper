@@ -33,6 +33,15 @@ class Proxy extends CI_Controller
         $realUri = str_replace('/signalpro/proxy/zsy/', '/', $requestUri);
         $realUri = "{$this->proxyUrl}{$realUri}";
 
+        if (strpos($realUri, "..")) {
+            echo "invalid path";
+            exit;
+        }
+
+        if (strpos($realUri, ".css")) {
+            header("Content-type:text/css");
+        }
+
         echo httpGET($realUri);
         exit;
     }
