@@ -507,7 +507,7 @@ class Task extends MY_Controller {
      * @param city_id	Y 城市ID
      * @return json
      */
-    public function getRelateTask()
+    public function getSameDayTaskId()
     {
         $taskId = intval($this->input->post('task_id', true));
 
