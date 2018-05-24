@@ -377,11 +377,11 @@ class Junction_model extends CI_Model
                 $nWhere .= ' and ' . $k . '_confidence' . $confidenceThreshold[$data['confidence']]['expression'];
             }
             $res[$k] = $this->db->select("count(id) as num , time_point as hour")
-                                    ->from($this->tb)
-                                    ->where($nWhere)
-                                    ->group_by('time_point')
-                                    ->get()
-                                    ->result_array();
+                                ->from($this->tb)
+                                ->where($nWhere)
+                                ->group_by('time_point')
+                                ->get()
+                                ->result_array();
         }
 
         $result = [];
