@@ -24,21 +24,16 @@ class Proxy extends CI_Controller
         $this->load->helper('http');
     }
 
-    public function html()
+    /*
+     * 自适应
+     */
+    public function zsy()
     {
-        $url = "/star_web_NG_with_server/area_traffic_map_info.html";
-        $url = "{$this->proxyUrl}{$url}";
+        $requestUri = $_SERVER['REQUEST_URI'];
+        $realUri = str_replace('/signalpro/proxy/zsy/', '/', $requestUri);
+        $realUri = "{$this->proxyUrl}{$realUri}";
 
-        echo httpGET($url);
-        exit;
-    }
-
-    public function json()
-    {
-        $url = "/star_web_NG_with_server/area_traffic_map_info.html";
-        $url = "{$this->proxyUrl}{$url}";
-
-        echo httpGET($url);
+        echo httpGET($realUri);
         exit;
     }
 
