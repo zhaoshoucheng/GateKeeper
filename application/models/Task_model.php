@@ -101,6 +101,36 @@ class Task_model extends CI_Model
         return $aRet;
     }
 
+    /*
+     * 根据id获取任务
+     */
+    public function getTaskById($taskId, $cols = '*')
+    {
+        return $this->its_tool->select($cols)->from($this->_table)->where('task_id', $taskId)->get()->first_row('array');
+    }
+
+    /*
+     * 获取一个任务的相关任务
+     */
+    public function getDayCycleTaskSummary($user, $cityId, $date)
+    {
+        return $this->its_tool
+            ->select('task_result.id as task_id, task_result.dates as dates, cycle_task.type as cycleType')
+            ->from($this->_table)
+            ->join('cycle_task', 'task_result.conf_id = cycle_task.id')
+            ->where('task_result.user', $user)
+            ->where('task_result.city_id', $cityId)
+            ->where('task_result.created_at > ', "{$date} 00:00:00")
+            ->where('task_result.created_at <= ', "{$date} 23:59:59")
+            ->where('task_result.kind', 2)
+            ->where('task_result.type', 1)
+            ->where('task_result.rate', 100)
+            ->where('task_result.status', $this->completed_status)
+            ->get()
+            ->result_array();
+    }
+
+
     function process() {
         try {
             $this->its_tool->reconnect();
