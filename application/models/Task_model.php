@@ -106,7 +106,7 @@ class Task_model extends CI_Model
      */
     public function getTaskById($taskId, $cols = '*')
     {
-        return $this->its_tool->select($cols)->from($this->_table)->where('task_id', $taskId)->get()->first_row('array');
+        return $this->its_tool->select($cols)->from($this->_table)->where('id', $taskId)->get()->first_row('array');
     }
 
     /*

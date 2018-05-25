@@ -516,7 +516,7 @@ class Task extends MY_Controller {
             return $this->response(array(), -1, "task is empty");
         }
 
-        $tasks = $this->task_model->getDayCycleTaskSummary($task['user_id'], $task['city_id'], date("Y-m-d", strtotime($task['created_at'])));
+        $tasks = $this->task_model->getDayCycleTaskSummary($task['user'], $task['city_id'], date("Y-m-d", strtotime($task['created_at'])));
 
         $types = [
             1 => 'last_day',
