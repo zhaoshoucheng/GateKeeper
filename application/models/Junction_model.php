@@ -549,6 +549,45 @@ class Junction_model extends CI_Model
     }
 
     /**
+    * 获取路口问题趋势图
+    * @param $data['task_id']         interger 任务ID
+    * @param $data['junction_id']     string   逻辑路口ID
+    * @param $data['time_point']      string   时间点
+    * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @return array
+    */
+    public function getJunctionQuestionTrend($data)
+    {
+        $diagnose_key_conf = $this->config->item('diagnose_key');
+
+        // 组织select 需要的字段
+        $select_str = '';
+        foreach ($diagnose_key_conf as $k=>$v) {
+            $select_str .= empty($select_str) ? $k : ',' . $k;
+        }
+        $select = "id, junction_id, {$select_str}, time_point";
+
+        // 组织where条件
+        $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
+
+        $where  .= ' and type = 0';
+
+        $res = $this->db->select($select)
+                        ->from($this->tb)
+                        ->where($where)
+                        ->get();
+
+        if (!$res || empty($res)) {
+            return [];
+        }
+
+        $result = $res->result_array();
+        $result = $this->formatJunctionQuestionTrendData($result, $data);
+
+        return $result;
+    }
+
+    /**
     * 获取诊断详情页数据
     * @param $data['task_id']         interger 任务ID
     * @param $data['junction_id']     string   逻辑路口ID
@@ -869,6 +908,18 @@ class Junction_model extends CI_Model
         }
 
         return $resultData;
+    }
+
+    /**
+    * 格式化路口问题趋势数据
+    * @param $data                         array  Y 路口数据
+    * @param $whereData['time_point']      string Y 时间点 用于标注问题持续时间段用
+    * @param $whereData['task_time_point'] string Y 任务时间段
+    * @return array
+    */
+    private function formatJunctionQuestionTrendData($data, $whereData)
+    {
+        echo "<pre>";print_r($data);exit;
     }
 
     /**
