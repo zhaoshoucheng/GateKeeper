@@ -838,6 +838,8 @@ class Junction_model extends CI_Model
                     if ($ruleCount < 1) {
                         $resultData['diagnose_detail'][$k]['movements'] = [];
                     }
+                    // 所有问题对应的指标集合
+                    $resultData['flow_quota'][$kk] = $flowQuotaKeyConf[$kk]['name'];
 
                     foreach ($data['movements'] as $kkk=>$vvv) {
                         foreach ($vv as $vvvv) {
@@ -848,9 +850,6 @@ class Junction_model extends CI_Model
                                 // movement中文名称-相位名称
                                 $resultData['diagnose_detail'][$k]['movements'][$kkk]['comment']
                                     = $flowIdName[$vvv['movement_id']];
-                                // 此问题对应指标中文名称
-                                $resultData['diagnose_detail'][$k]['movements'][$kkk]['quota_name']
-                                    = $flowQuotaKeyConf[$kk]['name'];
                                 // 此问题对应指标值
                                 $resultData['diagnose_detail'][$k]['movements'][$kkk][$kk]
                                     = round($vvv[$kk], $flowQuotaKeyConf[$kk]['round_num']);
