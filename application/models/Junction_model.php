@@ -506,6 +506,51 @@ class Junction_model extends CI_Model
     }
 
     /**
+    * 获取诊断列表页简易路口详情
+    * @param $data['task_id']         interger 任务ID
+    * @param $data['junction_id']     string   逻辑路口ID
+    * @param $data['dates']           array    评估/诊断日期
+    * @param $data['time_point']      string   时间点
+    * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
+    * @return array
+    */
+    public function getDiagnosePageSimpleJunctionDetail($data)
+    {
+        $diagnose_key_conf = $this->config->item('diagnose_key');
+
+        // 组织select 需要的字段
+        $select_str = '';
+        foreach ($diagnose_key_conf as $k=>$v) {
+            $select_str .= empty($select_str) ? $k : ',' . $k;
+        }
+        $select = "id, junction_id, {$select_str}, start_time, end_time, movements";
+
+        // 组织where条件
+        $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
+
+        $select .= ', time_point';
+        $where  .= ' and type = 0';
+        $where  .= ' and time_point = "' . trim($data['time_point']) . '"';
+
+        $res = $this->db->select($select)
+                        ->from($this->tb)
+                        ->where($where)
+                        ->get();
+        //echo 'sql = ' . $this->db->last_query();
+
+        if (!$res || empty($res)) {
+            return [];
+        }
+
+        $result = $res->row_array();
+        echo "<hr>data = <pre>";print_r($result);
+        $result = $this->formatJunctionDetailData($result, $data['dates'], 2, $data['timingType']);
+
+        return $result;
+    }
+
+    /**
     * 获取诊断详情页数据
     * @param $data['task_id']         interger 任务ID
     * @param $data['junction_id']     string   逻辑路口ID
