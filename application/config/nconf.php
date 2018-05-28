@@ -202,7 +202,20 @@ $config['diagnose_key']	= [
 			'route_length'  => [
 				'name'=>'路段长度/米'
 			]
-		]
+		],
+		// flow级的诊断问题
+		'flow_diagnose' => [
+			'saturation_degree' => [
+				[
+					'threshold' => 0,
+					'formula'   => '>='
+				],
+				[
+					'threshold' => 2,
+					'formula'   => '<'
+				]
+			]
+		],
 	],
 	'spillover_index'	=> [
 		'name'				         => '溢流',
@@ -229,7 +242,16 @@ $config['diagnose_key']	= [
 			'route_length'  => [
 				'name'=>'路段长度/米'
 			],
-		]
+		],
+		// flow级的诊断问题
+		'flow_diagnose' => [
+			'spillover_rate' => [
+				[
+					'threshold' => 0.008,
+					'formula'   => '>'
+				],
+			]
+		],
 	],
 	'saturation_index'	=> [
 		'name'				         => '空放',
@@ -250,7 +272,16 @@ $config['diagnose_key']	= [
 			'stop_time_cycle'=>[
 				'name'=>'停车次数'
 			]
-		]
+		],
+		// flow级的诊断问题
+		'flow_diagnose' => [
+			'saturation_degree' => [
+				[
+					'threshold' => 0.3,
+					'formula'   => '<'
+				],
+			]
+		],
 	]
 ];
 

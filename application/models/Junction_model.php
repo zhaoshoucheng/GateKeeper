@@ -160,6 +160,16 @@ class Junction_model extends CI_Model
             $res = $this->getJunctionsDiagnoseByTimePoint($data);
         }
 
+        // 获取此任务路口总数
+        $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
+        $junctionTotal = 0;
+        $allJunction = $this->db->select('count(DISTINCT junction_id) as count')
+                                    ->from($this->tb)
+                                    ->where($where)
+                                    ->get()
+                                    ->row_array();
+        $junctionTotal = $allJunction['count'];
+
         $diagnose_key_conf = $this->config->item('diagnose_key');
         $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
         $temp_diagnose_data = [];
@@ -211,6 +221,7 @@ class Junction_model extends CI_Model
             $temp_diagnose_data['quotaCount']['stop_delay'] = $countStopDelay;
             $temp_diagnose_data['quotaCount']['avg_speed'] = $countAvgSpeed;
         }
+        $temp_diagnose_data['junctionTotal'] = $junctionTotal;
 
         $result_data = $this->mergeAllJunctions($all_city_junctions, $temp_diagnose_data, 'diagnose_detail');
 
@@ -366,11 +377,11 @@ class Junction_model extends CI_Model
                 $nWhere .= ' and ' . $k . '_confidence' . $confidenceThreshold[$data['confidence']]['expression'];
             }
             $res[$k] = $this->db->select("count(id) as num , time_point as hour")
-                                    ->from($this->tb)
-                                    ->where($nWhere)
-                                    ->group_by('time_point')
-                                    ->get()
-                                    ->result_array();
+                                ->from($this->tb)
+                                ->where($nWhere)
+                                ->group_by('time_point')
+                                ->get()
+                                ->result_array();
         }
 
         $result = [];
@@ -492,6 +503,51 @@ class Junction_model extends CI_Model
         }
 
         return $result_data;
+    }
+
+    /**
+    * 获取诊断列表页简易路口详情
+    * @param $data['task_id']         interger 任务ID
+    * @param $data['junction_id']     string   逻辑路口ID
+    * @param $data['dates']           array    评估/诊断日期
+    * @param $data['time_point']      string   时间点
+    * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
+    * @return array
+    */
+    public function getDiagnosePageSimpleJunctionDetail($data)
+    {
+        $diagnose_key_conf = $this->config->item('diagnose_key');
+
+        // 组织select 需要的字段
+        $select_str = '';
+        foreach ($diagnose_key_conf as $k=>$v) {
+            $select_str .= empty($select_str) ? $k : ',' . $k;
+        }
+        $select = "id, junction_id, {$select_str}, start_time, end_time, movements";
+
+        // 组织where条件
+        $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
+
+        $select .= ', time_point';
+        $where  .= ' and type = 0';
+        $where  .= ' and time_point = "' . trim($data['time_point']) . '"';
+
+        $res = $this->db->select($select)
+                        ->from($this->tb)
+                        ->where($where)
+                        ->get();
+        //echo 'sql = ' . $this->db->last_query();
+
+        if (!$res || empty($res)) {
+            return [];
+        }
+
+        $result = $res->row_array();
+        echo "<hr>data = <pre>";print_r($result);
+        $result = $this->formatJunctionDetailData($result, $data['dates'], 2, $data['timingType']);
+
+        return $result;
     }
 
     /**
@@ -940,12 +996,13 @@ class Junction_model extends CI_Model
         }
 
         // 统计路口总数、去除dataList的key
-        $count = 0;
+        $count = !empty($data['junctionTotal']) ? $data['junctionTotal'] : 0;
+        $qcount = 0;
         if (!empty($result_data['dataList'])) {
-            $count = count($result_data['dataList']);
+            $qcount = count($result_data['dataList']);
             $result_data['dataList'] = array_values($result_data['dataList']);
         }
-        if ($count >= 1) {
+        if ($count >= 1 || $qcount >= 1) {
             $diagnoseKeyConf = $this->config->item('diagnose_key');
             $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
 
@@ -959,11 +1016,11 @@ class Junction_model extends CI_Model
             }
 
             // 计算地图中心坐标
-            $center_lng = round($count_lng / $count, 6);
-            $center_lat = round($count_lat / $count, 6);
+            $center_lng = round($count_lng / $qcount, 6);
+            $center_lat = round($count_lat / $qcount, 6);
 
             // 柱状图
-            if (!empty($data['count'])) {
+            if (!empty($data['count']) && $count >= 1) {
                 foreach ($data['count'] as $k=>$v) {
                     // 此问题的路口个数
                     $result_data['count'][$k]['num'] = $v;
@@ -982,8 +1039,9 @@ class Junction_model extends CI_Model
         if (isset($result_data['quotaCount'])) {
             $result_data['quotaCount'] = array_values($result_data['quotaCount']);
         }
-        // 路口总数
-        $result_data['junctionTotal'] = $count;
+        if ($count >= 1) {
+            $result_data['junctionTotal'] = $count;
+        }
 
         /*$center_lat = 36.663083;
         $center_lng = 117.033513;*/
