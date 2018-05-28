@@ -860,6 +860,11 @@ class Junction_model extends CI_Model
                         }
                     }
                 }
+
+                if (!empty($resultData['diagnose_detail'][$k]['movements'])) {
+                    $resultData['diagnose_detail'][$k]['movements']
+                        = array_values($resultData['diagnose_detail'][$k]['movements']);
+                }
             }
         }
 
