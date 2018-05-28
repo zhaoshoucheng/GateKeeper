@@ -812,9 +812,6 @@ class Junction_model extends CI_Model
 
         // flow 所有指标配置
         $flowQuotaKeyConf = $this->config->item('flow_quota_key');
-        foreach ($flowQuotaKeyConf as $k=>$v) {
-            $resultData['flow_quota'][$k] = $v['name'];
-        }
 
         // 置信度配置
         $confidenceConf = $this->config->item('confidence');
@@ -851,6 +848,9 @@ class Junction_model extends CI_Model
                                 // movement中文名称-相位名称
                                 $resultData['diagnose_detail'][$k]['movements'][$kkk]['comment']
                                     = $flowIdName[$vvv['movement_id']];
+                                // 此问题对应指标中文名称
+                                $resultData['diagnose_detail'][$k]['movements'][$kkk]['quota_name']
+                                    = $flowQuotaKeyConf[$kk]['name'];
                                 // 此问题对应指标值
                                 $resultData['diagnose_detail'][$k]['movements'][$kkk][$kk]
                                     = round($vvv[$kk], $flowQuotaKeyConf[$kk]['round_num']);
