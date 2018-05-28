@@ -203,7 +203,7 @@ $config['diagnose_key']	= [
 				'name'=>'路段长度/米'
 			]
 		],
-		// flow级的诊断问题
+		// flow级的诊断问题 如果有两个则是or的关系
 		'flow_diagnose' => [
 			'saturation_degree' => [
 				[
