@@ -64,7 +64,7 @@ class Task_model extends CI_Model
             $bit_value = $task_status / $weight % 10;
             $task['status'] = $task_status - $bit_value * $weight + $status * $weight;
             // 如果comment为空，不更新task_comment
-            if ($comment != '' and $comment != '') {
+            if ($comment != '' and $comment != null) {
                 $task['task_comment'] = $comment;
             }
 
