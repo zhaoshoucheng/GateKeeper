@@ -500,4 +500,45 @@ class Task extends MY_Controller {
 		}
 
 	}
+
+
+    /**
+     * 获取相关的任务id
+     * @param city_id	Y 城市ID
+     * @return json
+     */
+    public function getSameDayTaskId()
+    {
+        $taskId = intval($this->input->post('task_id', true));
+
+        $task = $this->task_model->getTaskById($taskId);
+        if (empty($task)) {
+            return $this->response(array(), -1, "task is empty");
+        }
+
+        $tasks = $this->task_model->getDayCycleTaskSummary($task['user'], $task['city_id'], date("Y-m-d", strtotime($task['created_at'])));
+
+        $types = [
+            1 => 'last_day',
+            2 => 'last_week',
+            3 => 'last_month'
+        ];
+
+        $ret = [];
+        foreach ($types as $taskType => $value) {
+            $tasksSummary = array_filter($tasks, function($task) use($taskType){
+                if ($task['cycleType'] == $taskType) {
+                    return true;
+                }
+                return false;
+            });
+
+            $task = array_first($tasksSummary);
+            $ret[$value] = [
+                'task_id' => $task['task_id'],
+                'dates' => explode(',', $task['dates']),
+            ];
+        }
+        $this->output_data = $ret;
+    }
 }
