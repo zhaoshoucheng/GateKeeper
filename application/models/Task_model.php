@@ -25,8 +25,6 @@ class Task_model extends CI_Model
     }
 
     function addTask($task) {
-        $task['created_at'] = date('Y-m-d H:i:s');
-        $task['updated_at'] = date('Y-m-d H:i:s');
         $bRet = $this->its_tool->insert($this->_table, $task);
         if ($bRet === false) {
             return -1;
@@ -35,7 +33,6 @@ class Task_model extends CI_Model
     }
 
     function updateTask($task_id, $task) {
-        $task['updated_at'] = date('Y-m-d H:i:s');
         $bRet = $this->its_tool->where('id', $task_id)->update($this->_table, $task);
         return $bRet;
     }
