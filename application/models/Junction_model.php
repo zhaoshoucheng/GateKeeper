@@ -954,11 +954,12 @@ class Junction_model extends CI_Model
                 $beforTime = $continuouStart - $scale;
                 if (empty($tempData[$beforTime])) {
                     $isBeforQuestion = false;
-                }
-                if ($this->compare($tempData[$beforTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
-                    $continuouStart = $beforTime;
                 } else {
-                    $isBeforQuestion = false;
+                    if ($this->compare($tempData[$beforTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                        $continuouStart = $beforTime;
+                    } else {
+                        $isBeforQuestion = false;
+                    }
                 }
             }
 
@@ -966,11 +967,12 @@ class Junction_model extends CI_Model
                 $afterTime = $continuouEnd + $scale;
                 if (empty($tempData[$afterTime])) {
                     $isAfterQuestion = false;
-                }
-                if ($this->compare($tempData[$afterTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
-                    $continuouEnd = $afterTime;
                 } else {
-                    $isAfterQuestion = false;
+                    if ($this->compare($tempData[$afterTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                        $continuouEnd = $afterTime;
+                    } else {
+                        $isAfterQuestion = false;
+                    }
                 }
             }
 
