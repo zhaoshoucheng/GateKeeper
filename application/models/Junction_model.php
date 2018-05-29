@@ -919,7 +919,75 @@ class Junction_model extends CI_Model
     */
     private function formatJunctionQuestionTrendData($data, $whereData)
     {
-        echo "<pre>";print_r($data);exit;
+        // 任务开始、结束时间
+        $taskTimeRange = array_filter(explode('-', $whereData['task_time_range']));
+        $taskStartTime = strtotime($taskTimeRange[0]);
+        $taskEndTime = strtotime($taskTimeRange[1]);
+
+        // 使任务时间连续 时间间隔15分钟
+        for ($i = $taskStartTime; $i < $taskEndTime; $i += 15 * 60) {
+            $tempData[date('H:i', $i)]['imbalance_index'] = 0;
+            $tempData[date('H:i', $i)]['spillover_index'] = 0;
+            $tempData[date('H:i', $i)]['saturation_index'] = 0;
+            $tempData[date('H:i', $i)]['time_point'] = date('H:i', $i);
+            foreach ($data as $k=>$v) {
+                $tempData[$v['time_point']] = $v;
+            }
+        }
+
+        // 诊断问题配置
+        $diagnoseConf = $this->config->item('diagnose_key');
+
+        $newData = [];
+        foreach ($diagnoseConf as $k=>$v) {
+            $newData[$k]['info']['name'] = $v['name'];
+            // 此问题持续开始时间
+            $continuouStart = strtotime($whereData['time_point']);
+            // 此问题持续结束时间
+            $continuouEnd = strtotime($whereData['time_point']);
+            // 时间刻度15分钟
+            $scale = 15 * 60;
+            $isBeforQuestion = true;
+            $isAfterQuestion = true;
+
+            while ($isBeforQuestion) {
+                $beforTime = date('H:i', $continuouStart - $scale);
+                if (empty($tempData[$beforTime])) {
+                    $isBeforQuestion = false;
+                }
+                if ($this->compare($tempData[$beforTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                    $continuouStart = $beforTime;
+                } else {
+                    $isBeforQuestion = false;
+                }
+            }
+
+            while ($isAfterQuestion) {
+                $afterTime = date('H:i', $continuouEnd + $scale);
+                if (empty($tempData[$afterTime])) {
+                    $isAfterQuestion = false;
+                }
+                if ($this->compare($tempData[$afterTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                    $continuouStart = $afterTime;
+                } else {
+                    $isAfterQuestion = false;
+                }
+            }
+
+            $newdata[$k]['info']['continuous_start'] = $continuouStart;
+            $newdata[$k]['info']['continuous_end'] = $continuouEnd;
+
+            foreach ($tempData as $kk=>$vv) {
+                $newData[$k]['list'][$kk]['value'] = round($vv[$k], 5);
+                $newData[$k]['list'][$kk]['time'] = $vv['time_point'];
+            }
+            if (!empty($newData[$k]['list'])) {
+                $newData[$k]['list'] = array_values($newData[$k]['list']);
+            }
+        }
+
+        echo "<pre>";print_r($newData);exit;
+        return $newData;
     }
 
     /**
