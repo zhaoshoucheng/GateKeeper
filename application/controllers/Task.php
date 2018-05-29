@@ -51,6 +51,10 @@ class Task extends MY_Controller {
 			]
 		);
 
+		if(!$validate['status']){
+			return $this->response(array(), $errno, $validate['errmsg']);
+		}
+
 		$city_id = intval($params['city_id']);
 		$type = intval($params['type']);
 		$kind = intval($params['kind']);
