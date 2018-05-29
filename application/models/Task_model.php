@@ -71,16 +71,6 @@ class Task_model extends CI_Model
                 $task['task_comment'] = $comment;
             }
 
-            // if ($comment !== null) {
-            //     if ($task_comment === null or $task_comment === '') {
-            //         $data[$ider] = $comment;
-            //     } else {
-            //         $data = json_decode($task_comment, true);
-            //         $data[$ider] = $comment;
-            //     }
-            //     $task['task_comment'] = json_encode($data);
-            // }
-
             $this->updateTask($task_id, $task);
             $this->its_tool->trans_commit();
             return true;
