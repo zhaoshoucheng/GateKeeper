@@ -9,7 +9,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Didi\Cloud\ItsMap\Task as TaskService;
 
-class Task extends MY_Controller {
+class Task extends MY_Controller
+{
 	private $to = 'lizhaohua@didichuxing.com';
 	private $subject = 'task scheduler';
 

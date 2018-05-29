@@ -11,7 +11,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Didi\Cloud\ItsMap\Task;
 
-class Cron extends CI_Controller {
+class Cron extends CI_Controller
+{
 	public function __construct(){
 		parent::__construct();
 		$this->load->helper('http');
