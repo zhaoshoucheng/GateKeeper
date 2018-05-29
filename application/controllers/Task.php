@@ -44,8 +44,7 @@ class Task extends MY_Controller {
 		$params = $this->input->post();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'city_id'		=> 'nullunable',
 				'type'			=> 'nullunable',
 				'kind'			=> 'nullunable',
@@ -156,8 +155,7 @@ class Task extends MY_Controller {
 		$params = $this->input->post();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'city_id'		=> 'nullunable',
 				'dates'			=> 'nullunable',
 				'start_time'	=> 'nullunable',
@@ -245,8 +243,7 @@ class Task extends MY_Controller {
 		$params = $this->input->post();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'city_id'		=> 'nullunable',
 				'start_time'	=> 'nullunable',
 				'end_time'		=> 'nullunable',
@@ -297,8 +294,7 @@ class Task extends MY_Controller {
 		$params = $this->input->post();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'city_id'		=> 'nullunable',
 			]
 		);
@@ -336,8 +332,7 @@ class Task extends MY_Controller {
 		$params = $this->input->get();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'task_id'		=> 'nullunable',
 				'rate'			=> 'nullunable',
 			]
@@ -377,8 +372,7 @@ class Task extends MY_Controller {
 		$params = $this->input->get();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'task_id'		=> 'nullunable',
 				'ider'			=> 'nullunable',
 				'status'		=> 'nullunable',
@@ -430,8 +424,7 @@ class Task extends MY_Controller {
 		$params = $this->input->get();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'city_id'		=> 'nullunable',
 				'dates'			=> 'nullunable',
 			]
