@@ -59,6 +59,7 @@ class Task_model extends CI_Model
 
             // 如果已经失败了，但是状态更新不是失败，不更新
             if (in_array($task_status, $this->failed_status) and $status != 2) {
+                $this->its_tool->trans_rollback();
                 return false;
             }
 
