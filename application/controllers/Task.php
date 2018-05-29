@@ -314,6 +314,7 @@ class Task extends MY_Controller
 		$types = [1 => 'last_day', 2 => 'last_week', 3 => 'last_month'];
 		foreach ($types as $task_type => $value) {
 			$aRet = $this->task_model->getSuccTask($user, $city_id, 1, 2, $task_type);
+			$tasks[$value] = [];
 			if (!empty($aRet)) {
 				$tasks[$value] = [
 					'task_id' => $aRet[0]['task_id'],
