@@ -52,7 +52,7 @@ class Task extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), $errno, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		$city_id = intval($params['city_id']);
@@ -169,7 +169,7 @@ class Task extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), $errno, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		$st = strtotime('2000-01-01 ' . $params['start_time'] . ':00');
@@ -257,7 +257,7 @@ class Task extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), -1, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		$task = [
@@ -304,7 +304,7 @@ class Task extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), -1, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		$city_id = $params['city_id'];
@@ -343,7 +343,7 @@ class Task extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), -1, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		$task_id = $params['task_id'];
@@ -384,7 +384,7 @@ class Task extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), -1, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		$task_id = $params['task_id'];
@@ -425,7 +425,7 @@ class Task extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), -1, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		try {
