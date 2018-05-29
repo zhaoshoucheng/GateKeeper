@@ -926,12 +926,12 @@ class Junction_model extends CI_Model
 
         // 使任务时间连续 时间间隔15分钟
         for ($i = $taskStartTime; $i < $taskEndTime; $i += 15 * 60) {
-            $tempData[date('H:i', $i)]['imbalance_index'] = 0;
-            $tempData[date('H:i', $i)]['spillover_index'] = 0;
-            $tempData[date('H:i', $i)]['saturation_index'] = 0;
-            $tempData[date('H:i', $i)]['time_point'] = date('H:i', $i);
+            $tempData[$i]['imbalance_index'] = 0;
+            $tempData[$i]['spillover_index'] = 0;
+            $tempData[$i]['saturation_index'] = 0;
+            $tempData[$i]['time_point'] = date('H:i', $i);
             foreach ($data as $k=>$v) {
-                $tempData[$v['time_point']] = $v;
+                $tempData[strtotime($v['time_point'])] = $v;
             }
         }
 
@@ -951,7 +951,7 @@ class Junction_model extends CI_Model
             $isAfterQuestion = true;
 
             while ($isBeforQuestion) {
-                $beforTime = date('H:i', $continuouStart - $scale);
+                $beforTime = $continuouStart - $scale;
                 if (empty($tempData[$beforTime])) {
                     $isBeforQuestion = false;
                 }
@@ -963,19 +963,19 @@ class Junction_model extends CI_Model
             }
 
             while ($isAfterQuestion) {
-                $afterTime = date('H:i', $continuouEnd + $scale);
+                $afterTime = $continuouEnd + $scale;
                 if (empty($tempData[$afterTime])) {
                     $isAfterQuestion = false;
                 }
                 if ($this->compare($tempData[$afterTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
-                    $continuouStart = $afterTime;
+                    $continuouEnd = $afterTime;
                 } else {
                     $isAfterQuestion = false;
                 }
             }
 
-            $newdata[$k]['info']['continuous_start'] = $continuouStart;
-            $newdata[$k]['info']['continuous_end'] = $continuouEnd;
+            $newData[$k]['info']['continuous_start'] = date('H:i',$continuouStart);
+            $newData[$k]['info']['continuous_end'] = date('H:i', $continuouEnd);
 
             foreach ($tempData as $kk=>$vv) {
                 $newData[$k]['list'][$kk]['value'] = round($vv[$k], 5);
@@ -986,7 +986,6 @@ class Junction_model extends CI_Model
             }
         }
 
-        echo "<pre>";print_r($newData);exit;
         return $newData;
     }
 
