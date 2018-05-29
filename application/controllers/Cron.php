@@ -57,16 +57,6 @@ class Cron extends CI_Controller {
 					$dateVersion = $task['dateVersion'];
 					$hdfs_dir = "/user/its_bi/its_flow_tool/{$task_id}_{$trace_id}/";
 					$this->task_model->updateTask($task['id'], ['trace_id' => $trace_id]);
-					// $task_dates = array();
-					// foreach ($dateVersion as $date => $version) {
-					// 	$task_dates[] = array(
-					// 		'task_id' => $task['id'],
-					// 		'date' => $date,
-					// 		'version' => $version,
-					// 	);
-					// }
-					// $this->taskdateversion_model->delete($task['id']);
-					// $this->taskdateversion_model->insert_batch($task_dates);
 					// process_flow
 					$task = new Task();
 					$response = $task->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values(array_unique($dateVersion)));

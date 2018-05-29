@@ -367,7 +367,7 @@ class Task extends MY_Controller {
 	* 修改运行任务状态信息
 	* @param task_id			Y 任务ID
 	* @param ider	 			N 身份	0 mapflow, 1 calcute
-	* @param status	 			N 执行状态，0 待执行；1 执行中；2 成功；-1 失败
+	* @param status	 			N 执行状态，0 待执行/执行中；1 成功；2 失败
 	* @param task_comment	 	N 注释
 	* @return json
 	*/
@@ -405,16 +405,6 @@ class Task extends MY_Controller {
 			sendMail($this->to, $this->subject, $content);
 		}
 
-		// $ider_to_id = [
-		// 	'mapflow' => 0,
-		// 	'calcute' => 1,
-		// ];
-		// if (isset($ider_to_id[$ider])) {
-		// 	$ider = $ider_to_id[$ider];
-		// } else {
-		// 	$this->errno = -1;
-		// 	$this->errmsg = '参数错误';
-		// }
 		$ider = intval($ider);
 
 		$bRet = $this->task_model->updateTaskStatus($task_id, $ider, $status, $task_comment);
