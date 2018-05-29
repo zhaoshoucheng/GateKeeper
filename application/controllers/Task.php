@@ -533,10 +533,22 @@ class Task extends MY_Controller {
                 return false;
             });
 
+            if (empty($tasksSummary)) {
+                continue;
+            }
+
+            $task_comment = "";
+            $run_status = [0, 1, 10, 11];
+            if (!empty($task['task_comment']) && isset($this->task_result[$task['task_comment']])) {
+                $task_comment = $this->task_result[$task['task_comment']];
+            }
+
             $task = array_first($tasksSummary);
             $ret[$value] = [
                 'task_id' => $task['task_id'],
                 'dates' => explode(',', $task['dates']),
+                'reason' => $task_comment,
+                'status' => (in_array($task['status'], $run_status)) ? $task['rate'] . '%' : '失败',
             ];
         }
         $this->output_data = $ret;
