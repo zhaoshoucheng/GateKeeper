@@ -168,6 +168,111 @@ class Junction extends MY_Controller
     }
 
     /**
+    * 获取诊断列表页简易路口详情
+    * @param task_id         interger Y 任务ID
+    * @param dates           array    Y 评估/诊断日期 [20180102,20180103,....]
+    * @param junction_id     string   Y 逻辑路口ID
+    * @param time_point      string   Y 时间点
+    * @param task_time_range string   Y 评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @return json
+    */
+    public function getDiagnosePageSimpleJunctionDetail()
+    {
+        $params = $this->input->post();
+
+        // 校验参数
+        $validate = Validate::make($params,
+            [
+                'task_id'         => 'min:1',
+                'junction_id'     => 'nullunable',
+                'task_time_range' => 'nullunable',
+                'time_point'      => 'nullunable'
+            ]
+        );
+
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        $task_time_range = array_filter(explode('-', $params['task_time_range']));
+        if (empty($task_time_range[0]) || empty($task_time_range[1])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The task_time_range is wrong.';
+            return;
+        }
+
+        if (!is_array($params['dates']) || count($params['dates']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The dates cannot be empty and must be array.';
+            return;
+        }
+
+        $data = [
+            'task_id'         => intval($params['task_id']),
+            'dates'           => $params['dates'],
+            'junction_id'     => strip_tags(trim($params['junction_id'])),
+            'time_point'      => strip_tags(trim($params['time_point'])),
+            'task_time_range' => strip_tags(trim($params['task_time_range'])),
+            'timingType'      => $this->timingType
+        ];
+
+        // 获取诊断列表页简易路口详情
+        $res = $this->junction_model->getDiagnosePageSimpleJunctionDetail($data);
+
+        return $this->response($res);
+    }
+
+    /**
+    * 获取路口问题趋势图
+    * @param task_id         interger Y 任务ID
+    * @param junction_id     string   Y 路口ID
+    * @param time_point      string   Y 时间点
+    * @param task_time_range string   Y 任务时间段
+    * @return json
+    */
+    public function getJunctionQuestionTrend()
+    {
+        $params = $this->input->post();
+
+        // 校验参数
+        $validate = Validate::make($params,
+            [
+                'task_id'         => 'min:1',
+                'junction_id'     => 'nullunable',
+                'task_time_range' => 'nullunable',
+                'time_point'      => 'nullunable'
+            ]
+        );
+
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        $task_time_range = array_filter(explode('-', $params['task_time_range']));
+        if (empty($task_time_range[0]) || empty($task_time_range[1])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The task_time_range is wrong.';
+            return;
+        }
+
+        $data = [
+            'task_id'         => intval($params['task_id']),
+            'junction_id'     => strip_tags(trim($params['junction_id'])),
+            'time_point'      => strip_tags(trim($params['time_point'])),
+            'task_time_range' => strip_tags(trim($params['task_time_range']))
+        ];
+
+        // 获取诊断列表页简易路口详情
+        $res = $this->junction_model->getJunctionQuestionTrend($data);
+
+        return $this->response($res);
+    }
+
+    /**
     * 获取配时方案及配时详情
     * @param dates           array  Y 评估/诊断日期
     * @param junction_id     string Y 路口ID
