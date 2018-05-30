@@ -172,7 +172,11 @@ $config['flow_quota_key'] = [
 	'flow_num' => [
 		'name'      => '流量',
 		'round_num' => 0
-	]
+	],
+	'freeflow_speed' => [
+		'name'      => '自由流',
+		'round_num' => 2
+	],
 ];
 
 // 诊断问题
