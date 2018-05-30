@@ -934,6 +934,7 @@ class Junction_model extends CI_Model
                 $tempData[strtotime($v['time_point'])] = $v;
             }
         }
+        ksort($tempData);
 
         // 诊断问题配置
         $diagnoseConf = $this->config->item('diagnose_key');
