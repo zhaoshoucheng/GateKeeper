@@ -493,7 +493,7 @@ class Junction_model extends CI_Model
         foreach ($result as $k=>$v) {
             foreach ($v as $k1=>$v1) {
                 $result_data[$k][$k1]['junction_id'] = $k1;
-                $result_data[$k][$k1]['junction_label'] = isset($junction_id_name[$k1]) ? $junction_id_name[$k1] : '';
+                $result_data[$k][$k1]['junction_label'] = $junction_id_name[$k1] ?? '';
                 $result_data[$k][$k1]['value'] = $v1;
             }
 
@@ -735,10 +735,9 @@ class Junction_model extends CI_Model
             ];
             $temp_movements = [];
             foreach ($data['movements'] as $k=>&$v) {
-                $v['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
-                $v['confidence'] = !empty($confidence_conf[$v['confidence']]['name'])
-                                    ? $confidence_conf[$v['confidence']]['name']
-                                    : '';
+                $v['comment'] = $flow_id_name[$v['movement_id']] ?? '';
+                $v['confidence'] = $confidence_conf[$v['confidence']]['name'] ?? '';
+
                 foreach ($flow_quota_key_conf as $kkk=>$vvv) {
                     $v[$kkk] = round($v[$kkk], $vvv['round_num']);
                 }
@@ -813,9 +812,7 @@ class Junction_model extends CI_Model
         }
 
         $result_comment_conf = $this->config->item('result_comment');
-        $data['result_comment'] = isset($result_comment_conf[$data['result_comment']])
-                                    ? $result_comment_conf[$data['result_comment']]
-                                    : '';
+        $data['result_comment'] = $result_comment_conf[$data['result_comment']] ?? '';
 
         return $data;
     }
