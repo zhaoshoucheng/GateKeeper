@@ -748,11 +748,13 @@ class Junction_model extends CI_Model
                 } else {
                     $temp_movements[mt_rand(100, 900) + mt_rand(1, 99)] = $v;
                 }
+
                 foreach ($flow_quota_key_conf as $key=>$val) {
                     $data['flow_quota_all'][$key]['name'] = $val['name'];
                     $data['flow_quota_all'][$key]['movements'][$k]['id'] = $v['movement_id'];
                     $data['flow_quota_all'][$key]['movements'][$k]['value'] = round($v[$key], $val['round_num']);
-                }                }
+                }
+
             }
 
             if (!empty($temp_movements)) {
