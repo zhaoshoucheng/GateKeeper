@@ -54,8 +54,16 @@ class Thrift
                 'transport' => 'Thrift\Transport\TBufferedTransport',
             ],
             'mtraj' => [
-                'host' => '100.90.164.32',
-                'port' => "8085",
+                'address' => [
+                    [
+                        'host' => '10.89.235.12',
+                        'port' => '8889',
+                    ],
+                    [
+                        'host' => '10.89.234.61',
+                        'port' => '8889',
+                    ]
+                ],
                 'read_timeout' => 30,
                 'write_timeout' => 30,
                 'class' => '\Track\MtrajServiceClient',
@@ -108,8 +116,16 @@ class Thrift
                 'transport' => 'Thrift\Transport\TBufferedTransport',
             ],
             'mtraj' => [
-                'host' => '100.90.164.32',
-                'port' => "8085",
+                'address' => [
+                    [
+                        'host' => '10.89.235.12',
+                        'port' => '8889',
+                    ],
+                    [
+                        'host' => '10.89.234.61',
+                        'port' => '8889',
+                    ]
+                ],
                 'read_timeout' => 30,
                 'write_timeout' => 30,
                 'class' => '\Track\MtrajServiceClient',
