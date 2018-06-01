@@ -926,7 +926,7 @@ class Junction_model extends CI_Model
 
         $newData = [];
         foreach ($diagnoseConf as $k=>$v) {
-            if (in_array($v, $diagnose, true)) {
+            if (in_array($k, $diagnose, true)) {
                 $newData[$k]['info']['name'] = $v['name'];
                 // 此问题持续开始时间
                 $continuouStart = strtotime($whereData['time_point']);
