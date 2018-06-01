@@ -923,11 +923,14 @@ class Junction_model extends CI_Model
 
         // 诊断问题配置
         $diagnoseConf = $this->config->item('diagnose_key');
+        // 路口级指标配置
+        $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
 
         $newData = [];
         foreach ($diagnoseConf as $k=>$v) {
             if (in_array($k, $diagnose, true)) {
                 $newData[$k]['info']['name'] = $v['name'];
+                $newData[$k]['info']['quota_name'] = $junctionQuotaKeyConf[$k]['name'];
                 // 此问题持续开始时间
                 $continuouStart = strtotime($whereData['time_point']);
                 // 此问题持续结束时间
