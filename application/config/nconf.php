@@ -181,6 +181,42 @@ $config['flow_quota_key'] = [
 
 // 诊断问题
 $config['diagnose_key']	= [
+	'spillover_index'	=> [
+		'name'				         => '溢流',
+		'junction_threshold'         => 0.005,
+		'junction_threshold_formula' => '>',
+		'nature_threshold'  => [
+			'high'       => 0.6,
+			'mide'       => 0.3,
+			'low'        => 0
+		],
+		'flow_quota'=>[
+			'spillover_rate'=>[
+				'name'=>'溢流比率'
+			],
+			'queue_position'=>[
+				'name'=>'排队长度/米'
+			],
+			'stop_delay'=>[
+				'name'=>'停车延误/秒'
+			],
+			'stop_time_cycle'=>[
+				'name'=>'停车次数'
+			],
+			'route_length'  => [
+				'name'=>'路段长度/米'
+			],
+		],
+		// flow级的诊断问题
+		'flow_diagnose' => [
+			'spillover_rate' => [
+				[
+					'threshold' => 0.008,
+					'formula'   => '>'
+				],
+			]
+		],
+	],
 	'imbalance_index'=>[
 		'name'				         => '失衡',
 		'junction_threshold'         => 0,
@@ -218,42 +254,6 @@ $config['diagnose_key']	= [
 					'threshold' => 2,
 					'formula'   => '<'
 				]
-			]
-		],
-	],
-	'spillover_index'	=> [
-		'name'				         => '溢流',
-		'junction_threshold'         => 0.005,
-		'junction_threshold_formula' => '>',
-		'nature_threshold'  => [
-			'high'       => 0.6,
-			'mide'       => 0.3,
-			'low'        => 0
-		],
-		'flow_quota'=>[
-			'spillover_rate'=>[
-				'name'=>'溢流比率'
-			],
-			'queue_position'=>[
-				'name'=>'排队长度/米'
-			],
-			'stop_delay'=>[
-				'name'=>'停车延误/秒'
-			],
-			'stop_time_cycle'=>[
-				'name'=>'停车次数'
-			],
-			'route_length'  => [
-				'name'=>'路段长度/米'
-			],
-		],
-		// flow级的诊断问题
-		'flow_diagnose' => [
-			'spillover_rate' => [
-				[
-					'threshold' => 0.008,
-					'formula'   => '>'
-				],
 			]
 		],
 	],
