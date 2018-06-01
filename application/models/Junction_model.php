@@ -512,19 +512,14 @@ class Junction_model extends CI_Model
     * @param $data['dates']           array    评估/诊断日期
     * @param $data['time_point']      string   时间点
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['diagnose_key']    array    诊断问题KEY
     * @param $data['timingType']      interger 配时来源 1：人工 2：反推
     * @return array
     */
     public function getDiagnosePageSimpleJunctionDetail($data)
     {
-        $diagnose_key_conf = $this->config->item('diagnose_key');
-
-        // 组织select 需要的字段
-        $select_str = '';
-        foreach ($diagnose_key_conf as $k=>$v) {
-            $select_str .= empty($select_str) ? $k : ',' . $k;
-        }
-        $select = "id, junction_id, {$select_str}, start_time, end_time, movements";
+        $selectStr = $this->selectColumns($data['diagnose_key']);
+        $select = "id, junction_id, {$selectStr}, start_time, end_time, movements";
 
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
@@ -554,18 +549,13 @@ class Junction_model extends CI_Model
     * @param $data['junction_id']     string   逻辑路口ID
     * @param $data['time_point']      string   时间点
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['diagnose_key']    array    诊断问题KEY
     * @return array
     */
     public function getJunctionQuestionTrend($data)
     {
-        $diagnose_key_conf = $this->config->item('diagnose_key');
-
-        // 组织select 需要的字段
-        $select_str = '';
-        foreach ($diagnose_key_conf as $k=>$v) {
-            $select_str .= empty($select_str) ? $k : ',' . $k;
-        }
-        $select = "id, junction_id, {$select_str}, time_point";
+        $selectStr = $this->selectColumns($data['diagnose_key']);
+        $select = "id, junction_id, {$selectStr}, time_point";
 
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
@@ -582,7 +572,7 @@ class Junction_model extends CI_Model
         }
 
         $result = $res->result_array();
-        $result = $this->formatJunctionQuestionTrendData($result, $data);
+        $result = $this->formatJunctionQuestionTrendData($result, $data, $data['diagnose_key']);
 
         return $result;
     }
@@ -857,44 +847,46 @@ class Junction_model extends CI_Model
             匹配此路口有问题的movement并放入此问题集合中
         *********************************************/
         foreach ($diagnoseConf as $k=>$v) {
-            if ($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
-                // 问题名称
-                $resultData['diagnose_detail'][$k]['name'] = $v['name'];
+            if (isset($data[$k])) {
+                if ($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                    // 问题名称
+                    $resultData['diagnose_detail'][$k]['name'] = $v['name'];
 
-                // 组织有此问题的movement集合
-                $resultData['diagnose_detail'][$k]['movements'] = [];
+                    // 组织有此问题的movement集合
+                    $resultData['diagnose_detail'][$k]['movements'] = [];
 
-                foreach ($v['flow_diagnose'] as $kk=>$vv) {
-                    $ruleCount = count($vv);
-                    if ($ruleCount < 1) {
-                        $resultData['diagnose_detail'][$k]['movements'] = [];
-                    }
-                    // 所有问题对应的指标集合
-                    $resultData['flow_quota'][$kk] = $flowQuotaKeyConf[$kk]['name'];
+                    foreach ($v['flow_diagnose'] as $kk=>$vv) {
+                        $ruleCount = count($vv);
+                        if ($ruleCount < 1) {
+                            $resultData['diagnose_detail'][$k]['movements'] = [];
+                        }
+                        // 所有问题对应的指标集合
+                        $resultData['flow_quota'][$kk] = $flowQuotaKeyConf[$kk]['name'];
 
-                    foreach ($data['movements'] as $kkk=>$vvv) {
-                        foreach ($vv as $vvvv) {
-                            if ($this->compare($vvv[$kk], $vvvv['threshold'], $vvvv['formula'])) {
-                                // movement_id
-                                $resultData['diagnose_detail'][$k]['movements'][$kkk]['movement_id']
-                                    = $vvv['movement_id'];
-                                // movement中文名称-相位名称
-                                $resultData['diagnose_detail'][$k]['movements'][$kkk]['comment']
-                                    = $flowIdName[$vvv['movement_id']];
-                                // 此问题对应指标值
-                                $resultData['diagnose_detail'][$k]['movements'][$kkk][$kk]
-                                    = round($vvv[$kk], $flowQuotaKeyConf[$kk]['round_num']);
-                                // 置信度
-                                $resultData['diagnose_detail'][$k]['movements'][$kkk]['confidence']
-                                    = $confidenceConf[$vvv['confidence']]['name'];
+                        foreach ($data['movements'] as $kkk=>$vvv) {
+                            foreach ($vv as $vvvv) {
+                                if ($this->compare($vvv[$kk], $vvvv['threshold'], $vvvv['formula'])) {
+                                    // movement_id
+                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['movement_id']
+                                        = $vvv['movement_id'];
+                                    // movement中文名称-相位名称
+                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['comment']
+                                        = $flowIdName[$vvv['movement_id']];
+                                    // 此问题对应指标值
+                                    $resultData['diagnose_detail'][$k]['movements'][$kkk][$kk]
+                                        = round($vvv[$kk], $flowQuotaKeyConf[$kk]['round_num']);
+                                    // 置信度
+                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['confidence']
+                                        = $confidenceConf[$vvv['confidence']]['name'];
+                                }
                             }
                         }
                     }
-                }
 
-                if (!empty($resultData['diagnose_detail'][$k]['movements'])) {
-                    $resultData['diagnose_detail'][$k]['movements']
-                        = array_values($resultData['diagnose_detail'][$k]['movements']);
+                    if (!empty($resultData['diagnose_detail'][$k]['movements'])) {
+                        $resultData['diagnose_detail'][$k]['movements']
+                            = array_values($resultData['diagnose_detail'][$k]['movements']);
+                    }
                 }
             }
         }
@@ -907,9 +899,10 @@ class Junction_model extends CI_Model
     * @param $data                         array  Y 路口数据
     * @param $whereData['time_point']      string Y 时间点 用于标注问题持续时间段用
     * @param $whereData['task_time_point'] string Y 任务时间段
+    * @param $diagnose                     array  Y 需要查询的问题
     * @return array
     */
-    private function formatJunctionQuestionTrendData($data, $whereData)
+    private function formatJunctionQuestionTrendData($data, $whereData, $diagnose)
     {
         // 任务开始、结束时间
         $taskTimeRange = array_filter(explode('-', $whereData['task_time_range']));
@@ -933,51 +926,53 @@ class Junction_model extends CI_Model
 
         $newData = [];
         foreach ($diagnoseConf as $k=>$v) {
-            $newData[$k]['info']['name'] = $v['name'];
-            // 此问题持续开始时间
-            $continuouStart = strtotime($whereData['time_point']);
-            // 此问题持续结束时间
-            $continuouEnd = strtotime($whereData['time_point']);
-            // 时间刻度15分钟
-            $scale = 15 * 60;
-            $isBeforQuestion = true;
-            $isAfterQuestion = true;
+            if (in_array($v, $diagnose, true)) {
+                $newData[$k]['info']['name'] = $v['name'];
+                // 此问题持续开始时间
+                $continuouStart = strtotime($whereData['time_point']);
+                // 此问题持续结束时间
+                $continuouEnd = strtotime($whereData['time_point']);
+                // 时间刻度15分钟
+                $scale = 15 * 60;
+                $isBeforQuestion = true;
+                $isAfterQuestion = true;
 
-            while ($isBeforQuestion) {
-                $beforTime = $continuouStart - $scale;
-                if (empty($tempData[$beforTime])) {
-                    $isBeforQuestion = false;
-                } else {
-                    if ($this->compare($tempData[$beforTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
-                        $continuouStart = $beforTime;
-                    } else {
+                while ($isBeforQuestion) {
+                    $beforTime = $continuouStart - $scale;
+                    if (empty($tempData[$beforTime])) {
                         $isBeforQuestion = false;
-                    }
-                }
-            }
-
-            while ($isAfterQuestion) {
-                $afterTime = $continuouEnd + $scale;
-                if (empty($tempData[$afterTime])) {
-                    $isAfterQuestion = false;
-                } else {
-                    if ($this->compare($tempData[$afterTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
-                        $continuouEnd = $afterTime;
                     } else {
-                        $isAfterQuestion = false;
+                        if ($this->compare($tempData[$beforTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                            $continuouStart = $beforTime;
+                        } else {
+                            $isBeforQuestion = false;
+                        }
                     }
                 }
-            }
 
-            $newData[$k]['info']['continuous_start'] = date('H:i',$continuouStart);
-            $newData[$k]['info']['continuous_end'] = date('H:i', $continuouEnd);
+                while ($isAfterQuestion) {
+                    $afterTime = $continuouEnd + $scale;
+                    if (empty($tempData[$afterTime])) {
+                        $isAfterQuestion = false;
+                    } else {
+                        if ($this->compare($tempData[$afterTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                            $continuouEnd = $afterTime;
+                        } else {
+                            $isAfterQuestion = false;
+                        }
+                    }
+                }
 
-            foreach ($tempData as $kk=>$vv) {
-                $newData[$k]['list'][$kk]['value'] = round($vv[$k], 5);
-                $newData[$k]['list'][$kk]['time'] = $vv['time_point'];
-            }
-            if (!empty($newData[$k]['list'])) {
-                $newData[$k]['list'] = array_values($newData[$k]['list']);
+                $newData[$k]['info']['continuous_start'] = date('H:i',$continuouStart);
+                $newData[$k]['info']['continuous_end'] = date('H:i', $continuouEnd);
+
+                foreach ($tempData as $kk=>$vv) {
+                    $newData[$k]['list'][$kk]['value'] = round($vv[$k], 5);
+                    $newData[$k]['list'][$kk]['time'] = $vv['time_point'];
+                }
+                if (!empty($newData[$k]['list'])) {
+                    $newData[$k]['list'] = array_values($newData[$k]['list']);
+                }
             }
         }
 
