@@ -493,7 +493,7 @@ class Junction_model extends CI_Model
         foreach ($result as $k=>$v) {
             foreach ($v as $k1=>$v1) {
                 $result_data[$k][$k1]['junction_id'] = $k1;
-                $result_data[$k][$k1]['junction_label'] = isset($junction_id_name[$k1]) ? $junction_id_name[$k1] : '';
+                $result_data[$k][$k1]['junction_label'] = $junction_id_name[$k1] ?? '';
                 $result_data[$k][$k1]['value'] = $v1;
             }
 
@@ -512,19 +512,14 @@ class Junction_model extends CI_Model
     * @param $data['dates']           array    评估/诊断日期
     * @param $data['time_point']      string   时间点
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['diagnose_key']    array    诊断问题KEY
     * @param $data['timingType']      interger 配时来源 1：人工 2：反推
     * @return array
     */
     public function getDiagnosePageSimpleJunctionDetail($data)
     {
-        $diagnose_key_conf = $this->config->item('diagnose_key');
-
-        // 组织select 需要的字段
-        $select_str = '';
-        foreach ($diagnose_key_conf as $k=>$v) {
-            $select_str .= empty($select_str) ? $k : ',' . $k;
-        }
-        $select = "id, junction_id, {$select_str}, start_time, end_time, movements";
+        $selectStr = $this->selectColumns($data['diagnose_key']);
+        $select = "id, junction_id, {$selectStr}, start_time, end_time, movements";
 
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
@@ -554,18 +549,13 @@ class Junction_model extends CI_Model
     * @param $data['junction_id']     string   逻辑路口ID
     * @param $data['time_point']      string   时间点
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+    * @param $data['diagnose_key']    array    诊断问题KEY
     * @return array
     */
     public function getJunctionQuestionTrend($data)
     {
-        $diagnose_key_conf = $this->config->item('diagnose_key');
-
-        // 组织select 需要的字段
-        $select_str = '';
-        foreach ($diagnose_key_conf as $k=>$v) {
-            $select_str .= empty($select_str) ? $k : ',' . $k;
-        }
-        $select = "id, junction_id, {$select_str}, time_point";
+        $selectStr = $this->selectColumns($data['diagnose_key']);
+        $select = "id, junction_id, {$selectStr}, time_point";
 
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
@@ -582,7 +572,7 @@ class Junction_model extends CI_Model
         }
 
         $result = $res->result_array();
-        $result = $this->formatJunctionQuestionTrendData($result, $data);
+        $result = $this->formatJunctionQuestionTrendData($result, $data, $data['diagnose_key']);
 
         return $result;
     }
@@ -735,10 +725,9 @@ class Junction_model extends CI_Model
             ];
             $temp_movements = [];
             foreach ($data['movements'] as $k=>&$v) {
-                $v['comment'] = !empty($flow_id_name[$v['movement_id']]) ? $flow_id_name[$v['movement_id']] : '';
-                $v['confidence'] = !empty($confidence_conf[$v['confidence']]['name'])
-                                    ? $confidence_conf[$v['confidence']]['name']
-                                    : '';
+                $v['comment'] = $flow_id_name[$v['movement_id']] ?? '';
+                $v['confidence'] = $confidence_conf[$v['confidence']]['name'] ?? '';
+
                 foreach ($flow_quota_key_conf as $kkk=>$vvv) {
                     $v[$kkk] = round($v[$kkk], $vvv['round_num']);
                 }
@@ -749,13 +738,13 @@ class Junction_model extends CI_Model
                 } else {
                     $temp_movements[mt_rand(100, 900) + mt_rand(1, 99)] = $v;
                 }
-                if ($result_type == 1) { // 指标详情页，组织每个指标对应各相位集合
-                    foreach ($flow_quota_key_conf as $key=>$val) {
-                        $data['flow_quota_all'][$key]['name'] = $val['name'];
-                        $data['flow_quota_all'][$key]['movements'][$k]['id'] = $v['movement_id'];
-                        $data['flow_quota_all'][$key]['movements'][$k]['value'] = round($v[$key], $val['round_num']);
-                    }
+
+                foreach ($flow_quota_key_conf as $key=>$val) {
+                    $data['flow_quota_all'][$key]['name'] = $val['name'];
+                    $data['flow_quota_all'][$key]['movements'][$k]['id'] = $v['movement_id'];
+                    $data['flow_quota_all'][$key]['movements'][$k]['value'] = round($v[$key], $val['round_num']);
                 }
+
             }
 
             if (!empty($temp_movements)) {
@@ -765,11 +754,6 @@ class Junction_model extends CI_Model
             }
 
             if ($result_type == 2) { // 诊断详情页
-                // flow级别所有指标集合
-                foreach ($flow_quota_key_conf as $k=>$v) {
-                    $data['flow_quota_all'][$k] = $v['name'];
-                }
-
                 // 组织问题集合
                 $diagnose_key_conf = $this->config->item('diagnose_key');
                 foreach ($diagnose_key_conf as $k=>$v) {
@@ -813,9 +797,7 @@ class Junction_model extends CI_Model
         }
 
         $result_comment_conf = $this->config->item('result_comment');
-        $data['result_comment'] = isset($result_comment_conf[$data['result_comment']])
-                                    ? $result_comment_conf[$data['result_comment']]
-                                    : '';
+        $data['result_comment'] = $result_comment_conf[$data['result_comment']] ?? '';
 
         return $data;
     }
@@ -865,44 +847,46 @@ class Junction_model extends CI_Model
             匹配此路口有问题的movement并放入此问题集合中
         *********************************************/
         foreach ($diagnoseConf as $k=>$v) {
-            if ($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
-                // 问题名称
-                $resultData['diagnose_detail'][$k]['name'] = $v['name'];
+            if (isset($data[$k])) {
+                if ($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                    // 问题名称
+                    $resultData['diagnose_detail'][$k]['name'] = $v['name'];
 
-                // 组织有此问题的movement集合
-                $resultData['diagnose_detail'][$k]['movements'] = [];
+                    // 组织有此问题的movement集合
+                    $resultData['diagnose_detail'][$k]['movements'] = [];
 
-                foreach ($v['flow_diagnose'] as $kk=>$vv) {
-                    $ruleCount = count($vv);
-                    if ($ruleCount < 1) {
-                        $resultData['diagnose_detail'][$k]['movements'] = [];
-                    }
-                    // 所有问题对应的指标集合
-                    $resultData['flow_quota'][$kk] = $flowQuotaKeyConf[$kk]['name'];
+                    foreach ($v['flow_diagnose'] as $kk=>$vv) {
+                        $ruleCount = count($vv);
+                        if ($ruleCount < 1) {
+                            $resultData['diagnose_detail'][$k]['movements'] = [];
+                        }
+                        // 所有问题对应的指标集合
+                        $resultData['flow_quota'][$kk] = $flowQuotaKeyConf[$kk]['name'];
 
-                    foreach ($data['movements'] as $kkk=>$vvv) {
-                        foreach ($vv as $vvvv) {
-                            if ($this->compare($vvv[$kk], $vvvv['threshold'], $vvvv['formula'])) {
-                                // movement_id
-                                $resultData['diagnose_detail'][$k]['movements'][$kkk]['movement_id']
-                                    = $vvv['movement_id'];
-                                // movement中文名称-相位名称
-                                $resultData['diagnose_detail'][$k]['movements'][$kkk]['comment']
-                                    = $flowIdName[$vvv['movement_id']];
-                                // 此问题对应指标值
-                                $resultData['diagnose_detail'][$k]['movements'][$kkk][$kk]
-                                    = round($vvv[$kk], $flowQuotaKeyConf[$kk]['round_num']);
-                                // 置信度
-                                $resultData['diagnose_detail'][$k]['movements'][$kkk]['confidence']
-                                    = $confidenceConf[$vvv['confidence']]['name'];
+                        foreach ($data['movements'] as $kkk=>$vvv) {
+                            foreach ($vv as $vvvv) {
+                                if ($this->compare($vvv[$kk], $vvvv['threshold'], $vvvv['formula'])) {
+                                    // movement_id
+                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['movement_id']
+                                        = $vvv['movement_id'];
+                                    // movement中文名称-相位名称
+                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['comment']
+                                        = $flowIdName[$vvv['movement_id']];
+                                    // 此问题对应指标值
+                                    $resultData['diagnose_detail'][$k]['movements'][$kkk][$kk]
+                                        = round($vvv[$kk], $flowQuotaKeyConf[$kk]['round_num']);
+                                    // 置信度
+                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['confidence']
+                                        = $confidenceConf[$vvv['confidence']]['name'];
+                                }
                             }
                         }
                     }
-                }
 
-                if (!empty($resultData['diagnose_detail'][$k]['movements'])) {
-                    $resultData['diagnose_detail'][$k]['movements']
-                        = array_values($resultData['diagnose_detail'][$k]['movements']);
+                    if (!empty($resultData['diagnose_detail'][$k]['movements'])) {
+                        $resultData['diagnose_detail'][$k]['movements']
+                            = array_values($resultData['diagnose_detail'][$k]['movements']);
+                    }
                 }
             }
         }
@@ -915,11 +899,87 @@ class Junction_model extends CI_Model
     * @param $data                         array  Y 路口数据
     * @param $whereData['time_point']      string Y 时间点 用于标注问题持续时间段用
     * @param $whereData['task_time_point'] string Y 任务时间段
+    * @param $diagnose                     array  Y 需要查询的问题
     * @return array
     */
-    private function formatJunctionQuestionTrendData($data, $whereData)
+    private function formatJunctionQuestionTrendData($data, $whereData, $diagnose)
     {
-        echo "<pre>";print_r($data);exit;
+        // 任务开始、结束时间
+        $taskTimeRange = array_filter(explode('-', $whereData['task_time_range']));
+        $taskStartTime = strtotime($taskTimeRange[0]);
+        $taskEndTime = strtotime($taskTimeRange[1]);
+
+        // 使任务时间连续 时间间隔15分钟
+        for ($i = $taskStartTime; $i < $taskEndTime; $i += 15 * 60) {
+            $tempData[$i]['imbalance_index'] = 0;
+            $tempData[$i]['spillover_index'] = 0;
+            $tempData[$i]['saturation_index'] = 0;
+            $tempData[$i]['time_point'] = date('H:i', $i);
+            foreach ($data as $k=>$v) {
+                $tempData[strtotime($v['time_point'])] = $v;
+            }
+        }
+        ksort($tempData);
+
+        // 诊断问题配置
+        $diagnoseConf = $this->config->item('diagnose_key');
+        // 路口级指标配置
+        $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
+
+        $newData = [];
+        foreach ($diagnoseConf as $k=>$v) {
+            if (in_array($k, $diagnose, true)) {
+                $newData[$k]['info']['name'] = $v['name'];
+                $newData[$k]['info']['quota_name'] = $junctionQuotaKeyConf[$k]['name'];
+                // 此问题持续开始时间
+                $continuouStart = strtotime($whereData['time_point']);
+                // 此问题持续结束时间
+                $continuouEnd = strtotime($whereData['time_point']);
+                // 时间刻度15分钟
+                $scale = 15 * 60;
+                $isBeforQuestion = true;
+                $isAfterQuestion = true;
+
+                while ($isBeforQuestion) {
+                    $beforTime = $continuouStart - $scale;
+                    if (empty($tempData[$beforTime])) {
+                        $isBeforQuestion = false;
+                    } else {
+                        if ($this->compare($tempData[$beforTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                            $continuouStart = $beforTime;
+                        } else {
+                            $isBeforQuestion = false;
+                        }
+                    }
+                }
+
+                while ($isAfterQuestion) {
+                    $afterTime = $continuouEnd + $scale;
+                    if (empty($tempData[$afterTime])) {
+                        $isAfterQuestion = false;
+                    } else {
+                        if ($this->compare($tempData[$afterTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                            $continuouEnd = $afterTime;
+                        } else {
+                            $isAfterQuestion = false;
+                        }
+                    }
+                }
+
+                $newData[$k]['info']['continuous_start'] = date('H:i',$continuouStart);
+                $newData[$k]['info']['continuous_end'] = date('H:i', $continuouEnd);
+
+                foreach ($tempData as $kk=>$vv) {
+                    $newData[$k]['list'][$kk]['value'] = round($vv[$k], 5);
+                    $newData[$k]['list'][$kk]['time'] = $vv['time_point'];
+                }
+                if (!empty($newData[$k]['list'])) {
+                    $newData[$k]['list'] = array_values($newData[$k]['list']);
+                }
+            }
+        }
+
+        return $newData;
     }
 
     /**

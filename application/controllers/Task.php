@@ -9,7 +9,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Didi\Cloud\ItsMap\Task as TaskService;
 
-class Task extends MY_Controller {
+class Task extends MY_Controller
+{
 	private $to = 'lizhaohua@didichuxing.com';
 	private $subject = 'task scheduler';
 
@@ -44,13 +45,16 @@ class Task extends MY_Controller {
 		$params = $this->input->post();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'city_id'		=> 'nullunable',
 				'type'			=> 'nullunable',
 				'kind'			=> 'nullunable',
 			]
 		);
+
+		if(!$validate['status']){
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
+		}
 
 		$city_id = intval($params['city_id']);
 		$type = intval($params['type']);
@@ -156,8 +160,7 @@ class Task extends MY_Controller {
 		$params = $this->input->post();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'city_id'		=> 'nullunable',
 				'dates'			=> 'nullunable',
 				'start_time'	=> 'nullunable',
@@ -167,7 +170,7 @@ class Task extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), $errno, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		$st = strtotime('2000-01-01 ' . $params['start_time'] . ':00');
@@ -245,8 +248,7 @@ class Task extends MY_Controller {
 		$params = $this->input->post();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'city_id'		=> 'nullunable',
 				'start_time'	=> 'nullunable',
 				'end_time'		=> 'nullunable',
@@ -256,7 +258,7 @@ class Task extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), -1, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		$task = [
@@ -297,14 +299,13 @@ class Task extends MY_Controller {
 		$params = $this->input->post();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'city_id'		=> 'nullunable',
 			]
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), -1, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		$city_id = $params['city_id'];
@@ -313,6 +314,7 @@ class Task extends MY_Controller {
 		$types = [1 => 'last_day', 2 => 'last_week', 3 => 'last_month'];
 		foreach ($types as $task_type => $value) {
 			$aRet = $this->task_model->getSuccTask($user, $city_id, 1, 2, $task_type);
+			$tasks[$value] = [];
 			if (!empty($aRet)) {
 				$tasks[$value] = [
 					'task_id' => $aRet[0]['task_id'],
@@ -336,15 +338,14 @@ class Task extends MY_Controller {
 		$params = $this->input->get();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'task_id'		=> 'nullunable',
 				'rate'			=> 'nullunable',
 			]
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), -1, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		$task_id = $params['task_id'];
@@ -368,7 +369,7 @@ class Task extends MY_Controller {
 	* 修改运行任务状态信息
 	* @param task_id			Y 任务ID
 	* @param ider	 			N 身份	0 mapflow, 1 calcute
-	* @param status	 			N 执行状态，0 待执行；1 执行中；2 成功；-1 失败
+	* @param status	 			N 执行状态，0 待执行/执行中；1 成功；2 失败
 	* @param task_comment	 	N 注释
 	* @return json
 	*/
@@ -377,8 +378,7 @@ class Task extends MY_Controller {
 		$params = $this->input->get();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'task_id'		=> 'nullunable',
 				'ider'			=> 'nullunable',
 				'status'		=> 'nullunable',
@@ -386,7 +386,7 @@ class Task extends MY_Controller {
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), -1, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		$task_id = $params['task_id'];
@@ -407,16 +407,6 @@ class Task extends MY_Controller {
 			sendMail($this->to, $this->subject, $content);
 		}
 
-		// $ider_to_id = [
-		// 	'mapflow' => 0,
-		// 	'calcute' => 1,
-		// ];
-		// if (isset($ider_to_id[$ider])) {
-		// 	$ider = $ider_to_id[$ider];
-		// } else {
-		// 	$this->errno = -1;
-		// 	$this->errmsg = '参数错误';
-		// }
 		$ider = intval($ider);
 
 		$bRet = $this->task_model->updateTaskStatus($task_id, $ider, $status, $task_comment);
@@ -430,15 +420,14 @@ class Task extends MY_Controller {
 		$params = $this->input->get();
 
 		// 校验参数
-		$validate = Validate::make($params,
-			[
+		$validate = Validate::make($params, [
 				'city_id'		=> 'nullunable',
 				'dates'			=> 'nullunable',
 			]
 		);
 
 		if(!$validate['status']){
-			return $this->response(array(), -1, $validate['errmsg']);
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
 		}
 
 		try {

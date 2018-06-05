@@ -25,8 +25,6 @@ class Task_model extends CI_Model
     }
 
     function addTask($task) {
-        $task['created_at'] = date('Y-m-d H:i:s');
-        $task['updated_at'] = date('Y-m-d H:i:s');
         $bRet = $this->its_tool->insert($this->_table, $task);
         if ($bRet === false) {
             return -1;
@@ -35,7 +33,6 @@ class Task_model extends CI_Model
     }
 
     function updateTask($task_id, $task) {
-        $task['updated_at'] = date('Y-m-d H:i:s');
         $bRet = $this->its_tool->where('id', $task_id)->update($this->_table, $task);
         return $bRet;
     }
@@ -59,6 +56,7 @@ class Task_model extends CI_Model
 
             // 如果已经失败了，但是状态更新不是失败，不更新
             if (in_array($task_status, $this->failed_status) and $status != 2) {
+                $this->its_tool->trans_rollback();
                 return false;
             }
 
@@ -66,19 +64,9 @@ class Task_model extends CI_Model
             $bit_value = $task_status / $weight % 10;
             $task['status'] = $task_status - $bit_value * $weight + $status * $weight;
             // 如果comment为空，不更新task_comment
-            if ($comment != '' and $comment != '') {
+            if ($comment != '' and $comment != null) {
                 $task['task_comment'] = $comment;
             }
-
-            // if ($comment !== null) {
-            //     if ($task_comment === null or $task_comment === '') {
-            //         $data[$ider] = $comment;
-            //     } else {
-            //         $data = json_decode($task_comment, true);
-            //         $data[$ider] = $comment;
-            //     }
-            //     $task['task_comment'] = json_encode($data);
-            // }
 
             $this->updateTask($task_id, $task);
             $this->its_tool->trans_commit();
