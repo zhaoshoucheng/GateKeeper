@@ -534,12 +534,19 @@ class Task extends MY_Controller
             if (!empty($task['task_comment']) && isset($this->task_result[$task['task_comment']])) {
                 $task_comment = $this->task_result[$task['task_comment']];
             }
+            if ( isset($this->task_result[$task_comment])) {
+                $task_comment = $this->task_result[$task_comment];
+            } elseif ((in_array($task['status'], $run_status))){
+                $task_comment = "任务执行中";
+            } else {
+                $task_comment  = "未知原因";
+            }
 
             $ret[$value] = [
                 'task_id' => $task['task_id'],
                 'dates' => explode(',', $task['dates']),
                 'reason' => $task_comment,
-                'status' => (in_array($task['status'], $run_status)) ? $task['rate'] . '%' : '失败',
+                'status' => (in_array($task['status'], $run_status)) ? '成功' : '失败',
             ];
         }
         $this->output_data = $ret;
