@@ -95,7 +95,7 @@ class Scatter_model extends CI_Model
             'filterData' => $sample_data
         ];
 
-        $result_data = $this->$type($vals, $junction_info);
+        $result_data = $this->getScatterMtraj($vals, $junction_info);
 
         return $result_data;
     }
