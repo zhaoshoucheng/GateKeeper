@@ -130,6 +130,8 @@ class Track_model extends CI_Model
                 }
                 $sample_data[$k]['num'] = $num[$k];
             }
+        } else {
+            return [];
         }
 
         $vals = [
