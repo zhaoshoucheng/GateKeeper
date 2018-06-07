@@ -39,7 +39,6 @@ class Scatter_model extends CI_Model
 
         // 获取路口详情 dates start_time end_time movements
         $junction_info = $this->junction_model->getJunctionInfoForScatter($data);
-        echo "<pre>junction_info = ";print_r($junction_info);exit;
         if (!$junction_info) {
             return [];
         }
@@ -47,10 +46,9 @@ class Scatter_model extends CI_Model
         // 获取 mapversion
         $mapversions = $this->taskdateversion_model->select($junction_info['task_id'], explode(',', $junction_info['dates']));
         if (!$mapversions) {
-            $content = "form_data = " . json_encode(['task_id'=>$junction_info['task_id'], 'dates'=>$junction_info['dates']]);
-            sendMail($this->email_to, 'logs: 获取时空/散点图（'.$type.'）->获取mapversion为空', $content);
             return [];
         }
+        echo "<pre>mapversion = ";print_r($mapversions);exit;
 
         // 获取 配时信息 周期 相位差 绿灯开始结束时间
         $timing_data = [

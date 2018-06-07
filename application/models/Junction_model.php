@@ -1138,7 +1138,7 @@ class Junction_model extends CI_Model
 
         $result = [];
 
-        $select = 'task_id, junction_id, dates, start_time, end_time, clock_shift, movements';
+        $select = 'task_id, junction_id, dates, clock_shift';
         $where  = "task_id = {$data['task_id']} and junction_id = '{$data['junction_id']}' and type = 1";
 
         $result = $this->db->select($select)
