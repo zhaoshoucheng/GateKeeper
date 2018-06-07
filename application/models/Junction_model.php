@@ -1128,6 +1128,34 @@ class Junction_model extends CI_Model
     }
 
     /**
+    *
+    */
+    public function getJunctionInfoForScatter($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+
+        $select = 'task_id, junction_id, dates, start_time, end_time, clock_shift, movements';
+        $where  = "task_id = {$data['task_id']} and junction_id = '{$data['junction_id']}' and type = 1";
+
+        $result = $this->db->select($select)
+                            ->from($this->tb)
+                            ->where($where)
+                            ->limit(1)
+                            ->get();
+        if (!$result) {
+            return [];
+        }
+
+        $result = $result->result_array();
+
+        return $result;
+    }
+
+    /**
     * 组织select 字段
     */
     private function selectColumns($key)

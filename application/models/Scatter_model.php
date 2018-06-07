@@ -1,13 +1,13 @@
 <?php
 /********************************************
-# desc:    轨迹数据模型
+# desc:    散点图模型
 # author:  ningxiangbing@didichuxing.com
 # date:    2018-04-13
 ********************************************/
 
 use Didi\Cloud\ItsMap\Track_vendor;
 
-class Track_model extends CI_Model
+class Scatter_model extends CI_Model
 {
 
     private $email_to = 'ningxiangbing@didichuxing.com';
@@ -20,7 +20,7 @@ class Track_model extends CI_Model
     }
 
     /**
-    * 获取时空、散点图轨迹数据
+    * 获取散点图轨迹数据
     * @param $data['task_id']     interger 任务ID
     * @param $data['junction_id'] string   城市ID
     * @param $data['flow_id']     string   相位ID （flow_id）
@@ -31,14 +31,15 @@ class Track_model extends CI_Model
     * @param $type                string   获取轨迹类型
     * @return json
     */
-    public function getTrackData($data, $type)
+    public function getTrackData($data)
     {
-        if (empty($data) || empty($type)) {
+        if (empty($data)) {
             return [];
         }
 
         // 获取路口详情 dates start_time end_time movements
-        $junction_info = $this->junction_model->getJunctionInfoForTheTrack($data);
+        $junction_info = $this->junction_model->getJunctionInfoForScatter($data);
+        echo "<pre>junction_info = ";print_r($junction_info);exit;
         if (!$junction_info) {
             return [];
         }
@@ -130,8 +131,6 @@ class Track_model extends CI_Model
                 }
                 $sample_data[$k]['num'] = $num[$k];
             }
-        } else {
-            return [];
         }
 
         $vals = [
