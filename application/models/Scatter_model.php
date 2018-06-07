@@ -39,6 +39,7 @@ class Scatter_model extends CI_Model
 
         // 获取路口详情 dates start_time end_time movements
         $junction_info = $this->junction_model->getJunctionInfoForScatter($data);
+        echo "<pre>junction_info = ";print_r($junction_info);exit;
         if (!$junction_info) {
             return [];
         }
