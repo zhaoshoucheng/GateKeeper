@@ -94,7 +94,7 @@ class Junction_model extends CI_Model
             } else {
                 $v['quota_status'] = 3;
             }
-            $v[$quota_key] = round($v[$quota_key], 5);
+            $v[$quota_key] = round($v[$quota_key], $quota_key_conf[$quota_key]['round_num']);
             $temp_quota_data[$v['junction_id']]['list'][$quota_key] = $v[$quota_key];
             $temp_quota_data[$v['junction_id']]['list']['quota_status'] = $v['quota_status'];
         }
@@ -186,13 +186,13 @@ class Junction_model extends CI_Model
 
                     // hover:路口平均延误
                     $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['value']
-                        = round($v['stop_delay'], 5);
+                        = round($v['stop_delay'], $junctionQuotaKeyConf['stop_delay']['round_num']);
                     $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['name']
                         = $junctionQuotaKeyConf['stop_delay']['name'];
                     $temp_diagnose_data[$v['junction_id']]['info']['quota']['stop_delay']['unit']
                         = $junctionQuotaKeyConf['stop_delay']['unit'];
 
-                    $temp_diagnose_data[$v['junction_id']]['list'][$val] = round($v[$val], 5);
+                    $temp_diagnose_data[$v['junction_id']]['list'][$val] = round($v[$val], $junctionQuotaKeyConf[$val]['round_num']);
                     $is_diagnose = 0;
                     if ($this->compare(
                                         $v[$val],
@@ -970,7 +970,7 @@ class Junction_model extends CI_Model
                 $newData[$k]['info']['continuous_end'] = date('H:i', $continuouEnd);
 
                 foreach ($tempData as $kk=>$vv) {
-                    $newData[$k]['list'][$kk]['value'] = round($vv[$k], 5);
+                    $newData[$k]['list'][$kk]['value'] = round($vv[$k], $junctionQuotaKeyConf[$k]['round_num']);
                     $newData[$k]['list'][$kk]['time'] = $vv['time_point'];
                 }
                 if (!empty($newData[$k]['list'])) {

@@ -99,42 +99,49 @@ $config['junction_quota_key'] = [
 		'name'		 => '失衡指数',
 		'status_max' => 0.6,
 		'status_min' => 0.3,
+		'round_num'  => 2,
 		'unit'       => ''
 	],
 	'spillover_index' => [
 		'name'       => '溢流指数',
 		'status_max' => 0.08,
 		'status_min' => 0.04,
+		'round_num'  => 2,
 		'unit'       => ''
 	],
 	'incoordination_index' => [
 		'name'       => '失调指数',
 		'status_max' => 0.7,
 		'status_min' => 0.4,
+		'round_num'  => 2,
 		'unit'       => ''
 	],
 	'saturation_index' => [
 		'name'       => '饱和指数',
 		'status_max' => 0.9,
 		'status_min' => 0.3,
+		'round_num'  => 2,
 		'unit'       => ''
 	],
 	'stop_cycle_time' => [
 		'name'       => '停车次数',
 		'status_max' => 2,
 		'status_min' => 1,
+		'round_num'  => 2,
 		'unit'       => ''
 	],
 	'stop_delay' => [
 		'name'       => '平均延误',
 		'status_max' => 40,
 		'status_min' => 20,
+		'round_num'  => 2,
 		'unit'       => 's'
 	],
 	'avg_speed' => [
 		'name'       => '平均速度',
 		'status_max' => 40,
 		'status_min' => 20,
+		'round_num'  => 2,
 		'unit'       => 'km/h'
 	]
 ];
