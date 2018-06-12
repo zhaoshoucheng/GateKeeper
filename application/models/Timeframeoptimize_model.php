@@ -11,6 +11,6 @@ class Timeframeoptimize_model extends CI_Model
 
     function __construct() {
         parent::__construct();
-        $this->its_tool = $this->load->database('default', true);
+        $this->db = $this->load->database('default', true);
     }
 }
