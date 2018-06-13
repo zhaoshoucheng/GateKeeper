@@ -7,11 +7,12 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Timeframescatter extends MY_Controller
+class Timeframeoptimize extends MY_Controller
 {
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('timeframeoptimize_model');
     }
 
     /**
@@ -22,7 +23,25 @@ class Timeframescatter extends MY_Controller
     */
     public function getAllJunctions()
     {
-        
+        $params = $this->input->post();
+        // 校验参数
+        $validate = Validate::make($params,
+            [
+                'task_id'      => 'min:1',
+                'city_id'      => 'min:1',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+        $data = [
+            'task_id'     => intval($params['task_id']),
+            'city_id'     => intval($params['city_id']),
+        ];
+        $result = $this->timeframeoptimize_model->getAllJunctions($data);
+        return $this->response($result);
     }
 
     /**
