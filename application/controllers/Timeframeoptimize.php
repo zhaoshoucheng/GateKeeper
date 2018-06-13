@@ -2,7 +2,7 @@
 /***************************************************************
 # 时段优化类
 # user:ningxiangbing@didichuxing.com
-# date:2018-06-012
+# date:2018-06-12
 ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
@@ -12,6 +12,7 @@ class Timeframeoptimize extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('timeframeoptimize_model');
     }
 
     /**
@@ -65,7 +66,7 @@ class Timeframeoptimize extends MY_Controller
             'timingType'  => $this->timingType
         ];
 
-        $result = $this->timeframeoptimize->getJunctionMovements($data);
+        $result = $this->timeframeoptimize_model->getJunctionMovements($data);
 
         return $this->response($result);
     }
