@@ -60,8 +60,15 @@ class Timeframeoptimize_model extends CI_Model
     private function formatDataForJunctionMovementsByNema($list, $data)
     {
         // 获取相位ID=>相位名称
-        $flowIdName = $this->timing_model->getFlowIdNameByTimeFrameOptimize($data);
+        $flowIdName = $this->timing_model->getFlowIdToName($data);
 
-        echo "<pre>";print_r($flowIdName);
+        foreach ($list as $k=>&$v) {
+            $v['movements'] = json_decode($v['movements'], true);
+            foreach ($v['movements'] as $vv) {
+                $result[$vv['movement_id']] = $flowIdName[$vv['movement_id']];
+            }
+        }
+
+        echo "<pre>";print_r($result);
     }
 }

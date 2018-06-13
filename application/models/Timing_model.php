@@ -130,28 +130,6 @@ class Timing_model extends CI_Model
     }
 
     /**
-    * 获取flow_id对应名称的数组 用于优化
-    * @param $data['junction_id'] string   逻辑路口ID
-    * @param $data['dates']       array    评估/诊断日期
-    * @param $data['time_range']  string   时间段 00:00-00:30
-    * @param $data['timingType']  interger 配时来源 1：人工 2：反推
-    * @return array
-    */
-    public function getFlowIdNameByTimeFrameOptimize($data)
-    {
-        if (empty($data)) {
-            return [];
-        }
-        // 获取配时数据
-        $timing = $this->getTimingData($data);
-        if (!$timing) {
-            return [];
-        }
-
-        echo "<pre>";print_r($timing);
-    }
-
-    /**
     * 格式配时数据 返回轨迹所需数据格式
     * @param $data
     * @param $flow_id
@@ -379,19 +357,11 @@ class Timing_model extends CI_Model
         foreach ($data['latest_plan']['time_plan'] as $k=>$v) {
             foreach ($v['plan_detail']['movement_timing'] as $kk=>$vv) {
                 foreach ($vv as $vvv) {
-                    $result1[$vvv['flow_logic']['logic_flow_id']] = $vvv['flow_logic']['comment'];
+                    $result[$vvv['flow_logic']['logic_flow_id']] = $vvv['flow_logic']['comment'];
                 }
             }
         }
-        echo "<pre>result1 = ";print_r($result1);
-        if (!empty($data['latest_plan']['time_plan'][0]['plan_detail']['movement_timing'])) {
-            foreach ($data['latest_plan']['time_plan'][0]['plan_detail']['movement_timing'] as $v) {
-                if (!empty($v[0]['flow_logic']['logic_flow_id']) && !empty($v[0]['flow_logic']['comment'])) {
-                    $result[$v[0]['flow_logic']['logic_flow_id']] = $v[0]['flow_logic']['comment'];
-                }
-            }
-        }
-        echo "<hr><pre>result = ";print_r($result);
+
         return $result;
     }
 
