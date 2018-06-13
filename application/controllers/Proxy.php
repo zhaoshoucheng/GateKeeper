@@ -31,6 +31,11 @@ class Proxy extends MY_Controller
     {
         $requestUri = $_SERVER['REQUEST_URI'];
         $realUri = str_replace('/signalpro/proxy/zsy/', '/', $requestUri);
+        if (strpos($realUri, '?') !== false) {
+            $realUri = "{$realUri}&login_username={$this->username}";
+        } else {
+            $realUri = "{$realUri}?login_username={$this->username}";
+        }
         $realUri = "{$this->proxyUrl}{$realUri}";
 
         if (strpos($realUri, "..")) {
