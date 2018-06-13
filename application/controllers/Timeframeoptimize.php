@@ -7,7 +7,7 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Timeframescatter extends MY_Controller
+class Timeframeoptimize extends MY_Controller
 {
     public function __construct()
     {
