@@ -81,7 +81,6 @@ class MY_Controller extends CI_Controller {
         $this->output_data = $data;
         $this->errno = $errno;
         $this->errmsg = $errmsg;
-        $this->username = $this->username;
         $this->output->set_content_type('application/json');
     }
 
@@ -98,7 +97,8 @@ class MY_Controller extends CI_Controller {
             $output = array(
                 'errno' => $this->errno,
                 'errmsg' => $this->errmsg,
-                'data' => $this->output_data
+                'data' => $this->output_data,
+                'username' => $this->username,
             );
             echo json_encode($output);
         }
