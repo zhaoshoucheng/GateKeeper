@@ -40,7 +40,7 @@ class Timeframeoptimize_model extends CI_Model
             return [];
         }
 
-        $list = $this->db->result_array();
+        $list = $list->result_array();
 
         $result = $this->formatDataForJunctionMovementsByNema($list, $data);
 

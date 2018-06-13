@@ -61,7 +61,7 @@ class Timeframeoptimize extends MY_Controller
         $data = [
             'task_id'     => intval($params['task_id']),
             'junction_id' => trim($params['junction_id']),
-            'dates'       => trim($params['dates']),
+            'dates'       => $params['dates'],
             'time_range'  => trim($params['task_time_range']),
             'timingType'  => $this->timingType
         ];
