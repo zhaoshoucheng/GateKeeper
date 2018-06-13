@@ -12,6 +12,7 @@ class Timeframeoptimize_model extends CI_Model
     function __construct() {
         parent::__construct();
         $this->db = $this->load->database('default', true);
+        $this->load->model('timing_model');
     }
 
     /**
@@ -58,6 +59,9 @@ class Timeframeoptimize_model extends CI_Model
     */
     private function formatDataForJunctionMovementsByNema($list, $data)
     {
-        echo "<pre>";print_r($list);
+        // 获取相位ID=>相位名称
+        $flowIdName = $this->timing_model->getFlowIdNameByTimeFrameOptimize($data);
+
+        echo "<pre>";print_r($flowIdName);
     }
 }

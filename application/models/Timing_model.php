@@ -130,6 +130,28 @@ class Timing_model extends CI_Model
     }
 
     /**
+    * 获取flow_id对应名称的数组 用于优化
+    * @param $data['junction_id'] string   逻辑路口ID
+    * @param $data['dates']       array    评估/诊断日期
+    * @param $data['time_range']  string   时间段 00:00-00:30
+    * @param $data['timingType']  interger 配时来源 1：人工 2：反推
+    * @return array
+    */
+    public function getFlowIdNameByTimeFrameOptimize($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+        // 获取配时数据
+        $timing = $this->getTimingData($data);
+        if (!$timing) {
+            return [];
+        }
+
+        echo "<pre>";print_r($timing);
+    }
+
+    /**
     * 格式配时数据 返回轨迹所需数据格式
     * @param $data
     * @param $flow_id
@@ -402,7 +424,6 @@ class Timing_model extends CI_Model
         } catch (Exception $e) {
             return [];
         }
-
         if (isset($timing['data']) && count($timing['data'] >= 1)) {
             return $timing['data'];
         } else {
