@@ -94,6 +94,8 @@ class Timeframeoptimize_model extends CI_Model
             }
         }
         ksort($newRes);
-        echo "<pre>result = ";print_r($newRes);
+        $newRes = array_values($newRes);
+
+        return $newRes;
     }
 }
