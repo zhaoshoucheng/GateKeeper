@@ -69,6 +69,31 @@ class Timeframeoptimize_model extends CI_Model
             }
         }
 
-        echo "<pre>";print_r($result);
+        // NEMA排序 南左、北直、西左、东直、北左、南直、东左、西直
+        $phase = [
+                '南左' => 10,
+                '北直' => 20,
+                '西左' => 30,
+                '东直' => 40,
+                '北左' => 50,
+                '南直' => 60,
+                '东左' => 70,
+                '西直' => 80
+            ];
+
+        $newRes = [];
+        foreach ($result as $k=>$v) {
+            if (array_key_exists($v, $phase) && !array_key_exists($phase[$v], $newRes)) {
+                $newRes[$phase[$v]]['logic_flow_id'] = $k;
+                $newRes[$phase[$v]]['name'] = $v;
+            } else {
+                $newRes[mt_rand(100, 900) + mt_rand(1, 99)] = [
+                    'logic_flow_id' => $k,
+                    'name'          => $v
+                ];
+            }
+        }
+        ksort($newRes);
+        echo "<pre>result = ";print_r($newRes);
     }
 }
