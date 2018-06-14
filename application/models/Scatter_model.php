@@ -14,7 +14,7 @@ class Scatter_model extends CI_Model
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('junction_model');
+        $this->load->model('timeframeoptimize_model');
         $this->load->model('taskdateversion_model');
         $this->load->model('timing_model');
     }
@@ -24,11 +24,6 @@ class Scatter_model extends CI_Model
     * @param $data['task_id']     interger 任务ID
     * @param $data['junction_id'] string   城市ID
     * @param $data['flow_id']     string   相位ID （flow_id）
-    * @param $data['search_type'] interger 搜索类型 查询类型 1：按方案查询 0：按时间点查询
-    * @param $data['time_point']  string   时间点 当search_type = 0 时 必传 格式：00:00
-    * @param $data['time_range']  string   时间段 当search_type = 1 时 必传 格式：00:00-00:30
-    * @param $data['timingType']  interger 配时来源 1：人工 2：反推
-    * @param $type                string   获取轨迹类型
     * @return json
     */
     public function getTrackData($data)
@@ -38,13 +33,13 @@ class Scatter_model extends CI_Model
         }
 
         // 获取路口详情 dates start_time end_time movements
-        $junction_info = $this->junction_model->getJunctionInfoForScatter($data);
-        if (!$junction_info) {
+        $junctionInfo = $this->timeframeoptimize_model->getJunctionInfoForScatter($data);
+        if (!$junctionInfo) {
             return [];
         }
 
         // 获取 mapversion
-        $mapversions = $this->taskdateversion_model->select($junction_info[0]['task_id'], explode(',', $junction_info[0]['dates']));
+        $mapversions = $this->taskdateversion_model->select($junctionInfo[0]['task_id'], explode(',', $junctionInfo[0]['dates']));
         if (!$mapversions) {
             return [];
         }
@@ -70,32 +65,28 @@ class Scatter_model extends CI_Model
         }
 
         // 组织thrift所需filterData数组
-        $af_condition = [];
-        $bf_condition = [];
-        $num = [];
-        if (!empty($junction_info['af_condition'])) {
-            $af_condition = explode(',', trim($junction_info['af_condition']));
-        }
-        if (!empty($junction_info['bf_condition'])) {
-            $bf_condition = explode(',', trim($junction_info['bf_condition']));
-        }
-        if (!empty($junction_info['num'])) {
-            $num = explode(',', trim($junction_info['num']));
-        }
-
-        $sample_data[0]['xType'] = 1;
-        $sample_data[0]['xData']['all'] = true;
-        $sample_data[0]['yType'] = 1;
-        $sample_data[0]['yData']['all'] = true;
+        $sample_data = [
+            [
+                'xType' => 1,
+                'xData' => [
+                    'all' => true
+                ],
+                'yType' => 1,
+                'yData' => [
+                    'all' => true
+                ],
+                'num'   => 3000
+            ]
+        ];
 
         $vals = [
-            'junctionId' => trim($junction_info[0]['junction_id']),
+            'junctionId' => trim($junctionInfo[0]['junction_id']),
             'flowId'     => trim($data['flow_id']),
             'rtimeVec'   => $rtimeVec,
             'filterData' => $sample_data
         ];
 
-        $result_data = $this->getScatterMtraj($vals, $junction_info);
+        $result_data = $this->getScatterMtraj($vals, $junctionInfo);
 
         return $result_data;
     }
@@ -103,7 +94,7 @@ class Scatter_model extends CI_Model
     /**
     * 获取散点图轨迹数据
     */
-    private function getScatterMtraj($vals, $junction_info)
+    private function getScatterMtraj($vals, $junctionInfo)
     {
         $track_mtraj = new Track_vendor();
         $res = $track_mtraj->getScatterMtraj($vals);

@@ -98,4 +98,35 @@ class Timeframeoptimize_model extends CI_Model
 
         return $newRes;
     }
+
+    /**
+    * 获取路口信息
+    * @param $data['task_id']      interger Y 任务ID
+    * @param $data['junction_id']  string   Y 路口ID
+    * @return array
+    */
+    public function getJunctionInfoForScatter($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+
+        $select = 'task_id, junction_id, dates, clock_shift';
+        $where  = "task_id = {$data['task_id']} and junction_id = '{$data['junction_id']}' and type = 1";
+
+        $result = $this->db->select($select)
+                            ->from($this->tb)
+                            ->where($where)
+                            ->limit(1)
+                            ->get();
+        if (!$result) {
+            return [];
+        }
+
+        $result = $result->result_array();
+
+        return $result;
+    }
 }
