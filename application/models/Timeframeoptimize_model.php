@@ -53,7 +53,21 @@ class Timeframeoptimize_model extends CI_Model
             }
             return $v;
         });
+
         $result_data['junctionTotal'] = count($result_data['dataList']);
+        $result_data['center'] = $this->getJunctionCenter($result_data['dataList']);
         return $result_data;
+    }
+
+    // 计算地图中心坐标
+    private function getJunctionCenter($dataList){
+        $count_lng = 0;
+        $count_lat = 0;
+        $qcount = count($dataList);
+        foreach ($dataList as $v){
+            $count_lng += $v['lng'];
+            $count_lat += $v['lat'];
+        }
+        return ["lng"=>round($count_lng / $qcount, 6), "lat"=>round($count_lat / $qcount, 6), ];
     }
 }
