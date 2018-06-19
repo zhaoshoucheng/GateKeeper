@@ -23,7 +23,10 @@ class Scatter_model extends CI_Model
     * 获取散点图轨迹数据
     * @param $data['task_id']     interger 任务ID
     * @param $data['junction_id'] string   城市ID
+    * @param $data['dates']       array    评估/诊断日期
+    * @param $data['time_range']  string   任务时间段
     * @param $data['flow_id']     string   相位ID （flow_id）
+    * @param $data['timingType']  interger 配时数据源 0，全部；1，人工；2，配时反推；3，信号机上报
     * @return json
     */
     public function getTrackData($data)
@@ -32,30 +35,25 @@ class Scatter_model extends CI_Model
             return [];
         }
 
-        // 获取路口详情 dates start_time end_time movements
-        $junctionInfo = $this->timeframeoptimize_model->getJunctionInfoForScatter($data);
-        if (!$junctionInfo) {
-            return [];
-        }
-
         // 获取 mapversion
-        $mapversions = $this->taskdateversion_model->select($junctionInfo[0]['task_id'], explode(',', $junctionInfo[0]['dates']));
+        $mapversions = $this->taskdateversion_model->select($data['task_id'], $data['dates']);
         if (!$mapversions) {
             return [];
         }
 
-        // 获取 配时信息 周期 相位差 绿灯开始结束时间
-        /*$timing_data = [
-            'junction_id' => $junction_info['junction_id'],
-            'dates'       => explode(',', $junction_info['dates']),
-            'time_range'  => $junction_info['start_time'] . '-' . date("H:i", strtotime($junction_info['end_time']) - 60),
+        // 获取配时信息 周期 相位差 绿灯开始结束时间 所有相位最大周期
+        $timingData = [
+            'junction_id' => $junctionInfo[0]['junction_id'],
+            'dates'       => explode(',', $junctionInfo[0]['dates']),
+            'time_range'  => $data['time_range'],
             'flow_id'     => trim($data['flow_id']),
             'timingType'  => $data['timingType']
         ];
-        $timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
+        $timing = $this->timing_model->gitFlowTimingByOptimizeScatter($timingData);
+        echo "<pre>";print_r($timing);exit;
         if (!$timing) {
             return [];
-        }*/
+        }
 
         // 组织thrift所需rtimeVec数组
         foreach ($mapversions as $k=>$v) {

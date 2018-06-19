@@ -74,8 +74,8 @@ class Timeframeoptimize extends MY_Controller
 
     /**
     * 获取配时时间方案
-    * @param junction_id string     Y 路口ID
-    * @param dates       array      Y 评估/诊断时间
+    * @param junction_id     string Y 路口ID
+    * @param dates           array  Y 评估/诊断时间
     * @param task_time_range string Y 任务时间段
     * @return json
     */

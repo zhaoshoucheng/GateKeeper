@@ -157,6 +157,67 @@ class Timing_model extends CI_Model
     }
 
     /**
+    * 获取某一相位的配时信息并计算出所有相位最大配时周期
+    * @param $data['junction_id'] string   逻辑路口ID
+    * @param $data['dates']       array    评估/诊断日期
+    * @param $data['time_range']  string   时间段 00:00-00:30
+    * @param $data['timingType']  interger 配时来源 1：人工 2：反推
+    * @param $data['flow_id']     string   相位ID
+    * @return array
+    */
+    public function gitFlowTimingByOptimizeScatter($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+        // 获取配时数据
+        $timing = $this->getTimingData($data);
+        if (!empty($timing)) {
+            $result = $this->formatTimingDataByOptimizeScatter($timing, $data['flow_id']);
+        }
+        return $result;
+    }
+
+    /**
+    * 格式化配时数据，返回时段优化散点图所需数据
+    * @param $data   array  配时数据
+    * @param $flowId string 相位ID
+    * @return array
+    */
+    private function formatTimingDataByOptimizeScatter($data, $flowId)
+    {
+        // 路口所有相位最大周期
+        $maxCycle = 0;
+        foreach ($data['latest_plan']['time_plan'] as $k=>$v) {
+            if ($maxCycle < $v['extra_timing']['cycle']) {
+                $maxCycle = $v['extra_timing']['cycle'];
+            }
+
+            foreach ($v['movement_timing'] as $kk=>$vv) {
+                foreach ($vv as $kkk=>$vvv) {
+                    if ($flowId == $vvv['flow_logic']['logic_flow_id']) {
+                        $result['planList'][$kk][$kkk] = [
+                            'cycle'         => $v['extra_timing']['cycle'],
+                            'offset'        => $v['extra_timing']['offset'],
+                            'state'         => $vvv['state'],
+                            'start_time'    => $vvv['start_time'],
+                            'duration'      => $vvv['duration'],
+                            'logic_flow_id' => $vvv['flow_logic']['logic_flow_id'],
+                            'comment'       => $vvv['flow_logic']['comment'],
+                        ];
+                    }
+                }
+            }
+        }
+
+        $result['maxCycle'] = $maxCycle;
+
+        return $result;
+    }
+
+    /**
     * 格式配时数据 返回轨迹所需数据格式
     * @param $data
     * @param $flow_id
@@ -303,13 +364,17 @@ class Timing_model extends CI_Model
     {
         // 从data中抽取方案
         $tempTiming = [];
-        foreach ($data['latest_plan']['time_plan'] as $v) {
-            $tempTiming[strtotime($v['tod_start_time'])]['start'] = $v['tod_start_time'];
-            $tempTiming[strtotime($v['tod_start_time'])]['end'] = $v['tod_end_time'];
-            $tempTiming[strtotime($v['tod_start_time'])]['name'] = $v['comment'];
+        if (!empty($data['latest_plan']['time_plan'])) {
+            foreach ($data['latest_plan']['time_plan'] as $v) {
+                $tempTiming[strtotime($v['tod_start_time'])]['start'] = $v['tod_start_time'];
+                $tempTiming[strtotime($v['tod_start_time'])]['end'] = $v['tod_end_time'];
+                $tempTiming[strtotime($v['tod_start_time'])]['name'] = $v['comment'];
+            }
         }
-        ksort($tempTiming);
-        $tempTiming = array_values($tempTiming);
+        if (!empty($tempTiming)) {
+            ksort($tempTiming);
+            $tempTiming = array_values($tempTiming);
+        }
 
         // 补全时段 PS：可能会存在某一个时间段没有配时方案导致时间段不连续，需要补全
         $timeRangeArr = explode('-', $timeRange);
@@ -325,7 +390,7 @@ class Timing_model extends CI_Model
                     'comment' => $tempTiming[$i]['name']
                 ];
             if (strtotime($tempTiming[$i]['end']) < $lastTime
-                && strtotime($tempTiming[$i]['end']) < $strtotime($tempTiming[$i+1]['start'])
+                && strtotime($tempTiming[$i]['end']) < strtotime($tempTiming[$i+1]['start'])
             ) {
                 $resultTiming[strtotime($tempTiming[$i+1]['start'])] = [
                     'start'   => $tempTiming[$i]['end'],
