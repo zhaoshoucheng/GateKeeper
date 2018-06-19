@@ -50,7 +50,6 @@ class Scatter_model extends CI_Model
             'timingType'  => $data['timingType']
         ];
         $timing = $this->timing_model->gitFlowTimingByOptimizeScatter($timingData);
-        echo "<pre>";print_r($timing);exit;
         if (!$timing) {
             return [];
         }
@@ -118,24 +117,22 @@ class Scatter_model extends CI_Model
             $result_data['dataList'] = array_values($result_data['dataList']);
         }
 
-        // 绿灯时长
-        foreach ($timing['planList']['list'] as $k=>$v) {
-            foreach ($v as $kk=>$vv) {
-                if ($vv['state'] == 1) {
-                    $a = 1;
-                }
-            }
-        }
-        $result_data['signal_detail']['cycle'] = (int)$timing['cycle'];
-        $result_data['signal_detail']['red_duration'] = (int)$timing['cycle'] - $green_time;
-        $result_data['signal_detail']['green_duration'] = $green_time;
+        $result_data = [
+            'planList' => $timing['planList'],
+            'info'     => [
+                'id'      => $timing['info']['logic_flow_id'],
+                'comment' => $timing['info']['comment'],
+                'x'       => [
+                    'min' => '00:00:00',
+                    'max' => '23:59:00',
+                ],
+                'y'       => [
+                    'min' => 0,
+                    'max' => intval($timing['maxCycle']) * 2,
+                ],
+            ],
+        ];
 
-        $result_data['info']['id'] = trim($vals['flow_id']);
-        $result_data['info']['comment'] = $timing['info']['comment'];
-        $result_data['info']['x']['min'] = '00:00:00';
-        $result_data['info']['x']['max'] = '23:59:00';
-        $result_data['info']['y']['min'] = 0;
-        $result_data['info']['y']['max'] = (int)$timing['maxCycle'] * 2;
         return $result_data;
     }
 }
