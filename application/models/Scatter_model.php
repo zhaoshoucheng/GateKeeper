@@ -50,7 +50,6 @@ class Scatter_model extends CI_Model
             'timingType'  => $data['timingType']
         ];
         $timing = $this->timing_model->gitFlowTimingByOptimizeScatter($timingData);
-        echo "<pre>";print_r($timing);exit;
         if (!$timing) {
             return [];
         }
@@ -78,13 +77,13 @@ class Scatter_model extends CI_Model
         ];
 
         $vals = [
-            'junctionId' => trim($junctionInfo[0]['junction_id']),
+            'junctionId' => trim($data['junction_id']),
             'flowId'     => trim($data['flow_id']),
             'rtimeVec'   => $rtimeVec,
             'filterData' => $sample_data
         ];
 
-        $result_data = $this->getScatterMtraj($vals, $junctionInfo);
+        $result_data = $this->getScatterMtraj($vals, $timing);
 
         return $result_data;
     }
@@ -92,12 +91,11 @@ class Scatter_model extends CI_Model
     /**
     * 获取散点图轨迹数据
     */
-    private function getScatterMtraj($vals, $junctionInfo)
+    private function getScatterMtraj($vals, $timing)
     {
         $track_mtraj = new Track_vendor();
         $res = $track_mtraj->getScatterMtraj($vals);
         $res = (array)$res;
-        echo "<pre>res = ";print_r($res);exit;
         if ($res['errno'] != 0) {
             return [];
         }
@@ -120,21 +118,23 @@ class Scatter_model extends CI_Model
         }
 
         // 绿灯时长
-        $green_time = 0;
-        foreach ($timing['signal'] as $k=>$v) {
-            // 绿灯
-            if ($v['state'] == 1) $green_time += $v['duration'];
+        foreach ($timing['planList']['list'] as $k=>$v) {
+            foreach ($v as $kk=>$vv) {
+                if ($vv['state'] == 1) {
+                    $a = 1;
+                }
+            }
         }
         $result_data['signal_detail']['cycle'] = (int)$timing['cycle'];
         $result_data['signal_detail']['red_duration'] = (int)$timing['cycle'] - $green_time;
         $result_data['signal_detail']['green_duration'] = $green_time;
 
-        $result_data['info']['id'] = trim($junction_info['flow_id']);
-        $result_data['info']['comment'] = $timing['comment'];
-        $result_data['info']['x']['min'] = $junction_info['start_time'];
-        $result_data['info']['x']['max'] = $junction_info['end_time'];
+        $result_data['info']['id'] = trim($vals['flow_id']);
+        $result_data['info']['comment'] = $timing['info']['comment'];
+        $result_data['info']['x']['min'] = '00:00:00';
+        $result_data['info']['x']['max'] = '23:59:00';
         $result_data['info']['y']['min'] = 0;
-        $result_data['info']['y']['max'] = (int)$timing['cycle'] * 2;
+        $result_data['info']['y']['max'] = (int)$timing['maxCycle'] * 2;
         return $result_data;
     }
 }
