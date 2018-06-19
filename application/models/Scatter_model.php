@@ -58,7 +58,7 @@ class Scatter_model extends CI_Model
         foreach ($mapversions as $k=>$v) {
             $rtimeVec[$k]['mapVersion'] = $v['map_version_md5'];
             $rtimeVec[$k]['startTS'] = strtotime($v['date'] . ' 00:00');
-            $rtimeVec[$k]['endTS'] = strtotime($v['date'] . ' 00:00');
+            $rtimeVec[$k]['endTS'] = strtotime($v['date'] . ' 00:00') + 24 * 3600;
         }
 
         // 组织thrift所需filterData数组
@@ -100,6 +100,22 @@ class Scatter_model extends CI_Model
             return [];
         }
 
+        $result_data = [
+            'planList' => $timing['planList'],
+            'info'     => [
+                'id'      => $timing['info']['logic_flow_id'],
+                'comment' => $timing['info']['comment'],
+                'x'       => [
+                    'min' => '00:00:00',
+                    'max' => '23:59:00',
+                ],
+                'y'       => [
+                    'min' => 0,
+                    'max' => intval($timing['maxCycle']) * 2,
+                ],
+            ],
+        ];
+
         if (!empty($res['scatterPoints'])) {
             foreach ($res['scatterPoints'] as $k=>&$v) {
                 $v = (array)$v;
@@ -116,22 +132,6 @@ class Scatter_model extends CI_Model
             ksort($result_data['dataList']);
             $result_data['dataList'] = array_values($result_data['dataList']);
         }
-
-        $result_data = [
-            'planList' => $timing['planList'],
-            'info'     => [
-                'id'      => $timing['info']['logic_flow_id'],
-                'comment' => $timing['info']['comment'],
-                'x'       => [
-                    'min' => '00:00:00',
-                    'max' => '23:59:00',
-                ],
-                'y'       => [
-                    'min' => 0,
-                    'max' => intval($timing['maxCycle']) * 2,
-                ],
-            ],
-        ];
 
         return $result_data;
     }
