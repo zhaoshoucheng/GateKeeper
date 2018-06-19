@@ -198,12 +198,14 @@ class Timing_model extends CI_Model
             foreach ($v['plan_detail']['movement_timing'] as $kk=>$vv) {
                 foreach ($vv as $kkk=>$vvv) {
                     if ($flowId == $vvv['flow_logic']['logic_flow_id']) {
-                        $result['planList'][$kk][$kkk] = [
+                        $result['planList'][$k][$kkk] = [
                             'cycle'         => $v['extra_timing']['cycle'],
                             'offset'        => $v['extra_timing']['offset'],
                             'state'         => $vvv['state'],
                             'start_time'    => $vvv['start_time'],
                             'duration'      => $vvv['duration'],
+                        ];
+                        $result['info'] = [
                             'logic_flow_id' => $vvv['flow_logic']['logic_flow_id'],
                             'comment'       => $vvv['flow_logic']['comment'],
                         ];
