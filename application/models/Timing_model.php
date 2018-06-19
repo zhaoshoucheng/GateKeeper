@@ -191,11 +191,11 @@ class Timing_model extends CI_Model
         // 路口所有相位最大周期
         $maxCycle = 0;
         foreach ($data['latest_plan']['time_plan'] as $k=>$v) {
-            if ($maxCycle < $v['extra_timing']['cycle']) {
-                $maxCycle = $v['extra_timing']['cycle'];
+            if ($maxCycle < $v['plan_detail']['extra_timing']['cycle']) {
+                $maxCycle = $v['plan_detail']['extra_timing']['cycle'];
             }
 
-            foreach ($v['movement_timing'] as $kk=>$vv) {
+            foreach ($v['plan_detail']['movement_timing'] as $kk=>$vv) {
                 foreach ($vv as $kkk=>$vvv) {
                     if ($flowId == $vvv['flow_logic']['logic_flow_id']) {
                         $result['planList'][$kk][$kkk] = [
