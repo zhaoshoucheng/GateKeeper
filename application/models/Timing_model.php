@@ -453,7 +453,8 @@ class Timing_model extends CI_Model
 
                 // 每个方案对应的详情配时详情
                 if (isset($v['plan_detail']['extra_timing']['cycle'])
-                    && isset($v['plan_detail']['extra_timing']['offset'])) {
+                    && isset($v['plan_detail']['extra_timing']['offset'])
+                ) {
                     $result['timing_detail'][$v['time_plan_id']]['cycle'] = $v['plan_detail']['extra_timing']['cycle'];
                     $result['timing_detail'][$v['time_plan_id']]['offset'] = $v['plan_detail']['extra_timing']['offset'];
                 }
@@ -467,9 +468,12 @@ class Timing_model extends CI_Model
                             // 绿灯开始时间
                             $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['start_time']
                             = isset($val['start_time']) ? $val['start_time'] : 0;
-                            // 绿灯结束时间
+                            // 绿灯持续时间
                             $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['duration']
                             = isset($val['duration']) ? $val['duration'] : 0;
+                            // 绿灯结束时间
+                            $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['end_time']
+                            = $val['start'] + $val['duration'];
                             // 逻辑flow id
                             $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['logic_flow_id']
                             = isset($val['flow_logic']['logic_flow_id']) ? $val['flow_logic']['logic_flow_id'] : 0;
