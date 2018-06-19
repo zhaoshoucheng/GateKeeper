@@ -50,6 +50,7 @@ class Scatter_model extends CI_Model
             'timingType'  => $data['timingType']
         ];
         $timing = $this->timing_model->gitFlowTimingByOptimizeScatter($timingData);
+        echo "<pre>";print_r($timing);exit;
         if (!$timing) {
             return [];
         }
