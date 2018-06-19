@@ -43,8 +43,8 @@ class Scatter_model extends CI_Model
 
         // 获取配时信息 周期 相位差 绿灯开始结束时间 所有相位最大周期
         $timingData = [
-            'junction_id' => $junctionInfo[0]['junction_id'],
-            'dates'       => explode(',', $junctionInfo[0]['dates']),
+            'junction_id' => $data['junction_id'],
+            'dates'       => $data['dates'],
             'time_range'  => $data['time_range'],
             'flow_id'     => trim($data['flow_id']),
             'timingType'  => $data['timingType']
