@@ -2,7 +2,7 @@
 /***************************************************************
 # 时段优化类
 # user:ningxiangbing@didichuxing.com
-# date:2018-06-012
+# date:2018-06-12
 ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');

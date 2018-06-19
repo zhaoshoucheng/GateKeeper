@@ -71,7 +71,7 @@ class Timeframeoptimize_model extends CI_Model
         }
         return ["lng"=>round($count_lng / $qcount, 6), "lat"=>round($count_lat / $qcount, 6), ];
     }
-    
+
     /**
     * 获取路口相位集合 按nema排序
     * @param $data['task_id']     interger Y 任务ID
