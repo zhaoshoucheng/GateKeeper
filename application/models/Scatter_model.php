@@ -107,7 +107,7 @@ class Scatter_model extends CI_Model
                 'comment' => $timing['info']['comment'],
                 'x'       => [
                     'min' => '00:00:00',
-                    'max' => '23:59:00',
+                    'max' => '24:00:00',
                 ],
                 'y'       => [
                     'min' => 0,
