@@ -43,6 +43,33 @@ class Timing_model extends CI_Model
     }
 
     /**
+    * 获取路口配时时间方案
+    * @param $data['junction_id'] string   逻辑路口ID
+    * @param $data['dates']       array    评估/诊断日期
+    * @param $data['time_range']  string   时间段 00:00-00:30
+    * @param $data['timingType']  interger 配时数据源 0，全部；1，人工；2，配时反推；3，信号机上报
+    * @return array
+    */
+    public function getOptimizeTiming($data)
+    {
+        if (count($data) < 1) {
+            return [];
+        }
+
+        // 获取配时数据
+        $timing = $this->getTimingData($data);
+
+        // 对返回数据格式化,返回需要的格式
+        if (count($timing >= 1)) {
+            $timing = $this->formatTimingDataByOptimize($timing, $data['time_range']);
+        } else {
+            return [];
+        }
+
+        return $timing;
+    }
+
+    /**
     * 获取flow_id对应名称的数组，用于匹配相位名称
     * @param $data['junction_id'] string 逻辑路口ID
     * @param $data['dates']       array  评估/诊断日期
@@ -125,6 +152,79 @@ class Timing_model extends CI_Model
         }
 
         $result = $this->formatTimingDataForTrack($timing['latest_plan']['time_plan'][0]['plan_detail'], trim($data['flow_id']));
+
+        return $result;
+    }
+
+    /**
+    * 获取某一相位的配时信息并计算出所有相位最大配时周期
+    * @param $data['junction_id'] string   逻辑路口ID
+    * @param $data['dates']       array    评估/诊断日期
+    * @param $data['time_range']  string   时间段 00:00-00:30
+    * @param $data['timingType']  interger 配时来源 1：人工 2：反推
+    * @param $data['flow_id']     string   相位ID
+    * @return array
+    */
+    public function gitFlowTimingByOptimizeScatter($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+        // 获取配时数据
+        $timing = $this->getTimingData($data);
+        if (!empty($timing)) {
+            $result = $this->formatTimingDataByOptimizeScatter($timing, $data['flow_id']);
+        }
+        return $result;
+    }
+
+    /**
+    * 格式化配时数据，返回时段优化散点图所需数据
+    * @param $data   array  配时数据
+    * @param $flowId string 相位ID
+    * @return array
+    */
+    private function formatTimingDataByOptimizeScatter($data, $flowId)
+    {
+        // 路口所有相位最大周期
+        $maxCycle = 0;
+        foreach ($data['latest_plan']['time_plan'] as $k=>$v) {
+            if ($maxCycle < $v['plan_detail']['extra_timing']['cycle']) {
+                $maxCycle = $v['plan_detail']['extra_timing']['cycle'];
+            }
+
+            foreach ($v['plan_detail']['movement_timing'] as $kk=>$vv) {
+                foreach ($vv as $kkk=>$vvv) {
+                    if ($flowId == $vvv['flow_logic']['logic_flow_id']) {
+                        $result['planList'][strtotime($v['tod_end_time'])]['plan'] = [
+                            'start_time' => $v['tod_start_time'],
+                            'end_time'   => $v['tod_end_time'],
+                            'comment'    => $v['comment'],
+                            'cycle'      => $v['plan_detail']['extra_timing']['cycle'],
+                            'offset'     => $v['plan_detail']['extra_timing']['offset'],
+                        ];
+                        $result['planList'][strtotime($v['tod_end_time'])]['list'][$kkk] = [
+                            'state'         => $vvv['state'],
+                            'start_time'    => $vvv['start_time'],
+                            'duration'      => $vvv['duration'],
+                        ];
+                        $result['info'] = [
+                            'logic_flow_id' => $vvv['flow_logic']['logic_flow_id'],
+                            'comment'       => $vvv['flow_logic']['comment'],
+                        ];
+                    }
+                }
+            }
+        }
+
+        if (!empty($result['planList'])) {
+            ksort($result['planList']);
+            $result['planList'] = array_values($result['planList']);
+        }
+
+        $result['maxCycle'] = $maxCycle;
 
         return $result;
     }
@@ -267,6 +367,60 @@ class Timing_model extends CI_Model
     }
 
     /**
+    * 格式化配时数据 用于单点时段优化所需
+    * @param $data
+    * @param $timeRange strign Y 任务完整时间段
+    * @return array
+    */
+    private function formatTimingDataByOptimize($data, $timeRange)
+    {
+        // 从data中抽取方案
+        $tempTiming = [];
+        if (!empty($data['latest_plan']['time_plan'])) {
+            foreach ($data['latest_plan']['time_plan'] as $v) {
+                $tempTiming[strtotime($v['tod_start_time'])]['start'] = $v['tod_start_time'];
+                $tempTiming[strtotime($v['tod_start_time'])]['end'] = $v['tod_end_time'];
+                $tempTiming[strtotime($v['tod_start_time'])]['name'] = $v['comment'];
+            }
+        }
+        if (!empty($tempTiming)) {
+            ksort($tempTiming);
+            $tempTiming = array_values($tempTiming);
+        }
+
+        // 补全时段 PS：可能会存在某一个时间段没有配时方案导致时间段不连续，需要补全
+        $timeRangeArr = explode('-', $timeRange);
+        // 最终的时间点
+        $lastTime = strtotime($timeRangeArr[1]);
+
+        $count = count($tempTiming);
+        $resultTiming = [];
+        for ($i = 0; $i < $count; $i++) {
+            $resultTiming[strtotime($tempTiming[$i]['end'])] = [
+                    'start'   => $tempTiming[$i]['start'],
+                    'end'     => $tempTiming[$i]['end'],
+                    'comment' => $tempTiming[$i]['name']
+                ];
+            if (strtotime($tempTiming[$i]['end']) < $lastTime
+                && strtotime($tempTiming[$i]['end']) < strtotime($tempTiming[$i+1]['start'])
+            ) {
+                $resultTiming[strtotime($tempTiming[$i+1]['start'])] = [
+                    'start'   => $tempTiming[$i]['end'],
+                    'end'     => $tempTiming[$i+1]['start'],
+                    'comment' => '未知方案'
+                ];
+            }
+        }
+        if (!empty($resultTiming)) {
+            ksort($resultTiming);
+            $resultTiming = array_values($resultTiming);
+        }
+
+        return $resultTiming;
+
+    }
+
+    /**
     * 格式化配时数据 用于返回详情页右侧数据
     * @param $data
     * @param $time_range 任务完整时间段
@@ -354,10 +508,10 @@ class Timing_model extends CI_Model
         }
 
         $result = [];
-        if (!empty($data['latest_plan']['time_plan'][0]['plan_detail']['movement_timing'])) {
-            foreach ($data['latest_plan']['time_plan'][0]['plan_detail']['movement_timing'] as $v) {
-                if (!empty($v[0]['flow_logic']['logic_flow_id']) && !empty($v[0]['flow_logic']['comment'])) {
-                    $result[$v[0]['flow_logic']['logic_flow_id']] = $v[0]['flow_logic']['comment'];
+        foreach ($data['latest_plan']['time_plan'] as $k=>$v) {
+            foreach ($v['plan_detail']['movement_timing'] as $kk=>$vv) {
+                foreach ($vv as $vvv) {
+                    $result[$vvv['flow_logic']['logic_flow_id']] = $vvv['flow_logic']['comment'];
                 }
             }
         }
@@ -402,7 +556,6 @@ class Timing_model extends CI_Model
         } catch (Exception $e) {
             return [];
         }
-
         if (isset($timing['data']) && count($timing['data'] >= 1)) {
             return $timing['data'];
         } else {
