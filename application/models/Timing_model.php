@@ -181,6 +181,72 @@ class Timing_model extends CI_Model
     }
 
     /**
+    * 获取带有黄灯的配时信息接口--绿信比优化配时方案展示
+    * @param $data['junction_id'] string   逻辑路口ID
+    * @param $data['dates']       array    评估/诊断日期
+    * @param $data['time_range']  string   时间段 00:00-00:30
+    * @param $data['yellowLight'] interger 黄灯时长
+    * @param $data['timingType']  interger 配时来源 1：人工 2：反推
+    */
+    public function getTimingPlan($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+        // 获取配时数据
+        $timing = $this->getTimingData($data);
+        if (!empty($timing)) {
+            $result = $this->formatTimingDataByOptimizeSplit($timing, $data['yellowLight']);
+        }
+        return $result;
+    }
+
+    /**
+    * 格式化配时数据，返回绿信比优化所需数据结构
+    * @param $data        array    配时数据
+    * @param $yellowLight interger 黄灯时长
+    * @return array
+    */
+    private function formatTimingDataByOptimizeSplit($data, $yellowLight)
+    {
+        $result = [];
+
+        foreach ($data['latest_plan']['time_plan'] as $k=>$v) {
+            $result[$k]['plan'] = [
+                'comment'    => $v['comment'],
+                'start_time' => $v['tod_start_time'],
+                'end_time'   => $v['tod_end_time'],
+                'cycle'      => $v['plan_detail']['extra_timing']['cycle'],
+                'offset'     => $v['plan_detail']['extra_timing']['offset'],
+            ];
+            foreach ($v['plan_detail']['movement_timing'] as $kk=>$vv) {
+                foreach ($vv as $kkk=>$vvv) {
+                    $result[$k]['movements'][$vvv['flow_logic']['logic_flow_id']][$kkk] = [
+                        'info'   => [
+                            'logic_junction_id' => $vvv['flow_logic']['logic_flow_id'],
+                            'comment'           => $vvv['flow_logic']['comment'],
+                        ],
+                        'signal' => [
+                            'state'       => $vvv['state'],
+                            'start_time'  => intval($vvv['start_time']),
+                            'duration'    => intval($vvv['duration']) - $yellowLight,
+                            'yellowLight' => intval($yellowLight),
+                        ],
+                    ];
+                }
+            }
+
+            if (!empty($result[$k]['movements'])) {
+                $result[$k]['movements'] = array_values($result[$k]['movements']);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
     * 格式化配时数据，返回时段优化散点图所需数据
     * @param $data   array  配时数据
     * @param $flowId string 相位ID
