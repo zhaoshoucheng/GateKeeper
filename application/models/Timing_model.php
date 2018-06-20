@@ -223,13 +223,11 @@ class Timing_model extends CI_Model
             ];
             foreach ($v['plan_detail']['movement_timing'] as $kk=>$vv) {
                 foreach ($vv as $kkk=>$vvv) {
-                    $result[$k]['movements'][$vvv['flow_logic']['logic_flow_id']] = [
-                        'info'   => [
-                            'logic_junction_id' => $vvv['flow_logic']['logic_flow_id'],
-                            'comment'           => $vvv['flow_logic']['comment'],
-                        ],
+                    $result[$k]['movements'][$vvv['flow_logic']['logic_flow_id']]['info'] = [
+                        'logic_junction_id' => $vvv['flow_logic']['logic_flow_id'],
+                        'comment'           => $vvv['flow_logic']['comment'],
                     ];
-                    $result[$k]['movements'][$vvv['flow_logic']['logic_flow_id']][$kkk] = [
+                    $result[$k]['movements'][$vvv['flow_logic']['logic_flow_id']]['signal'][$kkk] = [
                         'state'       => $vvv['state'],
                         'start_time'  => intval($vvv['start_time']),
                         'duration'    => intval($vvv['duration']) - $yellowLight,
