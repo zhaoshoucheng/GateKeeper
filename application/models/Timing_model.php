@@ -228,9 +228,8 @@ class Timing_model extends CI_Model
                         'comment'           => $vvv['flow_logic']['comment'],
                     ];
                     $result[$k]['movements'][$vvv['flow_logic']['logic_flow_id']]['signal'][$kkk] = [
-                        'state'       => $vvv['state'],
-                        'start_time'  => intval($vvv['start_time']),
-                        'duration'    => intval($vvv['duration']) - $yellowLight,
+                        'g_start_time'  => intval($vvv['start_time']),
+                        'g_duration'    => intval($vvv['duration']) - $yellowLight,
                         'yellowLight' => intval($yellowLight),
                     ];
                 }
