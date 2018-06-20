@@ -117,14 +117,16 @@ class Scatter_model extends CI_Model
         ];
 
         if (!empty($res['scatterPoints'])) {
+            $i = 0;
             foreach ($res['scatterPoints'] as $k=>&$v) {
                 $v = (array)$v;
                 $time = $v['stopLineTimestamp'];
                 $temp_time = date("H:i:s", $time);
                 // 时间
-                $result_data['dataList'][$time][0] = $temp_time;
+                $result_data['dataList'][$time + $i][0] = $temp_time;
                 // 值
-                $result_data['dataList'][$time][1] = round($v['stopDelayBefore']);
+                $result_data['dataList'][$time + $i][1] = round($v['stopDelayBefore']);
+                $i = 30 * 60;
             }
         }
 
