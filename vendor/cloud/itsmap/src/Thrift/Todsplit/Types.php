@@ -908,16 +908,12 @@ class TodInfo {
           'elem' => array(
             'type' => TType::MAP,
             'ktype' => TType::STRING,
-            'vtype' => TType::LST,
+            'vtype' => TType::STRING,
             'key' => array(
               'type' => TType::STRING,
             ),
             'val' => array(
-              'type' => TType::LST,
-              'etype' => TType::STRING,
-              'elem' => array(
-                'type' => TType::STRING,
-                ),
+              'type' => TType::STRING,
               ),
             ),
           ),
@@ -995,19 +991,9 @@ class TodInfo {
               for ($_i59 = 0; $_i59 < $_size55; ++$_i59)
               {
                 $key60 = '';
-                $val61 = array();
+                $val61 = '';
                 $xfer += $input->readString($key60);
-                $val61 = array();
-                $_size62 = 0;
-                $_etype65 = 0;
-                $xfer += $input->readListBegin($_etype65, $_size62);
-                for ($_i66 = 0; $_i66 < $_size62; ++$_i66)
-                {
-                  $elem67 = null;
-                  $xfer += $input->readString($elem67);
-                  $val61 []= $elem67;
-                }
-                $xfer += $input->readListEnd();
+                $xfer += $input->readString($val61);
                 $elem54[$key60] = $val61;
               }
               $xfer += $input->readMapEnd();
@@ -1028,15 +1014,15 @@ class TodInfo {
         case 4:
           if ($ftype == TType::LST) {
             $this->version = array();
-            $_size68 = 0;
-            $_etype71 = 0;
-            $xfer += $input->readListBegin($_etype71, $_size68);
-            for ($_i72 = 0; $_i72 < $_size68; ++$_i72)
+            $_size62 = 0;
+            $_etype65 = 0;
+            $xfer += $input->readListBegin($_etype65, $_size62);
+            for ($_i66 = 0; $_i66 < $_size62; ++$_i66)
             {
-              $elem73 = null;
-              $elem73 = new \Todsplit\Version();
-              $xfer += $elem73->read($input);
-              $this->version []= $elem73;
+              $elem67 = null;
+              $elem67 = new \Todsplit\Version();
+              $xfer += $elem67->read($input);
+              $this->version []= $elem67;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1069,24 +1055,15 @@ class TodInfo {
       {
         $output->writeListBegin(TType::MAP, count($this->junction_movements));
         {
-          foreach ($this->junction_movements as $iter74)
+          foreach ($this->junction_movements as $iter68)
           {
             {
-              $output->writeMapBegin(TType::STRING, TType::LST, count($iter74));
+              $output->writeMapBegin(TType::STRING, TType::STRING, count($iter68));
               {
-                foreach ($iter74 as $kiter75 => $viter76)
+                foreach ($iter68 as $kiter69 => $viter70)
                 {
-                  $xfer += $output->writeString($kiter75);
-                  {
-                    $output->writeListBegin(TType::STRING, count($viter76));
-                    {
-                      foreach ($viter76 as $iter77)
-                      {
-                        $xfer += $output->writeString($iter77);
-                      }
-                    }
-                    $output->writeListEnd();
-                  }
+                  $xfer += $output->writeString($kiter69);
+                  $xfer += $output->writeString($viter70);
                 }
               }
               $output->writeMapEnd();
@@ -1110,9 +1087,9 @@ class TodInfo {
       {
         $output->writeListBegin(TType::STRUCT, count($this->version));
         {
-          foreach ($this->version as $iter78)
+          foreach ($this->version as $iter71)
           {
-            $xfer += $iter78->write($output);
+            $xfer += $iter71->write($output);
           }
         }
         $output->writeListEnd();
@@ -1210,37 +1187,37 @@ class TodPlans {
         case 1:
           if ($ftype == TType::LST) {
             $this->tod_plans = array();
-            $_size79 = 0;
-            $_etype82 = 0;
-            $xfer += $input->readListBegin($_etype82, $_size79);
-            for ($_i83 = 0; $_i83 < $_size79; ++$_i83)
+            $_size72 = 0;
+            $_etype75 = 0;
+            $xfer += $input->readListBegin($_etype75, $_size72);
+            for ($_i76 = 0; $_i76 < $_size72; ++$_i76)
             {
-              $elem84 = null;
-              $elem84 = array();
-              $_size85 = 0;
-              $_ktype86 = 0;
-              $_vtype87 = 0;
-              $xfer += $input->readMapBegin($_ktype86, $_vtype87, $_size85);
-              for ($_i89 = 0; $_i89 < $_size85; ++$_i89)
+              $elem77 = null;
+              $elem77 = array();
+              $_size78 = 0;
+              $_ktype79 = 0;
+              $_vtype80 = 0;
+              $xfer += $input->readMapBegin($_ktype79, $_vtype80, $_size78);
+              for ($_i82 = 0; $_i82 < $_size78; ++$_i82)
               {
-                $key90 = '';
-                $val91 = array();
-                $xfer += $input->readString($key90);
-                $val91 = array();
-                $_size92 = 0;
-                $_etype95 = 0;
-                $xfer += $input->readListBegin($_etype95, $_size92);
-                for ($_i96 = 0; $_i96 < $_size92; ++$_i96)
+                $key83 = '';
+                $val84 = array();
+                $xfer += $input->readString($key83);
+                $val84 = array();
+                $_size85 = 0;
+                $_etype88 = 0;
+                $xfer += $input->readListBegin($_etype88, $_size85);
+                for ($_i89 = 0; $_i89 < $_size85; ++$_i89)
                 {
-                  $elem97 = null;
-                  $xfer += $input->readString($elem97);
-                  $val91 []= $elem97;
+                  $elem90 = null;
+                  $xfer += $input->readString($elem90);
+                  $val84 []= $elem90;
                 }
                 $xfer += $input->readListEnd();
-                $elem84[$key90] = $val91;
+                $elem77[$key83] = $val84;
               }
               $xfer += $input->readMapEnd();
-              $this->tod_plans []= $elem84;
+              $this->tod_plans []= $elem77;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -1282,20 +1259,20 @@ class TodPlans {
       {
         $output->writeListBegin(TType::MAP, count($this->tod_plans));
         {
-          foreach ($this->tod_plans as $iter98)
+          foreach ($this->tod_plans as $iter91)
           {
             {
-              $output->writeMapBegin(TType::STRING, TType::LST, count($iter98));
+              $output->writeMapBegin(TType::STRING, TType::LST, count($iter91));
               {
-                foreach ($iter98 as $kiter99 => $viter100)
+                foreach ($iter91 as $kiter92 => $viter93)
                 {
-                  $xfer += $output->writeString($kiter99);
+                  $xfer += $output->writeString($kiter92);
                   {
-                    $output->writeListBegin(TType::STRING, count($viter100));
+                    $output->writeListBegin(TType::STRING, count($viter93));
                     {
-                      foreach ($viter100 as $iter101)
+                      foreach ($viter93 as $iter94)
                       {
-                        $xfer += $output->writeString($iter101);
+                        $xfer += $output->writeString($iter94);
                       }
                     }
                     $output->writeListEnd();
