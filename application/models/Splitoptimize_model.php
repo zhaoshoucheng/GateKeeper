@@ -49,17 +49,17 @@ class Splitoptimize_model extends CI_Model
         $signal = [
             [
                 'logic_flow_id'=> '2017030116_i_74479370_2017030116_o_74186480',
-                'green_start'=>0,
-                'green_duration'=>52,
-                'yellow'=>3,
-                'red_clean'=>0
+                'green_start'=> [0],
+                'green_duration'=>[52],
+                'yellow'=>[3],
+                'red_clean'=>[0]
             ],
             [
                 'logic_flow_id'=>'2017030116_i_74479370_2017030116_o_74188361',
-                'green_start'=>0,
-                'green_duration'=>52,
-                'yellow'=>3,
-                'red_clean'=>0
+                'green_start'=>[0],
+                'green_duration'=>[52],
+                'yellow'=>[3],
+                'red_clean'=>[0]
             ]
         ];
 
