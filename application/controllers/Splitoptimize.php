@@ -16,6 +16,7 @@ class Splitoptimize extends MY_Controller
     {
         parent::__construct();
         $this->load->model('timing_model');
+        $this->load->model('splitoptimize_model');
     }
 
     /**
