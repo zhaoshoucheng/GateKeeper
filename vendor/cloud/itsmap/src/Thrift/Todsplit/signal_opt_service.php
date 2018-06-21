@@ -213,15 +213,15 @@ class signal_opt_service_green_split_opt_args {
         case 1:
           if ($ftype == TType::LST) {
             $this->version = array();
-            $_size95 = 0;
-            $_etype98 = 0;
-            $xfer += $input->readListBegin($_etype98, $_size95);
-            for ($_i99 = 0; $_i99 < $_size95; ++$_i99)
+            $_size77 = 0;
+            $_etype80 = 0;
+            $xfer += $input->readListBegin($_etype80, $_size77);
+            for ($_i81 = 0; $_i81 < $_size77; ++$_i81)
             {
-              $elem100 = null;
-              $elem100 = new \Todsplit\Version();
-              $xfer += $elem100->read($input);
-              $this->version []= $elem100;
+              $elem82 = null;
+              $elem82 = new \Todsplit\Version();
+              $xfer += $elem82->read($input);
+              $this->version []= $elem82;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -257,9 +257,9 @@ class signal_opt_service_green_split_opt_args {
       {
         $output->writeListBegin(TType::STRUCT, count($this->version));
         {
-          foreach ($this->version as $iter101)
+          foreach ($this->version as $iter83)
           {
-            $xfer += $iter101->write($output);
+            $xfer += $iter83->write($output);
           }
         }
         $output->writeListEnd();
