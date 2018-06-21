@@ -489,11 +489,13 @@ class RoadNet
 
         $vals = new TodInfo();
         $vals->dates = $data['dates'];
-        $vals->junction_movements = $data['junction_movements'];
+        foreach ($data['junction_movements'] as $k=>$v) {
+            $vals->junction_movements[$k] = $v;
+        }
         $vals->tod_cnt = $data['tod_cnt'];
-        //foreach ($data['version'] as $v) {
-            $vals->version = new todsplit_version($data['version']);
-        //}
+        foreach ($data['version'] as $v) {
+            $vals->version[] = new todsplit_version($v);
+        }
 
         $this->start('tod_split_optimize');
         $response = $this->call('tod_opt', [$vals]);
