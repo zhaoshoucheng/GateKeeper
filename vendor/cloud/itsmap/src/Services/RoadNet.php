@@ -521,13 +521,13 @@ class RoadNet
         }
 
         $vals = new SignalPlan();
-        $vals->dates = $data['dates'];
-        $vals->logic_junction_id = $data['logic_junction_id'];
-        $vals->start_time = $data['start_time'];
-        $vals->end_time = $data['end_time'];
-        $vals->cycle = $data['cycle'];
-        $vals->offset = $data['offset'];
-        $vals->clock_shift = $data['clock_shift'];
+        $vals->dates = trim($data['dates']);
+        $vals->logic_junction_id = trim($data['logic_junction_id']);
+        $vals->start_time = trim($data['start_time']);
+        $vals->end_time = trim($data['end_time']);
+        $vals->cycle = intval($data['cycle']);
+        $vals->offset = intval($data['offset']);
+        $vals->clock_shift = intval($data['clock_shift']);
         foreach ($data['signal'] as $v) {
             $vals->signal[] = new MovementSignal($v);
         }

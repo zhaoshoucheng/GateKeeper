@@ -63,7 +63,7 @@ class Splitoptimize_model extends CI_Model
             ]
         ];
 
-        $data = [
+        $ndata = [
             'dates' => implode(',', $data['dates']),
             'logic_junction_id' => $data['junction_id'],
             'start_time' => '00:00:00',
@@ -77,7 +77,7 @@ class Splitoptimize_model extends CI_Model
 
         $service = new Todsplit_vendor();
 
-        $res = $service->getSplitPlan($data);
+        $res = $service->getSplitPlan($ndata);
         var_dump($res);exit;
 
     }
