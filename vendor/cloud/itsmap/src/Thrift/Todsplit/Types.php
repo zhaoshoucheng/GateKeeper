@@ -552,6 +552,104 @@ class SignalPlan {
 
 }
 
+class Version {
+  static $_TSPEC;
+
+  /**
+   * @var string
+   */
+  public $map_version = null;
+  /**
+   * @var string
+   */
+  public $date = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        1 => array(
+          'var' => 'map_version',
+          'type' => TType::STRING,
+          ),
+        2 => array(
+          'var' => 'date',
+          'type' => TType::STRING,
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['map_version'])) {
+        $this->map_version = $vals['map_version'];
+      }
+      if (isset($vals['date'])) {
+        $this->date = $vals['date'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'Version';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 1:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->map_version);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->date);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('Version');
+    if ($this->map_version !== null) {
+      $xfer += $output->writeFieldBegin('map_version', TType::STRING, 1);
+      $xfer += $output->writeString($this->map_version);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->date !== null) {
+      $xfer += $output->writeFieldBegin('date', TType::STRING, 2);
+      $xfer += $output->writeString($this->date);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
 class GreenSplitOptResponse {
   static $_TSPEC;
 
@@ -780,7 +878,7 @@ class TodInfo {
   static $_TSPEC;
 
   /**
-   * @var string[]
+   * @var string
    */
   public $dates = null;
   /**
@@ -792,22 +890,18 @@ class TodInfo {
    */
   public $tod_cnt = null;
   /**
-   * @var string
+   * @var \Todsplit\Version[]
    */
-  public $map_version = null;
+  public $version = null;
 
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
       self::$_TSPEC = array(
-        -1 => array(
+        1 => array(
           'var' => 'dates',
-          'type' => TType::LST,
-          'etype' => TType::STRING,
-          'elem' => array(
-            'type' => TType::STRING,
-            ),
+          'type' => TType::STRING,
           ),
-        -2 => array(
+        2 => array(
           'var' => 'junction_movements',
           'type' => TType::LST,
           'etype' => TType::MAP,
@@ -827,13 +921,18 @@ class TodInfo {
               ),
             ),
           ),
-        -3 => array(
+        3 => array(
           'var' => 'tod_cnt',
           'type' => TType::I32,
           ),
-        -4 => array(
-          'var' => 'map_version',
-          'type' => TType::STRING,
+        4 => array(
+          'var' => 'version',
+          'type' => TType::LST,
+          'etype' => TType::STRUCT,
+          'elem' => array(
+            'type' => TType::STRUCT,
+            'class' => '\Todsplit\Version',
+            ),
           ),
         );
     }
@@ -847,8 +946,8 @@ class TodInfo {
       if (isset($vals['tod_cnt'])) {
         $this->tod_cnt = $vals['tod_cnt'];
       }
-      if (isset($vals['map_version'])) {
-        $this->map_version = $vals['map_version'];
+      if (isset($vals['version'])) {
+        $this->version = $vals['version'];
       }
     }
   }
@@ -872,73 +971,74 @@ class TodInfo {
       }
       switch ($fid)
       {
-        case -1:
+        case 1:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->dates);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
           if ($ftype == TType::LST) {
-            $this->dates = array();
+            $this->junction_movements = array();
             $_size49 = 0;
             $_etype52 = 0;
             $xfer += $input->readListBegin($_etype52, $_size49);
             for ($_i53 = 0; $_i53 < $_size49; ++$_i53)
             {
               $elem54 = null;
-              $xfer += $input->readString($elem54);
-              $this->dates []= $elem54;
-            }
-            $xfer += $input->readListEnd();
-          } else {
-            $xfer += $input->skip($ftype);
-          }
-          break;
-        case -2:
-          if ($ftype == TType::LST) {
-            $this->junction_movements = array();
-            $_size55 = 0;
-            $_etype58 = 0;
-            $xfer += $input->readListBegin($_etype58, $_size55);
-            for ($_i59 = 0; $_i59 < $_size55; ++$_i59)
-            {
-              $elem60 = null;
-              $elem60 = array();
-              $_size61 = 0;
-              $_ktype62 = 0;
-              $_vtype63 = 0;
-              $xfer += $input->readMapBegin($_ktype62, $_vtype63, $_size61);
-              for ($_i65 = 0; $_i65 < $_size61; ++$_i65)
+              $elem54 = array();
+              $_size55 = 0;
+              $_ktype56 = 0;
+              $_vtype57 = 0;
+              $xfer += $input->readMapBegin($_ktype56, $_vtype57, $_size55);
+              for ($_i59 = 0; $_i59 < $_size55; ++$_i59)
               {
-                $key66 = '';
-                $val67 = array();
-                $xfer += $input->readString($key66);
-                $val67 = array();
-                $_size68 = 0;
-                $_etype71 = 0;
-                $xfer += $input->readListBegin($_etype71, $_size68);
-                for ($_i72 = 0; $_i72 < $_size68; ++$_i72)
+                $key60 = '';
+                $val61 = array();
+                $xfer += $input->readString($key60);
+                $val61 = array();
+                $_size62 = 0;
+                $_etype65 = 0;
+                $xfer += $input->readListBegin($_etype65, $_size62);
+                for ($_i66 = 0; $_i66 < $_size62; ++$_i66)
                 {
-                  $elem73 = null;
-                  $xfer += $input->readString($elem73);
-                  $val67 []= $elem73;
+                  $elem67 = null;
+                  $xfer += $input->readString($elem67);
+                  $val61 []= $elem67;
                 }
                 $xfer += $input->readListEnd();
-                $elem60[$key66] = $val67;
+                $elem54[$key60] = $val61;
               }
               $xfer += $input->readMapEnd();
-              $this->junction_movements []= $elem60;
+              $this->junction_movements []= $elem54;
             }
             $xfer += $input->readListEnd();
           } else {
             $xfer += $input->skip($ftype);
           }
           break;
-        case -3:
+        case 3:
           if ($ftype == TType::I32) {
             $xfer += $input->readI32($this->tod_cnt);
           } else {
             $xfer += $input->skip($ftype);
           }
           break;
-        case -4:
-          if ($ftype == TType::STRING) {
-            $xfer += $input->readString($this->map_version);
+        case 4:
+          if ($ftype == TType::LST) {
+            $this->version = array();
+            $_size68 = 0;
+            $_etype71 = 0;
+            $xfer += $input->readListBegin($_etype71, $_size68);
+            for ($_i72 = 0; $_i72 < $_size68; ++$_i72)
+            {
+              $elem73 = null;
+              $elem73 = new \Todsplit\Version();
+              $xfer += $elem73->read($input);
+              $this->version []= $elem73;
+            }
+            $xfer += $input->readListEnd();
           } else {
             $xfer += $input->skip($ftype);
           }
@@ -956,21 +1056,16 @@ class TodInfo {
   public function write($output) {
     $xfer = 0;
     $xfer += $output->writeStructBegin('TodInfo');
-    if ($this->map_version !== null) {
-      $xfer += $output->writeFieldBegin('map_version', TType::STRING, -4);
-      $xfer += $output->writeString($this->map_version);
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($this->tod_cnt !== null) {
-      $xfer += $output->writeFieldBegin('tod_cnt', TType::I32, -3);
-      $xfer += $output->writeI32($this->tod_cnt);
+    if ($this->dates !== null) {
+      $xfer += $output->writeFieldBegin('dates', TType::STRING, 1);
+      $xfer += $output->writeString($this->dates);
       $xfer += $output->writeFieldEnd();
     }
     if ($this->junction_movements !== null) {
       if (!is_array($this->junction_movements)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('junction_movements', TType::LST, -2);
+      $xfer += $output->writeFieldBegin('junction_movements', TType::LST, 2);
       {
         $output->writeListBegin(TType::MAP, count($this->junction_movements));
         {
@@ -1002,17 +1097,22 @@ class TodInfo {
       }
       $xfer += $output->writeFieldEnd();
     }
-    if ($this->dates !== null) {
-      if (!is_array($this->dates)) {
+    if ($this->tod_cnt !== null) {
+      $xfer += $output->writeFieldBegin('tod_cnt', TType::I32, 3);
+      $xfer += $output->writeI32($this->tod_cnt);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->version !== null) {
+      if (!is_array($this->version)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('dates', TType::LST, -1);
+      $xfer += $output->writeFieldBegin('version', TType::LST, 4);
       {
-        $output->writeListBegin(TType::STRING, count($this->dates));
+        $output->writeListBegin(TType::STRUCT, count($this->version));
         {
-          foreach ($this->dates as $iter78)
+          foreach ($this->version as $iter78)
           {
-            $xfer += $output->writeString($iter78);
+            $xfer += $iter78->write($output);
           }
         }
         $output->writeListEnd();
@@ -1045,7 +1145,7 @@ class TodPlans {
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
       self::$_TSPEC = array(
-        -1 => array(
+        1 => array(
           'var' => 'tod_plans',
           'type' => TType::LST,
           'etype' => TType::MAP,
@@ -1065,11 +1165,11 @@ class TodPlans {
               ),
             ),
           ),
-        -2 => array(
+        2 => array(
           'var' => 'errno',
           'type' => TType::STRING,
           ),
-        -3 => array(
+        3 => array(
           'var' => 'errmsg',
           'type' => TType::STRING,
           ),
@@ -1107,7 +1207,7 @@ class TodPlans {
       }
       switch ($fid)
       {
-        case -1:
+        case 1:
           if ($ftype == TType::LST) {
             $this->tod_plans = array();
             $_size79 = 0;
@@ -1147,14 +1247,14 @@ class TodPlans {
             $xfer += $input->skip($ftype);
           }
           break;
-        case -2:
+        case 2:
           if ($ftype == TType::STRING) {
             $xfer += $input->readString($this->errno);
           } else {
             $xfer += $input->skip($ftype);
           }
           break;
-        case -3:
+        case 3:
           if ($ftype == TType::STRING) {
             $xfer += $input->readString($this->errmsg);
           } else {
@@ -1174,21 +1274,11 @@ class TodPlans {
   public function write($output) {
     $xfer = 0;
     $xfer += $output->writeStructBegin('TodPlans');
-    if ($this->errmsg !== null) {
-      $xfer += $output->writeFieldBegin('errmsg', TType::STRING, -3);
-      $xfer += $output->writeString($this->errmsg);
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($this->errno !== null) {
-      $xfer += $output->writeFieldBegin('errno', TType::STRING, -2);
-      $xfer += $output->writeString($this->errno);
-      $xfer += $output->writeFieldEnd();
-    }
     if ($this->tod_plans !== null) {
       if (!is_array($this->tod_plans)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('tod_plans', TType::LST, -1);
+      $xfer += $output->writeFieldBegin('tod_plans', TType::LST, 1);
       {
         $output->writeListBegin(TType::MAP, count($this->tod_plans));
         {
@@ -1218,6 +1308,16 @@ class TodPlans {
         }
         $output->writeListEnd();
       }
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->errno !== null) {
+      $xfer += $output->writeFieldBegin('errno', TType::STRING, 2);
+      $xfer += $output->writeString($this->errno);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->errmsg !== null) {
+      $xfer += $output->writeFieldBegin('errmsg', TType::STRING, 3);
+      $xfer += $output->writeString($this->errmsg);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();

@@ -18,11 +18,11 @@ use Thrift\Exception\TApplicationException;
 
 interface signal_opt_serviceIf {
   /**
-   * @param string $map_version
+   * @param \Todsplit\Version[] $version
    * @param \Todsplit\SignalPlan $origin_signal_plan
    * @return \Todsplit\GreenSplitOptResponse
    */
-  public function green_split_opt($map_version, \Todsplit\SignalPlan $origin_signal_plan);
+  public function green_split_opt(array $version, \Todsplit\SignalPlan $origin_signal_plan);
   /**
    * @param \Todsplit\TodInfo $tod_info
    * @return \Todsplit\TodPlans
@@ -42,16 +42,16 @@ class signal_opt_serviceClient implements \Todsplit\signal_opt_serviceIf {
     $this->output_ = $output ? $output : $input;
   }
 
-  public function green_split_opt($map_version, \Todsplit\SignalPlan $origin_signal_plan)
+  public function green_split_opt(array $version, \Todsplit\SignalPlan $origin_signal_plan)
   {
-    $this->send_green_split_opt($map_version, $origin_signal_plan);
+    $this->send_green_split_opt($version, $origin_signal_plan);
     return $this->recv_green_split_opt();
   }
 
-  public function send_green_split_opt($map_version, \Todsplit\SignalPlan $origin_signal_plan)
+  public function send_green_split_opt(array $version, \Todsplit\SignalPlan $origin_signal_plan)
   {
     $args = new \Todsplit\signal_opt_service_green_split_opt_args();
-    $args->map_version = $map_version;
+    $args->version = $version;
     $args->origin_signal_plan = $origin_signal_plan;
     $bin_accel = ($this->output_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
     if ($bin_accel)
@@ -154,9 +154,9 @@ class signal_opt_service_green_split_opt_args {
   static $_TSPEC;
 
   /**
-   * @var string
+   * @var \Todsplit\Version[]
    */
-  public $map_version = null;
+  public $version = null;
   /**
    * @var \Todsplit\SignalPlan
    */
@@ -166,8 +166,13 @@ class signal_opt_service_green_split_opt_args {
     if (!isset(self::$_TSPEC)) {
       self::$_TSPEC = array(
         1 => array(
-          'var' => 'map_version',
-          'type' => TType::STRING,
+          'var' => 'version',
+          'type' => TType::LST,
+          'etype' => TType::STRUCT,
+          'elem' => array(
+            'type' => TType::STRUCT,
+            'class' => '\Todsplit\Version',
+            ),
           ),
         2 => array(
           'var' => 'origin_signal_plan',
@@ -177,8 +182,8 @@ class signal_opt_service_green_split_opt_args {
         );
     }
     if (is_array($vals)) {
-      if (isset($vals['map_version'])) {
-        $this->map_version = $vals['map_version'];
+      if (isset($vals['version'])) {
+        $this->version = $vals['version'];
       }
       if (isset($vals['origin_signal_plan'])) {
         $this->origin_signal_plan = $vals['origin_signal_plan'];
@@ -206,8 +211,19 @@ class signal_opt_service_green_split_opt_args {
       switch ($fid)
       {
         case 1:
-          if ($ftype == TType::STRING) {
-            $xfer += $input->readString($this->map_version);
+          if ($ftype == TType::LST) {
+            $this->version = array();
+            $_size102 = 0;
+            $_etype105 = 0;
+            $xfer += $input->readListBegin($_etype105, $_size102);
+            for ($_i106 = 0; $_i106 < $_size102; ++$_i106)
+            {
+              $elem107 = null;
+              $elem107 = new \Todsplit\Version();
+              $xfer += $elem107->read($input);
+              $this->version []= $elem107;
+            }
+            $xfer += $input->readListEnd();
           } else {
             $xfer += $input->skip($ftype);
           }
@@ -233,9 +249,21 @@ class signal_opt_service_green_split_opt_args {
   public function write($output) {
     $xfer = 0;
     $xfer += $output->writeStructBegin('signal_opt_service_green_split_opt_args');
-    if ($this->map_version !== null) {
-      $xfer += $output->writeFieldBegin('map_version', TType::STRING, 1);
-      $xfer += $output->writeString($this->map_version);
+    if ($this->version !== null) {
+      if (!is_array($this->version)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('version', TType::LST, 1);
+      {
+        $output->writeListBegin(TType::STRUCT, count($this->version));
+        {
+          foreach ($this->version as $iter108)
+          {
+            $xfer += $iter108->write($output);
+          }
+        }
+        $output->writeListEnd();
+      }
       $xfer += $output->writeFieldEnd();
     }
     if ($this->origin_signal_plan !== null) {
