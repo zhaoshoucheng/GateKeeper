@@ -44,6 +44,7 @@ use Todsplit\MovementSignal;
 use Todsplit\SignalPlan;
 use Todsplit\TodInfo;
 use Todsplit\Version as todsplit_version;
+use Todsplit\JunctionMovements;
 
 /*
  * 导航路网提供的相关继承服务
@@ -489,7 +490,9 @@ class RoadNet
 
         $vals = new TodInfo();
         $vals->dates = $data['dates'];
-        $vals->junction_movements = $data['junction_movements'];
+        foreach ($data['junction_movements'] as $v) {
+            $vals->junction_movements[] = new JunctionMovements($v);
+        }
         $vals->tod_cnt = $data['tod_cnt'];
         foreach ($data['version'] as $v) {
             $vals->version[] = new todsplit_version($v);
