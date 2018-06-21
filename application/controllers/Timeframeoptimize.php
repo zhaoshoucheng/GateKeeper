@@ -124,6 +124,7 @@ class Timeframeoptimize extends MY_Controller
     */
     public function getTodOptimizePlan()
     {
+        $params = $this->input->post();
         // 校验参数
         $validate = Validate::make($params,
             [

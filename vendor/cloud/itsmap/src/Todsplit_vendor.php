@@ -7,11 +7,6 @@ require_once __DIR__ . '/Thrift/Todsplit/Types.php';
 use Didi\Cloud\ItsMap\Configs\Env;
 use Didi\Cloud\ItsMap\Services\RoadNet;
 
-use Todsplit\MovementSignal;
-use Todsplit\SignalPlan;
-use Todsplit\TodInfo;
-use Todsplit\Version;
-
 class Todsplit_vendor {
     public function __construct() {
         Env::init();
@@ -25,14 +20,6 @@ class Todsplit_vendor {
     * @param $data['version']            array    Y 版本、日期集合
     */
     public function getTodPlan($data) {
-        $vals = new TodInfo();
-        $vals->dates = $data['dates'];
-        $vals->junction_movements = $data['junction_movements'];
-        $vals->tod_cnt = $data['tod_cnt'];
-        foreach ($data['version'] as $v) {
-            $vals->version[] = new Version($v);
-        }
-
         $service = new RoadNet();
         $response = $service->getTodPlan($data);
 

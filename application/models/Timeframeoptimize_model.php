@@ -14,6 +14,7 @@ class Timeframeoptimize_model extends CI_Model
         parent::__construct();
         $this->db = $this->load->database('default', true);
         $this->load->model('timing_model');
+        $this->load->model('taskdateversion_model');
     }
 
     /**

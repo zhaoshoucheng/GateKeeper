@@ -40,6 +40,11 @@ use Track\Rtime;
 use Track\TypeData;
 use Track\FilterData;
 
+use Todsplit\MovementSignal;
+use Todsplit\SignalPlan;
+use Todsplit\TodInfo;
+use Todsplit\Version;
+
 /*
  * 导航路网提供的相关继承服务
  */
@@ -482,14 +487,22 @@ class RoadNet
             return [];
         }
 
+        $vals = new TodInfo();
+        $vals->dates = $data['dates'];
+        $vals->junction_movements = $data['junction_movements'];
+        $vals->tod_cnt = $data['tod_cnt'];
+        foreach ($data['version'] as $v) {
+            $vals->version[] = new Version($v);
+        }
+
         $this->start('tod_split_optimize');
-        $response = $this->call('tod_opt', [$data]);
+        $response = $this->call('tod_opt', [$vals]);
         $this->close();
         if(!$response || $response == 'null'){
             sendMail(
                     'ningxiangbing@didichuxing.com',
                     'logs: 调用时段划分接口获取数据',
-                    'data: '.json_encode([$data]).'\r\n result：' . $response
+                    'data: '.json_encode([$vals]).'\r\n result：' . $response
                 );
 
         }
