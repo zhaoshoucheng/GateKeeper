@@ -2,6 +2,7 @@
 /**
 * 时段优化数据模型
 */
+use Didi\Cloud\ItsMap\Todsplit_vendor;
 
 date_default_timezone_set('Asia/Shanghai');
 class Timeframeoptimize_model extends CI_Model
@@ -13,6 +14,64 @@ class Timeframeoptimize_model extends CI_Model
         parent::__construct();
         $this->db = $this->load->database('default', true);
         $this->load->model('timing_model');
+        $this->load->model('taskdateversion_model');
+    }
+
+    /**
+     * 优化-单点时段优化路口列表
+     * @param data['task_id']      interger 任务ID
+     * @param data['city_id']      interger 城市ID
+     * @return array 转换为json的格式:{"dataList":[{"logic_junction_id":"2017030116_4861479","lng":"117.16051","lat":"36.66729","name":"经十东路-凤山路"}],"junctionTotal":1}
+     */
+    public function getAllJunctions($data)
+    {
+        // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
+        $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
+        if (count($allCityJunctions) < 1 || !$allCityJunctions || !is_array($allCityJunctions)) {
+            return [];
+        }
+        // 获取任务路口ids
+        $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
+        $query = $this->db->select('*')
+            ->from($this->tb)
+            ->where($where)
+            ->group_by('junction_id')
+            ->get();
+        $newDataJids = [];
+        foreach ($query->result_array() as $v) {
+            $newDataJids[] = $v['junction_id'];
+        }
+        // 验证路口是否存在
+        $result_data['dataList'] = array_reduce($allCityJunctions,function($v,$w) use ($newDataJids){
+            if(empty($v)) {
+                $v = [];
+            }
+            if(isset($w["logic_junction_id"]) && in_array($w["logic_junction_id"],$newDataJids)){
+                $v[] = array(
+                    "logic_junction_id"=>$w["logic_junction_id"],
+                    "lng"=>$w["lng"],
+                    "lat"=>$w["lat"],
+                    "name"=>$w["name"],
+                );
+            }
+            return $v;
+        });
+
+        $result_data['junctionTotal'] = count($result_data['dataList']);
+        $result_data['center'] = $this->getJunctionCenter($result_data['dataList']);
+        return $result_data;
+    }
+
+    // 计算地图中心坐标
+    private function getJunctionCenter($dataList){
+        $count_lng = 0;
+        $count_lat = 0;
+        $qcount = count($dataList);
+        foreach ($dataList as $v){
+            $count_lng += $v['lng'];
+            $count_lat += $v['lat'];
+        }
+        return ["lng"=>round($count_lng / $qcount, 6), "lat"=>round($count_lat / $qcount, 6), ];
     }
 
     /**
@@ -128,5 +187,50 @@ class Timeframeoptimize_model extends CI_Model
         $result = $result->result_array();
 
         return $result;
+    }
+
+    /**
+    * 获取时段划分优化方案
+    * @param $data['task_id']     interger Y 任务ID
+    * @param $data['junction_id'] string   Y 路口ID
+    * @param $data['dates']       array    Y 评估/诊断日期
+    * @param $data['movements']   array    Y 路口相位集合
+    * @param $data['divide_num']  interger Y 划分数量
+    * @return array
+    */
+    public function getTodOptimizePlan($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+
+        // 获取 mapversion
+        $mapversions = $this->taskdateversion_model->select($data['task_id'], $data['dates']);
+        if (!$mapversions) {
+            return [];
+        }
+
+        // 组织thrift所需version数组
+        foreach ($mapversions as $k=>$v) {
+            $version[$k]['map_version'] = $v['map_version_md5'];
+            $version[$k]['date'] = $v['date'];
+        }
+
+        $data = [
+            'dates' => implode(',', $data['dates']),
+            'junction_movements' => [
+                $data['junction_id'] => $data['movements'],
+            ],
+            'tod_cnt' => $data['divide_num'],
+            'version' => $version,
+        ];
+
+        $service = new Todsplit_vendor();
+
+        $res = $service->getTodPlan($data);
+        var_dump($res);exit;
+
     }
 }

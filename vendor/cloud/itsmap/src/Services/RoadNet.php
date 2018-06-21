@@ -40,6 +40,11 @@ use Track\Rtime;
 use Track\TypeData;
 use Track\FilterData;
 
+use Todsplit\MovementSignal;
+use Todsplit\SignalPlan;
+use Todsplit\TodInfo;
+use Todsplit\Version as todsplit_version;
+
 /*
  * 导航路网提供的相关继承服务
  */
@@ -467,6 +472,78 @@ class RoadNet
                     'ningxiangbing@didichuxing.com',
                     'logs: 调用thrift接口获取数据',
                     'data: '.json_encode([$mtraj_request, $accessPara]).'\r\n result：' . $response
+                );
+
+        }
+        return $response;
+    }
+
+    /**
+    * 获取时段划分方案
+    */
+    public function getTodPlan($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $vals = new TodInfo();
+        $vals->dates = $data['dates'];
+        foreach ($data['junction_movements'] as $k=>$v) {
+            $vals->junction_movements[$k] = $v;
+        }
+        $vals->tod_cnt = $data['tod_cnt'];
+        foreach ($data['version'] as $v) {
+            $vals->version[] = new todsplit_version($v);
+        }
+
+        $this->start('tod_split_optimize');
+        $response = $this->call('tod_opt', [$vals]);
+        $this->close();
+        if(!$response || $response == 'null'){
+            sendMail(
+                    'ningxiangbing@didichuxing.com',
+                    'logs: 调用时段划分接口获取数据',
+                    'data: '.json_encode([$vals]).'\r\n result：' . $response
+                );
+
+        }
+        return $response;
+    }
+
+    /**
+    * 获绿信比优化方案
+    */
+    public function getSplitPlan($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $vals = new SignalPlan();
+        $vals->dates = trim($data['dates']);
+        $vals->logic_junction_id = trim($data['logic_junction_id']);
+        $vals->start_time = trim($data['start_time']);
+        $vals->end_time = trim($data['end_time']);
+        $vals->cycle = intval($data['cycle']);
+        $vals->offset = intval($data['offset']);
+        $vals->clock_shift = intval($data['clock_shift']);
+        foreach ($data['signal'] as $v) {
+            $vals->signal[] = new MovementSignal($v);
+        }
+
+        foreach ($data['version'] as $v) {
+            $version[] = new todsplit_version($v);
+        }
+
+        $this->start('tod_split_optimize');
+        $response = $this->call('green_split_opt', [$version, $vals]);
+        $this->close();
+        if(!$response || $response == 'null'){
+            sendMail(
+                    'ningxiangbing@didichuxing.com',
+                    'logs: 调用绿信比优化接口获取数据',
+                    'data: '.json_encode([$version, $vals]).'\r\n result：' . $response
                 );
 
         }

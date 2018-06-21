@@ -24,7 +24,25 @@ class Timeframeoptimize extends MY_Controller
     */
     public function getAllJunctions()
     {
-        
+        $params = $this->input->post();
+        // 校验参数
+        $validate = Validate::make($params,
+            [
+                'task_id'      => 'min:1',
+                'city_id'      => 'min:1',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+        $data = [
+            'task_id'     => intval($params['task_id']),
+            'city_id'     => intval($params['city_id']),
+        ];
+        $result = $this->timeframeoptimize_model->getAllJunctions($data);
+        return $this->response($result);
     }
 
     /**
@@ -100,13 +118,67 @@ class Timeframeoptimize extends MY_Controller
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
         }
-        $data['dates'] = $params['dates'];
-        $data['junction_id'] = strip_tags(trim($params['junction_id']));
-        $data['time_range'] = strip_tags(trim($params['task_time_range']));
-        $data['timingType'] = $this->timingType;
+
+        $data = [
+            'dates'       => $params['dates'],
+            'junction_id' => strip_tags(trim($params['junction_id'])),
+            'time_range'  => strip_tags(trim($params['task_time_range'])),
+            'timingType'  => $this->timingType
+        ];
+
         $timing = $this->timing_model->getOptimizeTiming($data);
 
         return $this->response($timing);
     }
 
+    /**
+    * 获取时段划分方案
+    * @param task_id     interger Y 任务ID
+    * @param junction_id string   Y 路口ID
+    * @param dates       array    Y 评估/诊断日期
+    * @param movements   array    Y 路口相位集合
+    * @param divide_num  interger Y 划分数量
+    * @return json
+    */
+    public function getTodOptimizePlan()
+    {
+        $params = $this->input->post();
+        // 校验参数
+        $validate = Validate::make($params,
+            [
+                'task_id'          => 'min:1',
+                'junction_id'      => 'nullunable',
+                'divide_num'       => 'min:1',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        if (!is_array($params['dates']) || count($params['dates']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The dates cannot be empty and must be array.';
+            return;
+        }
+
+        if (!is_array($params['movements']) || count($params['movements']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The movements cannot be empty and must be array.';
+            return;
+        }
+
+        $data = [
+            'dates'       => $params['dates'],
+            'junction_id' => strip_tags(trim($params['junction_id'])),
+            'task_id'     => intval($params['task_id']),
+            'movements'   => $params['movements'],
+            'divide_num'  => intval($params['divide_num']),
+        ];
+
+        $result = $this->timeframeoptimize_model->getTodOptimizePlan($data);
+
+        return $this->response($result);
+    }
 }

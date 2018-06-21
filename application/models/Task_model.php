@@ -13,7 +13,7 @@ class Task_model extends CI_Model
 
     private $failed_status = [2, 12, 22, 20, 21, 22];
     private $run_status = [0, 1, 10, 11];
-
+    private $success_status = [11];
 
     function __construct() {
         parent::__construct();
@@ -22,6 +22,14 @@ class Task_model extends CI_Model
         $this->load->helper('mail');
         $this->load->helper('http');
         $this->load->config('nconf');
+    }
+
+    public function getSuccessStatus(){
+        return $this->success_status;
+    }
+
+    public function getRunStatus(){
+        return $this->run_status;
     }
 
     function addTask($task) {
@@ -80,6 +88,11 @@ class Task_model extends CI_Model
     function getTask($user, $city_id, $type, $kind, $cols = '*') {
         $aRet = $this->its_tool->select($cols)->from($this->_table)->where('user', $user)->where('city_id', $city_id)->where('kind', $kind)->where('type', $type)->order_by('id', 'DESC')->get()->result_array();
         // var_dump($this->its_tool->last_query());
+        return $aRet;
+    }
+
+    function getSuccCycleTask($user, $city_id, $cols = '*') {
+        $aRet = $this->its_tool->select($cols)->from($this->_table)->where('user', $user)->where('city_id', $city_id)->where('type', 1)->where_in('status', $this->success_status)->order_by('id', 'DESC')->get()->result_array();
         return $aRet;
     }
 

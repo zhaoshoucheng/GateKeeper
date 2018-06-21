@@ -145,6 +145,61 @@ class Task extends MY_Controller
 		];
 	}
 
+    /**
+     *
+     * 创建自定义任务
+     * @param city_id	Y 城市ID
+     * @return json
+     */
+	public function getSuceessCycleTaskList(){
+        $params = $this->input->post();
+        // 校验参数
+        $validate = Validate::make($params, [
+                'city_id'       => 'nullunable',
+            ]
+        );
+        if(!$validate['status']){
+            return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
+        }
+
+        $city_id = intval($params['city_id']);
+        $cycle_task = $this->task_model->getSuccCycleTask('admin', $city_id);
+        $this->output_data = $this->formatTaskList($cycle_task);
+    }
+
+    /**
+     * 格式化任务列表
+     * @param $taskList 二纬数组 格式为task_result表result_array后的结果
+     * return array
+     */
+    private function formatTaskList($taskList){
+        $formatList = [];
+        foreach ($taskList as $task) {
+            $reason = '';
+            if (! in_array($task['status'], $this->task_model->getRunStatus())) {
+                $reason = '未知原因';
+                // 如果任务状态异常
+                if ($task['task_comment'] != '' and $task['task_comment'] != null) {
+                    // 有状态
+                    $i = intval($task['task_comment']);
+                    if (isset($this->task_result[$i])) {
+                        $reason = $this->task_result[$i];
+                    }
+                }
+            }
+            $formatList[] = array(
+                'task_id' => $task['id'],
+                'dates' => explode(',', $task['dates']),
+                'time_range' => $task['start_time'] . '-' . $task['end_time'],
+                'junctions' => ($task['junctions'] === '' or $task['junctions'] === null) ? '全城' : '路口',
+                'status' => (in_array($task['status'], $this->task_model->getRunStatus())) ? $task['rate'] . '%' : '失败',
+                'exec_date' => date('m.d', $task['task_start_time']),
+                'reason' => $reason,
+            );
+        }
+        return $formatList;
+    }
+
 	/**
 	* 创建自定义任务
 	* @param city_id	Y 城市ID
@@ -534,12 +589,19 @@ class Task extends MY_Controller
             if (!empty($task['task_comment']) && isset($this->task_result[$task['task_comment']])) {
                 $task_comment = $this->task_result[$task['task_comment']];
             }
+            if ( isset($this->task_result[$task_comment])) {
+                $task_comment = $this->task_result[$task_comment];
+            } elseif ((in_array($task['status'], $run_status))){
+                $task_comment = "任务执行中";
+            } else {
+                $task_comment  = "未知原因";
+            }
 
             $ret[$value] = [
                 'task_id' => $task['task_id'],
                 'dates' => explode(',', $task['dates']),
                 'reason' => $task_comment,
-                'status' => (in_array($task['status'], $run_status)) ? $task['rate'] . '%' : '失败',
+                'status' => (in_array($task['status'], $run_status)) ? '成功' : '失败',
             ];
         }
         $this->output_data = $ret;
