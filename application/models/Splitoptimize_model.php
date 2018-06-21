@@ -26,7 +26,7 @@ class Splitoptimize_model extends CI_Model
     * @param $data['divide_num']  interger Y 划分数量
     * @return array
     */
-    public function getTodOptimizePlan($data)
+    public function getSplitOptimizePlan($data)
     {
         if (empty($data)) {
             return [];

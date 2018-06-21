@@ -530,7 +530,9 @@ class RoadNet
             $vals->signal[] = new MovementSignal($v);
         }
 
-        $version = new todsplit_version($data['version']);
+        foreach ($data['version'] as $v) {
+            $version[] = new todsplit_version($v);
+        }
 
         $this->start('tod_split_optimize');
         $response = $this->call('green_split_opt', [$version, $vals]);
@@ -538,7 +540,7 @@ class RoadNet
         if(!$response || $response == 'null'){
             sendMail(
                     'ningxiangbing@didichuxing.com',
-                    'logs: 调用时段划分接口获取数据',
+                    'logs: 调用绿信比优化接口获取数据',
                     'data: '.json_encode([$version, $vals]).'\r\n result：' . $response
                 );
 
