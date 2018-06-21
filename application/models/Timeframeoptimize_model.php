@@ -218,11 +218,13 @@ class Timeframeoptimize_model extends CI_Model
             $version[$k]['date'] = $v['date'];
         }
 
-        $data = [
+        $ndata = [
             'dates' => implode(',', $data['dates']),
             'junction_movements' => [
-                'junction_id' => $data['junction_id'],
-                'movements'   => implode(',', $data['movements']),
+                [
+                    'junction_id' => $data['junction_id'],
+                    'movements'   => implode(',', $data['movements']),
+                ]
             ],
             'tod_cnt' => $data['divide_num'],
             'version' => $version,
@@ -230,7 +232,7 @@ class Timeframeoptimize_model extends CI_Model
 
         $service = new Todsplit_vendor();
 
-        $res = $service->getTodPlan($data);
+        $res = $service->getTodPlan($ndata);
         var_dump($res);exit;
 
     }
