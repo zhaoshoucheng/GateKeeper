@@ -443,7 +443,7 @@ class Timing_model extends CI_Model
             foreach ($data['latest_plan']['time_plan'] as $v) {
                 $tempTiming[strtotime($v['tod_start_time'])]['start'] = $v['tod_start_time'];
                 $tempTiming[strtotime($v['tod_start_time'])]['end'] = $v['tod_end_time'];
-                $tempTiming[strtotime($v['tod_start_time'])]['name'] = $v['comment'];
+                $tempTiming[strtotime($v['tod_start_time'])]['name'] = str_replace('方案', '', $v['comment']);
             }
         }
         if (!empty($tempTiming)) {
