@@ -472,4 +472,27 @@ class RoadNet
         }
         return $response;
     }
+
+    /**
+    * 获取时段划分方案
+    */
+    public function getTodPlan($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $this->start('tod_split_optimize');
+        $response = $this->call('tod_opt', [$data]);
+        $this->close();
+        if(!$response || $response == 'null'){
+            sendMail(
+                    'ningxiangbing@didichuxing.com',
+                    'logs: 调用时段划分接口获取数据',
+                    'data: '.json_encode([$data]).'\r\n result：' . $response
+                );
+
+        }
+        return $response;
+    }
 }
