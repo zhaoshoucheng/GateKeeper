@@ -557,13 +557,11 @@ class Junction extends MY_Controller
             return;
         }
 
-        $data = [
-            'dates'           => $params['dates'],
-            'junction_id'     => strip_tags(trim($params['junction_id'])),
-            'search_type'     => intval($params['search_type']),
-            'task_time_range' => strip_tags(trim($params['task_time_range'])),
-            'timingType'      => $this->timingType
-        ];
+        $data = ['dates'] = $params['dates'];
+        $data['junction_id'] = strip_tags(trim($params['junction_id']));
+        $data['search_type'] = intval($params['search_type']);
+        $data['task_time_range'] = strip_tags(trim($params['task_time_range']));
+        $data['timingType'] = $this->timingType;
 
         $result = $this->junction_model->getJunctionMapData($data);
 
