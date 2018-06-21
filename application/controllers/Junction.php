@@ -534,12 +534,14 @@ class Junction extends MY_Controller
                 $this->errmsg = 'The time_range is wrong.';
                 return;
             }
+            $data['time_range'] = strip_tags(trim($params['time_range']));
         } else {
             if (empty($params['time_point'])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_point cannot be empty.';
                 return;
             }
+            $data['time_point'] = strip_tags(trim($params['time_point']));
         }
 
         $task_time_range = array_filter(explode('-', $params['task_time_range']));
@@ -559,8 +561,6 @@ class Junction extends MY_Controller
             'dates'           => $params['dates'],
             'junction_id'     => strip_tags(trim($params['junction_id'])),
             'search_type'     => intval($params['search_type']),
-            'time_point'      => strip_tags(trim($params['time_point'])),
-            'time_range'      => strip_tags(trim($params['time_range'])),
             'task_time_range' => strip_tags(trim($params['task_time_range'])),
             'timingType'      => $this->timingType
         ];
