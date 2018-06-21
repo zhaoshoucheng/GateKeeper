@@ -221,7 +221,7 @@ class Timeframeoptimize_model extends CI_Model
         $data = [
             'dates' => implode(',', $data['dates']),
             'junction_movements' => [
-                $data['junction_id'] => $data['movements'],
+                $data['junction_id'] => implode(',', $data['movements']),
             ],
             'tod_cnt' => $data['divide_num'],
             'version' => $version,
