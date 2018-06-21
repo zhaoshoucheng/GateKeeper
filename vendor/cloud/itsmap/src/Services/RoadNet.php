@@ -491,9 +491,9 @@ class RoadNet
         $vals->dates = $data['dates'];
         $vals->junction_movements = $data['junction_movements'];
         $vals->tod_cnt = $data['tod_cnt'];
-        foreach ($data['version'] as $v) {
-            $vals->version[] = new todsplit_version($v);
-        }
+        //foreach ($data['version'] as $v) {
+            $vals->version = new todsplit_version($data['version']);
+        //}
 
         $this->start('tod_split_optimize');
         $response = $this->call('tod_opt', [$vals]);
@@ -503,6 +503,43 @@ class RoadNet
                     'ningxiangbing@didichuxing.com',
                     'logs: 调用时段划分接口获取数据',
                     'data: '.json_encode([$vals]).'\r\n result：' . $response
+                );
+
+        }
+        return $response;
+    }
+
+    /**
+    * 获绿信比优化方案
+    */
+    public function getSplitPlan($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $vals = new SignalPlan();
+        $vals->dates = $data['dates'];
+        $vals->logic_junction_id = $data['logic_junction_id'];
+        $vals->start_time = $data['start_time'];
+        $vals->end_time = $data['end_time'];
+        $vals->cycle = $data['cycle'];
+        $vals->offset = $data['offset'];
+        $vals->clock_shift = $data['clock_shift'];
+        foreach ($data['signal'] as $v) {
+            $vals->signal[] = new MovementSignal($v);
+        }
+
+        $version = new todsplit_version($data['version']);
+
+        $this->start('tod_split_optimize');
+        $response = $this->call('green_split_opt', [$version, $vals]);
+        $this->close();
+        if(!$response || $response == 'null'){
+            sendMail(
+                    'ningxiangbing@didichuxing.com',
+                    'logs: 调用时段划分接口获取数据',
+                    'data: '.json_encode([$version, $vals]).'\r\n result：' . $response
                 );
 
         }

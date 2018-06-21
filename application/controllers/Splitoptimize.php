@@ -62,4 +62,49 @@ class Splitoptimize extends MY_Controller
         return $this->response($timing);
     }
 
+    /**
+    *
+    */
+    public function getSplitOptimizePlan()
+    {
+        $params = $this->input->post();
+        // 校验参数
+        $validate = Validate::make($params,
+            [
+                'task_id'          => 'min:1',
+                'junction_id'      => 'nullunable',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        if (!is_array($params['dates']) || count($params['dates']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The dates cannot be empty and must be array.';
+            return;
+        }
+
+        if (!is_array($params['movements']) || count($params['movements']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The movements cannot be empty and must be array.';
+            return;
+        }
+
+        $data = [
+            'dates'       => $params['dates'],
+            'junction_id' => strip_tags(trim($params['junction_id'])),
+            'task_id'     => intval($params['task_id']),
+            'movements'   => $params['movements'],
+            'divide_num'  => intval($params['divide_num']),
+        ];
+
+        $result = $this->splitoptimize_model->getSplitOptimizePlan($data);
+
+        return $this->response($result);
+    }
+
+
 }
