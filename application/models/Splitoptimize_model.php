@@ -56,36 +56,45 @@ class Splitoptimize_model extends CI_Model
             'timingType'  => $data['timingType'],
         ];
         $timing = $this->timing_model->getTimingPlan($tdata);
-        echo "<pre>";print_r($timing);exit;
+        if (empty($timing)) {
+            return [];
+        }
 
-        $signal = [
-            [
-                'logic_flow_id'=> '2017030116_i_74479370_2017030116_o_74186480',
-                'green_start'=> [0],
-                'green_duration'=>[52],
-                'yellow'=>[3],
-                'red_clean'=>[0]
-            ],
-            [
-                'logic_flow_id'=>'2017030116_i_74479370_2017030116_o_74188361',
-                'green_start'=>[0],
-                'green_duration'=>[52],
-                'yellow'=>[3],
-                'red_clean'=>[0]
-            ]
-        ];
+        $timeRangeArr = explode('-', $data['time_range']);
+        [$start, $end] = $timeRangeArr;
 
-        $ndata = [
-            'dates' => implode(',', $data['dates']),
-            'logic_junction_id' => $data['junction_id'],
-            'start_time' => '00:00:00',
-            'end_time' => '05:00:00',
-            'cycle' => 80,
-            'offset' => 31,
-            'clock_shift'=> 0,
-            'signal'=>$signal,
-            'version'=>$version
-        ];
+        // 转为时间戳用于比较
+        $start = strtotime($start);
+        $end = strtotime($end);
+
+        $signal = [];
+        $flowIdName = [];
+        foreach ($timing as $v) {
+            if (strtotime($v['plan']['start_time']) == $start && strtotime($v['plan']['end_time']) == $end) {
+                // thrift参数
+                $ndata['start_time'] = $start;
+                $ndata['end_time'] = $end;
+                $ndata['cycle'] = $v['plan']['cycle'];
+                $ndata['offset'] = $v['plan']['offset'];
+                $ndata['clock_shift'] = 0;
+                foreach ($v['movements'] as $kk=>$vv) {
+                    $signal[$kk]['logic_flow_id'] = $vv['info']['logic_flow_id'];
+                    $flowIdName[$$vv['info']['logic_flow_id']] = $vv['info']['comment'];
+                    foreach ($vv['signal'] as $kkk=>$vvv) {
+                        $signal[$kk]['green_start'][$kkk] = $vvv['g_start_time'];
+                        $signal[$kk]['green_duration'][$kkk] = $vvv['g_duration'];
+                        $signal[$kk]['yellow'][$kkk] = $vvv['yellowLight'];
+                        $signal[$kk]['red_clean'][$kkk] = 0;
+                    }
+                }
+            }
+        }
+
+        if (empty($signal)) {
+            return [];
+        }
+        $ndata['signal'] = $signal;
+        $ndata['version'] =$version;
 
         $service = new Todsplit_vendor();
 
@@ -108,7 +117,7 @@ class Splitoptimize_model extends CI_Model
             $v = (array)$v;
             $result['movements'][$k]['info'] = [
                 'logic_flow_id' => $v['logic_flow_id'],
-                'comment'       => '';
+                'comment'       => $flowIdName[$v['logic_flow_id']],
             ];
             foreach ($v['green_start'] as $kk=>$vv) {
                 $result['movements'][$k]['signal'][$kk] = [
