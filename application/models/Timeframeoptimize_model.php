@@ -228,7 +228,7 @@ class Timeframeoptimize_model extends CI_Model
             ],
             'tod_cnt' => $data['divide_num'],
             'version' => $version,
-        ]
+        ];
 
         $service = new Todsplit_vendor();
 
