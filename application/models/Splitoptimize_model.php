@@ -18,12 +18,14 @@ class Splitoptimize_model extends CI_Model
     }
 
     /**
-    * 获取时段划分优化方案
-    * @param $data['task_id']     interger Y 任务ID
-    * @param $data['junction_id'] string   Y 路口ID
-    * @param $data['dates']       array    Y 评估/诊断日期
-    * @param $data['movements']   array    Y 路口相位集合
-    * @param $data['divide_num']  interger Y 划分数量
+    * 获取绿信比优化方案
+    * @param $data['task_id']          interger Y 任务ID
+    * @param $data['junction_id']      string   Y 路口ID
+    * @param $data['dates']            array    Y 评估/诊断日期
+    * @param $data['time_range']       string   Y 方案开始结束时间 00:00-09:00
+    * @param $data['task_time_range']  string   Y 任务时段 00:00-09:00
+    * @param $data['yellowLight']      interger Y 黄灯时长
+    * @param $data['timingType']       interger Y 配时来源 1：人工 2：反推
     * @return array
     */
     public function getSplitOptimizePlan($data)
@@ -45,6 +47,16 @@ class Splitoptimize_model extends CI_Model
             $version[$k]['map_version'] = $v['map_version_md5'];
             $version[$k]['date'] = $v['date'];
         }
+
+        $tdata = [
+            'dates'       => $data['dates'],
+            'junction_id' => strip_tags(trim($data['junction_id'])),
+            'time_range'  => strip_tags(trim($data['task_time_range'])),
+            'yellowLight' => $data['yellowLight'],
+            'timingType'  => $data['timingType'],
+        ];
+        $timing = $this->timing_model->getTimingPlan($tdata);
+        echo "<pre>";print_r($timing);exit;
 
         $signal = [
             [
@@ -78,7 +90,35 @@ class Splitoptimize_model extends CI_Model
         $service = new Todsplit_vendor();
 
         $res = $service->getSplitPlan($ndata);
-        var_dump($res);exit;
+        if (empty($res)) {
+            return [];
+        }
 
+        $res = (array)$res;
+        $res['green_split_opt_signal_plan'] = (array)$res['green_split_opt_signal_plan'];
+        $res['green_split_opt_signal_plan']['signal'] = (array)$res['green_split_opt_signal_plan']['signal'];
+
+        $result['plan'] = [
+            'start_time' => $res['green_split_opt_signal_plan']['start_time'],
+            'emd_time'   => $res['green_split_opt_signal_plan']['end_time'],
+            'cycle'      => $res['green_split_opt_signal_plan']['cycle'],
+            'offset'     => $res['green_split_opt_signal_plan']['offset'],
+        ];
+        foreach ($res['green_split_opt_signal_plan']['signal'] as $k=>&$v) {
+            $v = (array)$v;
+            $result['movements'][$k]['info'] = [
+                'logic_flow_id' => $v['logic_flow_id'],
+                'comment'       => '';
+            ];
+            foreach ($v['green_start'] as $kk=>$vv) {
+                $result['movements'][$k]['signal'][$kk] = [
+                    'g_start_time' => $vv,
+                    'g_duration'   => $v['green_duration'][$kk],
+                    'yellowLight'  => $v['yellow'][$kk],
+                ];
+            }
+        }
+
+        return $result;
     }
 }

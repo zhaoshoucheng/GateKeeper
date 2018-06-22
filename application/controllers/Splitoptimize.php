@@ -64,7 +64,13 @@ class Splitoptimize extends MY_Controller
     }
 
     /**
-    *
+    * 获取绿信比优化方案
+    * @param task_id         interger Y 任务ID
+    * @param junction_id     string   Y 路口ID
+    * @param time_range      string   Y 方案开始结束时间 00:00-09:00
+    * @param task_time_range string   Y 任务时段 例：00:00-24:00
+    * @param dates           array    Y 评估/诊断日期
+    * @return json
     */
     public function getSplitOptimizePlan()
     {
@@ -74,6 +80,8 @@ class Splitoptimize extends MY_Controller
             [
                 'task_id'          => 'min:1',
                 'junction_id'      => 'nullunable',
+                'time_range'       => 'nullunable',
+                'task_time_range'  => 'nullunable',
             ]
         );
         if (!$validate['status']) {
@@ -88,18 +96,14 @@ class Splitoptimize extends MY_Controller
             return;
         }
 
-        if (!is_array($params['movements']) || count($params['movements']) < 1) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The movements cannot be empty and must be array.';
-            return;
-        }
-
         $data = [
-            'dates'       => $params['dates'],
-            'junction_id' => strip_tags(trim($params['junction_id'])),
-            'task_id'     => intval($params['task_id']),
-            'movements'   => $params['movements'],
-            'divide_num'  => intval($params['divide_num']),
+            'dates'           => $params['dates'],
+            'junction_id'     => strip_tags(trim($params['junction_id'])),
+            'task_id'         => intval($params['task_id']),
+            'time_range'      => strip_tags(trim($params['time_range'])),
+            'task_time_range' => strip_tags(trim($params['task_time_range'])),
+            'yellowLight'     => $this->yellowLight,
+            'timingType'      => $this->timingType,
         ];
 
         $result = $this->splitoptimize_model->getSplitOptimizePlan($data);
