@@ -228,12 +228,29 @@ class Timeframeoptimize_model extends CI_Model
             ],
             'tod_cnt' => $data['divide_num'],
             'version' => $version,
-        ];
+        ]
 
         $service = new Todsplit_vendor();
 
         $res = $service->getTodPlan($ndata);
-        var_dump($res);exit;
+        if (empty($res)) {
+            return [];
+        }
 
+        $res = array($res);
+
+        foreach ($res as &$v) {
+            $v = array($v);
+            foreach ($v['tod_plans'] as $kk=>&$vv) {
+                $vv = array($vv);
+                $result[$kk] = [
+                    'start'   => $vv['tod_period'][0],
+                    'end'     => $vv['tod_period'][1],
+                    'comment' => $vv['tod_name'],
+                ];
+            }
+        }
+
+        return $result;
     }
 }
