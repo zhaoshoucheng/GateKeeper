@@ -536,7 +536,7 @@ class Timing_model extends CI_Model
                             = isset($val['duration']) ? $val['duration'] : 0;
                             // 绿灯结束时间
                             $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['end_time']
-                            = $val['start'] + $val['duration'];
+                            = $val['start_time'] + $val['duration'];
                             // 逻辑flow id
                             $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['logic_flow_id']
                             = isset($val['flow_logic']['logic_flow_id']) ? $val['flow_logic']['logic_flow_id'] : 0;
