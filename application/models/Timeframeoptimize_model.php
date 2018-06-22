@@ -237,12 +237,12 @@ class Timeframeoptimize_model extends CI_Model
             return [];
         }
 
-        $res = array($res);
+        $res = (array)$res;
 
         foreach ($res as &$v) {
-            $v = array($v);
+            $v = (array)$v;
             foreach ($v['tod_plans'] as $kk=>&$vv) {
-                $vv = array($vv);
+                $vv = (array)$vv;
                 $result[$kk] = [
                     'start'   => $vv['tod_period'][0],
                     'end'     => $vv['tod_period'][1],
