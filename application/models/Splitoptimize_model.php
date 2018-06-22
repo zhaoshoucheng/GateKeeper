@@ -72,8 +72,8 @@ class Splitoptimize_model extends CI_Model
         foreach ($timing as $v) {
             if (strtotime($v['plan']['start_time']) == $start && strtotime($v['plan']['end_time']) == $end) {
                 // thrift参数
-                $ndata['start_time'] = $start;
-                $ndata['end_time'] = $end;
+                $ndata['start_time'] = $v['plan']['start_time'];
+                $ndata['end_time'] = $v['plan']['end_time'];
                 $ndata['cycle'] = $v['plan']['cycle'];
                 $ndata['offset'] = $v['plan']['offset'];
                 $ndata['clock_shift'] = 0;
