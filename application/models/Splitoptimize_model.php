@@ -61,7 +61,7 @@ class Splitoptimize_model extends CI_Model
         }
 
         $timeRangeArr = explode('-', $data['time_range']);
-        [$start, $end] = $timeRangeArr;
+        list($start, $end) = $timeRangeArr;
 
         // 转为时间戳用于比较
         $start = strtotime($start);
@@ -79,7 +79,7 @@ class Splitoptimize_model extends CI_Model
                 $ndata['clock_shift'] = 0;
                 foreach ($v['movements'] as $kk=>$vv) {
                     $signal[$kk]['logic_flow_id'] = $vv['info']['logic_flow_id'];
-                    $flowIdName[$$vv['info']['logic_flow_id']] = $vv['info']['comment'];
+                    $flowIdName[$vv['info']['logic_flow_id']] = $vv['info']['comment'];
                     foreach ($vv['signal'] as $kkk=>$vvv) {
                         $signal[$kk]['green_start'][$kkk] = $vvv['g_start_time'];
                         $signal[$kk]['green_duration'][$kkk] = $vvv['g_duration'];
@@ -93,6 +93,7 @@ class Splitoptimize_model extends CI_Model
         if (empty($signal)) {
             return [];
         }
+        $ndata['dates'] = implode(',', $data['dates']);
         $ndata['signal'] = $signal;
         $ndata['version'] =$version;
 
