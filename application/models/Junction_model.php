@@ -728,11 +728,6 @@ class Junction_model extends CI_Model
                 $v['comment'] = $flow_id_name[$v['movement_id']] ?? '';
                 $v['confidence'] = $confidence_conf[$v['confidence']]['name'] ?? '';
 
-                foreach ($flow_quota_key_conf as $kkk=>$vvv) {
-                    if (isset($v[$kkk])) {
-                        $v[$kkk] = round($v[$kkk], $vvv['round_num']);
-                    }
-                }
                 if (array_key_exists(trim($v['comment']), $phase)
                     && !array_key_exists($phase[trim($v['comment'])], $temp_movements)
                 ) {
@@ -744,7 +739,10 @@ class Junction_model extends CI_Model
                 foreach ($flow_quota_key_conf as $key=>$val) {
                     $data['flow_quota_all'][$key]['name'] = $val['name'];
                     $data['flow_quota_all'][$key]['movements'][$k]['id'] = $v['movement_id'];
-                    $data['flow_quota_all'][$key]['movements'][$k]['value'] = round($v[$key], $val['round_num']);
+                    if (isset($v[$key])) {
+                        $v[$key] = round($v[$key], $val['round_num']);
+                        $data['flow_quota_all'][$key]['movements'][$k]['value'] = round($v[$key], $val['round_num']);
+                    }
                 }
 
             }
