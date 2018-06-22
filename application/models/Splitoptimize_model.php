@@ -94,6 +94,7 @@ class Splitoptimize_model extends CI_Model
             return [];
         }
         $ndata['dates'] = implode(',', $data['dates']);
+        $ndata['logic_junction_id'] = $data['junction_id'];
         $ndata['signal'] = $signal;
         $ndata['version'] =$version;
 
