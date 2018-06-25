@@ -142,9 +142,9 @@ class Splitoptimize_model extends CI_Model
                 }
             }
         }
-        /*if (!empty($result['suggest'])) {
+        if (!empty($result['suggest'])) {
             $result['suggest'] = array_values($result['suggest']);
-        }*/
+        }
 
         return $result;
     }
