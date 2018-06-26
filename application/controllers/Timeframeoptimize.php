@@ -71,7 +71,7 @@ class Timeframeoptimize extends MY_Controller
             return;
         }
 
-        if (!is_array($params['dates']) || count($params['dates']) < 1) {
+        if (!is_array($params['dates']) || empty($params['dates'])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
@@ -113,7 +113,7 @@ class Timeframeoptimize extends MY_Controller
             return;
         }
 
-        if (!is_array($params['dates']) || count($params['dates']) < 1) {
+        if (empty($params['dates']) || !is_array($params['dates'])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
@@ -157,13 +157,13 @@ class Timeframeoptimize extends MY_Controller
             return;
         }
 
-        if (!is_array($params['dates']) || count($params['dates']) < 1) {
+        if (empty($params['dates']) || !is_array($params['dates'])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
         }
 
-        if (!is_array($params['movements']) || count($params['movements']) < 1) {
+        if (empty($params['movements']) || !is_array($params['movements'])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The movements cannot be empty and must be array.';
             return;

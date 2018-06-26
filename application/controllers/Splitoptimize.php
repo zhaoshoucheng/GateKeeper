@@ -44,7 +44,7 @@ class Splitoptimize extends MY_Controller
             return;
         }
 
-        if (!is_array($params['dates']) || count($params['dates']) < 1) {
+        if (!is_array($params['dates']) || empty($params['dates'])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
@@ -90,7 +90,7 @@ class Splitoptimize extends MY_Controller
             return;
         }
 
-        if (!is_array($params['dates']) || count($params['dates']) < 1) {
+        if (!is_array($params['dates']) || empty($params['dates'])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
