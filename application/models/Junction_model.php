@@ -1066,7 +1066,7 @@ class Junction_model extends CI_Model
         $result['center'] = $center;
         $result['map_version'] = $map_version;
 
-        if (count($result['dataList']) >= 1) {
+        if (!empty($result['dataList'])) {
             $result['dataList'] = array_values($result['dataList']);
         }
 

@@ -576,10 +576,12 @@ class Timing_model extends CI_Model
         }
 
         $result = [];
-        foreach ($data['latest_plan']['time_plan'] as $k=>$v) {
-            foreach ($v['plan_detail']['movement_timing'] as $kk=>$vv) {
-                foreach ($vv as $vvv) {
-                    $result[$vvv['flow_logic']['logic_flow_id']] = $vvv['flow_logic']['comment'];
+        if (!empty($data['latest_plan']['time_plan'])) {
+            foreach ($data['latest_plan']['time_plan'] as $k=>$v) {
+                foreach ($v['plan_detail']['movement_timing'] as $kk=>$vv) {
+                    foreach ($vv as $vvv) {
+                        $result[$vvv['flow_logic']['logic_flow_id']] = $vvv['flow_logic']['comment'];
+                    }
                 }
             }
         }
