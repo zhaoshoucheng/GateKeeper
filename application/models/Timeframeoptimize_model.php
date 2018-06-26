@@ -121,6 +121,7 @@ class Timeframeoptimize_model extends CI_Model
         // 获取相位ID=>相位名称
         $flowIdName = $this->timing_model->getFlowIdToName($data);
 
+        $result = [];
         foreach ($list as $k=>&$v) {
             $v['movements'] = json_decode($v['movements'], true);
             foreach ($v['movements'] as $vv) {
@@ -128,6 +129,9 @@ class Timeframeoptimize_model extends CI_Model
                     $result[$vv['movement_id']] = $flowIdName[$vv['movement_id']];
                 }
             }
+        }
+        if (empty($result)) {
+            return [];
         }
 
         // NEMA排序 南左、北直、西左、东直、北左、南直、东左、西直
@@ -154,8 +158,11 @@ class Timeframeoptimize_model extends CI_Model
                 ];
             }
         }
-        ksort($newRes);
-        $newRes = array_values($newRes);
+
+        if (!empty($newRes)) {
+            ksort($newRes);
+            $newRes = array_values($newRes);
+        }
 
         return $newRes;
     }
