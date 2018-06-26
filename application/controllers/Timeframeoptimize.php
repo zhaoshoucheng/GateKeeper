@@ -71,7 +71,7 @@ class Timeframeoptimize extends MY_Controller
             return;
         }
 
-        if (!is_array($params['dates']) || empty($params['dates'])) {
+        if (!is_array($params['dates']) || empty($params['dates']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
