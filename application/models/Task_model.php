@@ -15,6 +15,9 @@ class Task_model extends CI_Model
     private $run_status = [0, 1, 10, 11];
     private $success_status = [11];
 
+    const TASK_TYPE_CYCLE   = 1;    //周期任务
+    const TASK_TYPE_CUSTOM  = 2;    //自定义任务
+
     function __construct() {
         parent::__construct();
         $this->its_tool = $this->load->database('default', true);
@@ -92,7 +95,7 @@ class Task_model extends CI_Model
     }
 
     function getSuccCycleTask($user, $city_id, $cols = '*') {
-        $aRet = $this->its_tool->select($cols)->from($this->_table)->where('user', $user)->where('city_id', $city_id)->where('type', 1)->where_in('status', $this->success_status)->order_by('id', 'DESC')->get()->result_array();
+        $aRet = $this->its_tool->select($cols)->from($this->_table)->where('user', $user)->where('city_id', $city_id)->where('type', self::TASK_TYPE_CYCLE)->where('rate', '100')->where_in('status', $this->success_status)->order_by('id', 'DESC')->get()->result_array();
         return $aRet;
     }
 
