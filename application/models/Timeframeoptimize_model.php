@@ -124,7 +124,9 @@ class Timeframeoptimize_model extends CI_Model
         foreach ($list as $k=>&$v) {
             $v['movements'] = json_decode($v['movements'], true);
             foreach ($v['movements'] as $vv) {
-                $result[$vv['movement_id']] = $flowIdName[$vv['movement_id']];
+                if (isset($result[$vv['movement_id']]) && isset($flowIdName[$vv['movement_id']])) {
+                    $result[$vv['movement_id']] = $flowIdName[$vv['movement_id']];
+                }
             }
         }
 
