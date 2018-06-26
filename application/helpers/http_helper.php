@@ -82,7 +82,9 @@ if (!function_exists('httpPOST')) {
         if($contentType == 'json'){
             $data = json_encode($data);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Content-Length: ' . strlen($data)));
-        }else{
+        } elseif ($contentType == 'raw') {
+            $data = $data;
+        } else  {
             $data = http_build_query($data);
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);

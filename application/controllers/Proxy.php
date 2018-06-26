@@ -49,7 +49,8 @@ class Proxy extends MY_Controller
 
         $httpMethod = $_SERVER['REQUEST_METHOD'];
         if ($httpMethod == 'POST') {
-            echo httpPOST($realUri, $_POST);
+            $post = file_get_contents('php://input');
+            echo httpPOST($realUri, $post, 0, 'raw');
         } else {
             echo httpGET($realUri);
         }
