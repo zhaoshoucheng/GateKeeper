@@ -52,7 +52,7 @@ class Junction extends MY_Controller
         $data['city_id'] = $params['city_id'];
 
         // type == 0时 time_point为必传项
-        if ($data['type'] == 0 && (!isset($params['time_point']) || empty(trim($params['time_point'])))) {
+        if ($data['type'] == 0 && empty(trim($params['time_point']))) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The time_point cannot be empty.';
             return;
@@ -202,7 +202,7 @@ class Junction extends MY_Controller
             return;
         }
 
-        if (!is_array($params['dates']) || count($params['dates']) < 1) {
+        if (!is_array($params['dates']) || empty($params['dates'])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
@@ -327,7 +327,7 @@ class Junction extends MY_Controller
             return;
         }
 
-        if (!is_array($params['dates']) || count($params['dates']) < 1) {
+        if (!is_array($params['dates']) || empty($params['dates'])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
@@ -373,7 +373,7 @@ class Junction extends MY_Controller
         $data['city_id'] = $params['city_id'];
         $data['type'] = (int)$params['type'];
 
-        if ($data['type'] == 0 && (!isset($params['time_point']) || empty(trim($params['time_point'])))) {
+        if ($data['type'] == 0 && empty(trim($params['time_point']))) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The time_point cannot be empty.';
             return;
