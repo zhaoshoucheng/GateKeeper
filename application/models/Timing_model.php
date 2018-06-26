@@ -122,7 +122,7 @@ class Timing_model extends CI_Model
             $result = $this->formartTimingDataByTimePoint($timing, $data['time_point']);
         }
 
-        $result['list'] = [];
+        $result_data['list'] = [];
         if (!empty($result)) {
             $result_data['list'] = $this->formatTimingDataResult($result);
         }
