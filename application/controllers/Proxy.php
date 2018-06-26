@@ -47,7 +47,14 @@ class Proxy extends MY_Controller
             header("Content-type:text/css");
         }
 
-        echo httpGET($realUri);
+        $httpMethod = $_SERVER['REQUEST_METHOD'];
+        if ($httpMethod == 'POST') {
+            $post = file_get_contents('php://input');
+            echo httpPOST($realUri, $post, 0, 'raw');
+        } else {
+            echo httpGET($realUri);
+        }
+
         exit;
     }
 
