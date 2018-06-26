@@ -311,6 +311,12 @@ $config['result_comment'] = [
 	'signal_mes_error' => '配时信息与实际车流不符'
 ];
 
+// 绿信比优化建议
+$config['split_opt_suggest'] = [
+	'over_saturation_flow' => '相位:movement过饱和，建议增加绿灯时长',
+	'green_loss_flow'      => '相位:movement存在空放，可缩短绿灯时长',
+];
+
 // 反推配时名单
 
 $config['back_timing_roll'] = [

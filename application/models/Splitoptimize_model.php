@@ -130,6 +130,22 @@ class Splitoptimize_model extends CI_Model
             }
         }
 
+        // 绿信比优化建议模板
+        $splitOptSuggestConf = $this->config->item('split_opt_suggest');
+        // 优化建议
+        $result['suggest'] = [];
+        foreach ($splitOptSuggestConf as $k=>$v) {
+            if (!empty($res[$k])) {
+                foreach ($res[$k] as $kk=>$vv) {
+                    $result['suggest'][$k][$kk]
+                        = str_replace(':movement', $flowIdName[$vv], $v);
+                }
+            }
+        }
+        if (!empty($result['suggest'])) {
+            $result['suggest'] = array_values($result['suggest']);
+        }
+
         return $result;
     }
 }
