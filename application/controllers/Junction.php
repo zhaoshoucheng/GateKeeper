@@ -128,12 +128,14 @@ class Junction extends MY_Controller
                 $this->errmsg = 'The time_range is wrong.';
                 return;
             }
+            $data['time_range'] = strip_tags(trim($params['time_range']));
         } else {
             if (empty($params['time_point'])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The time_point cannot be empty.';
                 return;
             }
+            $data['time_point'] = strip_tags(trim($params['time_point']));
         }
 
         $task_time_range = array_filter(explode('-', $params['task_time_range']));
@@ -143,23 +145,19 @@ class Junction extends MY_Controller
             return;
         }
 
-        if (!is_array($params['dates']) || count($params['dates']) < 1) {
+        if (!is_array($params['dates']) || empty($params['dates'])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
         }
 
-        $data = [
-            'task_id'         => intval($params['task_id']),
-            'dates'           => $params['dates'],
-            'junction_id'     => strip_tags(trim($params['junction_id'])),
-            'search_type'     => intval($params['search_type']),
-            'time_point'      => strip_tags(trim($params['time_point'])),
-            'time_range'      => strip_tags(trim($params['time_range'])),
-            'type'            => intval($params['type']),
-            'task_time_range' => strip_tags(trim($params['task_time_range'])),
-            'timingType'      => $this->timingType
-        ];
+        $data['task_id'] = intval($params['task_id']);
+        $data['dates'] = $params['dates'];
+        $data['junction_id'] = strip_tags(trim($params['junction_id']));
+        $data['search_type'] = intval($params['search_type']);
+        $data['type'] = intval($params['type']);
+        $data['task_time_range'] = strip_tags(trim($params['task_time_range']));
+        $data['timingType'] = $this->timingType;
 
         // 获取路口指标详情
         $res = $this->junction_model->getFlowQuotas($data);
