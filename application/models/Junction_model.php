@@ -730,7 +730,11 @@ class Junction_model extends CI_Model
         $temp_movements = [];
         foreach ($data['movements'] as $k=>&$v) {
             $v['comment'] = $flow_id_name[$v['movement_id']] ?? '';
-            $v['confidence'] = $confidence_conf[$v['confidence']]['name'] ?? '';
+            if (isset($v['confidence'])) {
+                $v['confidence'] = $confidence_conf[$v['confidence']]['name'] ?? '';
+            } else {
+                $v['confidence'] = '';
+            }
 
             // 组织flow级指标对应相位集合及格式化指标数据
             foreach ($flow_quota_key_conf as $key=>$val) {
