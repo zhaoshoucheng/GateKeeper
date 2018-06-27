@@ -791,11 +791,13 @@ class Junction_model extends CI_Model
                     foreach ($data['movements'] as $kk=>$vv) {
                         $data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, $temp_merge);
                         foreach ($v['flow_quota'] as $key=>$val) {
-                            $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
-                            $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id']
-                                = $vv['movement_id'];
-                            $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value']
-                                = round($vv[$key], $flow_quota_key_conf[$key]['round_num']);
+                            if (isset($vv[$key])) {
+                                $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
+                                $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id']
+                                    = $vv['movement_id'];
+                                $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value']
+                                    = round($vv[$key], $flow_quota_key_conf[$key]['round_num']);
+                            }
                         }
                     }
                 }
