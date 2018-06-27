@@ -479,13 +479,13 @@ class Timing_model extends CI_Model
                     'end'     => $tempTiming[$i]['end'],
                     'comment' => $tempTiming[$i]['name']
                 ];
-            if (strtotime($tempTiming[$i]['end']) < $lastTime
+            if (isset($tempTiming[$i+1]) && strtotime($tempTiming[$i]['end']) < $lastTime
                 && strtotime($tempTiming[$i]['end']) < strtotime($tempTiming[$i+1]['start'])
             ) {
                 $resultTiming[strtotime($tempTiming[$i+1]['start'])] = [
                     'start'   => $tempTiming[$i]['end'],
                     'end'     => $tempTiming[$i+1]['start'],
-                    'comment' => '未知方案'
+                    'comment' => '方案未知'
                 ];
             }
         }
