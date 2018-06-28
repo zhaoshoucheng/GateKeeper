@@ -422,7 +422,8 @@ class Timing_model extends CI_Model
         $phase_position = [];
         $temp_arr = [];
         foreach ($data as $k=>$v) {
-            $comment = $v['comment'];
+            // 暂时只取备注的前两个字，因为有的备注是 西南口向东直行 类似这样的.
+            $comment = mb_substr($v['comment'], 0, 2, "utf-8");
             foreach ($position as $k1=>$v1) {
                 foreach ($turn as $k2=>$v2) {
                     if (stristr($comment, $k1.$k2) !== false) {
