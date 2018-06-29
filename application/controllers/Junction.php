@@ -574,7 +574,7 @@ class Junction extends MY_Controller
     public function testLogin()
     {
         echo "welcome!";
-        sendMail($this->eamil_to, '测试', 'yeah');
+        sendMail($this->eamil_to, '测试', 'ok');
         exit;
     }
 }
