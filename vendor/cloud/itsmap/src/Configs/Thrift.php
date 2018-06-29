@@ -68,7 +68,23 @@ class Thrift
                 'write_timeout' => 30,
                 'class' => '\Track\MtrajServiceClient',
                 'transport' => 'Thrift\Transport\TBufferedTransport',
-            ]
+            ],
+            'tod_split_optimize' => [
+                'address' => [
+                    [
+                        'host' => '100.70.160.62',
+                        'port' => '9234',
+                    ],
+                    [
+                        'host' => '10.93.94.36',
+                        'port' => '9234',
+                    ]
+                ],
+                'read_timeout' => 30,
+                'write_timeout' => 30,
+                'class' => '\Todsplit\signal_opt_serviceClient',
+                'transport' => 'Thrift\Transport\TBufferedTransport',
+            ],
         ],
         ENV::DEBUG => [
             'inhert' => [
@@ -130,7 +146,23 @@ class Thrift
                 'write_timeout' => 30,
                 'class' => '\Track\MtrajServiceClient',
                 'transport' => 'Thrift\Transport\TBufferedTransport',
-            ]
+            ],
+            'tod_split_optimize' => [
+                'address' => [
+                    [
+                        'host' => '100.70.160.62',
+                        'port' => '9234',
+                    ],
+                    [
+                        'host' => '10.93.94.36',
+                        'port' => '9234',
+                    ]
+                ],
+                'read_timeout' => 30,
+                'write_timeout' => 30,
+                'class' => '\Todsplit\signal_opt_serviceClient',
+                'transport' => 'Thrift\Transport\TBufferedTransport',
+            ],
         ],
         ENV::ONLINE => [
             'inhert' => [
@@ -204,7 +236,23 @@ class Thrift
                 'write_timeout' => 30,
                 'class' => '\Track\MtrajServiceClient',
                 'transport' => 'Thrift\Transport\TBufferedTransport',
-            ]
+            ],
+            'tod_split_optimize' => [
+                'address' => [
+                    [
+                        'host' => '100.70.160.62',
+                        'port' => '9234',
+                    ],
+                    [
+                        'host' => '10.93.94.36',
+                        'port' => '9234',
+                    ]
+                ],
+                'read_timeout' => 30,
+                'write_timeout' => 30,
+                'class' => '\Todsplit\signal_opt_serviceClient',
+                'transport' => 'Thrift\Transport\TBufferedTransport'
+            ],
         ],
     ];
 
