@@ -251,7 +251,7 @@ class Thrift
                 'read_timeout' => 30,
                 'write_timeout' => 30,
                 'class' => '\Todsplit\signal_opt_serviceClient',
-                'transport' => 'Thrift\Transport\TBufferedTransport',
+                'transport' => 'Thrift\Transport\TBufferedTransport'
             ],
         ],
     ];
