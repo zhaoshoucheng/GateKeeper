@@ -180,7 +180,7 @@ $config['flow_quota_key'] = [
 		'name'      => '流量',
 		'round_num' => 0
 	],
-	'free_flow_speed' => [
+	'freeflow_speed' => [
 		'name'      => '自由流',
 		'round_num' => 2
 	],
