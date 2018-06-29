@@ -730,11 +730,7 @@ class Junction_model extends CI_Model
         $temp_movements = [];
         foreach ($data['movements'] as $k=>&$v) {
             $v['comment'] = $flow_id_name[$v['movement_id']] ?? '';
-            if (isset($v['confidence'])) {
-                $v['confidence'] = $confidence_conf[$v['confidence']]['name'] ?? '';
-            } else {
-                $v['confidence'] = '';
-            }
+            $v['confidence'] = $confidence_conf[$v['confidence']]['name'] ?? '';
 
             // 组织flow级指标对应相位集合及格式化指标数据
             foreach ($flow_quota_key_conf as $key=>$val) {
@@ -791,13 +787,11 @@ class Junction_model extends CI_Model
                     foreach ($data['movements'] as $kk=>$vv) {
                         $data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, $temp_merge);
                         foreach ($v['flow_quota'] as $key=>$val) {
-                            if (isset($vv[$key])) {
-                                $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
-                                $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id']
-                                    = $vv['movement_id'];
-                                $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value']
-                                    = round($vv[$key], $flow_quota_key_conf[$key]['round_num']);
-                            }
+                            $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
+                            $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id']
+                                = $vv['movement_id'];
+                            $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value']
+                                = round($vv[$key], $flow_quota_key_conf[$key]['round_num']);
                         }
                     }
                 }
@@ -1124,9 +1118,9 @@ class Junction_model extends CI_Model
             foreach ($result['movements'] as $v) {
                 if ($v['movement_id'] == trim($data['flow_id'])) {
                     $result['flow_id'] = $v['movement_id'];
-                    $result['af_condition'] = $v['af_condition'] ?? '';
-                    $result['bf_condition'] = $v['bf_condition'] ?? '';
-                    $result['num'] = $v['num'] ?? 0;
+                    $result['af_condition'] = $v['af_condition'];
+                    $result['bf_condition'] = $v['bf_condition'];
+                    $result['num'] = $v['num'];
                     unset($result['movements']);
                 }
             }

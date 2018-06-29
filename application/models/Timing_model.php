@@ -422,8 +422,7 @@ class Timing_model extends CI_Model
         $phase_position = [];
         $temp_arr = [];
         foreach ($data as $k=>$v) {
-            // 暂时只取备注的前两个字，因为有的备注是 西南口向东直行 类似这样的.
-            $comment = mb_substr($v['comment'], 0, 2, "utf-8");
+            $comment = $v['comment'];
             foreach ($position as $k1=>$v1) {
                 foreach ($turn as $k2=>$v2) {
                     if (stristr($comment, $k1.$k2) !== false) {
@@ -480,13 +479,13 @@ class Timing_model extends CI_Model
                     'end'     => $tempTiming[$i]['end'],
                     'comment' => $tempTiming[$i]['name']
                 ];
-            if (isset($tempTiming[$i+1]) && strtotime($tempTiming[$i]['end']) < $lastTime
+            if (strtotime($tempTiming[$i]['end']) < $lastTime
                 && strtotime($tempTiming[$i]['end']) < strtotime($tempTiming[$i+1]['start'])
             ) {
                 $resultTiming[strtotime($tempTiming[$i+1]['start'])] = [
                     'start'   => $tempTiming[$i]['end'],
                     'end'     => $tempTiming[$i+1]['start'],
-                    'comment' => '方案未知'
+                    'comment' => '未知方案'
                 ];
             }
         }
