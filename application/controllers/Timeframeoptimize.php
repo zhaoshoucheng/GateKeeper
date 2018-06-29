@@ -2,7 +2,7 @@
 /***************************************************************
 # 时段优化类
 # user:ningxiangbing@didichuxing.com
-# date:2018-06-012
+# date:2018-06-12
 ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
@@ -118,10 +118,14 @@ class Timeframeoptimize extends MY_Controller
             $this->errmsg = 'The dates cannot be empty and must be array.';
             return;
         }
-        $data['dates'] = $params['dates'];
-        $data['junction_id'] = strip_tags(trim($params['junction_id']));
-        $data['time_range'] = strip_tags(trim($params['task_time_range']));
-        $data['timingType'] = $this->timingType;
+
+        $data = [
+            'dates'       => $params['dates'],
+            'junction_id' => strip_tags(trim($params['junction_id'])),
+            'time_range'  => strip_tags(trim($params['task_time_range'])),
+            'timingType'  => $this->timingType
+        ];
+
         $timing = $this->timing_model->getOptimizeTiming($data);
 
         return $this->response($timing);

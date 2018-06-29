@@ -84,7 +84,7 @@ if (!function_exists('httpPOST')) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Content-Length: ' . strlen($data)));
         } elseif ($contentType == 'raw') {
             $data = $data;
-        }else{
+        } else  {
             $data = http_build_query($data);
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);

@@ -559,9 +559,8 @@ class Task extends MY_Controller
         if (empty($task)) {
             return $this->response(array(), -1, "task is empty");
         }
-
+        //创建周期任务时，一个用户一天只能创建一条周期任务的规则, 否则该逻辑有问题
         $tasks = $this->task_model->getDayCycleTaskSummary($task['user'], $task['city_id'], date("Y-m-d", strtotime($task['created_at'])));
-
         $types = [
             1 => 'last_day',
             2 => 'last_week',
@@ -584,13 +583,9 @@ class Task extends MY_Controller
 
             $task = array_first($tasksSummary);
 
-            $task_comment = "";
             $run_status = [0, 1, 10, 11];
             if (!empty($task['task_comment']) && isset($this->task_result[$task['task_comment']])) {
                 $task_comment = $this->task_result[$task['task_comment']];
-            }
-            if ( isset($this->task_result[$task_comment])) {
-                $task_comment = $this->task_result[$task_comment];
             } elseif ((in_array($task['status'], $run_status))){
                 $task_comment = "任务执行中";
             } else {

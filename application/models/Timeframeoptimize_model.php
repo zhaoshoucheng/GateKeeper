@@ -2,6 +2,7 @@
 /**
 * 时段优化数据模型
 */
+use Didi\Cloud\ItsMap\Todsplit_vendor;
 
 date_default_timezone_set('Asia/Shanghai');
 class Timeframeoptimize_model extends CI_Model
@@ -13,6 +14,7 @@ class Timeframeoptimize_model extends CI_Model
         parent::__construct();
         $this->db = $this->load->database('default', true);
         $this->load->model('timing_model');
+        $this->load->model('taskdateversion_model');
     }
 
     /**
@@ -71,7 +73,7 @@ class Timeframeoptimize_model extends CI_Model
         }
         return ["lng"=>round($count_lng / $qcount, 6), "lat"=>round($count_lat / $qcount, 6), ];
     }
-    
+
     /**
     * 获取路口相位集合 按nema排序
     * @param $data['task_id']     interger Y 任务ID
@@ -155,6 +157,72 @@ class Timeframeoptimize_model extends CI_Model
         }
 
         $result = $result->result_array();
+
+        return $result;
+    }
+
+    /**
+    * 获取时段划分优化方案
+    * @param $data['task_id']     interger Y 任务ID
+    * @param $data['junction_id'] string   Y 路口ID
+    * @param $data['dates']       array    Y 评估/诊断日期
+    * @param $data['movements']   array    Y 路口相位集合
+    * @param $data['divide_num']  interger Y 划分数量
+    * @return array
+    */
+    public function getTodOptimizePlan($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+
+        // 获取 mapversion
+        $mapversions = $this->taskdateversion_model->select($data['task_id'], $data['dates']);
+        if (!$mapversions) {
+            return [];
+        }
+
+        // 组织thrift所需version数组
+        foreach ($mapversions as $k=>$v) {
+            $version[$k]['map_version'] = $v['map_version_md5'];
+            $version[$k]['date'] = $v['date'];
+        }
+
+        $ndata = [
+            'dates' => implode(',', $data['dates']),
+            'junction_movements' => [
+                [
+                    'junction_id' => $data['junction_id'],
+                    'movements'   => implode(',', $data['movements']),
+                ]
+            ],
+            'tod_cnt' => $data['divide_num'],
+            'version' => $version,
+        ];
+
+        $service = new Todsplit_vendor();
+
+        $res = $service->getTodPlan($ndata);
+        if (empty($res)) {
+            return [];
+        }
+
+        $res = (array)$res;
+
+        if (empty($res['tod_plans'])) {
+            return [];
+        }
+
+        foreach ($res['tod_plans'] as $k=>&$v) {
+            $v = (array)$v;
+            $result[$k] = [
+                'start'   => $v['tod_period'][0],
+                'end'     => $v['tod_period'][1],
+                'comment' => $v['tod_name'],
+            ];
+        }
 
         return $result;
     }
