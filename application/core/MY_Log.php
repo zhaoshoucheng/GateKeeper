@@ -279,14 +279,19 @@ class MY_Log extends CI_Log {
         $str .= $biz_message.'||';
         */
 
+        $lineFormater = function($str){
+            $str = str_replace(array("\r\n", "\r", "\n"), '\\n', $str);
+            return preg_replace('/\s/', '', $str);
+            return $str;
+        };
         $format = $arr[0];
         array_shift($arr);
         if (empty($arr)) {
-            $str .= preg_replace('/\s/', '', $format);
+            $str.=$lineFormater($format);
         } else {
-            $arr = array_reduce($arr,function($v,$w) {
+            $arr = array_reduce($arr,function($v,$w) use($lineFormater){
                 if(empty($v)) { $v = [];}
-                $v[] = preg_replace('/\s/', '', $w);
+                $v[] = $lineFormater($w);
                 return $v;
             });
             $str .= vsprintf($format, $arr);
