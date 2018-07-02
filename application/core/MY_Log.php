@@ -282,8 +282,13 @@ class MY_Log extends CI_Log {
         $format = $arr[0];
         array_shift($arr);
         if (empty($arr)) {
-            $str .= $format;
+            $str .= preg_replace('/\s/', '', $format);
         } else {
+            $arr = array_reduce($arr,function($v,$w) {
+                if(empty($v)) { $v = [];}
+                $v[] = preg_replace('/\s/', '', $w);
+                return $v;
+            });
             $str .= vsprintf($format, $arr);
         }
 
