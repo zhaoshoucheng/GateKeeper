@@ -56,7 +56,7 @@ if (!function_exists('httpGET')) {
         }
 
         com_log_notice('_com_http_success', ["cspanid"=>$spanId, "url"=>$url, "args"=>http_build_query($query), "response"=>preg_replace('/\s/', '', $ret), "errno"=>$responseCode, 'proc_time'=> $totalTime]);
-        return $ret;
+        return $ret; 
     }
 }
 
