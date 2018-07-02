@@ -237,9 +237,9 @@ if (! function_exists('t_push_formatted_log_message')) {
     function t_push_formatted_log_message() {
         $arr = func_get_arg(0);
         $ret = array();
-        $message = '';
         if ( is_array($arr) ) {
             foreach ($arr as $key => $value) {
+                $value = preg_replace('/\s/', '', $value);
                 $tmp[] = "$key=$value";
             }
         }
