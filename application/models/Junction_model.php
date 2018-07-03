@@ -714,7 +714,7 @@ class Junction_model extends CI_Model
 
         $flow_quota_key_conf = $this->config->item('flow_quota_key');
         // 需要返回的全部movements所需字段
-        $movementsAll = array_merge($flow_quota_key_conf, ['movement_id'=>'', 'comment'=>'']);
+        $movementsAll = array_merge($flow_quota_key_conf, ['movement_id'=>'', 'comment'=>'', 'confidence'=>'']);
         $confidence_conf = $this->config->item('confidence');
         // 匹配相位名称 并按 南左、北直、西左、东直、北左、南直、东左、西直 进行排序
         $phase = [
@@ -753,7 +753,6 @@ class Junction_model extends CI_Model
                 $temp_movements[mt_rand(100, 900) + mt_rand(1, 99)] = array_intersect_key($v, $movementsAll);
             }
         }
-
         if (!empty($temp_movements)) {
             unset($data['movements']);
             ksort($temp_movements);
@@ -806,7 +805,6 @@ class Junction_model extends CI_Model
 
         $result_comment_conf = $this->config->item('result_comment');
         $data['result_comment'] = $result_comment_conf[$data['result_comment']] ?? '';
-
         return $data;
     }
 
