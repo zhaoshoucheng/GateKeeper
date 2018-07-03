@@ -350,15 +350,19 @@ class RoadNet
     /*
     * 生成全城flow
     */
-    public function areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, $versions) {  
+    public function areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, $versions) {
         ini_set('memory_limit', '2048M');
         set_time_limit(0);
         $areaFlowVersionReq = array();
+        $junctionService = new Junction();
+        $flowService = new Flow();
         foreach ($versions as $version) {
             $junction = new Junction();
             $junctions = array();
             $offset = 0;
             $count = 1000;
+            $logicJunctionReq = array();
+            $logicFlowReq = array();
             while(true) {
                 $tmp = $junction->allWithVersion($city_id, $version, $offset, $count);
                 if (empty($tmp)) {
@@ -366,24 +370,24 @@ class RoadNet
                 }
                 $junctions = array_merge($junctions, $tmp);
                 $offset += $count;
-            }
-            $logicJunctionReq = array();
-            $logicFlowReq = array();
-            foreach ($junctions as $one) {
-                $logic_junction_id = $one['logic_junction_id'];
 
-                $junctionService = new Junction();
-                $maps = $junctionService->maps(array($logic_junction_id), $version);
-                if (!empty($maps)) {
-                    $junctionReq = new LogicJunctionReq();
-                    $junctionReq->logic_junction_id = $logic_junction_id;
-                    $map = $maps[0];
-                    $junctionReq->node_id = explode(',', $map['node_ids']);
-                    $logicJunctionReq[] = $junctionReq;
+                $logic_junciton_ids = array();
+                foreach ($junctions as $one) {
+                    $logic_junciton_ids[] = $one['logic_junction_id'];
                 }
 
-                $flowService = new Flow();
-                $flows = $flowService->allByJunction($logic_junction_id, $version);
+                $maps = $junctionService->maps($logic_junciton_ids, $version);
+                if (!empty($maps)) {
+                    foreach ($maps as $map) {
+                        $junctionReq = new LogicJunctionReq();
+                        $junctionReq->logic_junction_id = $logic_junction_id;
+                        $junctionReq->node_id = explode(',', $map['node_ids']);
+                        $logicJunctionReq[] = $junctionReq;
+                    }
+
+                }
+
+                $flows = $flowService->allByJunctions($logic_junciton_ids, $version);
                 if (!empty($flows)) {
                     foreach ($flows as $flow) {
                         $flowReq = new LogicFlowReq();
@@ -394,10 +398,8 @@ class RoadNet
                         $logicFlowReq[] = $flowReq;
                     }
                 }
-
             }
 
-            
             $req = new AreaFlowVersionReq();
             $req->version_id = $version;
             $req->junction = $logicJunctionReq;
