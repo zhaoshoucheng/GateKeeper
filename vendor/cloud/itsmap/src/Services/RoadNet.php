@@ -380,7 +380,7 @@ class RoadNet
                 if (!empty($maps)) {
                     foreach ($maps as $map) {
                         $junctionReq = new LogicJunctionReq();
-                        $junctionReq->logic_junction_id = $logic_junction_id;
+                        $junctionReq->logic_junction_id = $map['logic_junction_id'];
                         $junctionReq->node_id = explode(',', $map['node_ids']);
                         $logicJunctionReq[] = $junctionReq;
                     }
@@ -391,7 +391,7 @@ class RoadNet
                 if (!empty($flows)) {
                     foreach ($flows as $flow) {
                         $flowReq = new LogicFlowReq();
-                        $flowReq->logic_junction_id = $logic_junction_id;
+                        $flowReq->logic_junction_id = $flow['logic_junction_id'];
                         $flowReq->logic_flow_id = $flow['logic_flow_id'];
                         $flowReq->in_link_id = strval($flow['inlink']);
                         $flowReq->out_link_id = strval($flow['outlink']);
