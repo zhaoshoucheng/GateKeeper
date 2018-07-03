@@ -239,7 +239,9 @@ if (! function_exists('t_push_formatted_log_message')) {
         $ret = array();
         if ( is_array($arr) ) {
             foreach ($arr as $key => $value) {
-                $value = preg_replace('/\s/', '', $value);
+                if(is_array($value)){
+                    $value = json_encode($value);
+                }
                 $tmp[] = "$key=$value";
             }
         }
