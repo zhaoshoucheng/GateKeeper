@@ -38,7 +38,7 @@ class Auth extends CI_Model
      */
     public function isValidticket($ticket, $username)
     {
-        $ret = httpPOST($this->_host.$this->_config_uri['ticketCheck'], array('ticket' => $ticket,  'app_id' => $this->_appid, 'username' => $username));
+        $ret = httpPOST($this->_host.$this->_config_uri['ticketCheck'], array('ticket' => $ticket));
         $json = $this->valid_json($ret);
         if (!$json || $json['errno'] != 0) {
             return FALSE;
