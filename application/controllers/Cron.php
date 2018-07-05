@@ -66,7 +66,8 @@ class Cron extends CI_Controller
 					$response = $task->calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time . ':00', $end_time . ':00', $dateVersion, $timingType);
 					print_r($response);
 				} catch (\Exception $e) {
-					$this->task_model->updateTask($task_id, ['status' => -1, 'task_end_time' => time()]);
+					// todo 失败分类，路网or计算thrift调用失败，计入task_comment，便于排查问题
+					$this->task_model->updateTask($task_id, ['status' => -1, 'task_comment' => 100, 'task_end_time' => time()]);
 				}
 			}
 		}
