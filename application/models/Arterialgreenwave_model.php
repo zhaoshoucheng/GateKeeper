@@ -8,7 +8,6 @@
 class Arterialgreenwave_model extends CI_Model
 {
     private $tb = '';
-    private $db = '';
 
     public function __construct()
     {
