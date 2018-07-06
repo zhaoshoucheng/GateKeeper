@@ -191,7 +191,19 @@ class Task_model extends CI_Model
                 $this->its_tool->trans_commit();
                 return true;
             }
-            $task['dateVersion'] = $ret['data'];
+            $dateVersion = $ret['data'];
+            foreach ($dateVersion as $date => $version) {
+                if ($version == '') {
+                    $this->updateTask($task_id, array(
+                        'expect_try_time' => $now + 10 * 60,
+                        'try_times' => intval($task['try_times']) + 1,
+                    ));
+                    $content = "{$task_id} {$dates} mapversion unready.";
+                    sendMail($this->to, $this->subject, $content);
+                    return true;
+                }
+            }
+            $task['dateVersion'] = $dateVersion;
 
             // 任务状态置为已投递
             $query = $this->its_tool->where('id', $task_id)->update($this->_table, ['task_start_time' => time()]);
