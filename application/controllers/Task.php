@@ -504,6 +504,11 @@ class Task extends MY_Controller
 			$res['errno'] = 0;
 			$res['errmsg'] = '';
 			foreach ($dateVersion as $date => $version) {
+				if ($version == '') {
+					$this->errno = -1;
+					$this->errmsg = 'maptypeversion unready';
+					return;
+				}
 				$res['dateversion'][$date] = $version;
 			}
 			$res['hdfs_dir'] = $hdfs_dir;
