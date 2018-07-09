@@ -40,9 +40,7 @@ use Track\Rtime;
 use Track\TypeData;
 use Track\FilterData;
 
-use Todsplit\MovementSignal;
 use Todsplit\SignalPlan;
-use Todsplit\TodInfo;
 
 /*
  * 导航路网提供的相关继承服务
@@ -488,14 +486,8 @@ class RoadNet
             return [];
         }
 
-        $vals = new TodInfo();
-        $vals->dates = $data['dates'];
-        $vals->junction_movements = $data['junction_movements'];
-        $vals->tod_cnt = $data['tod_cnt'];
-        $vals->version = $data['version'];
-
         $this->start('tod_split_optimize');
-        $response = $this->call('tod_opt', [$vals]);
+        $response = $this->call('tod_opt', [$data]);
         $this->close();
         if(!$response || $response == 'null'){
             sendMail(
@@ -525,13 +517,8 @@ class RoadNet
         $vals->cycle = intval($data['cycle']);
         $vals->offset = intval($data['offset']);
         $vals->clock_shift = intval($data['clock_shift']);
-        foreach ($data['signal'] as $v) {
-            $vals->signal[] = new MovementSignal($v);
-        }
-
-        foreach ($data['version'] as $v) {
-            $version[] = new todsplit_version($v);
-        }
+        $vals->signal = $data['signal'];
+        $version = $data['version'];
 
         $this->start('tod_split_optimize');
         $response = $this->call('green_split_opt', [$version, $vals]);
