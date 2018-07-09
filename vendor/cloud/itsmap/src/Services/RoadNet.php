@@ -357,18 +357,18 @@ class RoadNet
         $junctionService = new Junction();
         $flowService = new Flow();
         foreach ($versions as $version) {
-            $junction = new Junction();
-            $junctions = array();
+            // $junction = new Junction();
+            // $junctions = array();
             $offset = 0;
             $count = 1000;
             $logicJunctionReq = array();
             $logicFlowReq = array();
             while(true) {
-                $tmp = $junction->allWithVersion($city_id, $version, $offset, $count);
-                if (empty($tmp)) {
+                $junctions = $junctionService->allWithVersion($city_id, $version, $offset, $count);
+                if (empty($junctions)) {
                     break;
                 }
-                $junctions = array_merge($junctions, $tmp);
+                // $junctions = array_merge($junctions, $tmp);
                 $offset += $count;
 
                 $logic_junciton_ids = array();
