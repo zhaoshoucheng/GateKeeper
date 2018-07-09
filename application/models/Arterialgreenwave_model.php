@@ -5,6 +5,8 @@
 # date:    2018-06-29
 ********************************************/
 
+use Didi\Cloud\ItsMap\Arterialgreenwave_vendor;
+
 class Arterialgreenwave_model extends CI_Model
 {
     private $tb = '';
@@ -39,6 +41,11 @@ class Arterialgreenwave_model extends CI_Model
     */
     public function getGreenWaveOptPlan($data)
     {
-    	
+
+    	$serive = new Arterialgreenwave_vendor();
+    	$res = $serive->getGreenWaveOptPlan($data);
+    	if (empty($res)) {
+    		return [];
+    	}
     }
 }

@@ -35,11 +35,6 @@ use DidiRoadNet\AreaFlowResponse;
 
 use StsData\RoadVersionRuntime;
 
-use Track\Request as mtraj_request;
-use Track\Rtime;
-use Track\TypeData;
-use Track\FilterData;
-
 /*
  * 导航路网提供的相关继承服务
  */
@@ -448,30 +443,15 @@ class RoadNet
     * 获取时空图、散点图
     */
     public function getMtrajData($data, $type) {
-        $mtraj_request = new mtraj_request();
+        if (empty($data) || empty($type)) {
+            return [];
+        }
 
-        $mtraj_request->junctionId = $data['junctionId'];
-        $mtraj_request->flowId = $data['flowId'];
-        foreach($data['rtimeVec'] as $v){
-            $mtraj_request->rtimeVec[] = new Rtime($v);
-        }
-        foreach($data['filterData'] as $k=>&$v){
-            $v['xData'] = new TypeData($v['xData']);
-            $v['yData'] = new TypeData($v['yData']);
-            $mtraj_request->filterDataVec[] = new FilterData($v);
-        }
         $accessPara = json_encode(['source'=>'signal_pro', 'transMode'=>'thrift', 'userId'=>'web-api']);
         $this->start('mtraj');
-        $response = $this->call($type, [$mtraj_request, $accessPara]);
+        $response = $this->call($type, [$data, $accessPara]);
         $this->close();
-        if(!$response || $response == 'null'){
-            sendMail(
-                    'ningxiangbing@didichuxing.com',
-                    'logs: 调用thrift接口获取数据',
-                    'data: '.json_encode([$mtraj_request, $accessPara]).'\r\n result：' . $response
-                );
 
-        }
         return $response;
     }
 
@@ -487,14 +467,7 @@ class RoadNet
         $this->start('tod_split_optimize');
         $response = $this->call('tod_opt', [$data]);
         $this->close();
-        if(!$response || $response == 'null'){
-            sendMail(
-                    'ningxiangbing@didichuxing.com',
-                    'logs: 调用时段划分接口获取数据',
-                    'data: '.json_encode([$vals]).'\r\n result：' . $response
-                );
 
-        }
         return $response;
     }
 
@@ -510,14 +483,7 @@ class RoadNet
         $this->start('tod_split_optimize');
         $response = $this->call('green_split_opt', [$version, $data]);
         $this->close();
-        if(!$response || $response == 'null'){
-            sendMail(
-                    'ningxiangbing@didichuxing.com',
-                    'logs: 调用绿信比优化接口获取数据',
-                    'data: '.json_encode([$version, $vals]).'\r\n result：' . $response
-                );
 
-        }
         return $response;
     }
 }
