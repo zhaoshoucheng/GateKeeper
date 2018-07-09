@@ -32,32 +32,39 @@ class Auth extends CI_Model
         //return $this->_host . $this->_config_uri['login'] . '?app_id=' . $this->_appid . '&jumpto='.urlencode($callback);
     }
 
-    public function getUsername($ticket){
-        $res = httpPOST($this->_host.$this->_config_uri['getUserInfo'], array('access_token' => $ticket), $this->_config_server['timeout']);
-        $json = $this->valid_json($res);
-        if (!$json || $json['errno'] != 0 || empty($json['data'])) {
-            log_message('error', 'getuserinfo failed, ret:'.$res);
-            return false;
-        }
-        $ret = $json['data']['user'];
-        $ret['access_token'] = $ret['ticket'] = $ticket;
-        return $json['data']['user']['username'];
-    }
-
     /**
      * 用户是否登录
      * @param
      */
-    public function isValidticket($ticket)
+    public function isValidticket($ticket, $username)
     {
-        $ret = httpPOST($this->_host.$this->_config_uri['ticketCheck'], array('ticket' => $ticket,  'app_id' => $this->_appid));
+        $ret = httpPOST($this->_host.$this->_config_uri['ticketCheck'], array('ticket' => $ticket));
         $json = $this->valid_json($ret);
         if (!$json || $json['errno'] != 0) {
             return FALSE;
         }
         return TRUE;
     }
+    /**
+     * 验证接口响应数据
+     * @param json array 接口响应数据
+     * @return bool
+     */
+    private function valid_json($ret)
+    {
+        $json = json_decode($ret, true);
+        if (!$json || !is_array($json)) {
+            return FALSE;
+        }
+        if (!isset($json['errno'])){
+            $json['errno'] = 0;
+        }
+        return $json;
+    }
 
+
+
+    // -----------------分割线，以下都是sso的权限验证接口-----------------------
     /**
      * 验证是否有资源访问权限
      * @param feature string 资源标识/url
@@ -80,23 +87,6 @@ class Auth extends CI_Model
             return FALSE;
         }
         return $json['data'];
-    }
-
-    /**
-     * 验证接口响应数据
-     * @param json array 接口响应数据
-     * @return bool
-     */
-    private function valid_json($ret)
-    {
-        $json = json_decode($ret, true);
-        if (!$json || !is_array($json)) {
-            return FALSE;
-        }
-        if (!isset($json['errno'])){
-            $json['errno'] = 0;
-        }
-        return $json;
     }
 
     public function getCityAuth($ticket, $username, $treeid = 0) {

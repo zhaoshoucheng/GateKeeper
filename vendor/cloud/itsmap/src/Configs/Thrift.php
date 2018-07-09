@@ -80,8 +80,8 @@ class Thrift
                         'port' => '9234',
                     ]
                 ],
-                'read_timeout' => 30,
-                'write_timeout' => 30,
+                'read_timeout' => 9,
+                'write_timeout' => 9,
                 'class' => '\Todsplit\signal_opt_serviceClient',
                 'transport' => 'Thrift\Transport\TBufferedTransport',
             ],
@@ -158,8 +158,8 @@ class Thrift
                         'port' => '9234',
                     ]
                 ],
-                'read_timeout' => 30,
-                'write_timeout' => 30,
+                'read_timeout' => 9,
+                'write_timeout' => 9,
                 'class' => '\Todsplit\signal_opt_serviceClient',
                 'transport' => 'Thrift\Transport\TBufferedTransport',
             ],
@@ -248,8 +248,8 @@ class Thrift
                         'port' => '9234',
                     ]
                 ],
-                'read_timeout' => 30,
-                'write_timeout' => 30,
+                'read_timeout' => 9,
+                'write_timeout' => 9,
                 'class' => '\Todsplit\signal_opt_serviceClient',
                 'transport' => 'Thrift\Transport\TBufferedTransport'
             ],
