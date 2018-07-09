@@ -645,11 +645,55 @@ class Timing_model extends CI_Model
         } catch (Exception $e) {
             return [];
         }
-        if (isset($timing['data']) && count($timing['data'] >= 1)) {
+        if (isset($timing['data']) && count($timing['data']) >= 1) {
             return $timing['data'];
         } else {
             sendMail($this->email_to, 'logs: 获取配时数据', 'timing[\'data\'] is null');
             return [];
         }
     }
+
+    /**
+     * 批量获取路口配时数据(http://wiki.intra.xiaojukeji.com/pages/viewpage.action?pageId=125744261#id-配时API-根据获取多数据源配时信息)
+     * @param $data['junction_ids']
+     * @param $data['days']
+     * @param $data['start_time']
+     * @param $data['end_time']
+     * @param $data['version']
+     * @param $data['source']
+     * @return array
+     */
+    public function getTimingDataBatch($data)
+    {
+
+        $this->load->helper('http');
+
+        // 获取配时详情
+        $timing_data = [
+            'junction_ids'      => trim($data['junction_ids']),
+            'days'              => trim($data['days']),
+            'start_time'        => $data['start_time'],
+            'end_time'          => $data['end_time'],
+            'source'            => $data['source']
+        ];
+        try {
+            $timing = httpGET(
+                $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingVersionBatch',
+                $timing_data
+            );
+            $timing = json_decode($timing, true);
+            if (isset($timing['errorCode']) && $timing['errorCode'] != 0) {
+                $content = "form_data : " . json_encode($timing_data);
+                $content .= "<br>interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingVersionBatch';
+                $content .= '<br> result : ' . json_encode($timing);
+                sendMail($this->email_to, 'logs: 获取配时数据', $content);
+                return [];
+            }
+        } catch (Exception $e) {
+            return [];
+        }
+
+        return $timing['data'];
+    }
+
 }
