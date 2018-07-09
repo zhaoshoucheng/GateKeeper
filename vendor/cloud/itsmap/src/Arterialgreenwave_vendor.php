@@ -1,19 +1,16 @@
 <?php
-/********************************************
-# desc:    干线绿波数据模型
-# author:  ningxiangbing@didichuxing.com
-# date:    2018-06-29
-********************************************/
+namespace Didi\Cloud\ItsMap;
 
-use Didi\Cloud\ItsMap\Arterialgreenwave_vendor;
+require_once __DIR__ . '/Thrift/Arterialgreenwave/.php';
+require_once __DIR__ . '/Thrift/Arterialgreenwave/Types.php';
 
-class Arterialgreenwave_model extends CI_Model
+use Didi\Cloud\ItsMap\Configs\Env;
+use Didi\Cloud\ItsMap\Services\RoadNet;
+
+class Arterialgreenwave_vendor
 {
-    private $tb = '';
-
-    public function __construct()
-    {
-        parent::__construct();
+    public function __construct() {
+        Env::init();
     }
 
     /**
@@ -39,13 +36,10 @@ class Arterialgreenwave_model extends CI_Model
     * @param token          string Y 此次请求唯一标识，用于前端轮询
     * @return array
     */
-    public function getGreenWaveOptPlan($data)
-    {
+    public function getGreenWaveOptPlan($data) {
+        $service = new RoadNet();
+        $response = $service->getGreenWaveOptPlan($data);
 
-    	$serive = new Arterialgreenwave_vendor();
-    	$res = $serive->getGreenWaveOptPlan($data);
-    	if (empty($res)) {
-    		return [];
-    	}
+        return $response;
     }
 }
