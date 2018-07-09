@@ -40,8 +40,6 @@ use Track\Rtime;
 use Track\TypeData;
 use Track\FilterData;
 
-use Todsplit\SignalPlan;
-
 /*
  * 导航路网提供的相关继承服务
  */
@@ -503,25 +501,14 @@ class RoadNet
     /**
     * 获绿信比优化方案
     */
-    public function getSplitPlan($data)
+    public function getSplitPlan($data, $version)
     {
-        if (empty($data)) {
+        if (empty($data) || empty($version)) {
             return [];
         }
 
-        $vals = new SignalPlan();
-        $vals->dates = trim($data['dates']);
-        $vals->logic_junction_id = trim($data['logic_junction_id']);
-        $vals->start_time = trim($data['start_time']);
-        $vals->end_time = trim($data['end_time']);
-        $vals->cycle = intval($data['cycle']);
-        $vals->offset = intval($data['offset']);
-        $vals->clock_shift = intval($data['clock_shift']);
-        $vals->signal = $data['signal'];
-        $version = $data['version'];
-
         $this->start('tod_split_optimize');
-        $response = $this->call('green_split_opt', [$version, $vals]);
+        $response = $this->call('green_split_opt', [$version, $data]);
         $this->close();
         if(!$response || $response == 'null'){
             sendMail(
