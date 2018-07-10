@@ -677,7 +677,6 @@ class Junction_model extends CI_Model
         }
 
         $result = $res->row_array();
-        //echo "<hr>data = <pre>";print_r($result);
         $result = $this->formatJunctionDetailData($result, $data['dates'], 1, $data['timingType']);
 
         return $result;
