@@ -136,6 +136,7 @@ class Arterialjunction_model extends CI_Model
             //线路geo
             $allCityJunctions["path_geo"] = $mergeLinkGeoInfosByLinks($getDirectionLinks(1, $qData), $qData['city_id'], $qData['map_version']);   //正向
             $allCityJunctions["reverse_path_geo"] = $mergeLinkGeoInfosByLinks($getDirectionLinks(-1, $qData), $qData['city_id'], $qData['map_version']);   //反向
+            $allCityJunctions["map_version"] = $qData['map_version'];   //正向
 
             //路口geo
             $connectedJunctions = $allCityJunctions["adj_junc_paths"];
