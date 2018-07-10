@@ -27,6 +27,7 @@ class MY_Controller extends CI_Controller {
             && $host != 'www.itstool.com'
             && $host != '100.90.164.31:8089'
             && $host != '10.95.100.106:8088'
+            && $host != '10.95.100.106:8099'
             && $host != '100.90.164.31:8082') {
             $this->is_check_login = 1;
 
