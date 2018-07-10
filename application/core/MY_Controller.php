@@ -26,8 +26,7 @@ class MY_Controller extends CI_Controller {
         if ($host != '100.90.164.31:8088'
             && $host != 'www.itstool.com'
             && $host != '100.90.164.31:8089'
-            && $host != '100.90.164.31:8099'
-        ) {
+            && $host != '100.90.164.31:8082') {
             $this->is_check_login = 1;
 
             $this->load->model('user/user', 'user');
