@@ -622,14 +622,12 @@ class Junction_model extends CI_Model
                         ->from($this->tb)
                         ->where($where)
                         ->get();
-        //echo 'sql = ' . $this->db->last_query();
 
         if (!$res || empty($res)) {
             return [];
         }
 
         $result = $res->row_array();
-        //echo "<hr>data = <pre>";print_r($result);
         $result = $this->formatJunctionDetailData($result, $data['dates'], 2, $data['timingType']);
 
         return $result;
