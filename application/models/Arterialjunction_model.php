@@ -25,6 +25,7 @@ class Arterialjunction_model extends CI_Model
         $this->load->config('nconf');
         $this->load->model('waymap_model');
         $this->load->model('timing_model');
+        $this->load->model('task_model');
     }
 
     /**
@@ -74,6 +75,7 @@ class Arterialjunction_model extends CI_Model
 
     /**
      * 获取可连接为干线的路口集合
+     * @param $data['q']['task_id']             interger 任务id
      * @param $data['q']['city_id']             interger 城市id
      * @param $data['q']['map_version']         interger 地图版本
      * @param $data['q']['selected_junctionid'] string   被选路口
@@ -82,7 +84,20 @@ class Arterialjunction_model extends CI_Model
      */
     public function getAdjJunctions($data)
     {
-        $allCityJunctions = $this->waymap_model->getConnectionAdjJunctions($data['q']);
+        if(empty($data['q']['map_version'])){
+            // 获取任务详情
+            $task = $this->task_model->getTaskById($data['q']['task_id']);
+            if(empty($task["dates"])){
+                throw new \Exception("The task not found.");
+            }
+            // 获取地图版本
+            $data['q']['map_version'] = $this->waymap_model->getMapVersion(explode(",",$task['dates']));
+            if (empty($data['q']['map_version'])) {
+                throw new \Exception("The map_version not found.");
+            }
+        }
+
+        $adjJunctions = $this->waymap_model->getConnectionAdjJunctions($data['q']);
 
         //获取一个方向的links
         $getDirectionLinks = function ($direction, $qData) {
@@ -94,36 +109,23 @@ class Arterialjunction_model extends CI_Model
                 krsort($selectedPath);
             }
             return array_reduce($selectedPath, function ($carry, $item) use ($direction) {
-                if (empty($item["segment"])) {
-                    return $carry;
+                if($direction==1) {
+                    $dFlows = !empty($item["links"]) ? explode(",", $item["links"]) : [];
+                }else{
+                    $dFlows = !empty($item["reverse_links"]) ? explode(",", $item["reverse_links"]) : [];
                 }
-                //find same direction
-                foreach ($item["segment"] as $dItem) {
-                    if ($dItem["direction"] == $direction) {
-                        $dFlows = explode(",", $dItem["links"]);
-                        $carry = array_merge($carry, $dFlows);
-                    }
-                }
+                $carry = array_merge($carry, $dFlows);
                 return $carry;
             }, []);
         };
 
         //合并多个link的geo信息
-        $mergeLinkGeoInfosByLinks = function ($linkArr) {
-            $orginLinksGeoInfos = $this->waymap_model->getLinksGeoInfos($linkArr);
+        $mergeLinkGeoInfosByLinks = function ($linkArr, $cityId, $mapVersion) {
+            $orginLinksGeoInfos = $this->waymap_model->getLinksGeoInfos($linkArr, $cityId, $mapVersion);
             if(empty($orginLinksGeoInfos)){
                 return [];
             }
-            $mergeGeoInfos = array_reduce($orginLinksGeoInfos, function ($carry, $item) {
-                if (empty($item["features"]) ||
-                    empty($item["type"]) ||
-                    $item["type"]!="FeatureCollection") {
-                    return $carry;
-                }
-                $carry = array_merge($carry, $item["features"]);
-                return $carry;
-            },[]);
-            return ["type"=>"FeatureCollection","features"=>$mergeGeoInfos];
+            return $orginLinksGeoInfos;
         };
 
         //格式化路口
@@ -132,21 +134,19 @@ class Arterialjunction_model extends CI_Model
                 return [];
             }
             //线路geo
-            $allCityJunctions["path_geo_infos"]["forward"] = $mergeLinkGeoInfosByLinks($getDirectionLinks(1, $qData));   //正向
-            $allCityJunctions["path_geo_infos"]["back"] = $mergeLinkGeoInfosByLinks($getDirectionLinks(-1, $qData));   //反向
+            $allCityJunctions["path_geo"] = $mergeLinkGeoInfosByLinks($getDirectionLinks(1, $qData), $qData['city_id'], $qData['map_version']);   //正向
+            $allCityJunctions["reverse_path_geo"] = $mergeLinkGeoInfosByLinks($getDirectionLinks(-1, $qData), $qData['city_id'], $qData['map_version']);   //反向
+            $allCityJunctions["map_version"] = $qData['map_version'];   //正向
 
             //路口geo
-            $connectedJunctions = $allCityJunctions["connected_junction_infos"];
+            $connectedJunctions = $allCityJunctions["adj_junc_paths"];
             foreach ($connectedJunctions as $jKey=>$jItem){
-                $jSegments = $jItem["segments"];
-                foreach ($jSegments as $sKey=>$sItem){
-                    $allCityJunctions["connected_junction_infos"][$jKey]["segments"][$sKey]["junction_geo_info"] =
-                        $mergeLinkGeoInfosByLinks(explode(",",$sItem["links"]));
-                }
+                $allCityJunctions["adj_junc_paths"][$jKey]["links_geo"] = $mergeLinkGeoInfosByLinks(explode(",",$jItem["links"]), $qData['city_id'], $qData['map_version']);
+                $allCityJunctions["adj_junc_paths"][$jKey]["reverse_links_geo"] = $mergeLinkGeoInfosByLinks(explode(",",$jItem["reverse_links"]), $qData['city_id'], $qData['map_version']);
             }
             return $allCityJunctions;
         };
 
-        return $formatJunctions($allCityJunctions, $data['q']);
+        return $formatJunctions($adjJunctions, $data['q']);
     }
 }
