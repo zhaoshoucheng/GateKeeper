@@ -242,225 +242,68 @@ class Waymap_model extends CI_Model
 
     /**
      * 获取多个links的geo数据
-     * http://wiki.intra.xiaojukeji.com/pages/viewpage.action?pageId=146798263
      *
-     * @param $qArr array 请求参数
+     * @param $linksArr     array           linkId数组
+     * @param $cityId       Integer         城市id
+     * @param $mapVersion   Integer         地图版本
+     * @param $token        String          token
      * @return array
      */
-    public function getLinksGeoInfos($flowArr){
-        $tmpStr = '{
-	"type": "FeatureCollection",
-	"features": [{
-		"geometry": {
-			"type": "LineString",
-			"coordinates": [
-				[116.37703, 39.93088],
-				[116.37701, 39.93148]
-			]
-		},
-		"properties": {
-			"fid": 437896,
-			"geom": "{\"type\": \"LineString\", \"coordinates\": [[116.37703, 39.93088], [116.37701, 39.93148]]}",
-			"mapid": "595673",
-			"id": "684388",
-			"kind_num": "1",
-			"kind": "0601",
-			"width": "55",
-			"direction": "1",
-			"toll": "2",
-			"const_st": "1",
-			"undconcrid": "",
-			"snodeid": "773672",
-			"enodeid": "774811",
-			"funcclass": "5",
-			"length": "0.067",
-			"detailcity": "1",
-			"through": "1",
-			"unthrucrid": "",
-			"ownership": "0",
-			"road_cond": "1",
-			"special": "0",
-			"admincodel": "110102",
-			"admincoder": "110102",
-			"uflag": "1",
-			"onewaycrid": "",
-			"accesscrid": "",
-			"speedclass": "6",
-			"lanenums2e": "1",
-			"lanenume2s": "1",
-			"lanenum": "1",
-			"vehcl_type": "11110001110000000000000000000000",
-			"elevated": "0",
-			"structure": "0",
-			"usefeecrid": "",
-			"usefeetype": "",
-			"spdlmts2e": "400",
-			"spdlmte2s": "400",
-			"spdsrcs2e": "0",
-			"spdsrce2s": "0",
-			"dc_type": "1",
-			"nopasscrid": "",
-			"outbancrid": "",
-			"numbancrid": "",
-			"parkflag": "0",
-			"origin": 1,
-			"active": 1,
-			"rel_active": 1,
-			"edit_id": 0,
-			"rl_route_id": "259224",
-			"pathname": "西黄城根北街"
-		},
-		"type": "Feature"
-	}, {
-		"geometry": {
-			"type": "LineString",
-			"coordinates": [
-				[116.37706, 39.93006],
-				[116.37704, 39.93051],
-				[116.37703, 39.93088]
-			]
-		},
-		"properties": {
-			"fid": 437899,
-			"geom": "{\"type\": \"LineString\", \"coordinates\": [[116.37706, 39.93006], [116.37704, 39.93051], [116.37703, 39.93088]]}",
-			"mapid": "595673",
-			"id": "684391",
-			"kind_num": "1",
-			"kind": "0601",
-			"width": "55",
-			"direction": "1",
-			"toll": "2",
-			"const_st": "1",
-			"undconcrid": "",
-			"snodeid": "774812",
-			"enodeid": "773672",
-			"funcclass": "5",
-			"length": "0.091",
-			"detailcity": "1",
-			"through": "1",
-			"unthrucrid": "",
-			"ownership": "0",
-			"road_cond": "1",
-			"special": "0",
-			"admincodel": "110102",
-			"admincoder": "110102",
-			"uflag": "1",
-			"onewaycrid": "",
-			"accesscrid": "",
-			"speedclass": "6",
-			"lanenums2e": "1",
-			"lanenume2s": "1",
-			"lanenum": "1",
-			"vehcl_type": "11110001110000000000000000000000",
-			"elevated": "0",
-			"structure": "0",
-			"usefeecrid": "",
-			"usefeetype": "",
-			"spdlmts2e": "400",
-			"spdlmte2s": "400",
-			"spdsrcs2e": "0",
-			"spdsrce2s": "0",
-			"dc_type": "1",
-			"nopasscrid": "",
-			"outbancrid": "",
-			"numbancrid": "",
-			"parkflag": "0",
-			"origin": 1,
-			"active": 1,
-			"rel_active": 1,
-			"edit_id": 0,
-			"rl_route_id": "259224",
-			"pathname": "西黄城根北街"
-		},
-		"type": "Feature"
-	}, {
-		"geometry": {
-			"type": "Point",
-			"coordinates": [116.37703, 39.93088]
-		},
-		"properties": {
-			"fid": 432436,
-			"geom": "{\"type\": \"Point\", \"coordinates\": [116.37703, 39.93088]}",
-			"mapid": "595673",
-			"id": "773672",
-			"kind_num": "1",
-			"kind": "10ff",
-			"cross_flag": "0",
-			"light_flag": "0",
-			"cross_lid": "0",
-			"mainnodeid": "0",
-			"subnodeid": "0",
-			"subnodeid2": "",
-			"adjoin_mid": "0",
-			"adjoin_nid": "0",
-			"node_lid": "684388|684391",
-			"origin": 1,
-			"active": 1,
-			"rel_active": 1,
-			"edit_id": 0
-		},
-		"type": "Feature"
-	}, {
-		"geometry": {
-			"type": "Point",
-			"coordinates": [116.37701, 39.93148]
-		},
-		"properties": {
-			"fid": 433046,
-			"geom": "{\"type\": \"Point\", \"coordinates\": [116.37701, 39.93148]}",
-			"mapid": "595673",
-			"id": "774811",
-			"kind_num": "1",
-			"kind": "10ff",
-			"cross_flag": "0",
-			"light_flag": "0",
-			"cross_lid": "0",
-			"mainnodeid": "0",
-			"subnodeid": "0",
-			"subnodeid2": "",
-			"adjoin_mid": "0",
-			"adjoin_nid": "0",
-			"node_lid": "684388|684389",
-			"origin": 1,
-			"active": 1,
-			"rel_active": 1,
-			"edit_id": 0
-		},
-		"type": "Feature"
-	}, {
-		"geometry": {
-			"type": "Point",
-			"coordinates": [116.37706, 39.93006]
-		},
-		"properties": {
-			"fid": 433047,
-			"geom": "{\"type\": \"Point\", \"coordinates\": [116.37706, 39.93006]}",
-			"mapid": "595673",
-			"id": "774812",
-			"kind_num": "1",
-			"kind": "10ff",
-			"cross_flag": "0",
-			"light_flag": "0",
-			"cross_lid": "0",
-			"mainnodeid": "0",
-			"subnodeid": "0",
-			"subnodeid2": "",
-			"adjoin_mid": "0",
-			"adjoin_nid": "0",
-			"node_lid": "684390|684391",
-			"origin": 1,
-			"active": 1,
-			"rel_active": 1,
-			"edit_id": 0
-		},
-		"type": "Feature"
-	}]
-}';
-        $retArr = [];
-        foreach ($flowArr as $flowId){
-            $retArr[$flowId] = json_decode($tmpStr,true);
+    public function getLinksGeoInfos($linksArr, $cityId, $mapVersion, $token="fabf12896e792723a1180e96c0f37093"){
+        if (!is_array($linksArr) || empty($linksArr) || empty(implode(',', $linksArr))) {
+            return [];
         }
-        return$retArr;
+        $qArr = [];
+        $qArr['link_ids'] = implode(',', $linksArr);
+        $qArr['version'] = $mapVersion;
+        $qArr['city_id'] = 23;  //先都写23
+        $qArr['token'] = $token;
+        try {
+            $res = httpGet('https://sts.didichuxing.com/api/signal/link/info', $qArr);
+            $retArr = json_decode($res, true);
+            if (isset($retArr['errno'])
+                && $retArr['errno'] == 0
+                && !empty($retArr['data'])) {
+                return $retArr['data'];
+            }else{
+                $errorMsg = !empty($retArr['errorMsg']) ? $retArr['errorMsg'] : "The geo json error format.";
+                throw new \Exception($errorMsg);
+            }
+        } catch (Exception $e) {
+            com_log_warning('_itstool_waymap_getLinksGeoInfos_error', 0, $e->getMessage(), compact("qArr","res"));
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * @deprecated
+     * 新四获取多个links的geo数据
+     *
+     * @param $linksArr     array           linkId数组
+     * @return array
+     */
+    public function getLinksGeoInfosByMap($linksArr){
+        if (!is_array($linksArr) || empty($linksArr)) {
+            return [];
+        }
+        $qArr = [];
+        $qArr['id'] = implode(',', $linksArr);
+        $qArr['version'] = '2017101118';
+        $qArr['origin'] = 0;
+
+        try {
+            $res = httpPOST('http://100.69.187.40:8080/link_query/linkid_with_node', $qArr, 0 , 'raw');
+            $retArr = json_decode($res, true);
+            if (isset($retArr['features'])) {
+                return $retArr;
+            }else{
+                $errorMsg = !empty($retArr['errorMsg']) ? $retArr['errorMsg'] : "The linkid_with_node error format.";
+                throw new \Exception($errorMsg);
+            }
+        } catch (Exception $e) {
+            com_log_warning('_itstool_waymap_getLinksGeoInfosByMap_error', 0, $e->getMessage(), compact("qArr","res"));
+            throw new \Exception($e->getMessage());
+        }
     }
 
     /**
@@ -472,67 +315,51 @@ class Waymap_model extends CI_Model
      */
     public function getConnectionAdjJunctions($qArr)
     {
-        $tmp = array (
-  'select_junction_id' => '2017031615_5678903',
-  'connected_junction_infos' =>
-  array (
-    0 =>
-    array (
-      'connect_junction' =>
-      array (
-        'junction_id' => '2017031615_5678904',
-        'name' => 'xxx',
-        'lng' => 116.5134,
-        'lat' => 28.0976,
-      ),
-      'segments' =>
-      array (
-        0 =>
-        array (
-          'links' => '896784320,896784310',
-          'length' => 100,
-          'direction' => -1,
-        ),
-        1 =>
-        array (
-          'links' => '896784311,896784321',
-          'length' => 100,
-          'direction' => 1,
-        ),
-      ),
-    ),
-    1 =>
-    array (
-      'connect_junction' =>
-      array (
-        'junction_id' => '2017031615_5678902',
-        'name' => 'xxx',
-        'lng' => 116.5004,
-        'lat' => 28.0976,
-      ),
-      'segments' =>
-      array (
-        0 =>
-        array (
-          'links' => '896784320,896784310',
-          'length' => 100,
-          'direction' => -1,
-        ),
-        1 =>
-        array (
-          'links' => '896784311,896784321',
-          'length' => 100,
-          'direction' => 1,
-        ),
-      ),
-    ),
-  ),
-);
-        return $tmp;
+        if(ENVIRONMENT == 'development'){
+            $res = '{
+	"errorCode": 0,
+	"errorMsg": "",
+	"data": {
+		"junctions_info": {
+			"2017030116_5546487": {
+				"name": "经一路-生产路",
+				"lng": "117.01519",
+				"lat": "36.67656",
+				"node_ids": [5546486, 5546487]
+			},
+			"2017030116_5552628": {
+				"name": "经一路-白鹤",
+				"lng": "117.02644",
+				"lat": "36.67869",
+				"node_ids": [5552627, 5552628]
+			},
+			"b26c6af6c3edefe326ce77ab3457515f": {
+				"name": "经一路-北关北路",
+				"lng": "117.01868",
+				"lat": "36.67813",
+				"node_ids": [10935735, 10935736]
+			}
+		},
+		"start_junc_id": "b26c6af6c3edefe326ce77ab3457515f",
+		"adj_junc_paths": [{
+			"end_junc_id": "2017030116_5546487",
+			"links": "128503250,73771671,73771661,704904111,704904101,204355251",
+			"reverse_links": "74488990,73771691,73771681,128503271"
+		}, {
+			"end_junc_id": "2017030116_5552628",
+			"links": "128503261,74374111,74488971,74547200",
+			"reverse_links": "74309850,74430830,74374130,128503240"
+		}]
+	}
+}';
+            $retArr = json_decode($res, true);
+            return $retArr['data'];
+        }
 
         if (!is_array($qArr) || empty($qArr)) {
-            return [];
+            throw new \Exception("The qjson empty.");
         }
+
         try {
             $res = httpPOST($this->config->item('waymap_interface') . '/signal-map/connect/adj_junctions', $qArr, 0, 'json');
             $retArr = json_decode($res, true);
@@ -540,10 +367,13 @@ class Waymap_model extends CI_Model
                 && $retArr['errorCode'] == 0
                 && !empty($retArr['data'])) {
                 return $retArr['data'];
+            }else{
+                $errorMsg = !empty($retArr['errorMsg']) ? $retArr['errorMsg'] : "The adj_junctions error format.";
+                throw new \Exception($errorMsg);
             }
         } catch (Exception $e) {
             com_log_warning('_itstool_waymap_getConnectionAdjJunctions_error', 0, $e->getMessage(), compact("qArr","res"));
-            return [];
+            throw new \Exception($e->getMessage());
         }
     }
 
