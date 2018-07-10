@@ -123,7 +123,7 @@ class Arterialjunction_model extends CI_Model
         $mergeLinkGeoInfosByLinks = function ($linkArr, $cityId, $mapVersion) {
             $orginLinksGeoInfos = $this->waymap_model->getLinksGeoInfos($linkArr, $cityId, $mapVersion);
             if(empty($orginLinksGeoInfos)){
-                return [];
+                return (Object)[];
             }
             return $orginLinksGeoInfos;
         };
@@ -139,10 +139,16 @@ class Arterialjunction_model extends CI_Model
             $allCityJunctions["map_version"] = $qData['map_version'];   //正向
 
             //路口geo
-            $connectedJunctions = $allCityJunctions["adj_junc_paths"];
+            $connectedJunctions = \Illuminate\Support\Arr::get($allCityJunctions,"adj_junc_paths",[]);
             foreach ($connectedJunctions as $jKey=>$jItem){
+                if(empty($jItem["links"])){
+                    $jItem["links"] = "";
+                }
+                if(empty($jItem["reverse_links"])){
+                    $jItem["reverse_links"] = "";
+                }
                 $allCityJunctions["adj_junc_paths"][$jKey]["links_geo"] = $mergeLinkGeoInfosByLinks(explode(",",$jItem["links"]), $qData['city_id'], $qData['map_version']);
-                $allCityJunctions["adj_junc_paths"][$jKey]["reverse_links_geo"] = $mergeLinkGeoInfosByLinks(explode(",",$jItem["reverse_links"]), $qData['city_id'], $qData['map_version']);
+                $allCityJunctions["adj_junc_paths"][$jKey]["reverse_links_geo"] = $mergeLinkGeoInfosByLinks(explode(",", $jItem["reverse_links"]), $qData['city_id'], $qData['map_version']);
             }
             return $allCityJunctions;
         };
