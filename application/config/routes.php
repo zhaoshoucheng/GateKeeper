@@ -55,4 +55,6 @@ $route['translate_uri_dashes'] = FALSE;
 $route['itstool/(.+)'] = "$1";
 $route['signalpro/api/(.+)'] = "$1";
 
+$route['arterial/getgreenwaveoptplan'] = "arterialgreenwave/getgreenwaveoptplan";
+
 $route['signalpro/proxy/zsy/(.+)'] = "proxy/zsy/$1";
