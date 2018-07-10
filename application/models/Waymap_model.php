@@ -49,12 +49,13 @@ class Waymap_model extends CI_Model
     }
 
     /**
-    * 获取路口各相位lng、lat及
+    * 获取路口各相位lng、lat
     * @param $data['version']           路网版本
     * @param $data['logic_junction_id'] 逻辑路口ID
+    * @param $data['logic_flow_ids']    相位id集合
     * @return array
     */
-    public function getJunctionFlowAndCenterLngLat($data)
+    public function getJunctionFlowLngLat($data)
     {
         if (empty($data)) {
             return [];
@@ -66,38 +67,21 @@ class Waymap_model extends CI_Model
         $map_data = [];
 
         try {
-            $map_data = httpGET($this->config->item('waymap_interface') . '/signal-map/mapFlow/AllByJunctionWithLinkAttr', $data);
+            $map_data = httpGET($this->config->item('waymap_interface') . '/signal-map/MapFlow/simplifyFlows', $data);
             if (!$map_data) {
                 // 日志
                 return [];
             }
             $map_data = json_decode($map_data, true);
             if ($map_data['errorCode'] != 0 || empty($map_data['data'])) {
-                // 日志
-                $content = 'data = ' . json_encode($data)
-                        . ' \r\n interface = '
-                        . $this->config->item('waymap_interface') . '/signal-map/mapFlow/AllByJunctionWithLinkAttr'
-                        . '\r\n result = ' . json_encode($map_data);
-                sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return [];
             }
         } catch (Exception $e) {
             // 日志
-            $content = 'data = ' . json_encode($data)
-                    . ' \r\n interface = '
-                    . $this->config->item('waymap_interface') . '/signal-map/mapFlow/AllByJunctionWithLinkAttr'
-                    . '\r\n result = ' . json_encode($map_data);
-            sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
             return [];
         }
 
-        foreach ($map_data['data'] as $k=>$v) {
-            $result[$k]['logic_flow_id'] = $v['logic_flow_id'];
-            $result[$k]['lng'] = $v['inlink_info']['s_node']['lng'];
-            $result[$k]['lat'] = $v['inlink_info']['s_node']['lat'];
-        }
-
-        return $result;
+        return $map_data;
     }
 
     /**

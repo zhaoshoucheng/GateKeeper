@@ -1038,29 +1038,22 @@ class Junction_model extends CI_Model
         }
 
         // 获取路网路口各相位坐标
-        try {
-            $waymap_data = [
-                'version'           => trim($map_version),
-                'logic_junction_id' => $junction_id,
-                'logic_flow_ids'    => array_keys($timing['list']),
-                'token'             => $this->config->item('waymap_token'),
-                'user_id'           => $this->config->item('waymap_userid'),
-            ];
-            $ret = httpPOST($this->config->item('waymap_interface') . '/signal-map/MapFlow/simplifyFlows', $waymap_data);
-            $ret = json_decode($ret, true);
-            if ($ret['errorCode'] == -1 || empty($ret['data'])) {
-                return [];
-            }
-            foreach ($ret['data'] as $k=>$v) {
-                if (!empty($timing['list'][$v['logic_flow_id']])) {
-                    $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
-                    $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
-                    $result['dataList'][$k]['lng'] = $v['flows'][0][0];
-                    $result['dataList'][$k]['lat'] = $v['flows'][0][1];
-                }
-            }
-        } catch (Exception $e) {
+        $waymap_data = [
+            'version'           => trim($map_version),
+            'logic_junction_id' => $junction_id,
+            'logic_flow_ids'    => array_keys($timing['list']),
+        ];
+        $ret = $this->waymap_model->getJunctionFlowLngLat($waymap_data);
+        if (empty($ret['data'])) {
             return [];
+        }
+        foreach ($ret['data'] as $k=>$v) {
+            if (!empty($timing['list'][$v['logic_flow_id']])) {
+                $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
+                $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
+                $result['dataList'][$k]['lng'] = $v['flows'][0][0];
+                $result['dataList'][$k]['lat'] = $v['flows'][0][1];
+            }
         }
         // 获取路口中心坐标
         $result['center'] = '';
