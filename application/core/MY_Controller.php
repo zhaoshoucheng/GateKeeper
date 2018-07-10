@@ -183,6 +183,7 @@ class MY_Controller extends CI_Controller {
         if($this->is_check_login == 0){
             return true;
         }
+ 
         $ret = $this->user->getAuthorizedCityid();
         //$ret = $this->user->getCityAuth();
         if(empty($ret)){
@@ -190,10 +191,8 @@ class MY_Controller extends CI_Controller {
             return false;
         }
         foreach($ret as $val){
-            if($val['level'] != 3){
-                continue;
-            }
-            if($area == $val['taxi_id']){
+            //if($area == $val['taxi_id']){ // sso
+            if ($area == $val['taxiId']){
                 return true;
             }
         }

@@ -377,5 +377,32 @@ class Waymap_model extends CI_Model
         }
     }
 
+    public function getConnectPath($cityId,$mapVersion, array $selectedJunctionids)
+    {
+        if(empty($selectedJunctionids)){
+            return [];
+        }
+
+        try {
+
+            $res = httpPOST($this->config->item('waymap_interface') . '/signal-map/connect/path', array(
+                'city_id'=>$cityId,
+                'map_version'=>$mapVersion,
+                'selected_junctionids'=>$selectedJunctionids,
+            ), 0, 'json');
+            $retArr = json_decode($res, true);
+
+            if (isset($retArr['errorCode'])
+                && $retArr['errorCode'] == 0
+                && !empty($retArr['data'])) {
+                return $retArr['data'];
+            }
+        } catch (Exception $e) {
+
+            com_log_warning('_itstool_waymap_getConnectionAdjJunctions_error', 0, $e->getMessage(), compact("qArr","res"));
+            return [];
+        }
+
+    }
 
 }
