@@ -392,19 +392,21 @@ class Junction_model extends CI_Model
         for ($i = $start; $i < $end; $i += 15 * 60) {
             $timeRange[] = date('H:i', $i);
         }
-        if (!empty($res)) {
-            foreach ($res as $k=>$v) {
-                foreach ($timeRange as $hour) {
-                    $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
-                    $result[$k]['list'][$hour]['hour'] = $hour;
-                    $result[$k]['list'][$hour]['num'] = 0;
-                    $result[$k]['list'][$hour]['percent'] = 0 . '%';
-                    foreach ($v as $kk=>$vv) {
-                        if ($vv['hour'] == $hour) {
-                            $result[$k]['list'][$hour]['hour'] = $vv['hour'];
-                            $result[$k]['list'][$hour]['num'] = $vv['num'];
-                            $result[$k]['list'][$hour]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
-                        }
+        if (empty($res) || !is_array($res)) {
+            return [];
+        }
+
+        foreach ($res as $k=>$v) {
+            foreach ($timeRange as $hour) {
+                $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
+                $result[$k]['list'][$hour]['hour'] = $hour;
+                $result[$k]['list'][$hour]['num'] = 0;
+                $result[$k]['list'][$hour]['percent'] = 0 . '%';
+                foreach ($v as $kk=>$vv) {
+                    if ($vv['hour'] == $hour) {
+                        $result[$k]['list'][$hour]['hour'] = $vv['hour'];
+                        $result[$k]['list'][$hour]['num'] = $vv['num'];
+                        $result[$k]['list'][$hour]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
                     }
                 }
             }
