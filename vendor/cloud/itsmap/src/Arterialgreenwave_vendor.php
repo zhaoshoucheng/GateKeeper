@@ -10,6 +10,7 @@ use Didi\Cloud\ItsMap\Services\RoadNet;
 
 use Optimize\Greenwave\JunctionOfRoute;
 use Optimize\Greenwave\RouteMes;
+use Optimize\Greenwave\Green;
 
 class Arterialgreenwave_vendor
 {
@@ -19,86 +20,106 @@ class Arterialgreenwave_vendor
 
     /**
     * 获取干线绿波优化方案
-    * @param junctions      array  Y 路口集合 如下示例：
+    * @param $data['junctions']      array    Y 路口集合 如下示例：
     * [
     *  [
     *   "junction_id"=>"xx432423423",   // 路口ID
     *   "cycle"=>60,                    // 配时周期
     *   "offset"=>3,                    // 偏移量
-    *   "forward_green_start"=>[0],     // 正向绿灯开始时间 如只取反向传-1
-    *   "forward_green_duration"=>[30], // 正向绿灯持续时间 如只取反向传-1
-    *   "reverse_green_start"=>[30[,    // 反向绿灯开始时间 如只取正向传-1
-    *   "reverse_green_duration"=>[20], // 反向绿灯持续时间 如只取正向传-1
-    *   "lock_cycle"=>1,                // 周期是否锁定 1是 0否
-    *   "lock_offset"=>0                // 偏移量是否锁定 1是 0否
+    *   "forward_green"=>[              // 正向绿灯信息 如只取反向时传-1:forward_green['green_start'=>-1, green_duration=>-1]
+    *       [
+    *           'green_start' => 0,     // 绿灯开始时间
+    *           'green_duration' => 10  // 绿灯持续时间
+    *       ],
+    *       ......
+    *   ],
+    *   "reverse_green"=>[              // 反向绿灯信息 如只取正向时传-1:reverse_green['green_start'=>-1, green_duration=>-1]
+    *       [
+    *           'green_start' => 0,     // 绿灯开始时间
+    *           'green_duration' => 10  // 绿灯持续时间
+    *       ],
+    *       ......
+    *   ],
+    *   "lock_cycle"=>1,                // 周期是否锁定 0：否 1：是
+    *   "lock_offset"=>0                // 偏移量是否锁定 0：否 1：是
     *   ],
     * ]
-    * @param forward_length array  N 正向路段长度  格式：[100, 200, 300] 只取反向时可不传
-    * @param forward_speed  array  N 正向速度     格式：[100, 200, 300] 只取反向时可不传
-    * @param reverse_length array  N 反向路段长度 格式：[100, 200, 300]  只取正向时可不传
-    * @param reverse_speed  array  N 返向速度     格式：[100, 200, 300] 只取正向时可不传
-    * @param token          string Y 此次请求唯一标识，用于前端轮询
+    * @param $data['forward_length'] array    N 正向路段长度  格式：[100, 200, 300] 只取反向时可不传
+    * @param $data['forward_speed']  array    N 正向速度     格式：[100, 200, 300] 只取反向时可不传
+    * @param $data['reverse_length'] array    N 反向路段长度 格式：[100, 200, 300]  只取正向时可不传
+    * @param $data['reverse_speed']  array    N 返向速度     格式：[100, 200, 300] 只取正向时可不传
+    * @param $data['method']         interger Y 0=>正向 1=>反向 2=>双向
+    * @param $data['token']          string   Y 此次请求唯一标识，用于前端轮询
     * @return array
     */
     public function getGreenWaveOptPlan($data) {
-        $array = [
-            [
-                'junction_id' => 'minjunshapaozi01',
-                'cycle'       => 120,
-                'offset'      => 2,
-                'forward_green_start' => [0,10],
-                'forward_green_duration' => [20, 50],
-                'reverse_green_start' => [-1],
-                'reverse_green_duration' => [-1],
-                'lock_cycle' => false,
-                'lock_offset'=> true,
-            ],
-            [
-                'junction_id' => 'minjunshapaozi02',
-                'cycle'       => 100,
-                'offset'      => 2,
-                'forward_green_start' => [20],
-                'forward_green_duration' => [50],
-                'reverse_green_start' => [-1],
-                'reverse_green_duration' => [-1],
-                'lock_cycle' => true,
-                'lock_offset'=> false,
-            ],
-            [
-                'junction_id' => 'minjunshapaozi03',
-                'cycle'       => 100,
-                'offset'      => 2,
-                'forward_green_start' => [10],
-                'forward_green_duration' => [20],
-                'reverse_green_start' => [-1],
-                'reverse_green_duration' => [-1],
-                'lock_cycle' => true,
-                'lock_offset'=> true,
-            ],
-        ];
-
         $vals = new RouteMes();
-        $forward_length = [100,200,500,1000];
-        $forward_speed = [20,30,20,10];
-        foreach ($forward_length as $v) {
-            $vals->forward_length[] = $v;
-            $vals->reverse_length[] = $v;
-        }
-        foreach ($forward_speed as $v) {
-            $vals->forward_speed[] = $v;
-            $vals->reverse_speed[] = $v;
-        }
-        foreach ($array as $v) {
+        foreach ($data['junctions'] as &$v) {
+            if (!empty($v['forward_green']) && is_array($v['forward_green'])) {
+                foreach ($v['forward_green'] as $kk=>$vv) {
+                    $v['forward_green'][$kk] = new Green($vv);
+                }
+            }
+
+            if (!empty($v['reverse_green']) && is_array($v['reverse_green'])) {
+                foreach ($v['reverse_green'] as $kk=>$vv) {
+                    $v['reverse_green'][$kk] = new Green($vv);
+                }
+            }
+
             $vals->junction_list[] = new JunctionOfRoute($v);
         }
 
-        $direction_method = 0; // 0：正向 1：反向 2：双向
-        $token = 'xxxx';
+        $method = intval($data['method']); // 0：正向 1：反向 2：双向
+
+        if (!empty($data['forward_length']) && empty($data['reverse_length'])){
+            foreach ($data['forward_length'] as $v) {
+                $vals->forward_length[] = $v;
+                $vals->reverse_length[] = $v;
+            }
+        } else if (empty($data['forward_length']) && !empty($data['reverse_length'])) {
+            foreach ($data['reverse_length'] as $v) {
+                $vals->forward_length[] = $v;
+                $vals->reverse_length[] = $v;
+            }
+        } else if (!empty($data['forward_length']) && !empty($data['reverse_length'])) {
+            foreach ($data['reverse_length'] as $v) {
+                $vals->reverse_length[] = $v;
+            }
+            foreach ($data['forward_length'] as $v) {
+                $vals->forward_length[] = $v;
+            }
+        } else {
+            return [];
+        }
+
+        if (!empty($data['forward_speed']) && empty($data['reverse_speed'])){
+            foreach ($data['forward_speed'] as $v) {
+                $vals->forward_speed[] = $v;
+                $vals->reverse_speed[] = $v;
+            }
+        } else if (empty($data['forward_speed']) && !empty($data['reverse_speed'])) {
+            foreach ($data['reverse_speed'] as $v) {
+                $vals->forward_speed[] = $v;
+                $vals->reverse_speed[] = $v;
+            }
+        } else if (!empty($data['forward_speed']) && !empty($data['reverse_speed'])) {
+            foreach ($data['reverse_speed'] as $v) {
+                $vals->reverse_speed[] = $v;
+            }
+            foreach ($data['forward_speed'] as $v) {
+                $vals->forward_speed[] = $v;
+            }
+        } else {
+            return [];
+        }
+
+        $token = $data['token'];
+        echo "<pre>";print_r($vals);exit;
 
         $service = new RoadNet();
-        $response = $service->getGreenWaveOptPlan($vals, $direction_method, $token);
-        var_dump($response);
-        echo "<hr><pre>";print_r($response);
+        $response = $service->getGreenWaveOptPlan($vals, $method, $token);
+
         return $response;
     }
 }

@@ -17,70 +17,43 @@ use Thrift\Protocol\TBinaryProtocolAccelerated;
 use Thrift\Exception\TApplicationException;
 
 
-class RouteGreenWaveOptResponse {
+class Green {
   static $_TSPEC;
 
   /**
-   * @var string
+   * @var int
    */
-  public $errno = null;
+  public $green_start = null;
   /**
-   * @var string
+   * @var int
    */
-  public $errmsg = null;
-  /**
-   * @var \Optimize\Greenwave\JunctionOfRoute[]
-   */
-  public $opt_junction_list = null;
-  /**
-   * @var string
-   */
-  public $token = null;
+  public $green_duration = null;
 
   public function __construct($vals=null) {
     if (!isset(self::$_TSPEC)) {
       self::$_TSPEC = array(
         1 => array(
-          'var' => 'errno',
-          'type' => TType::STRING,
+          'var' => 'green_start',
+          'type' => TType::I32,
           ),
         2 => array(
-          'var' => 'errmsg',
-          'type' => TType::STRING,
-          ),
-        3 => array(
-          'var' => 'opt_junction_list',
-          'type' => TType::LST,
-          'etype' => TType::STRUCT,
-          'elem' => array(
-            'type' => TType::STRUCT,
-            'class' => '\Optimize\Greenwave\JunctionOfRoute',
-            ),
-          ),
-        4 => array(
-          'var' => 'token',
-          'type' => TType::STRING,
+          'var' => 'green_duration',
+          'type' => TType::I32,
           ),
         );
     }
     if (is_array($vals)) {
-      if (isset($vals['errno'])) {
-        $this->errno = $vals['errno'];
+      if (isset($vals['green_start'])) {
+        $this->green_start = $vals['green_start'];
       }
-      if (isset($vals['errmsg'])) {
-        $this->errmsg = $vals['errmsg'];
-      }
-      if (isset($vals['opt_junction_list'])) {
-        $this->opt_junction_list = $vals['opt_junction_list'];
-      }
-      if (isset($vals['token'])) {
-        $this->token = $vals['token'];
+      if (isset($vals['green_duration'])) {
+        $this->green_duration = $vals['green_duration'];
       }
     }
   }
 
   public function getName() {
-    return 'RouteGreenWaveOptResponse';
+    return 'Green';
   }
 
   public function read($input)
@@ -99,40 +72,15 @@ class RouteGreenWaveOptResponse {
       switch ($fid)
       {
         case 1:
-          if ($ftype == TType::STRING) {
-            $xfer += $input->readString($this->errno);
+          if ($ftype == TType::I32) {
+            $xfer += $input->readI32($this->green_start);
           } else {
             $xfer += $input->skip($ftype);
           }
           break;
         case 2:
-          if ($ftype == TType::STRING) {
-            $xfer += $input->readString($this->errmsg);
-          } else {
-            $xfer += $input->skip($ftype);
-          }
-          break;
-        case 3:
-          if ($ftype == TType::LST) {
-            $this->opt_junction_list = array();
-            $_size0 = 0;
-            $_etype3 = 0;
-            $xfer += $input->readListBegin($_etype3, $_size0);
-            for ($_i4 = 0; $_i4 < $_size0; ++$_i4)
-            {
-              $elem5 = null;
-              $elem5 = new \Optimize\Greenwave\JunctionOfRoute();
-              $xfer += $elem5->read($input);
-              $this->opt_junction_list []= $elem5;
-            }
-            $xfer += $input->readListEnd();
-          } else {
-            $xfer += $input->skip($ftype);
-          }
-          break;
-        case 4:
-          if ($ftype == TType::STRING) {
-            $xfer += $input->readString($this->token);
+          if ($ftype == TType::I32) {
+            $xfer += $input->readI32($this->green_duration);
           } else {
             $xfer += $input->skip($ftype);
           }
@@ -149,37 +97,15 @@ class RouteGreenWaveOptResponse {
 
   public function write($output) {
     $xfer = 0;
-    $xfer += $output->writeStructBegin('RouteGreenWaveOptResponse');
-    if ($this->errno !== null) {
-      $xfer += $output->writeFieldBegin('errno', TType::STRING, 1);
-      $xfer += $output->writeString($this->errno);
+    $xfer += $output->writeStructBegin('Green');
+    if ($this->green_start !== null) {
+      $xfer += $output->writeFieldBegin('green_start', TType::I32, 1);
+      $xfer += $output->writeI32($this->green_start);
       $xfer += $output->writeFieldEnd();
     }
-    if ($this->errmsg !== null) {
-      $xfer += $output->writeFieldBegin('errmsg', TType::STRING, 2);
-      $xfer += $output->writeString($this->errmsg);
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($this->opt_junction_list !== null) {
-      if (!is_array($this->opt_junction_list)) {
-        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
-      }
-      $xfer += $output->writeFieldBegin('opt_junction_list', TType::LST, 3);
-      {
-        $output->writeListBegin(TType::STRUCT, count($this->opt_junction_list));
-        {
-          foreach ($this->opt_junction_list as $iter6)
-          {
-            $xfer += $iter6->write($output);
-          }
-        }
-        $output->writeListEnd();
-      }
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($this->token !== null) {
-      $xfer += $output->writeFieldBegin('token', TType::STRING, 4);
-      $xfer += $output->writeString($this->token);
+    if ($this->green_duration !== null) {
+      $xfer += $output->writeFieldBegin('green_duration', TType::I32, 2);
+      $xfer += $output->writeI32($this->green_duration);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
@@ -205,27 +131,19 @@ class JunctionOfRoute {
    */
   public $offset = null;
   /**
-   * @var int[]
+   * @var \Optimize\Greenwave\Green[]
    */
-  public $forward_green_start = null;
+  public $forward_green = null;
   /**
-   * @var int[]
+   * @var \Optimize\Greenwave\Green[]
    */
-  public $forward_green_duration = null;
+  public $reverse_green = null;
   /**
-   * @var int[]
-   */
-  public $reverse_green_start = null;
-  /**
-   * @var int[]
-   */
-  public $reverse_green_duration = null;
-  /**
-   * @var bool
+   * @var int
    */
   public $lock_cycle = null;
   /**
-   * @var bool
+   * @var int
    */
   public $lock_offset = null;
 
@@ -245,44 +163,30 @@ class JunctionOfRoute {
           'type' => TType::I32,
           ),
         4 => array(
-          'var' => 'forward_green_start',
+          'var' => 'forward_green',
           'type' => TType::LST,
-          'etype' => TType::I32,
+          'etype' => TType::STRUCT,
           'elem' => array(
-            'type' => TType::I32,
+            'type' => TType::STRUCT,
+            'class' => '\Optimize\Greenwave\Green',
             ),
           ),
         5 => array(
-          'var' => 'forward_green_duration',
+          'var' => 'reverse_green',
           'type' => TType::LST,
-          'etype' => TType::I32,
+          'etype' => TType::STRUCT,
           'elem' => array(
-            'type' => TType::I32,
+            'type' => TType::STRUCT,
+            'class' => '\Optimize\Greenwave\Green',
             ),
           ),
         6 => array(
-          'var' => 'reverse_green_start',
-          'type' => TType::LST,
-          'etype' => TType::I32,
-          'elem' => array(
-            'type' => TType::I32,
-            ),
+          'var' => 'lock_cycle',
+          'type' => TType::I32,
           ),
         7 => array(
-          'var' => 'reverse_green_duration',
-          'type' => TType::LST,
-          'etype' => TType::I32,
-          'elem' => array(
-            'type' => TType::I32,
-            ),
-          ),
-        8 => array(
-          'var' => 'lock_cycle',
-          'type' => TType::BOOL,
-          ),
-        9 => array(
           'var' => 'lock_offset',
-          'type' => TType::BOOL,
+          'type' => TType::I32,
           ),
         );
     }
@@ -296,17 +200,11 @@ class JunctionOfRoute {
       if (isset($vals['offset'])) {
         $this->offset = $vals['offset'];
       }
-      if (isset($vals['forward_green_start'])) {
-        $this->forward_green_start = $vals['forward_green_start'];
+      if (isset($vals['forward_green'])) {
+        $this->forward_green = $vals['forward_green'];
       }
-      if (isset($vals['forward_green_duration'])) {
-        $this->forward_green_duration = $vals['forward_green_duration'];
-      }
-      if (isset($vals['reverse_green_start'])) {
-        $this->reverse_green_start = $vals['reverse_green_start'];
-      }
-      if (isset($vals['reverse_green_duration'])) {
-        $this->reverse_green_duration = $vals['reverse_green_duration'];
+      if (isset($vals['reverse_green'])) {
+        $this->reverse_green = $vals['reverse_green'];
       }
       if (isset($vals['lock_cycle'])) {
         $this->lock_cycle = $vals['lock_cycle'];
@@ -359,15 +257,16 @@ class JunctionOfRoute {
           break;
         case 4:
           if ($ftype == TType::LST) {
-            $this->forward_green_start = array();
-            $_size7 = 0;
-            $_etype10 = 0;
-            $xfer += $input->readListBegin($_etype10, $_size7);
-            for ($_i11 = 0; $_i11 < $_size7; ++$_i11)
+            $this->forward_green = array();
+            $_size0 = 0;
+            $_etype3 = 0;
+            $xfer += $input->readListBegin($_etype3, $_size0);
+            for ($_i4 = 0; $_i4 < $_size0; ++$_i4)
             {
-              $elem12 = null;
-              $xfer += $input->readI32($elem12);
-              $this->forward_green_start []= $elem12;
+              $elem5 = null;
+              $elem5 = new \Optimize\Greenwave\Green();
+              $xfer += $elem5->read($input);
+              $this->forward_green []= $elem5;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -376,15 +275,16 @@ class JunctionOfRoute {
           break;
         case 5:
           if ($ftype == TType::LST) {
-            $this->forward_green_duration = array();
-            $_size13 = 0;
-            $_etype16 = 0;
-            $xfer += $input->readListBegin($_etype16, $_size13);
-            for ($_i17 = 0; $_i17 < $_size13; ++$_i17)
+            $this->reverse_green = array();
+            $_size6 = 0;
+            $_etype9 = 0;
+            $xfer += $input->readListBegin($_etype9, $_size6);
+            for ($_i10 = 0; $_i10 < $_size6; ++$_i10)
             {
-              $elem18 = null;
-              $xfer += $input->readI32($elem18);
-              $this->forward_green_duration []= $elem18;
+              $elem11 = null;
+              $elem11 = new \Optimize\Greenwave\Green();
+              $xfer += $elem11->read($input);
+              $this->reverse_green []= $elem11;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -392,49 +292,15 @@ class JunctionOfRoute {
           }
           break;
         case 6:
-          if ($ftype == TType::LST) {
-            $this->reverse_green_start = array();
-            $_size19 = 0;
-            $_etype22 = 0;
-            $xfer += $input->readListBegin($_etype22, $_size19);
-            for ($_i23 = 0; $_i23 < $_size19; ++$_i23)
-            {
-              $elem24 = null;
-              $xfer += $input->readI32($elem24);
-              $this->reverse_green_start []= $elem24;
-            }
-            $xfer += $input->readListEnd();
+          if ($ftype == TType::I32) {
+            $xfer += $input->readI32($this->lock_cycle);
           } else {
             $xfer += $input->skip($ftype);
           }
           break;
         case 7:
-          if ($ftype == TType::LST) {
-            $this->reverse_green_duration = array();
-            $_size25 = 0;
-            $_etype28 = 0;
-            $xfer += $input->readListBegin($_etype28, $_size25);
-            for ($_i29 = 0; $_i29 < $_size25; ++$_i29)
-            {
-              $elem30 = null;
-              $xfer += $input->readI32($elem30);
-              $this->reverse_green_duration []= $elem30;
-            }
-            $xfer += $input->readListEnd();
-          } else {
-            $xfer += $input->skip($ftype);
-          }
-          break;
-        case 8:
-          if ($ftype == TType::BOOL) {
-            $xfer += $input->readBool($this->lock_cycle);
-          } else {
-            $xfer += $input->skip($ftype);
-          }
-          break;
-        case 9:
-          if ($ftype == TType::BOOL) {
-            $xfer += $input->readBool($this->lock_offset);
+          if ($ftype == TType::I32) {
+            $xfer += $input->readI32($this->lock_offset);
           } else {
             $xfer += $input->skip($ftype);
           }
@@ -467,68 +333,34 @@ class JunctionOfRoute {
       $xfer += $output->writeI32($this->offset);
       $xfer += $output->writeFieldEnd();
     }
-    if ($this->forward_green_start !== null) {
-      if (!is_array($this->forward_green_start)) {
+    if ($this->forward_green !== null) {
+      if (!is_array($this->forward_green)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('forward_green_start', TType::LST, 4);
+      $xfer += $output->writeFieldBegin('forward_green', TType::LST, 4);
       {
-        $output->writeListBegin(TType::I32, count($this->forward_green_start));
+        $output->writeListBegin(TType::STRUCT, count($this->forward_green));
         {
-          foreach ($this->forward_green_start as $iter31)
+          foreach ($this->forward_green as $iter12)
           {
-            $xfer += $output->writeI32($iter31);
+            $xfer += $iter12->write($output);
           }
         }
         $output->writeListEnd();
       }
       $xfer += $output->writeFieldEnd();
     }
-    if ($this->forward_green_duration !== null) {
-      if (!is_array($this->forward_green_duration)) {
+    if ($this->reverse_green !== null) {
+      if (!is_array($this->reverse_green)) {
         throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('forward_green_duration', TType::LST, 5);
+      $xfer += $output->writeFieldBegin('reverse_green', TType::LST, 5);
       {
-        $output->writeListBegin(TType::I32, count($this->forward_green_duration));
+        $output->writeListBegin(TType::STRUCT, count($this->reverse_green));
         {
-          foreach ($this->forward_green_duration as $iter32)
+          foreach ($this->reverse_green as $iter13)
           {
-            $xfer += $output->writeI32($iter32);
-          }
-        }
-        $output->writeListEnd();
-      }
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($this->reverse_green_start !== null) {
-      if (!is_array($this->reverse_green_start)) {
-        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
-      }
-      $xfer += $output->writeFieldBegin('reverse_green_start', TType::LST, 6);
-      {
-        $output->writeListBegin(TType::I32, count($this->reverse_green_start));
-        {
-          foreach ($this->reverse_green_start as $iter33)
-          {
-            $xfer += $output->writeI32($iter33);
-          }
-        }
-        $output->writeListEnd();
-      }
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($this->reverse_green_duration !== null) {
-      if (!is_array($this->reverse_green_duration)) {
-        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
-      }
-      $xfer += $output->writeFieldBegin('reverse_green_duration', TType::LST, 7);
-      {
-        $output->writeListBegin(TType::I32, count($this->reverse_green_duration));
-        {
-          foreach ($this->reverse_green_duration as $iter34)
-          {
-            $xfer += $output->writeI32($iter34);
+            $xfer += $iter13->write($output);
           }
         }
         $output->writeListEnd();
@@ -536,13 +368,13 @@ class JunctionOfRoute {
       $xfer += $output->writeFieldEnd();
     }
     if ($this->lock_cycle !== null) {
-      $xfer += $output->writeFieldBegin('lock_cycle', TType::BOOL, 8);
-      $xfer += $output->writeBool($this->lock_cycle);
+      $xfer += $output->writeFieldBegin('lock_cycle', TType::I32, 6);
+      $xfer += $output->writeI32($this->lock_cycle);
       $xfer += $output->writeFieldEnd();
     }
     if ($this->lock_offset !== null) {
-      $xfer += $output->writeFieldBegin('lock_offset', TType::BOOL, 9);
-      $xfer += $output->writeBool($this->lock_offset);
+      $xfer += $output->writeFieldBegin('lock_offset', TType::I32, 7);
+      $xfer += $output->writeI32($this->lock_offset);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
@@ -663,15 +495,15 @@ class RouteMes {
         case 1:
           if ($ftype == TType::LST) {
             $this->junction_list = array();
-            $_size35 = 0;
-            $_etype38 = 0;
-            $xfer += $input->readListBegin($_etype38, $_size35);
-            for ($_i39 = 0; $_i39 < $_size35; ++$_i39)
+            $_size14 = 0;
+            $_etype17 = 0;
+            $xfer += $input->readListBegin($_etype17, $_size14);
+            for ($_i18 = 0; $_i18 < $_size14; ++$_i18)
             {
-              $elem40 = null;
-              $elem40 = new \Optimize\Greenwave\JunctionOfRoute();
-              $xfer += $elem40->read($input);
-              $this->junction_list []= $elem40;
+              $elem19 = null;
+              $elem19 = new \Optimize\Greenwave\JunctionOfRoute();
+              $xfer += $elem19->read($input);
+              $this->junction_list []= $elem19;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -681,14 +513,14 @@ class RouteMes {
         case 2:
           if ($ftype == TType::LST) {
             $this->forward_length = array();
-            $_size41 = 0;
-            $_etype44 = 0;
-            $xfer += $input->readListBegin($_etype44, $_size41);
-            for ($_i45 = 0; $_i45 < $_size41; ++$_i45)
+            $_size20 = 0;
+            $_etype23 = 0;
+            $xfer += $input->readListBegin($_etype23, $_size20);
+            for ($_i24 = 0; $_i24 < $_size20; ++$_i24)
             {
-              $elem46 = null;
-              $xfer += $input->readI32($elem46);
-              $this->forward_length []= $elem46;
+              $elem25 = null;
+              $xfer += $input->readI32($elem25);
+              $this->forward_length []= $elem25;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -698,14 +530,14 @@ class RouteMes {
         case 3:
           if ($ftype == TType::LST) {
             $this->forward_speed = array();
-            $_size47 = 0;
-            $_etype50 = 0;
-            $xfer += $input->readListBegin($_etype50, $_size47);
-            for ($_i51 = 0; $_i51 < $_size47; ++$_i51)
+            $_size26 = 0;
+            $_etype29 = 0;
+            $xfer += $input->readListBegin($_etype29, $_size26);
+            for ($_i30 = 0; $_i30 < $_size26; ++$_i30)
             {
-              $elem52 = null;
-              $xfer += $input->readDouble($elem52);
-              $this->forward_speed []= $elem52;
+              $elem31 = null;
+              $xfer += $input->readDouble($elem31);
+              $this->forward_speed []= $elem31;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -715,14 +547,14 @@ class RouteMes {
         case 4:
           if ($ftype == TType::LST) {
             $this->reverse_length = array();
-            $_size53 = 0;
-            $_etype56 = 0;
-            $xfer += $input->readListBegin($_etype56, $_size53);
-            for ($_i57 = 0; $_i57 < $_size53; ++$_i57)
+            $_size32 = 0;
+            $_etype35 = 0;
+            $xfer += $input->readListBegin($_etype35, $_size32);
+            for ($_i36 = 0; $_i36 < $_size32; ++$_i36)
             {
-              $elem58 = null;
-              $xfer += $input->readI32($elem58);
-              $this->reverse_length []= $elem58;
+              $elem37 = null;
+              $xfer += $input->readI32($elem37);
+              $this->reverse_length []= $elem37;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -732,14 +564,14 @@ class RouteMes {
         case 5:
           if ($ftype == TType::LST) {
             $this->reverse_speed = array();
-            $_size59 = 0;
-            $_etype62 = 0;
-            $xfer += $input->readListBegin($_etype62, $_size59);
-            for ($_i63 = 0; $_i63 < $_size59; ++$_i63)
+            $_size38 = 0;
+            $_etype41 = 0;
+            $xfer += $input->readListBegin($_etype41, $_size38);
+            for ($_i42 = 0; $_i42 < $_size38; ++$_i42)
             {
-              $elem64 = null;
-              $xfer += $input->readDouble($elem64);
-              $this->reverse_speed []= $elem64;
+              $elem43 = null;
+              $xfer += $input->readDouble($elem43);
+              $this->reverse_speed []= $elem43;
             }
             $xfer += $input->readListEnd();
           } else {
@@ -767,9 +599,9 @@ class RouteMes {
       {
         $output->writeListBegin(TType::STRUCT, count($this->junction_list));
         {
-          foreach ($this->junction_list as $iter65)
+          foreach ($this->junction_list as $iter44)
           {
-            $xfer += $iter65->write($output);
+            $xfer += $iter44->write($output);
           }
         }
         $output->writeListEnd();
@@ -784,9 +616,9 @@ class RouteMes {
       {
         $output->writeListBegin(TType::I32, count($this->forward_length));
         {
-          foreach ($this->forward_length as $iter66)
+          foreach ($this->forward_length as $iter45)
           {
-            $xfer += $output->writeI32($iter66);
+            $xfer += $output->writeI32($iter45);
           }
         }
         $output->writeListEnd();
@@ -801,9 +633,9 @@ class RouteMes {
       {
         $output->writeListBegin(TType::DOUBLE, count($this->forward_speed));
         {
-          foreach ($this->forward_speed as $iter67)
+          foreach ($this->forward_speed as $iter46)
           {
-            $xfer += $output->writeDouble($iter67);
+            $xfer += $output->writeDouble($iter46);
           }
         }
         $output->writeListEnd();
@@ -818,9 +650,9 @@ class RouteMes {
       {
         $output->writeListBegin(TType::I32, count($this->reverse_length));
         {
-          foreach ($this->reverse_length as $iter68)
+          foreach ($this->reverse_length as $iter47)
           {
-            $xfer += $output->writeI32($iter68);
+            $xfer += $output->writeI32($iter47);
           }
         }
         $output->writeListEnd();
@@ -835,13 +667,185 @@ class RouteMes {
       {
         $output->writeListBegin(TType::DOUBLE, count($this->reverse_speed));
         {
-          foreach ($this->reverse_speed as $iter69)
+          foreach ($this->reverse_speed as $iter48)
           {
-            $xfer += $output->writeDouble($iter69);
+            $xfer += $output->writeDouble($iter48);
           }
         }
         $output->writeListEnd();
       }
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
+class RouteGreenWaveOptResponse {
+  static $_TSPEC;
+
+  /**
+   * @var string
+   */
+  public $errno = null;
+  /**
+   * @var string
+   */
+  public $errmsg = null;
+  /**
+   * @var \Optimize\Greenwave\JunctionOfRoute[]
+   */
+  public $opt_junction_list = null;
+  /**
+   * @var string
+   */
+  public $token = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        1 => array(
+          'var' => 'errno',
+          'type' => TType::STRING,
+          ),
+        2 => array(
+          'var' => 'errmsg',
+          'type' => TType::STRING,
+          ),
+        3 => array(
+          'var' => 'opt_junction_list',
+          'type' => TType::LST,
+          'etype' => TType::STRUCT,
+          'elem' => array(
+            'type' => TType::STRUCT,
+            'class' => '\Optimize\Greenwave\JunctionOfRoute',
+            ),
+          ),
+        4 => array(
+          'var' => 'token',
+          'type' => TType::STRING,
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['errno'])) {
+        $this->errno = $vals['errno'];
+      }
+      if (isset($vals['errmsg'])) {
+        $this->errmsg = $vals['errmsg'];
+      }
+      if (isset($vals['opt_junction_list'])) {
+        $this->opt_junction_list = $vals['opt_junction_list'];
+      }
+      if (isset($vals['token'])) {
+        $this->token = $vals['token'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'RouteGreenWaveOptResponse';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 1:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->errno);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->errmsg);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 3:
+          if ($ftype == TType::LST) {
+            $this->opt_junction_list = array();
+            $_size49 = 0;
+            $_etype52 = 0;
+            $xfer += $input->readListBegin($_etype52, $_size49);
+            for ($_i53 = 0; $_i53 < $_size49; ++$_i53)
+            {
+              $elem54 = null;
+              $elem54 = new \Optimize\Greenwave\JunctionOfRoute();
+              $xfer += $elem54->read($input);
+              $this->opt_junction_list []= $elem54;
+            }
+            $xfer += $input->readListEnd();
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 4:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->token);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('RouteGreenWaveOptResponse');
+    if ($this->errno !== null) {
+      $xfer += $output->writeFieldBegin('errno', TType::STRING, 1);
+      $xfer += $output->writeString($this->errno);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->errmsg !== null) {
+      $xfer += $output->writeFieldBegin('errmsg', TType::STRING, 2);
+      $xfer += $output->writeString($this->errmsg);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->opt_junction_list !== null) {
+      if (!is_array($this->opt_junction_list)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('opt_junction_list', TType::LST, 3);
+      {
+        $output->writeListBegin(TType::STRUCT, count($this->opt_junction_list));
+        {
+          foreach ($this->opt_junction_list as $iter55)
+          {
+            $xfer += $iter55->write($output);
+          }
+        }
+        $output->writeListEnd();
+      }
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->token !== null) {
+      $xfer += $output->writeFieldBegin('token', TType::STRING, 4);
+      $xfer += $output->writeString($this->token);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();
