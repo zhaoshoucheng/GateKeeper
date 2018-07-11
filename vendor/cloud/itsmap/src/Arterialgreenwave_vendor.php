@@ -55,9 +55,9 @@ class Arterialgreenwave_vendor
             ],
             [
                 'junction_id' => 'minjunshapaozi02',
-                'cycle'       => 1000,
+                'cycle'       => 100,
                 'offset'      => 2,
-                'forward_green_start' => [200],
+                'forward_green_start' => [20],
                 'forward_green_duration' => [50],
                 'reverse_green_start' => [-1],
                 'reverse_green_duration' => [-1],
@@ -66,7 +66,7 @@ class Arterialgreenwave_vendor
             ],
             [
                 'junction_id' => 'minjunshapaozi03',
-                'cycle'       => 10000,
+                'cycle'       => 100,
                 'offset'      => 2,
                 'forward_green_start' => [10],
                 'forward_green_duration' => [20],
@@ -79,7 +79,7 @@ class Arterialgreenwave_vendor
 
         $vals = new RouteMes();
         $forward_length = [100,200,500,1000];
-        $forward_speed = [20000,300,200,10000];
+        $forward_speed = [20,30,20,10];
         foreach ($forward_length as $v) {
             $vals->forward_length[] = $v;
             $vals->reverse_length[] = $v;
