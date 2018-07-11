@@ -392,19 +392,21 @@ class Junction_model extends CI_Model
         for ($i = $start; $i < $end; $i += 15 * 60) {
             $timeRange[] = date('H:i', $i);
         }
-        if (!empty($res)) {
-            foreach ($res as $k=>$v) {
-                foreach ($timeRange as $hour) {
-                    $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
-                    $result[$k]['list'][$hour]['hour'] = $hour;
-                    $result[$k]['list'][$hour]['num'] = 0;
-                    $result[$k]['list'][$hour]['percent'] = 0 . '%';
-                    foreach ($v as $kk=>$vv) {
-                        if ($vv['hour'] == $hour) {
-                            $result[$k]['list'][$hour]['hour'] = $vv['hour'];
-                            $result[$k]['list'][$hour]['num'] = $vv['num'];
-                            $result[$k]['list'][$hour]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
-                        }
+        if (empty($res) || !is_array($res)) {
+            return [];
+        }
+
+        foreach ($res as $k=>$v) {
+            foreach ($timeRange as $hour) {
+                $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
+                $result[$k]['list'][$hour]['hour'] = $hour;
+                $result[$k]['list'][$hour]['num'] = 0;
+                $result[$k]['list'][$hour]['percent'] = 0 . '%';
+                foreach ($v as $kk=>$vv) {
+                    if ($vv['hour'] == $hour) {
+                        $result[$k]['list'][$hour]['hour'] = $vv['hour'];
+                        $result[$k]['list'][$hour]['num'] = $vv['num'];
+                        $result[$k]['list'][$hour]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
                     }
                 }
             }
@@ -620,14 +622,12 @@ class Junction_model extends CI_Model
                         ->from($this->tb)
                         ->where($where)
                         ->get();
-        //echo 'sql = ' . $this->db->last_query();
 
         if (!$res || empty($res)) {
             return [];
         }
 
         $result = $res->row_array();
-        //echo "<hr>data = <pre>";print_r($result);
         $result = $this->formatJunctionDetailData($result, $data['dates'], 2, $data['timingType']);
 
         return $result;
@@ -675,7 +675,6 @@ class Junction_model extends CI_Model
         }
 
         $result = $res->row_array();
-        //echo "<hr>data = <pre>";print_r($result);
         $result = $this->formatJunctionDetailData($result, $data['dates'], 1, $data['timingType']);
 
         return $result;
@@ -1038,29 +1037,22 @@ class Junction_model extends CI_Model
         }
 
         // 获取路网路口各相位坐标
-        try {
-            $waymap_data = [
-                'version'           => trim($map_version),
-                'logic_junction_id' => $junction_id,
-                'logic_flow_ids'    => array_keys($timing['list']),
-                'token'             => $this->config->item('waymap_token'),
-                'user_id'           => $this->config->item('waymap_userid'),
-            ];
-            $ret = httpPOST($this->config->item('waymap_interface') . '/signal-map/MapFlow/simplifyFlows', $waymap_data);
-            $ret = json_decode($ret, true);
-            if ($ret['errorCode'] == -1 || empty($ret['data'])) {
-                return [];
-            }
-            foreach ($ret['data'] as $k=>$v) {
-                if (!empty($timing['list'][$v['logic_flow_id']])) {
-                    $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
-                    $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
-                    $result['dataList'][$k]['lng'] = $v['flows'][0][0];
-                    $result['dataList'][$k]['lat'] = $v['flows'][0][1];
-                }
-            }
-        } catch (Exception $e) {
+        $waymap_data = [
+            'version'           => trim($map_version),
+            'logic_junction_id' => $junction_id,
+            'logic_flow_ids'    => array_keys($timing['list']),
+        ];
+        $ret = $this->waymap_model->getJunctionFlowLngLat($waymap_data);
+        if (empty($ret['data'])) {
             return [];
+        }
+        foreach ($ret['data'] as $k=>$v) {
+            if (!empty($timing['list'][$v['logic_flow_id']])) {
+                $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
+                $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
+                $result['dataList'][$k]['lng'] = $v['flows'][0][0];
+                $result['dataList'][$k]['lat'] = $v['flows'][0][1];
+            }
         }
         // 获取路口中心坐标
         $result['center'] = '';

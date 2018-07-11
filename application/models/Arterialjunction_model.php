@@ -134,6 +134,9 @@ class Arterialjunction_model extends CI_Model
                 return [];
             }
             //线路geo
+            $allCityJunctions["path_links"] = implode(',', $getDirectionLinks(1, $qData));   //正向
+            $allCityJunctions["reverse_path_links"] = implode(',', $getDirectionLinks(-1, $qData));   //反向
+
             $allCityJunctions["path_geo"] = $mergeLinkGeoInfosByLinks($getDirectionLinks(1, $qData), $qData['city_id'], $qData['map_version']);   //正向
             $allCityJunctions["reverse_path_geo"] = $mergeLinkGeoInfosByLinks($getDirectionLinks(-1, $qData), $qData['city_id'], $qData['map_version']);   //反向
             $allCityJunctions["map_version"] = $qData['map_version'];   //正向
