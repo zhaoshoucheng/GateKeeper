@@ -77,17 +77,15 @@ class Arterialgreenwave_vendor
             ],
         ];
 
+        $vals = new RouteMes();
         $forward_length = [100,200,500,1000];
         $forward_speed = [20000,300,200,10000];
         foreach ($forward_length as $v) {
-            $forward_length_new[] = new RouteMes($v);
+            $vals->forward_length[] = $v;
         }
         foreach ($forward_speed as $v) {
-            $forward_speed_new[] = new RouteMes($v);
+            $vals->forward_speed[] = $v;
         }
-        $vals = new RouteMes();
-        $vals->forward_length = $forward_length_new;
-        $vals->forward_speed = $forward_speed_new;
         $vals->reverse_length[] = [];
         $vals->reverse_speed[] = [];
         foreach ($array as $v) {
