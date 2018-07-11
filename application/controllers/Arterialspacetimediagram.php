@@ -13,4 +13,12 @@ class Arterialspacetimediagram extends MY_Controller
     {
         parent::__construct();
     }
+
+    /**
+    * 获取干线路口时空图
+    */
+    public function getSpaceTimeDiagram()
+    {
+    	
+    }
 }

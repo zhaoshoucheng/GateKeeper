@@ -486,4 +486,20 @@ class RoadNet
 
         return $response;
     }
+
+    /**
+    * 获取绿波优化方案
+    */
+    public function getGreenWaveOptPlan($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $this->start('tod_split_optimize');
+        $response = $this->call('route_green_wave_opt', [$version, $data]);
+        $this->close();
+
+        return $response;
+    }
 }
