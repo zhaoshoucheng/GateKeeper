@@ -82,7 +82,10 @@ class Arterialgreenwave_vendor
         $vals->forward_speed[] = [20000,300,200,10000];
         $vals->reverse_length[] = [];
         $vals->reverse_speed[] = [];
-        $vals->junction_list[] = new JunctionOfRoute($array);
+        foreach ($array as $v) {
+            $vals->junction_list[] = new JunctionOfRoute($v);
+        }
+
         $direction_method = 0; // 0：正向 1：反向 2：双向
         $token = 'xxxx';
 
