@@ -65,7 +65,7 @@ class Arterialgreenwave extends MY_Controller
             $this->errmsg = '参数junctions不能为空！';
             return;
         }
-        $junctions = json_decode($params['junctions']);
+        $junctions = json_decode($params['junctions'], true);
         if (json_last_error() != JSON_ERROR_NONE) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数junctions必须为json格式！';

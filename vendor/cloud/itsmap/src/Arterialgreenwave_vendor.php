@@ -115,7 +115,6 @@ class Arterialgreenwave_vendor
         }
 
         $token = $data['token'];
-        echo "<pre>";print_r($vals);exit;
 
         $service = new RoadNet();
         $response = $service->getGreenWaveOptPlan($vals, $method, $token);

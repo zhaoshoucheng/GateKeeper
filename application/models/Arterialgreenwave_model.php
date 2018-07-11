@@ -58,5 +58,9 @@ class Arterialgreenwave_model extends CI_Model
     	if (empty($res)) {
     		return [];
     	}
+
+        $res = (array)$res;
+
+        echo "<pre>";print_r($res);
     }
 }
