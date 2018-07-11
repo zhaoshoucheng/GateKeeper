@@ -82,12 +82,12 @@ class Arterialgreenwave_vendor
         $forward_speed = [20000,300,200,10000];
         foreach ($forward_length as $v) {
             $vals->forward_length[] = $v;
+            $vals->reverse_length[] = $v;
         }
         foreach ($forward_speed as $v) {
             $vals->forward_speed[] = $v;
+            $vals->reverse_speed[] = $v;
         }
-        $vals->reverse_length[] = [];
-        $vals->reverse_speed[] = [];
         foreach ($array as $v) {
             $vals->junction_list[] = new JunctionOfRoute($v);
         }
@@ -98,6 +98,7 @@ class Arterialgreenwave_vendor
         $service = new RoadNet();
         $response = $service->getGreenWaveOptPlan($vals, $direction_method, $token);
         var_dump($response);
+        echo "<hr><pre>";print_r($response);
         return $response;
     }
 }
