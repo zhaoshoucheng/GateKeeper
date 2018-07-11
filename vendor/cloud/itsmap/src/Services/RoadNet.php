@@ -497,7 +497,7 @@ class RoadNet
         }
 
         $this->start('tod_split_optimize');
-        $response = $this->call('route_green_wave_opt', [$version, $data]);
+        $response = $this->call('route_green_wave_opt', [$data]);
         $this->close();
 
         return $response;

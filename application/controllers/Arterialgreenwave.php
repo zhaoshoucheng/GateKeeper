@@ -1,4 +1,4 @@
-x<?php
+<?php
 /***************************************************************
 # 干线绿波类
 # user:ningxiangbing@didichuxing.com
@@ -52,7 +52,7 @@ class Arterialgreenwave extends MY_Controller
             $this->errmsg = $validate['errmsg'];
             return;
         }
-        $data['token'] = $token;
+        $data['token'] = trim($params['token']);
 
         // junctions
         if (empty($params['junctions'])) {

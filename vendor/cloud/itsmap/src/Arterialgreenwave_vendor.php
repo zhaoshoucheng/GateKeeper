@@ -1,6 +1,8 @@
 <?php
 namespace Didi\Cloud\ItsMap;
 
+require_once __DIR__ . '/Thrift/Optimize/signal_opt_service.php';
+require_once __DIR__ . '/Thrift/Optimize/Types.php';
 require_once __DIR__ . '/Thrift/Optimize/Greenwave/Types.php';
 
 use Didi\Cloud\ItsMap\Configs\Env;
