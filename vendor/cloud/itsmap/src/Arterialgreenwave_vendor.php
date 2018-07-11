@@ -83,10 +83,11 @@ class Arterialgreenwave_vendor
         $vals->reverse_length[] = [];
         $vals->reverse_speed[] = [];
         $vals->junction_list[] = new JunctionOfRoute($array);
+        $direction_method = 0; // 0：正向 1：反向 2：双向
 
         $service = new RoadNet();
-        $response = $service->getGreenWaveOptPlan($vals);
-
+        $response = $service->getGreenWaveOptPlan($vals, $direction_method, $token);
+        var_dump($response);
         return $response;
     }
 }
