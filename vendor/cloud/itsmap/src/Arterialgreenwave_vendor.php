@@ -43,7 +43,7 @@ class Arterialgreenwave_vendor
     public function getGreenWaveOptPlan($data) {
         $array = [
             [
-                'junction_id' => '敏俊傻孢子01',
+                'junction_id' => 'minjunshapaozi01',
                 'cycle'       => 120,
                 'offset'      => 2,
                 'forward_green_start' => [0,10],
@@ -54,7 +54,7 @@ class Arterialgreenwave_vendor
                 'lock_offset'=> true,
             ],
             [
-                'junction_id' => '敏俊傻孢子02',
+                'junction_id' => 'minjunshapaozi02',
                 'cycle'       => 1000,
                 'offset'      => 2,
                 'forward_green_start' => [200],
@@ -65,7 +65,7 @@ class Arterialgreenwave_vendor
                 'lock_offset'=> false,
             ],
             [
-                'junction_id' => '敏俊傻孢子03',
+                'junction_id' => 'minjunshapaozi03',
                 'cycle'       => 10000,
                 'offset'      => 2,
                 'forward_green_start' => [10],
