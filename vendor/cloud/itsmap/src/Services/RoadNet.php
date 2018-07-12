@@ -458,14 +458,14 @@ class RoadNet
     /**
     * 获取时段划分方案
     */
-    public function getTodPlan($data)
+    public function getTodPlan($junctionMovements, $version, $todCnt)
     {
         if (empty($data)) {
             return [];
         }
 
         $this->start('tod_split_optimize');
-        $response = $this->call('tod_opt', [$data]);
+        $response = $this->call('tod_opt', [$version, $junctionMovements, $todCnt]);
         $this->close();
 
         return $response;

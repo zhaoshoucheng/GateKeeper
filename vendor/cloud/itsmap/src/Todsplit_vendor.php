@@ -1,17 +1,18 @@
 <?php
 namespace Didi\Cloud\ItsMap;
 
-require_once __DIR__ . '/Thrift/Todsplit/signal_opt_service.php';
-require_once __DIR__ . '/Thrift/Todsplit/Types.php';
+require_once __DIR__ . '/Thrift/Optimize/signal_opt_service.php';
+require_once __DIR__ . '/Thrift/Optimize/Types.php';
+require_once __DIR__ . '/Thrift/Optimize/Greensplit/Types.php';
+require_once __DIR__ . '/Thrift/Optimize/Tod/Types.php';
 
 use Didi\Cloud\ItsMap\Configs\Env;
 use Didi\Cloud\ItsMap\Services\RoadNet;
 
-use Todsplit\MovementSignal;
-use Todsplit\Version as todsplit_version;
-use Todsplit\JunctionMovements;
-use Todsplit\TodInfo;
-use Todsplit\SignalPlan;
+use Optimize\Greensplit\MovementSignal;
+use Optimize\Version as todsplit_version;
+use Optimize\Tod\JunctionMovements;
+use Optimize\Greensplit\SignalPlan;
 
 class Todsplit_vendor {
     public function __construct() {
@@ -27,19 +28,17 @@ class Todsplit_vendor {
     * @return array
     */
     public function getTodPlan($data) {
-        $vals = new TodInfo();
-        $vals->dates = $data['dates'];
         foreach ($data['junction_movements'] as $v) {
-            $vals->junction_movements[] = new JunctionMovements($v);
+            $vals['junction_movements'][] = new JunctionMovements($v);
         }
 
-        foreach ($data['version'] as $v) {
-            $vals->version[] = new todsplit_version($v);
+        foreach ($data['version'] as $k=>$v) {
+            $version[$k] = new todsplit_version($v);
         }
-        $vals->tod_cnt = $data['tod_cnt'];
+        $todCnt = $data['tod_cnt'];
 
         $service = new RoadNet();
-        $response = $service->getTodPlan($vals);
+        $response = $service->getTodPlan($vals, $version, $todCnt);
 
         return $response;
     }
