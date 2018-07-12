@@ -12,6 +12,7 @@ class Arterialspacetimediagram extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('arterialspacetimediagram_model');
     }
 
     /**
@@ -19,6 +20,7 @@ class Arterialspacetimediagram extends MY_Controller
     */
     public function getSpaceTimeDiagram()
     {
-    	
+        $data = [];
+    	$this->arterialspacetimediagram_model->getSpaceTimeDiagram($data);
     }
 }

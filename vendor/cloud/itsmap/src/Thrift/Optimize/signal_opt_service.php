@@ -33,8 +33,8 @@ interface signal_opt_serviceIf {
   /**
    * @param \Optimize\Version[] $version
    * @param int $direction_method
-   * @param \Optimize\Spacetimedragam\RouteJunction[] $route_junction
-   * @return \Optimize\Spacetimedragam\ContinueTSGraphResponse
+   * @param \Optimize\Spacetimediagram\RouteJunction[] $route_junction
+   * @return \Optimize\Spacetimediagram\ContinueTSGraphResponse
    */
   public function continue_ts_filter(array $version, $direction_method, array $route_junction);
   /**
@@ -703,7 +703,7 @@ class signal_opt_service_continue_ts_filter_args {
    */
   public $direction_method = null;
   /**
-   * @var \Optimize\Spacetimedragam\RouteJunction[]
+   * @var \Optimize\Spacetimediagram\RouteJunction[]
    */
   public $route_junction = null;
 
@@ -729,7 +729,7 @@ class signal_opt_service_continue_ts_filter_args {
           'etype' => TType::STRUCT,
           'elem' => array(
             'type' => TType::STRUCT,
-            'class' => '\Optimize\Spacetimedragam\RouteJunction',
+            'class' => '\Optimize\Spacetimediagram\RouteJunction',
             ),
           ),
         );
@@ -800,7 +800,7 @@ class signal_opt_service_continue_ts_filter_args {
             for ($_i17 = 0; $_i17 < $_size13; ++$_i17)
             {
               $elem18 = null;
-              $elem18 = new \Optimize\Spacetimedragam\RouteJunction();
+              $elem18 = new \Optimize\Spacetimediagram\RouteJunction();
               $xfer += $elem18->read($input);
               $this->route_junction []= $elem18;
             }
@@ -872,7 +872,7 @@ class signal_opt_service_continue_ts_filter_result {
   static $_TSPEC;
 
   /**
-   * @var \Optimize\Spacetimedragam\ContinueTSGraphResponse
+   * @var \Optimize\Spacetimediagram\ContinueTSGraphResponse
    */
   public $success = null;
 
@@ -882,7 +882,7 @@ class signal_opt_service_continue_ts_filter_result {
         0 => array(
           'var' => 'success',
           'type' => TType::STRUCT,
-          'class' => '\Optimize\Spacetimedragam\ContinueTSGraphResponse',
+          'class' => '\Optimize\Spacetimediagram\ContinueTSGraphResponse',
           ),
         );
     }
@@ -914,7 +914,7 @@ class signal_opt_service_continue_ts_filter_result {
       {
         case 0:
           if ($ftype == TType::STRUCT) {
-            $this->success = new \Optimize\Spacetimedragam\ContinueTSGraphResponse();
+            $this->success = new \Optimize\Spacetimediagram\ContinueTSGraphResponse();
             $xfer += $this->success->read($input);
           } else {
             $xfer += $input->skip($ftype);
