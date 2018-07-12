@@ -4,7 +4,7 @@
 # author:  ningxiangbing@didichuxing.com
 # date:    2018-06-29
 ********************************************/
-use Didi\Cloud\ItsMap\Arterialspacetimediagram_verdor;
+use Didi\Cloud\ItsMap\Arterialspacetimediagram_vendor;
 
 class Arterialspacetimediagram_model extends CI_Model
 {
@@ -19,7 +19,7 @@ class Arterialspacetimediagram_model extends CI_Model
     public function getSpaceTimeDiagram($data)
     {
     	$vals = [];
-    	$server = new Arterialspacetimediagram_verdor();
+    	$server = new Arterialspacetimediagram_vendor();
 
     	$server->getSpaceTimeDiagram($vals);
     }
