@@ -84,7 +84,8 @@ class Arterialtiming extends MY_Controller
         foreach ($selectJunctions as $k){
             foreach ($ret['junctions_info'] as $rk => $rv){
                 if($k == $rk){
-                    $sortJunctions[$rk]=$rv;
+                    $rv['logic_junction_id'] = $rk;
+                    $sortJunctions[]=$rv;
                 }
             }
         }
