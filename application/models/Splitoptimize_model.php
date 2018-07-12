@@ -107,7 +107,10 @@ class Splitoptimize_model extends CI_Model
 
         $res = (array)$res;
         $res['green_split_opt_signal_plan'] = (array)$res['green_split_opt_signal_plan'];
-        //$res['green_split_opt_signal_plan']['signal'] = (array)$res['green_split_opt_signal_plan']['signal'];
+
+        if ($res['errno'] != 0 || empty($res['green_split_opt_signal_plan']['signal'])) {
+            return [];
+        }
 
         $result['plan'] = [
             'start_time' => $res['green_split_opt_signal_plan']['start_time'],

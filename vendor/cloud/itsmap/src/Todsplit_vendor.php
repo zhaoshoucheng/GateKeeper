@@ -101,7 +101,7 @@ class Todsplit_vendor {
         foreach ($data['version'] as $v) {
             $version[] = new todsplit_version($v);
         }
-        echo "<pre>";print_r($vals);
+
         $service = new RoadNet();
         $response = $service->getSplitPlan($vals, $version);
 
