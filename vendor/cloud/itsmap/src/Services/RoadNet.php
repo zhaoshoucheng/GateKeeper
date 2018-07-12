@@ -460,7 +460,7 @@ class RoadNet
     */
     public function getTodPlan($junctionMovements, $version, $todCnt)
     {
-        if (empty($data)) {
+        if (empty($junctionMovements)) {
             return [];
         }
 
