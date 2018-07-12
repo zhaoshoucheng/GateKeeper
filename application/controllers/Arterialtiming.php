@@ -44,17 +44,19 @@ class Arterialtiming extends MY_Controller
         $params = $this->input->post();
         $validate = Validate::make($params, [
                 'city_id'               => 'nullunable',
-                'selected_junctionids'  => 'nullunable',
+//                'selected_junctionids'  => 'nullunable',
                 'map_version'           => 'nullunable',
             ]
         );
         if(!$validate['status']){
             return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
         }
+
         $cityId = $params['city_id'];
         $version = $params['map_version'];
         $selectJunctions = $params['selected_junctionids'];
-        $selectJunctions = json_decode($selectJunctions,true);
+
+//        $selectJunctions = json_decode($selectJunctions,true);
         $ret = $this->arterialtiming_model->getJunctionInfos($cityId,$version,$selectJunctions);
 
         return $this->response($ret);
