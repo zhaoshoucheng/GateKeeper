@@ -81,7 +81,9 @@ class Arterialtiming_model extends CI_Model
     public function getJunctionInfos($cityId,$version,$selectJunctions)
     {
         $ret = $this->waymap_model->getConnectPath($cityId,$version,$selectJunctions);
-
+        if(empty($ret)){
+            return [];
+        }
         //forwardMap[start][end] = length
         $forwardMap=[];
         $backMap=[];
@@ -99,9 +101,10 @@ class Arterialtiming_model extends CI_Model
                 $ret['backward_path_flows'][$bk]['ave_length'] = ceil($aveLength);
                 $backMap[$bv['start_junc_id']][$bv['end_junc_id']] = ceil($aveLength);
                 if(abs($bv['length']-$aveLength) > 50 + $aveLength*0.05){
-                    $ret['backward_path_flows'][$bv]['length_warning'] = 1;
+                    $ret['backward_path_flows'][$bk]['length_warning'] = 1;
+                }else{
+                    $ret['backward_path_flows'][$bk]['length_warning'] = 0;
                 }
-                $ret['backward_path_flows'][$bk]['length_warning'] = 0;
 
             }else{
                 $ret['backward_path_flows'][$bk]['ave_length'] = $bv['length'];
