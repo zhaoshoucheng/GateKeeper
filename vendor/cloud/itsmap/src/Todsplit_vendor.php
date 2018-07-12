@@ -30,7 +30,7 @@ class Todsplit_vendor {
     */
     public function getTodPlan($data) {
         foreach ($data['junction_movements'] as $v) {
-            $vals['junction_movements'][] = new JunctionMovements($v);
+            $junction_movements[] = new JunctionMovements($v);
         }
 
         foreach ($data['version'] as $k=>$v) {
@@ -39,7 +39,7 @@ class Todsplit_vendor {
         $todCnt = $data['tod_cnt'];
 
         $service = new RoadNet();
-        $response = $service->getTodPlan($vals, $version, $todCnt);
+        $response = $service->getTodPlan($junction_movements, $version, $todCnt);
 
         return $response;
     }
