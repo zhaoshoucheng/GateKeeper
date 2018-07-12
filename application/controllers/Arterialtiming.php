@@ -36,7 +36,29 @@ class Arterialtiming extends MY_Controller
         $date = $params['dates'];
         $date = json_decode($date,true);
         $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,end($date));
-        return $this->response($timingInfo);
+        $finalTimingInfo=[];
+        foreach ($data as $d){
+            if(isset($timingInfo[$d['logic_junction_id']])){
+                $finalTimingInfo[$d['logic_junction_id']] = $timingInfo[$d['logic_junction_id']];
+            }else{
+                $finalTimingInfo[$d['logic_junction_id']] = [
+                    array(
+                        'id'=>null,
+                        'logic_junction_id'=>$d['logicf_junction_id'],
+                        'date'=>null,
+                        'timing_info'=>array(
+                            'extra_timing'=>array(
+                                'cycle'=>null,
+                                'offset'=>null,
+                            ),
+                            'movement_timing'=>array()
+                        ),
+                    )
+                ];
+            }
+        }
+
+        return $this->response($finalTimingInfo);
     }
 
     public function queryArterialJunctionInfo()
@@ -44,19 +66,29 @@ class Arterialtiming extends MY_Controller
         $params = $this->input->post();
         $validate = Validate::make($params, [
                 'city_id'               => 'nullunable',
-                'selected_junctionids'  => 'nullunable',
+//                'selected_junctionids'  => 'nullunable',
                 'map_version'           => 'nullunable',
             ]
         );
         if(!$validate['status']){
             return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
         }
+
         $cityId = $params['city_id'];
         $version = $params['map_version'];
         $selectJunctions = $params['selected_junctionids'];
-        $selectJunctions = json_decode($selectJunctions,true);
-        $ret = $this->arterialtiming_model->getJunctionInfos($cityId,$version,$selectJunctions);
 
+//        $selectJunctions = json_decode($selectJunctions,true);
+        $ret = $this->arterialtiming_model->getJunctionInfos($cityId,$version,$selectJunctions);
+        $sortJunctions = [];
+        foreach ($selectJunctions as $k){
+            foreach ($ret['junctions_info'] as $rk => $rv){
+                if($k == $rk){
+                    $sortJunctions[$rk]=$rv;
+                }
+            }
+        }
+        $ret['junctions_info'] = $sortJunctions;
         return $this->response($ret);
     }
 }

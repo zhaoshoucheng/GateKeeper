@@ -64,8 +64,8 @@ class Arterialtiming_model extends CI_Model
                     foreach ($nv['flows'] as $f){
                         if($v['flow_logic']['logic_flow_id'] == $f){
                             $finalRet['movement_timing'][] = array(
-                                'start_time'=>$v['start_time'],
-                                'duration'=>$v['duration'],
+                                'start_time'=>intval($v['start_time']),
+                                'duration'=>intval($v['duration']),
                                 'logic_flow_id'=>$f,
                                 'comment'=>$v['flow_logic']['comment'],
                             );
@@ -81,6 +81,48 @@ class Arterialtiming_model extends CI_Model
     public function getJunctionInfos($cityId,$version,$selectJunctions)
     {
         $ret = $this->waymap_model->getConnectPath($cityId,$version,$selectJunctions);
+        if(empty($ret)){
+            return [];
+        }
+        //forwardMap[start][end] = length
+        $forwardMap=[];
+        $backMap=[];
+        foreach ($ret['forward_path_flows'] as $fk => $fv){
+            $forwardMap[$fv['start_junc_id']][$fv['end_junc_id']] = $fv['length'];
+            $ret['forward_path_flows'][$fk]['ave_length'] = $fv['length'];
+            $ret['forward_path_flows'][$fk]['length_warning'] = 0;
+        }
+
+        foreach ($ret['backward_path_flows'] as $bk =>$bv){
+            if(isset($forwardMap[$bv['end_junc_id']]) && isset($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']])){
+                //正向和反向都有
+                $aveLength = (intval($bv['length'])+intval($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']]))/2;
+
+                $ret['backward_path_flows'][$bk]['ave_length'] = ceil($aveLength);
+                $backMap[$bv['start_junc_id']][$bv['end_junc_id']] = ceil($aveLength);
+                if(abs($bv['length']-$aveLength) > 50 + $aveLength*0.05){
+                    $ret['backward_path_flows'][$bk]['length_warning'] = 1;
+                }else{
+                    $ret['backward_path_flows'][$bk]['length_warning'] = 0;
+                }
+
+            }else{
+                $ret['backward_path_flows'][$bk]['ave_length'] = $bv['length'];
+                $ret['backward_path_flows'][$bk]['length_warning'] = 0;
+                $backMap[$bv['start_junc_id']][$bv['end_junc_id']] = $bv['length'];
+            }
+        }
+
+        foreach ($ret['forward_path_flows'] as $fk =>$fv){
+            if(isset($backMap[$fv['end_junc_id']]) && isset($backMap[$fv['end_junc_id']][$fv['start_junc_id']])){
+                $aveLength = $backMap[$fv['end_junc_id']][$fv['start_junc_id']];
+                $ret['forward_path_flows'][$fk]['ave_length'] = $aveLength;
+                if(abs($fv['length']-$aveLength) > 50 + $aveLength*0.05){
+                    $ret['forward_path_flows'][$fk]['length_warning'] = 1;
+                }
+
+            }
+        }
 
         return $ret;
     }
