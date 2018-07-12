@@ -13,6 +13,7 @@ use Optimize\Greensplit\MovementSignal;
 use Optimize\Version as todsplit_version;
 use Optimize\Tod\JunctionMovements;
 use Optimize\Greensplit\SignalPlan;
+use Optimize\Greensplit\SignalOfGreen;
 
 class Todsplit_vendor {
     public function __construct() {
@@ -56,10 +57,14 @@ class Todsplit_vendor {
     *     data['signal'] = [
     *           [
     *               'logic_flow_id'  => 'xxx',  flow id
-    *               'green_start'    => [0],    绿灯开始时间
-    *               'green_duration' => [30],   绿灯持续时间
-    *               'yellow'         => [3],    黄灯时长
-    *               'red_clean'      => [0],    全红
+    *               'signal_of_green'=> [
+    *                   [
+    *                       'green_start'    => 0,    绿灯开始时间
+    *                       'green_duration' => 30,   绿灯持续时间
+    *                       'yellow'         => 3,    黄灯时长
+    *                       'red_clean'      => 0,    全红
+    *                   ],
+    *               ]
     *           ],
     *           ......
     *     ]
@@ -83,14 +88,20 @@ class Todsplit_vendor {
         $vals->offset = intval($data['offset']);
         $vals->clock_shift = intval($data['clock_shift']);
 
-        foreach ($data['signal'] as $v) {
+        foreach ($data['signal'] as &$v) {
+            if (!empty($v['signal_of_green']) && is_array($v['signal_of_green'])) {
+                foreach ($v['signal_of_green'] as $kk=>$vv) {
+                    $v['signal_of_green'][$kk] = new SignalOfGreen($vv);
+                }
+            }
+
             $vals->signal[] = new MovementSignal($v);
         }
 
         foreach ($data['version'] as $v) {
             $version[] = new todsplit_version($v);
         }
-
+        echo "<pre>";print_r($vals);
         $service = new RoadNet();
         $response = $service->getSplitPlan($vals, $version);
 

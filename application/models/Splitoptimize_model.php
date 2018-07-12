@@ -81,10 +81,10 @@ class Splitoptimize_model extends CI_Model
                     $signal[$kk]['logic_flow_id'] = $vv['info']['logic_flow_id'];
                     $flowIdName[$vv['info']['logic_flow_id']] = $vv['info']['comment'];
                     foreach ($vv['signal'] as $kkk=>$vvv) {
-                        $signal[$kk]['green_start'][$kkk] = $vvv['g_start_time'];
-                        $signal[$kk]['green_duration'][$kkk] = $vvv['g_duration'];
-                        $signal[$kk]['yellow'][$kkk] = $vvv['yellowLight'];
-                        $signal[$kk]['red_clean'][$kkk] = 0;
+                        $signal[$kk]['signal_of_green'][$kkk]['green_start'] = $vvv['g_start_time'];
+                        $signal[$kk]['signal_of_green'][$kkk]['green_duration'] = $vvv['g_duration'];
+                        $signal[$kk]['signal_of_green'][$kkk]['yellow'] = $vvv['yellowLight'];
+                        $signal[$kk]['signal_of_green'][$kkk]['red_clean'] = 0;
                     }
                 }
             }
