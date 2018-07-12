@@ -58,7 +58,15 @@ class Arterialtiming extends MY_Controller
 
 //        $selectJunctions = json_decode($selectJunctions,true);
         $ret = $this->arterialtiming_model->getJunctionInfos($cityId,$version,$selectJunctions);
-
+        $sortJunctions = [];
+        foreach ($selectJunctions as $k){
+            foreach ($ret['junctions_info'] as $rk => $rv){
+                if($k == $rk){
+                    $sortJunctions[$rk]=$rv;
+                }
+            }
+        }
+        $ret['junctions_info'] = $sortJunctions;
         return $this->response($ret);
     }
 }
