@@ -502,4 +502,20 @@ class RoadNet
 
         return $response;
     }
+
+    /**
+    * 获取干线时空图
+    */
+    public function getSpaceTimeDiagram($data, $method, $version)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $this->start('tod_split_optimize');
+        $response = $this->call('continue_ts_filter', [$version, $method, $data]);
+        $this->close();
+
+        return $response;
+    }
 }
