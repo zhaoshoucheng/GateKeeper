@@ -44,7 +44,7 @@ class Arterialtiming extends MY_Controller
                 $finalTimingInfo[$d['logic_junction_id']] = [
                     array(
                         'id'=>null,
-                        'logic_junction_id'=>$d['logicf_junction_id'],
+                        'logic_junction_id'=>$d['logic_junction_id'],
                         'date'=>null,
                         'timing_info'=>array(
                             'extra_timing'=>array(
