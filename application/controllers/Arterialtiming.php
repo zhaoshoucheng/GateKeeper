@@ -35,7 +35,7 @@ class Arterialtiming extends MY_Controller
         $timePoint = $params['time_point'];
         $date = $params['dates'];
 //        $date = json_decode($date,true);
-        $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,end($date));
+        $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,$date[0]);
         $finalTimingInfo=[];
         foreach ($data as $d){
             if(isset($timingInfo[$d['logic_junction_id']])){

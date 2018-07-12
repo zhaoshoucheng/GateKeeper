@@ -53,10 +53,15 @@ class Arterialtiming_model extends CI_Model
     {
 
         $finalRet = [];
+        $finalRet['tod_start_time'] = $oriFlows['tod_start_time'];
+        $finalRet['tod_end_time'] = $oriFlows['tod_end_time'];
         $finalRet['extra_timing'] = $oriFlows['plan_detail']['extra_timing'];
 
         foreach ($oriFlows['plan_detail']['movement_timing'] as  $mk => $mv){
             foreach ($nedFlows as $nk=>$nv){
+                if(!isset($nv['flows'])){
+                    continue;
+                }
                 if($nv['logic_junction_id']!=$logicJunctionId){
                     continue;
                 }
