@@ -21,20 +21,20 @@ class Arterialtiming extends MY_Controller
 
         // 校验参数
         $validate = Validate::make($params, [
-                'junction_infos'    => 'nullunable',
+//                'junction_infos'    => 'nullunable',
                 'time_point'        => 'nullunable',
-                'dates'             => 'nullunable',
+//                'dates'             => 'nullunable',
             ]
         );
         if(!$validate['status']){
             return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
         }
         $data = $params['junction_infos'];
-        $data = json_decode($data,true);
+//        $data = json_decode($data,true);
 
         $timePoint = $params['time_point'];
         $date = $params['dates'];
-        $date = json_decode($date,true);
+//        $date = json_decode($date,true);
         $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,end($date));
         $finalTimingInfo=[];
         foreach ($data as $d){
