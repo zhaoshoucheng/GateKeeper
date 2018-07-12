@@ -60,7 +60,26 @@ class Arterialgreenwave_model extends CI_Model
     	}
 
         $res = (array)$res;
+        if ($res['errno'] != 0 || empty($res['opt_junction_list'])) {
+            return [];
+        }
 
-        echo "<pre>";print_r($res);
+        foreach ($res['opt_junction_list'] as &$v) {
+            $v = (array)$v;
+            foreach ($v['forward_green'] as &$vv) {
+                $vv = (array)$vv;
+            }
+
+            foreach ($v['reverse_green'] as &$vv) {
+                $vv = (array)$vv;
+            }
+        }
+
+        $result = [
+            'dataList' => $res['opt_junction_list'],
+            'token'    => $res['token']
+        ];
+
+        return $result;
     }
 }
