@@ -19,6 +19,8 @@ class Arterialspacetimediagram_model extends CI_Model
     public function getSpaceTimeDiagram($data)
     {
     	$vals = [];
-    	$this->Arterialspacetimediagram_verdor->getSpaceTimeDiagram($vals);
+    	$server = new Arterialspacetimediagram_verdor();
+
+    	$server->getSpaceTimeDiagram($vals);
     }
 }
