@@ -141,6 +141,19 @@ class Arterialjunction_model extends CI_Model
             $allCityJunctions["reverse_path_geo"] = $mergeLinkGeoInfosByLinks($getDirectionLinks(-1, $qData), $qData['city_id'], $qData['map_version']);   //反向
             $allCityJunctions["map_version"] = $qData['map_version'];   //正向
 
+            $selectedJunc =  \Illuminate\Support\Arr::get($qData, 'selected_path', []);
+            $lastSelectedJunc = end($selectedJunc);
+            $lastSelectedJuncLinks = \Illuminate\Support\Arr::get($lastSelectedJunc, 'links', '');
+            $lastSelectedJuncRLinks = \Illuminate\Support\Arr::get($lastSelectedJunc, 'reverse_links', '');
+            $allCityJunctions["last_geo"] = $mergeLinkGeoInfosByLinks(
+                explode(',', $lastSelectedJuncLinks),
+                $qData['city_id'],
+                $qData['map_version']);
+            $allCityJunctions["reverse_last_geo"] = $mergeLinkGeoInfosByLinks(
+                explode(',', $lastSelectedJuncRLinks),
+                $qData['city_id'],
+                $qData['map_version']);
+
             //路口geo
             $connectedJunctions = \Illuminate\Support\Arr::get($allCityJunctions,"adj_junc_paths",[]);
             foreach ($connectedJunctions as $jKey=>$jItem){
