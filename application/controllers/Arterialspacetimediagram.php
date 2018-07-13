@@ -26,6 +26,7 @@ class Arterialspacetimediagram extends MY_Controller
     *          "tod_start_time": "16:00:00", // 配时方案开始时间 PS:当前时间点所属方案的开始结束时间
     *          "tod_end_time": "19:30:00",   // 配时方案结束时间
     *          "cycle": 220                  // 配时周期
+    *          "offset":30                   // 偏移量
     *       }
     *   ]
     * @param task_id    interger Y 任务ID
@@ -67,7 +68,7 @@ class Arterialspacetimediagram extends MY_Controller
         if (empty($params['token'])) {
             $data['token'] = md5(microtime(true) * mt_rand(1, 10000));
         } else {
-            $data['token'] = trim($params['token']);
+            $data['token'] = html_escape(trim($params['token']));
         }
 
         // junctions
@@ -86,6 +87,8 @@ class Arterialspacetimediagram extends MY_Controller
 
 
     	$result = $this->arterialspacetimediagram_model->getSpaceTimeDiagram($data);
+
+        $result['token'] = $data['token'];
         return $this->response($result);
     }
 }

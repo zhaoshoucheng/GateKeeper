@@ -14,6 +14,7 @@ class Arterialspacetimediagram_model extends CI_Model
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('taskdateversion_model');
     }
 
     /**
@@ -53,9 +54,48 @@ class Arterialspacetimediagram_model extends CI_Model
         $data['version'] = $version;
 
     	$server = new Arterialspacetimediagram_vendor();
-    	$res = $server->getSpaceTimeDiagram($vals);
+    	$res = $server->getSpaceTimeDiagram($data);
+        if (!$res) {
+            return [];
+        }
 
-        echo "<pre>";print_r($res);exit;
+        $res = (array)$res;
+        if ($res['errno'] != 0 || empty($res['junction_mes'])) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($res['junction_mes'] as $k=>$v) {
+            $v = (array)$v;
+            $result['dataList'][$k]['junction_id'] = $v['junction_id'] ?? '';
+            $result['dataList'][$k]['forward_speed'] = isset($v['forward_speed']) ? round($v['forward_speed'], 2) : 0;
+            $result['dataList'][$k]['reverse_speed'] = isset($v['reverse_speed']) ? round($v['reverse_speed'], 2) : 0;
+            // 正向
+            if (!empty($v['forward_traj'])) {
+                foreach ($v['forward_traj'] as $kk=>$vv) {
+                    foreach ($vv as $kkk=>$vvv) {
+                        $vvv = (array)$vvv;
+                        // 时间
+                        $result['dataList'][$k]['forward_traj'][$kkk][0] = $vvv['timestamp'];
+                        // 值
+                        $result['dataList'][$k]['forward_traj'][$kkk][1] = $vvv['distance'] * -1;
+                    }
+                }
+            }
+
+            // 反向
+            if (!empty($v['reverse_traj'])) {
+                foreach ($v['reverse_traj'] as $kk=>$vv) {
+                    foreach ($vv as $kkk=>$vvv) {
+                        $vvv = (array)$vvv;
+                        // 时间
+                        $result['dataList'][$k]['reverse_traj'][$kkk][0] = $vvv['timestamp'];
+                        // 值
+                        $result['dataList'][$k]['reverse_traj'][$kkk][1] = $vvv['distance'];
+                    }
+                }
+            }
+        }
 
         return $result;
     }
