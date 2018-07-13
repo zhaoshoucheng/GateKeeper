@@ -77,9 +77,14 @@ class Arterialtiming extends MY_Controller
         $cityId = $params['city_id'];
         $version = $params['map_version'];
         $selectJunctions = $params['selected_junctionids'];
+        if(count($selectJunctions) < 4){
+            return $this->response(array(), ERR_PARAMETERS, "路口数不得小于4");
+        }
 
-//        $selectJunctions = json_decode($selectJunctions,true);
         $ret = $this->arterialtiming_model->getJunctionInfos($cityId,$version,$selectJunctions);
+        if(empty($ret)){
+            return $this->response(array(), ERR_REQUEST_WAYMAP_API, "路网服务异常");
+        }
         $sortJunctions = [];
         foreach ($selectJunctions as $k){
             foreach ($ret['junctions_info'] as $rk => $rv){
