@@ -72,18 +72,12 @@ class Arterialspacetimediagram extends MY_Controller
         }
 
         // junctions
-        if (empty($params['junctions'])) {
+        if (empty($params['junctions']) || !is_array($params['junctions'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数 junctions 不能为空！';
+            $this->errmsg = '参数junctions 必须为数组格式且不能为空！';
             return;
         }
-        $junctions = json_decode($params['junctions'], true);
-        if (json_last_error() != JSON_ERROR_NONE) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数 junctions 必须为json格式！';
-            return;
-        }
-        $data['junctions'] = $junctions;
+        $data['junctions'] = $params['junctions'];
 
 
     	$result = $this->arterialspacetimediagram_model->getSpaceTimeDiagram($data);
