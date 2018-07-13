@@ -218,14 +218,14 @@ class Timeframeoptimize_model extends CI_Model
 
         foreach ($res['response_data']['tod_plans'] as $k=>&$v) {
             $v = (array)$v;
-            $result[$k] = [
+            $result['tod_plans'][$k] = [
                 'start'   => $v['tod_start_time'],
                 'end'     => $v['tod_end_time'],
                 'comment' => $v['tod_name'],
             ];
         }
 
-        //$result['cutTime'] = $res['response_data']['cut_time'];
+        $result['cutTime'] = $res['response_data']['cut_time'];
 
         return $result;
     }
