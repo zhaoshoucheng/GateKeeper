@@ -237,21 +237,66 @@ class Waymap_model extends CI_Model
         if (!is_array($linksArr) || empty($linksArr) || empty(implode(',', $linksArr))) {
             return [];
         }
-        $qArr = [];
-        $qArr['link_ids'] = implode(',', $linksArr);
-        $qArr['version'] = $mapVersion;
-        $qArr['city_id'] = 23;  //先都写23
-        $qArr['token'] = $token;
+        $qArr = [
+            'link_ids' => implode(",", $linksArr),
+            'version'  => $mapVersion,
+            'token'    => $this->config->item('waymap_token'),
+            'user_id'  => $this->config->item('waymap_userid'),
+        ];
         try {
-            $url = 'https://sts.didichuxing.com/api/signal/link/info';
-            $res = httpGet($url, $qArr);
+            $url = $this->config->item('waymap_interface') . '/signal-map/mapFlow/linkInfo';
+            $res = httpGET($url, $qArr);
             $retArr = json_decode($res, true);
-            if (isset($retArr['errno'])
-                && $retArr['errno'] == 0
-                && !empty($retArr['data'])) {
-                return $retArr['data'];
+            if (isset($retArr['errorCode']) && $retArr['errorCode'] == 0 && !empty($retArr['data'])) {
+                $linksInfo = !empty($retArr['data']['links_info']) ? $retArr['data']['links_info'] : [];
+                $features = [];
+                foreach ($linksInfo as $linkId=>$linkInfo){
+                    $geomArr = !empty($linkInfo['geom']) ? explode(';',$linkInfo['geom']) : [];
+                    $coords = [];
+                    foreach ($geomArr as $geo){
+                        $geoInfo = explode(',',$geo);
+                        $coords[] = [(float)$geoInfo[0],(float)$geoInfo[1],];
+                    }
+
+                    $sPoint = [
+                        'geometry'=>[
+                            'coordinates'=>[$linkInfo['s_node']['lng']/100000,$linkInfo['s_node']['lat']/100000,],
+                            'type'=>'Point',
+                        ],
+                        'properties'=>[
+                            'id'=>(int)$linkInfo['s_node']['node_id'],
+                        ],
+                        'type'=>'Feature',
+                    ];
+                    $ePoint = [
+                        'geometry'=>[
+                            'coordinates'=>[$linkInfo['e_node']['lng']/100000,$linkInfo['e_node']['lat']/100000,],
+                            'type'=>'Point',
+                        ],
+                        'properties'=>[
+                            'id'=>(int)$linkInfo['e_node']['node_id'],
+                        ],
+                        'type'=>'Feature',
+                    ];
+                    $lineString = [
+                        'geometry'=>[
+                            'coordinates'=>$coords,
+                            'type'=>'LineString',
+                        ],
+                        'properties'=>[
+                            'id'=>$linkId,
+                            'snodeid'=>(int)$linkInfo['s_node']['node_id'],
+                            'enodeid'=>(int)$linkInfo['e_node']['node_id'],
+                        ],
+                        'type'=>'Feature',
+                    ];
+                    $features[] = $sPoint;
+                    $features[] = $ePoint;
+                    $features[] = $lineString;
+                }
+                return ['features'=>$features, 'type'=>'FeatureCollection'];
             }else{
-                $errorMsg = !empty($retArr['errorMsg']) ? $retArr['errorMsg'] : "The geo json error format.";
+                $errorMsg = !empty($retArr['errorMsg']) ? $retArr['errorMsg'] : "The getLinksGeoInfos error format.";
                 throw new \Exception($errorMsg);
             }
         } catch (Exception $e) {
@@ -275,7 +320,7 @@ class Waymap_model extends CI_Model
 
         try {
             $url = $this->config->item('waymap_interface') . '/signal-map/connect/adj_junctions';
-            $res = httpPOST($url, $qArr, 0, 'json');
+            $res = httpPOST($url, $qArr, 2000, 'json');
             $retArr = json_decode($res, true);
             if (isset($retArr['errorCode'])
                 && $retArr['errorCode'] == 0

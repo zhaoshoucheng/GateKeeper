@@ -31,10 +31,18 @@ class Arterialjunction extends MY_Controller
             $this->errmsg = $validate['errmsg'];
             return;
         }
-        $data = $this->arterialjunction_model->getAllJunctions([
-            'task_id' => intval($params['task_id']),
-            'city_id' => intval($params['city_id']),
-        ]);
+
+        try{
+            $data = $this->arterialjunction_model->getAllJunctions([
+                'task_id' => intval($params['task_id']),
+                'city_id' => intval($params['city_id']),
+            ]);
+        }catch (\Exception $e){
+            com_log_warning('_itstool_Arterialjunction_getAllJunctions_error', 0, $e->getMessage(), compact("params","data"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
         return $this->response($data);
     }
 
@@ -85,6 +93,7 @@ class Arterialjunction extends MY_Controller
                 'q' => $qJson,
             ]);
         }catch (\Exception $e){
+            com_log_warning('_itstool_Arterialjunction_getAdjJunctions_error', 0, $e->getMessage(), compact("params","data"));
             $this->errno = ERR_HTTP_FAILED;
             $this->errmsg = $e->getMessage();
             return;
