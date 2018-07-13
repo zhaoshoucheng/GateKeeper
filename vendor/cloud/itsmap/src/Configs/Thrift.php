@@ -70,19 +70,11 @@ class Thrift
                 'transport' => 'Thrift\Transport\TBufferedTransport',
             ],
             'tod_split_optimize' => [
-                'address' => [
-                    [
-                        'host' => '100.70.160.62',
-                        'port' => '9234',
-                    ],
-                    [
-                        'host' => '10.93.94.36',
-                        'port' => '9234',
-                    ]
-                ],
+                'host' => '100.90.164.31',
+                'port' => '9234',
                 'read_timeout' => 9,
                 'write_timeout' => 9,
-                'class' => '\Todsplit\signal_opt_serviceClient',
+                'class' => '\Optimize\signal_opt_serviceClient',
                 'transport' => 'Thrift\Transport\TBufferedTransport',
             ],
         ],
@@ -148,19 +140,11 @@ class Thrift
                 'transport' => 'Thrift\Transport\TBufferedTransport',
             ],
             'tod_split_optimize' => [
-                'address' => [
-                    [
-                        'host' => '100.70.160.62',
-                        'port' => '9234',
-                    ],
-                    [
-                        'host' => '10.93.94.36',
-                        'port' => '9234',
-                    ]
-                ],
+                'host' => '100.90.164.31',
+                'port' => '9234',
                 'read_timeout' => 9,
                 'write_timeout' => 9,
-                'class' => '\Todsplit\signal_opt_serviceClient',
+                'class' => '\Optimize\signal_opt_serviceClient',
                 'transport' => 'Thrift\Transport\TBufferedTransport',
             ],
         ],

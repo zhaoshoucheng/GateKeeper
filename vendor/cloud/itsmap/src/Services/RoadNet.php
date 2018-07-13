@@ -458,14 +458,14 @@ class RoadNet
     /**
     * 获取时段划分方案
     */
-    public function getTodPlan($data)
+    public function getTodPlan($junctionMovements, $version, $todCnt)
     {
-        if (empty($data)) {
+        if (empty($junctionMovements)) {
             return [];
         }
 
         $this->start('tod_split_optimize');
-        $response = $this->call('tod_opt', [$data]);
+        $response = $this->call('tod_opt', [$version, $junctionMovements, $todCnt]);
         $this->close();
 
         return $response;
@@ -482,6 +482,38 @@ class RoadNet
 
         $this->start('tod_split_optimize');
         $response = $this->call('green_split_opt', [$version, $data]);
+        $this->close();
+
+        return $response;
+    }
+
+    /**
+    * 获取绿波优化方案
+    */
+    public function getGreenWaveOptPlan($data, $method, $token)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $this->start('tod_split_optimize');
+        $response = $this->call('route_green_wave_opt', [$data, $method, $token]);
+        $this->close();
+
+        return $response;
+    }
+
+    /**
+    * 获取干线时空图
+    */
+    public function getSpaceTimeDiagram($data, $method, $version)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $this->start('tod_split_optimize');
+        $response = $this->call('continue_ts_filter', [$version, $method, $data]);
         $this->close();
 
         return $response;
