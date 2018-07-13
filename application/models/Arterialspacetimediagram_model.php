@@ -67,7 +67,7 @@ class Arterialspacetimediagram_model extends CI_Model
         $result = [];
         foreach ($res['junction_mes'] as $k=>$v) {
             $v = (array)$v;
-            $result['dataList'][$k]['junction_id'] = $v['junction_id'] ?? '';
+            $result['dataList'][$k]['junction_id'] = $v['juction_id'] ?? '';
             $result['dataList'][$k]['forward_speed'] = isset($v['forward_speed']) ? round($v['forward_speed'], 2) : 0;
             $result['dataList'][$k]['reverse_speed'] = isset($v['reverse_speed']) ? round($v['reverse_speed'], 2) : 0;
             // 正向
