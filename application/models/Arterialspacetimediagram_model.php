@@ -27,7 +27,8 @@ class Arterialspacetimediagram_model extends CI_Model
     *           'reverse_flow_id' => '2017030116_i_877944150_2017030116_o_877944100', // 反向flow
     *           'tod_start_time'  => '16:00:00', // 配时方案开始时间
     *           'tod_end_time'    => '19:30:00', // 配时方案结束时间
-    *           'cycle'           => 220         // 配时周期
+    *           'cycle'           => 220,        // 配时周期
+    *           'offset'          => 2,          // 偏移量
     *       ],
     *   ]
     * @param $data['task_id']    interger Y 任务ID
@@ -53,9 +54,13 @@ class Arterialspacetimediagram_model extends CI_Model
 
         $data['version'] = $version;
 
-        $cycleArr = [];
-        foreach ($data['junctions'] as $v) {
-            $cycleArr[$v['junction_id']] = $v['cycle'];
+        $tempCycleOffset = [];
+        foreach ($data['junctions'] as $k=>$v) {
+            $tempCycleOffset[$v['junction_id']]['cycle'] = $v['cycle'] ?? 0;
+            $tempCycleOffset[$v['junction_id']]['offset'] = $v['offset'] ?? 0;
+            if (isset($data['junctions'][$k]['offset'])) {
+                unset($data['junctions'][$k]['offset']);
+            }
         }
 
     	$server = new Arterialspacetimediagram_vendor();
@@ -73,6 +78,9 @@ class Arterialspacetimediagram_model extends CI_Model
         foreach ($res['junction_mes'] as $k=>$v) {
             $v = (array)$v;
             $result['dataList'][$k]['junction_id'] = $v['juction_id'] ?? '';
+            $result['dataList'][$k]['cycle'] = $tempCycleOffset[$v['juction_id']]['cycle'] ?? 0;
+            $result['dataList'][$k]['offset'] = $tempCycleOffset[$v['juction_id']]['offset'] ?? 0;
+            $result['dataList'][$k]['junction_id'] = $v['juction_id'] ?? '';
             $result['dataList'][$k]['forward_speed'] = isset($v['forward_speed']) ? round($v['forward_speed'], 2) : 0;
             $result['dataList'][$k]['reverse_speed'] = isset($v['reverse_speed']) ? round($v['reverse_speed'], 2) : 0;
             // 正向
@@ -82,7 +90,8 @@ class Arterialspacetimediagram_model extends CI_Model
                     foreach ($vv as $kkk=>$vvv) {
                         $vvv = (array)$vvv;
                         // 秒数 % cycle
-                        $result['dataList'][$k]['forward_traj'][$kk][$kkk][0] = $vvv['timestamp'] % $cycleArr[$v['juction_id']];
+                        $result['dataList'][$k]['forward_traj'][$kk][$kkk][0]
+                        = $vvv['timestamp'] % $tempCycleOffset[$v['juction_id']]['cycle'];
                         // 值
                         $result['dataList'][$k]['forward_traj'][$kk][$kkk][1] = $vvv['distance'] * -1;
                         // 原始秒数
