@@ -89,13 +89,10 @@ class Arterialspacetimediagram_model extends CI_Model
                 foreach ($v['forward_traj'] as $kk=>$vv) {
                     foreach ($vv as $kkk=>$vvv) {
                         $vvv = (array)$vvv;
-                        // 秒数 % cycle
-                        $result['dataList'][$k]['forward_traj'][$kk][$kkk][0]
-                        = $vvv['timestamp'] % $tempCycleOffset[$v['juction_id']]['cycle'];
+                        // 秒数
+                        $result['dataList'][$k]['forward_traj'][$kk][$kkk][0] = $vvv['timestamp'];
                         // 值
                         $result['dataList'][$k]['forward_traj'][$kk][$kkk][1] = $vvv['distance'] * -1;
-                        // 原始秒数
-                        $result['dataList'][$k]['forward_traj'][$kk][$kkk][2] = $vvv['timestamp'];
                     }
                 }
             }
