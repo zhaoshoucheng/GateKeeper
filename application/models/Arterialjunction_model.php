@@ -152,6 +152,9 @@ class Arterialjunction_model extends CI_Model
                 $qData['map_version']);
 
             //路口geo
+            if (empty($allCityJunctions)) {
+                $allCityJunctions['adj_junc_paths'] = [];
+            }
             $connectedJunctions = \Illuminate\Support\Arr::get($allCityJunctions,"adj_junc_paths",[]);
             foreach ($connectedJunctions as $jKey=>$jItem){
                 if(empty($jItem["links"])){
