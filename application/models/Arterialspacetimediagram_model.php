@@ -56,8 +56,8 @@ class Arterialspacetimediagram_model extends CI_Model
 
         $tempCycleOffset = [];
         foreach ($data['junctions'] as $k=>$v) {
-            $tempCycleOffset[$v['junction_id']]['cycle'] = $v['cycle'] ?? 0;
-            $tempCycleOffset[$v['junction_id']]['offset'] = $v['offset'] ?? 0;
+            $tempCycleOffset[$v['junction_id']]['cycle'] = isset($v['cycle']) ? intval($v['cycle']) : 0;
+            $tempCycleOffset[$v['junction_id']]['offset'] = isset($v['offset']) ? intval($v['offset']) : 0;
             if (isset($data['junctions'][$k]['offset'])) {
                 unset($data['junctions'][$k]['offset']);
             }
