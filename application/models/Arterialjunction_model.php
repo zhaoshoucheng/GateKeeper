@@ -130,9 +130,6 @@ class Arterialjunction_model extends CI_Model
 
         //格式化路口
         $formatJunctions = function ($allCityJunctions, $qData) use ($getDirectionLinks, $mergeLinkGeoInfosByLinks) {
-            if (empty($allCityJunctions)) {
-                return [];
-            }
             //线路geo
             $allCityJunctions["path_links"] = implode(',', $getDirectionLinks(1, $qData));   //正向
             $allCityJunctions["reverse_path_links"] = implode(',', $getDirectionLinks(-1, $qData));   //反向
