@@ -556,8 +556,12 @@ class Junction_model extends CI_Model
     */
     public function getJunctionQuestionTrend($data)
     {
-        $selectStr = $this->selectColumns($data['diagnose_key']);
-        $select = "id, junction_id, {$selectStr}, time_point";
+        if (!empty($data['diagnose_key'])) {
+            $selectStr = $this->selectColumns($data['diagnose_key']);
+            $select = "id, junction_id, {$selectStr}, stop_delay, time_point";
+        } else {
+            $select = "id, junction_id, stop_delay, time_point";
+        }
 
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
@@ -916,14 +920,18 @@ class Junction_model extends CI_Model
 
     /**
     * 格式化路口问题趋势数据
+    *     PS:当路口无问题属于正常状态时，返回路口级指标平均延误的趋势图
     * @param $data                         array  Y 路口数据
     * @param $whereData['time_point']      string Y 时间点 用于标注问题持续时间段用
     * @param $whereData['task_time_point'] string Y 任务时间段
-    * @param $diagnose                     array  Y 需要查询的问题
+    * @param $diagnose                     array  N 需要查询的问题 当路口正常状态时，可为空
     * @return array
     */
     private function formatJunctionQuestionTrendData($data, $whereData, $diagnose)
     {
+        // 正常路口返回路口级指标平均延误的趋势图
+        $normalQuota = 'stop_delay';
+
         // 任务开始、结束时间
         $taskTimeRange = array_filter(explode('-', $whereData['task_time_range']));
         $taskStartTime = strtotime($taskTimeRange[0]);
@@ -947,8 +955,13 @@ class Junction_model extends CI_Model
         $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
 
         $newData = [];
-        foreach ($diagnoseConf as $k=>$v) {
-            if (in_array($k, $diagnose, true)) {
+
+        if (!empty($diagnose)) { // 有问题的路口
+            foreach ($diagnoseConf as $k=>$v) {
+                if (!in_array($k, $diagnose, true)) {
+                    continue;
+                }
+
                 $newData[$k]['info']['name'] = $v['name'];
                 $newData[$k]['info']['quota_name'] = $junctionQuotaKeyConf[$k]['name'];
                 // 此问题持续开始时间
@@ -996,6 +1009,19 @@ class Junction_model extends CI_Model
                 if (!empty($newData[$k]['list'])) {
                     $newData[$k]['list'] = array_values($newData[$k]['list']);
                 }
+            }
+        } else { // 正常路口，返回路口级指标 平均延误 的趋势图
+            $newData[$normalQuota]['info']['name'] = $junctionQuotaKeyConf[$normalQuota]['name'];
+            $newData[$normalQuota]['info']['quota_name'] = $junctionQuotaKeyConf[$normalQuota]['name'];
+            $newData[$normalQuota]['info']['continuous_start'] = '00:00';
+            $newData[$normalQuota]['info']['continuous_end'] = '00:00';
+            foreach ($tempData as $k=>$v) {
+                $newData[$normalQuota]['list'][$k]['value']
+                = round($v[$normalQuota], $junctionQuotaKeyConf[$normalQuota]['round_num']);
+                $newData[$normalQuota]['list'][$k]['time'] = $v['time_point'];
+            }
+            if (!empty($newData[$normalQuota]['list'])) {
+                $newData[$normalQuota]['list'] = array_values($newData[$normalQuota]['list']);
             }
         }
 
