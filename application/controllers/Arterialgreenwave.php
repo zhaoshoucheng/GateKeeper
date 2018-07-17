@@ -88,6 +88,8 @@ class Arterialgreenwave extends MY_Controller
                 $this->errmsg = '参数forward_length必须为数组格式且不为空！';
                 return;
             }
+            array_unshift($params['forward_length'], 0);
+            array_push($params['forward_length'], 0);
             $data['forward_length'] = $params['forward_length'];
 
             // forward_speed
@@ -96,6 +98,8 @@ class Arterialgreenwave extends MY_Controller
                 $this->errmsg = '参数forward_speed必须为数组格式且不为空！';
                 return;
             }
+            array_unshift($params['forward_speed'], 0);
+            array_push($params['forward_speed'], 0);
             $data['forward_speed'] = $params['forward_speed'];
 
         }
@@ -108,6 +112,8 @@ class Arterialgreenwave extends MY_Controller
                 $this->errmsg = '参数forward_length必须为数组格式且不为空！';
                 return;
             }
+            array_unshift($params['reverse_length'], 0);
+            array_push($params['reverse_length'], 0);
             $data['reverse_length'] = $params['reverse_length'];
 
             // reverse_speed
@@ -116,6 +122,8 @@ class Arterialgreenwave extends MY_Controller
                 $this->errmsg = '参数reverse_speed必须为数组格式且不为空！';
                 return;
             }
+            array_unshift($params['reverse_speed'], 0);
+            array_push($params['reverse_speed'], 0);
             $data['reverse_speed'] = $params['reverse_speed'];
         }
 
