@@ -836,11 +836,28 @@ class Junction_model extends CI_Model
         ];
         $flowIdName = $this->timing_model->getFlowIdToName($timingData);
 
-        // flow 所有指标配置
-        $flowQuotaKeyConf = $this->config->item('flow_quota_key');
-
         // 置信度配置
         $confidenceConf = $this->config->item('confidence');
+
+        // flow 所有指标配置
+        $flowQuotaKeyConf = $this->config->item('flow_quota_key');
+        // 指标集合
+        foreach ($flowQuotaKeyConf as $k => $v) {
+            $resultData['flow_quota'][$k] = $flowQuotaKeyConf[$k]['name'];
+        }
+
+        $tempArr = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'confidence'=>'', 'comment'=>'']);
+        foreach ($data['movements'] as $k=>$v) {
+            $v['comment'] = $flowIdName[$v['movement_id']];
+            $v['confidence'] = $confidenceConf[$v['confidence']]['name'];
+            foreach ($flowQuotaKeyConf as $kk=>$vv) {
+                if (isset($v[$kk])) {
+                    $v[$kk] = round($v[$kk], $vv['round_num']);
+                }
+            }
+            $resultData['notmal_movements'][$k] = array_intersect_key($v, $tempArr);
+        }
+
         // 诊断问题配置
         $diagnoseConf = $this->config->item('diagnose_key');
 
@@ -865,8 +882,6 @@ class Junction_model extends CI_Model
                         if ($ruleCount < 1) {
                             $resultData['diagnose_detail'][$k]['movements'] = [];
                         }
-                        // 所有问题对应的指标集合
-                        $resultData['flow_quota'][$kk] = $flowQuotaKeyConf[$kk]['name'];
 
                         foreach ($data['movements'] as $kkk=>$vvv) {
                             foreach ($vv as $vvvv) {
