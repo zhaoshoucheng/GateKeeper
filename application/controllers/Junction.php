@@ -245,7 +245,7 @@ class Junction extends MY_Controller
     * @param junction_id     string   Y 路口ID
     * @param time_point      string   Y 时间点
     * @param task_time_range string   Y 任务时间段
-    * @param diagnose_key    array    Y 诊断问题KEY
+    * @param diagnose_key    array    N 诊断问题KEY 当路口正常状态时可为空
     * @return json
     */
     public function getJunctionQuestionTrend()
@@ -275,19 +275,23 @@ class Junction extends MY_Controller
             return;
         }
 
-        if (empty($params['diagnose_key']) || !is_array($params['diagnose_key'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The diagnose_key cannot be empty and must be array.';
-            return;
-        }
-
-        $diagnoseConf = $this->config->item('diagnose_key');
-        foreach ($params['diagnose_key'] as $v) {
-            if (!array_key_exists($v, $diagnoseConf)) {
+        $diagnose_key = [];
+        if (!empty($params['diagnose_key'])) {
+            if (empty($params['diagnose_key']) || !is_array($params['diagnose_key'])) {
                 $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'The diagnose_key is error.';
+                $this->errmsg = 'The diagnose_key cannot be empty and must be array.';
                 return;
             }
+
+            $diagnoseConf = $this->config->item('diagnose_key');
+            foreach ($params['diagnose_key'] as $v) {
+                if (!array_key_exists($v, $diagnoseConf)) {
+                    $this->errno = ERR_PARAMETERS;
+                    $this->errmsg = 'The diagnose_key is error.';
+                    return;
+                }
+            }
+            $diagnose_key = $params['diagnose_key'];
         }
 
         $data = [
@@ -295,7 +299,7 @@ class Junction extends MY_Controller
             'junction_id'     => strip_tags(trim($params['junction_id'])),
             'time_point'      => strip_tags(trim($params['time_point'])),
             'task_time_range' => strip_tags(trim($params['task_time_range'])),
-            'diagnose_key'    => $params['diagnose_key'],
+            'diagnose_key'    => $diagnose_key,
         ];
 
         // 获取诊断列表页简易路口详情
