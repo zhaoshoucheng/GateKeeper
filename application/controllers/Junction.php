@@ -277,7 +277,7 @@ class Junction extends MY_Controller
 
         $diagnose_key = [];
         if (!empty($params['diagnose_key'])) {
-            if (empty($params['diagnose_key']) || !is_array($params['diagnose_key'])) {
+            if (!is_array($params['diagnose_key'])) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = 'The diagnose_key cannot be empty and must be array.';
                 return;

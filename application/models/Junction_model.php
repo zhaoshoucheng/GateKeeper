@@ -1009,10 +1009,6 @@ class Junction_model extends CI_Model
                 if (!empty($newData[$k]['list'])) {
                     $newData[$k]['list'] = array_values($newData[$k]['list']);
                 }
-
-                if (empty($diagnose)) {
-                    break;
-                }
             }
         } else { // 正常路口，返回路口级指标 平均延误 的趋势图
             $newData[$normalQuota]['info']['name'] = $junctionQuotaKeyConf[$normalQuota]['name'];
@@ -1023,6 +1019,9 @@ class Junction_model extends CI_Model
                 $newData[$normalQuota]['list'][$k]['value']
                 = round($v[$normalQuota], $junctionQuotaKeyConf[$normalQuota]['round_num']);
                 $newData[$normalQuota]['list'][$k]['time'] = $v['time_point'];
+            }
+            if (!empty($newData[$normalQuota]['list'])) {
+                $newData[$normalQuota]['list'] = array_values($newData[$normalQuota]['list']);
             }
         }
 
