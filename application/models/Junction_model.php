@@ -855,7 +855,7 @@ class Junction_model extends CI_Model
                     $v[$kk] = round($v[$kk], $vv['round_num']);
                 }
             }
-            $resultData['all_movements'][$k] = array_intersect_key($v, $tempArr);
+            $resultData['notmal_movements'][$k] = array_intersect_key($v, $tempArr);
         }
 
         // 诊断问题配置
