@@ -839,6 +839,17 @@ class Junction_model extends CI_Model
         // flow 所有指标配置
         $flowQuotaKeyConf = $this->config->item('flow_quota_key');
 
+        $tempArr = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'confidence'=>'', 'comment'=>'']);
+        foreach ($data['movements'] as $k=>&$v) {
+            $v['comment'] = $flowIdName[$v['movement_id']];
+            foreach ($flowQuotaKeyConf as $kk=>$vv) {
+                if (isset($v[$kk])) {
+                    $v[$kk] = round($v[$kk], $vv['round_num']);
+                }
+            }
+            $resultData['all_movements'][$k] = array_intersect_key($v, $tempArr);
+        }
+
         // 置信度配置
         $confidenceConf = $this->config->item('confidence');
         // 诊断问题配置
