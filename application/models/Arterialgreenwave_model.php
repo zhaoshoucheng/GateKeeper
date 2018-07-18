@@ -77,7 +77,7 @@ class Arterialgreenwave_model extends CI_Model
 
         $result = [
             'dataList' => $res['opt_junction_list'],
-            'token'    => $res['token']
+            'token'    => $data['token']
         ];
 
         return $result;
