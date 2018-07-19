@@ -87,6 +87,23 @@ class Arterialspacetimediagram extends MY_Controller
         }
         $junctions = $params['junctions'];
         foreach ($junctions as &$v) {
+            if (!isset($v['junction_id'])
+                || !isset($v['forward_flow_id'])
+                || !isset($v['forward_in_links'])
+                || !isset($v['forward_out_links'])
+                || !isset($v['reverse_flow_id'])
+                || !isset($v['reverse_in_links'])
+                || !isset($v['reverse_out_links'])
+                || !isset($v['junction_inner_links'])
+                || !isset($v['tod_start_time'])
+                || !isset($v['tod_end_time'])
+                || !isset($v['cycle'])
+                || !isset($v['offset']))
+            {
+                $this->errno = ERR_PARAMETERS;
+                $this->errmsg = 'junctions中有参数未传递！';
+                return;
+            }
             if ($v['forward_in_links'] == '-1') {
                 $v['forward_in_links'] = [];
             } else {
