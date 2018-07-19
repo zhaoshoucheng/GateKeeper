@@ -22,12 +22,17 @@ class Arterialspacetimediagram_vendor
     * @param $data['junctions']  array Y 路口信息集合 如下：
     *   $data['junctions'] = [
     *       [
-    *           'junction_id'     => '2017030116_5138189', // 路口ID
-    *           'forward_flow_id' => '2017030116_i_73821231_2017030116_o_877944131', // 正向flow
-    *           'reverse_flow_id' => '2017030116_i_877944150_2017030116_o_877944100', // 反向flow
-    *           'tod_start_time'  => '16:00:00', // 配时方案开始时间
-    *           'tod_end_time'    => '19:30:00', // 配时方案结束时间
-    *           'cycle'           => 220         // 配时周期
+    *           'junction_id'          => '2017030116_5138189', // 路口ID
+    *           'forward_flow_id'      => '2017030116_i_73821231_2017030116_o_877944131', // 正向flow
+    *           'forward_in_links'     => [111,222,333], // 正向inlinks
+    *           'forward_out_links'    => [111,222,333], // 正向outlinks
+    *           'reverse_flow_id'      => '2017030116_i_877944150_2017030116_o_877944100', // 反向flow
+    *           'reverse_in_links'     => [111,222,333], // 反向inlinks
+    *           'reverse_out_links'    => [111,222,333], // 反向outlinks
+    *           'junction_inner_links' => [111,222,333] // inner_links (正、反向是一样的)
+    *           'tod_start_time'       => '16:00:00', // 配时方案开始时间
+    *           'tod_end_time'         => '19:30:00', // 配时方案结束时间
+    *           'cycle'                => 220         // 配时周期
     *       ],
     *   ]
     * @param $data['version']    array  Y 版本信息 如下：
