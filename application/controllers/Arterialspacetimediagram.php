@@ -135,7 +135,7 @@ class Arterialspacetimediagram extends MY_Controller
             }
 
         }
-        $data['junctions'] = $params['junctions'];
+        $data['junctions'] = $junctions;
 
 
     	$result = $this->arterialspacetimediagram_model->getSpaceTimeDiagram($data);
