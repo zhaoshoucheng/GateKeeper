@@ -545,9 +545,29 @@ class RouteJunction {
    */
   public $forward_flow_id = null;
   /**
+   * @var string[]
+   */
+  public $forward_in_links = null;
+  /**
+   * @var string[]
+   */
+  public $forward_out_links = null;
+  /**
    * @var string
    */
   public $reverse_flow_id = null;
+  /**
+   * @var string[]
+   */
+  public $reverse_in_links = null;
+  /**
+   * @var string[]
+   */
+  public $reverse_out_links = null;
+  /**
+   * @var string[]
+   */
+  public $junction_inner_links = null;
   /**
    * @var string
    */
@@ -573,18 +593,58 @@ class RouteJunction {
           'type' => TType::STRING,
           ),
         3 => array(
+          'var' => 'forward_in_links',
+          'type' => TType::LST,
+          'etype' => TType::STRING,
+          'elem' => array(
+            'type' => TType::STRING,
+            ),
+          ),
+        4 => array(
+          'var' => 'forward_out_links',
+          'type' => TType::LST,
+          'etype' => TType::STRING,
+          'elem' => array(
+            'type' => TType::STRING,
+            ),
+          ),
+        5 => array(
           'var' => 'reverse_flow_id',
           'type' => TType::STRING,
           ),
-        4 => array(
+        6 => array(
+          'var' => 'reverse_in_links',
+          'type' => TType::LST,
+          'etype' => TType::STRING,
+          'elem' => array(
+            'type' => TType::STRING,
+            ),
+          ),
+        7 => array(
+          'var' => 'reverse_out_links',
+          'type' => TType::LST,
+          'etype' => TType::STRING,
+          'elem' => array(
+            'type' => TType::STRING,
+            ),
+          ),
+        8 => array(
+          'var' => 'junction_inner_links',
+          'type' => TType::LST,
+          'etype' => TType::STRING,
+          'elem' => array(
+            'type' => TType::STRING,
+            ),
+          ),
+        9 => array(
           'var' => 'tod_start_time',
           'type' => TType::STRING,
           ),
-        5 => array(
+        10 => array(
           'var' => 'tod_end_time',
           'type' => TType::STRING,
           ),
-        6 => array(
+        11 => array(
           'var' => 'cycle',
           'type' => TType::I32,
           ),
@@ -597,8 +657,23 @@ class RouteJunction {
       if (isset($vals['forward_flow_id'])) {
         $this->forward_flow_id = $vals['forward_flow_id'];
       }
+      if (isset($vals['forward_in_links'])) {
+        $this->forward_in_links = $vals['forward_in_links'];
+      }
+      if (isset($vals['forward_out_links'])) {
+        $this->forward_out_links = $vals['forward_out_links'];
+      }
       if (isset($vals['reverse_flow_id'])) {
         $this->reverse_flow_id = $vals['reverse_flow_id'];
+      }
+      if (isset($vals['reverse_in_links'])) {
+        $this->reverse_in_links = $vals['reverse_in_links'];
+      }
+      if (isset($vals['reverse_out_links'])) {
+        $this->reverse_out_links = $vals['reverse_out_links'];
+      }
+      if (isset($vals['junction_inner_links'])) {
+        $this->junction_inner_links = $vals['junction_inner_links'];
       }
       if (isset($vals['tod_start_time'])) {
         $this->tod_start_time = $vals['tod_start_time'];
@@ -646,27 +721,112 @@ class RouteJunction {
           }
           break;
         case 3:
-          if ($ftype == TType::STRING) {
-            $xfer += $input->readString($this->reverse_flow_id);
+          if ($ftype == TType::LST) {
+            $this->forward_in_links = array();
+            $_size35 = 0;
+            $_etype38 = 0;
+            $xfer += $input->readListBegin($_etype38, $_size35);
+            for ($_i39 = 0; $_i39 < $_size35; ++$_i39)
+            {
+              $elem40 = null;
+              $xfer += $input->readString($elem40);
+              $this->forward_in_links []= $elem40;
+            }
+            $xfer += $input->readListEnd();
           } else {
             $xfer += $input->skip($ftype);
           }
           break;
         case 4:
-          if ($ftype == TType::STRING) {
-            $xfer += $input->readString($this->tod_start_time);
+          if ($ftype == TType::LST) {
+            $this->forward_out_links = array();
+            $_size41 = 0;
+            $_etype44 = 0;
+            $xfer += $input->readListBegin($_etype44, $_size41);
+            for ($_i45 = 0; $_i45 < $_size41; ++$_i45)
+            {
+              $elem46 = null;
+              $xfer += $input->readString($elem46);
+              $this->forward_out_links []= $elem46;
+            }
+            $xfer += $input->readListEnd();
           } else {
             $xfer += $input->skip($ftype);
           }
           break;
         case 5:
           if ($ftype == TType::STRING) {
-            $xfer += $input->readString($this->tod_end_time);
+            $xfer += $input->readString($this->reverse_flow_id);
           } else {
             $xfer += $input->skip($ftype);
           }
           break;
         case 6:
+          if ($ftype == TType::LST) {
+            $this->reverse_in_links = array();
+            $_size47 = 0;
+            $_etype50 = 0;
+            $xfer += $input->readListBegin($_etype50, $_size47);
+            for ($_i51 = 0; $_i51 < $_size47; ++$_i51)
+            {
+              $elem52 = null;
+              $xfer += $input->readString($elem52);
+              $this->reverse_in_links []= $elem52;
+            }
+            $xfer += $input->readListEnd();
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 7:
+          if ($ftype == TType::LST) {
+            $this->reverse_out_links = array();
+            $_size53 = 0;
+            $_etype56 = 0;
+            $xfer += $input->readListBegin($_etype56, $_size53);
+            for ($_i57 = 0; $_i57 < $_size53; ++$_i57)
+            {
+              $elem58 = null;
+              $xfer += $input->readString($elem58);
+              $this->reverse_out_links []= $elem58;
+            }
+            $xfer += $input->readListEnd();
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 8:
+          if ($ftype == TType::LST) {
+            $this->junction_inner_links = array();
+            $_size59 = 0;
+            $_etype62 = 0;
+            $xfer += $input->readListBegin($_etype62, $_size59);
+            for ($_i63 = 0; $_i63 < $_size59; ++$_i63)
+            {
+              $elem64 = null;
+              $xfer += $input->readString($elem64);
+              $this->junction_inner_links []= $elem64;
+            }
+            $xfer += $input->readListEnd();
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 9:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->tod_start_time);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 10:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->tod_end_time);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 11:
           if ($ftype == TType::I32) {
             $xfer += $input->readI32($this->cycle);
           } else {
@@ -696,23 +856,108 @@ class RouteJunction {
       $xfer += $output->writeString($this->forward_flow_id);
       $xfer += $output->writeFieldEnd();
     }
+    if ($this->forward_in_links !== null) {
+      if (!is_array($this->forward_in_links)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('forward_in_links', TType::LST, 3);
+      {
+        $output->writeListBegin(TType::STRING, count($this->forward_in_links));
+        {
+          foreach ($this->forward_in_links as $iter65)
+          {
+            $xfer += $output->writeString($iter65);
+          }
+        }
+        $output->writeListEnd();
+      }
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->forward_out_links !== null) {
+      if (!is_array($this->forward_out_links)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('forward_out_links', TType::LST, 4);
+      {
+        $output->writeListBegin(TType::STRING, count($this->forward_out_links));
+        {
+          foreach ($this->forward_out_links as $iter66)
+          {
+            $xfer += $output->writeString($iter66);
+          }
+        }
+        $output->writeListEnd();
+      }
+      $xfer += $output->writeFieldEnd();
+    }
     if ($this->reverse_flow_id !== null) {
-      $xfer += $output->writeFieldBegin('reverse_flow_id', TType::STRING, 3);
+      $xfer += $output->writeFieldBegin('reverse_flow_id', TType::STRING, 5);
       $xfer += $output->writeString($this->reverse_flow_id);
       $xfer += $output->writeFieldEnd();
     }
+    if ($this->reverse_in_links !== null) {
+      if (!is_array($this->reverse_in_links)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('reverse_in_links', TType::LST, 6);
+      {
+        $output->writeListBegin(TType::STRING, count($this->reverse_in_links));
+        {
+          foreach ($this->reverse_in_links as $iter67)
+          {
+            $xfer += $output->writeString($iter67);
+          }
+        }
+        $output->writeListEnd();
+      }
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->reverse_out_links !== null) {
+      if (!is_array($this->reverse_out_links)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('reverse_out_links', TType::LST, 7);
+      {
+        $output->writeListBegin(TType::STRING, count($this->reverse_out_links));
+        {
+          foreach ($this->reverse_out_links as $iter68)
+          {
+            $xfer += $output->writeString($iter68);
+          }
+        }
+        $output->writeListEnd();
+      }
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->junction_inner_links !== null) {
+      if (!is_array($this->junction_inner_links)) {
+        throw new TProtocolException('Bad type in structure.', TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('junction_inner_links', TType::LST, 8);
+      {
+        $output->writeListBegin(TType::STRING, count($this->junction_inner_links));
+        {
+          foreach ($this->junction_inner_links as $iter69)
+          {
+            $xfer += $output->writeString($iter69);
+          }
+        }
+        $output->writeListEnd();
+      }
+      $xfer += $output->writeFieldEnd();
+    }
     if ($this->tod_start_time !== null) {
-      $xfer += $output->writeFieldBegin('tod_start_time', TType::STRING, 4);
+      $xfer += $output->writeFieldBegin('tod_start_time', TType::STRING, 9);
       $xfer += $output->writeString($this->tod_start_time);
       $xfer += $output->writeFieldEnd();
     }
     if ($this->tod_end_time !== null) {
-      $xfer += $output->writeFieldBegin('tod_end_time', TType::STRING, 5);
+      $xfer += $output->writeFieldBegin('tod_end_time', TType::STRING, 10);
       $xfer += $output->writeString($this->tod_end_time);
       $xfer += $output->writeFieldEnd();
     }
     if ($this->cycle !== null) {
-      $xfer += $output->writeFieldBegin('cycle', TType::I32, 6);
+      $xfer += $output->writeFieldBegin('cycle', TType::I32, 11);
       $xfer += $output->writeI32($this->cycle);
       $xfer += $output->writeFieldEnd();
     }
