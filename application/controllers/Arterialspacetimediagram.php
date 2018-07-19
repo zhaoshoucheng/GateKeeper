@@ -101,7 +101,7 @@ class Arterialspacetimediagram extends MY_Controller
                 || !isset($v['offset']))
             {
                 $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'junctions中有参数未传递！';
+                $this->errmsg = 'junctions中有参数未传递，数据结构不完整！';
                 return;
             }
             if ($v['forward_in_links'] == '-1') {
