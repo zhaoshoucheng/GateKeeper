@@ -104,31 +104,36 @@ class Arterialspacetimediagram extends MY_Controller
                 $this->errmsg = 'junctions中有参数未传递，数据结构不完整！';
                 return;
             }
-            if ($v['forward_in_links'] == '-1') {
+            if ($v['forward_in_links'] == '-1' || empty($v['forward_in_links'])) {
                 $v['forward_in_links'] = [];
             } else {
                 $v['forward_in_links'] = explode(',', $v['forward_in_links']);
             }
 
-            if ($v['forward_out_links'] == '-1') {
+            if ($v['forward_out_links'] == '-1' || empty($v['forward_out_links'])) {
                 $v['forward_out_links'] = [];
             } else {
                 $v['forward_out_links'] = explode(',', $v['forward_out_links']);
             }
 
-            if ($v['reverse_in_links'] == '-1') {
+            if ($v['reverse_in_links'] == '-1' || empty($v['reverse_in_links'])) {
                 $v['reverse_in_links'] = [];
             } else {
                 $v['reverse_in_links'] = explode(',', $v['reverse_in_links']);
             }
 
-            if ($v['reverse_out_links'] == '-1') {
+            if ($v['reverse_out_links'] == '-1' || empty($v['reverse_out_links'])) {
                 $v['reverse_out_links'] = [];
             } else {
                 $v['reverse_out_links'] = explode(',', $v['reverse_out_links']);
             }
 
-            $v['junction_inner_links'] = explode(',', $v['junction_inner_links']);
+            if (empty($v['junction_inner_links'])) {
+                $v['junction_inner_links'] = [];
+            } else {
+                $v['junction_inner_links'] = explode(',', $v['junction_inner_links']);
+            }
+
         }
         $data['junctions'] = $params['junctions'];
 
