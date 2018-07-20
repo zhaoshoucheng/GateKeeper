@@ -38,8 +38,22 @@ class Arterialjunction_model extends CI_Model
      */
     public function getAllJunctions($data)
     {
+        $version = 0;
+        if(!empty($data['task_id'])){
+            // 获取任务详情
+            $task = $this->task_model->getTaskById($data['task_id']);
+            if(empty($task["dates"])){
+                throw new \Exception("The task not found.");
+            }
+            // 获取地图版本
+            $version = $this->waymap_model->getMapVersion(explode(",",$task['dates']));
+            if (empty($version)) {
+                throw new \Exception("The map_version not found.");
+            }
+        }
+        
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
-        $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id'], $data['task_id']);
+        $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id'], $version);
         if (count($allCityJunctions) < 1 || !$allCityJunctions || !is_array($allCityJunctions)) {
             return [];
         }
@@ -70,6 +84,7 @@ class Arterialjunction_model extends CI_Model
             return ["lng" => round($count_lng / $qcount, 6), "lat" => round($count_lat / $qcount, 6),];
         };
         $resultData['center'] = $junctionCenterFunc($resultData['dataList']);
+        $resultData['map_version'] = $version;
         return $resultData;
     }
 

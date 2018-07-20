@@ -131,26 +131,11 @@ class Waymap_model extends CI_Model
     /**
     * 获取全城路口
      * @param city_id        Y 城市ID
-     * @param city_id        Y 城市ID
+     * @param $version       N 地图版本
     * @return array
     */
-    public function getAllCityJunctions($city_id, $task_id=0)
+    public function getAllCityJunctions($city_id, $version=0)
     {
-        $version = 0;
-        if(!empty($task_id)){
-            // 获取任务详情
-            $task = $this->task_model->getTaskById($task_id);
-            if(empty($task["dates"])){
-                throw new \Exception("The task not found.");
-            }
-            // 获取地图版本
-            $version = $this->getMapVersion(explode(",",$task['dates']));
-            if (empty($version)) {
-                throw new \Exception("The map_version not found.");
-            }
-        }
-
-
         if ((int)$city_id < 1) {
             return false;
         }
