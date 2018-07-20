@@ -134,6 +134,9 @@ class Arterialspacetimediagram extends MY_Controller
                 $v['junction_inner_links'] = explode(',', $v['junction_inner_links']);
             }
 
+            $v['tod_start_time'] = date('H:i:s', strtotime($v['tod_start_time']));
+            $v['tod_end_time'] = date('H:i:s', strtotime($v['tod_end_time']));
+
         }
         $data['junctions'] = $junctions;
 
