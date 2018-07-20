@@ -796,6 +796,7 @@ class Junction_model extends CI_Model
                         foreach ($v['flow_quota'] as $key=>$val) {
                             if (isset($vv[$key])) {
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
+                                $data['diagnose_detail'][$k]['flow_quota'][$key]['unit'] = $val['unit'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id']
                                     = $vv['movement_id'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value']
