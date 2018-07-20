@@ -294,14 +294,16 @@ $config['diagnose_key']	= [
 		],
 		'flow_quota'=>[
 			'saturation_degree'=>[
-				'name'=>'饱和度'
+				'name'=>'饱和度',
+				'unit'=>''
 			],
 			'stop_delay'=>[
 				'name'=>'停车延误',
 				'unit'=>'秒'
 			],
 			'stop_time_cycle'=>[
-				'name'=>'停车次数'
+				'name'=>'停车次数',
+				'unit'=>''
 			]
 		],
 		// flow级的诊断问题

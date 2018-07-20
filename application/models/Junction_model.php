@@ -849,7 +849,8 @@ class Junction_model extends CI_Model
         $flowQuotaKeyConf = $this->config->item('flow_quota_key');
         // 指标集合
         foreach ($flowQuotaKeyConf as $k => $v) {
-            $resultData['flow_quota'][$k] = $flowQuotaKeyConf[$k]['name'];
+            $resultData['flow_quota'][$k]['name'] = $flowQuotaKeyConf[$k]['name'];
+            $resultData['flow_quota'][$k]['unit'] = $flowQuotaKeyConf[$k]['unit'];
         }
 
         $tempArr = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'confidence'=>'', 'comment'=>'']);
