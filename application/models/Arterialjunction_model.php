@@ -51,7 +51,7 @@ class Arterialjunction_model extends CI_Model
                 throw new \Exception("The map_version not found.");
             }
         }
-        
+
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
         $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id'], $version);
         if (count($allCityJunctions) < 1 || !$allCityJunctions || !is_array($allCityJunctions)) {

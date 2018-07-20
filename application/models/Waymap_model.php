@@ -144,7 +144,7 @@ class Waymap_model extends CI_Model
         | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
         -----------------------------------------------------*/
         $this->load->model('redis_model');
-        $redis_key = "all_city_junctions_{$city_id}";
+        $redis_key = "all_city_junctions_{$city_id}_{$version}";
 
         // 获取redis中数据
         $city_junctions = $this->redis_model->getData($redis_key);
