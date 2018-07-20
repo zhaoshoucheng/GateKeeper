@@ -39,7 +39,7 @@ class Arterialjunction_model extends CI_Model
     public function getAllJunctions($data)
     {
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
-        $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
+        $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id'], $data['task_id']);
         if (count($allCityJunctions) < 1 || !$allCityJunctions || !is_array($allCityJunctions)) {
             return [];
         }
