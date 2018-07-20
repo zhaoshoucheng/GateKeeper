@@ -155,7 +155,7 @@ $config['flow_quota_key'] = [
 		'unit'      => '米'       // 单位
 	],
 	'queue_position' => [
-		'name'      =>'排队长度/米',
+		'name'      =>'排队长度',
 		'round_num' => 0,
 		'unit'      => '米'
 	],
@@ -209,19 +209,24 @@ $config['diagnose_key']	= [
 		],
 		'flow_quota'=>[
 			'spillover_rate'=>[
-				'name'=>'溢流比率'
+				'name'=>'溢流比率',
+				'unit'=>''
 			],
 			'queue_position'=>[
-				'name'=>'排队长度/米'
+				'name'=>'排队长度',
+				'unit'=>'米'
 			],
 			'stop_delay'=>[
-				'name'=>'停车延误/秒'
+				'name'=>'停车延误',
+				'unit'=>'秒'
 			],
 			'stop_time_cycle'=>[
-				'name'=>'停车次数'
+				'name'=>'停车次数',
+				'unit'=>''
 			],
 			'route_length'  => [
-				'name'=>'路段长度/米'
+				'name'=>'路段长度',
+				'unit'=>'米'
 			],
 		],
 		// flow级的诊断问题
@@ -245,19 +250,23 @@ $config['diagnose_key']	= [
 		],
 		'flow_quota'=>[
 			'saturation_degree'=>[
-				'name'=>'饱和度'
+				'name'=>'饱和度',
+				'unit'=>''
 			],
 			'queue_position'=>[
-				'name'=>'排队长度/米'
+				'name'=>'排队长度',
+				'unit'=>'米'
 			],
 			'stop_delay'=>[
-				'name'=>'停车延误/秒'
+				'name'=>'停车延误',
+				'unit'=>'秒'
 			],
 			'stop_time_cycle'=>[
 				'name'=>'停车次数'
 			],
 			'route_length'  => [
-				'name'=>'路段长度/米'
+				'name'=>'路段长度',
+				'unit'=>'米'
 			]
 		],
 		// flow级的诊断问题 如果有两个则是or的关系
@@ -288,7 +297,8 @@ $config['diagnose_key']	= [
 				'name'=>'饱和度'
 			],
 			'stop_delay'=>[
-				'name'=>'停车延误/秒'
+				'name'=>'停车延误',
+				'unit'=>'秒'
 			],
 			'stop_time_cycle'=>[
 				'name'=>'停车次数'
