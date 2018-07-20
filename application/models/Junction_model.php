@@ -742,6 +742,7 @@ class Junction_model extends CI_Model
             // 组织flow级指标对应相位集合及格式化指标数据
             foreach ($flow_quota_key_conf as $key=>$val) {
                 $data['flow_quota_all'][$key]['name'] = $val['name'];
+                $data['flow_quota_all'][$key]['unit'] = $val['unit'];
                 $data['flow_quota_all'][$key]['movements'][$k]['id'] = $v['movement_id'];
                 if (isset($v[$key])) {
                     $v[$key] = round($v[$key], $val['round_num']);
