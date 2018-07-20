@@ -31,6 +31,9 @@ class Arterialtiming_model extends CI_Model
 
 
         foreach ($ret as $j => $value){
+            if(empty($value[0]['time_plan'])){
+                continue;
+            }
             $timePlan = $value[0]['time_plan'][0];//一个时间点肯定只有一份配时
             unset($ret[$j][0]['time_plan']);
             unset($ret[$j][0]['schedule_id']);
