@@ -742,6 +742,7 @@ class Junction_model extends CI_Model
             // 组织flow级指标对应相位集合及格式化指标数据
             foreach ($flow_quota_key_conf as $key=>$val) {
                 $data['flow_quota_all'][$key]['name'] = $val['name'];
+                $data['flow_quota_all'][$key]['unit'] = $val['unit'];
                 $data['flow_quota_all'][$key]['movements'][$k]['id'] = $v['movement_id'];
                 if (isset($v[$key])) {
                     $v[$key] = round($v[$key], $val['round_num']);
@@ -795,6 +796,7 @@ class Junction_model extends CI_Model
                         foreach ($v['flow_quota'] as $key=>$val) {
                             if (isset($vv[$key])) {
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
+                                $data['diagnose_detail'][$k]['flow_quota'][$key]['unit'] = $val['unit'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id']
                                     = $vv['movement_id'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value']
@@ -847,7 +849,8 @@ class Junction_model extends CI_Model
         $flowQuotaKeyConf = $this->config->item('flow_quota_key');
         // 指标集合
         foreach ($flowQuotaKeyConf as $k => $v) {
-            $resultData['flow_quota'][$k] = $flowQuotaKeyConf[$k]['name'];
+            $resultData['flow_quota'][$k]['name'] = $flowQuotaKeyConf[$k]['name'];
+            $resultData['flow_quota'][$k]['unit'] = $flowQuotaKeyConf[$k]['unit'];
         }
 
         $tempArr = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'confidence'=>'', 'comment'=>'']);
