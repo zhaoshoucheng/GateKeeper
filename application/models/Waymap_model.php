@@ -365,6 +365,8 @@ class Waymap_model extends CI_Model
                 'city_id'=>$cityId,
                 'map_version'=>$mapVersion,
                 'selected_junctionids'=>$selectedJunctionids,
+                'token' => $this->token,
+                'user_id'=>$this->userid,
             ), 0, 'json');
             $retArr = json_decode($res, true);
 
