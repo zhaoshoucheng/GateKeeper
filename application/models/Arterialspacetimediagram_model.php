@@ -81,8 +81,8 @@ class Arterialspacetimediagram_model extends CI_Model
             $result['dataList'][$k]['cycle'] = $tempCycleOffset[$v['juction_id']]['cycle'] ?? 0;
             $result['dataList'][$k]['offset'] = $tempCycleOffset[$v['juction_id']]['offset'] ?? 0;
             $result['dataList'][$k]['junction_id'] = $v['juction_id'] ?? '';
-            $result['dataList'][$k]['forward_speed'] = isset($v['forward_speed']) ? round($v['forward_speed'], 2) : 0;
-            $result['dataList'][$k]['reverse_speed'] = isset($v['reverse_speed']) ? round($v['reverse_speed'], 2) : 0;
+            $result['dataList'][$k]['forward_speed'] = isset($v['forward_speed']) ? round($v['forward_speed']) : 0;
+            $result['dataList'][$k]['reverse_speed'] = isset($v['reverse_speed']) ? round($v['reverse_speed']) : 0;
             // 正向
             $result['dataList'][$k]['forward_traj'] = [];
             if (!empty($v['forward_traj'])) {
