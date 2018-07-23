@@ -28,8 +28,9 @@ class Arterialtiming_model extends CI_Model
             'end_time'          => $timePoint,
             'source'            => 1
         ));
-
-
+        if(empty($ret)){
+            return [];
+        }
         foreach ($ret as $j => $value){
             if(empty($value[0]['time_plan'])){
                 continue;
