@@ -262,6 +262,12 @@ class Waymap_model extends CI_Model
                         $coords[] = [(float)$geoInfo[0],(float)$geoInfo[1],];
                     }
 
+                    $linkInfo['s_node']['lng'] = $linkInfo['s_node']['lng'] ?? 0;
+                    $linkInfo['s_node']['lat'] = $linkInfo['s_node']['lat'] ?? 0;
+                    $linkInfo['s_node']['node_id'] = $linkInfo['s_node']['node_id'] ?? 0;
+                    $linkInfo['e_node']['lng'] = $linkInfo['e_node']['lng'] ?? 0;
+                    $linkInfo['e_node']['lat'] = $linkInfo['e_node']['lat'] ?? 0;
+                    $linkInfo['e_node']['node_id'] = $linkInfo['e_node']['node_id'] ?? 0;
                     $sPoint = [
                         'geometry'=>[
                             'coordinates'=>[$linkInfo['s_node']['lng']/100000,$linkInfo['s_node']['lat']/100000,],
