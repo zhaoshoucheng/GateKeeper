@@ -855,7 +855,7 @@ class Junction_model extends CI_Model
 
         $tempArr = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'confidence'=>'', 'comment'=>'']);
         foreach ($data['movements'] as $k=>$v) {
-            $v['comment'] = $flowIdName[$v['movement_id']];
+            $v['comment'] = $flowIdName[$v['movement_id']] ?? '';
             $v['confidence'] = $confidenceConf[$v['confidence']]['name'];
             foreach ($flowQuotaKeyConf as $kk=>$vv) {
                 if (isset($v[$kk])) {

@@ -262,7 +262,8 @@ $config['diagnose_key']	= [
 				'unit'=>'秒'
 			],
 			'stop_time_cycle'=>[
-				'name'=>'停车次数'
+				'name'=>'停车次数',
+				'unit'=>'秒'
 			],
 			'route_length'  => [
 				'name'=>'路段长度',

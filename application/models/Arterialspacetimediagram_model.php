@@ -92,7 +92,7 @@ class Arterialspacetimediagram_model extends CI_Model
                         // 秒数
                         $result['dataList'][$k]['forward_traj'][$kk][$kkk][0] = $vvv['timestamp'];
                         // 值
-                        $result['dataList'][$k]['forward_traj'][$kk][$kkk][1] = $vvv['distance'] * -1;
+                        $result['dataList'][$k]['forward_traj'][$kk][$kkk][1] = $vvv['distance'];
                     }
                 }
             }
@@ -106,7 +106,7 @@ class Arterialspacetimediagram_model extends CI_Model
                         // 秒数
                         $result['dataList'][$k]['reverse_traj'][$kk][$kkk][0] = $vvv['timestamp'];
                         // 值
-                        $result['dataList'][$k]['reverse_traj'][$kk][$kkk][1] = $vvv['distance'];
+                        $result['dataList'][$k]['reverse_traj'][$kk][$kkk][1] = $vvv['distance'] * -1;
                     }
                 }
             }
