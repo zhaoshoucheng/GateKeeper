@@ -323,7 +323,13 @@ class Waymap_model extends CI_Model
         }
 
         try {
+            $getQuery = [
+                'token'    => $this->config->item('waymap_token'),
+                'user_id'  => $this->config->item('waymap_userid'),
+            ];
             $url = $this->config->item('waymap_interface') . '/signal-map/connect/adj_junctions';
+            $url = $url."?".http_build_query($getQuery);
+
             $res = httpPOST($url, $qArr, 2000, 'json');
             $retArr = json_decode($res, true);
             if (isset($retArr['errorCode'])
