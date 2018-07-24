@@ -45,7 +45,7 @@ class Arterialgreenwavecallback extends MY_Controller
     public function getData()
     {
         $params = $this->input->post();
-        $res = $this->redis_model($params['token']);
+        $res = $this->redis_model->getData($params['token']);
         echo "<pre>";print_r($res);
         var_dump($res);
     }
