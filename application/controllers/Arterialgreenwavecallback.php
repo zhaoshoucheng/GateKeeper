@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Arterialgreenwavecallback extends MY_Controller
 {
-	public function __construct()
+    public function __construct()
     {
         parent::__construct();
         $this->load->model('redis_model');
@@ -22,20 +22,27 @@ class Arterialgreenwavecallback extends MY_Controller
     */
     public function fillData()
     {
-    	$params = $this->input->post();
+        $params = $this->input->post();
+        $content = "form_data : " . json_encode($params);
+        sendMail('ningxiangbing@didichuxing.com', 'logs: 干线绿波结果存储传参', $content);
 
-    	if (!empty($params['data']) && !empty($params['token'])) {
-    		$this->redis_model->setData($params['token'], json_encode($params['data']));
-    	}
+        if (!empty($params['data']) && !empty($params['token'])) {
+            $res = $this->redis_model->setData($params['token'], $params['data']);
+            if (!$res) {
+                $content = "form_data : " . json_encode($params);
+                $content .= '<br> result : ' . json_encode($res);
+                sendMail('ningxiangbing@didichuxing.com', 'logs: 干线绿波结果存储失败', $content);
+            }
+        }
 
-    	return [];
+        return [];
     }
 
     public function getData()
     {
-    	$params = $this->input->post();
-    	$res = $this->redis_model($params['token']);
-    	echo "<pre>";print_r($res);
-    	var_dump($res);
+        $params = $this->input->post();
+        $res = $this->redis_model($params['token']);
+        echo "<pre>";print_r($res);
+        var_dump($res);
     }
 }
