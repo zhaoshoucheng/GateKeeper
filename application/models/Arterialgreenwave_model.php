@@ -52,18 +52,18 @@ class Arterialgreenwave_model extends CI_Model
     */
     public function getGreenWaveOptPlan($data)
     {
-        $this->load->model('redis_model');
+        /*$this->load->model('redis_model');
         $key = $data['token'];
 
-        $res = $this->redis_model->getData($key);
+        $res = $this->redis_model->getData($key);*/
 
-        if (!$res) {
+        //if (!$res) {
             $serive = new Arterialgreenwave_vendor();
             $res = $serive->getGreenWaveOptPlan($data);
             $res = (array)$res;
-        } else {
+        /*} else {
             $res = json_decode($res, true);
-        }
+        }*/
 
     	if (empty($res)) {
     		return [];
