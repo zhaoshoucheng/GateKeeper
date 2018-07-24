@@ -108,8 +108,33 @@ class Redis_model extends CI_Model
     /**
     * 集合 添加成员
     */
-    public function sadd()
+    public function sadd($key, $val)
     {
-        
+        if (!$this->redis) {
+            return false;
+        }
+        try {
+            $this->redis->sadd($key, $val);
+        } catch (RedisException $e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+    * 集合 取成员
+    */
+    public function smembers($key)
+    {
+        if (!$this->redis) {
+            return [];
+        }
+
+        try {
+            $res = $this->redis->smembers($key);
+        } catch  (RedisException $e) {
+            $res = [];
+        }
+        return $res;
     }
 }
