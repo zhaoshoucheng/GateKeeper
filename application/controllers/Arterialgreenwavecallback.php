@@ -23,7 +23,7 @@ class Arterialgreenwavecallback extends MY_Controller
     public function fillData()
     {
         $params = $this->input->post();
-        $content = "form_data : " . json_encode($params);
+        $content = "form_data : " . ' token = ' . $params['token'] . ' && data = ' . $params['data'];
         sendMail('ningxiangbing@didichuxing.com', 'logs: 干线绿波结果存储传参', $content);
 
         if (!empty($params['data']) && !empty($params['token'])) {
@@ -33,9 +33,13 @@ class Arterialgreenwavecallback extends MY_Controller
                 $content .= '<br> result : ' . json_encode($res);
                 sendMail('ningxiangbing@didichuxing.com', 'logs: 干线绿波结果存储失败', $content);
             }
+        } else {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数token或data为空！token = ' . $params['token'] . ' && data = ' . $params['data'];
+            return;
         }
 
-        return [];
+        return $this->response(['success.']);
     }
 
     public function getData()
