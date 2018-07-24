@@ -360,8 +360,13 @@ class Waymap_model extends CI_Model
         }
 
         try {
-
-            $res = httpPOST($this->config->item('waymap_interface') . '/signal-map/connect/path', array(
+            $getQuery = [
+                'token'    => $this->config->item('waymap_token'),
+                'user_id'  => $this->config->item('waymap_userid'),
+            ];
+            $url = $this->config->item('waymap_interface') . '/signal-map/connect/path';
+            $url = $url."?".http_build_query($getQuery);
+            $res = httpPOST($url, array(
                 'city_id'=>$cityId,
                 'map_version'=>$mapVersion,
                 'selected_junctionids'=>$selectedJunctionids,
