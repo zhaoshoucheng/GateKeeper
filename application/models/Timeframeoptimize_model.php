@@ -210,19 +210,22 @@ class Timeframeoptimize_model extends CI_Model
         }
 
         $res = (array)$res;
+        $res['response_data'] = (array)$res['response_data'];
 
-        if (empty($res['tod_plans'])) {
+        if ($res['errno'] != 0 || empty($res['response_data']['tod_plans'])) {
             return [];
         }
 
-        foreach ($res['tod_plans'] as $k=>&$v) {
+        foreach ($res['response_data']['tod_plans'] as $k=>&$v) {
             $v = (array)$v;
-            $result[$k] = [
-                'start'   => $v['tod_period'][0],
-                'end'     => $v['tod_period'][1],
+            $result['tod_plans'][$k] = [
+                'start'   => $v['tod_start_time'],
+                'end'     => $v['tod_end_time'],
                 'comment' => $v['tod_name'],
             ];
         }
+
+        $result['cutTime'] = $res['response_data']['cut_time'];
 
         return $result;
     }

@@ -28,9 +28,13 @@ class Arterialtiming_model extends CI_Model
             'end_time'          => $timePoint,
             'source'            => 1
         ));
-
-
+        if(empty($ret)){
+            return [];
+        }
         foreach ($ret as $j => $value){
+            if(empty($value[0]['time_plan'])){
+                continue;
+            }
             $timePlan = $value[0]['time_plan'][0];//一个时间点肯定只有一份配时
             unset($ret[$j][0]['time_plan']);
             unset($ret[$j][0]['schedule_id']);
@@ -53,10 +57,17 @@ class Arterialtiming_model extends CI_Model
     {
 
         $finalRet = [];
+        $finalRet['tod_start_time'] = $oriFlows['tod_start_time'];
+        $finalRet['tod_end_time'] = $oriFlows['tod_end_time'];
         $finalRet['extra_timing'] = $oriFlows['plan_detail']['extra_timing'];
+        $finalRet['extra_timing']['cycle'] = intval($finalRet['extra_timing']['cycle']);
+        $finalRet['extra_timing']['offset'] = intval($finalRet['extra_timing']['offset']);
 
         foreach ($oriFlows['plan_detail']['movement_timing'] as  $mk => $mv){
             foreach ($nedFlows as $nk=>$nv){
+                if(!isset($nv['flows'])){
+                    continue;
+                }
                 if($nv['logic_junction_id']!=$logicJunctionId){
                     continue;
                 }
@@ -95,8 +106,16 @@ class Arterialtiming_model extends CI_Model
 
         foreach ($ret['backward_path_flows'] as $bk =>$bv){
             if(isset($forwardMap[$bv['end_junc_id']]) && isset($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']])){
-                //正向和反向都有
-                $aveLength = (intval($bv['length'])+intval($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']]))/2;
+                //单行路口,平均值为其中一个
+                if(intval($bv['length']) ==0 && intval($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']])!=0){
+                    $aveLength = intval($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']]);
+                }elseif (intval($bv['length']) !=0 && intval($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']])==0){
+                    $aveLength = intval($bv['length']);
+                }else{
+                    //正向和反向都有
+                    $aveLength = (intval($bv['length'])+intval($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']]))/2;
+                }
+
 
                 $ret['backward_path_flows'][$bk]['ave_length'] = ceil($aveLength);
                 $backMap[$bv['start_junc_id']][$bv['end_junc_id']] = ceil($aveLength);

@@ -15,36 +15,41 @@ class Arterialtiming extends MY_Controller
         $this->load->model('arterialtiming_model');
     }
 
+    /**
+     * 获取优化干线路口配时信息
+     * http://wiki.intra.xiaojukeji.com/pages/viewpage.action?pageId=124728304#WEB-API%EF%BC%88web%E5%89%8D%E7%AB%AF%E8%B0%83%E7%94%A8%EF%BC%89-%E5%B9%B2%E7%BA%BF%E7%BB%BF%E6%B3%A2%E4%BC%98%E5%8C%96-%E8%8E%B7%E5%8F%96%E5%B9%B2%E7%BA%BF%E8%B7%AF%E5%8F%A3%E9%85%8D%E6%97%B6%E4%BF%A1%E6%81%AF
+     *
+     */
     public function queryArterialTimingInfo()
     {
         $params = $this->input->post();
 
         // 校验参数
         $validate = Validate::make($params, [
-                'junction_infos'    => 'nullunable',
+//                'junction_infos'    => 'nullunable',
                 'time_point'        => 'nullunable',
-                'dates'             => 'nullunable',
+//                'dates'             => 'nullunable',
             ]
         );
         if(!$validate['status']){
             return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
         }
         $data = $params['junction_infos'];
-        $data = json_decode($data,true);
+//        $data = json_decode($data,true);
 
         $timePoint = $params['time_point'];
         $date = $params['dates'];
-        $date = json_decode($date,true);
-        $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,end($date));
+//        $date = json_decode($date,true);
+        $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,$date[0]);
         $finalTimingInfo=[];
         foreach ($data as $d){
             if(isset($timingInfo[$d['logic_junction_id']])){
                 $finalTimingInfo[$d['logic_junction_id']] = $timingInfo[$d['logic_junction_id']];
             }else{
-                $finalTimingInfo[$d['logic_junction_id']] = [
+                $finalTimingInfo[$d['logic_junction_id']] = array(
                     array(
                         'id'=>null,
-                        'logic_junction_id'=>$d['logicf_junction_id'],
+                        'logic_junction_id'=>$d['logic_junction_id'],
                         'date'=>null,
                         'timing_info'=>array(
                             'extra_timing'=>array(
@@ -54,13 +59,17 @@ class Arterialtiming extends MY_Controller
                             'movement_timing'=>array()
                         ),
                     )
-                ];
+                );
             }
         }
 
         return $this->response($finalTimingInfo);
     }
 
+    /**
+     * 获取干线优化路口信息详情
+     * http://wiki.intra.xiaojukeji.com/pages/viewpage.action?pageId=124728304#WEB-API%EF%BC%88web%E5%89%8D%E7%AB%AF%E8%B0%83%E7%94%A8%EF%BC%89-%E5%B9%B2%E7%BA%BF%E7%BB%BF%E6%B3%A2%E4%BC%98%E5%8C%96-%E8%8E%B7%E5%8F%96%E5%B9%B2%E7%BA%BF%E8%B7%AF%E5%8F%A3%E8%AF%A6%E7%BB%86%E4%BF%A1%E6%81%AF
+     */
     public function queryArterialJunctionInfo()
     {
         $params = $this->input->post();
@@ -77,14 +86,20 @@ class Arterialtiming extends MY_Controller
         $cityId = $params['city_id'];
         $version = $params['map_version'];
         $selectJunctions = $params['selected_junctionids'];
+        if(count($selectJunctions) < 4){
+            return $this->response(array(), ERR_PARAMETERS, "路口数不得小于4");
+        }
 
-//        $selectJunctions = json_decode($selectJunctions,true);
         $ret = $this->arterialtiming_model->getJunctionInfos($cityId,$version,$selectJunctions);
+        if(empty($ret)){
+            return $this->response(array(), ERR_REQUEST_WAYMAP_API, "路网服务异常");
+        }
         $sortJunctions = [];
         foreach ($selectJunctions as $k){
             foreach ($ret['junctions_info'] as $rk => $rv){
                 if($k == $rk){
-                    $sortJunctions[$rk]=$rv;
+                    $rv['logic_junction_id'] = $rk;
+                    $sortJunctions[]=$rv;
                 }
             }
         }

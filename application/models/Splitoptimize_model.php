@@ -81,10 +81,10 @@ class Splitoptimize_model extends CI_Model
                     $signal[$kk]['logic_flow_id'] = $vv['info']['logic_flow_id'];
                     $flowIdName[$vv['info']['logic_flow_id']] = $vv['info']['comment'];
                     foreach ($vv['signal'] as $kkk=>$vvv) {
-                        $signal[$kk]['green_start'][$kkk] = $vvv['g_start_time'];
-                        $signal[$kk]['green_duration'][$kkk] = $vvv['g_duration'];
-                        $signal[$kk]['yellow'][$kkk] = $vvv['yellowLight'];
-                        $signal[$kk]['red_clean'][$kkk] = 0;
+                        $signal[$kk]['signal_of_green'][$kkk]['green_start'] = $vvv['g_start_time'];
+                        $signal[$kk]['signal_of_green'][$kkk]['green_duration'] = $vvv['g_duration'];
+                        $signal[$kk]['signal_of_green'][$kkk]['yellow'] = $vvv['yellowLight'];
+                        $signal[$kk]['signal_of_green'][$kkk]['red_clean'] = 0;
                     }
                 }
             }
@@ -107,7 +107,10 @@ class Splitoptimize_model extends CI_Model
 
         $res = (array)$res;
         $res['green_split_opt_signal_plan'] = (array)$res['green_split_opt_signal_plan'];
-        $res['green_split_opt_signal_plan']['signal'] = (array)$res['green_split_opt_signal_plan']['signal'];
+
+        if ($res['errno'] != 0 || empty($res['green_split_opt_signal_plan']['signal'])) {
+            return [];
+        }
 
         $result['plan'] = [
             'start_time' => $res['green_split_opt_signal_plan']['start_time'],
@@ -121,11 +124,12 @@ class Splitoptimize_model extends CI_Model
                 'logic_flow_id' => $v['logic_flow_id'],
                 'comment'       => $flowIdName[$v['logic_flow_id']],
             ];
-            foreach ($v['green_start'] as $kk=>$vv) {
+            foreach ($v['signal_of_green'] as $kk=>&$vv) {
+                $vv = (array)$vv;
                 $result['movements'][$k]['signal'][$kk] = [
-                    'g_start_time' => $vv,
-                    'g_duration'   => $v['green_duration'][$kk],
-                    'yellowLight'  => $v['yellow'][$kk],
+                    'g_start_time' => $vv['green_start'],
+                    'g_duration'   => $vv['green_duration'],
+                    'yellowLight'  => $vv['yellow'],
                 ];
             }
         }
@@ -134,9 +138,11 @@ class Splitoptimize_model extends CI_Model
         $splitOptSuggestConf = $this->config->item('split_opt_suggest');
         // 优化建议
         $result['suggest'] = [];
+        $res['advice_mes'] = (array)$res['advice_mes'];
+
         foreach ($splitOptSuggestConf as $k=>$v) {
-            if (!empty($res[$k])) {
-                foreach ($res[$k] as $kk=>$vv) {
+            if (!empty($res['advice_mes'][$k])) {
+                foreach ($res['advice_mes'][$k] as $kk=>$vv) {
                     $result['suggest'][$k][$kk]
                         = str_replace(':movement', $flowIdName[$vv], $v);
                 }

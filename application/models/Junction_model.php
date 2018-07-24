@@ -392,19 +392,21 @@ class Junction_model extends CI_Model
         for ($i = $start; $i < $end; $i += 15 * 60) {
             $timeRange[] = date('H:i', $i);
         }
-        if (!empty($res)) {
-            foreach ($res as $k=>$v) {
-                foreach ($timeRange as $hour) {
-                    $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
-                    $result[$k]['list'][$hour]['hour'] = $hour;
-                    $result[$k]['list'][$hour]['num'] = 0;
-                    $result[$k]['list'][$hour]['percent'] = 0 . '%';
-                    foreach ($v as $kk=>$vv) {
-                        if ($vv['hour'] == $hour) {
-                            $result[$k]['list'][$hour]['hour'] = $vv['hour'];
-                            $result[$k]['list'][$hour]['num'] = $vv['num'];
-                            $result[$k]['list'][$hour]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
-                        }
+        if (empty($res) || !is_array($res)) {
+            return [];
+        }
+
+        foreach ($res as $k=>$v) {
+            foreach ($timeRange as $hour) {
+                $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
+                $result[$k]['list'][$hour]['hour'] = $hour;
+                $result[$k]['list'][$hour]['num'] = 0;
+                $result[$k]['list'][$hour]['percent'] = 0 . '%';
+                foreach ($v as $kk=>$vv) {
+                    if ($vv['hour'] == $hour) {
+                        $result[$k]['list'][$hour]['hour'] = $vv['hour'];
+                        $result[$k]['list'][$hour]['num'] = $vv['num'];
+                        $result[$k]['list'][$hour]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
                     }
                 }
             }
@@ -554,8 +556,12 @@ class Junction_model extends CI_Model
     */
     public function getJunctionQuestionTrend($data)
     {
-        $selectStr = $this->selectColumns($data['diagnose_key']);
-        $select = "id, junction_id, {$selectStr}, time_point";
+        if (!empty($data['diagnose_key'])) {
+            $selectStr = $this->selectColumns($data['diagnose_key']);
+            $select = "id, junction_id, {$selectStr}, stop_delay, time_point";
+        } else {
+            $select = "id, junction_id, stop_delay, time_point";
+        }
 
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
@@ -620,14 +626,12 @@ class Junction_model extends CI_Model
                         ->from($this->tb)
                         ->where($where)
                         ->get();
-        //echo 'sql = ' . $this->db->last_query();
 
         if (!$res || empty($res)) {
             return [];
         }
 
         $result = $res->row_array();
-        //echo "<hr>data = <pre>";print_r($result);
         $result = $this->formatJunctionDetailData($result, $data['dates'], 2, $data['timingType']);
 
         return $result;
@@ -675,7 +679,6 @@ class Junction_model extends CI_Model
         }
 
         $result = $res->row_array();
-        //echo "<hr>data = <pre>";print_r($result);
         $result = $this->formatJunctionDetailData($result, $data['dates'], 1, $data['timingType']);
 
         return $result;
@@ -739,6 +742,7 @@ class Junction_model extends CI_Model
             // 组织flow级指标对应相位集合及格式化指标数据
             foreach ($flow_quota_key_conf as $key=>$val) {
                 $data['flow_quota_all'][$key]['name'] = $val['name'];
+                $data['flow_quota_all'][$key]['unit'] = $val['unit'];
                 $data['flow_quota_all'][$key]['movements'][$k]['id'] = $v['movement_id'];
                 if (isset($v[$key])) {
                     $v[$key] = round($v[$key], $val['round_num']);
@@ -792,6 +796,7 @@ class Junction_model extends CI_Model
                         foreach ($v['flow_quota'] as $key=>$val) {
                             if (isset($vv[$key])) {
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
+                                $data['diagnose_detail'][$k]['flow_quota'][$key]['unit'] = $val['unit'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id']
                                     = $vv['movement_id'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value']
@@ -837,11 +842,29 @@ class Junction_model extends CI_Model
         ];
         $flowIdName = $this->timing_model->getFlowIdToName($timingData);
 
-        // flow 所有指标配置
-        $flowQuotaKeyConf = $this->config->item('flow_quota_key');
-
         // 置信度配置
         $confidenceConf = $this->config->item('confidence');
+
+        // flow 所有指标配置
+        $flowQuotaKeyConf = $this->config->item('flow_quota_key');
+        // 指标集合
+        foreach ($flowQuotaKeyConf as $k => $v) {
+            $resultData['flow_quota'][$k]['name'] = $flowQuotaKeyConf[$k]['name'];
+            $resultData['flow_quota'][$k]['unit'] = $flowQuotaKeyConf[$k]['unit'];
+        }
+
+        $tempArr = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'confidence'=>'', 'comment'=>'']);
+        foreach ($data['movements'] as $k=>$v) {
+            $v['comment'] = $flowIdName[$v['movement_id']] ?? '';
+            $v['confidence'] = $confidenceConf[$v['confidence']]['name'];
+            foreach ($flowQuotaKeyConf as $kk=>$vv) {
+                if (isset($v[$kk])) {
+                    $v[$kk] = round($v[$kk], $vv['round_num']);
+                }
+            }
+            $resultData['notmal_movements'][$k] = array_intersect_key($v, $tempArr);
+        }
+
         // 诊断问题配置
         $diagnoseConf = $this->config->item('diagnose_key');
 
@@ -866,8 +889,6 @@ class Junction_model extends CI_Model
                         if ($ruleCount < 1) {
                             $resultData['diagnose_detail'][$k]['movements'] = [];
                         }
-                        // 所有问题对应的指标集合
-                        $resultData['flow_quota'][$kk] = $flowQuotaKeyConf[$kk]['name'];
 
                         foreach ($data['movements'] as $kkk=>$vvv) {
                             foreach ($vv as $vvvv) {
@@ -902,14 +923,18 @@ class Junction_model extends CI_Model
 
     /**
     * 格式化路口问题趋势数据
+    *     PS:当路口无问题属于正常状态时，返回路口级指标平均延误的趋势图
     * @param $data                         array  Y 路口数据
     * @param $whereData['time_point']      string Y 时间点 用于标注问题持续时间段用
     * @param $whereData['task_time_point'] string Y 任务时间段
-    * @param $diagnose                     array  Y 需要查询的问题
+    * @param $diagnose                     array  N 需要查询的问题 当路口正常状态时，可为空
     * @return array
     */
     private function formatJunctionQuestionTrendData($data, $whereData, $diagnose)
     {
+        // 正常路口返回路口级指标平均延误的趋势图
+        $normalQuota = 'stop_delay';
+
         // 任务开始、结束时间
         $taskTimeRange = array_filter(explode('-', $whereData['task_time_range']));
         $taskStartTime = strtotime($taskTimeRange[0]);
@@ -933,8 +958,13 @@ class Junction_model extends CI_Model
         $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
 
         $newData = [];
-        foreach ($diagnoseConf as $k=>$v) {
-            if (in_array($k, $diagnose, true)) {
+
+        if (!empty($diagnose)) { // 有问题的路口
+            foreach ($diagnoseConf as $k=>$v) {
+                if (!in_array($k, $diagnose, true)) {
+                    continue;
+                }
+
                 $newData[$k]['info']['name'] = $v['name'];
                 $newData[$k]['info']['quota_name'] = $junctionQuotaKeyConf[$k]['name'];
                 // 此问题持续开始时间
@@ -982,6 +1012,19 @@ class Junction_model extends CI_Model
                 if (!empty($newData[$k]['list'])) {
                     $newData[$k]['list'] = array_values($newData[$k]['list']);
                 }
+            }
+        } else { // 正常路口，返回路口级指标 平均延误 的趋势图
+            $newData[$normalQuota]['info']['name'] = $junctionQuotaKeyConf[$normalQuota]['name'];
+            $newData[$normalQuota]['info']['quota_name'] = $junctionQuotaKeyConf[$normalQuota]['name'];
+            $newData[$normalQuota]['info']['continuous_start'] = '00:00';
+            $newData[$normalQuota]['info']['continuous_end'] = '00:00';
+            foreach ($tempData as $k=>$v) {
+                $newData[$normalQuota]['list'][$k]['value']
+                = round($v[$normalQuota], $junctionQuotaKeyConf[$normalQuota]['round_num']);
+                $newData[$normalQuota]['list'][$k]['time'] = $v['time_point'];
+            }
+            if (!empty($newData[$normalQuota]['list'])) {
+                $newData[$normalQuota]['list'] = array_values($newData[$normalQuota]['list']);
             }
         }
 
@@ -1038,29 +1081,22 @@ class Junction_model extends CI_Model
         }
 
         // 获取路网路口各相位坐标
-        try {
-            $waymap_data = [
-                'version'           => trim($map_version),
-                'logic_junction_id' => $junction_id,
-                'logic_flow_ids'    => array_keys($timing['list']),
-                'token'             => $this->config->item('waymap_token'),
-                'user_id'           => $this->config->item('waymap_userid'),
-            ];
-            $ret = httpPOST($this->config->item('waymap_interface') . '/signal-map/MapFlow/simplifyFlows', $waymap_data);
-            $ret = json_decode($ret, true);
-            if ($ret['errorCode'] == -1 || empty($ret['data'])) {
-                return [];
-            }
-            foreach ($ret['data'] as $k=>$v) {
-                if (!empty($timing['list'][$v['logic_flow_id']])) {
-                    $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
-                    $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
-                    $result['dataList'][$k]['lng'] = $v['flows'][0][0];
-                    $result['dataList'][$k]['lat'] = $v['flows'][0][1];
-                }
-            }
-        } catch (Exception $e) {
+        $waymap_data = [
+            'version'           => trim($map_version),
+            'logic_junction_id' => $junction_id,
+            'logic_flow_ids'    => array_keys($timing['list']),
+        ];
+        $ret = $this->waymap_model->getJunctionFlowLngLat($waymap_data);
+        if (empty($ret['data'])) {
             return [];
+        }
+        foreach ($ret['data'] as $k=>$v) {
+            if (!empty($timing['list'][$v['logic_flow_id']])) {
+                $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
+                $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
+                $result['dataList'][$k]['lng'] = $v['flows'][0][0];
+                $result['dataList'][$k]['lat'] = $v['flows'][0][1];
+            }
         }
         // 获取路口中心坐标
         $result['center'] = '';
