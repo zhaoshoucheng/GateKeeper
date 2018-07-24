@@ -56,7 +56,7 @@ class Arterialgreenwave extends MY_Controller
         if (empty($params['token'])) {
             $data['token'] = md5(microtime(true) * mt_rand(1, 10000));
         } else {
-            $data['token'] = trim($params['token']);
+            $data['token'] = html_escape(trim($params['token']));
         }
 
         /// junctions
@@ -128,6 +128,7 @@ class Arterialgreenwave extends MY_Controller
         }
 
         $result = $this->arterialgreenwave_model->getGreenWaveOptPlan($data);
+        $result['token'] = $data['token'];
 
         return $this->response($result);
     }

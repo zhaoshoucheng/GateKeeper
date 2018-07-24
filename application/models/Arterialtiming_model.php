@@ -106,8 +106,16 @@ class Arterialtiming_model extends CI_Model
 
         foreach ($ret['backward_path_flows'] as $bk =>$bv){
             if(isset($forwardMap[$bv['end_junc_id']]) && isset($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']])){
-                //正向和反向都有
-                $aveLength = (intval($bv['length'])+intval($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']]))/2;
+                //单行路口,平均值为其中一个
+                if(intval($bv['length']) ==0 && intval($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']])!=0){
+                    $aveLength = intval($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']]);
+                }elseif (intval($bv['length']) !=0 && intval($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']])==0){
+                    $aveLength = intval($bv['length']);
+                }else{
+                    //正向和反向都有
+                    $aveLength = (intval($bv['length'])+intval($forwardMap[$bv['end_junc_id']][$bv['start_junc_id']]))/2;
+                }
+
 
                 $ret['backward_path_flows'][$bk]['ave_length'] = ceil($aveLength);
                 $backMap[$bv['start_junc_id']][$bv['end_junc_id']] = ceil($aveLength);
