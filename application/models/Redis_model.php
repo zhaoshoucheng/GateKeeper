@@ -104,4 +104,12 @@ class Redis_model extends CI_Model
         }
         return true;
     }
+
+    /**
+    * 集合 添加成员
+    */
+    public function sadd()
+    {
+        
+    }
 }
