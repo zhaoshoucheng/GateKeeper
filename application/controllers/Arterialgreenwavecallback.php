@@ -60,7 +60,7 @@ class Arterialgreenwavecallback extends MY_Controller
         return $this->response(['success.']);
     }
 
-    public function testsmembers($key)
+    public function testsmembers()
     {
         $key = 'arterialgreenwaveopt';
 

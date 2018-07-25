@@ -86,7 +86,7 @@ class Arterialspacetimediagram extends MY_Controller
             return;
         }
         $junctions = $params['junctions'];
-        foreach ($junctions as &$v) {
+        foreach ($junctions as $k=>$v) {
             if (!isset($v['junction_id'])
                 || !isset($v['forward_flow_id'])
                 || !isset($v['forward_in_links'])
@@ -105,37 +105,37 @@ class Arterialspacetimediagram extends MY_Controller
                 return;
             }
             if (empty($v['forward_in_links'])) {
-                $v['forward_in_links'] = [];
+                $junctions[$k]['forward_in_links'] = [];
             } else {
-                $v['forward_in_links'] = explode(',', $v['forward_in_links']);
+                $junctions[$k]['forward_in_links'] = explode(',', $v['forward_in_links']);
             }
 
             if (empty($v['forward_out_links'])) {
-                $v['forward_out_links'] = [];
+                $junctions[$k]['forward_out_links'] = [];
             } else {
-                $v['forward_out_links'] = explode(',', $v['forward_out_links']);
+                $junctions[$k]['forward_out_links'] = explode(',', $v['forward_out_links']);
             }
 
             if (empty($v['reverse_in_links'])) {
-                $v['reverse_in_links'] = [];
+                $junctions[$k]['reverse_in_links'] = [];
             } else {
-                $v['reverse_in_links'] = explode(',', $v['reverse_in_links']);
+                $junctions[$k]['reverse_in_links'] = explode(',', $v['reverse_in_links']);
             }
 
             if (empty($v['reverse_out_links'])) {
-                $v['reverse_out_links'] = [];
+                $junctions[$k]['reverse_out_links'] = [];
             } else {
-                $v['reverse_out_links'] = explode(',', $v['reverse_out_links']);
+                $junctions[$k]['reverse_out_links'] = explode(',', $v['reverse_out_links']);
             }
 
             if (empty($v['junction_inner_links'])) {
-                $v['junction_inner_links'] = [];
+                $junctions[$k]['junction_inner_links'] = [];
             } else {
-                $v['junction_inner_links'] = explode(',', $v['junction_inner_links']);
+                $junctions[$k]['junction_inner_links'] = explode(',', $v['junction_inner_links']);
             }
 
-            $v['tod_start_time'] = date('H:i:s', strtotime($v['tod_start_time']));
-            $v['tod_end_time'] = date('H:i:s', strtotime($v['tod_end_time']));
+            $junctions[$k]['tod_start_time'] = date('H:i:s', strtotime($v['tod_start_time']));
+            $junctions[$k]['tod_end_time'] = date('H:i:s', strtotime($v['tod_end_time']));
 
         }
         $data['junctions'] = $junctions;
