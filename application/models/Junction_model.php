@@ -945,6 +945,7 @@ class Junction_model extends CI_Model
             $tempData[$i]['imbalance_index'] = 0;
             $tempData[$i]['spillover_index'] = 0;
             $tempData[$i]['saturation_index'] = 0;
+            $tempData[$i]['stop_delay'] = 0;
             $tempData[$i]['time_point'] = date('H:i', $i);
             foreach ($data as $k=>$v) {
                 $tempData[strtotime($v['time_point'])] = $v;
