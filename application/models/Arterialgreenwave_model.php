@@ -75,12 +75,12 @@ class Arterialgreenwave_model extends CI_Model
 
         foreach ($res['opt_junction_list'] as &$v) {
             $v = (array)$v;
-            foreach ($v['forward_green'] as &$vv) {
-                $vv = (array)$vv;
+            foreach ($v['forward_green'] as &$forward_green) {
+                $forward_green = (array)$forward_green;
             }
 
-            foreach ($v['reverse_green'] as &$vv) {
-                $vv = (array)$vv;
+            foreach ($v['reverse_green'] as &$reverse_green) {
+                $reverse_green = (array)$reverse_green;
             }
         }
 

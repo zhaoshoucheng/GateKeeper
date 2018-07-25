@@ -49,4 +49,23 @@ class Arterialgreenwavecallback extends MY_Controller
         echo "<pre>";print_r($res);
         var_dump($res);
     }
+
+    public function testsadd()
+    {
+        $key = 'arterialgreenwaveopt';
+        $token = md5(mt_rand(100, 100000));
+
+        $res = $this->redis_model->sadd($key, $token);
+
+        return $this->response(['success.']);
+    }
+
+    public function testsmembers()
+    {
+        $key = 'arterialgreenwaveopt';
+
+        $res = $this->redis_model->smembers($key);
+
+        echo "<pre> res = ";print_r($res);exit;
+    }
 }
