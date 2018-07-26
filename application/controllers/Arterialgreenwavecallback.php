@@ -62,7 +62,7 @@ class Arterialgreenwavecallback extends MY_Controller
 
     public function testsmembers()
     {
-        $key = 'arterialgreenwaveopt';
+        $key = 'ArterialGreenWaveExecutingKeyList';
 
         $res = $this->redis_model->smembers($key);
 
@@ -73,7 +73,7 @@ class Arterialgreenwavecallback extends MY_Controller
     {
         $key = 'arterialgreenwaveopt';
 
-        $res = $this->redis_model->srem($key, 'e0e840797e83d7cf537d4a0efd4b7724');
+        $res = $this->redis_model->sremData($key, 'e0e840797e83d7cf537d4a0efd4b7724');
 
         echo "<pre> res = ";print_r($res);exit;
     }
