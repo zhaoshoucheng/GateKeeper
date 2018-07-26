@@ -95,7 +95,7 @@ class Todsplit_vendor {
                 }
             }
 
-            $vals->signal[] = new MovementSignal($v);
+            $vals->signal[] = new MovementSignal($data['signal'][$k]);
         }
 
         foreach ($data['version'] as $v) {
