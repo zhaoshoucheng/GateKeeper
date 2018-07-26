@@ -137,4 +137,21 @@ class Redis_model extends CI_Model
         }
         return $res;
     }
+
+    /**
+    * 集合 移除成员
+    */
+    public function sremData($key, $member)
+    {
+        if (!$this->redis) {
+            return false;
+        }
+
+        try {
+            $this->redis->srem($key, $member);
+        } catch  (RedisException $e) {
+            return false;
+        }
+        return true;
+    }
 }

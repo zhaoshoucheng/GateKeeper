@@ -68,4 +68,13 @@ class Arterialgreenwavecallback extends MY_Controller
 
         echo "<pre> res = ";print_r($res);exit;
     }
+
+    public function testsrem()
+    {
+        $key = 'arterialgreenwaveopt';
+
+        $res = $this->redis_model->srem($key, 'e0e840797e83d7cf537d4a0efd4b7724');
+
+        echo "<pre> res = ";print_r($res);exit;
+    }
 }
