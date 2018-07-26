@@ -118,13 +118,13 @@ class Splitoptimize_model extends CI_Model
             'cycle'      => $res['green_split_opt_signal_plan']['cycle'],
             'offset'     => $res['green_split_opt_signal_plan']['offset'],
         ];
-        foreach ($res['green_split_opt_signal_plan']['signal'] as $k=>&$v) {
+        foreach ($res['green_split_opt_signal_plan']['signal'] as $k=>$v) {
             $v = (array)$v;
             $result['movements'][$k]['info'] = [
                 'logic_flow_id' => $v['logic_flow_id'],
                 'comment'       => $flowIdName[$v['logic_flow_id']],
             ];
-            foreach ($v['signal_of_green'] as $kk=>&$vv) {
+            foreach ($v['signal_of_green'] as $kk=>$vv) {
                 $vv = (array)$vv;
                 $result['movements'][$k]['signal'][$kk] = [
                     'g_start_time' => $vv['green_start'],
