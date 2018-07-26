@@ -757,6 +757,8 @@ class Junction_model extends CI_Model
                 $temp_movements[mt_rand(100, 900) + mt_rand(1, 99)] = array_intersect_key($v, $movementsAll);
             }
         }
+        unset($v);
+
         if (!empty($temp_movements)) {
             unset($data['movements']);
             ksort($temp_movements);

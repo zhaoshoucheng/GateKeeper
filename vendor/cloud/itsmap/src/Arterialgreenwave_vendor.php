@@ -54,16 +54,16 @@ class Arterialgreenwave_vendor
     */
     public function getGreenWaveOptPlan($data) {
         $vals = new RouteMes();
-        foreach ($data['junctions'] as &$v) {
+        foreach ($data['junctions'] as $k=>$v) {
             if (!empty($v['forward_green']) && is_array($v['forward_green'])) {
                 foreach ($v['forward_green'] as $kk=>$vv) {
-                    $v['forward_green'][$kk] = new Green($vv);
+                    $data['junctions'][$k]['forward_green'][$kk] = new Green($vv);
                 }
             }
 
             if (!empty($v['reverse_green']) && is_array($v['reverse_green'])) {
                 foreach ($v['reverse_green'] as $kk=>$vv) {
-                    $v['reverse_green'][$kk] = new Green($vv);
+                    $data['junctions'][$k]['reverse_green'][$kk] = new Green($vv);
                 }
             }
 

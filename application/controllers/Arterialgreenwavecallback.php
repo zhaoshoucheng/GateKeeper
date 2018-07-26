@@ -23,8 +23,6 @@ class Arterialgreenwavecallback extends MY_Controller
     public function fillData()
     {
         $params = $this->input->post();
-        $content = "form_data : " . ' token = ' . $params['token'] . ' && data = ' . $params['data'];
-        sendMail('ningxiangbing@didichuxing.com', 'logs: 干线绿波结果存储传参', $content);
 
         if (!empty($params['data']) && !empty($params['token'])) {
             $res = $this->redis_model->setData($params['token'], $params['data']);
@@ -46,34 +44,16 @@ class Arterialgreenwavecallback extends MY_Controller
     {
         $params = $this->input->post();
         $res = $this->redis_model->getData($params['token']);
+        $res = json_decode($res, true);
         echo "<pre>";print_r($res);
-        var_dump($res);
     }
 
-    public function testsadd()
-    {
-        $key = 'arterialgreenwaveopt';
-        $token = md5(mt_rand(100, 100000));
-
-        $res = $this->redis_model->sadd($key, $token);
-
-        return $this->response(['success.']);
-    }
 
     public function testsmembers()
     {
         $key = 'ArterialGreenWaveExecutingKeyList';
 
         $res = $this->redis_model->smembers($key);
-
-        echo "<pre> res = ";print_r($res);exit;
-    }
-
-    public function testsrem()
-    {
-        $key = 'arterialgreenwaveopt';
-
-        $res = $this->redis_model->sremData($key, 'e0e840797e83d7cf537d4a0efd4b7724');
 
         echo "<pre> res = ";print_r($res);exit;
     }
