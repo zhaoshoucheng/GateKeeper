@@ -216,7 +216,7 @@ class Timeframeoptimize_model extends CI_Model
             return [];
         }
 
-        foreach ($res['response_data']['tod_plans'] as $k=>&$v) {
+        foreach ($res['response_data']['tod_plans'] as $k=>$v) {
             $v = (array)$v;
             $result['tod_plans'][$k] = [
                 'start'   => $v['tod_start_time'],

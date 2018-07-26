@@ -88,10 +88,10 @@ class Todsplit_vendor {
         $vals->offset = intval($data['offset']);
         $vals->clock_shift = intval($data['clock_shift']);
 
-        foreach ($data['signal'] as &$v) {
+        foreach ($data['signal'] as $k=>$v) {
             if (!empty($v['signal_of_green']) && is_array($v['signal_of_green'])) {
                 foreach ($v['signal_of_green'] as $kk=>$vv) {
-                    $v['signal_of_green'][$kk] = new SignalOfGreen($vv);
+                    $data['signal'][$k]['signal_of_green'][$kk] = new SignalOfGreen($vv);
                 }
             }
 
