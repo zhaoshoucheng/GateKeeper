@@ -7,43 +7,51 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Arterialgreenwavecallback extends MY_Controller
+class Arterialgreenwavecallback extends CI_Controller
 {
     public function __construct()
     {
         parent::__construct();
+        date_default_timezone_set('Asia/Shanghai');
+        $this->load->model('junction_model');
         $this->load->model('redis_model');
+        $this->load->config('nconf');
     }
 
     /**
     * 将数据写入redis
     * @param data  数据
-    * @param token 唯一标识
+    * @param key   唯一标识
     */
     public function fillData()
     {
         $params = $this->input->post();
 
-        if (!empty($params['data']) && !empty($params['token'])) {
-            $res = $this->redis_model->setData($params['token'], $params['data']);
+        if (!empty($params['data']) && !empty($params['key'])) {
+            $res = $this->redis_model->setData($params['key'], $params['data']);
             if (!$res) {
+                $return = ['errno'=>100400, 'errmsg'=>'result:'.json_encode($res) . 'params:' . json_encode($params), 'data'=>['']];
                 $content = "form_data : " . json_encode($params);
                 $content .= '<br> result : ' . json_encode($res);
                 sendMail('ningxiangbing@didichuxing.com', 'logs: 干线绿波结果存储失败', $content);
+                echo json_encode($return);
+                exit;
             }
         } else {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数token或data为空！token = ' . $params['token'] . ' && data = ' . $params['data'];
-            return;
+            $return = ['errno'=>100400, 'errmsg'=>'key 或 data 为空', 'data'=>['']];
+            echo json_encode($return);
+            exit;
         }
 
-        return $this->response(['success.']);
+        $result = ['errno'=>0, 'errmsg'=>'', 'data'=>['success']];
+        echo json_encode($result);
+        exit;
     }
 
     public function getData()
     {
         $params = $this->input->post();
-        $res = $this->redis_model->getData($params['token']);
+        $res = $this->redis_model->getData($params['key']);
         $res = json_decode($res, true);
         echo "<pre>";print_r($res);
     }
