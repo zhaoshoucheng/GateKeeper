@@ -31,9 +31,6 @@
 	},
 	"autoload": {
 		"files": [
-			"application/libraries/TraceFormatter.php",
-			"application/libraries/TraceLog.php",
-			"application/helpers/common_helper.php"
 		]
 	}
 }

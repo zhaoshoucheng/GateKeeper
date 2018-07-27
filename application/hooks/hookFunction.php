@@ -11,6 +11,6 @@ if( !function_exists('pre_controller')){
         gen_traceid();
         log_request();
 
-        TraceLog::getInstance("operate_log",$ci->config->item('log_path')."operate_log.log");
+        initOperateTraceLog($ci->config->item('log_path')."operate_log.log", 1);
     }
 }
