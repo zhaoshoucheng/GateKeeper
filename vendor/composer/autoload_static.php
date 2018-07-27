@@ -9,6 +9,7 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '72579e7bd17821bb1321b87411366eae' => __DIR__ . '/..' . '/illuminate/support/helpers.php',
+        '9937fe4496a0ac77b255d131c17706fc' => __DIR__ . '/..' . '/niuyufu/php_tracelog/src/common_helper.php',
         '160419db6acb04ff0f6e7e334f6f4119' => __DIR__ . '/../..' . '/application/libraries/TraceFormatter.php',
         '96a6bb67aad11918bc2c434cb9a41f86' => __DIR__ . '/../..' . '/application/libraries/TraceLog.php',
         '7d176831b4e3e8bf0e4fcfa3aa4e3503' => __DIR__ . '/../..' . '/application/helpers/common_helper.php',
@@ -40,6 +41,7 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
         'D' => 
         array (
             'Doctrine\\Common\\Inflector\\' => 26,
+            'Didi\\Cloud\\TraceLog\\' => 20,
             'Didi\\Cloud\\ItsMap\\' => 18,
         ),
         'C' => 
@@ -92,6 +94,10 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
         'Doctrine\\Common\\Inflector\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/inflector/lib/Doctrine/Common/Inflector',
+        ),
+        'Didi\\Cloud\\TraceLog\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/niuyufu/php_tracelog/src/TraceLog',
         ),
         'Didi\\Cloud\\ItsMap\\' => 
         array (

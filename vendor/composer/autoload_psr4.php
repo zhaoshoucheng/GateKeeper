@@ -17,6 +17,7 @@ return array(
     'Illuminate\\Contracts\\' => array($vendorDir . '/illuminate/contracts'),
     'Illuminate\\Container\\' => array($vendorDir . '/illuminate/container'),
     'Doctrine\\Common\\Inflector\\' => array($vendorDir . '/doctrine/inflector/lib/Doctrine/Common/Inflector'),
+    'Didi\\Cloud\\TraceLog\\' => array($vendorDir . '/niuyufu/php_tracelog/src/TraceLog'),
     'Didi\\Cloud\\ItsMap\\' => array($vendorDir . '/cloud/itsmap/src'),
     'Carbon\\' => array($vendorDir . '/nesbot/carbon/src/Carbon'),
 );

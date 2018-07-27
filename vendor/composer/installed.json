@@ -1,5 +1,40 @@
 [
   {
+    "name": "niuyufu/php_tracelog",
+    "version": "v1.0.0",
+    "version_normalized": "1.0.0.0",
+    "source": {
+      "type": "git",
+      "url": "git@git.xiaojukeji.com:niuyufu/php_tracelog.git",
+      "reference": "043b8aba259ce33bd63edf7a4421371f8e97ca40"
+    },
+    "require": {
+      "monolog/monolog": "^1.23",
+      "php": ">=5.2.4"
+    },
+    "time": "2018-07-27T09:06:15+00:00",
+    "type": "library",
+    "installation-source": "source",
+    "autoload": {
+      "psr-4": {
+        "Didi\\Cloud\\TraceLog\\": "src/TraceLog"
+      },
+      "files": [
+        "src/common_helper.php"
+      ]
+    },
+    "license": [
+      "Didi"
+    ],
+    "authors": [
+      {
+        "name": "niuyufu",
+        "email": "niuyufu@didichuxing.com"
+      }
+    ],
+    "description": "php日志基础库"
+  },
+  {
     "name": "monolog/monolog",
     "version": "1.23.0",
     "source": {
