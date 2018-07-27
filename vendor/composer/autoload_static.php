@@ -9,6 +9,9 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '72579e7bd17821bb1321b87411366eae' => __DIR__ . '/..' . '/illuminate/support/helpers.php',
+        '160419db6acb04ff0f6e7e334f6f4119' => __DIR__ . '/../..' . '/application/libraries/TraceFormatter.php',
+        '96a6bb67aad11918bc2c434cb9a41f86' => __DIR__ . '/../..' . '/application/libraries/TraceLog.php',
+        '7d176831b4e3e8bf0e4fcfa3aa4e3503' => __DIR__ . '/../..' . '/application/helpers/common_helper.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -20,7 +23,12 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
         'P' => 
         array (
             'Psr\\SimpleCache\\' => 16,
+            'Psr\\Log\\' => 8,
             'Psr\\Container\\' => 14,
+        ),
+        'M' => 
+        array (
+            'Monolog\\' => 8,
         ),
         'I' => 
         array (
@@ -53,9 +61,17 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
         array (
             0 => __DIR__ . '/..' . '/psr/simple-cache/src',
         ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+        ),
         'Psr\\Container\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
+        ),
+        'Monolog\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
         ),
         'Illuminate\\Support\\' => 
         array (
