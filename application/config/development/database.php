@@ -74,19 +74,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
-//production
-$hostname = '100.90.163.51';
-$username = 'its_tool_its_tool_rw';
-$password = 'Oibvwqpc7zyUTQ2';
-$database = 'its_tool';
-$port = 8002;
-
-//development
 $hostname = '100.90.164.31';
 $username = 'root';
 $password = 'Znjty@Didi@2017';
 $database = 'its_tool';
-$port = 8002;
+$port = 3306;
 
 $db['default'] = array(
     'dsn'   => '',
