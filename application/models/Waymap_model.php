@@ -24,9 +24,10 @@ class Waymap_model extends CI_Model
     /**
     * 根据路口ID串获取路口名称
     * @param logic_junction_ids     逻辑路口ID串     string
+    * @param onlyIdName             是否只需要 ID NAME boolean
     * @return array
     */
-    public function getJunctionInfo($ids)
+    public function getJunctionInfo($ids, $onlyIdName = false)
     {
         $data['logic_ids'] = $ids;
         $data['token'] = $this->token;
@@ -42,7 +43,17 @@ class Waymap_model extends CI_Model
             if ($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])) {
                 return [];
             }
-            return $res['data'];
+
+            if(!$onlyIdName) {
+                return $res['data'];
+            } else {
+                $result = [];
+                foreach ($res['data'] as $datum) {
+                    $result[$datum['logic_junction_id']] = $datum['name'];
+                }
+                return $result;
+            }
+
         } catch (Exception $e) {
             return [];
         }
