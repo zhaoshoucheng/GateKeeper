@@ -14,7 +14,7 @@ use Monolog\Handler\StreamHandler;
  * Class TraceLog
  *
  * 一、使用方法
- * $logger = new TraceLog("your.log");
+ * $logger = new TraceLog("","your.log");
  * $logger->Info(111,["name"=>"hello_name"]);
  * 查看方法
  * tail -f your.log.inf
@@ -32,30 +32,31 @@ use Monolog\Handler\StreamHandler;
  */
 class TraceLog
 {
-    private static $loggerMap;
     private $logger;
     private $_global_log_id = 0;
     private $_global_trace_id = 0;
     private $_global_span_id = 0;
     private $_global_parent_span_id = 0;
+    private $actionMap = [];        //action列表
     private $useGlobalTraceId = 0;  //1 使用全局trace_id
+    private $plateform;
 
-    function __construct($name = "default", $path, $userGlobalTraceId=0)
+    public function __construct($name = "default", $path="", $actionMap=[], $platform="", $userGlobalTraceId=0)
     {
         $this->logger = new Logger($name);
         $this->setPushHandler($path);
         $this->setPushProcessor();
         $this->useGlobalTraceId = $userGlobalTraceId;
-
-        self::$loggerMap[$name] = $this;
+        $this->actionMap = $actionMap;
+        $this->plateform = $platform;
     }
 
-    public static function getInstance($name, $path, $userGlobalTraceId=0)
-    {
-        if (isset(self::$loggerMap[$name])) {
-            return self::$loggerMap[$name];
-        }
-        return new TraceLog($name, $path, $userGlobalTraceId=0);
+    public function getAction($action){
+        return isset($this->actionMap[$action]) ? $this->actionMap[$action] : false;
+    }
+
+    public function getPlateform(){
+        return $this->plateform;
     }
 
     public function info($message, $context = array(), $dltag = "_undef")
@@ -81,7 +82,7 @@ class TraceLog
     {
         $dateFormat = "Y-m-d\TH:i:s.000P";
         $output = "[%level_name%][%datetime%][%message%] %dltag%||%context%\n";
-        $formatter = new TraceFormatter($output, $dateFormat);
+        $formatter = new TraceLogFormatter($output, $dateFormat);
 
         $stream = new StreamHandler($path . ".inf", Logger::INFO);
         $stream->setFormatter($formatter);
@@ -209,7 +210,6 @@ class TraceLog
     {
         return t_gen_random_id();
     }
-
 
     /**
      * int to hex string

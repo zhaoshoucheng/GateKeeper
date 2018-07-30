@@ -1,31 +1,31 @@
 <?php
-use Didi\Cloud\TraceLog\TraceLog;
+use Didi\Cloud\TraceLog\TraceLogFactory;
 
 if (!function_exists('operateLog')) {
     /**
      * 记录操作日志
-     * @param $message
-     * @param $context
+     * @param string $userName      操作人
+     * @param string $actionTag     操作action
+     * @param int    $itemId        操作对象主键Id
+     * @param array  $changeValue   更改内容 var=>val
+     * @param array  $extra         附加信息 var=>val
+     * @throws Exception
      */
     function operateLog($userName, $actionTag, $itemId, $changeValue, $extra = [])
     {
-        //请先自定义action, 否则会抛出异常.
-        $actionMap = [
-            'adapt_area_switch_edit' => '自适应区域配时开关修改',
-        ];
-        if (empty($actionMap[$actionTag])) {
+        $logger = TraceLogFactory::getInstance("operate_log");
+        $action = $logger->getAction($actionTag);
+        if (!$action) {
             throw new \Exception("请先定义 action.");
         }
-
-        $logger = TraceLog::getInstance("operate_log", "");
         $context["item_id"] = $itemId;
         $context["user_name"] = $userName;
         $context["action_tag"] = $actionTag;
-        $context["action_detail"] = $actionMap[$actionTag];
+        $context["action_detail"] = $action;
         $context["change_value"] = $changeValue;
 
         //系统默认
-        $context["platform"] = "itstool";   //项目名
+        $context["platform"] = $logger->getPlateform();   //项目名
         $context["create_time"] = date("Y-m-d H:i:s");
 
         $context = array_merge($extra, $context);
@@ -33,12 +33,14 @@ if (!function_exists('operateLog')) {
     }
 
     /**
-     * 初始化trace日志
-     * @param $path string  日志路径
-     * @param int $userGlobalTraceId 0=使用全局trace_id
+     * 初始化操作日志
+     * @param string    $path            日志路径
+     * @param array     $actionMap       操作action数组
+     * @param string    $platform        项目名
+     * @param int $userGlobalTraceId     是否使用全局trace_id方法 0=不使用 1=使用
      */
-    function initOperateTraceLog($path, $userGlobalTraceId = 0)
+    function initOperateLog($path, $actionMap, $platform="itstool", $userGlobalTraceId = 0)
     {
-        TraceLog::getInstance("operate_log", $path, $userGlobalTraceId);
+        TraceLogFactory::getInstance("operate_log", $path, $actionMap, $platform, $userGlobalTraceId);
     }
 }
