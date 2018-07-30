@@ -10,5 +10,7 @@ if( !function_exists('pre_controller')){
         gen_logid();
         gen_traceid();
         log_request();
+
+        initOperateTraceLog($ci->config->item('log_path')."operate_log.log", 1);
     }
 }

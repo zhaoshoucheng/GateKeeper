@@ -32,6 +32,12 @@ class Welcome extends CI_Controller {
 		$this->load->view('welcome_message');
 	}
 
+    public function operateLog()
+    {
+        //追加相应信息
+        operateLog("niuyufu", "adapt_area_switch_edit", 516, ["old" => "status=0", "new" => "status=1",]);
+        echo "operateLog";
+    }
 
     public function demo()
     {

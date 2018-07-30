@@ -9,6 +9,7 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '72579e7bd17821bb1321b87411366eae' => __DIR__ . '/..' . '/illuminate/support/helpers.php',
+        '9937fe4496a0ac77b255d131c17706fc' => __DIR__ . '/..' . '/niuyufu/php_tracelog/src/common_helper.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -20,7 +21,12 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
         'P' => 
         array (
             'Psr\\SimpleCache\\' => 16,
+            'Psr\\Log\\' => 8,
             'Psr\\Container\\' => 14,
+        ),
+        'M' => 
+        array (
+            'Monolog\\' => 8,
         ),
         'I' => 
         array (
@@ -32,6 +38,7 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
         'D' => 
         array (
             'Doctrine\\Common\\Inflector\\' => 26,
+            'Didi\\Cloud\\TraceLog\\' => 20,
             'Didi\\Cloud\\ItsMap\\' => 18,
         ),
         'C' => 
@@ -53,9 +60,17 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
         array (
             0 => __DIR__ . '/..' . '/psr/simple-cache/src',
         ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+        ),
         'Psr\\Container\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
+        ),
+        'Monolog\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
         ),
         'Illuminate\\Support\\' => 
         array (
@@ -76,6 +91,10 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
         'Doctrine\\Common\\Inflector\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/inflector/lib/Doctrine/Common/Inflector',
+        ),
+        'Didi\\Cloud\\TraceLog\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/niuyufu/php_tracelog/src/TraceLog',
         ),
         'Didi\\Cloud\\ItsMap\\' => 
         array (
