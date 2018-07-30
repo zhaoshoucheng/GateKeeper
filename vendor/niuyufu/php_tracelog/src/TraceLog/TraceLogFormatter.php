@@ -3,14 +3,10 @@ namespace Didi\Cloud\TraceLog;
 use Monolog\Formatter\NormalizerFormatter;
 
 /**
- * Formats incoming records into a one-line string
- *
- * This is especially useful for logging to files
- *
- * @author Jordi Boggiano <j.boggiano@seld.be>
- * @author Christophe Coevoet <stof@notk.org>
+ * Class TraceLogFormatter
+ * @package Didi\Cloud\TraceLog
  */
-class TraceFormatter extends NormalizerFormatter
+class TraceLogFormatter extends NormalizerFormatter
 {
     const SIMPLE_FORMAT = "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n";
 

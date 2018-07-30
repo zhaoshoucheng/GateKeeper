@@ -3,8 +3,12 @@
 if (!function_exists('operateLog')) {
     /**
      * 记录操作日志
-     * @param $message
-     * @param $context
+     * @param $userName string      当前用户名
+     * @param $actionTag string     当前操作tag
+     * @param $itemId   string      当前操作主键Id
+     * @param $changeValue string   当前操作变更内容
+     * @param array $extra array    附加内容
+     * @throws Exception
      */
     function operateLog($userName, $actionTag, $itemId, $changeValue, $extra = [])
     {

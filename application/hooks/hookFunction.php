@@ -11,6 +11,10 @@ if( !function_exists('pre_controller')){
         gen_traceid();
         log_request();
 
-        initOperateTraceLog($ci->config->item('log_path')."operate_log.log", 1);
+        $ci->load->config('nconf');
+        initOperateLog($ci->config->item('log_path')."operate_log.log",
+            $ci->config->item('action_log_map'),
+            "itstool",
+            1);
     }
 }
