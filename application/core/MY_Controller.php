@@ -28,6 +28,7 @@ class MY_Controller extends CI_Controller {
             && $host != '100.90.164.31:8089'
             && $host != '10.95.100.106:8088'
             && $host != '100.90.164.31:8099'
+            && $host != '100.90.164.31:8013'
             && $host != '100.95.100.106:8088'
             && $host != '100.90.164.31:8082') {
             $this->is_check_login = 1;
@@ -106,7 +107,7 @@ class MY_Controller extends CI_Controller {
                 'data' => $this->output_data,
                 'username' => $this->username,
             );
-            echo json_encode($output);
+            $this->set_output(json_encode($output));
         }
     }
 
