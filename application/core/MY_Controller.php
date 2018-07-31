@@ -97,6 +97,7 @@ class MY_Controller extends CI_Controller {
             $this->errmsg = $errmsgMap[$this->errno];
         }
         if(!empty($this->templates)){
+
             foreach ($this->templates as $t){
                 echo $this->load->view($t, array(), true);
             }
@@ -107,7 +108,8 @@ class MY_Controller extends CI_Controller {
                 'data' => $this->output_data,
                 'username' => $this->username,
             );
-            $this->output->set_output(json_encode($output));
+            $this->output->set_content_type('application/json')
+                ->set_output(json_encode($output));
         }
     }
 
