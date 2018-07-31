@@ -108,6 +108,7 @@ class MY_Controller extends CI_Controller {
                 'data' => $this->output_data,
                 'username' => $this->username,
             );
+            $this->output->set_header('Content-Type: application/json; charset=utf-8');
             echo json_encode($output);
         }
     }
