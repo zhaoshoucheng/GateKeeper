@@ -153,7 +153,7 @@ class Overview_model extends CI_Model
     {
         //合并所有指标
         foreach ($target['quota'] as $key => &$quote) {
-            $quote = array_merge($quote, $item['quota']['key']);
+            $quote = array_merge($quote, $item['quota'][$key]);
         }
 
         //合并报警信息
