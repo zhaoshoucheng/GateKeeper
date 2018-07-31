@@ -523,7 +523,7 @@ class Junction_model extends CI_Model
 
         // 组织 junction_id=>name 数组 用于匹配路口名称
         $junctionIdName = [];
-        if (count($junction_info) >= 1) {
+        if (count($junctionInfo) >= 1) {
             $junctionIdName = array_column($junctionInfo, 'name', 'logic_junction_id');
         }
 

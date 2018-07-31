@@ -484,6 +484,10 @@ class Junction extends MY_Controller
             }
         }
 
+        if (!isset($params['orderby'])) {
+            $params['orderby'] = 2;
+        }
+
         $data = [
             'task_id'      => intval($params['task_id']),
             'city_id'      => intval($params['city_id']),
