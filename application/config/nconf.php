@@ -348,3 +348,9 @@ $config['back_timing_roll'] = [
 	'lixiaolx_v', 'duzelong', 'wangzhimingjay','tanchenxi', 'tjlifuliang_i',
 	'hanyuhan','umzhaoyan_i','yangjianhao','wangxingmin_i','larrymeiyu_i','mengyuan','wangzihao_i','zhengjianfeng','tianshanshan','wangshengguang',
 ];
+
+
+// 定义tracelog的action
+$config['action_log_map'] = [
+    'adapt_area_switch_edit' => '自适应区域配时开关修改',
+];

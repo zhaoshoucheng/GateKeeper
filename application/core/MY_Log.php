@@ -218,7 +218,7 @@ class MY_Log extends CI_Log {
         $class = $this->get_caller_class_name($bt[3]);
         $function = $this->get_caller_function_name($bt[3]);
         $file_line_str = $file_line.' '.$class.' '.$function;
-        $micro = microtime();
+        $micro = microtime(true);
         $sec = intval(substr($micro, strpos($micro," ")));
         //$ms = floor($micro*1000000);    //微妙
         $us = floor($micro*1000000);    //微妙

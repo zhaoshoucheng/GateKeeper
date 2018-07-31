@@ -55,76 +55,76 @@ class Arterialgreenwave extends MY_Controller
 
         if (empty($params['token'])) {
             $data['token'] = md5(microtime(true) * mt_rand(1, 10000));
+
+            // junctions
+            if (empty($params['junctions']) || !is_array($params['junctions'])) {
+                $this->errno = ERR_PARAMETERS;
+                $this->errmsg = '参数junctions 必须为数组格式且不能为空！';
+                return;
+            }
+            $data['junctions'] = $params['junctions'];
+
+            // method
+            if (!isset($params['method'])) {
+                $this->errno = ERR_PARAMETERS;
+                $this->errmsg = '参数method为必传参数！';
+                return;
+            }
+            if (!in_array(intval($params['method']), [0, 1, 2], true)) {
+                $this->errno = ERR_PARAMETERS;
+                $this->errmsg = '参数method传递错误！';
+                return;
+            }
+            $data['method'] = intval($params['method']);
+
+            // 当获取正向或双向时
+            if ($data['method'] == 0 || $data['method'] == 2) {
+                // forward_length
+                if (empty($params['forward_length']) || !is_array($params['forward_length'])) {
+                    $this->errno = ERR_PARAMETERS;
+                    $this->errmsg = '参数forward_length必须为数组格式且不为空！';
+                    return;
+                }
+                array_unshift($params['forward_length'], 0);
+                array_push($params['forward_length'], 0);
+                $data['forward_length'] = $params['forward_length'];
+
+                // forward_speed
+                if (empty($params['forward_speed']) || !is_array($params['forward_speed'])) {
+                    $this->errno = ERR_PARAMETERS;
+                    $this->errmsg = '参数forward_speed必须为数组格式且不为空！';
+                    return;
+                }
+                array_unshift($params['forward_speed'], 0);
+                array_push($params['forward_speed'], 0);
+                $data['forward_speed'] = $params['forward_speed'];
+
+            }
+
+            // 当获取反向或双向时
+            if ($data['method'] == 1 || $data['method'] == 2) {
+                // reverse_length
+                if (empty($params['reverse_length']) || !is_array($params['reverse_length'])) {
+                    $this->errno = ERR_PARAMETERS;
+                    $this->errmsg = '参数forward_length必须为数组格式且不为空！';
+                    return;
+                }
+                array_unshift($params['reverse_length'], 0);
+                array_push($params['reverse_length'], 0);
+                $data['reverse_length'] = $params['reverse_length'];
+
+                // reverse_speed
+                if (empty($params['reverse_speed']) || !is_array($params['reverse_speed'])) {
+                    $this->errno = ERR_PARAMETERS;
+                    $this->errmsg = '参数reverse_speed必须为数组格式且不为空！';
+                    return;
+                }
+                array_unshift($params['reverse_speed'], 0);
+                array_push($params['reverse_speed'], 0);
+                $data['reverse_speed'] = $params['reverse_speed'];
+            }
         } else {
             $data['token'] = html_escape(trim($params['token']));
-        }
-
-        /// junctions
-        if (empty($params['junctions']) || !is_array($params['junctions'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数junctions 必须为数组格式且不能为空！';
-            return;
-        }
-        $data['junctions'] = $params['junctions'];
-
-        // method
-        if (!isset($params['method'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数method为必传参数！';
-            return;
-        }
-        if (!in_array(intval($params['method']), [0, 1, 2], true)) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数method传递错误！';
-            return;
-        }
-        $data['method'] = intval($params['method']);
-
-        // 当获取正向或双向时
-        if ($data['method'] == 0 || $data['method'] == 2) {
-            // forward_length
-            if (empty($params['forward_length']) || !is_array($params['forward_length'])) {
-                $this->errno = ERR_PARAMETERS;
-                $this->errmsg = '参数forward_length必须为数组格式且不为空！';
-                return;
-            }
-            array_unshift($params['forward_length'], 0);
-            array_push($params['forward_length'], 0);
-            $data['forward_length'] = $params['forward_length'];
-
-            // forward_speed
-            if (empty($params['forward_speed']) || !is_array($params['forward_speed'])) {
-                $this->errno = ERR_PARAMETERS;
-                $this->errmsg = '参数forward_speed必须为数组格式且不为空！';
-                return;
-            }
-            array_unshift($params['forward_speed'], 0);
-            array_push($params['forward_speed'], 0);
-            $data['forward_speed'] = $params['forward_speed'];
-
-        }
-
-        // 当获取反向或双向时
-        if ($data['method'] == 1 || $data['method'] == 2) {
-            // reverse_length
-            if (empty($params['reverse_length']) || !is_array($params['reverse_length'])) {
-                $this->errno = ERR_PARAMETERS;
-                $this->errmsg = '参数forward_length必须为数组格式且不为空！';
-                return;
-            }
-            array_unshift($params['reverse_length'], 0);
-            array_push($params['reverse_length'], 0);
-            $data['reverse_length'] = $params['reverse_length'];
-
-            // reverse_speed
-            if (empty($params['reverse_speed']) || !is_array($params['reverse_speed'])) {
-                $this->errno = ERR_PARAMETERS;
-                $this->errmsg = '参数reverse_speed必须为数组格式且不为空！';
-                return;
-            }
-            array_unshift($params['reverse_speed'], 0);
-            array_push($params['reverse_speed'], 0);
-            $data['reverse_speed'] = $params['reverse_speed'];
         }
 
         $result = $this->arterialgreenwave_model->getGreenWaveOptPlan($data);

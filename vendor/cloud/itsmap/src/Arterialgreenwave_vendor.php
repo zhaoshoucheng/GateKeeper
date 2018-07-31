@@ -67,7 +67,7 @@ class Arterialgreenwave_vendor
                 }
             }
 
-            $vals->junction_list[] = new JunctionOfRoute($v);
+            $vals->junction_list[] = new JunctionOfRoute($data['junctions'][$k]);
         }
 
         $method = intval($data['method']); // 0：正向 1：反向 2：双向
