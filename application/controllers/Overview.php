@@ -59,7 +59,7 @@ class Overview extends MY_Controller
 
         $data = $this->overview_model->junctionsList($data);
 
-        return $this->response($data);
+        $this->response($data);
     }
 
     /**
