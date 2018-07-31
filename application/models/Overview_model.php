@@ -48,7 +48,7 @@ class Overview_model extends CI_Model
             'value' => ['name', 'lng', 'lat']
         ]);
 
-        $result = array_map(function ($item) use ($junctionsInfo) {
+        $result = array_map(function ($item) use ($junctionsInfo, $data) {
             $junctionInfo = $junctionsInfo[$item['logic_junction_id']] ?? '';
             return [
                 'logic_junction_id' => $item['logic_junction_id'],
@@ -57,7 +57,7 @@ class Overview_model extends CI_Model
                 'lat' => $junctionInfo['lat'] ?? '',
                 'quota' => $this->createQuotaInfo($item),
                 'alarm_info' => $this->getAlarmInfo($item),
-                'junction_status' => $this->getJunctionStatus($item)
+                'junction_status' => $this->getJunctionStatus($item, $data['city_id'])
             ];
         }, $result);
 
@@ -80,9 +80,13 @@ class Overview_model extends CI_Model
      * @param $item
      * @return array
      */
-    private function getJunctionStatus($item)
+    private function getJunctionStatus($item, $city_id)
     {
-        $junction_status = $this->config->item('junction_status')[$item['id']];
+        $junction_status = $this->config->item('junction_status')[$city_id] ?? null;
+
+        if(!is_null($junction_status)) {
+            return [];
+        }
 
         $formula_alarm = $junction_status[4]['formula'];
 
