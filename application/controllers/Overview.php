@@ -58,6 +58,8 @@ class Overview extends MY_Controller
         $data['time_point'] = $params['time_point'];
 
         $data = $this->overview_model->junctionsList($data);
+
+        return $this->response($data);
     }
 
     /**
