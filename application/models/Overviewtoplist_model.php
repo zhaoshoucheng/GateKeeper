@@ -37,13 +37,21 @@ class Overviewtoplist_model extends CI_Model
         return $this->topList('stop_time_cycle', $data);
     }
 
-    private function topList($column, $data)
+    /**
+     * 依据时间获取指定字段指定数目的数据
+     *
+     * @param $column
+     * @param $data
+     * @param $method max|sum|avg
+     * @return array
+     */
+    private function topList($column, $data, $method)
     {
         $result = [];
 
         $table = 'real_time_' . $data['city_id'];
 
-        $result = $this->db->select('logic_junction_id, hour' . $column)
+        $result = $this->db->select('logic_junction_id, hour, ' . $method . '(' . $column . ') as ' . $column)
             ->from($table)
             ->where('hour', date('H:i', strtotime($data['time_point'])))
             ->where('updated_at >=', $data['date'] . ' 00:00:00')

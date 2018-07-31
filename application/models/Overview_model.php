@@ -49,13 +49,12 @@ class Overview_model extends CI_Model
         ]);
 
         $result = array_map(function ($item) use ($junctionsInfo) {
-            $junctionInfo = $junctionsInfo[$item['logic_junction_id']];
+            $junctionInfo = $junctionsInfo[$item['logic_junction_id']] ?? '';
             return [
                 'logic_junction_id' => $item['logic_junction_id'],
-                //'logic_flow_id' => [$item['logic_flow_id']],
-                'junction_name' => $junctionInfo['name'],
-                'lng' => $junctionInfo['lng'],
-                'lat' => $junctionInfo['lat'],
+                'junction_name' => $junctionInfo['name'] ?? '',
+                'lng' => $junctionInfo['lng'] ?? '',
+                'lat' => $junctionInfo['lat'] ?? '',
                 'quota' => $this->createQuotaInfo($item),
                 'alarm_info' => $this->getAlarmInfo($item),
                 'junction_status' => $this->getJunctionStatus($item)
@@ -75,6 +74,12 @@ class Overview_model extends CI_Model
         ];
     }
 
+    /**
+     * 获取当前路口的状态
+     *
+     * @param $item
+     * @return array
+     */
     private function getJunctionStatus($item)
     {
         $junction_status = $this->config->item('junction_status')[$item['id']];
@@ -133,6 +138,13 @@ class Overview_model extends CI_Model
         return $temp;
     }
 
+    /**
+     * 合并数组成员
+     *
+     * @param $target
+     * @param $item
+     * @return mixed
+     */
     private function mergeJunctionResultItem($target, $item)
     {
         //合并所有指标
@@ -151,8 +163,8 @@ class Overview_model extends CI_Model
         return $target;
     }
 
-//    private function getAlarmInfo($item)
-//    {
-//
-//    }
+    private function getAlarmInfo($item)
+    {
+        return [];
+    }
 }
