@@ -101,3 +101,17 @@ $config['junction_status'] = [
         ],
     ],
 ];
+
+// 报警类别
+$config['alarm_category'] = [
+    1 => [
+        'name' => '溢流', // 类别名称
+        'key'  => 1,       // 类别KEY
+        'desc' => '',      // 描述
+    ],
+    2 => [
+        'name' => '过饱和',
+        'key'  => 2,
+        'desc' => '',
+    ],
+];
