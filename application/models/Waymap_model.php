@@ -24,10 +24,10 @@ class Waymap_model extends CI_Model
     /**
     * 根据路口ID串获取路口名称
     * @param logic_junction_ids     逻辑路口ID串     string
-    * @param onlyIdName             是否只需要 ID NAME boolean
+    * @param returnFormat           数据返回格式      array [key => 'id', value => ['name',...]]
     * @return array
     */
-    public function getJunctionInfo($ids, $onlyIdName = false)
+    public function getJunctionInfo($ids, $returnFormat = null)
     {
         $data['logic_ids'] = $ids;
         $data['token'] = $this->token;
@@ -44,13 +44,32 @@ class Waymap_model extends CI_Model
                 return [];
             }
 
-            if(!$onlyIdName) {
+            if(is_null($returnFormat)) {
                 return $res['data'];
             } else {
+
+                //检查 $returnFormat 格式
+                if(!is_array($returnFormat) || !array_key_exists('key')
+                    || !array_key_exists('value') || !is_string($returnFormat['key']
+                    || !(is_string($returnFormat['value']) || is_array($returnFormat['value']))))
+                    return $res['data'];
+
                 $result = [];
-                foreach ($res['data'] as $datum) {
-                    $result[$datum['logic_junction_id']] = $datum['name'];
+
+                if(is_string($returnFormat['value'])) {
+                    foreach ($res['data'] as $datum) {
+                        $result[$datum[$returnFormat['key']]] = $datum[$returnFormat['value']];
+                    }
+                } else {
+                    foreach ($res['data'] as $datum) {
+                        $temp = [];
+                        foreach ($returnFormat['value'] as $item) {
+                            $temp[$item] = $datum[$item];
+                        }
+                        $result[$datum[$returnFormat['key']]] = $temp;
+                    }
                 }
+
                 return $result;
             }
 

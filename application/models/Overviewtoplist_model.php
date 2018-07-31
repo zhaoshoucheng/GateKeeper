@@ -42,7 +42,7 @@ class Overviewtoplist_model extends CI_Model
 
         $ids = implode(',', array_column($result, 'logic_junction_id'));
 
-        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
+        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids, ['key' => 'logic_junction_id', 'value' => 'name']);
 
         array_map(function ($item) use ($column, $junctionIdNames) {
             return [
