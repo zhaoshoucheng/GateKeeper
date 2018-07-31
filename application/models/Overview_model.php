@@ -79,7 +79,10 @@ class Overview_model extends CI_Model
         $junction_status = $this->config->item('junction_status')[$city_id] ?? null;
 
         if(is_null($junction_status)) {
-            return [];
+            return [
+                'name' => '',
+                'key' => 0
+            ];
         }
 
         $formula_alarm = $junction_status[4]['formula'];
@@ -108,7 +111,10 @@ class Overview_model extends CI_Model
                 'key' => $junction_status[4]['key']
             ];
         } else {
-            return [];
+            return [
+                'name' => '',
+                'key' => 0
+            ];
         }
     }
 
