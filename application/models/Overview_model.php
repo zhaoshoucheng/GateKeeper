@@ -17,13 +17,7 @@ class Overview_model extends CI_Model
             $this->db = $this->load->database('default', true);
         }
 
-        $is_existed = $this->db->table_exists($this->tb);
-        if (!$is_existed) {
-            // 添加日志
-            return [];
-        }
-
-        $this->load->config('realtime_conf');
+        $this->config->load('realtime_conf');
         $this->load->model('waymap_model');
     }
 
@@ -84,7 +78,7 @@ class Overview_model extends CI_Model
     {
         $junction_status = $this->config->item('junction_status')[$city_id] ?? null;
 
-        if(!is_null($junction_status)) {
+        if(is_null($junction_status)) {
             return [];
         }
 
