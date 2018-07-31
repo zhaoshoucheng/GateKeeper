@@ -107,7 +107,7 @@ class MY_Controller extends CI_Controller {
                 'data' => $this->output_data,
                 'username' => $this->username,
             );
-            echo json_encode($output);
+            $this->output->set_output(json_encode($output));
         }
     }
 
