@@ -418,4 +418,25 @@ class Waymap_model extends CI_Model
 
     }
 
+    public function getFlowsInfo($junctionId, array $flowIds)
+    {
+        if(empty($junctionId)) {
+            return [];
+        }
+
+        try {
+
+            $getQuery = [
+                'token'    => $this->config->item('waymap_token'),
+                'user_id'  => $this->config->item('waymap_userid'),
+                ''
+            ];
+            $url = $this->config->item('waymap_interface') . '/signal-map/mapFlow/flowsByJunction';
+            $url = $url."?".http_build_query($getQuery);
+        } catch (Exception $e) {
+
+            return [];
+        }
+    }
+
 }

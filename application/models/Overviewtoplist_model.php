@@ -43,12 +43,12 @@ class Overviewtoplist_model extends CI_Model
 
         $table = 'real_time_' . $data['city_id'];
 
-        $result = $this->db->select('logic_junction_id, hour, logic_flow_id' . $column)
+        $result = $this->db->select('logic_junction_id, hour' . $column)
             ->from($table)
             ->where('hour', date('H:i', strtotime($data['time_point'])))
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
-            ->group_by('logic_flow_id')
+            ->group_by('logic_junction_id')
             ->limit($data['pagesize'])
             ->get()->result_array();
 

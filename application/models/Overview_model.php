@@ -33,15 +33,14 @@ class Overview_model extends CI_Model
 
         $table = 'real_time_' . $data['city_id'];
 
-        $result = $this->db->select('logic_junction_id, hour, stop_delay, logic_flow_id')
+        $result = $this->db->select('*')
             ->from($table)
             ->where('hour', date('H:i', strtotime($data['time_point'])))
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
-            ->group_by('logic_flow_id')
             ->get()->result_array();
 
-        $ids = implode(',', array_column($result, 'logic_junction_id'));
+        $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
         //获取自定义的返回格式
         $junctionsInfo = $this->waymap_model->getJunctionInfo($ids, [
@@ -49,35 +48,31 @@ class Overview_model extends CI_Model
             'value' => ['name', 'lng', 'lat']
         ]);
 
-        array_map(function ($item) use ($junctionsInfo) {
+        $result = array_map(function ($item) use ($junctionsInfo) {
             $junctionInfo = $junctionsInfo[$item['logic_junction_id']];
             return [
                 'logic_junction_id' => $item['logic_junction_id'],
+                //'logic_flow_id' => [$item['logic_flow_id']],
                 'junction_name' => $junctionInfo['name'],
                 'lng' => $junctionInfo['lng'],
                 'lat' => $junctionInfo['lat'],
                 'quota' => $this->createQuotaInfo($item),
-                'alarm_info' => [],
+                'alarm_info' => $this->getAlarmInfo($item),
                 'junction_status' => $this->getJunctionStatus($item)
             ];
         }, $result);
+
+        $result = $this->mergeJunctionResult($result);
 
         return $result;
     }
 
     private function createQuotaInfo($item)
     {
-        $real_time_quota = $this->config->item('real_time_quota');
-
-        array_map(function ($key, $value) use ($item) {
-            return [
-                'name' => $value['name'],
-                'value' => $item[$key],
-                'unit' => $value['unit']
-            ];
-        }, $real_time_quota);
-
-        return $real_time_quota;
+        return [
+            'stop_delay' => [$item['stop_delay']],
+            'stop_time_cycle' => [$item['stop_time_cycle']]
+        ];
     }
 
     private function getJunctionStatus($item)
@@ -113,4 +108,51 @@ class Overview_model extends CI_Model
             return [];
         }
     }
+
+    /**
+     * 合并结果数组，返回数据粒度为 junction
+     *
+     * @param $result
+     * @return array
+     */
+    private function mergeJunctionResult($result)
+    {
+        $temp = [];
+
+        foreach ($result as $item) {
+            $temp[$item['logic_junction_id']] = isset($temp[$item['logic_junction_id']]) ?
+                $this->mergeJunctionResultItem($temp[$item['logic_junction_id']], $item) :
+                $item;
+        }
+
+        foreach ($temp as &$item) {
+            $item['quota']['stop_delay'] = array_sum($item['quota']['stop_delay']) / count($item['quota']['stop_delay']);
+            $item['quota']['stop_time_cycle'] = max($item['quota']['stop_time_cycle']);
+        }
+
+        return $temp;
+    }
+
+    private function mergeJunctionResultItem($target, $item)
+    {
+        //合并所有指标
+        foreach ($target['quota'] as $key => &$quote) {
+            $quote = array_merge($quote, $item['quota']['key']);
+        }
+
+        //合并报警信息
+        $target['alarm_info'] = array_merge($target['alarm_info'], $item['alarm_info']);
+
+        //取所有路口状态 key 值最大的一个
+        $target['junction_status'] =
+            $target['junction_status']['key'] > $item['junction_status']['key'] ?
+                $target['junction_status'] : $item['junction_status'];
+
+        return $target;
+    }
+
+//    private function getAlarmInfo($item)
+//    {
+//
+//    }
 }
