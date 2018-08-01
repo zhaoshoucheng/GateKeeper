@@ -110,7 +110,37 @@ class Overview extends MY_Controller
     */
     public function junctionSurvey()
     {
+        $params = $this->input->post();
 
+        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The value of city_id is wrong.';
+            return;
+        }
+
+        $data['city_id'] = $params['city_id'];
+
+        if(!isset($params['date']) ||
+            date('Y-m-d', strtotime($params['date'])) !== $params['date']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The format of date is wrong.';
+            return;
+        }
+
+        $data['date'] = $params['date'];
+
+        if(!isset($params['time_point']) ||
+            date('H:i:s', strtotime($params['time_point'])) !== $params['time_point']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The format of time_point is wrong.';
+            return;
+        }
+
+        $data['time_point'] = $params['time_point'];
+
+        $data = $this->overview_model->junctionSurvey($data);
+
+        $this->response($data);
 
     }
 

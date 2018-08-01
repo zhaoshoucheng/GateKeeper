@@ -87,6 +87,17 @@ class Overview_model extends CI_Model
         return ['dataList' => $result];
     }
 
+    public function junctionSurvey($data)
+    {
+
+    }
+
+    /**
+     * 构建指标信息
+     *
+     * @param $item
+     * @return array
+     */
     private function createQuotaInfo($item)
     {
         return [
@@ -194,6 +205,14 @@ class Overview_model extends CI_Model
         return $target;
     }
 
+    /**
+     * 生成报警信息
+     *
+     * @param $item
+     * @param $city_id
+     * @param $flowsInfo
+     * @return array|string
+     */
     private function getAlarmInfo($item, $city_id, $flowsInfo)
     {
         //获取路口当前 flow 的状态
