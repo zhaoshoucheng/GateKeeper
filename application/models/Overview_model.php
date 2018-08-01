@@ -140,7 +140,7 @@ class Overview_model extends CI_Model
         }
 
         foreach ($temp as &$item) {
-            $item['quota']['stop_delay']      = array_sum($item['quota']['stop_delay']) / count($item['quota']['stop_delay']);
+            $item['quota']['stop_delay']      = round(array_sum($item['quota']['stop_delay']) / count($item['quota']['stop_delay']), 2);
             $item['quota']['stop_time_cycle'] = max($item['quota']['stop_time_cycle']);
         }
 
@@ -162,7 +162,7 @@ class Overview_model extends CI_Model
         }
 
         //合并报警信息
-        $target['alarm_info'] = array_merge($target['alarm_info'], $item['alarm_info']);
+        $target['alarm_info'] = array_merge($target['alarm_info'], $item['alarm_info']) ?? [];
 
         //取所有路口状态 key 值最大的一个
         $target['junction_status'] =
