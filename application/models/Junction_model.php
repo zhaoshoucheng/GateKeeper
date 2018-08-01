@@ -41,22 +41,22 @@ class Junction_model extends CI_Model
     */
     public function getAllCityJunctionInfo($data)
     {
-        $quota_key = $data['quota_key'];
+        $quotaKey = $data['quota_key'];
 
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
-        $all_city_junctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
-        if (count($all_city_junctions) < 1 || !$all_city_junctions) {
+        $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
+        if (count($allCityJunctions) < 1 || !$allCityJunctions) {
             return [];
         }
 
-        $selectstr = empty($this->selectColumns($quota_key)) ? '' : ',' . $this->selectColumns($quota_key);
+        $selectstr = empty($this->selectColumns($quotaKey)) ? '' : ',' . $this->selectColumns($quotaKey);
         if (empty($selectstr)) {
             return [];
         }
 
         $select = '';
         if ($data['type'] == 1) { // 综合
-            $select = "id, junction_id, max({$quota_key}) as {$quota_key}";
+            $select = "id, junction_id, max({$quotaKey}) as {$quotaKey}";
         } else {
             $select = 'id, junction_id' . $selectstr;
         }
@@ -69,8 +69,9 @@ class Junction_model extends CI_Model
         $confidenceConf = $this->config->item('confidence');
         if (isset($data['confidence'])
             && (int)$data['confidence'] >= 1
-            && array_key_exists($data['confidence'], $confidenceConf)) {
-            $where .= ' and ' . $quota_key . '_confidence ' . $confidenceConf[$data['confidence']]['expression'];
+            && array_key_exists($data['confidence'], $confidenceConf))
+        {
+            $where .= ' and ' . $confidenceConf[$data['confidence']]['sql_where']($quotaKey . '_confidence');
         }
 
         $this->db->select($select);
@@ -82,26 +83,20 @@ class Junction_model extends CI_Model
 
         $res = $this->db->get()->result_array();
 
-        // 指标状态 1：高 2：中 3：低
-        $quota_key_conf = $this->config->item('junction_quota_key');
-        $temp_quota_data = [];
+        $quotaKeyConf = $this->config->item('junction_quota_key');
+        $tempQuotaData = [];
         foreach ($res as &$v) {
-            if ($v[$quota_key] > $quota_key_conf[$quota_key]['status_max']) {
-                $v['quota_status'] = 1;
-            } elseif ($v[$quota_key] <= $quota_key_conf[$quota_key]['status_max']
-                    && $v[$quota_key] > $quota_key_conf[$quota_key]['status_min']) {
-                $v['quota_status'] = 2;
-            } else {
-                $v['quota_status'] = 3;
-            }
-            $v[$quota_key] = round($v[$quota_key], $quota_key_conf[$quota_key]['round_num']);
-            $temp_quota_data[$v['junction_id']]['list'][$quota_key] = $v[$quota_key];
-            $temp_quota_data[$v['junction_id']]['list']['quota_status'] = $v['quota_status'];
+            // 指标状态 1：高 2：中 3：低
+            $v['quota_status'] = $quotaKeyConf[$quotaKey]['status_formula']($v[$quotaKey]);
+
+            $v[$quotaKey] = $quotaKeyConf[$quotaKey]['round']($v[$quotaKey]);
+            $tempQuotaData[$v['junction_id']]['list'][$quotaKey] = $v[$quotaKey];
+            $tempQuotaData[$v['junction_id']]['list']['quota_status'] = $v['quota_status'];
         }
 
-        $result_data = $this->mergeAllJunctions($all_city_junctions, $temp_quota_data, 'quota_detail');
+        $resultData = $this->mergeAllJunctions($allCityJunctions, $tempQuotaData, 'quota_detail');
 
-        return $result_data;
+        return $resultData;
     }
 
     /**
@@ -559,7 +554,19 @@ class Junction_model extends CI_Model
     */
     public function getDiagnosePageSimpleJunctionDetail($data)
     {
-        $selectStr = $this->selectColumns($data['diagnose_key']);
+        /*
+         * 因为过饱和问题与空放问题共用一个指标，现空放问题的KEY与指标KEY相同
+         * 所以可以把过饱和问题的KEY忽略
+         */
+        $tempDiagnoseKey = [];
+        foreach ($data['diagnose_key'] as $k=>$v) {
+            $tempDiagnoseKey[$k] = $v;
+            if ($v == 'over_saturation') {
+                $tempDiagnoseKey[$k] = 'saturation_index';
+            }
+        }
+        array_unique($tempDiagnoseKey);
+        $selectStr = $this->selectColumns($tempDiagnoseKey);
         $select = "id, junction_id, {$selectStr}, start_time, end_time, movements";
 
         // 组织where条件
@@ -596,7 +603,20 @@ class Junction_model extends CI_Model
     public function getJunctionQuestionTrend($data)
     {
         if (!empty($data['diagnose_key'])) {
-            $selectStr = $this->selectColumns($data['diagnose_key']);
+            /*
+             * 因为过饱和问题与空放问题共用一个指标，现空放问题的KEY与指标KEY相同
+             * 所以可以把过饱和问题的KEY忽略
+             */
+            $tempDiagnoseKey = [];
+            foreach ($data['diagnose_key'] as $k=>$v) {
+                $tempDiagnoseKey[$k] = $v;
+                if ($v == 'over_saturation') {
+                    $tempDiagnoseKey[$k] = 'saturation_index';
+                }
+            }
+            array_unique($tempDiagnoseKey);
+
+            $selectStr = $this->selectColumns($tempDiagnoseKey);
             $select = "id, junction_id, {$selectStr}, stop_delay, time_point";
         } else {
             $select = "id, junction_id, stop_delay, time_point";
@@ -915,7 +935,7 @@ class Junction_model extends CI_Model
             $v['confidence'] = $confidenceConf[$v['confidence']]['name'];
             foreach ($flowQuotaKeyConf as $kk=>$vv) {
                 if (isset($v[$kk])) {
-                    $v[$kk] = round($v[$kk], $vv['round_num']);
+                    $v[$kk] = $vv['round']($v[$kk]);
                 }
             }
             $resultData['notmal_movements'][$k] = array_intersect_key($v, $tempArr);
@@ -932,44 +952,46 @@ class Junction_model extends CI_Model
             匹配此路口有问题的movement并放入此问题集合中
         *********************************************/
         foreach ($diagnoseConf as $k=>$v) {
-            if (isset($data[$k])) {
-                if ($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
-                    // 问题名称
-                    $resultData['diagnose_detail'][$k]['name'] = $v['name'];
+            /*
+             * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
+             * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
+             */
+            $diagnoseKey = $k;
+            if ($k == 'over_saturation') {
+                $diagnoseKey = 'saturation_index';
+            }
+            if (!isset($data[$diagnoseKey])) {
+                continue;
+            }
+            if ($v['junction_diagnose_formula']($data[$diagnoseKey])) {
+                // 问题名称
+                $resultData['diagnose_detail'][$k]['name'] = $v['name'];
 
-                    // 组织有此问题的movement集合
-                    $resultData['diagnose_detail'][$k]['movements'] = [];
+                // 组织有此问题的movement集合
+                $resultData['diagnose_detail'][$k]['movements'] = [];
 
-                    foreach ($v['flow_diagnose'] as $kk=>$vv) {
-                        $ruleCount = count($vv);
-                        if ($ruleCount < 1) {
-                            $resultData['diagnose_detail'][$k]['movements'] = [];
-                        }
-
-                        foreach ($data['movements'] as $kkk=>$vvv) {
-                            foreach ($vv as $vvvv) {
-                                if ($this->compare($vvv[$kk], $vvvv['threshold'], $vvvv['formula'])) {
-                                    // movement_id
-                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['movement_id']
-                                        = $vvv['movement_id'];
-                                    // movement中文名称-相位名称
-                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['comment']
-                                        = $flowIdName[$vvv['movement_id']];
-                                    // 此问题对应指标值
-                                    $resultData['diagnose_detail'][$k]['movements'][$kkk][$kk]
-                                        = round($vvv[$kk], $flowQuotaKeyConf[$kk]['round_num']);
-                                    // 置信度
-                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['confidence']
-                                        = $confidenceConf[$vvv['confidence']]['name'];
-                                }
-                            }
-                        }
+                foreach ($data['movements'] as $kk=>$vv) {
+                    // 问题对应的指标
+                    $diagnoseQuota = $v['flow_diagnose']['quota'];
+                    if ($v['flow_diagnose']['formula']($vv[$diagnoseQuota])) {
+                        // movement_id
+                        $resultData['diagnose_detail'][$k]['movements'][$kk]['movement_id']
+                        = $vv['movement_id'];
+                        // movement中文名称-相位名称
+                        $resultData['diagnose_detail'][$k]['movements'][$kk]['comment']
+                        = $flowIdName[$vv['movement_id']];
+                        // 此问题对应指标值
+                        $resultData['diagnose_detail'][$k]['movements'][$kk][$diagnoseQuota]
+                        = $flowQuotaKeyConf[$diagnoseQuota]['round']($vv[$diagnoseQuota]);
+                        // 置信度
+                        $resultData['diagnose_detail'][$k]['movements'][$kk]['confidence']
+                        = $confidenceConf[$vv['confidence']]['name'];
                     }
+                }
 
-                    if (!empty($resultData['diagnose_detail'][$k]['movements'])) {
-                        $resultData['diagnose_detail'][$k]['movements']
-                            = array_values($resultData['diagnose_detail'][$k]['movements']);
-                    }
+                if (!empty($resultData['diagnose_detail'][$k]['movements'])) {
+                    $resultData['diagnose_detail'][$k]['movements']
+                    = array_values($resultData['diagnose_detail'][$k]['movements']);
                 }
             }
         }
@@ -1003,9 +1025,9 @@ class Junction_model extends CI_Model
             $tempData[$i]['saturation_index'] = 0;
             $tempData[$i]['stop_delay'] = 0;
             $tempData[$i]['time_point'] = date('H:i', $i);
-            foreach ($data as $k=>$v) {
-                $tempData[strtotime($v['time_point'])] = $v;
-            }
+        }
+        foreach ($data as $k=>$v) {
+            $tempData[strtotime($v['time_point'])] = $v;
         }
         ksort($tempData);
 
@@ -1022,8 +1044,17 @@ class Junction_model extends CI_Model
                     continue;
                 }
 
+                /*
+                 * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
+                 * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
+                 */
+                $diagnoseKey = $k;
+                if ($k == 'over_saturation') {
+                    $diagnoseKey = 'saturation_index';
+                }
+
                 $newData[$k]['info']['name'] = $v['name'];
-                $newData[$k]['info']['quota_name'] = $junctionQuotaKeyConf[$k]['name'];
+                $newData[$k]['info']['quota_name'] = $junctionQuotaKeyConf[$diagnoseKey]['name'];
                 // 此问题持续开始时间
                 $continuouStart = strtotime($whereData['time_point']);
                 // 此问题持续结束时间
@@ -1038,7 +1069,7 @@ class Junction_model extends CI_Model
                     if (empty($tempData[$beforTime])) {
                         $isBeforQuestion = false;
                     } else {
-                        if ($this->compare($tempData[$beforTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                        if ($v['junction_diagnose_formula']($tempData[$beforTime][$diagnoseKey])) {
                             $continuouStart = $beforTime;
                         } else {
                             $isBeforQuestion = false;
@@ -1051,7 +1082,7 @@ class Junction_model extends CI_Model
                     if (empty($tempData[$afterTime])) {
                         $isAfterQuestion = false;
                     } else {
-                        if ($this->compare($tempData[$afterTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                        if ($v['junction_diagnose_formula']($tempData[$afterTime][$diagnoseKey])) {
                             $continuouEnd = $afterTime;
                         } else {
                             $isAfterQuestion = false;
@@ -1063,7 +1094,7 @@ class Junction_model extends CI_Model
                 $newData[$k]['info']['continuous_end'] = date('H:i', $continuouEnd);
 
                 foreach ($tempData as $kk=>$vv) {
-                    $newData[$k]['list'][$kk]['value'] = round($vv[$k], $junctionQuotaKeyConf[$k]['round_num']);
+                    $newData[$k]['list'][$kk]['value'] = $junctionQuotaKeyConf[$diagnoseKey]['round']($vv[$diagnoseKey]);
                     $newData[$k]['list'][$kk]['time'] = $vv['time_point'];
                 }
                 if (!empty($newData[$k]['list'])) {
@@ -1077,7 +1108,7 @@ class Junction_model extends CI_Model
             $newData[$normalQuota]['info']['continuous_end'] = '00:00';
             foreach ($tempData as $k=>$v) {
                 $newData[$normalQuota]['list'][$k]['value']
-                = round($v[$normalQuota], $junctionQuotaKeyConf[$normalQuota]['round_num']);
+                = $junctionQuotaKeyConf[$normalQuota]['round']($v[$normalQuota]);
                 $newData[$normalQuota]['list'][$k]['time'] = $v['time_point'];
             }
             if (!empty($newData[$normalQuota]['list'])) {
