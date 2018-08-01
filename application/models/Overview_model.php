@@ -102,40 +102,6 @@ class Overview_model extends CI_Model
     }
 
     /**
-     * 获取当前路口的状态
-     *
-     * @param $item
-     * @return array
-     */
-    private function getJunctionStatus($item)
-    {
-        $junction_status = $this->config->item('junction_status') ?? null;
-
-        if (is_null($junction_status)) {
-            return [];
-        }
-
-        if ($junction_status[1]['formula']($item['stop_delay'])) {
-            return [
-                'name' => $junction_status[1]['name'],
-                'key' => $junction_status[1]['key']
-            ];
-        } elseif ($junction_status[2]['formula']($item['stop_delay'])) {
-            return [
-                'name' => $junction_status[2]['name'],
-                'key' => $junction_status[2]['key']
-            ];
-        } elseif ($junction_status[3]['formula']($item['stop_delay'])) {
-            return [
-                'name' => $junction_status[3]['name'],
-                'key' => $junction_status[3]['key']
-            ];
-        } else {
-            return [];
-        }
-    }
-
-    /**
      * 生成报警信息
      *
      * @param $item
@@ -198,9 +164,46 @@ class Overview_model extends CI_Model
             $item['junction_name'] = $junctionInfo['name'] ?? '';
             $item['lng']           = $junctionInfo['lng'] ?? '';
             $item['lat']           = $junctionInfo['lat'] ?? '';
+
+            $item['junction_status'] = $this->getJunctionStatus($item);
         }
 
         return ['dataList' => array_values($temp)];
+    }
+
+
+    /**
+     * 获取当前路口的状态
+     *
+     * @param $item
+     * @return array
+     */
+    private function getJunctionStatus($item)
+    {
+        $junction_status = $this->config->item('junction_status') ?? null;
+
+        if (is_null($junction_status)) {
+            return [];
+        }
+
+        if ($junction_status[1]['formula']($item['stop_delay'])) {
+            return [
+                'name' => $junction_status[1]['name'],
+                'key' => $junction_status[1]['key']
+            ];
+        } elseif ($junction_status[2]['formula']($item['stop_delay'])) {
+            return [
+                'name' => $junction_status[2]['name'],
+                'key' => $junction_status[2]['key']
+            ];
+        } elseif ($junction_status[3]['formula']($item['stop_delay'])) {
+            return [
+                'name' => $junction_status[3]['name'],
+                'key' => $junction_status[3]['key']
+            ];
+        } else {
+            return [];
+        }
     }
 
     /**
