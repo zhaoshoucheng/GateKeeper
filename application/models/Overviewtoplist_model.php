@@ -47,8 +47,6 @@ class Overviewtoplist_model extends CI_Model
      */
     private function topList($column, $data, $method)
     {
-        $result = [];
-
         $table = 'real_time_' . $data['city_id'];
 
         $result = $this->db->select('logic_junction_id, hour, ' . $method . '(' . $column . ') as ' . $column)
@@ -65,7 +63,7 @@ class Overviewtoplist_model extends CI_Model
 
         $junctionIdNames = $this->waymap_model->getJunctionInfo($ids, ['key' => 'logic_junction_id', 'value' => 'name']);
 
-        array_map(function ($item) use ($column, $junctionIdNames) {
+        $result = array_map(function ($item) use ($column, $junctionIdNames) {
             return [
                 'time' => $item['hour'],
                 'logic_junction_id' => $item['logic_junction_id'],
