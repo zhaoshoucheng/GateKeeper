@@ -344,7 +344,7 @@ $config['diagnose_key']	= [
 		'junction_diagnose_formula' => function($val) { return $val > 0.9;},
 		'sql_where' => function() { return '`saturation_index` > 1';},
 		'nature_formula'  => function($val) {
-			if ($val < 1.2) {
+			if ($val > 1.2) {
 				return 1;
 			} else if ($val > 1 && $val <= 1.2) {
 				return 2;
@@ -368,7 +368,7 @@ $config['diagnose_key']	= [
 				'unit'=>''
 			],
 			'queue_position'=>[
-				'name'=>'排队长队',
+				'name'=>'排队长度',
 				'unit'=>'m'
 			]
 		],
