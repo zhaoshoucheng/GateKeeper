@@ -152,7 +152,9 @@ class Overview_model extends CI_Model
                     'unit' => '秒',
                 ],
                 'stop_time_cycle' => [
-                    $item['quota']['stop_time_cycle']
+                    'name' => '最大停车时间',
+                    'value' => $item['quota']['stop_time_cycle'],
+                    'unit' => '秒',
                 ]
             ];
 
