@@ -443,15 +443,15 @@ class Waymap_model extends CI_Model
                 return [];
             }
 
-            $phaseMap = $this->config->item('logic_flow_name');
-
-            $res = array_map(function ($k, $v) use ($phaseMap) {
+            $res = array_map(function ($k, $v) {
                 $item = [];
                 foreach ($v as $flow) {
                     $item[$flow['logic_flow_id']] = $flow['phare_name'];
                 }
                 return $item;
             }, $res['data']);
+
+            return $res;
         } catch (Exception $e) {
 
             return [];
