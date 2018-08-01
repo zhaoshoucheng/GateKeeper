@@ -68,7 +68,7 @@ class Overviewtoplist_model extends CI_Model
                 'time' => $item['hour'],
                 'logic_junction_id' => $item['logic_junction_id'],
                 'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '',
-                $column => $item[$column],
+                $column => round($item[$column], 2),
                 'quota_unit' => ''
             ];
         }, $result);
