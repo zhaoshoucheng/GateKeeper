@@ -23,8 +23,6 @@ class Overview_model extends CI_Model
 
     public function junctionsList($data)
     {
-        $result = [];
-
         $table = 'real_time_' . $data['city_id'];
 
         $result = $this->db->select('*')
@@ -83,6 +81,20 @@ class Overview_model extends CI_Model
 
     public function junctionSurvey($data)
     {
+        $data = $this->junctionsList($data);
+
+        $result = [];
+
+        $result['junction_total'] = count($data);
+        $result['alarm_total'] = 0;
+        $result['congestion_total'] = 0;
+
+        foreach ($data as $datum) {
+            $result['alarm_total'] += $datum['alarm_info']['is_alarm'];
+            $result['congestion_total'] += (int)($datum['junction_status']['key'] == 2);
+        }
+
+        return $result;
 
     }
 
@@ -172,7 +184,6 @@ class Overview_model extends CI_Model
 
         return ['dataList' => array_values($temp)];
     }
-
 
     /**
      * 获取当前路口的状态
