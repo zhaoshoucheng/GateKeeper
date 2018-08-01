@@ -32,8 +32,7 @@ class Junction extends MY_Controller
     {
         $params = $this->input->post();
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'    => 'min:1',
                 'type'       => 'min:0',
                 'city_id'    => 'min:1',
@@ -100,8 +99,7 @@ class Junction extends MY_Controller
         $params = $this->input->post();
 
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'          => 'min:1',
                 'junction_id'      => 'nullunable',
                 'task_time_range'  => 'nullunable',
@@ -180,8 +178,7 @@ class Junction extends MY_Controller
         $params = $this->input->post();
 
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'         => 'min:1',
                 'junction_id'     => 'nullunable',
                 'task_time_range' => 'nullunable',
@@ -253,8 +250,7 @@ class Junction extends MY_Controller
         $params = $this->input->post();
 
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'         => 'min:1',
                 'junction_id'     => 'nullunable',
                 'task_time_range' => 'nullunable',
@@ -319,8 +315,7 @@ class Junction extends MY_Controller
     {
         $params = $this->input->post();
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'junction_id'      => 'nullunable',
                 'task_time_range'  => 'nullunable'
             ]
@@ -359,8 +354,7 @@ class Junction extends MY_Controller
     {
         $params = $this->input->post();
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'    => 'min:1',
                 'city_id'    => 'min:1',
                 'type'       => 'min:0',
@@ -452,8 +446,7 @@ class Junction extends MY_Controller
     {
         $params = $this->input->post();
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'    => 'min:1',
                 'time_point' => 'nullunable',
                 'city_id'    => 'min:1',
@@ -515,8 +508,7 @@ class Junction extends MY_Controller
     {
         $params = $this->input->post();
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'junction_id'     => 'nullunable',
                 'search_type'     => 'min:0',
                 'task_time_range' => 'nullunable'
