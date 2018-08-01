@@ -7,42 +7,42 @@ $config['real_time_quota'] = [
     'stop_time_cycle' => [
         'name'      => '停车次数', // 指标名称
         'unit'      => '',        // 指标单位
-        'round_num' => 0,         // 取指标几位小数 用于返给前端时round()
+        'round'     => function($val) { return round($val);}, // 取指标几位小数 用于返给前端时round()
     ],
     'spillover_rate' => [
         'name'      => '溢流指标',
         'unit'      => '',
-        'round_num' => 0,
+        'round'     => function($val) { return round($val);},
     ],
     'queue_length' => [
         'name'      => '排队长队',
         'unit'      => '',
-        'round_num' => 0,
+        'round'     => function($val) { return round($val);},
     ],
     'stop_delay' => [
         'name'      => '停车延误',
         'unit'      => '',
-        'round_num' => 0,
+        'round'     => function($val) { return round($val);},
     ],
     'stop_rate' => [
         'name'      => '失调指标',
         'unit'      => '',
-        'round_num' => 0,
+        'round'     => function($val) { return round($val);},
     ],
     'twice_stop_rate' => [
         'name'      => '二次停车比例',
         'unit'      => '',
-        'round_num' => 0,
+        'round'     => function($val) { return round($val);},
     ],
     'speed' => [
         'name'      => '速度',
         'unit'      => '',
-        'round_num' => 0,
+        'round'     => function($val) { return round($val);},
     ],
     'free_flow_speed' => [
         'name'      => '行驶速度',
         'unit'      => '',
-        'round_num' => 0,
+        'round'     => function($val) { return round($val);},
     ],
 ];
 

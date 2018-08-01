@@ -596,7 +596,20 @@ class Junction_model extends CI_Model
     public function getJunctionQuestionTrend($data)
     {
         if (!empty($data['diagnose_key'])) {
-            $selectStr = $this->selectColumns($data['diagnose_key']);
+            /*
+             * 因为过饱和问题与空放问题共用一个指标，现空放问题的KEY与指标KEY相同
+             * 所以可以把过饱和问题的KEY忽略
+             */
+            $tempDiagnoseKey = [];
+            foreach ($data['diagnose_key'] as $k=>$v) {
+                $tempDiagnoseKey[$k] = $v;
+                if ($v == 'over_saturation') {
+                    $tempDiagnoseKey[$k] = 'saturation_index';
+                }
+            }
+            array_unique($tempDiagnoseKey);
+
+            $selectStr = $this->selectColumns($tempDiagnoseKey);
             $select = "id, junction_id, {$selectStr}, stop_delay, time_point";
         } else {
             $select = "id, junction_id, stop_delay, time_point";
@@ -1001,11 +1014,14 @@ class Junction_model extends CI_Model
             $tempData[$i]['imbalance_index'] = 0;
             $tempData[$i]['spillover_index'] = 0;
             $tempData[$i]['saturation_index'] = 0;
+            $tempData[$i]['over_saturation'] = 0;
             $tempData[$i]['stop_delay'] = 0;
             $tempData[$i]['time_point'] = date('H:i', $i);
-            foreach ($data as $k=>$v) {
-                $tempData[strtotime($v['time_point'])] = $v;
-            }
+        }
+        foreach ($data as $k=>$v) {
+            // 过饱和问题对应的是指标：饱和指数
+            $data[$k]['over_saturation'] = $v['saturation_index'];
+            $tempData[strtotime($v['time_point'])] = $data[$k];
         }
         ksort($tempData);
 
@@ -1020,6 +1036,15 @@ class Junction_model extends CI_Model
             foreach ($diagnoseConf as $k=>$v) {
                 if (!in_array($k, $diagnose, true)) {
                     continue;
+                }
+
+                /*
+                 * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
+                 * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
+                 */
+                $diagnoseKey = $k;
+                if ($k == 'over_saturation') {
+                    $diagnoseKey = 'saturation_index';
                 }
 
                 $newData[$k]['info']['name'] = $v['name'];
@@ -1038,7 +1063,7 @@ class Junction_model extends CI_Model
                     if (empty($tempData[$beforTime])) {
                         $isBeforQuestion = false;
                     } else {
-                        if ($this->compare($tempData[$beforTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                        if ($v['junction_diagnose_formula']($tempData[$beforTime][$k])) {
                             $continuouStart = $beforTime;
                         } else {
                             $isBeforQuestion = false;
@@ -1051,7 +1076,7 @@ class Junction_model extends CI_Model
                     if (empty($tempData[$afterTime])) {
                         $isAfterQuestion = false;
                     } else {
-                        if ($this->compare($tempData[$afterTime][$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+                        if ($v['junction_diagnose_formula']($tempData[$afterTime][$k])) {
                             $continuouEnd = $afterTime;
                         } else {
                             $isAfterQuestion = false;
@@ -1063,7 +1088,7 @@ class Junction_model extends CI_Model
                 $newData[$k]['info']['continuous_end'] = date('H:i', $continuouEnd);
 
                 foreach ($tempData as $kk=>$vv) {
-                    $newData[$k]['list'][$kk]['value'] = round($vv[$k], $junctionQuotaKeyConf[$k]['round_num']);
+                    $newData[$k]['list'][$kk]['value'] = $junctionQuotaKeyConf[$k]['round']($vv[$diagnoseKey]);
                     $newData[$k]['list'][$kk]['time'] = $vv['time_point'];
                 }
                 if (!empty($newData[$k]['list'])) {
@@ -1077,7 +1102,7 @@ class Junction_model extends CI_Model
             $newData[$normalQuota]['info']['continuous_end'] = '00:00';
             foreach ($tempData as $k=>$v) {
                 $newData[$normalQuota]['list'][$k]['value']
-                = round($v[$normalQuota], $junctionQuotaKeyConf[$normalQuota]['round_num']);
+                = $junctionQuotaKeyConf[$normalQuota]['round']($v[$normalQuota]);
                 $newData[$normalQuota]['list'][$k]['time'] = $v['time_point'];
             }
             if (!empty($newData[$normalQuota]['list'])) {
