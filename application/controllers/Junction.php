@@ -423,13 +423,13 @@ class Junction extends MY_Controller
     public function getQuestionTrend()
     {
         $params = $this->input->post();
-        if ($params['task_id'] < 1) {
+        if (!isset($params['task_id']) || $params['task_id'] < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The task_id is error.';
             return;
         }
         $data['task_id'] = intval($params['task_id']);
-        $data['confidence'] = intval($params['confidence']);
+        $data['confidence'] = $params['confidence'] ?? 0;
 
         $result = [];
 

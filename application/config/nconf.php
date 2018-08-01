@@ -78,19 +78,23 @@ $confidence_threshold = 0.5;
 $config['confidence'] = [
 	0=>[
 		'name'      => '全部',
-		'expression'=> '> 0'
+		'sql_where' => function($val) { return $val . ' > 0';},
+		'formula'   => function($val) { return $val > 0;},
 	],
 	1=>[
 		'name'      => '高',
-		'expression'=> '>=' . $confidence_threshold
+		'sql_where' => function($val) use($confidence_threshold) { return $val . ' > ' . $confidence_threshold;},
+		'formula'   => function($val) use($confidence_threshold) { return $val > $confidence_threshold;},
 	],
 	2=>[
 		'name'      => '低',
-		'expression'=> '<' . $confidence_threshold
+		'sql_where' => function($val) use($confidence_threshold) { return $val . ' < ' . $confidence_threshold;},
+		'formula'   => function($val) use($confidence_threshold) { return $val < $confidence_threshold;},
 	],
 	3=>[
 		'name'      => '中',
-		'expression'=> '> 0'
+		'sql_where' => function($val) { return $val . ' > 0';},
+		'formula'   => function($val) { return $val > 0;},
 	]
 ];
 
@@ -201,6 +205,7 @@ $config['diagnose_key']	= [
 	'spillover_index'	=> [
 		'name'				        => '溢流',
 		'junction_diagnose_formula' => function($val) { return $val > 0.008;},
+		'sql_where' => function() { return '`spillover_index` > 0.008';},
 		'nature_threshold'  => [
 			'high'       => 0.6,
 			'mide'       => 0.3,
@@ -241,6 +246,7 @@ $config['diagnose_key']	= [
 	'imbalance_index'=>[
 		'name'				        => '失衡',
 		'junction_diagnose_formula' => function($val) { return $val > 0;},
+		'sql_where' => function() { return '`imbalance_index` > 0';},
 		'nature_threshold'          => [
 			'high'       => 0.08,
 			'mide'       => 0.04,
@@ -285,6 +291,7 @@ $config['diagnose_key']	= [
 	'saturation_index'	=> [
 		'name'				        => '空放',
 		'junction_diagnose_formula' => function($val) { return $val < 0.3;},
+		'sql_where' => function() { return '`saturation_index` < 0.3';},
 		'nature_threshold'          => [
 			'high'       => 0.1 * -1,
 			'mide'       => 0.2 * -1,
@@ -317,6 +324,7 @@ $config['diagnose_key']	= [
 	'over_saturation'	=> [
 		'name'				        => '过饱和',
 		'junction_diagnose_formula' => function($val) { return $val > 1;},
+		'sql_where' => function() { return '`saturation_index` > 1';},
 		'nature_threshold'          => [
 			'high'       => 0.1 * -1,
 			'mide'       => 0.2 * -1,

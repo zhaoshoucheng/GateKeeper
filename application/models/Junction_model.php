@@ -401,12 +401,14 @@ class Junction_model extends CI_Model
                                     ->row_array();
         $junctionTotal = $allJunction['count'];
 
-        // 循环获取每种问题各时间点路口总数
+        // 置信度
         $confidenceThreshold = $this->config->item('confidence');
+
+        // 循环获取每种问题各时间点路口总数
         foreach ($diagnoseKeyConf as $k=>$v) {
-            $nWhere = $where . ' and ' . $k . $v['junction_threshold_formula'] . $v['junction_threshold'];
+            $nWhere = $where . ' and ' . $v['sql_where']();
             if ($data['confidence'] >= 1) {
-                $nWhere .= ' and ' . $k . '_confidence' . $confidenceThreshold[$data['confidence']]['expression'];
+                $nWhere .= ' and ' . $confidenceThreshold[$data['confidence']]['sql_where']($k . '_confidence');
             }
             $res[$k] = $this->db->select("count(id) as num , time_point as hour")
                                 ->from($this->tb)
