@@ -239,15 +239,13 @@ $config['diagnose_key']	= [
 				'unit'=>'m'
 			],
 		],
-		// flow级的诊断问题
+		// flow级的诊断问题 规则：溢流比率 > 0.008
 		'flow_diagnose' => [
-			'spillover_rate' => [
-				[
-					'threshold' => 0.008,
-					'formula'   => '>'
-				],
-			]
-		],
+			'quota' => 'spillover_rate',
+			'formula' => function($val) { // $val = ['spillover_rate'=>xxx]
+				return $val > 0.008;
+			},
+		]
 	],
 	'imbalance_index'=>[
 		'name'				        => '失衡',
@@ -286,18 +284,12 @@ $config['diagnose_key']	= [
 				'unit'=>'m'
 			]
 		],
-		// flow级的诊断问题 如果有两个则是or的关系
+		// flow级的诊断问题 规则：饱和度 >= 0 或 饱和度 < 2
 		'flow_diagnose' => [
-			'saturation_degree' => [
-				[
-					'threshold' => 0,
-					'formula'   => '>='
-				],
-				[
-					'threshold' => 2,
-					'formula'   => '<'
-				]
-			]
+			'quota' => 'saturation_degree',
+			'formula' => function($val) { // $val = ['spillover_rate'=>xxx]
+				return ($val > 0 || $val < 2);
+			},
 		],
 	],
 	'saturation_index'	=> [
@@ -329,14 +321,12 @@ $config['diagnose_key']	= [
 				'unit'=>''
 			]
 		],
-		// flow级的诊断问题
+		// flow级的诊断问题 规则：饱和度 < 0.3
 		'flow_diagnose' => [
-			'saturation_degree' => [
-				[
-					'threshold' => 0.3,
-					'formula'   => '<'
-				],
-			]
+			'quota' => 'saturation_degree',
+			'formula' => function($val) { // $val = ['spillover_rate'=>xxx]
+				return $val < 0.3;
+			},
 		],
 	],
 	'over_saturation'	=> [
@@ -372,14 +362,12 @@ $config['diagnose_key']	= [
 				'unit'=>'m'
 			]
 		],
-		// flow级的诊断问题
+		// flow级的诊断问题 饱和度 > 0.9
 		'flow_diagnose' => [
-			'saturation_degree' => [
-				[
-					'threshold' => 0.3,
-					'formula'   => '<'
-				],
-			]
+			'quota' => 'saturation_degree',
+			'formula' => function($val) { // $val = ['spillover_rate'=>xxx]
+				return $val > 0.9;
+			},
 		],
 	]
 ];

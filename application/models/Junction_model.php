@@ -559,7 +559,19 @@ class Junction_model extends CI_Model
     */
     public function getDiagnosePageSimpleJunctionDetail($data)
     {
-        $selectStr = $this->selectColumns($data['diagnose_key']);
+        /*
+         * 因为过饱和问题与空放问题共用一个指标，现空放问题的KEY与指标KEY相同
+         * 所以可以把过饱和问题的KEY忽略
+         */
+        $tempDiagnoseKey = [];
+        foreach ($data['diagnose_key'] as $k=>$v) {
+            $tempDiagnoseKey[$k] = $v;
+            if ($v == 'over_saturation') {
+                $tempDiagnoseKey[$k] = 'saturation_index';
+            }
+        }
+        array_unique($tempDiagnoseKey);
+        $selectStr = $this->selectColumns($tempDiagnoseKey);
         $select = "id, junction_id, {$selectStr}, start_time, end_time, movements";
 
         // 组织where条件
@@ -928,7 +940,7 @@ class Junction_model extends CI_Model
             $v['confidence'] = $confidenceConf[$v['confidence']]['name'];
             foreach ($flowQuotaKeyConf as $kk=>$vv) {
                 if (isset($v[$kk])) {
-                    $v[$kk] = round($v[$kk], $vv['round_num']);
+                    $v[$kk] = $vv['round']($v[$kk]);
                 }
             }
             $resultData['notmal_movements'][$k] = array_intersect_key($v, $tempArr);
@@ -945,44 +957,46 @@ class Junction_model extends CI_Model
             匹配此路口有问题的movement并放入此问题集合中
         *********************************************/
         foreach ($diagnoseConf as $k=>$v) {
-            if (isset($data[$k])) {
-                if ($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
-                    // 问题名称
-                    $resultData['diagnose_detail'][$k]['name'] = $v['name'];
+            /*
+             * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
+             * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
+             */
+            $diagnoseKey = $k;
+            if ($k == 'over_saturation') {
+                $diagnoseKey = 'saturation_index';
+            }
+            if (!isset($data[$diagnoseKey])) {
+                continue;
+            }
+            if ($v['junction_diagnose_formula']($data[$diagnoseKey])) {
+                // 问题名称
+                $resultData['diagnose_detail'][$k]['name'] = $v['name'];
 
-                    // 组织有此问题的movement集合
-                    $resultData['diagnose_detail'][$k]['movements'] = [];
+                // 组织有此问题的movement集合
+                $resultData['diagnose_detail'][$k]['movements'] = [];
 
-                    foreach ($v['flow_diagnose'] as $kk=>$vv) {
-                        $ruleCount = count($vv);
-                        if ($ruleCount < 1) {
-                            $resultData['diagnose_detail'][$k]['movements'] = [];
-                        }
-
-                        foreach ($data['movements'] as $kkk=>$vvv) {
-                            foreach ($vv as $vvvv) {
-                                if ($this->compare($vvv[$kk], $vvvv['threshold'], $vvvv['formula'])) {
-                                    // movement_id
-                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['movement_id']
-                                        = $vvv['movement_id'];
-                                    // movement中文名称-相位名称
-                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['comment']
-                                        = $flowIdName[$vvv['movement_id']];
-                                    // 此问题对应指标值
-                                    $resultData['diagnose_detail'][$k]['movements'][$kkk][$kk]
-                                        = round($vvv[$kk], $flowQuotaKeyConf[$kk]['round_num']);
-                                    // 置信度
-                                    $resultData['diagnose_detail'][$k]['movements'][$kkk]['confidence']
-                                        = $confidenceConf[$vvv['confidence']]['name'];
-                                }
-                            }
-                        }
+                foreach ($data['movements'] as $kk=>$vv) {
+                    /* 判断是否有问题 */
+                    $diagnoseQuota = $v['flow_diagnose']['quota'];
+                    if ($v['flow_diagnose']['formula']($vv[$diagnoseQuota])) {
+                        // movement_id
+                        $resultData['diagnose_detail'][$k]['movements'][$kk]['movement_id']
+                        = $vv['movement_id'];
+                        // movement中文名称-相位名称
+                        $resultData['diagnose_detail'][$k]['movements'][$kk]['comment']
+                        = $flowIdName[$vv['movement_id']];
+                        // 此问题对应指标值
+                        $resultData['diagnose_detail'][$k]['movements'][$kk]
+                        = $flowQuotaKeyConf[$diagnoseQuota]['round']($vv[$diagnoseQuota]);
+                        // 置信度
+                        $resultData['diagnose_detail'][$k]['movements'][$kk]['confidence']
+                        = $confidenceConf[$vv['confidence']]['name'];
                     }
+                }
 
-                    if (!empty($resultData['diagnose_detail'][$k]['movements'])) {
-                        $resultData['diagnose_detail'][$k]['movements']
-                            = array_values($resultData['diagnose_detail'][$k]['movements']);
-                    }
+                if (!empty($resultData['diagnose_detail'][$k]['movements'])) {
+                    $resultData['diagnose_detail'][$k]['movements']
+                    = array_values($resultData['diagnose_detail'][$k]['movements']);
                 }
             }
         }
@@ -1014,7 +1028,6 @@ class Junction_model extends CI_Model
             $tempData[$i]['imbalance_index'] = 0;
             $tempData[$i]['spillover_index'] = 0;
             $tempData[$i]['saturation_index'] = 0;
-            $tempData[$i]['over_saturation'] = 0;
             $tempData[$i]['stop_delay'] = 0;
             $tempData[$i]['time_point'] = date('H:i', $i);
         }
