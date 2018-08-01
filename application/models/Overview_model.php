@@ -199,17 +199,17 @@ class Overview_model extends CI_Model
             return [];
         }
 
-        if ($junction_status[1]['formula']($item['stop_delay']['value'])) {
+        if ($junction_status[1]['formula']($item['quote']['stop_delay']['value'])) {
             return [
                 'name' => $junction_status[1]['name'],
                 'key' => $junction_status[1]['key']
             ];
-        } elseif ($junction_status[2]['formula']($item['stop_delay']['value'])) {
+        } elseif ($junction_status[2]['formula']($item['quote']['stop_delay']['value'])) {
             return [
                 'name' => $junction_status[2]['name'],
                 'key' => $junction_status[2]['key']
             ];
-        } elseif ($junction_status[3]['formula']($item['stop_delay']['value'])) {
+        } elseif ($junction_status[3]['formula']($item['quote']['stop_delay']['value'])) {
             return [
                 'name' => $junction_status[3]['name'],
                 'key' => $junction_status[3]['key']
