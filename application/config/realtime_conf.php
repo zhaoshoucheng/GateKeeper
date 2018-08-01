@@ -6,43 +6,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $config['real_time_quota'] = [
     'stop_time_cycle' => [
         'name'      => '停车次数', // 指标名称
-        'unit'      => '',        // 指标单位
-        'round'     => function($val) { return round($val);}, // 取指标几位小数 用于返给前端时round()
+        'unit'      => '次',        // 指标单位
+        'round'     => function($val) { return round($val, 2);}, // 取指标几位小数 用于返给前端时round()
     ],
     'spillover_rate' => [
         'name'      => '溢流指标',
         'unit'      => '',
-        'round'     => function($val) { return round($val);},
+        'round'     => function($val) { return round($val, 5);},
     ],
     'queue_length' => [
         'name'      => '排队长队',
-        'unit'      => '',
+        'unit'      => '米',
         'round'     => function($val) { return round($val);},
     ],
     'stop_delay' => [
         'name'      => '停车延误',
-        'unit'      => '',
-        'round'     => function($val) { return round($val);},
+        'unit'      => '秒',
+        'round'     => function($val) { return round($val, 2);},
     ],
     'stop_rate' => [
         'name'      => '失调指标',
         'unit'      => '',
-        'round'     => function($val) { return round($val);},
-    ],
-    'twice_stop_rate' => [
-        'name'      => '二次停车比例',
-        'unit'      => '',
-        'round'     => function($val) { return round($val);},
-    ],
-    'speed' => [
-        'name'      => '速度',
-        'unit'      => '',
-        'round'     => function($val) { return round($val);},
-    ],
-    'free_flow_speed' => [
-        'name'      => '行驶速度',
-        'unit'      => '',
-        'round'     => function($val) { return round($val);},
+        'round'     => function($val) { return round($val, 4);},
     ],
 ];
 
