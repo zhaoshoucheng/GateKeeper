@@ -1019,9 +1019,7 @@ class Junction_model extends CI_Model
             $tempData[$i]['time_point'] = date('H:i', $i);
         }
         foreach ($data as $k=>$v) {
-            // 过饱和问题对应的是指标：饱和指数
-            $data[$k]['over_saturation'] = $v['saturation_index'];
-            $tempData[strtotime($v['time_point'])] = $data[$k];
+            $tempData[strtotime($v['time_point'])] = $v;
         }
         ksort($tempData);
 
@@ -1063,7 +1061,7 @@ class Junction_model extends CI_Model
                     if (empty($tempData[$beforTime])) {
                         $isBeforQuestion = false;
                     } else {
-                        if ($v['junction_diagnose_formula']($tempData[$beforTime][$k])) {
+                        if ($v['junction_diagnose_formula']($tempData[$beforTime][$diagnoseKey])) {
                             $continuouStart = $beforTime;
                         } else {
                             $isBeforQuestion = false;
@@ -1076,7 +1074,7 @@ class Junction_model extends CI_Model
                     if (empty($tempData[$afterTime])) {
                         $isAfterQuestion = false;
                     } else {
-                        if ($v['junction_diagnose_formula']($tempData[$afterTime][$k])) {
+                        if ($v['junction_diagnose_formula']($tempData[$afterTime][$diagnoseKey])) {
                             $continuouEnd = $afterTime;
                         } else {
                             $isAfterQuestion = false;
@@ -1088,7 +1086,7 @@ class Junction_model extends CI_Model
                 $newData[$k]['info']['continuous_end'] = date('H:i', $continuouEnd);
 
                 foreach ($tempData as $kk=>$vv) {
-                    $newData[$k]['list'][$kk]['value'] = $junctionQuotaKeyConf[$diagnoseKey]['round']($vv[$k]);
+                    $newData[$k]['list'][$kk]['value'] = $junctionQuotaKeyConf[$diagnoseKey]['round']($vv[$diagnoseKey]);
                     $newData[$k]['list'][$kk]['time'] = $vv['time_point'];
                 }
                 if (!empty($newData[$k]['list'])) {
