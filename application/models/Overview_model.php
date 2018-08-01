@@ -70,17 +70,17 @@ class Overview_model extends CI_Model
 
         $table = 'real_time_' . $data['city_id'];
 
-        $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
+        $result = $this->db->select('left(hour, 5) as hour, avg(stop_delay) as avg_stop_delay')
             ->from($table)
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
-            ->group_by('hour')
+            ->group_by('left(hour, 5)')
             ->get()->result_array();
 
         $result = array_map(function ($v) {
             return [
                 round($v['avg_stop_delay'], 2),
-                date('H:i', $v['hour'])
+                $v['hour']
             ];
         }, $result);
 
