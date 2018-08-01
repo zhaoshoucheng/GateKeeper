@@ -1048,7 +1048,7 @@ class Junction_model extends CI_Model
                 }
 
                 $newData[$k]['info']['name'] = $v['name'];
-                $newData[$k]['info']['quota_name'] = $junctionQuotaKeyConf[$k]['name'];
+                $newData[$k]['info']['quota_name'] = $junctionQuotaKeyConf[$diagnoseKey]['name'];
                 // 此问题持续开始时间
                 $continuouStart = strtotime($whereData['time_point']);
                 // 此问题持续结束时间
@@ -1088,7 +1088,7 @@ class Junction_model extends CI_Model
                 $newData[$k]['info']['continuous_end'] = date('H:i', $continuouEnd);
 
                 foreach ($tempData as $kk=>$vv) {
-                    $newData[$k]['list'][$kk]['value'] = $junctionQuotaKeyConf[$k]['round']($vv[$diagnoseKey]);
+                    $newData[$k]['list'][$kk]['value'] = $junctionQuotaKeyConf[$diagnoseKey]['round']($vv[$k]);
                     $newData[$k]['list'][$kk]['time'] = $vv['time_point'];
                 }
                 if (!empty($newData[$k]['list'])) {
