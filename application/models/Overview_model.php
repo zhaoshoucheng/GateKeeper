@@ -157,7 +157,7 @@ class Overview_model extends CI_Model
             ];
 
             $item['alarm_info'] = [
-                'is_alarm' => !empty($item['alarm_info']),
+                'is_alarm' => (int)!empty($item['alarm_info']),
                 'commment' => $item['alarm_info']
             ];
 
