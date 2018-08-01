@@ -129,13 +129,16 @@ class Overview_model extends CI_Model
             return [];
         }
 
+        $result = [];
+
         if ($alarmCategory[1]['formula']($item['spillover_rate'])) {
-            return [$flowsInfo[$item['logic_junction_id']]['logic_flow_id']] . '-溢流';
-        } elseif ($alarmCategory[2]['formula']($item)) {
-            return [$flowsInfo[$item['logic_junction_id']]['logic_flow_id']] . '-过饱和';
-        } else {
-            return [];
+            $result[] = $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-溢流';
         }
+        if ($alarmCategory[2]['formula']($item)) {
+            $result[] = $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-过饱和';
+        }
+
+        return $result;
     }
 
     /**
@@ -164,7 +167,7 @@ class Overview_model extends CI_Model
                     'unit' => '秒',
                 ],
                 'stop_time_cycle' => [
-                    'name' => '最大停车时间',
+                    'name' => '最大停车次数',
                     'value' => round($item['quota']['stop_time_cycle'], 2),
                     'unit' => '秒',
                 ]

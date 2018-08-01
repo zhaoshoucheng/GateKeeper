@@ -420,7 +420,7 @@ class Waymap_model extends CI_Model
 
     public function getFlowsInfo($junctionIds)
     {
-        if(empty($junctionId)) {
+        if(empty($junctionIds)) {
             return [];
         }
 
@@ -444,7 +444,7 @@ class Waymap_model extends CI_Model
             $res = array_map(function ($v) {
                 $item = [];
                 foreach ($v as $flow) {
-                    $item[$flow['logic_flow_id']] = $flow['phare_name'];
+                    $item[$flow['logic_flow_id']] = $flow['phase_name'];
                 }
                 return $item;
             }, $res['data']);
