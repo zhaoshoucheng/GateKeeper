@@ -16,6 +16,7 @@ class Waymap_model extends CI_Model
         parent::__construct();
 
         $this->load->config('nconf');
+        $this->load->config('realtime_conf');
         $this->load->helper('http');
         $this->token = $this->config->item('waymap_token');
         $this->userid = $this->config->item('waymap_userid');
@@ -418,7 +419,7 @@ class Waymap_model extends CI_Model
 
     }
 
-    public function getFlowsInfo($junctionId, array $flowIds)
+    public function getFlowsInfo($junctionIds)
     {
         if(empty($junctionId)) {
             return [];
@@ -429,10 +430,29 @@ class Waymap_model extends CI_Model
             $getQuery = [
                 'token'    => $this->config->item('waymap_token'),
                 'user_id'  => $this->config->item('waymap_userid'),
-                ''
+                'version'  => '2018042512',
+                'logic_junction_ids' => implode(',', $junctionIds)
+
             ];
-            $url = $this->config->item('waymap_interface') . '/signal-map/mapFlow/flowsByJunction';
+            $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
             $url = $url."?".http_build_query($getQuery);
+
+            $res = httpGET($url);
+
+            $res = json_decode($res, true);
+            if ($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])) {
+                return [];
+            }
+
+            $phaseMap = $this->config->item('logic_flow_name');
+
+            $res = array_map(function ($k, $v) use ($phaseMap) {
+                $item = [];
+                foreach ($v as $flow) {
+                    $item[$flow['logic_flow_id']] = $phaseMap[$flow['phare_id']];
+                }
+                return $item;
+            }, $res['data']);
         } catch (Exception $e) {
 
             return [];

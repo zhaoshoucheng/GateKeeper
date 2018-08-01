@@ -42,16 +42,21 @@ class Overview_model extends CI_Model
             'value' => ['name', 'lng', 'lat']
         ]);
 
-        $result = array_map(function ($item) use ($junctionsInfo, $data) {
+        $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+
+        $result = array_map(function ($item) use ($junctionsInfo, $flowsInfo, $data) {
             $junctionInfo = $junctionsInfo[$item['logic_junction_id']] ?? '';
+
+            $junction_status = $this->getJunctionStatus($item, $data['city_id']);
+
             return [
                 'logic_junction_id' => $item['logic_junction_id'],
                 'junction_name' => $junctionInfo['name'] ?? '',
                 'lng' => $junctionInfo['lng'] ?? '',
                 'lat' => $junctionInfo['lat'] ?? '',
                 'quota' => $this->createQuotaInfo($item),
-                'alarm_info' => $this->getAlarmInfo($item),
-                'junction_status' => $this->getJunctionStatus($item, $data['city_id'])
+                'alarm_info' => $this->getAlarmInfo($item, $data['city_id'], $flowsInfo),
+                'junction_status' => $junction_status
             ];
         }, $result);
 
@@ -78,7 +83,7 @@ class Overview_model extends CI_Model
     {
         $junction_status = $this->config->item('junction_status')[$city_id] ?? null;
 
-        if(is_null($junction_status)) {
+        if (is_null($junction_status)) {
             return [
                 'name' => '',
                 'key' => 0
@@ -104,8 +109,8 @@ class Overview_model extends CI_Model
             ];
         } elseif ($formula_alarm($item['spillover_rate'], 'spillover_rate')
             || ($formula_alarm($item['twice_stop_rate'], 'twice_stop_rate')
-            && $formula_alarm($item['queue_length'], 'queue_length')
-            && $formula_alarm($item['stop_delay'], 'stop_delay'))) {
+                && $formula_alarm($item['queue_length'], 'queue_length')
+                && $formula_alarm($item['stop_delay'], 'stop_delay'))) {
             return [
                 'name' => $junction_status[4]['name'],
                 'key' => $junction_status[4]['key']
@@ -135,7 +140,7 @@ class Overview_model extends CI_Model
         }
 
         foreach ($temp as &$item) {
-            $item['quota']['stop_delay'] = array_sum($item['quota']['stop_delay']) / count($item['quota']['stop_delay']);
+            $item['quota']['stop_delay']      = array_sum($item['quota']['stop_delay']) / count($item['quota']['stop_delay']);
             $item['quota']['stop_time_cycle'] = max($item['quota']['stop_time_cycle']);
         }
 
@@ -167,8 +172,26 @@ class Overview_model extends CI_Model
         return $target;
     }
 
-    private function getAlarmInfo($item)
+    private function getAlarmInfo($item, $city_id, $flowsInfo)
     {
-        return [];
+        //获取路口当前 flow 的状态
+        $junction_status = $this->config->item('junction_status')[$city_id] ?? null;
+
+        if (is_null($junction_status)) {
+            return [];
+        }
+
+        $formula_alarm = $junction_status[4]['formula'];
+
+        if ($formula_alarm($item['spillover_rate'], 'spillover_rate')){
+            return [$flowsInfo[$item['logic_junction_id']]['logic_flow_id']] . '-溢流';
+        } elseif (($formula_alarm($item['twice_stop_rate'], 'twice_stop_rate')
+            && $formula_alarm($item['queue_length'], 'queue_length')
+            && $formula_alarm($item['stop_delay'], 'stop_delay'))
+        ) {
+            return [$flowsInfo[$item['logic_junction_id']]['logic_flow_id']] . '-过饱和';
+        } else {
+            return [];
+        }
     }
 }
