@@ -448,7 +448,7 @@ class Waymap_model extends CI_Model
             $res = array_map(function ($k, $v) use ($phaseMap) {
                 $item = [];
                 foreach ($v as $flow) {
-                    $item[$flow['logic_flow_id']] = $phaseMap[$flow['phare_id']];
+                    $item[$flow['logic_flow_id']] = $flow['phare_name'];
                 }
                 return $item;
             }, $res['data']);
