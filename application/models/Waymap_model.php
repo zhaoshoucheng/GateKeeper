@@ -429,9 +429,7 @@ class Waymap_model extends CI_Model
             $getQuery = [
                 'token'    => $this->config->item('waymap_token'),
                 'user_id'  => $this->config->item('waymap_userid'),
-                'version'  => '2018042512',
-                'logic_junction_ids' => implode(',', $junctionIds)
-
+                'logic_junction_ids' => $junctionIds
             ];
             $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
             $url = $url."?".http_build_query($getQuery);
@@ -443,7 +441,7 @@ class Waymap_model extends CI_Model
                 return [];
             }
 
-            $res = array_map(function ($k, $v) {
+            $res = array_map(function ($v) {
                 $item = [];
                 foreach ($v as $flow) {
                     $item[$flow['logic_flow_id']] = $flow['phare_name'];
