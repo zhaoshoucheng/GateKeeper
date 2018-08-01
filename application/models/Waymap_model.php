@@ -51,8 +51,7 @@ class Waymap_model extends CI_Model
 
                 //检查 $returnFormat 格式
                 if(!is_array($returnFormat) || !array_key_exists('key', $returnFormat)
-                    || !array_key_exists('value', $returnFormat) || !is_string($returnFormat['key']
-                    || !(is_string($returnFormat['value']) || is_array($returnFormat['value']))))
+                    || !array_key_exists('value', $returnFormat) || !is_string($returnFormat['key']))
                     return $res['data'];
 
                 $result = [];

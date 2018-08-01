@@ -144,7 +144,7 @@ class Overview_model extends CI_Model
             $item['quota']['stop_time_cycle'] = max($item['quota']['stop_time_cycle']);
         }
 
-        return $temp;
+        return [ 'dataList' => array_values($temp) ];
     }
 
     /**
