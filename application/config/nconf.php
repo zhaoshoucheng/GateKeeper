@@ -36,8 +36,8 @@ if($development == 2){
 	$timing_ext = '/its';
 
 	$config['redis'] = [
-		'host' => '100.69.139.14',
-		'port' => '3660'
+		'host' => '100.69.239.57',
+		'port' => '3060'
 	];
 }else{
 	// 路网接口服务器地址
@@ -78,19 +78,23 @@ $confidence_threshold = 0.5;
 $config['confidence'] = [
 	0=>[
 		'name'      => '全部',
-		'expression'=> '> 0'
+		'sql_where' => function($val) { return $val . ' > 0';},
+		'formula'   => function($val) { return $val > 0;},
 	],
 	1=>[
 		'name'      => '高',
-		'expression'=> '>=' . $confidence_threshold
+		'sql_where' => function($val) use($confidence_threshold) { return $val . ' > ' . $confidence_threshold;},
+		'formula'   => function($val) use($confidence_threshold) { return $val > $confidence_threshold;},
 	],
 	2=>[
 		'name'      => '低',
-		'expression'=> '<' . $confidence_threshold
+		'sql_where' => function($val) use($confidence_threshold) { return $val . ' < ' . $confidence_threshold;},
+		'formula'   => function($val) use($confidence_threshold) { return $val < $confidence_threshold;},
 	],
 	3=>[
 		'name'      => '中',
-		'expression'=> '> 0'
+		'sql_where' => function($val) { return $val . ' > 0';},
+		'formula'   => function($val) { return $val > 0;},
 	]
 ];
 
@@ -100,49 +104,49 @@ $config['junction_quota_key'] = [
 		'name'		 => '失衡指数',
 		'status_max' => 0.6,
 		'status_min' => 0.3,
-		'round_num'  => 2,
+		'round'      => function($val) { return round($val, 2);},
 		'unit'       => ''
 	],
 	'spillover_index' => [
 		'name'       => '溢流指数',
 		'status_max' => 0.08,
 		'status_min' => 0.04,
-		'round_num'  => 2,
+		'round'      => function($val) { return round($val, 2);},
 		'unit'       => ''
 	],
 	'incoordination_index' => [
 		'name'       => '失调指数',
 		'status_max' => 0.7,
 		'status_min' => 0.4,
-		'round_num'  => 2,
+		'round'      => function($val) { return round($val, 2);},
 		'unit'       => ''
 	],
 	'saturation_index' => [
 		'name'       => '饱和指数',
 		'status_max' => 0.9,
 		'status_min' => 0.3,
-		'round_num'  => 2,
+		'round'      => function($val) { return round($val, 2);},
 		'unit'       => ''
 	],
 	'stop_cycle_time' => [
 		'name'       => '停车次数',
 		'status_max' => 2,
 		'status_min' => 1,
-		'round_num'  => 2,
+		'round'      => function($val) { return round($val, 2);},
 		'unit'       => ''
 	],
 	'stop_delay' => [
 		'name'       => '平均延误',
 		'status_max' => 40,
 		'status_min' => 20,
-		'round_num'  => 2,
+		'round'      => function($val) { return round($val, 2);},
 		'unit'       => 's'
 	],
 	'avg_speed' => [
 		'name'       => '平均速度',
 		'status_max' => 40,
 		'status_min' => 20,
-		'round_num'  => 2,
+		'round'      => function($val) { return round($val, 2);},
 		'unit'       => 'km/h'
 	]
 ];
@@ -199,9 +203,9 @@ $config['flow_quota_key'] = [
 // 诊断问题
 $config['diagnose_key']	= [
 	'spillover_index'	=> [
-		'name'				         => '溢流',
-		'junction_threshold'         => 0.008,
-		'junction_threshold_formula' => '>',
+		'name'				        => '溢流',
+		'junction_diagnose_formula' => function($val) { return $val > 0.008;},
+		'sql_where' => function() { return '`spillover_index` > 0.008';},
 		'nature_threshold'  => [
 			'high'       => 0.6,
 			'mide'       => 0.3,
@@ -240,10 +244,10 @@ $config['diagnose_key']	= [
 		],
 	],
 	'imbalance_index'=>[
-		'name'				         => '失衡',
-		'junction_threshold'         => 0,
-		'junction_threshold_formula' => '>',
-		'nature_threshold'           => [
+		'name'				        => '失衡',
+		'junction_diagnose_formula' => function($val) { return $val > 0;},
+		'sql_where' => function() { return '`imbalance_index` > 0';},
+		'nature_threshold'          => [
 			'high'       => 0.08,
 			'mide'       => 0.04,
 			'low'        => 0.005
@@ -285,10 +289,43 @@ $config['diagnose_key']	= [
 		],
 	],
 	'saturation_index'	=> [
-		'name'				         => '空放',
-		'junction_threshold'         => 0.3,
-		'junction_threshold_formula' => '<',
-		'nature_threshold'           => [
+		'name'				        => '空放',
+		'junction_diagnose_formula' => function($val) { return $val < 0.3;},
+		'sql_where' => function() { return '`saturation_index` < 0.3';},
+		'nature_threshold'          => [
+			'high'       => 0.1 * -1,
+			'mide'       => 0.2 * -1,
+			'low'        => 0.3 * -1
+		],
+		'flow_quota'=>[
+			'saturation_degree'=>[
+				'name'=>'饱和度',
+				'unit'=>''
+			],
+			'stop_delay'=>[
+				'name'=>'停车延误',
+				'unit'=>'秒'
+			],
+			'stop_time_cycle'=>[
+				'name'=>'停车次数',
+				'unit'=>''
+			]
+		],
+		// flow级的诊断问题
+		'flow_diagnose' => [
+			'saturation_degree' => [
+				[
+					'threshold' => 0.3,
+					'formula'   => '<'
+				],
+			]
+		],
+	],
+	'over_saturation'	=> [
+		'name'				        => '过饱和',
+		'junction_diagnose_formula' => function($val) { return $val > 1;},
+		'sql_where' => function() { return '`saturation_index` > 1';},
+		'nature_threshold'          => [
 			'high'       => 0.1 * -1,
 			'mide'       => 0.2 * -1,
 			'low'        => 0.3 * -1
