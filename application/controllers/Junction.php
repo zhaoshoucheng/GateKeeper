@@ -32,8 +32,7 @@ class Junction extends MY_Controller
     {
         $params = $this->input->post();
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'    => 'min:1',
                 'type'       => 'min:0',
                 'city_id'    => 'min:1',
@@ -100,8 +99,7 @@ class Junction extends MY_Controller
         $params = $this->input->post();
 
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'          => 'min:1',
                 'junction_id'      => 'nullunable',
                 'task_time_range'  => 'nullunable',
@@ -180,8 +178,7 @@ class Junction extends MY_Controller
         $params = $this->input->post();
 
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'         => 'min:1',
                 'junction_id'     => 'nullunable',
                 'task_time_range' => 'nullunable',
@@ -253,8 +250,7 @@ class Junction extends MY_Controller
         $params = $this->input->post();
 
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'         => 'min:1',
                 'junction_id'     => 'nullunable',
                 'task_time_range' => 'nullunable',
@@ -319,8 +315,7 @@ class Junction extends MY_Controller
     {
         $params = $this->input->post();
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'junction_id'      => 'nullunable',
                 'task_time_range'  => 'nullunable'
             ]
@@ -359,8 +354,7 @@ class Junction extends MY_Controller
     {
         $params = $this->input->post();
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'    => 'min:1',
                 'city_id'    => 'min:1',
                 'type'       => 'min:0',
@@ -393,11 +387,12 @@ class Junction extends MY_Controller
         }
         $data['confidence'] = $params['confidence'];
 
-        if (isset($params['diagnose_key']) && count($params['diagnose_key']) >= 1) {
+        if (!empty($params['diagnose_key'])) {
+            $diagnoseKeyConf = $this->config->item('diagnose_key');
             foreach ($params['diagnose_key'] as $v) {
-                if (!array_key_exists($v, $this->config->item('diagnose_key'))) {
+                if (!array_key_exists($v, $diagnoseKeyConf)) {
                     $this->errno = ERR_PARAMETERS;
-                    $this->errmsg = 'The value of diagnose_key ' . $v . ' is wrong.';
+                    $this->errmsg = 'The value of diagnose_key ' . html_escape($v) . ' is wrong.';
                     return;
                 }
             }
@@ -422,13 +417,13 @@ class Junction extends MY_Controller
     public function getQuestionTrend()
     {
         $params = $this->input->post();
-        if ($params['task_id'] < 1) {
+        if (!isset($params['task_id']) || $params['task_id'] < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The task_id is error.';
             return;
         }
         $data['task_id'] = intval($params['task_id']);
-        $data['confidence'] = intval($params['confidence']);
+        $data['confidence'] = $params['confidence'] ?? 0;
 
         $result = [];
 
@@ -451,8 +446,7 @@ class Junction extends MY_Controller
     {
         $params = $this->input->post();
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'task_id'    => 'min:1',
                 'time_point' => 'nullunable',
                 'city_id'    => 'min:1',
@@ -467,21 +461,24 @@ class Junction extends MY_Controller
 
         $res = [];
 
-        $diagnose_key = $params['diagnose_key'];
-        $diagnose_key_conf = $this->config->item('diagnose_key');
-        if (is_array($diagnose_key) && count($diagnose_key) >= 1) {
-            $diagnose_key = array_filter($diagnose_key);
-            foreach ($diagnose_key as $k=>$v) {
-                if (!array_key_exists($v, $diagnose_key_conf)) {
-                    $this->errno = ERR_PARAMETERS;
-                    $this->errmsg = 'The value of diagnose_key ' . $v . ' is wrong.';
-                    return;
-                }
-            }
-        } else {
+        if (empty($params['diagnose_key']) || !is_array($params['diagnose_key'])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The diagnose_key cannot be empty and must be array.';
             return;
+        }
+
+        $diagnoseKeyConf = $this->config->item('diagnose_key');
+        $params['diagnose_key'] = array_filter($params['diagnose_key']);
+        foreach ($params['diagnose_key'] as $k=>$v) {
+            if (!array_key_exists($v, $diagnoseKeyConf)) {
+                $this->errno = ERR_PARAMETERS;
+                $this->errmsg = 'The value of diagnose_key ' . html_escape($v) . ' is wrong.';
+                return;
+            }
+        }
+
+        if (!isset($params['orderby'])) {
+            $params['orderby'] = 2;
         }
 
         $data = [
@@ -511,8 +508,7 @@ class Junction extends MY_Controller
     {
         $params = $this->input->post();
         // 校验参数
-        $validate = Validate::make($params,
-            [
+        $validate = Validate::make($params, [
                 'junction_id'     => 'nullunable',
                 'search_type'     => 'min:0',
                 'task_time_range' => 'nullunable'
