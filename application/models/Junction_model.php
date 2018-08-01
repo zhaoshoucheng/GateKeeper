@@ -41,22 +41,22 @@ class Junction_model extends CI_Model
     */
     public function getAllCityJunctionInfo($data)
     {
-        $quota_key = $data['quota_key'];
+        $quotaKey = $data['quota_key'];
 
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
-        $all_city_junctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
-        if (count($all_city_junctions) < 1 || !$all_city_junctions) {
+        $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
+        if (count($allCityJunctions) < 1 || !$allCityJunctions) {
             return [];
         }
 
-        $selectstr = empty($this->selectColumns($quota_key)) ? '' : ',' . $this->selectColumns($quota_key);
+        $selectstr = empty($this->selectColumns($quotaKey)) ? '' : ',' . $this->selectColumns($quotaKey);
         if (empty($selectstr)) {
             return [];
         }
 
         $select = '';
         if ($data['type'] == 1) { // 综合
-            $select = "id, junction_id, max({$quota_key}) as {$quota_key}";
+            $select = "id, junction_id, max({$quotaKey}) as {$quotaKey}";
         } else {
             $select = 'id, junction_id' . $selectstr;
         }
@@ -69,8 +69,9 @@ class Junction_model extends CI_Model
         $confidenceConf = $this->config->item('confidence');
         if (isset($data['confidence'])
             && (int)$data['confidence'] >= 1
-            && array_key_exists($data['confidence'], $confidenceConf)) {
-            $where .= ' and ' . $quota_key . '_confidence ' . $confidenceConf[$data['confidence']]['expression'];
+            && array_key_exists($data['confidence'], $confidenceConf))
+        {
+            $where .= ' and ' . $confidenceConf[$data['confidence']]['sql_where']($quotaKey . '_confidence');
         }
 
         $this->db->select($select);
@@ -82,26 +83,20 @@ class Junction_model extends CI_Model
 
         $res = $this->db->get()->result_array();
 
-        // 指标状态 1：高 2：中 3：低
-        $quota_key_conf = $this->config->item('junction_quota_key');
-        $temp_quota_data = [];
+        $quotaKeyConf = $this->config->item('junction_quota_key');
+        $tempQuotaData = [];
         foreach ($res as &$v) {
-            if ($v[$quota_key] > $quota_key_conf[$quota_key]['status_max']) {
-                $v['quota_status'] = 1;
-            } elseif ($v[$quota_key] <= $quota_key_conf[$quota_key]['status_max']
-                    && $v[$quota_key] > $quota_key_conf[$quota_key]['status_min']) {
-                $v['quota_status'] = 2;
-            } else {
-                $v['quota_status'] = 3;
-            }
-            $v[$quota_key] = round($v[$quota_key], $quota_key_conf[$quota_key]['round_num']);
-            $temp_quota_data[$v['junction_id']]['list'][$quota_key] = $v[$quota_key];
-            $temp_quota_data[$v['junction_id']]['list']['quota_status'] = $v['quota_status'];
+            // 指标状态 1：高 2：中 3：低
+            $v['quota_status'] = $quotaKeyConf[$quotaKey]['status_formula']($v[$quotaKey]);
+
+            $v[$quotaKey] = $quotaKeyConf[$quotaKey]['round']($v[$quotaKey]);
+            $tempQuotaData[$v['junction_id']]['list'][$quotaKey] = $v[$quotaKey];
+            $tempQuotaData[$v['junction_id']]['list']['quota_status'] = $v['quota_status'];
         }
 
-        $result_data = $this->mergeAllJunctions($all_city_junctions, $temp_quota_data, 'quota_detail');
+        $resultData = $this->mergeAllJunctions($allCityJunctions, $tempQuotaData, 'quota_detail');
 
-        return $result_data;
+        return $resultData;
     }
 
     /**
@@ -976,7 +971,7 @@ class Junction_model extends CI_Model
                 $resultData['diagnose_detail'][$k]['movements'] = [];
 
                 foreach ($data['movements'] as $kk=>$vv) {
-                    /* 判断是否有问题 */
+                    // 问题对应的指标
                     $diagnoseQuota = $v['flow_diagnose']['quota'];
                     if ($v['flow_diagnose']['formula']($vv[$diagnoseQuota])) {
                         // movement_id
@@ -986,7 +981,7 @@ class Junction_model extends CI_Model
                         $resultData['diagnose_detail'][$k]['movements'][$kk]['comment']
                         = $flowIdName[$vv['movement_id']];
                         // 此问题对应指标值
-                        $resultData['diagnose_detail'][$k]['movements'][$kk]
+                        $resultData['diagnose_detail'][$k]['movements'][$kk][$diagnoseQuota]
                         = $flowQuotaKeyConf[$diagnoseQuota]['round']($vv[$diagnoseQuota]);
                         // 置信度
                         $resultData['diagnose_detail'][$k]['movements'][$kk]['confidence']
