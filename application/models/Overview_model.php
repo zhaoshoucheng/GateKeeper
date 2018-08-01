@@ -54,7 +54,7 @@ class Overview_model extends CI_Model
             ];
         }, $result);
 
-        $result = $this->mergeJunctionResult($result);
+        $result = $this->mergeJunctionResult($result, $junctionsInfo);
 
         return $result;
     }
@@ -151,7 +151,7 @@ class Overview_model extends CI_Model
             return [];
         }
 
-        if ($alarmCategory[1]['formula']($item['spillover_rate'])){
+        if ($alarmCategory[1]['formula']($item['spillover_rate'])) {
             return [$flowsInfo[$item['logic_junction_id']]['logic_flow_id']] . '-溢流';
         } elseif ($alarmCategory[2]['formula']($item)) {
             return [$flowsInfo[$item['logic_junction_id']]['logic_flow_id']] . '-过饱和';
@@ -180,8 +180,14 @@ class Overview_model extends CI_Model
             $junctionInfo = $junctionsInfo[$item['logic_junction_id']];
 
             $item['quota'] = [
-                'stop_delay' => round($item['quota']['stop_delay_weight'] / $item['quota']['traj_count'], 2),
-                'stop_time_cycle' => $item['quota']['stop_time_cycle']
+                'stop_delay' => [
+                    'name' => '平均延误',
+                    'value' => round($item['quota']['stop_delay_weight'] / $item['quota']['traj_count'], 2),
+                    'unit' => '秒',
+                ],
+                'stop_time_cycle' => [
+                    $item['quota']['stop_time_cycle']
+                ]
             ];
 
             $item['alarm_info'] = [
@@ -190,11 +196,11 @@ class Overview_model extends CI_Model
             ];
 
             $item['junction_name'] = $junctionInfo['name'] ?? '';
-            $item['lng'] = $junctionInfo['lng'] ?? '';
-            $item['lat'] = $junctionInfo['lat'] ?? '';
+            $item['lng']           = $junctionInfo['lng'] ?? '';
+            $item['lat']           = $junctionInfo['lat'] ?? '';
         }
 
-        return [ 'dataList' => array_values($temp) ];
+        return ['dataList' => array_values($temp)];
     }
 
     /**
@@ -208,8 +214,8 @@ class Overview_model extends CI_Model
     {
         //合并属性 停车延误加权求和，停车时间求最大，权值求和
         $target['quota']['stop_delay_weight'] += $item['quota']['stop_delay_weight'];
-        $target['quota']['stop_time_cycle'] = max($target['quota']['stop_time_cycle'], $item['quota']['stop_time_cycle']);
-        $target['quota']['traj_count'] += $item['quota']['traj_count'];
+        $target['quota']['stop_time_cycle']   = max($target['quota']['stop_time_cycle'], $item['quota']['stop_time_cycle']);
+        $target['quota']['traj_count']        += $item['quota']['traj_count'];
 
         //合并报警信息
         $target['alarm_info'] = array_merge($target['alarm_info'], $item['alarm_info']) ?? [];
