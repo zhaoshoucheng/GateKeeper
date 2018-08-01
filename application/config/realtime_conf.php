@@ -80,24 +80,10 @@ $config['alarm_category'] = [
         'name'    => '过饱和',
         'key'     => 2,
         'desc'    => '',
-        'formula' => function($val, $key) {
-            switch ($key) {
-                // 二次停车比例
-                case 'twice_stop_rate':
-                    return $val >= 0.2;
-                    break;
-                // 排队长度
-                case 'queue_length':
-                    return $val >= 180;
-                    break;
-                // 停车延误
-                case 'stop_delay':
-                    return $val >= 50;
-                    break;
-                default:
-                    return false;
-                    break;
-            }
+        'formula' => function($val) { // $val = ['twice_stop_rate'=>xx, 'queue_length'=>xx, ...]
+            return ($val['twice_stop_rate'] >= 0.02
+                && $val['queue_length'] >= 180
+                && $val['stop_delay'] >= 50);
         },
     ],
 ];

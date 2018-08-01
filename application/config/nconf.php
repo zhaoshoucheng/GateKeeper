@@ -155,47 +155,47 @@ $config['junction_quota_key'] = [
 $config['flow_quota_key'] = [
 	'route_length' => [
 		'name'      => '路段长度', // 中文名称
-		'round_num' => 0,         // 取小数点位数
-		'unit'      => '米'       // 单位
+		'round'     => function($val) { return round($val);},  // 格式化数据
+		'unit'      => 'm'       // 单位
 	],
 	'queue_position' => [
 		'name'      =>'排队长度',
-		'round_num' => 0,
-		'unit'      => '米'
+		'round'     => function($val) { return round($val);},
+		'unit'      => 'm'
 	],
 	'saturation_degree'	=> [
 		'name'      =>'饱和度',
-		'round_num' => 2,
+		'round'     => function($val) { return round($val, 2);},
 		'unit'      => ''
 	],
 	'stop_delay' => [
 		'name'      => '停车延误',
-		'round_num' => 2,
-		'unit'      => '秒'
+		'round'     => function($val) { return round($val, 2);},
+		'unit'      => 's'
 	],
 	'stop_time_cycle' => [
 		'name'      =>'停车次数',
-		'round_num' => 2,
+		'round'     => function($val) { return round($val, 2);},
 		'unit'      => ''
 	],
 	'spillover_rate' => [
 		'name'      => '溢流比率',
-		'round_num' => 5,
+		'round'     => function($val) { return round($val, 5);},
 		'unit'      => ''
 	],
 	'stop_rate' => [
 		'name'      => '停车比率',
-		'round_num' => 2,
+		'round'     => function($val) { return round($val, 2);},
 		'unit'      => ''
 	],
 	'flow_num' => [
 		'name'      => '流量',
-		'round_num' => 0,
+		'round'     => function($val) { return round($val);},
 		'unit'      => 'veh/h/lane'
 	],
 	'free_flow_speed' => [
 		'name'      => '自由流',
-		'round_num' => 2,
+		'round'     => function($val) { return round($val, 2);},
 		'unit'      => 'km/h'
 	],
 ];
@@ -206,11 +206,17 @@ $config['diagnose_key']	= [
 		'name'				        => '溢流',
 		'junction_diagnose_formula' => function($val) { return $val > 0.008;},
 		'sql_where' => function() { return '`spillover_index` > 0.008';},
-		'nature_threshold'  => [
-			'high'       => 0.6,
-			'mide'       => 0.3,
-			'low'        => 0
-		],
+		'nature_formula'  => function($val) {
+			if ($val > 0.6) {
+				return 1;
+			} else if ($val > 0.3 && $val <= 0.6) {
+				return 2;
+			} else if ($val > 0 && $val <= 0.3){
+				return 3;
+			} else {
+				return 0;
+			}
+		},
 		'flow_quota'=>[
 			'spillover_rate'=>[
 				'name'=>'溢流比率',
@@ -218,11 +224,11 @@ $config['diagnose_key']	= [
 			],
 			'queue_position'=>[
 				'name'=>'排队长度',
-				'unit'=>'米'
+				'unit'=>'m'
 			],
 			'stop_delay'=>[
 				'name'=>'停车延误',
-				'unit'=>'秒'
+				'unit'=>'s'
 			],
 			'stop_time_cycle'=>[
 				'name'=>'停车次数',
@@ -230,7 +236,7 @@ $config['diagnose_key']	= [
 			],
 			'route_length'  => [
 				'name'=>'路段长度',
-				'unit'=>'米'
+				'unit'=>'m'
 			],
 		],
 		// flow级的诊断问题
@@ -247,11 +253,17 @@ $config['diagnose_key']	= [
 		'name'				        => '失衡',
 		'junction_diagnose_formula' => function($val) { return $val > 0;},
 		'sql_where' => function() { return '`imbalance_index` > 0';},
-		'nature_threshold'          => [
-			'high'       => 0.08,
-			'mide'       => 0.04,
-			'low'        => 0.005
-		],
+		'nature_formula'  => function($val) {
+			if ($val > 0.08) {
+				return 1;
+			} else if ($val > 0.04 && $val <= 0.08) {
+				return 2;
+			} else if ($val > 0.005 && $val <= 0.04) {
+				return 3;
+			} else {
+				return 0;
+			}
+		},
 		'flow_quota'=>[
 			'saturation_degree'=>[
 				'name'=>'饱和度',
@@ -259,19 +271,19 @@ $config['diagnose_key']	= [
 			],
 			'queue_position'=>[
 				'name'=>'排队长度',
-				'unit'=>'米'
+				'unit'=>'m'
 			],
 			'stop_delay'=>[
 				'name'=>'停车延误',
-				'unit'=>'秒'
+				'unit'=>'s'
 			],
 			'stop_time_cycle'=>[
 				'name'=>'停车次数',
-				'unit'=>'秒'
+				'unit'=>'s'
 			],
 			'route_length'  => [
 				'name'=>'路段长度',
-				'unit'=>'米'
+				'unit'=>'m'
 			]
 		],
 		// flow级的诊断问题 如果有两个则是or的关系
@@ -292,11 +304,17 @@ $config['diagnose_key']	= [
 		'name'				        => '空放',
 		'junction_diagnose_formula' => function($val) { return $val < 0.3;},
 		'sql_where' => function() { return '`saturation_index` < 0.3';},
-		'nature_threshold'          => [
-			'high'       => 0.1 * -1,
-			'mide'       => 0.2 * -1,
-			'low'        => 0.3 * -1
-		],
+		'nature_formula'  => function($val) {
+			if ($val < 0.1) {
+				return 1;
+			} else if ($val >= 0.1 && $val < 0.2) {
+				return 2;
+			} else if ($val >= 0.2 && $val < 0.3) {
+				return 3;
+			} else {
+				return 0;
+			}
+		},
 		'flow_quota'=>[
 			'saturation_degree'=>[
 				'name'=>'饱和度',
@@ -304,7 +322,7 @@ $config['diagnose_key']	= [
 			],
 			'stop_delay'=>[
 				'name'=>'停车延误',
-				'unit'=>'秒'
+				'unit'=>'s'
 			],
 			'stop_time_cycle'=>[
 				'name'=>'停车次数',
@@ -323,13 +341,19 @@ $config['diagnose_key']	= [
 	],
 	'over_saturation'	=> [
 		'name'				        => '过饱和',
-		'junction_diagnose_formula' => function($val) { return $val > 1;},
+		'junction_diagnose_formula' => function($val) { return $val > 0.9;},
 		'sql_where' => function() { return '`saturation_index` > 1';},
-		'nature_threshold'          => [
-			'high'       => 0.1 * -1,
-			'mide'       => 0.2 * -1,
-			'low'        => 0.3 * -1
-		],
+		'nature_formula'  => function($val) {
+			if ($val < 1.2) {
+				return 1;
+			} else if ($val > 1 && $val <= 1.2) {
+				return 2;
+			} else if ($val > 0.9 && $val < 1) {
+				return 3;
+			} else {
+				return 0;
+			}
+		},
 		'flow_quota'=>[
 			'saturation_degree'=>[
 				'name'=>'饱和度',
@@ -337,11 +361,15 @@ $config['diagnose_key']	= [
 			],
 			'stop_delay'=>[
 				'name'=>'停车延误',
-				'unit'=>'秒'
+				'unit'=>'s'
 			],
 			'stop_time_cycle'=>[
 				'name'=>'停车次数',
 				'unit'=>''
+			],
+			'queue_position'=>[
+				'name'=>'排队长队',
+				'unit'=>'m'
 			]
 		],
 		// flow级的诊断问题

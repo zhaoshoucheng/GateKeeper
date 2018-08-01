@@ -66,11 +66,11 @@ class Junction_model extends CI_Model
             $where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
         }
 
-        $confidence_conf = $this->config->item('confidence');
+        $confidenceConf = $this->config->item('confidence');
         if (isset($data['confidence'])
             && (int)$data['confidence'] >= 1
-            && array_key_exists($data['confidence'], $confidence_conf)) {
-            $where .= ' and ' . $quota_key . '_confidence ' . $confidence_conf[$data['confidence']]['expression'];
+            && array_key_exists($data['confidence'], $confidenceConf)) {
+            $where .= ' and ' . $quota_key . '_confidence ' . $confidenceConf[$data['confidence']]['expression'];
         }
 
         $this->db->select($select);
@@ -637,12 +637,18 @@ class Junction_model extends CI_Model
     */
     private function getDiagnoseJunctionDetail($data)
     {
-        $diagnose_key_conf = $this->config->item('diagnose_key');
+        $diagnoseKeyConf = $this->config->item('diagnose_key');
 
         // 组织select 需要的字段
         $select_str = '';
-        foreach ($diagnose_key_conf as $k=>$v) {
-            $select_str .= empty($select_str) ? $k : ',' . $k;
+        foreach ($diagnoseKeyConf as $k=>$v) {
+            /*
+             * 因为过饱和问题与空放都是根据同一指标计算的，现空放问题的KEY与指标相同
+             * 所以只不需要再拼接过饱和问题的select column
+             */
+            if ($k != 'over_saturation') {
+                $select_str .= empty($select_str) ? $k : ',' . $k;
+            }
         }
         $select = "id, junction_id, {$select_str}, start_time, end_time, result_comment, movements";
 
@@ -728,18 +734,19 @@ class Junction_model extends CI_Model
     * 格式化路口详情数据
     * @param $data        路口详情数据
     * @param $dates       评估/诊断日期
-    * @param $result_type 数据返回类型 1：指标详情页 2：诊断详情页
+    * @param $resultType 数据返回类型 1：指标详情页 2：诊断详情页
     * @param $timingType  配时数据来源 1：人工 2：反推
     */
-    private function formatJunctionDetailData($data, $dates, $result_type, $timingType)
+    private function formatJunctionDetailData($data, $dates, $resultType, $timingType)
     {
-        if (empty($data) || empty($dates) || (int)$result_type < 1) {
+        if (empty($data) || empty($dates) || (int)$resultType < 1) {
             return [];
         }
 
         // 因为详情页地图下方列表所有相位都有 置信度字段，而置信度不属于指标，固将此放到扩展指标集合中
         $data['extend_flow_quota']['confidence'] = '置信度';
 
+        // movement级指标数据在数据表中以json格式的存储，需要json_decode
         $data['movements'] = json_decode($data['movements'], true);
         if (empty($data['movements'])) {
             return [];
@@ -752,13 +759,18 @@ class Junction_model extends CI_Model
             'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60),
             'timingType'  => $timingType
         ];
-        $flow_id_name = $this->timing_model->getFlowIdToName($timing_data);
+        $flowIdName = $this->timing_model->getFlowIdToName($timing_data);
 
-        $flow_quota_key_conf = $this->config->item('flow_quota_key');
+        // flow级指标配置
+        $flowQuotaKeyConf = $this->config->item('flow_quota_key');
+
         // 需要返回的全部movements所需字段
-        $movementsAll = array_merge($flow_quota_key_conf, ['movement_id'=>'', 'comment'=>'', 'confidence'=>'']);
-        $confidence_conf = $this->config->item('confidence');
-        // 匹配相位名称 并按 南左、北直、西左、东直、北左、南直、东左、西直 进行排序
+        $movementsAll = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'comment'=>'', 'confidence'=>'']);
+
+        // 置信度配置
+        $confidenceConf = $this->config->item('confidence');
+
+        // 匹配相位名称 并按 南左、北直、西左、东直、北左、南直、东左、西直 进行排序(NEMA排序)
         $phase = [
             '南左' => 10,
             '北直' => 20,
@@ -769,79 +781,82 @@ class Junction_model extends CI_Model
             '东左' => 70,
             '西直' => 80
         ];
-        $temp_movements = [];
+
+        $tempMovements = [];
         foreach ($data['movements'] as $k=>&$v) {
-            $v['comment'] = $flow_id_name[$v['movement_id']] ?? '';
+            // 相位名称
+            $v['comment'] = $flowIdName[$v['movement_id']] ?? '';
+
+            // 加这个判断是旧的任务结果数据中没有此字段
             if (isset($v['confidence'])) {
-                $v['confidence'] = $confidence_conf[$v['confidence']]['name'] ?? '';
+                $v['confidence'] = $confidenceConf[$v['confidence']]['name'] ?? '';
             } else {
                 $v['confidence'] = '';
             }
 
             // 组织flow级指标对应相位集合及格式化指标数据
-            foreach ($flow_quota_key_conf as $key=>$val) {
+            foreach ($flowQuotaKeyConf as $key=>$val) {
+                // 指标名称
                 $data['flow_quota_all'][$key]['name'] = $val['name'];
+                // 指标单位
                 $data['flow_quota_all'][$key]['unit'] = $val['unit'];
                 $data['flow_quota_all'][$key]['movements'][$k]['id'] = $v['movement_id'];
                 if (isset($v[$key])) {
-                    $v[$key] = round($v[$key], $val['round_num']);
-                    $data['flow_quota_all'][$key]['movements'][$k]['value'] = round($v[$key], $val['round_num']);
+                    $v[$key] = $val['round']($v[$key]);
+                    $data['flow_quota_all'][$key]['movements'][$k]['value'] = $val['round']($v[$key]);
                 }
             }
             if (array_key_exists(trim($v['comment']), $phase)
-                && !array_key_exists($phase[trim($v['comment'])], $temp_movements)
+                && !array_key_exists($phase[trim($v['comment'])], $tempMovements)
             ) {
-                $temp_movements[$phase[trim($v['comment'])]] = array_intersect_key($v, $movementsAll);
+                $tempMovements[$phase[trim($v['comment'])]] = array_intersect_key($v, $movementsAll);
             } else {
-                $temp_movements[mt_rand(100, 900) + mt_rand(1, 99)] = array_intersect_key($v, $movementsAll);
+                $tempMovements[mt_rand(100, 900) + mt_rand(1, 99)] = array_intersect_key($v, $movementsAll);
             }
         }
+        // 因为foreach 使用了引用&$v，所以foreach完成后要销毁$v
         unset($v);
 
-        if (!empty($temp_movements)) {
+        if (!empty($tempMovements)) {
             unset($data['movements']);
-            ksort($temp_movements);
-            $data['movements'] = array_values($temp_movements);
+            ksort($tempMovements);
+            $data['movements'] = array_values($tempMovements);
         }
 
-        if ($result_type == 2) { // 诊断详情页
+        if ($resultType == 2) { // 诊断详情页
             // 组织问题集合
-            $diagnose_key_conf = $this->config->item('diagnose_key');
-            foreach ($diagnose_key_conf as $k=>$v) {
-                if ($this->compare($data[$k], $v['junction_threshold'], $v['junction_threshold_formula'])) {
+            $diagnoseKeyConf = $this->config->item('diagnose_key');
+            foreach ($diagnoseKeyConf as $k=>$v) {
+                /*
+                 * 因为过饱和问题与空放问题同用一个指标进行计算
+                 * 所以过饱和问题要单独处理一下
+                 */
+                $diagnose = $k;
+                if ($k == 'over_saturation') {
+                    $diagnose = 'saturation_index';
+                }
+
+                // 判断路口的问题
+                if ($v['junction_diagnose_formula']($data[$diagnose])) {
                     $data['diagnose_detail'][$k]['name'] = $v['name'];
                     $data['diagnose_detail'][$k]['key'] = $k;
 
                     // 计算性质程度
-                    $compare_val = $data[$k];
-                    if ($k == 'saturation_index') {
-                        // 空放问题，因为统一算法，空放的性质阈值设置为负数，所以当是空放问题时，传递负数进行比较
-                        $compare_val = $data[$k] * -1;
-                    }
-                    // 诊断问题性质 1:重度 2:中度 3:轻度
-                    if ($compare_val > $v['nature_threshold']['high']) {
-                        $data['diagnose_detail'][$k]['nature'] = 1;
-                    } elseif ($compare_val > $v['nature_threshold']['mide']
-                            && $compare_val <= $v['nature_threshold']['high']) {
-                        $data['diagnose_detail'][$k]['nature'] = 2;
-                    }else if($compare_val > $v['nature_threshold']['low']
-                            && $compare_val <= $v['nature_threshold']['mide']) {
-                        $data['diagnose_detail'][$k]['nature'] = 3;
-                    }
+                    $data['diagnose_detail'][$k]['nature'] = $v['nature_formula']($data[$diagnose]);
 
                     // 匹配每个问题指标
-                    $temp_arr = ['movement_id'=>'logic_flow_id', 'comment'=>'name', 'confidence'=>'置信度'];
-                    $temp_merge = array_merge($v['flow_quota'], $temp_arr);
+                    $tempArr = ['movement_id'=>'logic_flow_id', 'comment'=>'name', 'confidence'=>'置信度'];
+                    $tempMerge = array_merge($v['flow_quota'], $tempArr);
                     foreach ($data['movements'] as $kk=>$vv) {
-                        $data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, $temp_merge);
+                        $data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, $tempMerge);
                         foreach ($v['flow_quota'] as $key=>$val) {
                             if (isset($vv[$key])) {
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['unit'] = $val['unit'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id']
-                                    = $vv['movement_id'];
+                                = $vv['movement_id'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value']
-                                    = round($vv[$key], $flow_quota_key_conf[$key]['round_num']);
+                                = $flowQuotaKeyConf[$key]['round']($vv[$key]);
                             }
                         }
                     }
@@ -849,8 +864,8 @@ class Junction_model extends CI_Model
             }
         }
 
-        $result_comment_conf = $this->config->item('result_comment');
-        $data['result_comment'] = $result_comment_conf[$data['result_comment']] ?? '';
+        $resultCommentConf = $this->config->item('result_comment');
+        $data['result_comment'] = $resultCommentConf[$data['result_comment']] ?? '';
         return $data;
     }
 
@@ -1223,9 +1238,9 @@ class Junction_model extends CI_Model
             }
         }
         if (is_array($key)) { // 诊断问题， 多选
-            $diagnose_key_conf = $this->config->item('diagnose_key');
+            $diagnoseKeyConf = $this->config->item('diagnose_key');
             foreach ($key as $v) {
-                if (array_key_exists($v, $diagnose_key_conf)) {
+                if (array_key_exists($v, $diagnoseKeyConf)) {
                     $select .= empty($select) ? $v : ',' . $v;
                 }
             }
