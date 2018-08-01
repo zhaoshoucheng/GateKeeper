@@ -34,29 +34,23 @@ class Overview_model extends CI_Model
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
             ->get()->result_array();
 
+        //获取全部路口 ID
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
-        //获取自定义的返回格式
+        //获取路口信息的自定义返回格式
         $junctionsInfo = $this->waymap_model->getJunctionInfo($ids, [
             'key' => 'logic_junction_id',
             'value' => ['name', 'lng', 'lat']
         ]);
 
+        //获取全部路口的全部方向的信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
 
-        $result = array_map(function ($item) use ($junctionsInfo, $flowsInfo, $data) {
-            $junctionInfo = $junctionsInfo[$item['logic_junction_id']] ?? '';
-
-            $junction_status = $this->getJunctionStatus($item, $data['city_id']);
-
+        $result = array_map(function ($item) use ($junctionsInfo, $flowsInfo) {
             return [
                 'logic_junction_id' => $item['logic_junction_id'],
-                'junction_name' => $junctionInfo['name'] ?? '',
-                'lng' => $junctionInfo['lng'] ?? '',
-                'lat' => $junctionInfo['lat'] ?? '',
                 'quota' => $this->createQuotaInfo($item),
-                'alarm_info' => $this->getAlarmInfo($item, $data['city_id'], $flowsInfo),
-                'junction_status' => $junction_status
+                'alarm_info' => $this->getAlarmInfo($item, $flowsInfo),
             ];
         }, $result);
 
@@ -101,8 +95,9 @@ class Overview_model extends CI_Model
     private function createQuotaInfo($item)
     {
         return [
-            'stop_delay' => [$item['stop_delay']],
-            'stop_time_cycle' => [$item['stop_time_cycle']]
+            'stop_delay_weight' => $item['stop_delay'] * $item['traj_count'],
+            'stop_time_cycle' => $item['stop_time_cycle'],
+            'traj_count' => $item['traj_count']
         ];
     }
 
@@ -112,18 +107,13 @@ class Overview_model extends CI_Model
      * @param $item
      * @return array
      */
-    private function getJunctionStatus($item, $city_id)
+    private function getJunctionStatus($item)
     {
-        $junction_status = $this->config->item('junction_status')[$city_id] ?? null;
+        $junction_status = $this->config->item('junction_status') ?? null;
 
         if (is_null($junction_status)) {
-            return [
-                'name' => '',
-                'key' => 0
-            ];
+            return [];
         }
-
-        $formula_alarm = $junction_status[4]['formula'];
 
         if ($junction_status[1]['formula']($item['stop_delay'])) {
             return [
@@ -140,19 +130,33 @@ class Overview_model extends CI_Model
                 'name' => $junction_status[3]['name'],
                 'key' => $junction_status[3]['key']
             ];
-        } elseif ($formula_alarm($item['spillover_rate'], 'spillover_rate')
-            || ($formula_alarm($item['twice_stop_rate'], 'twice_stop_rate')
-                && $formula_alarm($item['queue_length'], 'queue_length')
-                && $formula_alarm($item['stop_delay'], 'stop_delay'))) {
-            return [
-                'name' => $junction_status[4]['name'],
-                'key' => $junction_status[4]['key']
-            ];
         } else {
-            return [
-                'name' => '',
-                'key' => 0
-            ];
+            return [];
+        }
+    }
+
+    /**
+     * 生成报警信息
+     *
+     * @param $item
+     * @param $city_id
+     * @param $flowsInfo
+     * @return array|string
+     */
+    private function getAlarmInfo($item, $flowsInfo)
+    {
+        $alarmCategory = $this->config->item('alarm_category');
+
+        if (is_null($alarmCategory)) {
+            return [];
+        }
+
+        if ($alarmCategory[1]['formula']($item['spillover_rate'])){
+            return [$flowsInfo[$item['logic_junction_id']]['logic_flow_id']] . '-溢流';
+        } elseif ($alarmCategory[2]['formula']($item)) {
+            return [$flowsInfo[$item['logic_junction_id']]['logic_flow_id']] . '-过饱和';
+        } else {
+            return [];
         }
     }
 
@@ -162,7 +166,7 @@ class Overview_model extends CI_Model
      * @param $result
      * @return array
      */
-    private function mergeJunctionResult($result)
+    private function mergeJunctionResult($result, $junctionsInfo)
     {
         $temp = [];
 
@@ -173,8 +177,21 @@ class Overview_model extends CI_Model
         }
 
         foreach ($temp as &$item) {
-            $item['quota']['stop_delay']      = round(array_sum($item['quota']['stop_delay']) / count($item['quota']['stop_delay']), 2);
-            $item['quota']['stop_time_cycle'] = max($item['quota']['stop_time_cycle']);
+            $junctionInfo = $junctionsInfo[$item['logic_junction_id']];
+
+            $item['quota'] = [
+                'stop_delay' => round($item['quota']['stop_delay_weight'] / $item['quota']['traj_count'], 2),
+                'stop_time_cycle' => $item['quota']['stop_time_cycle']
+            ];
+
+            $item['alarm_info'] = [
+                'is_alarm' => !empty($item['alarm_info']),
+                'commment' => $item['alarm_info']
+            ];
+
+            $item['junction_name'] = $junctionInfo['name'] ?? '';
+            $item['lng'] = $junctionInfo['lng'] ?? '';
+            $item['lat'] = $junctionInfo['lat'] ?? '';
         }
 
         return [ 'dataList' => array_values($temp) ];
@@ -189,50 +206,14 @@ class Overview_model extends CI_Model
      */
     private function mergeJunctionResultItem($target, $item)
     {
-        //合并所有指标
-        foreach ($target['quota'] as $key => &$quote) {
-            $quote = array_merge($quote, $item['quota'][$key]);
-        }
+        //合并属性 停车延误加权求和，停车时间求最大，权值求和
+        $target['quota']['stop_delay_weight'] += $item['quota']['stop_delay_weight'];
+        $target['quota']['stop_time_cycle'] = max($target['quota']['stop_time_cycle'], $item['quota']['stop_time_cycle']);
+        $target['quota']['traj_count'] += $item['quota']['traj_count'];
 
         //合并报警信息
         $target['alarm_info'] = array_merge($target['alarm_info'], $item['alarm_info']) ?? [];
 
-        //取所有路口状态 key 值最大的一个
-        $target['junction_status'] =
-            $target['junction_status']['key'] > $item['junction_status']['key'] ?
-                $target['junction_status'] : $item['junction_status'];
-
         return $target;
-    }
-
-    /**
-     * 生成报警信息
-     *
-     * @param $item
-     * @param $city_id
-     * @param $flowsInfo
-     * @return array|string
-     */
-    private function getAlarmInfo($item, $city_id, $flowsInfo)
-    {
-        //获取路口当前 flow 的状态
-        $junction_status = $this->config->item('junction_status')[$city_id] ?? null;
-
-        if (is_null($junction_status)) {
-            return [];
-        }
-
-        $formula_alarm = $junction_status[4]['formula'];
-
-        if ($formula_alarm($item['spillover_rate'], 'spillover_rate')){
-            return [$flowsInfo[$item['logic_junction_id']]['logic_flow_id']] . '-溢流';
-        } elseif (($formula_alarm($item['twice_stop_rate'], 'twice_stop_rate')
-            && $formula_alarm($item['queue_length'], 'queue_length')
-            && $formula_alarm($item['stop_delay'], 'stop_delay'))
-        ) {
-            return [$flowsInfo[$item['logic_junction_id']]['logic_flow_id']] . '-过饱和';
-        } else {
-            return [];
-        }
     }
 }
