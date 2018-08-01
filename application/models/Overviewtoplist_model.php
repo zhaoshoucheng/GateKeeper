@@ -29,12 +29,12 @@ class Overviewtoplist_model extends CI_Model
 
     public function stopDelayTopList($data)
     {
-        return $this->topList('stop_delay', $data);
+        return $this->topList('stop_delay', $data, 'avg');
     }
 
     public function stopTimeCycleTopList($data)
     {
-        return $this->topList('stop_time_cycle', $data);
+        return $this->topList('stop_time_cycle', $data, 'max');
     }
 
     /**
