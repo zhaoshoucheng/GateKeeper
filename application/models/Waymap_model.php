@@ -3,7 +3,7 @@
 # desc:    路网数据模型
 # author:  ningxiangbing@didichuxing.com
 # date:    2018-04-08
-********************************************/
+ ********************************************/
 
 class Waymap_model extends CI_Model
 {
@@ -23,11 +23,11 @@ class Waymap_model extends CI_Model
     }
 
     /**
-    * 根据路口ID串获取路口名称
-    * @param logic_junction_ids     逻辑路口ID串     string
-    * @param returnFormat           数据返回格式      array [key => 'id', value => ['name',...]]
-    * @return array
-    */
+     * 根据路口ID串获取路口名称
+     * @param logic_junction_ids     逻辑路口ID串     string
+     * @param returnFormat           数据返回格式      array [key => 'id', value => ['name',...]]
+     * @return array
+     */
     public function getJunctionInfo($ids, $returnFormat = null)
     {
         $data['logic_ids'] = $ids;
@@ -57,9 +57,7 @@ class Waymap_model extends CI_Model
                 $result = [];
 
                 if(is_string($returnFormat['value'])) {
-                    foreach ($res['data'] as $datum) {
-                        $result[$datum[$returnFormat['key']]] = $datum[$returnFormat['value']];
-                    }
+                    $result = array_column($res['data'], $returnFormat['value'], $returnFormat['key']);
                 } else {
                     foreach ($res['data'] as $datum) {
                         $temp = [];
@@ -79,12 +77,12 @@ class Waymap_model extends CI_Model
     }
 
     /**
-    * 获取路口各相位lng、lat
-    * @param $data['version']           路网版本
-    * @param $data['logic_junction_id'] 逻辑路口ID
-    * @param $data['logic_flow_ids']    相位id集合
-    * @return array
-    */
+     * 获取路口各相位lng、lat
+     * @param $data['version']           路网版本
+     * @param $data['logic_junction_id'] 逻辑路口ID
+     * @param $data['logic_flow_ids']    相位id集合
+     * @return array
+     */
     public function getJunctionFlowLngLat($data)
     {
         if (empty($data)) {
@@ -115,10 +113,10 @@ class Waymap_model extends CI_Model
     }
 
     /**
-    * 获取路口中心点坐标
-    * @param $data['logic_id']  逻辑路口ID
-    * @return array
-    */
+     * 获取路口中心点坐标
+     * @param $data['logic_id']  逻辑路口ID
+     * @return array
+     */
     public function getJunctionCenterCoords($data)
     {
         if (empty($data)) {
@@ -137,17 +135,17 @@ class Waymap_model extends CI_Model
             $junction_info = json_decode($junction_info, true);
             if ($junction_info['errorCode'] != 0 || empty($junction_info['data'])) {
                 $content = 'data = ' . json_encode($data)
-                        . ' \r\n interface = '
-                        . $this->config->item('waymap_interface') . '/signal-map/map/detail'
-                        . '\r\n result = ' . json_encode($junction_info);
+                    . ' \r\n interface = '
+                    . $this->config->item('waymap_interface') . '/signal-map/map/detail'
+                    . '\r\n result = ' . json_encode($junction_info);
                 sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return [];
             }
         } catch (Exception $e) {
             $content = 'data = ' . json_encode($data)
-                    . ' \r\n interface = '
-                    . $this->config->item('waymap_interface') . '/signal-map/map/detail'
-                    . '\r\n result = ' . json_encode($junction_info);
+                . ' \r\n interface = '
+                . $this->config->item('waymap_interface') . '/signal-map/map/detail'
+                . '\r\n result = ' . json_encode($junction_info);
             sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
             return [];
         }
@@ -159,11 +157,11 @@ class Waymap_model extends CI_Model
     }
 
     /**
-    * 获取全城路口
+     * 获取全城路口
      * @param city_id        Y 城市ID
      * @param $version       N 地图版本
-    * @return array
-    */
+     * @return array
+     */
     public function getAllCityJunctions($city_id, $version=0)
     {
         if ((int)$city_id < 1) {
@@ -210,7 +208,7 @@ class Waymap_model extends CI_Model
                 }
             } catch (Exception $e) {
                 $content = 'data = ' . json_encode($data)
-                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/signal-map/map/getList';
+                    . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/signal-map/map/getList';
                 sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return false;
             }
@@ -222,10 +220,10 @@ class Waymap_model extends CI_Model
     }
 
     /**
-    * 获取最新地图版本号
-    * @param $dates array 日期 ['20180102', '20180103']
-    * @return array
-    */
+     * 获取最新地图版本号
+     * @param $dates array 日期 ['20180102', '20180103']
+     * @return array
+     */
     public function getMapVersion($dates)
     {
         if (!is_array($dates) || empty($dates)) {
