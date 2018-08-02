@@ -191,18 +191,13 @@ class Overview_model extends CI_Model
     {
         $alarmCategory = $this->config->item('alarm_category');
 
-        if (is_null($alarmCategory)) {
-            return [];
-        }
+        $alarmFormula = $this->config->item('alarm_formula');
 
-        $result = [];
+        $result = $alarmFormula($item);
 
-        if ($alarmCategory[1]['formula']($item['spillover_rate'])) {
-            $result[] = $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-溢流';
-        }
-        if ($alarmCategory[2]['formula']($item)) {
-            $result[] = $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-过饱和';
-        }
+        $result = array_map(function ($v) use ($item, $flowsInfo, $alarmCategory) {
+            $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-' . $alarmCategory[$v]['name'];
+        }, $result);
 
         return $result;
     }
@@ -229,30 +224,11 @@ class Overview_model extends CI_Model
      */
     private function getJunctionStatus($quota)
     {
-        $junction_status = $this->config->item('junction_status') ?? null;
+        $junctionStatus = $this->config->item('junction_status');
 
-        if (is_null($junction_status)) {
-            return [];
-        }
+        $junctionStatusFormula = $this->config->item('junction_status_formula');
 
-        if ($junction_status[1]['formula']($quota['stop_delay']['value'])) {
-            return [
-                'name' => $junction_status[1]['name'],
-                'key' => $junction_status[1]['key']
-            ];
-        } elseif ($junction_status[2]['formula']($quota['stop_delay']['value'])) {
-            return [
-                'name' => $junction_status[2]['name'],
-                'key' => $junction_status[2]['key']
-            ];
-        } elseif ($junction_status[3]['formula']($quota['stop_delay']['value'])) {
-            return [
-                'name' => $junction_status[3]['name'],
-                'key' => $junction_status[3]['key']
-            ];
-        } else {
-            return [];
-        }
+        return $junctionStatus[$junctionStatusFormula($quota['stop_delay']['value'])];
     }
 
     /**
