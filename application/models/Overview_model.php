@@ -81,14 +81,11 @@ class Overview_model extends CI_Model
 
         // 路口状态配置
         $junctionStatusConf = $this->config->item('junction_status');
+        // 路口状态计算规则
+        $junctinStatusFormula = $this->config->item('junction_status_formula');
 
         foreach ($data as $k=>$v) {
-            foreach ($junctionStatusConf as $key=>$val) {
-                if ($val['formula']($v['stop_delay'])) {
-                    $result['count'][$key]['cate'] = $val['name'];
-                    $result['count'][$key]['num'] += 1;
-                }
-            }
+            $result['count'][$junctinStatusFormula($v['stop_delay'])][$k] = 1;
         }
 
         echo "<pre>";print_r($result);

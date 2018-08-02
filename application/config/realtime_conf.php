@@ -35,26 +35,31 @@ $config['real_time_quota'] = [
 $config['junction_status'] = [
     // 畅通：停车延误 <= 阈值
     1 => [
-        'name'    => '畅通',    // 状态名
-        'key'     => 1,        // 状态KEY
-        'en_key'  => 'open', // 英文KEY
-        'formula' => function ($val) { return $val < 90;}, // 计算规则
+        'name' => '畅通',    // 状态名
+        'key'  => 1,        // 状态KEY
     ],
     // 缓行：停车延误 > 阈值 && 停车延误 <= 阈值
     2 => [
-        'name'    => '缓行',
-        'key'     => 2,
-        'en_key'  => 'amble',
-        'formula' => function ($val) { return ($val >= 90 && $val < 180);},
+        'name' => '缓行',
+        'key'  => 2,
     ],
     // 拥堵：停车延误 > 阈值
     3 => [
-        'name'    => '拥堵',
-        'key'     => 3,
-        'en_key'  => 'congestion',
-        'formula' => function ($val) { return $val >= 180;},
+        'name' => '拥堵',
+        'key'  => 3,
     ],
 ];
+
+// 路口状态计算规则
+$config['junction_status_formula'] = function($val) {
+    if ($val >= 180) {
+        return 3; // 拥堵
+    } else if ($val < 180 && $val >= 90) {
+        return 2; // 缓行
+    } else {
+        return 1; // 畅通
+    }
+};
 
 // 报警类别
 $config['alarm_category'] = [
