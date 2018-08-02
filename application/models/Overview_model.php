@@ -226,7 +226,7 @@ class Overview_model extends CI_Model
      * @param $item
      * @return array
      */
-    private function getJunctionStatus($item)
+    private function getJunctionStatus($quota)
     {
         $junction_status = $this->config->item('junction_status') ?? null;
 
@@ -234,17 +234,17 @@ class Overview_model extends CI_Model
             return [];
         }
 
-        if ($junction_status[1]['formula']($item['quota']['stop_delay']['value'])) {
+        if ($junction_status[1]['formula']($quota['stop_delay']['value'])) {
             return [
                 'name' => $junction_status[1]['name'],
                 'key' => $junction_status[1]['key']
             ];
-        } elseif ($junction_status[2]['formula']($item['quota']['stop_delay']['value'])) {
+        } elseif ($junction_status[2]['formula']($quota['stop_delay']['value'])) {
             return [
                 'name' => $junction_status[2]['name'],
                 'key' => $junction_status[2]['key']
             ];
-        } elseif ($junction_status[3]['formula']($item['quota']['stop_delay']['value'])) {
+        } elseif ($junction_status[3]['formula']($quota['stop_delay']['value'])) {
             return [
                 'name' => $junction_status[3]['name'],
                 'key' => $junction_status[3]['key']
