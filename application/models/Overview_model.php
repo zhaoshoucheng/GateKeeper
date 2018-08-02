@@ -100,7 +100,8 @@ class Overview_model extends CI_Model
             ];
         }
 
-        echo "<pre>";print_r($result);
+        $result['count'] = array_values($result['count']);
+        $result['ratio'] = array_values($result['ratio']);
 
         return $result;
     }

@@ -75,7 +75,7 @@ $config['alarm_category'] = [
     ],
 ];
 
-// 报警计算规则
+// 报警计算规则 $val = ['指标KEY' => 指标值]
 $config['alarm_formula'] = function($val) {
     $res = [];
     if (array_key_exists('spillover_rate', $val) && $val['spillover_rate'] >= 0.2) {
