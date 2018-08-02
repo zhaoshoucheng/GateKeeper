@@ -77,9 +77,9 @@ class Overview_model extends CI_Model
                 $v['hour']
             ];
         }, $result);
-
+        $allStopDelay = array_column($result, 0);
         $info = [
-            'value' => array_column($result, 0),
+            'value' => $realTimeQuota['stop_delay']['round'](array_sum($allStopDelay) / count($allStopDelay)) ,
             'quota_unit' => $realTimeQuota['stop_delay']['unit']
         ];
 
