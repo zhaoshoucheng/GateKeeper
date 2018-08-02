@@ -440,11 +440,7 @@ class Waymap_model extends CI_Model
             }
 
             $res = array_map(function ($v) {
-                $item = [];
-                foreach ($v as $flow) {
-                    $item[$flow['logic_flow_id']] = $flow['phase_name'];
-                }
-                return $item;
+                return array_column($v, 'phase_name', 'logic_flow_id');
             }, $res['data']);
 
             return $res;
