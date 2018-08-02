@@ -59,17 +59,19 @@ class Overviewtoplist_model extends CI_Model
             ->limit($data['pagesize'])
             ->get()->result_array();
 
-        $ids = implode(',', array_column($result, 'logic_junction_id'));
+        $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
         $junctionIdNames = $this->waymap_model->getJunctionInfo($ids, ['key' => 'logic_junction_id', 'value' => 'name']);
 
-        $result = array_map(function ($item) use ($column, $junctionIdNames) {
+        $realTimeQuota = $this->config->item('real_time_quota');
+
+        $result = array_map(function ($item) use ($column, $junctionIdNames, $realTimeQuota) {
             return [
                 'time' => $item['hour'],
                 'logic_junction_id' => $item['logic_junction_id'],
                 'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '',
-                $column => round($item[$column], 2),
-                'quota_unit' => ''
+                $column => $realTimeQuota[$column]['round']($item[$column]),
+                'quota_unit' => $realTimeQuota[$column]['unit']
             ];
         }, $result);
 
