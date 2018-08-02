@@ -55,7 +55,7 @@ class Overviewtoplist_model extends CI_Model
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
             ->group_by('logic_junction_id')
-            ->order_by($method . '(' . $column . ')')
+            ->order_by($method . '(' . $column . ')', 'desc')
             ->limit($data['pagesize'])
             ->get()->result_array();
 
