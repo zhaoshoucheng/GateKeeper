@@ -196,7 +196,7 @@ class Overview_model extends CI_Model
         $result = $alarmFormula($item);
 
         $result = array_map(function ($v) use ($item, $flowsInfo, $alarmCategory) {
-            $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-' . $alarmCategory[$v]['name'];
+            return $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-' . $alarmCategory[$v]['name'];
         }, $result);
 
         return $result;
@@ -253,6 +253,7 @@ class Overview_model extends CI_Model
 
     /**
      * 获取拥堵概览
+     *
      * @param $data['city_id']    interger Y 城市ID
      * @param $data['date']       string   Y 日期 Y-m-d
      * @param $data['time_point'] string   Y 时间 H:i:s
