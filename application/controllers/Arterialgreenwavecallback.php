@@ -65,4 +65,10 @@ class Arterialgreenwavecallback extends CI_Controller
 
         echo "<pre> res = ";print_r($res);exit;
     }
+
+    public function delList()
+    {
+        $key = 'ArterialGreenWaveExecutingKeyList';
+        $this->redis_model->delList($key);
+    }
 }

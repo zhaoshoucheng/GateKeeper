@@ -56,25 +56,37 @@ class Overview extends MY_Controller
     }
 
     /**
-    * 拥堵占比
-    * @param
+    * 拥堵概览
+    * @param city_id    interger Y 城市ID
+    * @param date       string   Y 日期 yyyy-mm-dd
+    * @param time_point stirng   Y 时间点 H:i:s
     * @return json
     */
-    public function stopDelayRatio()
+    public function getCongestionInfo()
     {
+        $params = $this->input->post();
+        // 校验参数
+        $validate = Validate::make($params, [
+                'city_id'    => 'min:1',
+                'date'       => 'nullunable',
+                'time_point' => 'nullunable',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
 
+        $data = [
+            'city_id'    => intval($params['city_id']),
+            'date'       => date('Y-m-d', strtotime(strip_tags(trim($params['date'])))),
+            'time_point' => date('H:i:s', strtotime(strip_tags(trim($params['time_point'])))),
+        ];
 
-    }
+        $result = $this->overview_model->getCongestionInfo($data);
 
-    /**
-    * 拥堵数量
-    * @param
-    * @return json
-    */
-    public function stopDelayNum()
-    {
-
-
+        return $this->response($result);
     }
 
     /**
