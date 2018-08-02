@@ -72,9 +72,7 @@ class Overview_model extends CI_Model
         $result = [];
 
         // 拥堵数量
-        $result['count'] = [];
-        // 拥堵占比
-        $result['ratio'] = [];
+        $congestionNum = [];
 
         // 路口总数
         $junctionTotal = count($data);
@@ -85,7 +83,21 @@ class Overview_model extends CI_Model
         $junctinStatusFormula = $this->config->item('junction_status_formula');
 
         foreach ($data as $k=>$v) {
-            $result['count'][$junctinStatusFormula($v['stop_delay'])][$k] = 1;
+            $congestionNum[$junctinStatusFormula($v['stop_delay'])][$k] = 1;
+        }
+
+        $result['count'] = [];
+        $result['ratio'] = [];
+        foreach ($junctionStatusConf as $k=>$v) {
+            $result['count'][$k] = [
+                'cate' => $v['name'],
+                'num'  => isset($congestionNum[$k]) ? count($congestionNum[$k]) : 0,
+            ];
+
+            $result['ratio'][$k] = [
+                'cate'  => $v['name'],
+                'ratio' => isset($congestionNum[$k]) ? count($congestionNum[$k]) / $junctionTotal . '%' : '0%',
+            ];
         }
 
         echo "<pre>";print_r($result);
