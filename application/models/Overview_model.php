@@ -69,14 +69,24 @@ class Overview_model extends CI_Model
             ->group_by('left(hour, 5)')
             ->get()->result_array();
 
-        $result = array_map(function ($v) {
+        $realTimeQuota = $this->config->item('real_time_quota');
+
+        $result = array_map(function ($v) use ($realTimeQuota) {
             return [
-                round($v['avg_stop_delay'], 2),
+                $realTimeQuota['stop_delay']['round']($v['avg_stop_delay']),
                 $v['hour']
             ];
         }, $result);
 
-        return ['dataList' => $result];
+        $info = [
+            'value' => array_column($result, 0),
+            'quota_unit' => $realTimeQuota['stop_delay']['unit']
+        ];
+
+        return [
+            'dataList' => $result,
+            'info' => $info
+        ];
     }
 
     public function junctionSurvey($data)
@@ -85,12 +95,12 @@ class Overview_model extends CI_Model
 
         $result = [];
 
-        $result['junction_total'] = count($data);
-        $result['alarm_total'] = 0;
+        $result['junction_total']   = count($data);
+        $result['alarm_total']      = 0;
         $result['congestion_total'] = 0;
 
         foreach ($data as $datum) {
-            $result['alarm_total'] += $datum['alarm_info']['is_alarm'];
+            $result['alarm_total']      += $datum['alarm_info']['is_alarm'];
             $result['congestion_total'] += (int)($datum['junction_status']['key'] == 2);
         }
 
@@ -157,19 +167,21 @@ class Overview_model extends CI_Model
                 $item;
         }
 
+        $realTimeQuota = $this->config->item('real_time_quota');
+
         foreach ($temp as &$item) {
             $junctionInfo = $junctionsInfo[$item['logic_junction_id']];
 
             $item['quota'] = [
                 'stop_delay' => [
                     'name' => '平均延误',
-                    'value' => round($item['quota']['stop_delay_weight'] / $item['quota']['traj_count'], 2),
-                    'unit' => '秒',
+                    'value' => $realTimeQuota['stop_delay']['round']($item['quota']['stop_delay_weight'] / $item['quota']['traj_count']),
+                    'unit' => $realTimeQuota['stop_delay']['unit'],
                 ],
                 'stop_time_cycle' => [
                     'name' => '最大停车次数',
-                    'value' => round($item['quota']['stop_time_cycle'], 2),
-                    'unit' => '秒',
+                    'value' => $realTimeQuota['stop_time_cycle']['round']($item['quota']['stop_time_cycle']),
+                    'unit' => $realTimeQuota['stop_time_cycle']['unit'],
                 ]
             ];
 
