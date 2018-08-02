@@ -35,23 +35,31 @@ $config['real_time_quota'] = [
 $config['junction_status'] = [
     // 畅通：停车延误 <= 阈值
     1 => [
-        'name' => '畅通', // 状态名
-        'key' => 1,      // 状态KEY
-        'formula' => function ($val) { return $val < 90;}, // 计算规则
+        'name' => '畅通',    // 状态名
+        'key'  => 1,        // 状态KEY
     ],
     // 缓行：停车延误 > 阈值 && 停车延误 <= 阈值
     2 => [
         'name' => '缓行',
-        'key' => 2,
-        'formula' => function ($val) { return ($val >= 90 && $val < 180);},
+        'key'  => 2,
     ],
     // 拥堵：停车延误 > 阈值
     3 => [
         'name' => '拥堵',
-        'key' => 3,
-        'formula' => function ($val) { return $val >= 180;},
+        'key'  => 3,
     ],
 ];
+
+// 路口状态计算规则
+$config['junction_status_formula'] = function($val) {
+    if ($val >= 180) {
+        return 3; // 拥堵
+    } else if ($val < 180 && $val >= 90) {
+        return 2; // 缓行
+    } else {
+        return 1; // 畅通
+    }
+};
 
 // 报警类别
 $config['alarm_category'] = [
@@ -59,16 +67,27 @@ $config['alarm_category'] = [
         'name'    => '溢流', // 类别名称
         'key'     => 1,       // 类别KEY
         'desc'    => '',      // 描述
-        'formula' => function($val) { return $val >= 0.2;}, // 判断规则
     ],
     2 => [
         'name'    => '过饱和',
         'key'     => 2,
         'desc'    => '',
-        'formula' => function($val) { // $val = ['twice_stop_rate'=>xx, 'queue_length'=>xx, ...]
-            return ($val['twice_stop_rate'] >= 0.02
-                && $val['queue_length'] >= 180
-                && $val['stop_delay'] >= 50);
-        },
     ],
 ];
+
+// 报警计算规则
+$config['alarm_formula'] = function($val) {
+    $res = [];
+    if (array_key_exists('spillover_rate', $val) && $val['spillover_rate'] >= 0.2) {
+        array_push($res, 1);
+    }
+
+    if ((array_key_exists('twice_stop_rate', $val) && $val['twice_stop_rate'] >= 0.2)
+        && (array_key_exists('queue_length', $val) && $val['queue_length'] >= 180)
+        && (array_key_exists('stop_delay', $val) && $val['stop_delay'] >= 50))
+    {
+        array_push($res, 2);
+    }
+
+    return $res;
+};
