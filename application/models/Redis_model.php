@@ -154,4 +154,21 @@ class Redis_model extends CI_Model
         }
         return true;
     }
+
+    /**
+     * 删除集合
+     */
+    public function delList($key)
+    {
+        if (!$this->redis) {
+            return false;
+        }
+
+        try {
+            $this->redis->del($key);
+        } catch  (RedisException $e) {
+            return false;
+        }
+        return true;
+    }
 }
