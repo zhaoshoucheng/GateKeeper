@@ -53,7 +53,7 @@ class Overview_model extends CI_Model
             return [];
         }
 
-        $result = formatCongestionInfoData($res);
+        $result = $this->formatCongestionInfoData($res);
 
         return $result;
     }
@@ -71,38 +71,25 @@ class Overview_model extends CI_Model
 
         $result = [];
 
+        // 拥堵数量
+        $result['count'] = [];
+        // 拥堵占比
+        $result['ratio'] = [];
+
         // 路口总数
         $junctionTotal = count($data);
 
-        // 拥堵数量
-        $result['count'] = [
-            // 畅通路口数
-            'open'       => 0,
-            // 缓行路口数
-            'amble'      => 0,
-            // 拥堵路口数
-            'congestion' => 0,
-        ];
-
         // 路口状态配置
         $junctionStatusConf = $this->config->item('junction_status');
-        // 组织新路口状态数组，用于判断路口状态 英文key => 计算规则
-        $junctionSatus = array_column($junctionStatusConf, 'en_key', 'formula');
 
         foreach ($data as $k=>$v) {
-            foreach ($junctionSatus as $key=>$val) {
-                if ($val($v['stop_delay'])) {
-                    $result['count'][$key] += 1;
+            foreach ($junctionStatusConf as $key=>$val) {
+                if ($val['formula']($v['stop_delay'])) {
+                    $result['count'][$key]['cate'] = $val['name'];
+                    $result['count'][$key]['num'] += 1;
                 }
             }
         }
-
-        // 拥堵占比
-        $result['ratio'] = [
-            'open'       => $result['count']['open'] / $junctionTotal . '%',
-            'amble'      => $result['count']['amble'] / $junctionTotal . '%',
-            'congestion' => $result['count']['congestion'] / $junctionTotal . '%',
-        ];
 
         echo "<pre>";print_r($result);
 
