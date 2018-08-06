@@ -36,7 +36,7 @@ class Overviewalarm_model extends CI_Model
 
         $this->db->select('logic_junction_id, logic_flow_id, updated_at, type');
         $date = $data['date'] . ' ' . $data['time_point'];
-        $where = 'day(`updated_at`) = day("' . $date . '")';
+        $where = 'city_id = ' . $data['city_id'] . ' and  day(`updated_at`) = day("' . $date . '")';
         $this->db->from($this->tb);
         $this->db->where($where);
         $this->db->group_by('type, logic_junction_id');
@@ -123,26 +123,48 @@ class Overviewalarm_model extends CI_Model
 
         $this->db->select('logic_junction_id, date');
         $this->db->from($this->tb);
+        $this->db->where('city_id = ' . $data['city_id']);
         $this->db->where_in('date', $sevenDates);
-        $this->db->group_by('logic_junction_id');
+        $this->db->group_by('logic_junction_id, date');
         $res = $this->db->get()->result_array();
         if (empty($res)) {
             return [];
         }
 
-        $result = $this->formatSevenDaysAlarmChangeData($res);
+        $result = $this->formatSevenDaysAlarmChangeData($res, $sevenDates);
 
         return $result;
     }
 
     /**
      * 格式化七日报警变化数据
-     * @param $data 数据集合
+     * @param $data       数据集合
+     * @param $sevenDates 七日日期集合
      * @return array
      */
-    private function formatSevenDaysAlarmChangeData($data)
+    private function formatSevenDaysAlarmChangeData($data, $sevenDates)
     {
         $result = [];
+
+        $tempData = [];
+        foreach ($data as $k=>$v) {
+            $tempData[$v['date']][$v['logic_junction_id']] = 1;
+        }
+
+        if (empty($tempData)) {
+            return [];
+        }
+
+        foreach ($sevenDates as $k=>$v) {
+            $result[$v] = [
+                'date'  => $v,
+                'value' => isset($tempData[$v]) ? count($tempData[$v]) : 0,
+            ];
+        };
+
+        if (!empty($result)) {
+            $result = array_values($result);
+        }
 
         return $result;
     }
