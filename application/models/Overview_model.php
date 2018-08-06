@@ -43,7 +43,7 @@ class Overview_model extends CI_Model
         );
 
         $nowDate = date('Y-m-d H:i:s');
-        $where = "day(`updated_at`) = day($nowDate)";
+        $where = "day(`updated_at`) = day('" . $nowDate . "')";
         $this->db->from($table);
         $this->db->where($where);
         $this->db->group_by('hour, logic_junction_id');
