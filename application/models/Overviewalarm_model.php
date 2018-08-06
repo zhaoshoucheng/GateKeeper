@@ -162,7 +162,9 @@ class Overviewalarm_model extends CI_Model
             ];
         };
 
-        echo "<pre>";print_r($result);
+        if (!empty($result)) {
+            $result = array_values($result);
+        }
 
         return $result;
     }
