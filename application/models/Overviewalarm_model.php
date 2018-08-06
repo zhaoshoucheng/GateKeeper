@@ -125,41 +125,42 @@ class Overviewalarm_model extends CI_Model
         $this->db->from($this->tb);
         $this->db->where('city_id = ' . $data['city_id']);
         $this->db->where_in('date', $sevenDates);
-        $this->db->group_by('logic_junction_id');
+        $this->db->group_by('logic_junction_id, date');
         $res = $this->db->get()->result_array();
         if (empty($res)) {
             return [];
         }
 
-        $result = $this->formatSevenDaysAlarmChangeData($res);
+        $result = $this->formatSevenDaysAlarmChangeData($res, $sevenDates);
 
         return $result;
     }
 
     /**
      * 格式化七日报警变化数据
-     * @param $data 数据集合
+     * @param $data       数据集合
+     * @param $sevenDates 七日日期集合
      * @return array
      */
-    private function formatSevenDaysAlarmChangeData($data)
+    private function formatSevenDaysAlarmChangeData($data, $sevenDates)
     {
         $result = [];
 
         $tempData = [];
         foreach ($data as $k=>$v) {
-            $tempData[date('m.d', strtotime($v['date']))][$v['logic_junction_id']] = 1;
+            $tempData[$v['date']][$v['logic_junction_id']] = 1;
         }
 
         if (empty($tempData)) {
             return [];
         }
 
-        array_walk($tempData, function($item, $key){
-            $result[$key] = [
-                'date'  => $key,
-                'value' => count($item),
+        foreach ($sevenDates as $k=>$v) {
+            $result[$v] = [
+                'date'  => $v,
+                'value' => isset($tempData[$v]) ? count($tempData[$v]) : 0,
             ];
-        });
+        };
 
         echo "<pre>";print_r($result);
 
