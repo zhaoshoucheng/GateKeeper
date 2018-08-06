@@ -278,10 +278,11 @@ class Overview_model extends CI_Model
             updated_at'
         );
 
-        $where = "updated_at = (select updated_at from $table ORDER by updated_at DESC LIMIT 1)";
+        $nowDate = date('Y-m-d H:i:s');
+        $where = "day(`updated_at`) = day('" . $nowDate . "')";
         $this->db->from($table);
         $this->db->where($where);
-        $this->db->group_by('logic_junction_id');
+        $this->db->group_by('hour, logic_junction_id');
         $res = $this->db->get();
 
         $res = $res->result_array();
@@ -332,11 +333,12 @@ class Overview_model extends CI_Model
 
             $result['ratio'][$k] = [
                 'cate'  => $v['name'],
-                'ratio' => isset($congestionNum[$k]) ? count($congestionNum[$k]) / $junctionTotal . '%' : '0%',
+                'ratio' => isset($congestionNum[$k]) ? (count($congestionNum[$k]) / $junctionTotal) * 100 . '%' : '0%',
             ];
         }
 
-        echo "<pre>";print_r($result);
+        $result['count'] = array_values($result['count']);
+        $result['ratio'] = array_values($result['ratio']);
 
         return $result;
     }
