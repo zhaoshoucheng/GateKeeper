@@ -164,8 +164,6 @@ class Overview_model extends CI_Model
         $center['lng'] = array_sum($lngs) / count($lngs);
         $center['lat'] = array_sum($lats) / count($lats);
 
-
-
         return [
             'dataList' => array_values($temp),
             'center' => $center
