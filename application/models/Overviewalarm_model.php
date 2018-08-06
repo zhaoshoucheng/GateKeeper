@@ -18,6 +18,7 @@ class Overviewalarm_model extends CI_Model
             $this->db = $this->load->database('default', true);
         }
         $this->load->config('realtime_conf.php');
+        $this->load->model('waymap_model');
     }
 
     /**
@@ -165,6 +166,59 @@ class Overviewalarm_model extends CI_Model
         if (!empty($result['dataList'])) {
             $result['dataList'] = array_values($result['dataList']);
         }
+
+        return $result;
+    }
+
+    /**
+     * 实时报警列表
+     * @param $data['city_id']    interger Y 城市ID
+     * @param $data['date']       string   Y 日期 Y-m-d
+     * @param $data['time_point'] string   Y 时间 H:i:s
+     * @return array
+     */
+    public function realTimeAlarmList($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+
+        $where = 'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"';
+        $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
+        $this->db->from($this->tb);
+        $this->db->where($where);
+        $this->db->order_by('type', 'asc');
+        $res = $this->db->get()->result_array();
+        if (empty($res)) {
+            return [];
+        }
+
+        $result = $this->formatRealTimeAlarmListData($res);
+
+        return $result;
+    }
+
+    /**
+     * 格式化实时报警列表
+     * @param $data 数据集合
+     * @return array
+     */
+    public function formatRealTimeAlarmListData($data)
+    {
+        $result = [];
+        echo "<pre>";print_r($data);
+        // 需要获取路口name的路口ID口中
+        $juncitonIds = implode(',', array_unique(array_column($data, 'logic_junction_id')));
+
+        // 获取路口信息
+        $junctionsInfo = $this->waymap_model->getJunctionInfo($juncitonIds);
+        echo "<hr><pre>";print_r($junctionsInfo);
+
+        // 获取路口相位信息
+        $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+
 
         return $result;
     }
