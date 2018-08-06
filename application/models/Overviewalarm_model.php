@@ -189,7 +189,7 @@ class Overviewalarm_model extends CI_Model
         $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
         $this->db->from($this->tb);
         $this->db->where($where);
-        $this->db->order_by('type', 'asc');
+        $this->db->order_by('type asc');
         $res = $this->db->get()->result_array();
         if (empty($res)) {
             return [];
@@ -215,11 +215,28 @@ class Overviewalarm_model extends CI_Model
         // 获取路口信息
         $junctionsInfo = $this->waymap_model->getJunctionInfo($juncitonIds);
         echo "<hr><pre>";print_r($junctionsInfo);
+        $junctionIdName = array_column($junctionsInfo, 'logic_junction_id', 'name');
 
         // 获取路口相位信息
-        $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+        $flowsInfo = $this->waymap_model->getFlowsInfo($juncitonIds);
+        echo "<hr><pre>";print_r($flowsInfo);
 
+        // 报警类别
+        $alarmCate = $this->config->item('alarm_category');
 
+        $result = array_map(function($val){
+            return [
+                'start_time'        => date('H:i', strtotime($val['start_time'])),
+                'duration_time'     => (strtotime($val['last_time']) - strtotime($val['start_time'])) / 60,
+                'logic_junction_id' => $val['logic_junction_id'],
+                'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '',
+                'logic_flow_id'     => $val['logic_flow_id'],
+                'flow_name'         => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
+                'alarm_comment'     => $alarmCate[$val['type']]['name'] ?? '',
+                'alarm_key'         => $val['type'],
+            ];
+        }, $data);
+        echo "<hr><pre> result = ";print_r($result);
         return $result;
     }
 }
