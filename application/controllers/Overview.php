@@ -138,7 +138,7 @@ class Overview extends MY_Controller
     */
     public function getToken()
     {
-        $token = md5(time() . random_string());
+        $token = md5(time() . rand(1, 10000) * rand(1, 10000));
 
         $this->redis_model->setData('Token_' . $token, $token);
         $this->redis_model->setExpire('Token_' . $token, 60 * 30);
