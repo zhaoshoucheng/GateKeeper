@@ -18,6 +18,7 @@ class Overview extends MY_Controller
     {
         parent::__construct();
         $this->load->model('overview_model');
+        $this->load->model('redis_model');
     }
 
     /**
@@ -137,7 +138,13 @@ class Overview extends MY_Controller
     */
     public function getToken()
     {
+        $token = md5(time() . random_string());
 
+        $this->redis_model->setData('Token_' . $token, $token);
+        $this->redis_model->setExpire('Token_' . $token, 60 * 30);
 
+        $data = [$token];
+
+        $this->response($data);
     }
 }
