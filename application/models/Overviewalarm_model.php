@@ -189,7 +189,7 @@ class Overviewalarm_model extends CI_Model
         $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
         $this->db->from($this->tb);
         $this->db->where($where);
-        $this->db->order_by('type asc');
+        $this->db->order_by('type asc, (UNIX_TIMESTAMP(last_time) - UNIX_TIMESTAMP(start_time)) desc');
         $res = $this->db->get()->result_array();
         if (empty($res)) {
             return [];
@@ -208,18 +208,16 @@ class Overviewalarm_model extends CI_Model
     public function formatRealTimeAlarmListData($data)
     {
         $result = [];
-        echo "<pre>";print_r($data);
+
         // 需要获取路口name的路口ID口中
         $juncitonIds = implode(',', array_unique(array_column($data, 'logic_junction_id')));
 
         // 获取路口信息
         $junctionsInfo = $this->waymap_model->getJunctionInfo($juncitonIds);
-        echo "<hr><pre>";print_r($junctionsInfo);
         $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
 
         // 获取路口相位信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($juncitonIds);
-        echo "<hr><pre>";print_r($flowsInfo);
 
         // 报警类别
         $alarmCate = $this->config->item('alarm_category');
@@ -236,7 +234,7 @@ class Overviewalarm_model extends CI_Model
                 'alarm_key'         => $val['type'],
             ];
         }, $data);
-        echo "<hr><pre> result = ";print_r($result);
+
         return $result;
     }
 }
