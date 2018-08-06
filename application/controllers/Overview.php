@@ -148,6 +148,32 @@ class Overview extends MY_Controller
         $this->response($data);
     }
 
+    public function verifyToken()
+    {
+        $params = $this->input->post();
+
+        if(!isset($params['tokenval'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The value of tokenval is empty.';
+            return;
+        }
+
+        $tokenval = $params['tokenval'];
+
+        $data = [];
+
+        if(!$this->redis_model->getData('Token_' . $tokenval)) {
+            $data['verify'] = false;
+        } else {
+            $data['verify'] = true;
+        }
+
+        $this->response($data);
+    }
+
+    /**
+     * 获取当前时间和日期
+     */
     public function getNowDate()
     {
         $weekArray = [
