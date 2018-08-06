@@ -26,10 +26,7 @@ class Overview_model extends CI_Model
     {
         $table = 'real_time_' . $data['city_id'];
 
-        $start = $data['date'] . ' 00:00:00';
-        $end = $data['date'] . ' 23:59:59';
-
-        $hour = " (select hour from $table where updated_at >= '{$start}' and updated_at <= '{$end}' order by hour desc limit 1)";
+        $hour = $this->getLastestHour($table, $data['date']);
 
         $result = $this->db->select('*')
             ->from($table)
@@ -92,6 +89,24 @@ class Overview_model extends CI_Model
 
         return $result;
 
+    }
+
+    private function getLastestHour($table, $date = null)
+    {
+        $date = $date ?? date('Y-m-d');
+
+        $result = $this->db->select('hour')
+            ->from($table)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->order_by('hour')
+            ->limit(1)
+            ->get()->first_row();
+
+        if(!$result)
+            return date('H:i:s');
+
+        return $result['hour'];
     }
 
     /**
