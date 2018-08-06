@@ -215,7 +215,7 @@ class Overviewalarm_model extends CI_Model
         // 获取路口信息
         $junctionsInfo = $this->waymap_model->getJunctionInfo($juncitonIds);
         echo "<hr><pre>";print_r($junctionsInfo);
-        $junctionIdName = array_column($junctionsInfo, 'logic_junction_id', 'name');
+        $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
 
         // 获取路口相位信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($juncitonIds);
@@ -224,7 +224,7 @@ class Overviewalarm_model extends CI_Model
         // 报警类别
         $alarmCate = $this->config->item('alarm_category');
 
-        $result = array_map(function($val){
+        $result = array_map(function($val) use($junctionIdName, $flowsInfo, $alarmCate) {
             return [
                 'start_time'        => date('H:i', strtotime($val['start_time'])),
                 'duration_time'     => (strtotime($val['last_time']) - strtotime($val['start_time'])) / 60,
