@@ -49,9 +49,11 @@ class Overviewtoplist_model extends CI_Model
     {
         $table = 'real_time_' . $data['city_id'];
 
+        $hour = $this->getLastestHour($table, $data['date']);
+
         $result = $this->db->select('logic_junction_id, hour, ' . $method . '(' . $column . ') as ' . $column)
             ->from($table)
-            ->where('hour', $data['time_point'])
+            ->where('hour', $hour)
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
             ->group_by('logic_junction_id')
@@ -76,5 +78,23 @@ class Overviewtoplist_model extends CI_Model
         }, $result);
 
         return $result;
+    }
+
+    private function getLastestHour($table, $date = null)
+    {
+        $date = $date ?? date('Y-m-d');
+
+        $result = $this->db->select('hour')
+            ->from($table)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->order_by('hour')
+            ->limit(1)
+            ->get()->first_row();
+
+        if(!$result)
+            return date('H:i:s');
+
+        return $result->hour;
     }
 }
