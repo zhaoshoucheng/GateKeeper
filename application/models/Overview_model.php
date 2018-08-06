@@ -101,7 +101,7 @@ class Overview_model extends CI_Model
             ->from($table)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
-            ->order_by('hour')
+            ->order_by('hour', 'desc')
             ->limit(1)
             ->get()->first_row();
 
