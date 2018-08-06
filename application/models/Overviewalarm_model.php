@@ -156,14 +156,14 @@ class Overviewalarm_model extends CI_Model
         }
 
         foreach ($sevenDates as $k=>$v) {
-            $result[$v] = [
+            $result['dataList'][$v] = [
                 'date'  => $v,
                 'value' => isset($tempData[$v]) ? count($tempData[$v]) : 0,
             ];
         };
 
-        if (!empty($result)) {
-            $result = array_values($result);
+        if (!empty($result['dataList'])) {
+            $result = array_values($result['dataList']);
         }
 
         return $result;
