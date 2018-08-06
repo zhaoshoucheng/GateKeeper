@@ -26,9 +26,14 @@ class Overview_model extends CI_Model
     {
         $table = 'real_time_' . $data['city_id'];
 
+        $start = $data['date'] . ' 00:00:00';
+        $end = $data['date'] . ' 23:59:59';
+
+        $hour = " (select hour from $table where updated_at >= '{$start}' and updated_at <= '{$end}' order by hour desc limit 1)";
+
         $result = $this->db->select('*')
             ->from($table)
-            ->where('hour', $data['time_point'])
+            ->where('hour', $hour)
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
             ->get()->result_array();
