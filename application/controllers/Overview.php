@@ -100,8 +100,8 @@ class Overview extends MY_Controller
     /**
     * 拥堵概览
     * @param city_id    interger Y 城市ID
-    * @param date       string   Y 日期 yyyy-mm-dd
-    * @param time_point stirng   Y 时间点 H:i:s
+    * @param date       string   N 日期 yyyy-mm-dd
+    * @param time_point stirng   N 时间点 H:i:s
     * @return json
     */
     public function getCongestionInfo()
@@ -110,8 +110,6 @@ class Overview extends MY_Controller
         // 校验参数
         $validate = Validate::make($params, [
                 'city_id'    => 'min:1',
-                'date'       => 'nullunable',
-                'time_point' => 'nullunable',
             ]
         );
         if (!$validate['status']) {
@@ -119,12 +117,19 @@ class Overview extends MY_Controller
             $this->errmsg = $validate['errmsg'];
             return;
         }
-
         $data = [
             'city_id'    => intval($params['city_id']),
-            'date'       => date('Y-m-d', strtotime(strip_tags(trim($params['date'])))),
-            'time_point' => date('H:i:s', strtotime(strip_tags(trim($params['time_point'])))),
+            'date'       => date('Y-m-d'),
+            'time_point' => date('H:i:s'),
         ];
+
+        if (!empty($params['date'])) {
+            $data['date'] = date('Y-m-d', strtotime(strip_tags(trim($params['date']))));
+        }
+
+        if (!empty($params['time_point'])) {
+            $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
+        }
 
         $result = $this->overview_model->getCongestionInfo($data);
 

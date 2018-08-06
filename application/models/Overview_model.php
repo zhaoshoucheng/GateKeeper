@@ -297,8 +297,8 @@ class Overview_model extends CI_Model
             updated_at'
         );
 
-        $nowDate = date('Y-m-d H:i:s');
-        $where = "day(`updated_at`) = day('" . $nowDate . "')";
+        $date = $data['date'] . ' ' . $data['time_point'];
+        $where = "day(`updated_at`) = day('" . $date . "')";
         $this->db->from($table);
         $this->db->where($where);
         $this->db->group_by('hour, logic_junction_id');
