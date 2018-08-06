@@ -18,6 +18,7 @@ class Overview extends MY_Controller
     {
         parent::__construct();
         $this->load->model('overview_model');
+        $this->load->model('redis_model');
     }
 
     /**
@@ -63,23 +64,7 @@ class Overview extends MY_Controller
 
         $data['city_id'] = $params['city_id'];
 
-        if(!isset($params['date']) ||
-            date('Y-m-d', strtotime($params['date'])) !== $params['date']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The format of date is wrong.';
-            return;
-        }
-
-        $data['date'] = $params['date'];
-
-        if(!isset($params['time_point']) ||
-            date('H:i:s', strtotime($params['time_point'])) !== $params['time_point']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The format of time_point is wrong.';
-            return;
-        }
-
-        $data['time_point'] = $params['time_point'];
+        $data['date'] = $params['date'] ?? date('Y-m-d');
 
         $data = $this->overview_model->operationCondition($data);
 
@@ -104,23 +89,7 @@ class Overview extends MY_Controller
 
         $data['city_id'] = $params['city_id'];
 
-        if(!isset($params['date']) ||
-            date('Y-m-d', strtotime($params['date'])) !== $params['date']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The format of date is wrong.';
-            return;
-        }
-
-        $data['date'] = $params['date'];
-
-        if(!isset($params['time_point']) ||
-            date('H:i:s', strtotime($params['time_point'])) !== $params['time_point']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The format of time_point is wrong.';
-            return;
-        }
-
-        $data['time_point'] = $params['time_point'];
+        $data['date'] = $params['date'] ?? date('Y-m-d');
 
         $data = $this->overview_model->junctionSurvey($data);
 
@@ -169,7 +138,13 @@ class Overview extends MY_Controller
     */
     public function getToken()
     {
+        $token = md5(time() . rand(1, 10000) * rand(1, 10000));
 
+        $this->redis_model->setData('Token_' . $token, $token);
+        $this->redis_model->setExpire('Token_' . $token, 60 * 30);
 
+        $data = [$token];
+
+        $this->response($data);
     }
 }
