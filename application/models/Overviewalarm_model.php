@@ -225,7 +225,7 @@ class Overviewalarm_model extends CI_Model
         $result = array_map(function($val) use($junctionIdName, $flowsInfo, $alarmCate) {
             return [
                 'start_time'        => date('H:i', strtotime($val['start_time'])),
-                'duration_time'     => (strtotime($val['last_time']) - strtotime($val['start_time'])) / 60,
+                'duration_time'     => round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2),
                 'logic_junction_id' => $val['logic_junction_id'],
                 'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '',
                 'logic_flow_id'     => $val['logic_flow_id'],
