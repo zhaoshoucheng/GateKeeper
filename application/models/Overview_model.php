@@ -106,7 +106,7 @@ class Overview_model extends CI_Model
         if(!$result)
             return date('H:i:s');
 
-        return $result['hour'];
+        return $result->hour;
     }
 
     /**
