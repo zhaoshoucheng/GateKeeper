@@ -35,8 +35,8 @@ class Overviewalarm_model extends CI_Model
         $result = [];
 
         $this->db->select('logic_junction_id, logic_flow_id, updated_at, type');
-        $nowDate = date('Y-m-d H:i:s');
-        $where = 'day(`updated_at`) = day("' . $nowDate . '")';
+        $date = $data['date'] . ' ' . $data['time_point'];
+        $where = 'day(`updated_at`) = day("' . $date . '")';
         $this->db->from($this->tb);
         $this->db->where($where);
         $this->db->group_by('type, logic_junction_id');
@@ -90,6 +90,59 @@ class Overviewalarm_model extends CI_Model
 
         $result['count'] = array_values($result['count']);
         $result['ratio'] = array_values($result['ratio']);
+
+        return $result;
+    }
+
+    /**
+     * 获取七日报警变化
+     * @param $data['city_id']    interger Y 城市ID
+     * @param $data['date']       string   Y 日期 Y-m-d
+     * @param $data['time_point'] string   Y 时间 H:i:s
+     * @return array
+     */
+    public function sevenDaysAlarmChange($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+
+        // 七日日期
+        $sevenDates = [];
+
+        // 前6天时间戳作为开始时间
+        $startDate = strtotime($data['date'] . '-6 day');
+        // 当前日期时间戳作为结束时间
+        $endDate = strtotime($data['date']);
+
+        for ($i = $startDate; $i <= $endDate; $i += 24 * 3600) {
+            $sevenDates[] = date('Y-m-d', $i);
+        }
+
+        $this->db->select('logic_junction_id, date');
+        $this->db->from($this->tb);
+        $this->db->where_in('date', $sevenDates);
+        $this->db->group_by('logic_junction_id');
+        $res = $this->db->get()->result_array();
+        if (empty($res)) {
+            return [];
+        }
+
+        $result = $this->formatSevenDaysAlarmChangeData($res);
+
+        return $result;
+    }
+
+    /**
+     * 格式化七日报警变化数据
+     * @param $data 数据集合
+     * @return array
+     */
+    private function formatSevenDaysAlarmChangeData($data)
+    {
+        $result = [];
 
         return $result;
     }
