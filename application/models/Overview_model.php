@@ -76,6 +76,8 @@ class Overview_model extends CI_Model
     {
         $data = $this->junctionsList($data);
 
+        $data = $data['dataList'];
+
         $result = [];
 
         $result['junction_total']   = count($data);
