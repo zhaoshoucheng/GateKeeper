@@ -147,4 +147,21 @@ class Overview extends MY_Controller
 
         $this->response($data);
     }
+
+    public function getNowDate()
+    {
+        $weekArray = [
+            '日', '一', '二', '三', '四', '五' ,'六'
+        ];
+
+        $time = time();
+
+        $data = [
+            'date' => date('Y-m-d', $time),
+            'time' => date('H:i:s', $time),
+            'week' => '星期' . $weekArray[date('w', $time)]
+        ];
+
+        $this->response($data);
+    }
 }
