@@ -63,23 +63,7 @@ class Overview extends MY_Controller
 
         $data['city_id'] = $params['city_id'];
 
-        if(!isset($params['date']) ||
-            date('Y-m-d', strtotime($params['date'])) !== $params['date']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The format of date is wrong.';
-            return;
-        }
-
-        $data['date'] = $params['date'];
-
-        if(!isset($params['time_point']) ||
-            date('H:i:s', strtotime($params['time_point'])) !== $params['time_point']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The format of time_point is wrong.';
-            return;
-        }
-
-        $data['time_point'] = $params['time_point'];
+        $data['date'] = $params['date'] ?? date('Y-m-d');
 
         $data = $this->overview_model->operationCondition($data);
 
@@ -104,23 +88,7 @@ class Overview extends MY_Controller
 
         $data['city_id'] = $params['city_id'];
 
-        if(!isset($params['date']) ||
-            date('Y-m-d', strtotime($params['date'])) !== $params['date']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The format of date is wrong.';
-            return;
-        }
-
-        $data['date'] = $params['date'];
-
-        if(!isset($params['time_point']) ||
-            date('H:i:s', strtotime($params['time_point'])) !== $params['time_point']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The format of time_point is wrong.';
-            return;
-        }
-
-        $data['time_point'] = $params['time_point'];
+        $data['date'] = $params['date'] ?? date('Y-m-d');
 
         $data = $this->overview_model->junctionSurvey($data);
 
