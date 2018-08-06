@@ -36,7 +36,7 @@ class Overviewalarm_model extends CI_Model
 
         $this->db->select('logic_junction_id, logic_flow_id, updated_at, type');
         $date = $data['date'] . ' ' . $data['time_point'];
-        $where = 'day(`updated_at`) = day("' . $date . '")';
+        $where = 'city_id = ' . $data['city_id'] . ' and  day(`updated_at`) = day("' . $date . '")';
         $this->db->from($this->tb);
         $this->db->where($where);
         $this->db->group_by('type, logic_junction_id');
@@ -123,6 +123,7 @@ class Overviewalarm_model extends CI_Model
 
         $this->db->select('logic_junction_id, date');
         $this->db->from($this->tb);
+        $this->db->where('city_id = ' . $data['city_id']);
         $this->db->where_in('date', $sevenDates);
         $this->db->group_by('logic_junction_id');
         $res = $this->db->get()->result_array();
@@ -143,6 +144,24 @@ class Overviewalarm_model extends CI_Model
     private function formatSevenDaysAlarmChangeData($data)
     {
         $result = [];
+
+        $tempData = [];
+        foreach ($data as $k=>$v) {
+            $tempData[date('m.d', strtotime($v['date']))][$v['logic_junction_id']] = 1;
+        }
+
+        if (empty($tempData)) {
+            return [];
+        }
+
+        array_walk($tempData, function($item, $key){
+            $result[$key] = [
+                'date'  => $key,
+                'value' => count($item),
+            ];
+        });
+
+        echo "<pre>";print_r($result);
 
         return $result;
     }
