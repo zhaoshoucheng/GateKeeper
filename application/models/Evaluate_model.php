@@ -46,12 +46,12 @@ class Evaluate_model extends CI_Model
         $this->db->where($where);
         $this->db->group_by('logic_junction_id');
         $this->db->order_by('(SUM(' . $data['quota_key'] . ') / count(logic_flow_id)) DESC');
+        $this->db->limit(100);
         $res = $this->db->get()->result_array();
         if (empty($res)) {
             return [];
         }
-        echo 'sql = ' . $this->db->last_query() . '<hr>';
-        echo "<pre>";print_r($res);
+
         $result = $this->formatJunctionQuotaSortListData($res, $data['quota_key']);
 
         return $result;
@@ -84,32 +84,6 @@ class Evaluate_model extends CI_Model
                 'quota_value'       => $val['quota_value'],
             ];
         }, $data);
-
-        /*// 临时数组，用于计算所有相位指标平均用
-        $tempData = [];
-        foreach ($data as $k=>$v) {
-            $tempData[$v['logic_junction_id']][$v['logic_flow_id']] = $v[$quotaKey];
-            $result['dataList'][$v['logic_junction_id']] = [
-                'logic_junction_id' => $v['logic_junction_id'],
-                'junction_name'     => $junctionIdName[$v['logic_junction_id']] ?? '',
-            ];
-        }
-        if (empty($tempData)) {
-            return [];
-        }
-
-        $sortKeyArr = [];
-        foreach ($tempData as $k=>$v) {
-            $quotaValue = $quotaConf[$quotaKey]['round'](array_sum($v) / count($v));
-            $sortKeyArr[$k] = $quotaValue;
-            $result['dataList'][$k]['quota_value'] = $quotaValue;
-        }
-
-        // $result['dataList'] 按指标值进行倒序排序
-        array_multisort($sortKeyArr, SORT_DESC, SORT_NUMERIC, $result['dataList']);
-
-        // 去除$result['dataList']的KEY
-        $result['dataList'] = array_values($result['dataList']);*/
 
         // 返回数据：指标信息
         $result['quota_info'] = [
