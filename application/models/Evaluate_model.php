@@ -235,4 +235,59 @@ class Evaluate_model extends CI_Model
 
         return $result;
     }
+
+    /**
+     * 获取路口地图数据
+     * @param $data['city_id']     interger Y 城市ID
+     * @param $data['junction_id'] string   Y 路口ID
+     * @return array
+     */
+    public function getJunctionMapData($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+
+        // 获取最新路网版本 在全部路网版本中取最新的
+        $mapVersions = $this->waymap_model->getAllMapVersion();
+        // 最新路网版本
+        $newMapVersion = max($mapVersions);
+
+        // 获取路口所有相位
+        $allFlows = $this->waymap_model->getFlowsInfo($data['junction_id']);
+
+        // 获取路网路口各相位坐标
+        $waymap_data = [
+            'version'           => $newMapVersion,
+            'logic_junction_id' => $data['junction_id'],
+            'logic_flow_ids'    => array_keys($allFlows[$data['junction_id']]),
+        ];
+        $ret = $this->waymap_model->getJunctionFlowLngLat($waymap_data);
+        if (empty($ret['data'])) {
+            return [];
+        }
+        foreach ($ret['data'] as $k=>$v) {
+            if (!empty($allFlows[$data['junction_id']][$v['logic_flow_id']])) {
+                $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
+                $result['dataList'][$k]['flow_label'] = $allFlows[$data['junction_id']][$v['logic_flow_id']];
+                $result['dataList'][$k]['lng'] = $v['flows'][0][0];
+                $result['dataList'][$k]['lat'] = $v['flows'][0][1];
+            }
+        }
+        // 获取路口中心坐标
+        $result['center'] = '';
+        $centerData['logic_id'] = $data['junction_id'];
+        $center = $this->waymap_model->getJunctionCenterCoords($centerData);
+
+        $result['center'] = $center;
+        $result['map_version'] = $newMapVersion;
+
+        if (!empty($result['dataList'])) {
+            $result['dataList'] = array_values($result['dataList']);
+        }
+
+        return $result;
+    }
 }
