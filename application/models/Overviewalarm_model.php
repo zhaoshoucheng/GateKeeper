@@ -85,7 +85,7 @@ class Overviewalarm_model extends CI_Model
             $result['ratio'][$k] = [
                 'cate'  => $v['name'],
                 'ratio' => isset($tempJunctiomNum[$k])
-                            ? round((count($tempJunctiomNum[$k]) / $junctionTotal) * 100, 2) . '%'
+                            ? round((count($tempJunctiomNum[$k]) / $junctionTotal) * 100) . '%'
                             : '0%',
             ];
         }
