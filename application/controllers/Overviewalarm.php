@@ -108,6 +108,34 @@ class Overviewalarm extends MY_Controller
      */
     public function realTimeAlarmList()
     {
+        $params = $this->input->post();
+        // 校验参数
+        $validate = Validate::make($params, [
+                'city_id'    => 'min:1',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
 
+        $data = [
+            'city_id'    => intval($params['city_id']),
+            'date'       => date('Y-m-d'),
+            'time_point' => date('H:i:s'),
+        ];
+
+        if (!empty($params['date'])) {
+            $data['date'] = date('Y-m-d', strtotime(strip_tags(trim($params['date']))));
+        }
+
+        if (!empty($params['time_point'])) {
+            $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
+        }
+
+        $result = $this->overviewalarm_model->realTimeAlarmList($data);
+
+        return $this->response($result);
     }
 }
