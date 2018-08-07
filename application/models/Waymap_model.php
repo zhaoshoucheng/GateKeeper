@@ -30,19 +30,26 @@ class Waymap_model extends CI_Model
      */
     public function getJunctionInfo($ids, $returnFormat = null)
     {
-        $data['logic_ids'] = $ids;
         $data['token'] = $this->token;
         $data['user_id'] = $this->userid;
 
         try {
-            $res = httpGET($this->config->item('waymap_interface') . '/signal-map/map/many', $data);
-            if (!$res) {
-                // 日志
-                return [];
-            }
-            $res = json_decode($res, true);
-            if ($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])) {
-                return [];
+            $ids_array = explode(',', $ids);
+
+            $res = [];
+
+            foreach (array_chunk($ids_array, 100) as $ids) {
+                $data['logic_ids'] = implode(',', $ids);
+                $result = httpGET($this->config->item('waymap_interface') . '/signal-map/map/many', $data);
+                if (!$res) {
+                    // 日志
+                    return [];
+                }
+                $result = json_decode($res, true);
+                if ($result['errorCode'] != 0 || !isset($result['data']) || empty($result['data'])) {
+                    return [];
+                }
+                $res = array_merge($res, $result);
             }
 
             if(is_null($returnFormat)) {
