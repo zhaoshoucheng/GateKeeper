@@ -36,8 +36,7 @@ class Overviewalarm_model extends CI_Model
         $result = [];
 
         $this->db->select('logic_junction_id, logic_flow_id, updated_at, type');
-        $date = $data['date'] . ' ' . $data['time_point'];
-        $where = 'city_id = ' . $data['city_id'] . ' and  day(`updated_at`) = day("' . $date . '")';
+        $where = 'city_id = ' . $data['city_id'] . ' and  day(`updated_at`) = day("' . $data['date'] . '")';
         $this->db->from($this->tb);
         $this->db->where($where);
         $this->db->group_by('type, logic_junction_id');

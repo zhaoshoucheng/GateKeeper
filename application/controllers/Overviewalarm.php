@@ -19,7 +19,7 @@ class Overviewalarm extends MY_Controller
     }
 
     /**
-     * 获取今日报警占比
+     * 获取今日报警概览
      * @param city_id    interger Y 城市ID
      * @param date       string   N 日期 yyyy-mm-dd
      * @param time_point stirng   N 时间点 H:i:s
