@@ -198,9 +198,9 @@ class Evaluate_model extends CI_Model
             return [];
         }
         foreach ($ret['data'] as $k=>$v) {
-            if (!empty($timing['list'][$v['logic_flow_id']])) {
+            if (!empty($allFlows[$v['logic_flow_id']])) {
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
-                $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
+                $result['dataList'][$k]['flow_label'] = $allFlows[$v['logic_flow_id']];
                 $result['dataList'][$k]['lng'] = $v['flows'][0][0];
                 $result['dataList'][$k]['lat'] = $v['flows'][0][1];
             }
