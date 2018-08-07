@@ -362,7 +362,7 @@ class Overview_model extends CI_Model
             $result['ratio'][$k] = [
                 'cate'  => $v['name'],
                 'ratio' => isset($congestionNum[$k])
-                            ? round((count($congestionNum[$k]) / $junctionTotal) * 100, 2) . '%'
+                            ? round((count($congestionNum[$k]) / $junctionTotal) * 100) . '%'
                             : '0%',
             ];
         }
