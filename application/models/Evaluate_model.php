@@ -145,12 +145,12 @@ class Evaluate_model extends CI_Model
         // 指标配置
         $quotaConf = $this->config->item('real_time_quota');
 
-        $result['dataList'] = array_map(function($val) {
+        $result['dataList'] = array_map(function($val) use($quotaKey) {
             return [
                 // 指标值 Y轴
                 $val[$quotaKey],
                 // 时间点 X轴
-                $VAL['hour']
+                $val['hour']
             ];
         }, $data);
 
