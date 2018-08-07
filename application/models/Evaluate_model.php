@@ -8,9 +8,15 @@
 class Evaluate_model extends CI_Model
 {
     private $tb = '';
+    private $db = '';
 
     public function __construct()
     {
         parent::__construct();
+        if (empty($this->db)) {
+            $this->db = $this->load->database('default', true);
+        }
+        $this->load->config('realtime_conf.php');
+        $this->load->model('waymap_model');
     }
 }
