@@ -95,9 +95,12 @@ class Evaluate_model extends CI_Model
         $where = 'hour = (select hour from ' . $table;
         $where .= ' where day(`updated_at`) = day("' . $data['date'] . '") order by hour desc limit 1)';
 
-        $this->db->select("logic_junction_id, logic_flow_id, {$data['quota_key']}");
+        $this->db->select("`logic_junction_id`, SUM({$data['quota_key']}) / count(logic_flow_id) as quota_value");
         $this->db->from($table);
         $this->db->where($where);
+        $this->db->group_by('logic_junction_id');
+        $this->db->order_by('(SUM(' . $data['quota_key'] . ') / count(logic_flow_id)) DESC');
+        $this->db->limit(100);
         $res = $this->db->get()->result_array();
         if (empty($res)) {
             return [];
@@ -128,31 +131,13 @@ class Evaluate_model extends CI_Model
         // 指标配置
         $quotaConf = $this->config->item('real_time_quota');
 
-        // 临时数组，用于计算所有相位指标平均用
-        $tempData = [];
-        foreach ($data as $k=>$v) {
-            $tempData[$v['logic_junction_id']][$v['logic_flow_id']] = $v[$quotaKey];
-            $result['dataList'][$v['logic_junction_id']] = [
-                'logic_junction_id' => $v['logic_junction_id'],
-                'junction_name'     => $junctionIdName[$v['logic_junction_id']],
+        $result['dataList'] = array_map(function($val) use($junctionIdName) {
+            return [
+                'logic_junction_id' => $val['logic_junction_id'],
+                'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '',
+                'quota_value'       => $val['quota_value'],
             ];
-        }
-        if (empty($tempData)) {
-            return [];
-        }
-
-        $sortKeyArr = [];
-        foreach ($tempData as $k=>$v) {
-            $quotaValue = $quotaConf[$quotaKey]['round'](array_sum($v) / count($v));
-            $sortKeyArr[$k] = $quotaValue;
-            $result['dataList'][$k]['quota_value'] = $quotaValue;
-        }
-
-        // $result['dataList'] 按指标值进行倒序排序
-        array_multisort($sortKeyArr, SORT_DESC, SORT_NUMERIC, $result['dataList']);
-
-        // 去除$result['dataList']的KEY
-        $result['dataList'] = array_values($result['dataList']);
+        }, $data);
 
         // 返回数据：指标信息
         $result['quota_info'] = [
@@ -160,6 +145,29 @@ class Evaluate_model extends CI_Model
             'key'  => $quotaKey,
             'unit' => $quotaConf[$quotaKey]['unit'],
         ];
+
+        return $result;
+    }
+
+    /**
+     * 获取指标趋势
+     * @param $data['city_id']     interger Y 城市ID
+     * @param $data['junction_id'] string   Y 路口ID
+     * @param $data['quota_key']   string   Y 指标KEY
+     * @param $data['flow_id']     string   Y 相位ID
+     * @param $data['date']        string   Y 日期 格式：Y-m-d 默认当前日期
+     * @param $data['time_point']  string   Y 时间 格式：H:i:s 默认当前时间
+     * @return array
+     */
+    public function getQuotaTrend($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+
+
 
         return $result;
     }

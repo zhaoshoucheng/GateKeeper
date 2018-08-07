@@ -158,7 +158,47 @@ class Evaluate extends MY_Controller
      */
     public function getQuotaTrend()
     {
+        $params = $this->input->post();
+        // 校验参数
+        $validate = Validate::make($params, [
+                'city_id'     => 'min:1',
+                'junction_id' => 'nullunable',
+                'quota_key'   => 'nullunable',
+                'flow_id'     => 'nullunable',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
 
+        if (!array_key_exists($params['quota_key'], $this->config->item('real_time_quota'))) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '指标 ' . html_escape($params['quota_key']) . ' 不存在！';
+            return;
+        }
+
+        $data = [
+            'city_id'     => intval($params['city_id']),
+            'junction_id' => strip_tags(trim($params['junction_id'])),
+            'quota_key'   => strip_tags(trim($params['quota_key'])),
+            'flow_id'     => strip_tags(trim($params['flow_id'])),
+            'date'        => date('Y-m-d'),
+            'time_point'  => date('H:i:s'),
+        ];
+
+        if (!empty($params['date'])) {
+            $data['date'] = date('Y-m-d', strtotime(strip_tags(trim($params['date']))));
+        }
+
+        if (!empty($params['time_point'])) {
+            $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
+        }
+
+        $result = $this->evaluate_model->getQuotaTrend($data);
+
+        return $this->response($result);
     }
 
     /**
