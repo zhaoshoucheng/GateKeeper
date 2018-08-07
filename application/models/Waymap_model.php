@@ -32,7 +32,7 @@ class Waymap_model extends CI_Model
     {
         $data['token'] = $this->token;
         $data['user_id'] = $this->userid;
-
+        $data['version'] = '2017030116';
         try {
             $ids_array = explode(',', $ids);
 
@@ -41,15 +41,17 @@ class Waymap_model extends CI_Model
             foreach (array_chunk($ids_array, 100) as $ids) {
                 $data['logic_ids'] = implode(',', $ids);
                 $result = httpGET($this->config->item('waymap_interface') . '/signal-map/map/many', $data);
-                if (!$res) {
+
+                if (!$result) {
                     // 日志
                     return [];
                 }
-                $result = json_decode($res, true);
+                $result = json_decode($result, true);
                 if ($result['errorCode'] != 0 || !isset($result['data']) || empty($result['data'])) {
                     return [];
                 }
-                $res = array_merge($res, $result);
+
+                $res = array_merge($res, $result['data']);
             }
 
             if(is_null($returnFormat)) {
