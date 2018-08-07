@@ -89,7 +89,7 @@ class Evaluate_model extends CI_Model
 
         $sortKeyArr = [];
         foreach ($tempData as $k=>$v) {
-            $quotaValue = $quotaConf[$quotaKey](array_sum($v) / count($v));
+            $quotaValue = $quotaConf[$quotaKey]['round'](array_sum($v) / count($v));
             $sortKeyArr[$k] = $quotaValue;
             $result['dataList'][$k]['quota_value'] = $quotaValue;
         }
