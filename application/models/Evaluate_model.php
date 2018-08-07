@@ -167,7 +167,54 @@ class Evaluate_model extends CI_Model
 
         $result = [];
 
+        $table = $this->realtimetb . $data['city_id'];
+        $where = 'logic_junction_id = "' . $data['junction_id'] . '"';
+        $where .= ' and logic_flow_id = "' . $data['flow_id'] . '"';
+        $where .= ' and day(`updated_at`) = day("' . $data['date'] . '")';
+        $this->db->select("hour, {$data['quota_key']}");
+        $this->db->from($table);
+        $this->db->where($where);
+        $res = $this->db->get()->result_array();
+        echo "sql = " . $this->db->last_query() . '<hr>';
+        if (empty($res)) {
+            return [];
+        }
+        echo "<pre>";print_r($res);
 
+        $result = $this->formatQuotaTrendData($res, $data['quota_key']);
+
+        return $result;
+    }
+
+    /**
+     * 格式化指标趋势数据
+     * @param $data     指标趋势数据
+     * @param $quotaKey 查询的指标KEY
+     * @return array
+     */
+    public function formatQuotaTrendData($data, $quotaKey)
+    {
+        $result = [];
+
+        // 指标配置
+        $quotaConf = $this->config->item('real_time_quota');
+
+        $result['dataList'] = array_map(function($val) use($quotaKey) {
+            return [
+                // 指标值 Y轴
+                $val[$quotaKey],
+                // 时间点 X轴
+                $val['hour']
+            ];
+        }, $data);
+
+
+        // 返回数据：指标信息
+        $result['quota_info'] = [
+            'name' => $quotaConf[$quotaKey]['name'],
+            'key'  => $quotaKey,
+            'unit' => $quotaConf[$quotaKey]['unit'],
+        ];
 
         return $result;
     }
