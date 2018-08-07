@@ -22,7 +22,15 @@ class Evaluate extends MY_Controller
      */
     public function getCityJunctionList()
     {
+        $params = $this->input->post();
 
+        $data['city_id'] = $params['city_id'];
+
+        $data['date'] = $params['date'] ?? date('Y-m-d');
+
+        $data = $this->evaluate_model->getCityJunctionList($data);
+
+        $this->response($data);
     }
 
     /**
