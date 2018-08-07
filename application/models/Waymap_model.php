@@ -468,14 +468,14 @@ class Waymap_model extends CI_Model
             }
 
             $mapVersions = json_decode($mapVersions, true);
-            if ($mapVersions['errorCode'] != 0) {
+            if ($mapVersions['errorCode'] != 0 || empty($mapVersions['data'])) {
                 return [];
             }
+
+            return $mapVersions['data'];
         } catch (Exception $e) {
             return [];
         }
-
-        return $mapVersions;
     }
 
 }
