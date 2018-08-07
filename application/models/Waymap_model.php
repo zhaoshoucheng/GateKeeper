@@ -30,36 +30,45 @@ class Waymap_model extends CI_Model
      */
     public function getJunctionInfo($ids, $returnFormat = null)
     {
-        $data['logic_ids'] = $ids;
         $data['token'] = $this->token;
         $data['user_id'] = $this->userid;
-
+        $data['version'] = '2017030116';
         try {
-            $res = httpGET($this->config->item('waymap_interface') . '/signal-map/map/many', $data);
-            if (!$res) {
-                // 日志
-                return [];
-            }
-            $res = json_decode($res, true);
-            if ($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])) {
-                return [];
+            $ids_array = explode(',', $ids);
+
+            $res = [];
+
+            foreach (array_chunk($ids_array, 100) as $ids) {
+                $data['logic_ids'] = implode(',', $ids);
+                $result = httpGET($this->config->item('waymap_interface') . '/signal-map/map/many', $data);
+
+                if (!$result) {
+                    // 日志
+                    return [];
+                }
+                $result = json_decode($result, true);
+                if ($result['errorCode'] != 0 || !isset($result['data']) || empty($result['data'])) {
+                    return [];
+                }
+
+                $res = array_merge($res, $result['data']);
             }
 
             if(is_null($returnFormat)) {
-                return $res['data'];
+                return $res;
             } else {
 
                 //检查 $returnFormat 格式
                 if(!is_array($returnFormat) || !array_key_exists('key', $returnFormat)
                     || !array_key_exists('value', $returnFormat) || !is_string($returnFormat['key']))
-                    return $res['data'];
+                    return $res;
 
                 $result = [];
 
                 if(is_string($returnFormat['value'])) {
-                    $result = array_column($res['data'], $returnFormat['value'], $returnFormat['key']);
+                    $result = array_column($res, $returnFormat['value'], $returnFormat['key']);
                 } else {
-                    foreach ($res['data'] as $datum) {
+                    foreach ($res as $datum) {
                         $temp = [];
                         foreach ($returnFormat['value'] as $item) {
                             $temp[$item] = $datum[$item];
@@ -427,7 +436,8 @@ class Waymap_model extends CI_Model
             $getQuery = [
                 'token'    => $this->config->item('waymap_token'),
                 'user_id'  => $this->config->item('waymap_userid'),
-                'logic_junction_ids' => $junctionIds
+                'logic_junction_ids' => $junctionIds,
+                'version' => '2017030116'
             ];
             $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
             $url = $url."?".http_build_query($getQuery);

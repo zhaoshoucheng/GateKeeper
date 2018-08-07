@@ -21,6 +21,12 @@ class Evaluate_model extends CI_Model
         $this->load->model('waymap_model');
     }
 
+    /**
+     * 获取城市路口列表
+     *
+     * @param $data['city_id'] 城市ID
+     * @return array
+     */
     public function getCityJunctionList($data)
     {
         $result = $this->waymap_model->getAllCityJunctions($data['city_id']);
@@ -47,6 +53,12 @@ class Evaluate_model extends CI_Model
         ];
     }
 
+    /**
+     * 获取指标列表
+     *
+     * @param $data
+     * @return array
+     */
     public function getQuotaList($data)
     {
         $realTimeQuota = $this->config->item('real_time_quota');
@@ -62,6 +74,13 @@ class Evaluate_model extends CI_Model
         return ['dataList' => array_values($realTimeQuota)];
     }
 
+    /**
+     * 获取某个路口的全部 flow(方向)
+     *
+     * @param $data['city_id'] 城市ID
+     * @param $data['junction_id'] 路口ID
+     * @return array
+     */
     public function getDirectionList($data)
     {
         $result = $this->waymap_model->getFlowsInfo($data['junction_id']);
