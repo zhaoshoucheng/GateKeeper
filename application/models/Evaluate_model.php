@@ -56,20 +56,20 @@ class Evaluate_model extends CI_Model
                 'key' => $key,
                 'unit' => $value['unit']
             ];
-        }, $realTimeQuota);
+        }, array_keys($realTimeQuota), array_values($realTimeQuota));
 
         return ['dataList' => array_values($realTimeQuota)];
     }
 
     public function getDirectionList($data)
     {
-        $result = $this->waymap->getFlowsInfo($data['junction_id']);
+        $result = $this->waymap_model->getFlowsInfo($data['junction_id']);
 
-        $result = $result['junction_id'] ?? [];
+        $result = $result[$data['junction_id']] ?? [];
 
         $result = array_map(function ($key, $value) {
             return [ $key, $value ];
-        }, $result);
+        }, array_keys($result), array_values($result));
 
         return [ 'dataList' => $result ];
     }
