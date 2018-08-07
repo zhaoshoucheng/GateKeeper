@@ -62,7 +62,7 @@ class Overview_model extends CI_Model
         }, $result);
         $allStopDelay = array_column($result, 0);
         $info         = [
-            'value' => $realTimeQuota['stop_delay']['round'](array_sum($allStopDelay) / count($allStopDelay)),
+            'value' => count($allStopDelay) != 0 ? $realTimeQuota['stop_delay']['round'](array_sum($allStopDelay) / count($allStopDelay)) : 0,
             'quota_unit' => $realTimeQuota['stop_delay']['unit']
         ];
 
@@ -76,7 +76,7 @@ class Overview_model extends CI_Model
     {
         $data = $this->junctionsList($data);
 
-        $data = $data['dataList'];
+        $data = $data['dataList'] ?? [];
 
         $result = [];
 

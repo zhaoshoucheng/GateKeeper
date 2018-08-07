@@ -148,6 +148,9 @@ class Overview extends MY_Controller
         $this->response($data);
     }
 
+    /**
+     * 验证token
+     */
     public function verifyToken()
     {
         $params = $this->input->post();
