@@ -191,16 +191,16 @@ class Evaluate_model extends CI_Model
         $waymap_data = [
             'version'           => $newMapVersion,
             'logic_junction_id' => $data['junction_id'],
-            'logic_flow_ids'    => array_keys($allFlows),
+            'logic_flow_ids'    => array_keys($allFlows[$data['junction_id']]),
         ];
         $ret = $this->waymap_model->getJunctionFlowLngLat($waymap_data);
         if (empty($ret['data'])) {
             return [];
         }
         foreach ($ret['data'] as $k=>$v) {
-            if (!empty($allFlows[$v['logic_flow_id']])) {
+            if (!empty($allFlows[$data['junction_id']][$v['logic_flow_id']])) {
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
-                $result['dataList'][$k]['flow_label'] = $allFlows[$v['logic_flow_id']];
+                $result['dataList'][$k]['flow_label'] = $allFlows[$data['junction_id']][$v['logic_flow_id']];
                 $result['dataList'][$k]['lng'] = $v['flows'][0][0];
                 $result['dataList'][$k]['lat'] = $v['flows'][0][1];
             }
@@ -211,7 +211,7 @@ class Evaluate_model extends CI_Model
         $center = $this->waymap_model->getJunctionCenterCoords($centerData);
 
         $result['center'] = $center;
-        $result['map_version'] = $mapVersions;
+        $result['map_version'] = $newMapVersion;
 
         if (!empty($result['dataList'])) {
             $result['dataList'] = array_values($result['dataList']);
