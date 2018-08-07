@@ -416,6 +416,9 @@ class Waymap_model extends CI_Model
 
     }
 
+    /**
+     * 获取路口相位信息
+     */
     public function getFlowsInfo($junctionIds)
     {
         if(empty($junctionIds)) {
@@ -430,9 +433,8 @@ class Waymap_model extends CI_Model
                 'logic_junction_ids' => $junctionIds
             ];
             $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
-            $url = $url."?".http_build_query($getQuery);
 
-            $res = httpGET($url);
+            $res = httpGET($url, $getQuery);
 
             $res = json_decode($res, true);
             if ($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])) {
@@ -448,6 +450,32 @@ class Waymap_model extends CI_Model
 
             return [];
         }
+    }
+
+    /**
+     * 获取全部路网版本
+     */
+    public function getAllMapVersion()
+    {
+        $data['token'] = $this->token;
+        $data['user_id'] = $this->userid;
+        $mapVersions = [];
+
+        try {
+            $mapVersions = httpGET($this->config->item('waymap_interface') . '/signal-map/map/versions', $data);
+            if (!$mapVersions) {
+                return [];
+            }
+
+            $mapVersions = json_decode($mapVersions, true);
+            if ($mapVersions['errorCode'] != 0) {
+                return [];
+            }
+        } catch (Exception $e) {
+            return [];
+        }
+
+        return $mapVersions;
     }
 
 }

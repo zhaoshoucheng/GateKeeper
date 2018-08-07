@@ -162,4 +162,25 @@ class Evaluate_model extends CI_Model
 
         return $result;
     }
+
+    /**
+     * 获取路口地图数据
+     * @param $data['city_id']     interger Y 城市ID
+     * @param $data['junction_id'] string   Y 路口ID
+     * @return array
+     */
+    public function getJunctionMapData($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+
+        // 获取最新路网版本 在全部路网版本中取最新的
+        $mapVersions = $this->waymap_model->getAllMapVersion();
+        echo "<pre>";print_r($mapVersions);
+
+        return $result;
+    }
 }

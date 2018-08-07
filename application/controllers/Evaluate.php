@@ -159,7 +159,27 @@ class Evaluate extends MY_Controller
      */
     public function getJunctionMapData()
     {
+        $params = $this->input->post();
+        // 校验参数
+        $validate = Validate::make($params, [
+                'city_id'     => 'min:1',
+                'junction_id' => 'nullunable',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
 
+        $data = [
+            'city_id'     => intval($params['city_id']),
+            'junction_id' => strip_tags(trim($params['junction_id'])),
+        ];
+
+        $result = $this->evaluate_model->getJunctionMapData($data);
+
+        return $this->response($result);
     }
 
     /**
