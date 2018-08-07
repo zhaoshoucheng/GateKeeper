@@ -179,13 +179,11 @@ class Evaluate_model extends CI_Model
 
         // 获取最新路网版本 在全部路网版本中取最新的
         $mapVersions = $this->waymap_model->getAllMapVersion();
-        echo "<pre> mapVersions = ";print_r($mapVersions);
         // 最新路网版本
         $newMapVersion = max($mapVersions);
 
         // 获取路口所有相位
         $allFlows = $this->waymap_model->getFlowsInfo($data['junction_id']);
-        echo "<hr><pre> allFlows = ";print_r($allFlows);
 
         // 获取路网路口各相位坐标
         $waymap_data = [
