@@ -135,7 +135,7 @@ class Overview_model extends CI_Model
         $junctionsInfo = $this->waymap_model->getJunctionInfo($ids, ['key' => 'logic_junction_id', 'value' => ['name', 'lng', 'lat']]);
 
         //获取需要报警的全部路口ID
-        $ids = $this->getAlarmFlowIds($result);
+        $ids = implode(',', $this->getAlarmFlowIds($result));
 
         //获取全部路口的全部方向的信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
@@ -256,7 +256,7 @@ class Overview_model extends CI_Model
         $result = $alarmFormula($item);
 
         $result = array_map(function ($v) use ($item, $flowsInfo, $alarmCategory) {
-            return $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-' . $alarmCategory[$v]['name'];
+            return ($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] ?? $item['logic_flow_id']) . '-' . $alarmCategory[$v]['name'];
         }, $result);
 
         return $result;
