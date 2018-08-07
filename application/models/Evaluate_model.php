@@ -121,11 +121,9 @@ class Evaluate_model extends CI_Model
         $this->db->from($table);
         $this->db->where($where);
         $res = $this->db->get()->result_array();
-        echo "sql = " . $this->db->last_query() . '<hr>';
         if (empty($res)) {
             return [];
         }
-        echo "<pre>";print_r($res);
 
         $result = $this->formatQuotaTrendData($res, $data['quota_key']);
 
