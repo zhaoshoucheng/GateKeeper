@@ -62,7 +62,7 @@ class Overview_model extends CI_Model
         }, $result);
         $allStopDelay = array_column($result, 0);
         $info         = [
-            'value' => count($allStopDelay) != 0 ? $realTimeQuota['stop_delay']['round'](array_sum($allStopDelay) / count($allStopDelay)) : 0,
+            'value' => count($allStopDelay) == 0 ? 0 : $realTimeQuota['stop_delay']['round'](array_sum($allStopDelay) / count($allStopDelay)),
             'quota_unit' => $realTimeQuota['stop_delay']['unit']
         ];
 
@@ -161,8 +161,8 @@ class Overview_model extends CI_Model
         $lngs = array_column($temp, 'lng');
         $lats = array_column($temp, 'lat');
 
-        $center['lng'] = array_sum($lngs) / count($lngs);
-        $center['lat'] = array_sum($lats) / count($lats);
+        $center['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
+        $center['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
 
         return [
             'dataList' => array_values($temp),
