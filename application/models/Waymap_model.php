@@ -55,20 +55,20 @@ class Waymap_model extends CI_Model
             }
 
             if(is_null($returnFormat)) {
-                return $res['data'];
+                return $res;
             } else {
 
                 //检查 $returnFormat 格式
                 if(!is_array($returnFormat) || !array_key_exists('key', $returnFormat)
                     || !array_key_exists('value', $returnFormat) || !is_string($returnFormat['key']))
-                    return $res['data'];
+                    return $res;
 
                 $result = [];
 
                 if(is_string($returnFormat['value'])) {
-                    $result = array_column($res['data'], $returnFormat['value'], $returnFormat['key']);
+                    $result = array_column($res, $returnFormat['value'], $returnFormat['key']);
                 } else {
-                    foreach ($res['data'] as $datum) {
+                    foreach ($res as $datum) {
                         $temp = [];
                         foreach ($returnFormat['value'] as $item) {
                             $temp[$item] = $datum[$item];
