@@ -210,14 +210,14 @@ class Overviewalarm_model extends CI_Model
         $result = [];
 
         // 需要获取路口name的路口ID口中
-        $juncitonIds = implode(',', array_unique(array_column($data, 'logic_junction_id')));
+        $junctionIds = implode(',', array_unique(array_column($data, 'logic_junction_id')));
 
         // 获取路口信息
-        $junctionsInfo = $this->waymap_model->getJunctionInfo($juncitonIds);
+        $junctionsInfo = $this->waymap_model->getJunctionInfo($junctionIds);
         $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
 
         // 获取路口相位信息
-        $flowsInfo = $this->waymap_model->getFlowsInfo($juncitonIds);
+        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
 
         // 报警类别
         $alarmCate = $this->config->item('alarm_category');
