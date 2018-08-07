@@ -7,7 +7,8 @@
 
 class Evaluate_model extends CI_Model
 {
-    private $tb = 'offline_';
+    private $offlintb = 'offline_';
+    private $realtimetb = 'real_time_';
     private $db = '';
 
     public function __construct()
@@ -36,10 +37,11 @@ class Evaluate_model extends CI_Model
 
     	$result = [];
 
-    	$table = $this->tb . $data['city_id'];
-    	$where = 'date = (select updated_at from ' . $table . ' order by updated_at desc limit 1)';
+    	$table = $this->realtimetb . $data['city_id'];
+    	$where = 'hour = (select hour from ' . $table;
+    	$where .= ' where day(`hour`) = day(' . $data['date'] . ') order by hour desc limit 1)';
 
-    	$this->db->select("logic_junction_id, {$data['quota_key']}");
+    	$this->db->select("logic_junction_id, logic_flow_id, {$data['quota_key']}");
     	$this->db->from($table);
     	$this->db->where($where);
     	$res = $this->db->get()->result_array();
@@ -48,6 +50,21 @@ class Evaluate_model extends CI_Model
     		return [];
     	}
 
+    	echo "<pre>";print_r($res);
+
+    	$result = $this->formatJunctionQuotaSortListData($res);
+
+    	return $result;
+    }
+
+    /**
+     * 格式化路口指标排序列表数据
+     * @param $data 列表数据
+     * @return array
+     */
+    private function formatJunctionQuotaSortListData($data)
+    {
+    	$result = [];
 
     	return $result;
     }
