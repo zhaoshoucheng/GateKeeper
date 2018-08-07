@@ -187,6 +187,36 @@ class Evaluate_model extends CI_Model
         $allFlows = $this->waymap_model->getFlowsInfo($data['junction_id']);
         echo "<hr><pre> allFlows = ";print_r($allFlows);
 
+        // 获取路网路口各相位坐标
+        $waymap_data = [
+            'version'           => $newMapVersion,
+            'logic_junction_id' => $data['junction_id'],
+            'logic_flow_ids'    => array_keys($allFlows),
+        ];
+        $ret = $this->waymap_model->getJunctionFlowLngLat($waymap_data);
+        if (empty($ret['data'])) {
+            return [];
+        }
+        foreach ($ret['data'] as $k=>$v) {
+            if (!empty($timing['list'][$v['logic_flow_id']])) {
+                $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
+                $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
+                $result['dataList'][$k]['lng'] = $v['flows'][0][0];
+                $result['dataList'][$k]['lat'] = $v['flows'][0][1];
+            }
+        }
+        // 获取路口中心坐标
+        $result['center'] = '';
+        $centerData['logic_id'] = $data['junction_id'];
+        $center = $this->waymap_model->getJunctionCenterCoords($centerData);
+
+        $result['center'] = $center;
+        $result['map_version'] = $mapVersions;
+
+        if (!empty($result['dataList'])) {
+            $result['dataList'] = array_values($result['dataList']);
+        }
+
         return $result;
     }
 }
