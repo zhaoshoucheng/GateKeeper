@@ -22,6 +22,11 @@ class Overview_model extends CI_Model
         $this->load->model('waymap_model');
     }
 
+    /**
+     * @param $data['city_id'] Y 城市ID
+     * @param $data['date'] N 日期
+     * @return array
+     */
     public function junctionsList($data)
     {
         $table = 'real_time_' . $data['city_id'];
@@ -40,6 +45,10 @@ class Overview_model extends CI_Model
         return $result;
     }
 
+    /**
+     * @param $data['city_id'] Y 城市ID
+     * @return array
+     */
     public function operationCondition($data)
     {
 
@@ -125,11 +134,14 @@ class Overview_model extends CI_Model
         //获取路口信息的自定义返回格式
         $junctionsInfo = $this->waymap_model->getJunctionInfo($ids, ['key' => 'logic_junction_id', 'value' => ['name', 'lng', 'lat']]);
 
+        //获取需要报警的全部路口ID
+        $ids = $this->getAlarmFlowIds($result);
+
         //获取全部路口的全部方向的信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
 
         //数组初步处理，去除无用数据
-        $result = array_map(function ($item) use ($junctionsInfo, $flowsInfo) {
+        $result = array_map(function ($item) use ($flowsInfo) {
             return [
                 'logic_junction_id' => $item['logic_junction_id'],
                 'quota' => $this->getRawQuotaInfo($item),
@@ -208,6 +220,23 @@ class Overview_model extends CI_Model
                 'unit' => $realTimeQuota['stop_time_cycle']['unit'],
             ]
         ];
+    }
+
+    /**
+     * 获取全部的报警flow的id
+     *
+     * @param $result
+     * @return array
+     */
+    private function getAlarmFlowIds($result)
+    {
+        $alarmFormula = $this->config->item('alarm_formula');
+
+        $result = array_filter($result, function ($value) use ($alarmFormula) {
+            return !empty($alarmFormula($value));
+        });
+
+        return array_unique(array_column($result, 'logic_junction_id'));
     }
 
     /**
