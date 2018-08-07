@@ -16,7 +16,7 @@ class Evaluate_model extends CI_Model
         if (empty($this->db)) {
             $this->db = $this->load->database('default', true);
         }
-        $this->load->config('realtime_conf.php');
+        $this->load->config('realtime_conf');
         $this->load->model('waymap_model');
     }
 
@@ -44,5 +44,33 @@ class Evaluate_model extends CI_Model
             'dataList' => $result,
             'center' => $center
         ];
+    }
+
+    public function getQuotaList($data)
+    {
+        $realTimeQuota = $this->config->item('real_time_quota');
+
+        $realTimeQuota = array_map(function ($key, $value) {
+            return [
+                'name' => $value['name'],
+                'key' => $key,
+                'unit' => $value['unit']
+            ];
+        }, $realTimeQuota);
+
+        return ['dataList' => array_values($realTimeQuota)];
+    }
+
+    public function getDirectionList($data)
+    {
+        $result = $this->waymap->getFlowsInfo($data['junction_id']);
+
+        $result = $result['junction_id'] ?? [];
+
+        $result = array_map(function ($key, $value) {
+            return [ $key, $value ];
+        }, $result);
+
+        return [ 'dataList' => $result ];
     }
 }

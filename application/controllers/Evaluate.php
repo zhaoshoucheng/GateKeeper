@@ -24,6 +24,12 @@ class Evaluate extends MY_Controller
     {
         $params = $this->input->post();
 
+        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The value of city_id is wrong.';
+            return;
+        }
+
         $data['city_id'] = $params['city_id'];
 
         $data['date'] = $params['date'] ?? date('Y-m-d');
@@ -40,7 +46,21 @@ class Evaluate extends MY_Controller
      */
     public function getQuotaList()
     {
+        $params = $this->input->post();
 
+        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The value of city_id is wrong.';
+            return;
+        }
+
+        $data['city_id'] = $params['city_id'];
+
+        $data['date'] = $params['date'] ?? date('Y-m-d');
+
+        $data = $this->evaluate_model->getQuotaList($data);
+
+        $this->response($data);
     }
 
     /**
@@ -51,7 +71,29 @@ class Evaluate extends MY_Controller
      */
     public function getDirectionList()
     {
+        $params = $this->input->post();
 
+        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The value of city_id is wrong.';
+            return;
+        }
+
+        $data['city_id'] = $params['city_id'];
+
+        if(!isset($params['junction_id']) || empty(trim($params['junction_id']))) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The value of junction_id is empty.';
+            return;
+        }
+
+        $data['junction_id'] = $params['junction_id'];
+
+        $data['date'] = $params['date'] ?? date('Y-m-d');
+
+        $data = $this->evaluate_model->getDirectionList($data);
+
+        $this->response($data);
     }
 
     /**
