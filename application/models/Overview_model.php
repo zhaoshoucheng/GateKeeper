@@ -164,7 +164,7 @@ class Overview_model extends CI_Model
                 'junction_name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
                 'lng' => $junctionsInfo[$item['logic_junction_id']]['lng'] ?? '',
                 'lat' => $junctionsInfo[$item['logic_junction_id']]['lat'] ?? '',
-                'quota' => ($quota = $this->getFinalQuotaInfo($item)),
+                'quota_info' => ($quota = $this->getFinalQuotaInfo($item)),
                 'alarm_info' => $this->getFinalAlarmInfo($item),
                 'junction_status' => $this->getJunctionStatus($quota),
             ];
