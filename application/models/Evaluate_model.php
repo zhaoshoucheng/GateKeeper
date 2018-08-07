@@ -45,12 +45,9 @@ class Evaluate_model extends CI_Model
         $this->db->from($table);
         $this->db->where($where);
         $res = $this->db->get()->result_array();
-        echo "sql = " . $this->db->last_query();
         if (empty($res)) {
             return [];
         }
-
-        echo "<pre>";print_r($res);
 
         $result = $this->formatJunctionQuotaSortListData($res, $data['quota_key']);
 
@@ -92,11 +89,12 @@ class Evaluate_model extends CI_Model
 
         $sortKeyArr = [];
         foreach ($tempData as $k=>$v) {
-            $quotaValue = array_sum($v) / count($v);
+            $quotaValue = $quotaConf[$quotaKey](array_sum($v) / count($v));
             $sortKeyArr[$k] = $quotaValue;
             $result['dataList'][$k]['quota_value'] = $quotaValue;
         }
 
+        // $result['dataList'] 按指标值进行倒序排序
         array_multisort($sortKeyArr, SORT_DESC, SORT_NUMERIC, $result['dataList']);
 
         // 去除$result['dataList']的KEY
@@ -108,7 +106,7 @@ class Evaluate_model extends CI_Model
             'key'  => $quotaKey,
             'unit' => $quotaConf[$quotaKey]['unit'],
         ];
-        echo "<pre>";print_r($result);
+
         return $result;
     }
 }
