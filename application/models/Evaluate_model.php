@@ -293,4 +293,224 @@ class Evaluate_model extends CI_Model
 
         return $result;
     }
+
+    /**
+     * 指标评估对比
+     * @param $data['city_id']         interger Y 城市ID
+     * @param $data['junction_id']     string   Y 路口ID
+     * @param $data['quota_key']       string   Y 指标KEY
+     * @param $data['flow_id']         string   Y 相位ID
+     * @param $data['base_time']       array    Y 基准时间 [1532880000, 1532966400, 1533052800] 日期时间戳
+     * @param $data['evaluate_time']   array    Y 评估时间 有可能会有多个评估时间段
+     * $data['evaluate_time'] = [
+     *     [
+     *         1532880000,
+     *         1532880000,
+     *     ],
+     * ]
+     * @param $data['base_time_start_end']       array Y 基准时间 开始、结束时间 用于返回数据
+     * @param $data['evaluate_time_start_end']   array Y 评估时间 开始、结束时间 用于返回数据
+     * @return array
+     */
+    public function quotaEvaluateCompare($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+
+        $table = $this->offlintb . $data['city_id'];
+
+        $groupBy = '';
+        $where = "logic_junction_id = '{$data['junction_id']}'";
+
+        $seelctColumn = "logic_junction_id, logic_flow_id, created_at, hour, {$data['quota_key']} as quota_value";
+        // 取路口所有方向
+        if ($data['flow_id'] == 9999) {
+            $seelctColumn = 'logic_junction_id, hour,';
+            $seelctColumn .= " sum({$data['quota_key']}) / count(logic_flow_id) as quota_value";
+            $groupBy = 'logic_junction_id';
+        } else {
+            $where .= " and logic_flow_id = '{$data['flow_id']}'";
+        }
+
+        $this->db->select($seelctColumn);
+        $this->db->from($table);
+
+        // 合并所有需要查询的日期
+        $evaluateAllDates = [];
+        foreach ($data['evaluate_time'] as $k=>$v) {
+            foreach ($v as $vv) {
+                $evaluateAllDates[$vv] = $vv;
+            }
+        }
+
+        $allDates = array_unique(array_merge($data['base_time'], $evaluateAllDates));
+
+        $whereIn = '';
+        foreach ($allDates as $val) {
+            $tempDate = date('Y-m-d', $val);
+
+            $whereIn .= empty($whereIn)
+                    ? ' and day(created_at) IN (day("' . $tempDate . '")'
+                    : ', day("' . $tempDate . '")';
+        }
+        // 闭合 IN
+        $whereIn .= !empty($whereIn) ? ')' : '';
+
+        $where .= $whereIn;
+        $this->db->where($where);
+        $res = $this->db->get()->result_array();
+        if (empty($res)) {
+            return [];
+        }
+
+        $result = $this->formatQuotaEvaluateCompareData($res, $data);
+
+        return $result;
+    }
+
+    /**
+     * 格式化指标评估对比数据
+     * @param $data   指标数据
+     * @param $params 参数
+     * @return array
+     */
+    private function formatQuotaEvaluateCompareData($data, $params)
+    {
+        $result = [];
+
+        // 基准日期
+        $baseDate = array_map(function($val) {
+            return date('Y-m-d', $val);
+        }, $params['base_time']);
+
+        // 评估日期
+        $evaluateDate = [];
+        foreach ($params['evaluate_time'] as $k=>$v) {
+            $evaluateDate[$k] = array_map(function($val) {
+                return date('Y-m-d', $val);
+            }, $v);
+        }
+
+        // 指标配置
+        $quotaConf = $this->config->item('real_time_quota');
+
+        // 平均对比数组
+        $avgArr = [];
+        $result['base'] = [];
+        $result['evaluate'] = [];
+        $result['average'] = [];
+
+        foreach ($data as $k=>$v) {
+            $date = date('Y-m-d', strtotime($v['created_at']));
+
+            // 组织基准时间数据
+            if (in_array($date, $baseDate, true)) {
+                $result['base'][$date][strtotime($v['hour'])] = [
+                    // 指标值
+                    $quotaConf[$params['quota_key']]['round']($v['quota_value']),
+                    // 时间
+                    $v['hour'],
+                ];
+
+                $avgArr['average']['base'][strtotime($v['hour'])][$date] = [
+                    'hour'  => $v['hour'],
+                    'value' => $v['quota_value'],
+                ];
+            }
+
+            // 组织评估时间数据
+            foreach ($evaluateDate as $kk=>$vv) {
+                if (in_array($date, $vv, true)) {
+                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])] = [
+                        // 指标值
+                        $quotaConf[$params['quota_key']]['round']($v['quota_value']),
+                        // 时间
+                        $v['hour'],
+                    ];
+                    $avgArr['average']['evaluate'][$kk][strtotime($v['hour'])][$date] = [
+                        'hour'  => $v['hour'],
+                        'value' => $v['quota_value'],
+                    ];
+                }
+            }
+        }
+
+        // 处理基准平均值
+        if (!empty($avgArr['average']['base'])) {
+            ksort($avgArr['average']['base']);
+            $result['average']['base'] = array_map(function($val) use($quotaConf, $params) {
+                $tempData = array_column($val, 'value');
+                $tempSum = array_sum($tempData);
+                $tempCount = count($val);
+                list($hour) = array_unique(array_column($val, 'hour'));
+                return [
+                    // 指标平均值
+                    $quotaConf[$params['quota_key']]['round']($tempSum / $tempCount),
+                    // 时间
+                    $hour,
+                ];
+            }, $avgArr['average']['base']);
+            $result['average']['base'] = array_values($result['average']['base']);
+        }
+        // 处理评估平均值
+        if (!empty($avgArr['average']['evaluate'])) {
+            foreach ($avgArr['average']['evaluate'] as $k=>$v) {
+                ksort($v);
+                $result['average']['evaluate'][$k+1] = array_map(function($val) use($quotaConf, $params) {
+                    $tempData = array_column($val, 'value');
+                    $tempSum = array_sum($tempData);
+                    $tempCount = count($val);
+                    list($hour) = array_unique(array_column($val, 'hour'));
+                    return [
+                        // 指标平均值
+                        $quotaConf[$params['quota_key']]['round']($tempSum / $tempCount),
+                        // 时间
+                        $hour,
+                    ];
+                }, $v);
+                $result['average']['evaluate'][$k+1] = array_values($result['average']['evaluate'][$k+1]);
+            }
+        }
+
+        // 排序、去除key
+        if (!empty($result['base'])) {
+            foreach ($result['base'] as $k=>$v) {
+                ksort($result['base'][$k]);
+                $result['base'][$k] = array_values($result['base'][$k]);
+            }
+        }
+
+        if (!empty($result['evaluate'])) {
+            foreach ($result['evaluate'] as $k=>$v) {
+                foreach ($v as $kk=>$vv) {
+                    ksort($result['evaluate'][$k][$kk]);
+                    $result['evaluate'][$k][$kk] = array_values($result['evaluate'][$k][$kk]);
+                }
+            }
+        }
+
+        // 获取路口信息
+        $junctionsInfo = $this->waymap_model->getJunctionInfo($params['junction_id']);
+        $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
+
+        // 获取路口相位信息
+        $flowsInfo = $this->waymap_model->getFlowsInfo($params['junction_id']);
+        // 将所有方向放入路口相位信息中
+        $flowsInfo[$params['junction_id']]['9999'] = '所有方向';
+
+        // 基本信息
+        $result['info'] = [
+            'junction_name' => $junctionIdName[$params['junction_id']] ?? '',
+            'quota_name'    => $quotaConf[$params['quota_key']]['name'],
+            'quota_unit'    => $quotaConf[$params['quota_key']]['unit'],
+            'base_time'     => $params['base_time_start_end'],
+            'evaluate_time' => $params['evaluate_time_start_end'],
+            'direction'     => $flowsInfo[$params['junction_id']][$params['flow_id']] ?? '',
+        ];
+
+        return $result;
+    }
 }
