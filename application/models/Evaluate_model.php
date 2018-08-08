@@ -318,6 +318,9 @@ class Evaluate_model extends CI_Model
             }, $v);
         }
 
+        // 指标配置
+        $quotaConf = $this->config->item('real_time_quota');
+
         foreach ($data as $k=>$v) {
             $date = date('Y-m-d', strtotime($v['created_at']));
 
@@ -325,7 +328,7 @@ class Evaluate_model extends CI_Model
             if (in_array($date, $baseDate, true)) {
                 $result['base'][$date][strtotime($v['hour'])] = [
                     // 指标值
-                    $v['quota_value'],
+                    $quotaConf[$data['quota_key']]['round']($v['quota_value']),
                     // 时间
                     $v['hour'],
                 ];
@@ -336,7 +339,7 @@ class Evaluate_model extends CI_Model
                 if (in_array($date, $vv, true)) {
                     $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])] = [
                         // 指标值
-                        $v['quota_value'],
+                        $quotaConf[$data['quota_key']]['round']($v['quota_value']),
                         // 时间
                         $v['hour'],
                     ];
@@ -347,7 +350,7 @@ class Evaluate_model extends CI_Model
         // 排序、去除key
         if (!empty($result['base'])) {
             foreach ($result['base'] as $k=>$v) {
-                ksort($v);
+                ksort($result['base'][$k]);
                 $result['base'][$k] = array_values($result['base'][$k]);
             }
         }
@@ -355,11 +358,28 @@ class Evaluate_model extends CI_Model
         if (!empty($result['evaluate'])) {
             foreach ($result['evaluate'] as $k=>$v) {
                 foreach ($v as $kk=>$vv) {
-                    ksort($vv);
+                    ksort($result['evaluate'][$k][$kk]);
                     $result['evaluate'][$k][$kk] = array_values($result['evaluate'][$k][$kk]);
                 }
             }
         }
+
+        // 基本信息
+        $result['info'] = [
+            'junction_name' => 'xxxx',
+            'quota_name'    => $quotaConf[$data['quota_key']]['name'],
+            'base_time'     => [
+                'start' => 'xxxx',
+                'end'   => 'xxxx',
+            ],
+            'evaluate_time' => [
+                [
+                    'start' => 'xxx',
+                    'end'   => 'xxx',
+                ]
+            ],
+            'direction'     => 'xxx'
+        ];
 
         echo "<hr><pre>result = ";print_r($result);
 
