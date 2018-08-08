@@ -95,7 +95,7 @@ class Overview_model extends CI_Model
 
         foreach ($data as $datum) {
             $result['alarm_total']      += $datum['alarm_info']['is_alarm'];
-            $result['congestion_total'] += (int)($datum['junction_status']['key'] == 2);
+            $result['congestion_total'] += (int)($datum['junction_status']['key'] == 3);
         }
 
         return $result;
