@@ -340,7 +340,7 @@ class Evaluate_model extends CI_Model
                 ];
 
                 $avgArr['average']['base'][strtotime($v['hour'])][$date] = [
-                    'hour'  => date('H:i:s', $v['hour']),
+                    'hour'  => $v['hour'],
                     'value' => $v['quota_value'],
                 ];
             }
@@ -355,7 +355,7 @@ class Evaluate_model extends CI_Model
                         $v['hour'],
                     ];
                     $avgArr['average']['evaluate'][$kk][strtotime($v['hour'])][$date] = [
-                        'hour'  => date('H:i:s', $v['hour']),
+                        'hour'  => $v['hour'],
                         'value' => $v['quota_value'],
                     ];
                 }
@@ -364,7 +364,7 @@ class Evaluate_model extends CI_Model
 
         // 处理基准平均值
         if (!empty($avgArr['average']['base'])) {
-            $result['average']['base'] = array_map(function($val) {
+            $result['average']['base'] = array_map(function($val) use($quotaConf, $params) {
                 $tempData = array_column($val, 'value');
                 $tempSum = array_sum($tempData);
                 $tempCount = count($val);
@@ -379,7 +379,7 @@ class Evaluate_model extends CI_Model
         // 处理评估平均值
         if (!empty($avgArr['average']['evaluate'])) {
             foreach ($avgArr['average']['evaluate'] as $k=>$v) {
-                $result['average']['evaluate'][$k] = array_map(function($val) {
+                $result['average']['evaluate'][$k] = array_map(function($val) use($quotaConf, $params) {
                     $tempData = array_column($val, 'value');
                     $tempSum = array_sum($tempData);
                     $tempCount = count($val);
