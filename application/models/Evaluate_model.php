@@ -88,7 +88,10 @@ class Evaluate_model extends CI_Model
         $result = $result[$data['junction_id']] ?? [];
 
         $result = array_map(function ($key, $value) {
-            return [ $key, $value ];
+            return [
+                'logic_flow_id' => $key,
+                'flow_name' => $value
+            ];
         }, array_keys($result), array_values($result));
 
         return [ 'dataList' => $result ];
