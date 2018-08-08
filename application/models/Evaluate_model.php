@@ -421,7 +421,7 @@ class Evaluate_model extends CI_Model
         $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
 
         // 获取路口相位信息
-        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        $flowsInfo = $this->waymap_model->getFlowsInfo($params['junction_id']);
         // 将所有方向放入路口相位信息中
         $flowsInfo[$params['junction_id']]['9999'] = '所有方向';
 
