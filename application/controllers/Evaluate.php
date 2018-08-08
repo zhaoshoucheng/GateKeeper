@@ -300,4 +300,61 @@ class Evaluate extends MY_Controller
         ob_end_clean();
         $objWriter->save('php://output');
     }
+
+    private function getExcelStyle() {
+        $title_style = array(
+            'font' => array(
+                'bold' => true,
+                'size '=> 16,
+                'color'=>array(
+                    'argb' => '00000000',
+                ),
+            ),
+            'fill' => array(
+                'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                'color' => array(
+                    'argb' => '00FFFF00',
+                ),
+            ),
+        );
+
+        $headers_style = array(
+            'font' => array(
+                'bold' => true,
+                'size '=> 12,
+                'color'=>array(
+                    'argb' => '00000000',
+                ),
+            ),
+            'fill' => array(
+                'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                'color' => array(
+                    'argb' => '00DCDCDC',
+                ),
+            ),
+            'alignment' => array(
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            ),
+        );
+
+        $content_style = array(
+            'borders' => array (
+                'allborders' => array (
+                    'style' => PHPExcel_Style_Border::BORDER_THIN,  //设置border样式
+                    //'style' => PHPExcel_Style_Border::BORDER_THICK, //另一种样式
+                    'color' => array ('argb' => '00000000'),     //设置border颜色
+                ),
+            ),
+            'alignment' => array(
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            ),
+        );
+
+        return array(
+            'title'  => $title_style,
+            'header' => $headers_style,
+            'content'=> $content_style,
+        );
+
+    }
 }
