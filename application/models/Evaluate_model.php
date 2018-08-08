@@ -41,8 +41,8 @@ class Evaluate_model extends CI_Model
         }, $result);
 
 
-        $lngs = array_column($result, 'lng');
-        $lats = array_column($result, 'lat');
+        $lngs = array_filter(array_column($result, 'lng'));
+        $lats = array_filter(array_column($result, 'lat'));
 
         $center['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
         $center['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
