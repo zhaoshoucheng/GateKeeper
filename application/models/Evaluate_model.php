@@ -323,7 +323,7 @@ class Evaluate_model extends CI_Model
 
             // 组织基准时间数据
             if (in_array($date, $baseDate, true)) {
-                $result['base'][$date][$v['hour']] = [
+                $result['base'][$date][strtotime($v['hour'])] = [
                     // 指标值
                     $v['quota_value'],
                     // 时间
@@ -334,12 +334,29 @@ class Evaluate_model extends CI_Model
             // 组织评估时间数据
             foreach ($evaluateDate as $kk=>$vv) {
                 if (in_array($date, $vv, true)) {
-                    $result['evaluate' . $kk + 1 . ''][$date][$v['hour']] = [
+                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])] = [
                         // 指标值
                         $v['quota_value'],
                         // 时间
                         $v['hour'],
                     ];
+                }
+            }
+        }
+
+        // 排序、去除key
+        if (!empty($result['base'])) {
+            foreach ($result['base'] as $k=>$v) {
+                ksort($v);
+                $result['base'][$k] = array_values($result['base'][$k]);
+            }
+        }
+
+        if (!empty($result['evaluate'])) {
+            foreach ($result['evaluate'] as $k=>$v) {
+                foreach ($v as $kk=>$vv) {
+                    ksort($vv);
+                    $result['evaluate'][$k][$kk] = array_values($result['evaluate'][$k][$kk]);
                 }
             }
         }
