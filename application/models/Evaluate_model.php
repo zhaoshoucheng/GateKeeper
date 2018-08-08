@@ -365,17 +365,19 @@ class Evaluate_model extends CI_Model
         // 处理基准平均值
         if (!empty($avgArr['average']['base'])) {
             ksort($avgArr['average']['base']);
-            $result['average']['base'] = array_map(function($bavgval) use($quotaConf, $params) {
-                $tempData = array_column($bavgval, 'value');
+            $result['average']['base'] = array_map(function($val) use($quotaConf, $params) {
+                $tempData = array_column($val, 'value');
                 $tempSum = array_sum($tempData);
-                $tempCount = count($bavgval);
+                $tempCount = count($val);
+                list($hour) = array_unique(array_column($val, 'hour'));
                 return [
                     // 指标平均值
                     $quotaConf[$params['quota_key']]['round']($tempSum / $tempCount),
                     // 时间
-                    $bavgval['hour'],
+                    $hour,
                 ];
             }, $avgArr['average']['base']);
+            $result['average']['base'] = array_values($result['average']['base']);
         }
         // 处理评估平均值
         if (!empty($avgArr['average']['evaluate'])) {
@@ -385,13 +387,15 @@ class Evaluate_model extends CI_Model
                     $tempData = array_column($val, 'value');
                     $tempSum = array_sum($tempData);
                     $tempCount = count($val);
+                    list($hour) = array_unique(array_column($val, 'hour'));
                     return [
                         // 指标平均值
                         $quotaConf[$params['quota_key']]['round']($tempSum / $tempCount),
                         // 时间
-                        $val['hour'],
+                        $hour,
                     ];
                 }, $v);
+                $result['average']['evaluate'][$k] = array_values($result['average']['evaluate'][$k]);
             }
         }
 
