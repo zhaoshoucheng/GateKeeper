@@ -383,7 +383,7 @@ class Evaluate_model extends CI_Model
         if (!empty($avgArr['average']['evaluate'])) {
             foreach ($avgArr['average']['evaluate'] as $k=>$v) {
                 ksort($v);
-                $result['average']['evaluate'][$k] = array_map(function($val) use($quotaConf, $params) {
+                $result['average']['evaluate'][$k+1] = array_map(function($val) use($quotaConf, $params) {
                     $tempData = array_column($val, 'value');
                     $tempSum = array_sum($tempData);
                     $tempCount = count($val);
@@ -395,7 +395,7 @@ class Evaluate_model extends CI_Model
                         $hour,
                     ];
                 }, $v);
-                $result['average']['evaluate'][$k] = array_values($result['average']['evaluate'][$k]);
+                $result['average']['evaluate'][$k+1] = array_values($result['average']['evaluate'][$k+1]);
             }
         }
 
