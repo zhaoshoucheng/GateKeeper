@@ -247,11 +247,11 @@ class Evaluate_model extends CI_Model
         $groupBy = '';
         $where = "logic_junction_id = '{$data['junction_id']}'";
 
-        $seelctColumn = "logic_junction_id, logic_flow_id, hour, {$data['quota_key']}";
+        $seelctColumn = "logic_junction_id, logic_flow_id, hour, {$data['quota_key']} as quota_value";
         // 取路口所有方向
         if ($data['flow_id'] == 9999) {
             $seelctColumn = 'logic_junction_id, hour,';
-            $seelctColumn .= " sum({$data['quota_key']}) / count(logic_flow_id) as {$data['quota_key']}";
+            $seelctColumn .= " sum({$data['quota_key']}) / count(logic_flow_id) as quota_value";
             $groupBy = 'logic_junction_id';
         } else {
             $where .= " and logic_flow_id = '{$data['flow_id']}'";
@@ -278,12 +278,61 @@ class Evaluate_model extends CI_Model
                     ? ' and day(created_at) IN (day("' . $tempDate . '")'
                     : ', day("' . $tempDate . '")';
         }
+        // 闭合 IN
+        $whereIn .= !empty($whereIn) ? ')' : '';
 
         $where .= $whereIn;
         $this->db->where($where);
         $res = $this->db->get()->result_array();
         echo "<hr>sql = " . $this->db->last_query();
         echo "<hr><pre>res = "; print_r($res);
+        if (empty($res)) {
+            return [];
+        }
+
+        $result = $this->formatQuotaEvaluateCompareData($res, $data);
+
+        return $result;
+    }
+
+    /**
+     * 格式化指标评估对比数据
+     * @param $data   指标数据
+     * @param $params 参数
+     * @return array
+     */
+    private function formatQuotaEvaluateCompareData($data, $params)
+    {
+        $result = [];
+
+        foreach ($data as $k=>$v) {
+            $date = date('Y-m-d', $v['created_at']);
+
+            // 组织基准时间数据
+            if (in_array($date, $params['base_time'], true)) {
+                $result['base'][$date][$v['hour']] = [
+                    // 指标值
+                    $v['quota_value'],
+                    // 时间
+                    $v['hour'],
+                ];
+            }
+
+            // 组织评估时间数据
+            foreach ($params['evaluate_time'] as $kk=>$vv) {
+                // 组织基准时间数据
+                if (in_array($date, $vv, true)) {
+                    $result['evaluate' . $kk + 1 . ''][$date][$v['hour']] = [
+                        // 指标值
+                        $v['quota_value'],
+                        // 时间
+                        $v['hour'],
+                    ];
+                }
+            }
+        }
+
+        echo "<hr><pre>result = ";print_r($result);
 
         return $result;
     }
