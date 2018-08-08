@@ -217,4 +217,56 @@ class Evaluate_model extends CI_Model
 
         return $result;
     }
+
+    /**
+     * 指标评估对比
+     * @param $data['city_id']         interger Y 城市ID
+     * @param $data['junction_id']     string   Y 路口ID
+     * @param $data['quota_key']       string   Y 指标KEY
+     * @param $data['flow_id']         string   Y 相位ID
+     * @param $data['base_start_time'] string   N 基准开始时间 格式：yyyy-mm-dd hh:ii:ss
+     * 例：2018-08-06 00:00:00 默认：上一周工作日开始时间（上周一 yyyy-mm-dd 00:00:00）
+     * @param $data['base_end_time']   string   N 基准结束时间 格式：yyyy-mm-dd hh:ii:ss
+     * 例：2018-08-07 23:59:59 默认：上一周工作日结束时间（上周五 yyyy-mm-dd 23:59:59）
+     * @param $data['evaluate_time']   array    N 评估时间 有可能会有多个评估时间段，固使用json格式的字符串 默认本周工作日
+     * $data['evaluate_time'] = [
+     *     [
+     *         "start_time" => "2018-08-06 00:00:00", // 开始时间 格式：yyyy-mm-dd hh:ii:ss 例：2018-08-06 00:00:00
+     *         "end_time"   => "2018-08-07 23:59:59"  // 结束时间 格式：yyyy-mm-dd hh:ii:ss 例：2018-08-07 23:59:59
+     *     ],
+     * ]
+     * @return array
+     */
+    public function quotaEvaluateCompare($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        $result = [];
+
+        $data = [
+            'logic_junction_id' => '2017030116_4875896',
+            'logic_flow_id' => '2017030116_i_63164690_2017030116_o_691081540',
+            'hour' => '',
+            'stop_time_cycle' => mt_rand(10, 200),
+            'spillover_rate' => 0,
+            'queue_length' => mt_rand(20, 300),
+            'stop_delay' => mt_rand(1, 30),
+            'stop_rate' => 0,
+            'twice_stop_rate' => 0,
+            'speed' => 50,
+            'free_flow_speed' => 50,
+            'traj_count' => mt_rand(100, 300),
+        ];
+
+        $table = $this->offlintb . '12';
+
+        for ($i = 0; $i < 24 * 3600; $i += 5 * 60) {
+            $data['hour'] = date('H:i:s', $i);
+            $this->db->inset_batch($table, $data);
+        }
+
+        return $result;
+    }
 }
