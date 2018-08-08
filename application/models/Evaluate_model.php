@@ -328,9 +328,9 @@ class Evaluate_model extends CI_Model
         $seelctColumn = "logic_junction_id, logic_flow_id, created_at, hour, {$data['quota_key']} as quota_value";
         // 取路口所有方向
         if ($data['flow_id'] == 9999) {
-            $seelctColumn = 'logic_junction_id, hour,';
+            $seelctColumn = 'logic_junction_id, created_at, hour,';
             $seelctColumn .= " sum({$data['quota_key']}) / count(logic_flow_id) as quota_value";
-            $groupBy = 'logic_junction_id';
+            $groupBy = 'logic_junction_id, hour, day(created_at)';
         } else {
             $where .= " and logic_flow_id = '{$data['flow_id']}'";
         }
@@ -361,6 +361,9 @@ class Evaluate_model extends CI_Model
 
         $where .= $whereIn;
         $this->db->where($where);
+        if (!empty($groupBy)) {
+            $this->db->group_by($groupBy);
+        }
         $res = $this->db->get()->result_array();
         if (empty($res)) {
             return [];
