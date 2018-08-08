@@ -232,6 +232,8 @@ class Evaluate_model extends CI_Model
      *         1532880000,
      *     ],
      * ]
+     * @param $data['base_time_start_end']       array Y 基准时间 开始、结束时间 用于返回数据
+     * @param $data['evaluate_time_start_end']   array Y 评估时间 开始、结束时间 用于返回数据
      * @return array
      */
     public function quotaEvaluateCompare($data)
@@ -284,8 +286,6 @@ class Evaluate_model extends CI_Model
         $where .= $whereIn;
         $this->db->where($where);
         $res = $this->db->get()->result_array();
-        echo "<hr>sql = " . $this->db->last_query();
-        echo "<hr><pre>res = "; print_r($res);
         if (empty($res)) {
             return [];
         }
@@ -321,6 +321,12 @@ class Evaluate_model extends CI_Model
         // 指标配置
         $quotaConf = $this->config->item('real_time_quota');
 
+        // 平均对比数组
+        $avgArr = [];
+        $result['base'] = [];
+        $result['evaluate'] = [];
+        $result['average'] = [];
+
         foreach ($data as $k=>$v) {
             $date = date('Y-m-d', strtotime($v['created_at']));
 
@@ -331,6 +337,11 @@ class Evaluate_model extends CI_Model
                     $quotaConf[$params['quota_key']]['round']($v['quota_value']),
                     // 时间
                     $v['hour'],
+                ];
+
+                $avgArr['average']['base'][strtotime($v['hour'])][$date] = [
+                    'hour'  => date('H:i:s', $v['hour']),
+                    'value' => $v['quota_value'],
                 ];
             }
 
@@ -343,7 +354,42 @@ class Evaluate_model extends CI_Model
                         // 时间
                         $v['hour'],
                     ];
+                    $avgArr['average']['evaluate'][$kk][strtotime($v['hour'])][$date] = [
+                        'hour'  => date('H:i:s', $v['hour']),
+                        'value' => $v['quota_value'],
+                    ];
                 }
+            }
+        }
+
+        // 处理基准平均值
+        if (!empty($avgArr['average']['base'])) {
+            $result['average']['base'] = array_map(function($val) {
+                $tempData = array_column($val, 'value');
+                $tempSum = array_sum($tempData);
+                $tempCount = count($val);
+                return [
+                    // 指标平均值
+                    $quotaConf[$params['quota_key']]['round']($tempSum / $tempCount),
+                    // 时间
+                    $val['hour'],
+                ];
+            }, $avgArr['average']['base']);
+        }
+        // 处理评估平均值
+        if (!empty($avgArr['average']['evaluate'])) {
+            foreach ($avgArr['average']['evaluate'] as $k=>$v) {
+                $result['average']['evaluate'][$k] = array_map(function($val) {
+                    $tempData = array_column($val, 'value');
+                    $tempSum = array_sum($tempData);
+                    $tempCount = count($val);
+                    return [
+                        // 指标平均值
+                        $quotaConf[$params['quota_key']]['round']($tempSum / $tempCount),
+                        // 时间
+                        $val['hour'],
+                    ];
+                }, $v);
             }
         }
 
@@ -364,24 +410,24 @@ class Evaluate_model extends CI_Model
             }
         }
 
+        // 获取路口信息
+        $junctionsInfo = $this->waymap_model->getJunctionInfo($params['junction_id']);
+        $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
+
+        // 获取路口相位信息
+        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        // 将所有方向放入路口相位信息中
+        $flowsInfo[$params['junction_id']]['9999'] = '所有方向';
+
         // 基本信息
         $result['info'] = [
-            'junction_name' => 'xxxx',
+            'junction_name' => $junctionIdName[$params['junction_id']] ?? '',
             'quota_name'    => $quotaConf[$params['quota_key']]['name'],
-            'base_time'     => [
-                'start' => 'xxxx',
-                'end'   => 'xxxx',
-            ],
-            'evaluate_time' => [
-                [
-                    'start' => 'xxx',
-                    'end'   => 'xxx',
-                ]
-            ],
-            'direction'     => 'xxx'
+            'quota_unit'    => $quotaConf[$params['quota_key']]['unit'],
+            'base_time'     => $params['base_time_start_end'],
+            'evaluate_time' => $params['evaluate_time_start_end'],
+            'direction'     => $flowsInfo[$params['junction_id']][$params['flow_id']] ?? '',
         ];
-
-        echo "<hr><pre>result = ";print_r($result);
 
         return $result;
     }
