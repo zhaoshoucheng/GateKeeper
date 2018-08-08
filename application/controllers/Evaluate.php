@@ -233,17 +233,24 @@ class Evaluate extends MY_Controller
          */
         if (empty($params['base_start_time'])) {
             // 上周一作为开始时间 Y-m-d H:i:s
-            $data['base_start_time'] = date('Y-m-d H:i:s', strtotime('monday last week'));
+            $baseStartTime = strtotime('monday last week');
         } else {
-            $data['base_start_time'] = date('Y-m-d H:i:s', strtotime($params['base_start_time']));
+            $baseStartTime = strtotime($params['base_start_time']);
         }
 
         if (empty($params['base_end_time'])) {
             // 上周五作为结束时间 本周减去2天减1秒
-            $data['base_end_time'] = date('Y-m-d H:i:s', strtotime('monday this week') - 2 * 24 * 3600 - 1);
+            $baseEndTime = strtotime('monday this week') - 2 * 24 * 3600 - 1;
         } else {
-            $data['base_end_time'] = date('Y-m-d H:i:s', strtotime($params['base_end_time']));
+            $baseEndTime = strtotime($params['base_end_time']);
         }
+
+        // 计算基准时间段具体每天日期
+        for ($i = $baseStartTime; $i < $baseEndTime; $i += 24 * 3600) {
+            $data['base_time'][] = date('Y-m-d H:i:s', $i);
+        }
+
+        echo "<pre>";print_r($data['base_time']);
 
         if (empty($params['evaluate_time'])) {
             // 开始时间 本周一开始时间
