@@ -261,28 +261,25 @@ class Evaluate_model extends CI_Model
         $this->db->from($table);
         $this->db->where($where);
 
-        // 基准日期
-        $baseDateArr = array_map(function($val) {
-            return "day('{date('Y-m-d H:i:s', $val)}')";
-        }, $data['base_time']);
-        echo "<hr><pre>baseDateArr = ";print_r($baseDateArr);
-        // 取基准评估数据
-        $baseData = $this->db->where_in("day(created_at)", $baseDateArr);
-        $baseData = $this->db->get()->result_array();
-        echo '<hr>sql =' . $this->db->last_query();
-        echo "<hr><pre> baseData = ";print_r($baseData);
-
-        $evaluateData = [];
+        // 合并所有需要查询的日期
+        $evaluateAllDates = [];
         foreach ($data['evaluate_time'] as $k=>$v) {
-            $tempDates[$k] = array_map(function($val) {
-                return "day('{date('Y-m-d H:i:s', $val)}')";
-            }, $v);
-            $evaluateData[$k] = $this->db->where_in("day(created_at)", $tempDates[$k]);
-            $evaluateData[$k] = $this->db->get()->result_array();
-            echo "<hr>sql = " . $this->db->last_query();
+            foreach ($v as $vv) {
+                $evaluateAllDates[$vv] = $vv;
+            }
         }
-        echo "<hr><pre> evaluateData = ";print_r($evaluateData);
 
+        $allDates = array_unique(array_merge($data['base_time'], $evaluateAllDates));
+
+        $whereInDates = array_map(function($val) {
+            $tempDate = date('Y-m-d', $val);
+            return "day('{$tempDate}')";
+        }, $allDates);
+
+        $this->db->where_in('day(created_at)', $whereInDates);
+        $res = $this->db->get()->result_array();
+        echo "<hr>sql = " . $this->db->last_query();
+        echo "<hr><pre>res = "; print_r($res);
 
         return $result;
     }
