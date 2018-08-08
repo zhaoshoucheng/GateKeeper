@@ -247,7 +247,7 @@ class Evaluate_model extends CI_Model
         $groupBy = '';
         $where = "logic_junction_id = '{$data['junction_id']}'";
 
-        $seelctColumn = "logic_junction_id, logic_flow_id, hour, {$data['quota_key']} as quota_value";
+        $seelctColumn = "logic_junction_id, logic_flow_id, created_at, hour, {$data['quota_key']} as quota_value";
         // 取路口所有方向
         if ($data['flow_id'] == 9999) {
             $seelctColumn = 'logic_junction_id, hour,';
@@ -305,11 +305,24 @@ class Evaluate_model extends CI_Model
     {
         $result = [];
 
+        // 基准日期
+        $baseDate = array_map(function($val) {
+            return date('Y-m-d', $val);
+        }, $params['base_time']);
+
+        // 评估日期
+        $evaluateDate = [];
+        foreach ($params['evaluate_time'] as $k=>$v) {
+            $evaluateDate[$k] = array_map(function($val) {
+                return date('Y-m-d', $val);
+            }, $v);
+        }
+
         foreach ($data as $k=>$v) {
-            $date = date('Y-m-d', $v['created_at']);
+            $date = date('Y-m-d', strtotime($v['created_at']));
 
             // 组织基准时间数据
-            if (in_array($date, $params['base_time'], true)) {
+            if (in_array($date, $baseDate, true)) {
                 $result['base'][$date][$v['hour']] = [
                     // 指标值
                     $v['quota_value'],
@@ -319,8 +332,7 @@ class Evaluate_model extends CI_Model
             }
 
             // 组织评估时间数据
-            foreach ($params['evaluate_time'] as $kk=>$vv) {
-                // 组织基准时间数据
+            foreach ($evaluateDate as $kk=>$vv) {
                 if (in_array($date, $vv, true)) {
                     $result['evaluate' . $kk + 1 . ''][$date][$v['hour']] = [
                         // 指标值
