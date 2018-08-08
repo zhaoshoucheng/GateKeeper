@@ -245,26 +245,65 @@ class Evaluate_model extends CI_Model
 
         $result = [];
 
-        $data = [
-            'logic_junction_id' => '2017030116_4875896',
-            'logic_flow_id' => '2017030116_i_63164690_2017030116_o_691081540',
-            'hour' => '',
-            'stop_time_cycle' => mt_rand(10, 200),
-            'spillover_rate' => 0,
-            'queue_length' => mt_rand(20, 300),
-            'stop_delay' => mt_rand(1, 30),
-            'stop_rate' => 0,
-            'twice_stop_rate' => 0,
-            'speed' => 50,
-            'free_flow_speed' => 50,
-            'traj_count' => mt_rand(100, 300),
+        $sdata = [
+            [
+                'logic_junction_id' => '2017030116_4875896',
+                'logic_flow_id' => '2017030116_i_63164690_2017030116_o_691081540',
+                'hour' => '',
+                'stop_time_cycle' => mt_rand(10, 200),
+                'spillover_rate' => 0,
+                'queue_length' => mt_rand(20, 300),
+                'stop_delay' => mt_rand(1, 30),
+                'stop_rate' => 0,
+                'twice_stop_rate' => 0,
+                'speed' => 50,
+                'free_flow_speed' => 50,
+                'traj_count' => mt_rand(100, 300),
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ],
+            [
+                'logic_junction_id' => '2017030116_4875896',
+                'logic_flow_id' => '2017030116_i_63164690_2017030116_o_63410440',
+                'hour' => '',
+                'stop_time_cycle' => mt_rand(10, 200),
+                'spillover_rate' => 0,
+                'queue_length' => mt_rand(20, 300),
+                'stop_delay' => mt_rand(1, 30),
+                'stop_rate' => 0,
+                'twice_stop_rate' => 0,
+                'speed' => 50,
+                'free_flow_speed' => 50,
+                'traj_count' => mt_rand(100, 300),
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]
+        ];
+
+        $tem = [
+            '2018-07-30',
+            '2018-07-31',
+            '2018-08-01',
+            '2018-08-02',
+            '2018-08-03',
+            '2018-08-06',
+            '2018-08-07',
         ];
 
         $table = $this->offlintb . '12';
-
-        for ($i = 0; $i < 24 * 3600; $i += 5 * 60) {
-            $data['hour'] = date('H:i:s', $i);
-            $this->db->inset_batch($table, $data);
+        foreach ($tep as $v) {
+            foreach ($sdata as $kk=>$vv) {
+                for ($i = 0; $i < 24 * 3600; $i += 30 * 60) {
+                    $sdata[$kk]['hour'] = date('H:i:s', $i);
+                    $sdata[$kk]['stop_time_cycle'] = mt_rand(10, 200);
+                    $sdata[$kk]['queue_length'] = mt_rand(20, 300);
+                    $sdata[$kk]['stop_delay'] = mt_rand(1, 30);
+                    $sdata[$kk]['traj_count'] = mt_rand(100, 300);
+                    $sdata[$kk]['created_at'] = $v . ' ' . date('H:i:s', $i);
+                    $sdata[$kk]['updated_at'] = $v . ' ' . date('H:i:s', $i);
+                    $this->db->insert($table, $sdata);
+                }
+            }
         }
 
         return $result;
