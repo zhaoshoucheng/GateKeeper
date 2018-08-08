@@ -240,17 +240,17 @@ class Evaluate extends MY_Controller
 
         if (empty($params['base_end_time'])) {
             // 上周五作为结束时间 本周减去2天减1秒
-            $baseEndTime = strtotime('monday this week') - 2 * 24 * 3600 - 1;
+            $baseEndTime = strtotime('monday this week') - 2 * 24 * 3600;
         } else {
             $baseEndTime = strtotime($params['base_end_time']);
         }
 
         // 计算基准时间段具体每天日期
         for ($i = $baseStartTime; $i < $baseEndTime; $i += 24 * 3600) {
-            $data['base_time'][] = date('Y-m-d H:i:s', $i);
+            $data['base_time'][] = $i;
         }
 
-        echo "<pre>";print_r($data['base_time']);
+        echo "<pre>base_time = ";print_r($data['base_time']);
 
         if (empty($params['evaluate_time'])) {
             // 开始时间 本周一开始时间
@@ -259,28 +259,42 @@ class Evaluate extends MY_Controller
             // 当前星期几 如果星期一，结束时间要到当前时间 如果大于星期一，结束时间要前一天 如果是周日则向前推两天
             $week = date('w');
             if ($week == 0) { // 周日
-                $endTime = date('Y-m-d H:i:s', strtotime(date('Y-m-d') . '-2 days') + 24 * 3600 - 1);
+                $endTime = strtotime(date('Y-m-d') . '-2 days');
             } else if ($week == 1) { // 周一
-                $endTime = date('Y-m-d H:i:s');
+                $endTime = time();
             } else {
-                $endTime = date('Y-m-d H:i:s', strtotime(date('Y-m-d') . '-1 days') + 24 * 3600 - 1);
+                $endTime = strtotime(date('Y-m-d') . '-1 days');
             }
 
-            $data['evaluate_time'][] = [
+            $params['evaluate_time'][] = [
                 'start_time' => $startTime,
                 'end_time'   => $endTime,
             ];
         } else {
             // 解析json
-            $evaluateTime = json_decode($params['evaluate_time'], true);
+            $params['evaluate_time'] = json_decode($params['evaluate_time'], true);
             if (json_last_error() != JSON_ERROR_NONE) {
                 $this->errno = ERR_PARAMETERS;
                 $this->errmsg = '参数 evaluate_time 非json格式的文本！';
                 return;
             }
 
-            $data['evaluate_time'] = $evaluateTime;
+            foreach ($params['evaluate_time'] as $k=>$v) {
+                $params['evaluate_time'][$k] = [
+                    'start_time' => strtotime($v['start_time']),
+                    'end_time' => strtotime($v['end_time']),
+                ];
+            }
         }
+
+        // 处理评估时间，计算各评估时间具体日期
+        foreach ($params['evaluate_time'] as $k=>$v) {
+            for ($i = $v['start_time']; $i <= $v['end_time']; $i += 24 * 3600) {
+                $data['evaluate' . $k + 1][$i] = date('Y-m-d H:i:s', $i);
+            }
+        }
+
+        echo "<pre> data = ";print_r($data);
 
         $result = $this->evaluate_model->quotaEvaluateCompare($data);
 
