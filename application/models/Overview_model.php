@@ -95,7 +95,7 @@ class Overview_model extends CI_Model
 
         foreach ($data as $datum) {
             $result['alarm_total']      += $datum['alarm_info']['is_alarm'];
-            $result['congestion_total'] += (int)($datum['junction_status']['key'] == 2);
+            $result['congestion_total'] += (int)($datum['junction_status']['key'] == 3);
         }
 
         return $result;
@@ -170,8 +170,8 @@ class Overview_model extends CI_Model
             ];
         }, $temp);
 
-        $lngs = array_column($temp, 'lng');
-        $lats = array_column($temp, 'lat');
+        $lngs = array_filter(array_column($temp, 'lng'));
+        $lats = array_filter(array_column($temp, 'lat'));
 
         $center['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
         $center['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
