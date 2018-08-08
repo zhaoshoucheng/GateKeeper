@@ -245,7 +245,7 @@ class Evaluate_model extends CI_Model
         $table = $this->offlintb . $data['city_id'];
 
         $groupBy = '';
-        $where = "junction_id = '{$data['junction_id']}'";
+        $where = "logic_junction_id = '{$data['junction_id']}'";
 
         $seelctColumn = "logic_junction_id, logic_flow_id, hour, {$data['quota_key']}";
         // 取路口所有方向
@@ -259,7 +259,6 @@ class Evaluate_model extends CI_Model
 
         $this->db->select($seelctColumn);
         $this->db->from($table);
-        $this->db->where($where);
 
         // 合并所有需要查询的日期
         $evaluateAllDates = [];
@@ -271,12 +270,17 @@ class Evaluate_model extends CI_Model
 
         $allDates = array_unique(array_merge($data['base_time'], $evaluateAllDates));
 
-        $whereInDates = array_map(function($val) {
+        $whereIn = '';
+        foreach ($allDates as $val) {
             $tempDate = date('Y-m-d', $val);
-            return "day('{$tempDate}')";
-        }, $allDates);
 
-        $this->db->where_in('day(created_at)', $whereInDates);
+            $whereIn .= empty($whereIn)
+                    ? ' and day(created_at) IN (day("' . $tempDate . '")'
+                    : ', day("' . $tempDate . '")';
+        }
+
+        $where .= $whereIn;
+        $this->db->where($where);
         $res = $this->db->get()->result_array();
         echo "<hr>sql = " . $this->db->last_query();
         echo "<hr><pre>res = "; print_r($res);
