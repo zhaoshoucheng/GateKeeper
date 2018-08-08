@@ -328,7 +328,7 @@ class Evaluate_model extends CI_Model
             if (in_array($date, $baseDate, true)) {
                 $result['base'][$date][strtotime($v['hour'])] = [
                     // 指标值
-                    $quotaConf[$data['quota_key']]['round']($v['quota_value']),
+                    $quotaConf[$params['quota_key']]['round']($v['quota_value']),
                     // 时间
                     $v['hour'],
                 ];
@@ -339,7 +339,7 @@ class Evaluate_model extends CI_Model
                 if (in_array($date, $vv, true)) {
                     $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])] = [
                         // 指标值
-                        $quotaConf[$data['quota_key']]['round']($v['quota_value']),
+                        $quotaConf[$params['quota_key']]['round']($v['quota_value']),
                         // 时间
                         $v['hour'],
                     ];
@@ -367,7 +367,7 @@ class Evaluate_model extends CI_Model
         // 基本信息
         $result['info'] = [
             'junction_name' => 'xxxx',
-            'quota_name'    => $quotaConf[$data['quota_key']]['name'],
+            'quota_name'    => $quotaConf[$params['quota_key']]['name'],
             'base_time'     => [
                 'start' => 'xxxx',
                 'end'   => 'xxxx',
