@@ -276,6 +276,17 @@ class Evaluate extends MY_Controller
         $objSheet->fromArray($detailParams, NULL, 'A4');
         $objSheet->fromArray($table, NULL, 'A11');
 
+        $styles = $this->getExcelStyle();
+        $rows_cnt = count($table);
+        $cols_cnt = count($table[0]);
+        $objSheet->getStyle('A1')->applyFromArray($styles['title']);
+        $rows_idx = count($detailParams) + 3;
+        $objSheet->getStyle("A4:A{$rows_idx}")->getFont()->setSize(12)->setBold(true);
+        $rows_index = $rows_cnt + 10;
+        $objSheet->getStyle("A11:AW{$rows_index}")->applyFromArray($styles['content']);
+        $objSheet->getStyle("A11:A{$rows_index}")->applyFromArray($styles['header']);
+        $objSheet->getStyle("A11:AW11")->applyFromArray($styles['header']);
+
         $objWriter = new PHPExcel_Writer_Excel5($objPHPExcel);
 
         header('Content-Type: application/x-xls;');
