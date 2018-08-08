@@ -254,7 +254,7 @@ class Evaluate extends MY_Controller
 
         if (empty($params['evaluate_time'])) {
             // 开始时间 本周一开始时间
-            $startTime = date('Y-m-d H:i:s', strtotime('monday this week'));
+            $startTime = strtotime('monday this week');
 
             // 当前星期几 如果星期一，结束时间要到当前时间 如果大于星期一，结束时间要前一天 如果是周日则向前推两天
             $week = date('w');
@@ -290,7 +290,7 @@ class Evaluate extends MY_Controller
         // 处理评估时间，计算各评估时间具体日期
         foreach ($params['evaluate_time'] as $k=>$v) {
             for ($i = $v['start_time']; $i <= $v['end_time']; $i += 24 * 3600) {
-                $data['evaluate' . $k + 1][$i] = date('Y-m-d H:i:s', $i);
+                $data['evaluate_time'][$k][$i] = $i;
             }
         }
 

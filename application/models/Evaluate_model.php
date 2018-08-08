@@ -224,13 +224,12 @@ class Evaluate_model extends CI_Model
      * @param $data['junction_id']     string   Y 路口ID
      * @param $data['quota_key']       string   Y 指标KEY
      * @param $data['flow_id']         string   Y 相位ID
-     * @param $data['base_start_time'] string   Y 基准开始时间 格式：yyyy-mm-dd hh:ii:ss
-     * @param $data['base_end_time']   string   Y 基准结束时间 格式：yyyy-mm-dd hh:ii:ss
+     * @param $data['base_time']       array    Y 基准时间 [1532880000, 1532966400, 1533052800] 日期时间戳
      * @param $data['evaluate_time']   array    Y 评估时间 有可能会有多个评估时间段
      * $data['evaluate_time'] = [
      *     [
-     *         "start_time" => "2018-08-06 00:00:00", // 开始时间 格式：yyyy-mm-dd hh:ii:ss 例：2018-08-06 00:00:00
-     *         "end_time"   => "2018-08-07 23:59:59"  // 结束时间 格式：yyyy-mm-dd hh:ii:ss 例：2018-08-07 23:59:59
+     *         1532880000,
+     *         1532880000,
      *     ],
      * ]
      * @return array
@@ -243,7 +242,47 @@ class Evaluate_model extends CI_Model
 
         $result = [];
 
-        
+        $table = $this->offlintb . $data['city_id'];
+
+        $groupBy = '';
+        $where = "junction_id = '{$data['junction_id']}'";
+
+        $seelctColumn = "logic_junction_id, logic_flow_id, hour, {$data['quota_key']}";
+        // 取路口所有方向
+        if ($data['flow_id'] == 9999) {
+            $seelctColumn = 'logic_junction_id, hour,';
+            $seelctColumn .= " sum({$data['quota_key']}) / count(logic_flow_id) as {$data['quota_key']}";
+            $groupBy = 'logic_junction_id';
+        } else {
+            $where .= " and logic_flow_id = '{$data['flow_id']}'";
+        }
+
+        $this->db->select($seelctColumn);
+        $this->db->from($table);
+        $this->db->where($where);
+
+        // 基准日期
+        $baseDateArr = array_map(function($val) {
+            return "day('{date('Y-m-d H:i:s', $val)}')";
+        }, $data['base_time']);
+        echo "<hr><pre>baseDateArr = ";print_r($baseDateArr);
+        // 取基准评估数据
+        $baseData = $this->db->where_in("day(created_at)", $baseDateArr);
+        $baseData = $this->db->get()->result_array();
+        echo '<hr>sql =' . $this->db->last_query();
+        echo "<hr><pre> baseData = ";print_r($baseData);
+
+        $evaluateData = [];
+        foreach ($data['evaluate_time'] as $k=>$v) {
+            $tempDates[$k] = array_map(function($val) {
+                return "day('{date('Y-m-d H:i:s', $val)}')";
+            }, $v);
+            $evaluateData[$k] = $this->db->where_in("day(created_at)", $tempDates[$k]);
+            $evaluateData[$k] = $this->db->get()->result_array();
+            echo "<hr>sql = " . $this->db->last_query();
+        }
+        echo "<hr><pre> evaluateData = ";print_r($evaluateData);
+
 
         return $result;
     }
