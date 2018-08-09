@@ -308,6 +308,8 @@ class Overview_model extends CI_Model
 
         $date = $data['date'] . ' ' . $data['time_point'];
         $where = "day(`updated_at`) = day('" . $date . "')";
+        $where .= " and hour = (select hour from {$table} where day(updated_at) = day('".$date."')
+                    order by hour desc limit 1)";
         $this->db->from($table);
         $this->db->where($where);
         $this->db->group_by('hour, logic_junction_id');
