@@ -372,7 +372,7 @@ class Evaluate extends MY_Controller
 
         if(!isset($params['download_id'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = "The value of download_id is empty";
+            $this->errmsg = "download_id 的值不能为空";
             return;
         }
 
@@ -380,7 +380,7 @@ class Evaluate extends MY_Controller
 
         if(!$this->redis_model->getData($key)) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = "The value of download_id is wrong";
+            $this->errmsg = "请先评估再下载";
             return;
         }
 
