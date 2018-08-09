@@ -124,7 +124,7 @@ class Realtimewarning_model extends CI_Model
 
         $currentId = 0;
         while (1) {
-            $sql = "SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} order by id asc limit 2";
+            $sql = "SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} order by id asc limit 1000";
             $query = $this->db->query($sql);
             $result = $query->result_array();
             if (empty($result)) {
