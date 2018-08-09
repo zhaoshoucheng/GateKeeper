@@ -40,15 +40,22 @@ class Realtimewarning extends CI_Controller
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
 
         //执行任务
+        $command = "";
         if ($processNum == 0) {
             $logPath = $this->config->item('log_path');
+
             $phpPath = "/home/xiaoju/php7/bin/php -c /home/xiaoju/php7/etc/php.ini ";
-            exec("nohup {$phpPath} index.php realtimewarning process/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >" .
-                "{$logPath}realtimewarning.log  2>&1 &");
+            if (gethostname()=='ipd-cloud-server01.gz01'){
+                $phpPath = "php ";
+            }
+            $command = "nohup {$phpPath} index.php realtimewarning process/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
+                "{$logPath}realtimewarning.log  2>&1 &";
+            exec($command);
         }
         $output = array(
             'errno' => ERR_SUCCESS,
             'errmsg' => "",
+            'command' => $command,
         );
         echo json_encode($output);
         return;
@@ -56,6 +63,7 @@ class Realtimewarning extends CI_Controller
 
     public function process($cityId = '12', $hour = '00:00', $date = "", $traceId = "", $uid = "")
     {
+        ob_end_flush();
         date_default_timezone_set('Asia/Shanghai');
         if(!is_numeric($cityId)){
             echo "cityId 必须为数字! \n";exit;

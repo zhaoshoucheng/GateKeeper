@@ -603,8 +603,10 @@ if( ! function_exists('log_finish'))
           'logid'=>$logid,
           )
           );*/
-
-        $response = ob_get_flush();
+        $response = "";
+        if (!empty(ob_get_status())){
+            $response = ob_get_flush();
+        }
 
         //log_notice("time: total=%f load_base=%f ac_exe=%f cache=%f (s)][memory: use=%f peak=%f (MB)"
         com_log_notice("_com_request_out", "response=%s||proc_time=%f||time=[total=%f load_base=%f ac_exe=%f (s)]||memory=[use=%f peak=%f (MB)]"
