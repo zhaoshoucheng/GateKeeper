@@ -372,7 +372,7 @@ class Evaluate extends MY_Controller
 
         if(!isset($params['download_id'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = "The value of download is empty";
+            $this->errmsg = "The value of download_id is empty";
             return;
         }
 
@@ -380,7 +380,7 @@ class Evaluate extends MY_Controller
 
         if(!$this->redis_model->getData($key)) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = "The value of download is wrong";
+            $this->errmsg = "The value of download_id is wrong";
             return;
         }
 
@@ -412,7 +412,6 @@ class Evaluate extends MY_Controller
         $table = array_map(function ($value) {
             return explode(',', $value);
         }, explode(';', $data));
-
 
         $objSheet->mergeCells('A1:F1');
         $objSheet->setCellValue('A1', $fileName);
