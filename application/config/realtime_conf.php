@@ -91,3 +91,6 @@ $config['alarm_formula'] = function($val) {
 
     return $res;
 };
+
+// 指标评估数据redis KEY前缀
+$config['quota_evaluate_key_prefix'] = 'quotaEvaluateDataKey_';
