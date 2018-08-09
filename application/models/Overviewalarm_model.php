@@ -224,9 +224,22 @@ class Overviewalarm_model extends CI_Model
         $alarmCate = $this->config->item('alarm_category');
 
         $result = array_map(function($val) use($junctionIdName, $flowsInfo, $alarmCate) {
+            // 持续时间
+            $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
+            if ($durationTime == 0) {
+                // 当前时间
+                $nowTime = time();
+                $tempDurationTime = ($nowTime - strtotime($val['start_time'])) / 60;
+                // 默认持续时间为2分钟 有的只出现一次，表里记录last_time与start_time相等
+                if ($tempDurationTime < 2) {
+                    $durationTime = $tempDurationTime;
+                } else {
+                    $durationTime = 2;
+                }
+            }
             return [
                 'start_time'        => date('H:i', strtotime($val['start_time'])),
-                'duration_time'     => round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2),
+                'duration_time'     => $durationTime,
                 'logic_junction_id' => $val['logic_junction_id'],
                 'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '',
                 'logic_flow_id'     => $val['logic_flow_id'],
