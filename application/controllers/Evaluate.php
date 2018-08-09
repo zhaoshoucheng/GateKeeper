@@ -283,8 +283,8 @@ class Evaluate extends MY_Controller
         } else {
             foreach ($params['evaluate_time'] as $k=>$v) {
                 $params['evaluate_time'][$k] = [
-                    'start_time' => strtotime($v['start_time']),
-                    'end_time' => strtotime($v['end_time']),
+                    'start_time' => isset($v['start_time']) ? strtotime($v['start_time']) : 0,
+                    'end_time' => isset($v['end_time'])  ? strtotime($v['end_time']) : 0,
                 ];
             }
         }
