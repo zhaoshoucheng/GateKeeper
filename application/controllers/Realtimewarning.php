@@ -40,15 +40,18 @@ class Realtimewarning extends CI_Controller
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
 
         //执行任务
+        $command = "";
         if ($processNum == 0) {
             $logPath = $this->config->item('log_path');
             $phpPath = "/home/xiaoju/php7/bin/php -c /home/xiaoju/php7/etc/php.ini ";
-            exec("nohup {$phpPath} index.php realtimewarning process/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >" .
-                "{$logPath}realtimewarning.log  2>&1 &");
+            $command = "nohup {$phpPath} index.php realtimewarning process/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
+                "{$logPath}realtimewarning.log  2>&1 &";
+            exec($command);
         }
         $output = array(
             'errno' => ERR_SUCCESS,
             'errmsg' => "",
+            'command' => $command,
         );
         echo json_encode($output);
         return;
