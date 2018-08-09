@@ -270,6 +270,12 @@ class Evaluate extends MY_Controller
             return;
         }
 
+        if (!array_key_exists($params['quota_key'], $this->config->item('real_time_quota'))) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '指标 ' . html_escape($params['quota_key']) . ' 不存在！';
+            return;
+        }
+
         $data = [
             'city_id'     => intval($params['city_id']),
             'junction_id' => strip_tags(trim($params['junction_id'])),
