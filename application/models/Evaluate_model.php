@@ -19,6 +19,7 @@ class Evaluate_model extends CI_Model
         }
         $this->load->config('realtime_conf');
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
     }
 
     /**
@@ -513,6 +514,17 @@ class Evaluate_model extends CI_Model
             'evaluate_time' => $params['evaluate_time_start_end'],
             'direction'     => $flowsInfo[$params['junction_id']][$params['flow_id']] ?? '',
         ];
+
+        // 将结果存储在redis中，以备下载使用
+        $redisKeyPrefix = $this->config->item('quota_evaluate_key_prefix');
+        $redisKey = md5(json_encode($result));
+
+        // 将ID返回前端以供下载使用
+        $result['info']['download_id'] = $redisKey;
+
+        $this->redis_model->setData($redisKeyPrefix . $redisKey, json_encode($result));
+        // 30分钟后过期
+        $this->redis_model->setExpire($redisKeyPrefix . $redisKey, 1800);
 
         return $result;
     }
