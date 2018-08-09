@@ -28,6 +28,7 @@ class MY_Controller extends CI_Controller {
             && $host != '100.90.164.31:8089'
             && $host != '10.95.100.106:8088'
             && $host != '100.90.164.31:8099'
+            && $host != '100.90.164.31:8013'
             && $host != '100.95.100.106:8088'
             && $host != '100.90.164.31:8082') {
             $this->is_check_login = 1;
@@ -96,6 +97,7 @@ class MY_Controller extends CI_Controller {
             $this->errmsg = $errmsgMap[$this->errno];
         }
         if(!empty($this->templates)){
+
             foreach ($this->templates as $t){
                 echo $this->load->view($t, array(), true);
             }
@@ -106,6 +108,7 @@ class MY_Controller extends CI_Controller {
                 'data' => $this->output_data,
                 'username' => $this->username,
             );
+            header("Content-Type:application/json;charset=UTF-8");
             echo json_encode($output);
         }
     }
