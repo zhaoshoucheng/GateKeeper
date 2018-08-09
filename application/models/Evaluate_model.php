@@ -486,12 +486,26 @@ class Evaluate_model extends CI_Model
                 $result['base'][$k] = array_values($result['base'][$k]);
             }
         }
+        // 补全基准日期
+        foreach ($baseDate as $v) {
+            if (!array_key_exists($v, $result['base'])) {
+                $result['base'][$v] = [];
+            }
+        }
 
         if (!empty($result['evaluate'])) {
             foreach ($result['evaluate'] as $k=>$v) {
                 foreach ($v as $kk=>$vv) {
                     ksort($result['evaluate'][$k][$kk]);
                     $result['evaluate'][$k][$kk] = array_values($result['evaluate'][$k][$kk]);
+                }
+            }
+        }
+        // 补全评估日期
+        foreach ($evaluateDate as $k=>$v) {
+            foreach ($v as $vv) {
+                if (!array_key_exists($vv, $result['evaluate'][$k+1])) {
+                    $result['evaluate'][$k+1][$vv] = [];
                 }
             }
         }
