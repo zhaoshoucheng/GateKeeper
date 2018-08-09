@@ -603,7 +603,7 @@ if( ! function_exists('log_finish'))
           'logid'=>$logid,
           )
           );*/
-        $response = [];
+        $response = "";
         if (!empty(ob_get_status())){
             $response = ob_get_flush();
         }
