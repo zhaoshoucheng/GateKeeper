@@ -79,6 +79,5 @@ class Realtimewarning extends CI_Controller
         }
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=".$cityId."||hour=".$hour."||date=".$date."||trace_id=".$traceId."||message=processing\n\r";
         $this->realtimewarning_model->process($cityId, $date, $hour, $traceId);
-        exit;
     }
 }
