@@ -409,6 +409,8 @@ class Evaluate extends MY_Controller
             return;
         }
 
+        $data = json_decode($data, true);
+
         $fileName = "{$data['info']['junction_name']}_{$data['info']['quota_name']}_" . date('Ymd');
 
         $objPHPExcel = new PHPExcel();
@@ -418,10 +420,13 @@ class Evaluate extends MY_Controller
         $detailParams = [
             ['指标名', $data['info']['quota_name']],
             ['方向', $data['info']['direction']],
-            ['基准时间', $data['info']['base_time'] ? implode(' ~ ', $data['info']['base_time']) : '无'],
-            ['评估时间', $data['info']['evaluate_time'] ? implode(' ~ ', $data['info']['evaluate_time']) : '无'],
-            ['指标单位', $data['info']['quota_unit']]
+            ['基准时间', implode(' ~ ', $data['info']['base_time'])],
         ];
+        foreach ($data['info']['evaluate_time'] as $key => $item) {
+            $detailParams[] = ['评估时间'.$key, implode(' ~ ', $item)];
+        }
+
+        $detailParams[] = ['指标单位', $data['info']['quota_unit']];
 
         $objSheet->mergeCells('A1:F1');
         $objSheet->setCellValue('A1', $fileName);
@@ -432,7 +437,7 @@ class Evaluate extends MY_Controller
         $rows_idx = count($detailParams) + 3;
         $objSheet->getStyle("A4:A{$rows_idx}")->getFont()->setSize(12)->setBold(true);
 
-        $line = 11;
+        $line = 6 + count($detailParams);
 
         if(!empty($data['base'])) {
 
