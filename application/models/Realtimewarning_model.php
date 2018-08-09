@@ -58,7 +58,7 @@ class Realtimewarning_model extends CI_Model
         $this->db->trans_begin();
         try {
             //判断数据是否存在?
-            $warnRecord = $this->db->select("id, start_time, last_time")->from('real_time_warning')
+            $warnRecord = $this->db->select("id, start_time, last_time")->from('real_time_alarm')
                 ->where('logic_junction_id', $logicJunctionId)
                 ->where('logic_flow_id', $logicFlowId)
                 ->where('date', $date)
@@ -82,7 +82,7 @@ class Realtimewarning_model extends CI_Model
                     'created_at' => date("Y-m-d H:i:s"),
                     'updated_at' => date("Y-m-d H:i:s"),
                 );
-                $this->db->insert('real_time_warning', $data);
+                $this->db->insert('real_time_alarm', $data);
                 echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=".$traceId."||junction_id=".$logicJunctionId."||flow_id=".$logicFlowId."||message=insert\n\r";
             } else {
                 //判断warning表的最后一次更新时间点与实时表数据更新时间差是否小于10分钟?
@@ -101,7 +101,7 @@ class Realtimewarning_model extends CI_Model
                 $this->db->set('updated_at', date("Y-m-d H:i:s"));
                 $this->db->set('last_time', $realtimeUpatetime);
                 $this->db->where('id', $warningId);
-                $this->db->update('real_time_warning');
+                $this->db->update('real_time_alarm');
                 echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=".$traceId."||junction_id=".$logicJunctionId."||flow_id=".$logicFlowId."||message=update\n\r";
             }
             $this->db->trans_commit();

@@ -39,6 +39,224 @@ class Welcome extends CI_Controller {
         echo "operateLog";
     }
 
+    public function getAreaJunctionList(){
+        $jstr = '{
+	"errorCode": 0,
+	"errorMsg": "",
+	"data": {
+		"junctionList": [{
+			"lat": 36.66607,
+			"lng": 116.99921,
+			"logic_junction_id": "2017030116_4875782",
+			"name": "纬一路_经二路_4875782",
+			"type": 1,
+			"status": 1
+		}, {
+			"lat": 36.66607,
+			"lng": 116.99921,
+			"logic_junction_id": "2017030116_4875783",
+			"name": "纬一路_经二路_4875782",
+			"type": 1,
+			"status": 1
+		}, {
+			"lat": 36.66607,
+			"lng": 116.99921,
+			"logic_junction_id": "2017030116_4875784",
+			"name": "纬一路_经二路_4875782",
+			"type": 1,
+			"status": 1
+		}]
+	}
+}';
+        echo $jstr;exit;
+    }
+
+    public function getAreaList(){
+        $jstr = '{
+	"errorCode": 0,
+	"errorMsg": "",
+	"data": {
+		"areaList": [{
+			"area_id": 1,
+			"area_name": "测试区域",
+			"center_lat": 36.6692375,
+			"center_lng": 117.0065725,
+			"status": 1,
+			"llat": 36.703935,
+			"llng": 116.936191,
+			"rlat": 36.63454,
+			"rlng": 117.076954,
+			"junction_num": 100,
+			"adaptive_num": 10
+		}, {
+			"area_id": 2,
+			"area_name": "测试区域",
+			"center_lat": 36.6692375,
+			"center_lng": 117.0065725,
+			"status": 1,
+			"llat": 36.703935,
+			"llng": 116.936191,
+			"rlat": 36.63454,
+			"rlng": 117.076954,
+			"junction_num": 100,
+			"adaptive_num": 10
+		}, {
+			"area_id": 3,
+			"area_name": "测试区域",
+			"center_lat": 36.6692375,
+			"center_lng": 117.0065725,
+			"status": 1,
+			"llat": 36.703935,
+			"llng": 116.936191,
+			"rlat": 36.63454,
+			"rlng": 117.076954,
+			"junction_num": 100,
+			"adaptive_num": 10
+		}]
+	}
+}';
+        echo $jstr;exit;
+    }
+
+
+    public function getOneAreaList(){
+        $jstr = '{
+	"errorCode": 0,
+	"errorMsg": "",
+	"data": {
+		"areaList": [{
+			"area_id": 1,
+			"area_name": "测试区域",
+			"center_lat": 36.6692375,
+			"center_lng": 117.0065725,
+			"status": 1,
+			"llat": 36.703935,
+			"llng": 116.936191,
+			"rlat": 36.63454,
+			"rlng": 117.076954,
+			"junction_num": 100,
+			"adaptive_num": 10
+		}]
+	}
+}';
+        echo $jstr;exit;
+    }
+
+    public function getCurrentAdaptTimingInfo(){
+        $jstr = '{
+	"errorCode": 0,
+	"errorMsg": "",
+	"data": {
+		"flag": 1,
+		"dispatch": {
+			"logic_junction_id": "2017030116_73316908",
+			"source": 3,
+			"comment": "调度1",
+			"weekend": [1, 2, 3, 4, 5, 6, 7],
+			"start_date": "2018-01-01",
+			"end_date": "2018-03-03"
+		},
+		"tod": [{
+			"tod_id": 123,
+			"plan_id": 123,
+			"plan_num": 1,
+			"stage": [{
+				"num": 1,
+				"start_time": 0,
+				"duration": 20,
+				"yellow_length": 3,
+				"green_min": 7,
+				"green_length": 57,
+				"green_max": 60,
+				"allred_length": 0,
+				"ring_id": 1,
+				"movements": [{
+					"flow": {
+						"type": 0,
+						"logic_flow_id": "2017030116_i_576765780_2017030116_o_576765800",
+						"comment": "东直"
+					},
+					"channel": 1
+				}]
+			}, {
+				"num": 2,
+				"start_time": 20,
+				"duration": 30,
+				"yellow_length": 3,
+				"green_min": 7,
+				"green_length": 57,
+				"green_max": 60,
+				"allred_length": 0,
+				"ring_id": 1
+			}],
+			"extra_time": {
+				"offset": 54,
+				"cycle": 100,
+				"tod_start_time": "00:00:00",
+				"tod_end_time": "12:00:00"
+			},
+			"movement_timing": [{
+				"movement_id": 123,
+				"channel": 1,
+				"phase_id": 1,
+				"phase_seq": 10,
+				"timing": [{
+					"state": 1,
+					"start_time": 0,
+					"duration": 10,
+					"max": 15,
+					"min": 9
+				}, {
+					"state": 2,
+					"start_time": 10,
+					"duration": 3,
+					"max": null,
+					"min": null
+				}],
+				"flow": {
+					"type": 0,
+					"logic_flow_id": "2017030116_i_576765780_2017030116_o_576765800",
+					"comment": "东直"
+				}
+			}]
+		}]
+	}
+}';
+        echo $jstr;exit;
+    }
+
+
+    public function getAdaptiveJunctionList(){
+        $jstr = '{
+	"errorCode": 0,
+	"errorMsg": "",
+	"data": [{
+		"logic_junction_id": "2017030116_10939810",
+		"is_opt": 1,
+		"is_upload": 1,
+		"is_upsigntime": 1,
+		"source": 3
+	}, {
+		"logic_junction_id": "2017030116_10939811",
+		"is_opt": 1,
+		"is_upload": 0,
+		"is_upsigntime": 1,
+		"source": 3
+	}]
+}';
+        echo $jstr;exit;
+    }
+
+    //获取最新信号机时间
+    public function getSignUploadTime(){
+        $jstr = '{
+	"errorCode": 0,
+	"errorMsg": "",
+	"data": "2018-08-02 16:32:03"
+}';
+        echo $jstr;exit;
+    }
+
     public function demo()
     {
         // mysql
