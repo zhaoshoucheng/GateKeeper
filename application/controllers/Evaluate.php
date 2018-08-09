@@ -13,6 +13,7 @@ class Evaluate extends MY_Controller
     {
         parent::__construct();
         $this->load->model('evaluate_model');
+        $this->load->model('redis_model');
         $this->load->config('realtime_conf');
     }
 
@@ -369,10 +370,28 @@ class Evaluate extends MY_Controller
     {
         $params = $this->input->get();
 
-        $downloadId = $params['download_id'];
+        if(!isset($params['download_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = "The value of download is empty";
+            return;
+        }
+
+        $key = $this->config->item('quota_evaluate_key_prefix') . $params['download_id'];
+
+        if(!$this->redis_model->getData($key)) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = "The value of download is wrong";
+            return;
+        }
+
+        $data = [
+            'download_url' => '/evaluate/download?download_id='. $params['download_id']
+        ];
+
+        $this->response($data);
     }
 
-    public function createEvaluateData()
+    public function download()
     {
         $fileName = 'CityName_DataTypeName_ObjectName_QuotaName_Date.xls';
 
