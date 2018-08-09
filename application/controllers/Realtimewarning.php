@@ -43,7 +43,11 @@ class Realtimewarning extends CI_Controller
         $command = "";
         if ($processNum == 0) {
             $logPath = $this->config->item('log_path');
+
             $phpPath = "/home/xiaoju/php7/bin/php -c /home/xiaoju/php7/etc/php.ini ";
+            if (gethostname()=='ipd-cloud-server01.gz01'){
+                $phpPath = "php ";
+            }
             $command = "nohup {$phpPath} index.php realtimewarning process/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
                 "{$logPath}realtimewarning.log  2>&1 &";
             exec($command);
