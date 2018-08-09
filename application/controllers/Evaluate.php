@@ -245,7 +245,9 @@ class Evaluate extends MY_Controller
      */
     public function downloadEvaluateData()
     {
+        $params = $this->input->get();
 
+        $downloadId = $params['download_id'];
     }
 
     public function createEvaluateData()
