@@ -108,6 +108,7 @@ class Realtimewarning_model extends CI_Model
         } catch (\Exception $e) {
             $this->db->trans_rollback();
             echo "[ERROR] " . date("Y-m-d\TH:i:s") . " trace_id=".$traceId."||junction_id=".$logicJunctionId."||flow_id=".$logicFlowId."||message=".$e->getMessage()."\n\r";
+            com_log_warning('_realtimewarning_updatewarning_error', 0, $e->getMessage(), compact("val", "type", "date", "cityId", "traceId"));
         }
         return true;
     }
