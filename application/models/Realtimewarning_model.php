@@ -138,7 +138,7 @@ class Realtimewarning_model extends CI_Model
                 if($this->isSAT($val)){
                     $this->updateWarning($val, 2, $date, $cityId, $traceId);
                 }
-                sleep(10);
+                //sleep(10);
             }
         }
         echo "processed";
