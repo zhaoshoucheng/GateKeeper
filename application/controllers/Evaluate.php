@@ -192,13 +192,13 @@ class Evaluate extends MY_Controller
      * 例：2018-08-06 00:00:00 默认：上一周工作日开始时间（上周一 yyyy-mm-dd 00:00:00）
      * @param base_end_time   string   N 基准结束时间 格式：yyyy-mm-dd hh:ii:ss
      * 例：2018-08-07 23:59:59 默认：上一周工作日结束时间（上周五 yyyy-mm-dd 23:59:59）
-     * @param evaluate_time   string   N 评估时间 有可能会有多个评估时间段，固使用json格式的字符串
+     * @param evaluate_time   array    N 评估时间 有可能会有多个评估时间段，固使用json格式的字符串
      * evaluate_time 格式：
      * [
-     *     {
-     *         "start_time": "2018-08-01 00:00:00", // 开始时间 格式：yyyy-mm-dd hh:ii:ss 例：2018-08-06 00:00:00
-     *         "end_time": "2018-08-07 23:59:59"    // 结束时间 格式：yyyy-mm-dd hh:ii:ss 例：2018-08-07 23:59:59
-     *     },
+     *     [
+     *         "start_time"=> "2018-08-01 00:00:00", // 开始时间 格式：yyyy-mm-dd hh:ii:ss 例：2018-08-06 00:00:00
+     *         "end_time"=> "2018-08-07 23:59:59"    // 结束时间 格式：yyyy-mm-dd hh:ii:ss 例：2018-08-07 23:59:59
+     *     ],
      *     ......
      * ]
      * @return json
@@ -262,7 +262,7 @@ class Evaluate extends MY_Controller
             $data['base_time'][] = $i;
         }
 
-        if (empty($params['evaluate_time'])) {
+        if (empty($params['evaluate_time']) || !is_array($params['evaluate_time'])) {
             // 开始时间 本周一开始时间
             $startTime = strtotime('monday this week');
 
@@ -281,14 +281,6 @@ class Evaluate extends MY_Controller
                 'end_time'   => $endTime,
             ];
         } else {
-            // 解析json
-            $params['evaluate_time'] = json_decode($params['evaluate_time'], true);
-            if (json_last_error() != JSON_ERROR_NONE) {
-                $this->errno = ERR_PARAMETERS;
-                $this->errmsg = '参数 evaluate_time 非json格式的文本！';
-                return;
-            }
-
             foreach ($params['evaluate_time'] as $k=>$v) {
                 $params['evaluate_time'][$k] = [
                     'start_time' => strtotime($v['start_time']),
