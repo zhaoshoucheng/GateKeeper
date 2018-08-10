@@ -83,9 +83,43 @@ class Overview_model extends CI_Model
 
     public function junctionSurvey($data)
     {
-        $data = $this->junctionsList($data);
+        //$data = $this->junctionsList($data);        $data = $data['dataList'] ?? [];
+        $table = 'real_time_' . $data['city_id'];
 
-        $data = $data['dataList'] ?? [];
+        $hour = $this->getLastestHour($table, $data['date']);
+
+        $result = $this->db->select('*')
+            ->from($table)
+            ->where('hour', $hour)
+            ->where('updated_at >=', $data['date'] . ' 00:00:00')
+            ->where('updated_at <=', $data['date'] . ' 23:59:59')
+            ->get()->result_array();
+        //数组初步处理，去除无用数据
+        $result = array_map(function ($item) {
+            return [
+                'logic_junction_id' => $item['logic_junction_id'],
+                'quota' => $this->getRawQuotaInfo($item),
+                'alarm_info' => $this->getRawAlarmInfo($item, []),
+            ];
+        }, $result);
+
+        //数组按照 logic_junction_id 进行合并
+        $temp = [];
+        foreach($result as $item) {
+            $temp[$item['logic_junction_id']] = isset($temp[$item['logic_junction_id']]) ?
+                $this->mergeFlowInfo($temp[$item['logic_junction_id']], $item) :
+                $item;
+        };
+
+        //处理数据内容格式
+        $temp = array_map(function ($item) {
+            return [
+                'jid' => $item['logic_junction_id'],
+                'quota' => ($quota = $this->getFinalQuotaInfo($item)),
+                'alarm' => $this->getFinalAlarmInfo($item),
+                'status' => $this->getJunctionStatus($quota),
+            ];
+        }, $temp);
 
         $result = [];
 
@@ -102,6 +136,12 @@ class Overview_model extends CI_Model
 
     }
 
+    /**
+     * 获取指定日期最新的数据时间
+     * @param $table
+     * @param null $date
+     * @return false|string
+     */
     private function getLastestHour($table, $date = null)
     {
         $date = $date ?? date('Y-m-d');
