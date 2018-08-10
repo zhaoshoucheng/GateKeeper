@@ -121,6 +121,8 @@ class Overview_model extends CI_Model
             ];
         }, $temp);
 
+        $data = $temp;
+
         $result = [];
 
         $result['junction_total']   = count($data);
