@@ -115,8 +115,11 @@ class Evaluate_model extends CI_Model
         $result = [];
 
         $table = $this->realtimetb . $data['city_id'];
-        $where = 'hour = (select hour from ' . $table;
-        $where .= ' where day(`updated_at`) = day("' . $data['date'] . '") order by hour desc limit 1)';
+
+        // 获取最近时间
+        $lastHour = $this->getLastestHour($table, $data['date']);
+
+        $where = "hour = '{$lastHour}'";
 
         $this->db->select("`logic_junction_id`, SUM({$data['quota_key']}) / count(logic_flow_id) as quota_value");
         $this->db->from($table);
@@ -541,5 +544,29 @@ class Evaluate_model extends CI_Model
         $this->redis_model->setExpire($redisKeyPrefix . $redisKey, 1800);
 
         return $result;
+    }
+
+    /**
+     * 获取最近时间
+     * @param $table 数据表
+     * @param $date  日期
+     * @return string H:i:s
+     */
+    private function getLastestHour($table, $date = null)
+    {
+        $date = $date ?? date('Y-m-d');
+
+        $result = $this->db->select('hour')
+            ->from($table)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->order_by('hour', 'desc')
+            ->limit(1)
+            ->get()->first_row();
+
+        if(!$result)
+            return date('H:i:s');
+
+        return $result->hour;
     }
 }
