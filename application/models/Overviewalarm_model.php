@@ -222,14 +222,11 @@ class Overviewalarm_model extends CI_Model
          * 分批获取 因为路口太多会导致路网接口超时
          */
         $tempJunctonIds = array_chunk(array_unique(array_column($data, 'logic_junction_id')), 300);
-
         $flowsInfo = [];
         array_map(function($val) use(&$flowsInfo) {
             $Jids = implode(',', $val);
             $flowsInfo =  array_merge($flowsInfo, $this->waymap_model->getFlowsInfo($Jids));
         }, $tempJunctonIds);
-        echo "<pre>";print_r($flowsInfo);exit;
-        //$flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
 
         // 报警类别
         $alarmCate = $this->config->item('alarm_category');
