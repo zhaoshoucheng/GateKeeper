@@ -160,13 +160,13 @@ class Overview_model extends CI_Model
         //处理数据内容格式
         $temp = array_map(function ($item) use ($junctionsInfo) {
             return [
-                'logic_junction_id' => $item['logic_junction_id'],
-                'junction_name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
+                'jid' => $item['logic_junction_id'],
+                'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
                 'lng' => $junctionsInfo[$item['logic_junction_id']]['lng'] ?? '',
                 'lat' => $junctionsInfo[$item['logic_junction_id']]['lat'] ?? '',
-                'quota_info' => ($quota = $this->getFinalQuotaInfo($item)),
-                'alarm_info' => $this->getFinalAlarmInfo($item),
-                'junction_status' => $this->getJunctionStatus($quota),
+                'quota' => ($quota = $this->getFinalQuotaInfo($item)),
+                'alarm' => $this->getFinalAlarmInfo($item),
+                'status' => $this->getJunctionStatus($quota),
             ];
         }, $temp);
 
@@ -271,7 +271,7 @@ class Overview_model extends CI_Model
     private function getFinalAlarmInfo($item)
     {
         return [
-            'is_alarm' => (int)!empty($item['alarm_info']),
+            'is' => (int)!empty($item['alarm_info']),
             'comment' => $item['alarm_info']
         ];
     }
