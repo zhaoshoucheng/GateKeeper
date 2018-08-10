@@ -7,7 +7,7 @@
 
 class Evaluate_model extends CI_Model
 {
-    private $offlintb = 'offline_';
+    private $offlintb = 'flow_duration_v6_';
     private $realtimetb = 'real_time_';
     private $db = '';
 
@@ -329,10 +329,10 @@ class Evaluate_model extends CI_Model
         $groupBy = '';
         $where = "logic_junction_id = '{$data['junction_id']}'";
 
-        $seelctColumn = "logic_junction_id, logic_flow_id, created_at, hour, {$data['quota_key']} as quota_value";
+        $seelctColumn = "logic_junction_id, logic_flow_id, date, hour, {$data['quota_key']} as quota_value";
         // 取路口所有方向
         if ($data['flow_id'] == 9999) {
-            $seelctColumn = 'logic_junction_id, created_at, hour,';
+            $seelctColumn = 'logic_junction_id, date, hour,';
             $seelctColumn .= " sum({$data['quota_key']}) / count(logic_flow_id) as quota_value";
             $groupBy = 'logic_junction_id, hour, day(created_at)';
         } else {
@@ -357,8 +357,8 @@ class Evaluate_model extends CI_Model
             $tempDate = date('Y-m-d', $val);
 
             $whereIn .= empty($whereIn)
-                    ? ' and day(created_at) IN (day("' . $tempDate . '")'
-                    : ', day("' . $tempDate . '")';
+                    ? ' and date IN ("' . $tempDate . '"'
+                    : ', "' . $tempDate . '"';
         }
         // 闭合 IN
         $whereIn .= !empty($whereIn) ? ')' : '';
@@ -411,7 +411,7 @@ class Evaluate_model extends CI_Model
         $result['average'] = [];
 
         foreach ($data as $k=>$v) {
-            $date = date('Y-m-d', strtotime($v['created_at']));
+            $date = date('Y-m-d', strtotime($v['date']));
 
             // 组织基准时间数据
             if (in_array($date, $baseDate, true)) {
