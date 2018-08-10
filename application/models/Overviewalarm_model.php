@@ -223,9 +223,10 @@ class Overviewalarm_model extends CI_Model
          */
         $tempJunctonIds = array_chunk(array_unique(array_column($data, 'logic_junction_id')), 300);
 
-        $flowsInfo = array_map(function($val) {
+        $flowsInfo = [];
+        array_map(function($val) use(&$flowsInfo) {
             $Jids = implode(',', $val);
-            return $this->waymap_model->getFlowsInfo($Jids);
+            $flowsInfo =  array_merge($flowsInfo, $this->waymap_model->getFlowsInfo($Jids));
         }, $tempJunctonIds);
         echo "<pre>";print_r($flowsInfo);exit;
         //$flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
