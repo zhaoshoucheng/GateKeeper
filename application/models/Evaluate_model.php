@@ -334,7 +334,7 @@ class Evaluate_model extends CI_Model
         if ($data['flow_id'] == 9999) {
             $seelctColumn = 'logic_junction_id, date, hour,';
             $seelctColumn .= " sum({$data['quota_key']}) / count(logic_flow_id) as quota_value";
-            $groupBy = 'logic_junction_id, hour, day(created_at)';
+            $groupBy = 'logic_junction_id, hour, date';
         } else {
             $where .= " and logic_flow_id = '{$data['flow_id']}'";
         }
