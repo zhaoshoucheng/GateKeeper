@@ -171,7 +171,7 @@ class Waymap_model extends CI_Model
      * @param $version       N 地图版本
      * @return array
      */
-    public function getAllCityJunctions($city_id, $version=0)
+    public function getAllCityJunctions($city_id, $version=0, $returnFormat = null)
     {
         if ((int)$city_id < 1) {
             return false;
@@ -225,6 +225,29 @@ class Waymap_model extends CI_Model
             $city_junctions = json_decode($city_junctions, true);
         }
 
+        if(!is_null($returnFormat)) {
+
+            //检查 $returnFormat 格式
+            if(!is_array($returnFormat) || !array_key_exists('key', $returnFormat)
+                || !array_key_exists('value', $returnFormat) || !is_string($returnFormat['key']))
+                return $city_junctions;
+
+            $result = [];
+
+            if(is_string($returnFormat['value'])) {
+                $result = array_column($city_junctions, $returnFormat['value'], $returnFormat['key']);
+            } else {
+                foreach ($city_junctions as $datum) {
+                    $temp = [];
+                    foreach ($returnFormat['value'] as $item) {
+                        $temp[$item] = $datum[$item];
+                    }
+                    $result[$datum[$returnFormat['key']]] = $temp;
+                }
+            }
+
+            return $result;
+        }
         return $city_junctions;
     }
 

@@ -366,7 +366,7 @@ class Evaluate extends MY_Controller
      */
     public function downloadEvaluateData()
     {
-        $params = $this->input->get();
+        $params = $this->input->post();
 
         if(!isset($params['download_id'])) {
             $this->errno = ERR_PARAMETERS;

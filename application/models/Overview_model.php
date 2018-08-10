@@ -40,7 +40,7 @@ class Overview_model extends CI_Model
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
             ->get()->result_array();
 
-        $result = $this->getJunctionListResult($result);
+        $result = $this->getJunctionListResult($data['city_id'], $result);
 
         return $result;
     }
@@ -126,13 +126,13 @@ class Overview_model extends CI_Model
      * @param $result
      * @return array
      */
-    private function getJunctionListResult($result)
+    private function getJunctionListResult($cityId, $result)
     {
         //获取全部路口 ID
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
         //获取路口信息的自定义返回格式
-        $junctionsInfo = $this->waymap_model->getJunctionInfo($ids, ['key' => 'logic_junction_id', 'value' => ['name', 'lng', 'lat']]);
+        $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0, ['key' => 'logic_junction_id', 'value' => ['name', 'lng', 'lat']]);
 
         //获取需要报警的全部路口ID
         $ids = implode(',', $this->getAlarmFlowIds($result));
@@ -160,13 +160,13 @@ class Overview_model extends CI_Model
         //处理数据内容格式
         $temp = array_map(function ($item) use ($junctionsInfo) {
             return [
-                'logic_junction_id' => $item['logic_junction_id'],
-                'junction_name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
+                'jid' => $item['logic_junction_id'],
+                'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
                 'lng' => $junctionsInfo[$item['logic_junction_id']]['lng'] ?? '',
                 'lat' => $junctionsInfo[$item['logic_junction_id']]['lat'] ?? '',
-                'quota_info' => ($quota = $this->getFinalQuotaInfo($item)),
-                'alarm_info' => $this->getFinalAlarmInfo($item),
-                'junction_status' => $this->getJunctionStatus($quota),
+                'quota' => ($quota = $this->getFinalQuotaInfo($item)),
+                'alarm' => $this->getFinalAlarmInfo($item),
+                'status' => $this->getJunctionStatus($quota),
             ];
         }, $temp);
 
@@ -271,7 +271,7 @@ class Overview_model extends CI_Model
     private function getFinalAlarmInfo($item)
     {
         return [
-            'is_alarm' => (int)!empty($item['alarm_info']),
+            'is' => (int)!empty($item['alarm_info']),
             'comment' => $item['alarm_info']
         ];
     }
