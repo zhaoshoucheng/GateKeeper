@@ -459,3 +459,29 @@ $config['back_timing_roll'] = [
 $config['action_log_map'] = [
     'adapt_area_switch_edit' => '自适应区域配时开关修改',
 ];
+
+// 定义实时报警规则
+$config['realtimewarning_rule'] = [
+    'default' =>[
+        'isOverFlow'=>[
+            'spillover_rate'=>0.2,
+        ],
+        'isSAT'=>[
+            'twice_stop_rate'=>0.2,
+            'queue_length'=>180,
+            'stop_delay'=>50,
+        ],
+        'where'=>' and traj_count >= 10',
+    ],
+    '12' =>[
+        'isOverFlow'=>[
+            'spillover_rate'=>0.2,
+        ],
+        'isSAT'=>[
+            'twice_stop_rate'=>0.2,
+            'queue_length'=>180,
+            'stop_delay'=>50,
+        ],
+        'where'=>' and traj_count >= 10',
+    ],
+];
