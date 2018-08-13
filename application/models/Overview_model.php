@@ -381,7 +381,7 @@ class Overview_model extends CI_Model
         );
 
         $date = $data['date'] . ' ' . $data['time_point'];
-        $where = "day(`updated_at`) = day('" . $date . "')";
+        $where = "updated_at > '" . $data['date'] . " 00:00:00'";
         $where .= " and hour = '{$lastHour}'";
         $this->db->from($table);
         $this->db->where($where);
