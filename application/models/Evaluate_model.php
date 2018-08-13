@@ -523,6 +523,9 @@ class Evaluate_model extends CI_Model
                     {
                         $result['evaluate'][$k+1][$vv] = [];
                     }
+                    if (empty($result['average']['evaluate'][$k+1])) {
+                        $result['average']['evaluate'][$k+1] = [];
+                    }
                 }
             }
         }
