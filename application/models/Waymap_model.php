@@ -465,7 +465,7 @@ class Waymap_model extends CI_Model
             $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase?token='
                 . $this->config->item('waymap_token') . '&userid=' . $this->config->item('waymap_userid');
 
-            $res = httpGET($url, $getQuery);
+            $res = httpPOST($url, $getQuery);
 
             $res = json_decode($res, true);
             if ($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])) {
