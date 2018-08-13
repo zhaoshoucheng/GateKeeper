@@ -160,7 +160,7 @@ class Evaluate_model extends CI_Model
         $result['dataList'] = array_map(function($val) use($junctionIdName) {
             return [
                 'logic_junction_id' => $val['logic_junction_id'],
-                'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '',
+                'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '未知路口',
                 'quota_value'       => $val['quota_value'],
             ];
         }, $data);

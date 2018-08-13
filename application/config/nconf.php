@@ -185,7 +185,7 @@ $config['junction_quota_key'] = [
             }
         },
         'round'      => function($val) { return round($val, 2);},
-        'unit'       => 's'
+        'unit'       => '秒'
     ],
     'avg_speed' => [
         'name'       => '平均速度',
@@ -199,7 +199,7 @@ $config['junction_quota_key'] = [
             }
         },
         'round'      => function($val) { return round($val, 2);},
-        'unit'       => 'km/h'
+        'unit'       => '千米/时'
     ]
 ];
 
@@ -208,12 +208,12 @@ $config['flow_quota_key'] = [
     'route_length' => [
         'name'      => '路段长度', // 中文名称
         'round'     => function($val) { return round($val);},  // 格式化数据
-        'unit'      => 'm'       // 单位
+        'unit'      => '米'       // 单位
     ],
     'queue_position' => [
         'name'      =>'排队长度',
         'round'     => function($val) { return round($val);},
-        'unit'      => 'm'
+        'unit'      => '米'
     ],
     'saturation_degree' => [
         'name'      =>'饱和度',
@@ -223,7 +223,7 @@ $config['flow_quota_key'] = [
     'stop_delay' => [
         'name'      => '停车延误',
         'round'     => function($val) { return round($val, 2);},
-        'unit'      => 's'
+        'unit'      => '秒'
     ],
     'stop_time_cycle' => [
         'name'      =>'停车次数',
@@ -248,7 +248,7 @@ $config['flow_quota_key'] = [
     'free_flow_speed' => [
         'name'      => '自由流',
         'round'     => function($val) { return round($val, 2);},
-        'unit'      => 'km/h'
+        'unit'      => '千米/时'
     ],
 ];
 
@@ -276,11 +276,11 @@ $config['diagnose_key'] = [
             ],
             'queue_position'=>[
                 'name'=>'排队长度',
-                'unit'=>'m'
+                'unit'=>'米'
             ],
             'stop_delay'=>[
                 'name'=>'停车延误',
-                'unit'=>'s'
+                'unit'=>'秒'
             ],
             'stop_time_cycle'=>[
                 'name'=>'停车次数',
@@ -288,7 +288,7 @@ $config['diagnose_key'] = [
             ],
             'route_length'  => [
                 'name'=>'路段长度',
-                'unit'=>'m'
+                'unit'=>'米'
             ],
         ],
         // flow级的诊断问题 规则：溢流比率 > 0.008
@@ -321,19 +321,19 @@ $config['diagnose_key'] = [
             ],
             'queue_position'=>[
                 'name'=>'排队长度',
-                'unit'=>'m'
+                'unit'=>'米'
             ],
             'stop_delay'=>[
                 'name'=>'停车延误',
-                'unit'=>'s'
+                'unit'=>'秒'
             ],
             'stop_time_cycle'=>[
                 'name'=>'停车次数',
-                'unit'=>'s'
+                'unit'=>'秒'
             ],
             'route_length'  => [
                 'name'=>'路段长度',
-                'unit'=>'m'
+                'unit'=>'米'
             ]
         ],
         // flow级的诊断问题 规则：饱和度 >= 0 或 饱和度 < 2
@@ -366,7 +366,7 @@ $config['diagnose_key'] = [
             ],
             'stop_delay'=>[
                 'name'=>'停车延误',
-                'unit'=>'s'
+                'unit'=>'秒'
             ],
             'stop_time_cycle'=>[
                 'name'=>'停车次数',
@@ -403,7 +403,7 @@ $config['diagnose_key'] = [
             ],
             'stop_delay'=>[
                 'name'=>'停车延误',
-                'unit'=>'s'
+                'unit'=>'秒'
             ],
             'stop_time_cycle'=>[
                 'name'=>'停车次数',
@@ -411,7 +411,7 @@ $config['diagnose_key'] = [
             ],
             'queue_position'=>[
                 'name'=>'排队长度',
-                'unit'=>'m'
+                'unit'=>'米'
             ]
         ],
         // flow级的诊断问题 饱和度 > 0.9
