@@ -512,6 +512,8 @@ class Evaluate_model extends CI_Model
                         && !array_key_exists($vv, $result['evaluate'][$k+1]))
                     {
                         $result['evaluate'][$k+1][$vv] = [];
+                    } else {
+                        $result['evaluate'][$k+1] = [];
                     }
                 }
             }
