@@ -196,7 +196,7 @@ class Evaluate_model extends CI_Model
         $table = $this->realtimetb . $data['city_id'];
         $where = 'logic_junction_id = "' . $data['junction_id'] . '"';
         $where .= ' and logic_flow_id = "' . $data['flow_id'] . '"';
-        $where .= ' and day(`updated_at`) = day("' . $data['date'] . '")';
+        $where .= ' and updated_at > "' . $data['date'] . ' 00:00:00"';
         $this->db->select("hour, {$data['quota_key']}");
         $this->db->from($table);
         $this->db->where($where);
