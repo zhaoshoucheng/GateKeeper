@@ -444,7 +444,7 @@ class Evaluate_model extends CI_Model
                         // 时间
                         $v['hour'],
                     ];
-                    $avgArr['average']['evaluate'][$kk+1][strtotime($v['hour'])][$date] = [
+                    $avgArr['average']['evaluate'][$kk][strtotime($v['hour'])][$date] = [
                         'hour'  => $v['hour'],
                         'value' => $v['quota_value'],
                     ];
@@ -515,12 +515,13 @@ class Evaluate_model extends CI_Model
             // 补全评估日期
             foreach ($evaluateDate as $k=>$v) {
                 foreach ($v as $vv) {
+                    if (empty($result['evaluate'][$k+1])) {
+                        $result['evaluate'][$k+1] = [];
+                    }
                     if (!empty($result['evaluate'][$k+1])
                         && !array_key_exists($vv, $result['evaluate'][$k+1]))
                     {
                         $result['evaluate'][$k+1][$vv] = [];
-                    } else {
-                        $result['evaluate'][$k+1] = [];
                     }
                 }
             }
