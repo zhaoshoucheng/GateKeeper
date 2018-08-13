@@ -401,9 +401,17 @@ class Junction_model extends CI_Model
 
         // 循环获取每种问题各时间点路口总数
         foreach ($diagnoseKeyConf as $k=>$v) {
+            /*
+             * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
+             * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
+             */
+            $diagnose = $k;
+            if ($diagnose == 'over_saturation') {
+                $diagnose = 'saturation_index';
+            }
             $nWhere = $where . ' and ' . $v['sql_where']();
             if ($data['confidence'] >= 1) {
-                $nWhere .= ' and ' . $confidenceThreshold[$data['confidence']]['sql_where']($k . '_confidence');
+                $nWhere .= ' and ' . $confidenceThreshold[$data['confidence']]['sql_where']($diagnose . '_confidence');
             }
             $res[$k] = $this->db->select("count(id) as num , time_point as hour")
                                 ->from($this->tb)
