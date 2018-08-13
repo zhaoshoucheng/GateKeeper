@@ -54,11 +54,11 @@ class Overview_model extends CI_Model
 
         $table = 'real_time_' . $data['city_id'];
 
-        $result = $this->db->select('left(hour, 5) as hour, avg(stop_delay) as avg_stop_delay')
+        $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
             ->from($table)
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
-            ->group_by('left(hour, 5)')
+            ->group_by('hour')
             ->get()->result_array();
 
         $realTimeQuota = $this->config->item('real_time_quota');
@@ -66,7 +66,7 @@ class Overview_model extends CI_Model
         $result       = array_map(function ($v) use ($realTimeQuota) {
             return [
                 $realTimeQuota['stop_delay']['round']($v['avg_stop_delay']),
-                $v['hour']
+                substr($v['hour'],0, 5)
             ];
         }, $result);
         $allStopDelay = array_column($result, 0);
@@ -298,8 +298,10 @@ class Overview_model extends CI_Model
         $result = $alarmFormula($item);
 
         $result = array_map(function ($v) use ($item, $flowsInfo, $alarmCategory) {
-            return ($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] ?? $item['logic_flow_id']) . '-' . $alarmCategory[$v]['name'];
-        }, $result);
+            return isset($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']]) ?
+                $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-' . $alarmCategory[$v]['name']
+                : [];
+            }, $result);
 
         return $result;
     }
@@ -381,7 +383,7 @@ class Overview_model extends CI_Model
         );
 
         $date = $data['date'] . ' ' . $data['time_point'];
-        $where = "day(`updated_at`) = day('" . $date . "')";
+        $where = "updated_at > '" . $data['date'] . " 00:00:00'";
         $where .= " and hour = '{$lastHour}'";
         $this->db->from($table);
         $this->db->where($where);
