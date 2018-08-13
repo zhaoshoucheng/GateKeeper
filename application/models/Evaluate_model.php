@@ -264,8 +264,15 @@ class Evaluate_model extends CI_Model
 
         // 获取路口所有相位
         $allFlows = $this->waymap_model->getFlowsInfo($data['junction_id']);
+        if (empty($allFlows)) {
+            return [];
+        }
 
         // 获取路网路口各相位坐标
+        if (empty($allFlows[$data['junction_id']])) {
+            return [];
+        }
+
         $waymap_data = [
             'version'           => $newMapVersion,
             'logic_junction_id' => $data['junction_id'],
@@ -437,7 +444,7 @@ class Evaluate_model extends CI_Model
                         // 时间
                         $v['hour'],
                     ];
-                    $avgArr['average']['evaluate'][$kk][strtotime($v['hour'])][$date] = [
+                    $avgArr['average']['evaluate'][$kk+1][strtotime($v['hour'])][$date] = [
                         'hour'  => $v['hour'],
                         'value' => $v['quota_value'],
                     ];
@@ -508,7 +515,7 @@ class Evaluate_model extends CI_Model
             // 补全评估日期
             foreach ($evaluateDate as $k=>$v) {
                 foreach ($v as $vv) {
-                    if (isset($result['evaluate'][$k+1])
+                    if (!empty($result['evaluate'][$k+1])
                         && !array_key_exists($vv, $result['evaluate'][$k+1]))
                     {
                         $result['evaluate'][$k+1][$vv] = [];

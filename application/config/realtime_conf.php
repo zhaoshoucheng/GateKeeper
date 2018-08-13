@@ -78,13 +78,16 @@ $config['alarm_category'] = [
 // 报警计算规则 $val = ['指标KEY' => 指标值]
 $config['alarm_formula'] = function($val) {
     $res = [];
-    if (array_key_exists('spillover_rate', $val) && $val['spillover_rate'] >= 0.2) {
+    if (array_key_exists('spillover_rate', $val)
+        && $val['spillover_rate'] >= 0.2
+        && $val['traj_count'] >= 10) {
         array_push($res, 1);
     }
 
     if ((array_key_exists('twice_stop_rate', $val) && $val['twice_stop_rate'] >= 0.2)
         && (array_key_exists('queue_length', $val) && $val['queue_length'] >= 180)
-        && (array_key_exists('stop_delay', $val) && $val['stop_delay'] >= 50))
+        && (array_key_exists('stop_delay', $val) && $val['stop_delay'] >= 50)
+        && $val['traj_count'] >= 10)
     {
         array_push($res, 2);
     }
