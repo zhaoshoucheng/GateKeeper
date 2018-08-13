@@ -53,9 +53,10 @@ class Overviewtoplist_model extends CI_Model
 
         $result = $this->db->select('logic_junction_id, hour, ' . $method . '(' . $column . ') as ' . $column)
             ->from($table)
-            ->where('hour', $hour)
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
+            ->where('hour', $hour)
+            ->where('traj_count >', 10)
             ->group_by('logic_junction_id')
             ->order_by($method . '(' . $column . ')', 'desc')
             ->limit($data['pagesize'])
@@ -71,7 +72,7 @@ class Overviewtoplist_model extends CI_Model
             return [
                 'time' => $item['hour'],
                 'logic_junction_id' => $item['logic_junction_id'],
-                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '',
+                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
                 $column => $realTimeQuota[$column]['round']($item[$column]),
                 'quota_unit' => $realTimeQuota[$column]['unit']
             ];

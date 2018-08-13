@@ -27,8 +27,11 @@ class Realtimewarning_model extends CI_Model
      * @param $record
      * @return bool
      */
-    public function isOverFlow($record){
-        if(!empty($record["spillover_rate"]) && $record["spillover_rate"]>=0.2){
+    public function isOverFlow($record,$rule){
+        if(!isset($rule['isOverFlow']['spillover_rate'])){
+            return false;
+        }
+        if(!empty($record["spillover_rate"]) && $record["spillover_rate"]>=$rule['isOverFlow']['spillover_rate']){
             return true;
         }
         return false;
@@ -39,11 +42,14 @@ class Realtimewarning_model extends CI_Model
      * @param $record
      * @return bool
      */
-    public function isSAT($record){
+    public function isSAT($record,$rule){
+        if(!isset($rule['isSAT']['twice_stop_rate']) || !isset($rule['isSAT']['queue_length']) || !isset($rule['isSAT']['stop_delay'])){
+            return false;
+        }
         if(empty($record["twice_stop_rate"] || $record["queue_length"] || $record["stop_delay"])){
             return false;
         }
-        if($record["twice_stop_rate"]>=0.2 && $record["queue_length"]>=180 && $record["stop_delay"]>=50){
+        if($record["twice_stop_rate"]>=$rule['isSAT']['twice_stop_rate'] && $record["queue_length"]>=$rule['isSAT']['queue_length'] && $record["stop_delay"]>=$rule['isSAT']['stop_delay']){
             return true;
         }
         return false;
@@ -115,6 +121,8 @@ class Realtimewarning_model extends CI_Model
 
     public function process($cityId, $date, $hour, $traceId)
     {
+        $rtwRule = $this->config->item('realtimewarning_rule');
+        $rtwRule = empty($rtwRule[$cityId]) ? $rtwRule['default'] : $rtwRule[$cityId];
         $tableName = "real_time_" . $cityId;
         $isExisted = $this->db->table_exists($tableName);
         if (!$isExisted) {
@@ -124,7 +132,7 @@ class Realtimewarning_model extends CI_Model
 
         $currentId = 0;
         while (1) {
-            $sql = "SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} order by id asc limit 1000";
+            $sql = "SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} {$rtwRule['where']} order by id asc limit 1000";
             $query = $this->db->query($sql);
             $result = $query->result_array();
             if (empty($result)) {
@@ -133,10 +141,10 @@ class Realtimewarning_model extends CI_Model
             }
             foreach ($result as $var => $val) {
                 $currentId = $val["id"];
-                if($this->isOverFlow($val)){
+                if($this->isOverFlow($val,$rtwRule)){
                     $this->updateWarning($val, 1, $date, $cityId, $traceId);
                 }
-                if($this->isSAT($val)){
+                if($this->isSAT($val,$rtwRule)){
                     $this->updateWarning($val, 2, $date, $cityId, $traceId);
                 }
                 //sleep(10);
