@@ -7,7 +7,7 @@
 
 class Evaluate_model extends CI_Model
 {
-    private $offlintb = 'offline_';
+    private $offlintb = 'flow_duration_v6_';
     private $realtimetb = 'real_time_';
     private $db = '';
 
@@ -115,8 +115,11 @@ class Evaluate_model extends CI_Model
         $result = [];
 
         $table = $this->realtimetb . $data['city_id'];
-        $where = 'hour = (select hour from ' . $table;
-        $where .= ' where day(`updated_at`) = day("' . $data['date'] . '") order by hour desc limit 1)';
+
+        // 获取最近时间
+        $lastHour = $this->getLastestHour($table, $data['date']);
+
+        $where = "hour = '{$lastHour}'";
 
         $this->db->select("`logic_junction_id`, SUM({$data['quota_key']}) / count(logic_flow_id) as quota_value");
         $this->db->from($table);
@@ -193,7 +196,7 @@ class Evaluate_model extends CI_Model
         $table = $this->realtimetb . $data['city_id'];
         $where = 'logic_junction_id = "' . $data['junction_id'] . '"';
         $where .= ' and logic_flow_id = "' . $data['flow_id'] . '"';
-        $where .= ' and day(`updated_at`) = day("' . $data['date'] . '")';
+        $where .= ' and updated_at > "' . $data['date'] . ' 00:00:00"';
         $this->db->select("hour, {$data['quota_key']}");
         $this->db->from($table);
         $this->db->where($where);
@@ -326,12 +329,12 @@ class Evaluate_model extends CI_Model
         $groupBy = '';
         $where = "logic_junction_id = '{$data['junction_id']}'";
 
-        $seelctColumn = "logic_junction_id, logic_flow_id, created_at, hour, {$data['quota_key']} as quota_value";
+        $seelctColumn = "logic_junction_id, logic_flow_id, date, hour, {$data['quota_key']} as quota_value";
         // 取路口所有方向
         if ($data['flow_id'] == 9999) {
-            $seelctColumn = 'logic_junction_id, created_at, hour,';
+            $seelctColumn = 'logic_junction_id, date, hour,';
             $seelctColumn .= " sum({$data['quota_key']}) / count(logic_flow_id) as quota_value";
-            $groupBy = 'logic_junction_id, hour, day(created_at)';
+            $groupBy = 'logic_junction_id, hour, date';
         } else {
             $where .= " and logic_flow_id = '{$data['flow_id']}'";
         }
@@ -354,8 +357,8 @@ class Evaluate_model extends CI_Model
             $tempDate = date('Y-m-d', $val);
 
             $whereIn .= empty($whereIn)
-                    ? ' and day(created_at) IN (day("' . $tempDate . '")'
-                    : ', day("' . $tempDate . '")';
+                    ? ' and date IN ("' . $tempDate . '"'
+                    : ', "' . $tempDate . '"';
         }
         // 闭合 IN
         $whereIn .= !empty($whereIn) ? ')' : '';
@@ -408,7 +411,7 @@ class Evaluate_model extends CI_Model
         $result['average'] = [];
 
         foreach ($data as $k=>$v) {
-            $date = date('Y-m-d', strtotime($v['created_at']));
+            $date = date('Y-m-d', strtotime($v['date']));
 
             // 组织基准时间数据
             if (in_array($date, $baseDate, true)) {
@@ -541,5 +544,29 @@ class Evaluate_model extends CI_Model
         $this->redis_model->setExpire($redisKeyPrefix . $redisKey, 1800);
 
         return $result;
+    }
+
+    /**
+     * 获取最近时间
+     * @param $table 数据表
+     * @param $date  日期
+     * @return string H:i:s
+     */
+    private function getLastestHour($table, $date = null)
+    {
+        $date = $date ?? date('Y-m-d');
+
+        $result = $this->db->select('hour')
+            ->from($table)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->order_by('hour', 'desc')
+            ->limit(1)
+            ->get()->first_row();
+
+        if(!$result)
+            return date('H:i:s');
+
+        return $result->hour;
     }
 }

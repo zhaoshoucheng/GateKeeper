@@ -217,8 +217,16 @@ class Overviewalarm_model extends CI_Model
         $junctionsInfo = $this->waymap_model->getJunctionInfo($junctionIds);
         $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
 
-        // 获取路口相位信息
-        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        /**
+         * 获取路口相位信息
+         * 分批获取 因为路口太多会导致路网接口超时
+         */
+        $tempJunctonIds = array_chunk(array_unique(array_column($data, 'logic_junction_id')), 300);
+        $flowsInfo = [];
+        array_map(function($val) use(&$flowsInfo) {
+            $Jids = implode(',', $val);
+            $flowsInfo =  array_merge($flowsInfo, $this->waymap_model->getFlowsInfo($Jids));
+        }, $tempJunctonIds);
 
         // 报警类别
         $alarmCate = $this->config->item('alarm_category');

@@ -366,6 +366,9 @@ class Overview_model extends CI_Model
         $result = [];
         $table = $this->tb . $data['city_id'];
 
+        // 获取最近时间
+        $lastHour = $this->getLastestHour($table, $data['date']);
+
         /*
          * 获取实时路口停车延误记录
          * 现数据表记录的是每个路口各相位的指标数据
@@ -378,9 +381,8 @@ class Overview_model extends CI_Model
         );
 
         $date = $data['date'] . ' ' . $data['time_point'];
-        $where = "day(`updated_at`) = day('" . $date . "')";
-        $where .= " and hour = (select hour from {$table} where day(updated_at) = day('".$date."')
-                    order by hour desc limit 1)";
+        $where = "updated_at > '" . $data['date'] . " 00:00:00'";
+        $where .= " and hour = '{$lastHour}'";
         $this->db->from($table);
         $this->db->where($where);
         $this->db->group_by('hour, logic_junction_id');
