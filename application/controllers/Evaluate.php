@@ -485,6 +485,7 @@ class Evaluate extends MY_Controller
         header('Pragma: public'); // HTTP/1.0
         ob_end_clean();
         $objWriter->save('php://output');
+        exit();
     }
 
     private function getExcelStyle() {
