@@ -166,15 +166,17 @@ class Overview extends MY_Controller
             return;
         }
 
-        $tokenval = $params['tokenval'];
+        $tokenval = 'Token_' . $params['tokenval'];
 
         $data = [];
 
-        if(!$this->redis_model->getData('Token_' . $tokenval)) {
+        if(!$this->redis_model->getData($tokenval)) {
             $data['verify'] = false;
         } else {
             $data['verify'] = true;
         }
+
+        $this->redis_model->deleteData($tokenval);
 
         $this->response($data);
     }
