@@ -72,7 +72,7 @@ class Overviewtoplist_model extends CI_Model
             return [
                 'time' => $item['hour'],
                 'logic_junction_id' => $item['logic_junction_id'],
-                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '',
+                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
                 $column => $realTimeQuota[$column]['round']($item[$column]),
                 'quota_unit' => $realTimeQuota[$column]['unit']
             ];
