@@ -383,7 +383,7 @@ class Evaluate extends MY_Controller
         }
 
         $data = [
-            'download_url' => '/evaluate/download?download_id='. $params['download_id']
+            'download_url' => '/api/evaluate/download?download_id='. $params['download_id']
         ];
 
         $this->response($data);
@@ -477,7 +477,7 @@ class Evaluate extends MY_Controller
 
         header('Content-Type: application/x-xls;');
         header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename='.$fileName . 'xls');
+        header('Content-Disposition: attachment;filename='.$fileName . '.xls');
         header('Cache-Control: max-age=0');
         header('Cache-Control: max-age=1');
         header('Expires: 0'); // Date in the past
