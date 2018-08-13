@@ -240,7 +240,7 @@ class Overviewalarm_model extends CI_Model
 
             if (!empty($junctionIdName[$val['logic_junction_id']])
                 && !empty($flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']])) {
-                $result[$k] = [
+                $result['dataList'][$k] = [
                     'start_time'        => date('H:i', strtotime($val['start_time'])),
                     'duration_time'     => $durationTime,
                     'logic_junction_id' => $val['logic_junction_id'],
