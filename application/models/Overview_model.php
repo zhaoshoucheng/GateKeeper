@@ -66,7 +66,7 @@ class Overview_model extends CI_Model
         $result       = array_map(function ($v) use ($realTimeQuota) {
             return [
                 $realTimeQuota['stop_delay']['round']($v['avg_stop_delay']),
-                substr($v['hour'],5)
+                substr($v['hour'],0, 5)
             ];
         }, $result);
         $allStopDelay = array_column($result, 0);
