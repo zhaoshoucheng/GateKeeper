@@ -462,7 +462,7 @@ class Waymap_model extends CI_Model
             $getQuery = [
                 'token'    => $this->config->item('waymap_token'),
                 'user_id'  => $this->config->item('waymap_userid'),
-                'logic_junction_ids' => $junctionIds,
+                'logic_junction_ids' => $junctionIds
             ];
             $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
 
