@@ -298,8 +298,10 @@ class Overview_model extends CI_Model
         $result = $alarmFormula($item);
 
         $result = array_map(function ($v) use ($item, $flowsInfo, $alarmCategory) {
-            return ($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] ?? $item['logic_flow_id']) . '-' . $alarmCategory[$v]['name'];
-        }, $result);
+            return isset($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']]) ?
+                $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-' . $alarmCategory[$v]['name']
+                : [];
+            }, $result);
 
         return $result;
     }
