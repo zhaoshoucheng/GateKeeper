@@ -447,9 +447,9 @@ class Evaluate extends MY_Controller
             $rows_cnt = count($table);
             $cols_cnt = count($table[0]);
             $rows_index = $rows_cnt + $line - 1;
-            $objSheet->getStyle("A{$line}:AW{$rows_index}")->applyFromArray($styles['content']);
+            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $rows_index)->applyFromArray($styles['content']);
             $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($styles['header']);
-            $objSheet->getStyle("A{$line}:AW{$line}")->applyFromArray($styles['header']);
+            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $line)->applyFromArray($styles['header']);
 
             $line += ($rows_cnt + 2);
         }
