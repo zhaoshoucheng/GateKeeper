@@ -217,21 +217,13 @@ class Overviewalarm_model extends CI_Model
         $junctionsInfo = $this->waymap_model->getJunctionInfo($junctionIds);
         $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
 
-        /**
-         * 获取路口相位信息
-         * 分批获取 因为路口太多会导致路网接口超时
-         */
-        //$tempJunctonIds = array_chunk(array_unique(array_column($data, 'logic_junction_id')), 300);
+        // 获取路口相位信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
-        /*array_map(function($val) use(&$flowsInfo) {
-            $Jids = implode(',', $val);
-            $flowsInfo =  array_merge($flowsInfo, $this->waymap_model->getFlowsInfo($Jids));
-        }, $tempJunctonIds);*/
 
         // 报警类别
         $alarmCate = $this->config->item('alarm_category');
 
-        $result = array_map(function($val) use($junctionIdName, $flowsInfo, $alarmCate) {
+        foreach ($data as $k=>$val) {
             // 持续时间
             $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
             if ($durationTime == 0) {
@@ -245,17 +237,21 @@ class Overviewalarm_model extends CI_Model
                     $durationTime = 2;
                 }
             }
-            return [
-                'start_time'        => date('H:i', strtotime($val['start_time'])),
-                'duration_time'     => $durationTime,
-                'logic_junction_id' => $val['logic_junction_id'],
-                'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '',
-                'logic_flow_id'     => $val['logic_flow_id'],
-                'flow_name'         => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
-                'alarm_comment'     => $alarmCate[$val['type']]['name'] ?? '',
-                'alarm_key'         => $val['type'],
-            ];
-        }, $data);
+
+            if (!empty($junctionIdName[$val['logic_junction_id']])
+                && !empty($flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']])) {
+                $result[$k] = [
+                    'start_time'        => date('H:i', strtotime($val['start_time'])),
+                    'duration_time'     => $durationTime,
+                    'logic_junction_id' => $val['logic_junction_id'],
+                    'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '',
+                    'logic_flow_id'     => $val['logic_flow_id'],
+                    'flow_name'         => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
+                    'alarm_comment'     => $alarmCate[$val['type']]['name'] ?? '',
+                    'alarm_key'         => $val['type'],
+                ];
+            }
+        }
 
         return $result;
     }
