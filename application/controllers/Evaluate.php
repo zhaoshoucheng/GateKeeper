@@ -445,8 +445,9 @@ class Evaluate extends MY_Controller
 
             $styles = $this->getExcelStyle();
             $rows_cnt = count($table);
-            $cols_cnt = count($table[0]);
+            $cols_cnt = count($table[0]) - 1;
             $rows_index = $rows_cnt + $line - 1;
+
             $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $rows_index)->applyFromArray($styles['content']);
             $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($styles['header']);
             $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $line)->applyFromArray($styles['header']);
@@ -463,7 +464,7 @@ class Evaluate extends MY_Controller
 
                 $styles = $this->getExcelStyle();
                 $rows_cnt = count($table);
-                $cols_cnt = count($table[0]);
+                $cols_cnt = count($table[0]) - 1;
                 $rows_index = $rows_cnt + $line - 1;
                 $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $rows_index)->applyFromArray($styles['content']);
                 $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($styles['header']);
@@ -557,20 +558,21 @@ class Evaluate extends MY_Controller
         $table = [];
 
         $table[] = $timeArray;
-        array_unshift(current($table), "日期-时间");
+        array_unshift($table[0], "日期-时间");
 
         $data = array_map(function ($value) {
             return array_column($value, 0, 1);
         }, $data);
 
         foreach ($data as $key => $value) {
+            $column = [];
             $column[] = $key;
             foreach ($timeArray as $item) {
-                $column[$item] = $value[$item] ?? '-';
+                $column[] = $value[$item] ?? '-';
             }
             $table[] = $column;
         }
-
+        //echo json_encode($table);die();
         return $table;
     }
 
