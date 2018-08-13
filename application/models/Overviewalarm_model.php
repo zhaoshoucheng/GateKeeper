@@ -253,6 +253,8 @@ class Overviewalarm_model extends CI_Model
             }
         }
 
+        $result['dataList'] = array_values($result['dataList']);
+
         return $result;
     }
 }
