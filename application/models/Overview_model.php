@@ -54,11 +54,11 @@ class Overview_model extends CI_Model
 
         $table = 'real_time_' . $data['city_id'];
 
-        $result = $this->db->select('left(hour, 5) as hour, avg(stop_delay) as avg_stop_delay')
+        $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
             ->from($table)
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
-            ->group_by('left(hour, 5)')
+            ->group_by('hour')
             ->get()->result_array();
 
         $realTimeQuota = $this->config->item('real_time_quota');
@@ -66,7 +66,7 @@ class Overview_model extends CI_Model
         $result       = array_map(function ($v) use ($realTimeQuota) {
             return [
                 $realTimeQuota['stop_delay']['round']($v['avg_stop_delay']),
-                $v['hour']
+                substr($v['hour'],5)
             ];
         }, $result);
         $allStopDelay = array_column($result, 0);
