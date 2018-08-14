@@ -35,19 +35,23 @@ class Overviewalarm_model extends CI_Model
         }
         $result = [];
 
-        $this->db->select('logic_junction_id, logic_flow_id, updated_at, type');
-        $where = 'city_id = ' . $data['city_id'] . ' and  date = "' . $data['date'] . '"';
-        $this->db->from($this->tb);
-        $this->db->where($where);
-        $this->db->group_by('type, logic_junction_id');
-        $res = $this->db->get();
+        // 获取溢流报警个数
+        $spilloverCount = $this->db->select('count(DISTINCT logic_junction_id) as num');
+        $spilloverCount = $this->db->from($this->tb);
+        $where = 'city_id = ' . $data['city_id'] . ' and  date = "' . $data['date'] . '" and type = 1';
+        $spilloverCount = $this->db->where($where);
+        $spilloverCount = $this->db->get()->row_array();
+        $spilloverCountRes = $spilloverCount['num'];
 
-        $res = $res->result_array();
-        if (empty($res)) {
-            return [];
-        }
+        // 获取过饱和报警个数
+        $saturationCount = $this->db->select('count(DISTINCT logic_junction_id) as num');
+        $saturationCount = $this->db->from($this->tb);
+        $where = 'city_id = ' . $data['city_id'] . ' and  date = "' . $data['date'] . '" and type = 2';
+        $saturationCount = $this->db->where($where);
+        $saturationCount = $this->db->get()->row_array();
+        $saturationCountRes = $saturationCount['num'];
 
-        $result = $this->formatTodayAlarmInfoData($res);
+        $result = $this->formatTodayAlarmInfoData($spilloverCountRes, $saturationCountRes);
 
         return $result;
     }
@@ -57,36 +61,31 @@ class Overviewalarm_model extends CI_Model
      * @param $data 报警信息数组
      * @return array
      */
-    private function formatTodayAlarmInfoData($data)
+    private function formatTodayAlarmInfoData($spilloverCount, $saturationCount)
     {
-        if (empty($data)) {
-            return [];
-        }
-
         $result = [];
 
-        $tempJunctiomNum = [];
-        foreach ($data as $k=>$v) {
-            $tempJunctiomNum[$v['type']][$v['logic_junction_id']] = 1;
-        }
-
-        // 今日报警路口总数
-        $junctionTotal = count($data);
+        $total = intval($spilloverCount) + intval($saturationCount);
 
         // 报警类别配置
         $alarmCate = $this->config->item('alarm_category');
 
         foreach ($alarmCate as $k=>$v) {
+            if ($k == 1) {
+                // 溢流
+                $num = intval($spilloverCount);
+            } else {
+                // 过饱和
+                $num = intval($saturationCount);
+            }
             $result['count'][$k] = [
                 'cate' => $v['name'],
-                'num'  => isset($tempJunctiomNum[$k]) ? count($tempJunctiomNum[$k]) : 0,
+                'num'  => $num,
             ];
 
             $result['ratio'][$k] = [
                 'cate'  => $v['name'],
-                'ratio' => isset($tempJunctiomNum[$k])
-                            ? round((count($tempJunctiomNum[$k]) / $junctionTotal) * 100) . '%'
-                            : '0%',
+                'ratio' => round(($num / $total) * 100 ). '%',
             ];
         }
 
@@ -185,8 +184,9 @@ class Overviewalarm_model extends CI_Model
         }
 
         $result = [];
-
+        $nowTime = time();
         $where = 'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"';
+        $where .= " and {$nowTime} - UNIX_TIMESTAMP(last_time) <= 600";
         $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
         $this->db->from($this->tb);
         $this->db->where($where);

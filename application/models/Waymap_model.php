@@ -32,7 +32,12 @@ class Waymap_model extends CI_Model
     {
         $data['token'] = $this->token;
         $data['user_id'] = $this->userid;
-        $data['version'] = '2017030116';
+
+        // 获取最新版本
+        $mapVersions = $this->getAllMapVersion();
+        $newMapVersion = max($mapVersions);
+        $data['version'] = $newMapVersion;
+
         try {
             $ids_array = explode(',', $ids);
 
