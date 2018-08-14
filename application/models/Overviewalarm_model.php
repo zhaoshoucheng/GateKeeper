@@ -184,20 +184,9 @@ class Overviewalarm_model extends CI_Model
         }
 
         $result = [];
-
-        // 获取实时报警表报警最近时间
-        $lastTime = strtotime($this->getLastTime());
-
-        // 当前时间
         $nowTime = time();
-
-        // 取10分钟之内报警的数据
-        if (($nowTime - $lastTime) / 60 > 10) {
-            return [];
-        }
-
         $where = 'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"';
-        $where .= ' and last_time = "' . $lastTime . '"';
+        $where .= "{$nowTime} - UNIX_TIMESTAMP(last_time) <= 600";
         $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
         $this->db->from($this->tb);
         $this->db->where($where);
@@ -267,29 +256,5 @@ class Overviewalarm_model extends CI_Model
         $result['dataList'] = array_values($result['dataList']);
 
         return $result;
-    }
-
-    /**
-     * 获取实时报警最近时间
-     * @param $table 数据表
-     * @param $date  日期
-     * @return string H:i:s
-     */
-    private function getLastTime()
-    {
-        $date = date('Y-m-d');
-
-        $result = $this->db->select('last_time')
-            ->from($this->tb)
-            ->where('date =', $date)
-            ->order_by('last_time', 'desc')
-            ->limit(1)
-            ->get()->first_row();
-
-        if(empty($result)) {
-            return [];
-        }
-
-        return $result->last_time;
     }
 }
