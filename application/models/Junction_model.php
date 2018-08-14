@@ -347,7 +347,11 @@ class Junction_model extends CI_Model
 
         $confidenceWhere = '';
         foreach ($data['diagnose_key'] as $v) {
-            $confidenceWhere .= empty($confidenceWhere) ? $v . '_confidence' : '+' . $v . '_confidence';
+            $diagnose = $v;
+            if ($v == 'over_saturation') {
+                $diagnose = 'saturation_index';
+            }
+            $confidenceWhere .= empty($confidenceWhere) ? $diagnose . '_confidence' : '+' . $diagnose . '_confidence';
         }
         $confidenceThreshold = $this->config->item('diagnose_confidence_threshold');
 
