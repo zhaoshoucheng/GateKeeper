@@ -56,7 +56,7 @@ class Overview_model extends CI_Model
         $table = 'real_time_' . $data['city_id'];
 
         $result = $this->redis_model->getData('its_realtime_avg_stop_delay_' . $data['city_id'] . '_' . $data['date']);
-
+        $result = json_decode($result, true);
         if(!$result) {
             $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
                 ->from($table)
