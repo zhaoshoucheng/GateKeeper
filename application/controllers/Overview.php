@@ -54,6 +54,7 @@ class Overview extends MY_Controller
     */
     public function operationCondition()
     {
+        return $this->response([]);
         $params = $this->input->post();
 
         if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
