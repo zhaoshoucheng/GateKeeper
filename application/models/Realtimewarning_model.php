@@ -65,9 +65,8 @@ class Realtimewarning_model extends CI_Model
         try {
             //判断数据是否存在?
             $warnRecord = $this->db->select("id, start_time, last_time")->from('real_time_alarm')
-                ->where('logic_junction_id', $logicJunctionId)
-                ->where('logic_flow_id', $logicFlowId)
                 ->where('date', $date)
+                ->where('logic_flow_id', $logicFlowId)
                 ->where('type', $type)
                 ->where('deleted_at', "1970-01-01 00:00:00")
                 ->get()->result_array();
@@ -172,14 +171,12 @@ class Realtimewarning_model extends CI_Model
 
         //todo生成rediskey
         //key = its_realtime_avg_stop_delay_2018-08-14
-        $sql = "SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} {$rtwRule['where']} order by id asc limit 1000";
 
-        echo $sql;
+        $sql = " SELECT `hour`, avg(stop_delay) as avg_stop_delay FROM `real_time_12` force index(idx_updated_at) WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
         $query = $this->db->query($sql);
         $result = $query->result_array();
         if (empty($result)) {
-            echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=$traceId||sql=$sql||message=loop over!\n\r";
-            exit;
+
         }
 
 
