@@ -157,13 +157,13 @@ class Evaluate_model extends CI_Model
         // 指标配置
         $quotaConf = $this->config->item('real_time_quota');
 
-        $result['dataList'] = array_map(function($val) use($junctionIdName) {
-            return [
+        foreach ($data as $k=>$val) {
+            $result['dataList'][$k] = [
                 'logic_junction_id' => $val['logic_junction_id'],
-                'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '',
+                'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '未知路口',
                 'quota_value'       => $val['quota_value'],
             ];
-        }, $data);
+        }
 
         // 返回数据：指标信息
         $result['quota_info'] = [
