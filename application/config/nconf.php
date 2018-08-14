@@ -243,7 +243,7 @@ $config['flow_quota_key'] = [
     'flow_num' => [
         'name'      => '流量',
         'round'     => function($val) { return round($val);},
-        'unit'      => 'veh/h/lane'
+        'unit'      => '每小时/车道'
     ],
     'free_flow_speed' => [
         'name'      => '自由流',
