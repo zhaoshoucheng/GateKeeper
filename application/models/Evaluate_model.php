@@ -578,7 +578,7 @@ class Evaluate_model extends CI_Model
         $date = $date ?? date('Y-m-d');
 
         $result = $this->db->select('hour')
-            ->from($this->tb . $cityId)
+            ->from($this->realtimetb . $cityId)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->order_by('hour', 'desc')
