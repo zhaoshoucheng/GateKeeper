@@ -564,17 +564,21 @@ class Evaluate_model extends CI_Model
     }
 
     /**
-     * 获取最近时间
-     * @param $table 数据表
-     * @param $date  日期
-     * @return string H:i:s
+     * 获取指定日期最新的数据时间
+     * @param $table
+     * @param null $date
+     * @return false|string
      */
-    private function getLastestHour($table, $date = null)
+    private function getLastestHour($cityId, $date = null)
     {
+        if (($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
+            return $hour;
+        }
+
         $date = $date ?? date('Y-m-d');
 
         $result = $this->db->select('hour')
-            ->from($table)
+            ->from($this->tb . $cityId)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->order_by('hour', 'desc')
