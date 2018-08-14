@@ -421,7 +421,7 @@ class Evaluate extends MY_Controller
             ['基准时间', implode(' ~ ', $data['info']['base_time'])],
         ];
         foreach ($data['info']['evaluate_time'] as $key => $item) {
-            $detailParams[] = ['评估时间'.$key, implode(' ~ ', $item)];
+            $detailParams[] = ['评估时间'.($key+1), implode(' ~ ', $item)];
         }
 
         $detailParams[] = ['指标单位', $data['info']['quota_unit']];
