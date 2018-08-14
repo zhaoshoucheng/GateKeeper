@@ -146,6 +146,7 @@ class Overview_model extends CI_Model
      */
     private function getLastestHour($table, $date = null)
     {
+        return "15:32:02"; 
         $date = $date ?? date('Y-m-d');
 
         $result = $this->db->select('hour')
