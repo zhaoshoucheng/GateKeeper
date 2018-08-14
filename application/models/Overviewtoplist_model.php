@@ -83,7 +83,6 @@ class Overviewtoplist_model extends CI_Model
 
     private function getLastestHour($cityId, $date = null)
     {
-        return "15:32:00";
         if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
             return $hour;
         }
