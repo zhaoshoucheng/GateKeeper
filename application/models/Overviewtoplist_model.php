@@ -7,7 +7,7 @@
 
 class Overviewtoplist_model extends CI_Model
 {
-    private $tb = '';
+    private $tb = 'real_time_';
 
     public function __construct()
     {
@@ -47,9 +47,9 @@ class Overviewtoplist_model extends CI_Model
      */
     private function topList($column, $data, $method)
     {
-        $table = 'real_time_' . $data['city_id'];
+        $table = $this->tb . $data['city_id'];
 
-        $hour = $this->getLastestHour($table, $data['date']);
+        $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
         $result = $this->db->select('logic_junction_id, hour, ' . $method . '(' . $column . ') as ' . $column)
             ->from($table)
@@ -81,12 +81,16 @@ class Overviewtoplist_model extends CI_Model
         return $result;
     }
 
-    private function getLastestHour($table, $date = null)
+    private function getLastestHour($cityId, $date = null)
     {
+        return "15:32:02";
+        if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
+            return $hour;
+        }
         $date = $date ?? date('Y-m-d');
 
         $result = $this->db->select('hour')
-            ->from($table)
+            ->from($this->tb . $cityId)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->order_by('hour', 'desc')

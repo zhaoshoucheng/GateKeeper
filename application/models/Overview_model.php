@@ -20,6 +20,7 @@ class Overview_model extends CI_Model
 
         $this->config->load('realtime_conf');
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
     }
 
     /**
@@ -29,9 +30,9 @@ class Overview_model extends CI_Model
      */
     public function junctionsList($data)
     {
-        $table = 'real_time_' . $data['city_id'];
+        $table = $this->tb . $data['city_id'];
 
-        $hour = $this->getLastestHour($table, $data['date']);
+        $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
         $result = $this->db->select('*')
             ->from($table)
@@ -84,9 +85,9 @@ class Overview_model extends CI_Model
     public function junctionSurvey($data)
     {
         //$data = $this->junctionsList($data);        $data = $data['dataList'] ?? [];
-        $table = 'real_time_' . $data['city_id'];
+        $table = $this->tb . $data['city_id'];
 
-        $hour = $this->getLastestHour($table, $data['date']);
+        $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
         $result = $this->db->select('*')
             ->from($table)
@@ -144,13 +145,17 @@ class Overview_model extends CI_Model
      * @param null $date
      * @return false|string
      */
-    private function getLastestHour($table, $date = null)
+    private function getLastestHour($cityId, $date = null)
     {
-        return "15:32:02"; 
+        return "15:32:02";
+        if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
+            return $hour;
+        }
+
         $date = $date ?? date('Y-m-d');
 
         $result = $this->db->select('hour')
-            ->from($table)
+            ->from($this->tb . $cityId)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->order_by('hour', 'desc')
@@ -370,7 +375,7 @@ class Overview_model extends CI_Model
         $table = $this->tb . $data['city_id'];
 
         // 获取最近时间
-        $lastHour = $this->getLastestHour($table, $data['date']);
+        $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
 
         /*
          * 获取实时路口停车延误记录
