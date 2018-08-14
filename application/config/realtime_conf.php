@@ -80,7 +80,8 @@ $config['alarm_formula'] = function($val) {
     $res = [];
     if (array_key_exists('spillover_rate', $val)
         && $val['spillover_rate'] >= 0.2
-        && $val['traj_count'] >= 10) {
+        && $val['traj_count'] >= 10)
+    {
         array_push($res, 1);
     }
 
