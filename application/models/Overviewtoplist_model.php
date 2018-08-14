@@ -25,6 +25,7 @@ class Overviewtoplist_model extends CI_Model
 
         $this->load->config('realtime_conf');
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
     }
 
     public function stopDelayTopList($data)
