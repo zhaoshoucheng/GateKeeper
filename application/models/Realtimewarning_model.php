@@ -170,18 +170,21 @@ class Realtimewarning_model extends CI_Model
         }
 
         //todo生成rediskey
-        //key = its_realtime_avg_stop_delay_2018-08-14
+        $this->load->model('redis_model');
+        $redisKey = "its_realtime_lasthour_$cityId";
+        $this->redis_model->setEx($redisKey, $hour, 24*3600);
 
-        $sql = " SELECT `hour`, avg(stop_delay) as avg_stop_delay FROM `real_time_12` force index(idx_updated_at) WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
-        $query = $this->db->query($sql);
-        $result = $query->result_array();
-        if (empty($result)) {
-
-        }
-
+//        $sql = "SELECT`hour` FROM `{$tableName}` WHERE`updated_at`>='2018-08-1400:00:00' AND`updated_at`<='2018-08-1423:59:59' ORDERBY `hour` DESC LIMIT 1";
+//
+//        $sql = " SELECT `hour`, avg(stop_delay) as avg_stop_delay FROM `{$tableName}` force index(idx_updated_at) WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
+//        $query = $this->db->query($sql);
+//        $result = $query->result_array();
+//        if (empty($result)) {
+//
+//        }
+//        print_r($result);exit;
 
         //计算结果
-
         //写入redis中
     }
 }
