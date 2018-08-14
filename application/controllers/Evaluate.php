@@ -108,7 +108,6 @@ class Evaluate extends MY_Controller
      */
     public function getJunctionQuotaSortList()
     {
-        return $this->response([]);
         $params = $this->input->post();
         // 校验参数
         $validate = Validate::make($params, [

@@ -15,7 +15,7 @@ $config['real_time_quota'] = [
         'round'     => function($val) { return round($val, 5);},
     ],
     'queue_length' => [
-        'name'      => '排队长队',
+        'name'      => '排队长度',
         'unit'      => '米',
         'round'     => function($val) { return round($val);},
     ],
@@ -80,7 +80,8 @@ $config['alarm_formula'] = function($val) {
     $res = [];
     if (array_key_exists('spillover_rate', $val)
         && $val['spillover_rate'] >= 0.2
-        && $val['traj_count'] >= 10) {
+        && $val['traj_count'] >= 10)
+    {
         array_push($res, 1);
     }
 
