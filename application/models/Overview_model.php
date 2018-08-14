@@ -55,12 +55,17 @@ class Overview_model extends CI_Model
 
         $table = 'real_time_' . $data['city_id'];
 
-        $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
-            ->from($table)
-            ->where('updated_at >=', $data['date'] . ' 00:00:00')
-            ->where('updated_at <=', $data['date'] . ' 23:59:59')
-            ->group_by('hour')
-            ->get()->result_array();
+        $result = $this->redis_model->getData('its_realtime_avg_stop_delay_' . $data['city_id'] . '_' . $data['date']);
+
+        if(!$result) {
+            $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
+                ->from($table)
+                ->where('updated_at >=', $data['date'] . ' 00:00:00')
+                ->where('updated_at <=', $data['date'] . ' 23:59:59')
+                ->group_by('hour')
+                ->get()->result_array();
+        }
+
 
         $realTimeQuota = $this->config->item('real_time_quota');
 
