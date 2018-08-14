@@ -17,12 +17,6 @@ class Overviewtoplist_model extends CI_Model
             $this->db = $this->load->database('default', true);
         }
 
-        $is_existed = $this->db->table_exists($this->tb);
-        if (!$is_existed) {
-            // 添加日志
-            return [];
-        }
-
         $this->load->config('realtime_conf');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
