@@ -79,7 +79,7 @@ $hostname = '100.90.164.31';
 $username = 'root';
 $password = 'Znjty@Didi@2017';
 $database = 'its_tool';
-$port = 8004;
+$port = 3306;
 
 $db['default'] = array(
     'dsn'   => '',
