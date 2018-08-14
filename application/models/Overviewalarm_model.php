@@ -186,7 +186,7 @@ class Overviewalarm_model extends CI_Model
         $result = [];
         $nowTime = time();
         $where = 'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"';
-        $where .= "{$nowTime} - UNIX_TIMESTAMP(last_time) <= 600";
+        $where .= " and {$nowTime} - UNIX_TIMESTAMP(last_time) <= 600";
         $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
         $this->db->from($this->tb);
         $this->db->where($where);
