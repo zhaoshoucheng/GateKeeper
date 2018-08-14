@@ -60,8 +60,8 @@ class Realtimewarning_model extends CI_Model
         $logicJunctionId = $val['logic_junction_id'];
         $logicFlowId = $val['logic_flow_id'];
         $realtimeUpatetime = $val['updated_at'];
-        $this->db->reconnect();
-        $this->db->trans_begin();
+        //$this->db->reconnect();
+        //$this->db->trans_begin();
         try {
             //判断数据是否存在?
             $warnRecord = $this->db->select("id, start_time, last_time")->from('real_time_alarm')
@@ -110,9 +110,9 @@ class Realtimewarning_model extends CI_Model
                 $this->db->update('real_time_alarm');
                 echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=".$traceId."||junction_id=".$logicJunctionId."||flow_id=".$logicFlowId."||message=update\n\r";
             }
-            $this->db->trans_commit();
+            //$this->db->trans_commit();
         } catch (\Exception $e) {
-            $this->db->trans_rollback();
+            //$this->db->trans_rollback();
             echo "[ERROR] " . date("Y-m-d\TH:i:s") . " trace_id=".$traceId."||junction_id=".$logicJunctionId."||flow_id=".$logicFlowId."||message=".$e->getMessage()."\n\r";
             com_log_warning('_realtimewarning_updatewarning_error', 0, $e->getMessage(), compact("val", "type", "date", "cityId", "traceId"));
         }
@@ -137,7 +137,7 @@ class Realtimewarning_model extends CI_Model
             $result = $query->result_array();
             if (empty($result)) {
                 echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=$traceId||sql=$sql||message=loop over!\n\r";
-                exit;
+                break;
             }
             foreach ($result as $var => $val) {
                 $currentId = $val["id"];
@@ -150,6 +150,41 @@ class Realtimewarning_model extends CI_Model
                 //sleep(10);
             }
         }
-        echo "processed";
+    }
+
+    /**
+     * 指标计算
+     * @param $cityId
+     * @param $date
+     * @param $hour
+     * @param $traceId
+     */
+    public function calculate($cityId, $date, $hour, $traceId)
+    {
+        $rtwRule = $this->config->item('realtimewarning_rule');
+        $rtwRule = empty($rtwRule[$cityId]) ? $rtwRule['default'] : $rtwRule[$cityId];
+        $tableName = "real_time_" . $cityId;
+        $isExisted = $this->db->table_exists($tableName);
+        if (!$isExisted) {
+            echo "{$tableName} not exists!\n\r";
+            exit;
+        }
+
+        //todo生成rediskey
+        //key = its_realtime_avg_stop_delay_2018-08-14
+        $sql = "SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} {$rtwRule['where']} order by id asc limit 1000";
+
+        echo $sql;
+        $query = $this->db->query($sql);
+        $result = $query->result_array();
+        if (empty($result)) {
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=$traceId||sql=$sql||message=loop over!\n\r";
+            exit;
+        }
+
+
+        //计算结果
+
+        //写入redis中
     }
 }
