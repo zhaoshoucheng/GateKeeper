@@ -107,7 +107,6 @@ class Overview extends MY_Controller
     */
     public function getCongestionInfo()
     {
-        return $this->response([]);
         $params = $this->input->post();
         // 校验参数
         $validate = Validate::make($params, [
