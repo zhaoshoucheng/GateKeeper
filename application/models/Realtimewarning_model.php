@@ -178,14 +178,18 @@ class Realtimewarning_model extends CI_Model
         $this->redis_model->setEx($redisKey, $hour, 24*3600);
 
         //生成 avg(stop_delay) group by hour
-        $sql = " SELECT `hour`, sum(stop_delay * traj_count) / sum(traj_count) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
-        $query = $this->db->query($sql); 
-        $result = $query->result_array();
-        if (empty($result)) {
-            echo "生成 avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
-            exit;
+        $splitHour = explode(':',$hour);
+        $limitMinus = [5,6,7];  //只在分钟级的5-7之间执行
+        if(isset($splitHour[1][1]) && in_array($splitHour[1][1],$limitMinus)){
+            $sql = " SELECT `hour`, sum(stop_delay * traj_count) / sum(traj_count) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
+            $query = $this->db->query($sql);
+            $result = $query->result_array();
+            if (empty($result)) {
+                echo "生成 avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
+                exit;
+            }
+            $avgStopDelayKey = "its_realtime_avg_stop_delay_{$cityId}_{$date}";
+            $this->redis_model->setEx($avgStopDelayKey, json_encode($result), 24*3600);
         }
-        $avgStopDelayKey = "its_realtime_avg_stop_delay_{$cityId}_{$date}";
-        $this->redis_model->setEx($avgStopDelayKey, json_encode($result), 24*3600);
     }
 }
