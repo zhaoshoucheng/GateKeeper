@@ -203,7 +203,6 @@ class Realtimewarning_model extends CI_Model
             $data = $this->db->select('*')
                 ->from($tableName)
                 ->where('hour', $hour)
-                ->where('traj_count >=', 10)
                 ->where('updated_at >=', $date . ' 00:00:00')
                 ->where('updated_at <=', $date . ' 23:59:59')
                 ->limit($value, $offset)
