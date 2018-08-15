@@ -301,18 +301,9 @@ class Overview_model extends CI_Model
     {
         $alarmCategory = $this->config->item('alarm_category');
 
-        $alarmFormula = $this->config->item('alarm_formula');
-
-        $result = $alarmFormula($item);
-
-        $result = array_map(function ($v) use ($item, $flowsInfo, $alarmCategory, $realTimeAlarmsInfo) {
-
-            return isset($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']]) ?
+        return isset($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']]) ?
                 $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-' . $alarmCategory[$realTimeAlarmsInfo[$item['logic_flow_id']]['type']]['name']
                 : [];
-            }, $result);
-
-        return $result;
     }
 
     /**
