@@ -42,14 +42,7 @@ class Overview_model extends CI_Model
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
             ->get()->result_array();
 
-        $realTimeAlarmsInfo = $this->db->select('type, logic_junction_id, logic_flow_id')
-            ->from('real_time_alarm')
-            ->where('city_id', $data['city_id'])
-            ->where('date', $data['date'])
-            ->where(time() . ' - UNIX_TIMESTAMP(last_time) <=', 130)
-            ->get()->result_array();
-
-        $realTimeAlarmsInfo = $this->formatRealTimeAlarmsInfo($realTimeAlarmsInfo);
+        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
 
         $result = $this->getJunctionListResult($data['city_id'], $result, $realTimeAlarmsInfo);
 
@@ -99,10 +92,11 @@ class Overview_model extends CI_Model
 
     public function junctionSurvey($data)
     {
-        //$data = $this->junctionsList($data);        $data = $data['dataList'] ?? [];
         $table = $this->tb . $data['city_id'];
 
         $hour = $this->getLastestHour($data['city_id'], $data['date']);
+
+        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, 'logic_junction_id');
 
         $result = $this->db->select('*')
             ->from($table)
@@ -110,12 +104,12 @@ class Overview_model extends CI_Model
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
             ->get()->result_array();
+
         //数组初步处理，去除无用数据
         $result = array_map(function ($item) {
             return [
                 'logic_junction_id' => $item['logic_junction_id'],
                 'quota' => $this->getRawQuotaInfo($item),
-                'alarm_info' => $this->getRawAlarmInfo($item, []),
             ];
         }, $result);
 
@@ -132,7 +126,6 @@ class Overview_model extends CI_Model
             return [
                 'jid' => $item['logic_junction_id'],
                 'quota' => ($quota = $this->getFinalQuotaInfo($item)),
-                'alarm' => $this->getFinalAlarmInfo($item),
                 'status' => $this->getJunctionStatus($quota),
             ];
         }, $temp);
@@ -142,11 +135,10 @@ class Overview_model extends CI_Model
         $result = [];
 
         $result['junction_total']   = count($data);
-        $result['alarm_total']      = 0;
+        $result['alarm_total']      = count(array_unique(array_keys($realTimeAlarmsInfo)));
         $result['congestion_total'] = 0;
 
         foreach ($data as $datum) {
-            $result['alarm_total']      += $datum['alarm']['is'];
             $result['congestion_total'] += (int)($datum['status']['key'] == 3);
         }
 
@@ -244,9 +236,16 @@ class Overview_model extends CI_Model
         ];
     }
 
-    private function formatRealTimeAlarmsInfo($realTimeAlarmsInfo)
+    private function getRealTimeAlarmsInfo($data, $key = 'logic_flow_id')
     {
-        return array_column($realTimeAlarmsInfo, null, 'logic_flow_id');
+        $realTimeAlarmsInfo = $this->db->select('type, logic_junction_id, logic_flow_id')
+            ->from('real_time_alarm')
+            ->where('city_id', $data['city_id'])
+            ->where('date', $data['date'])
+            ->where(time() . ' - UNIX_TIMESTAMP(last_time) <=', 130)
+            ->get()->result_array();
+
+        return array_column($realTimeAlarmsInfo, null, $key);
     }
 
     /**
@@ -350,8 +349,10 @@ class Overview_model extends CI_Model
         $target['quota']['stop_time_cycle']   = max($target['quota']['stop_time_cycle'], $item['quota']['stop_time_cycle']);
         $target['quota']['traj_count']        += $item['quota']['traj_count'];
 
-        //合并报警信息
-        $target['alarm_info'] = array_merge($target['alarm_info'], $item['alarm_info']) ?? [];
+        if(isset($target['alarm_info'])) {
+            //合并报警信息
+            $target['alarm_info'] = array_merge($target['alarm_info'], $item['alarm_info']) ?? [];
+        }
 
         return $target;
     }
