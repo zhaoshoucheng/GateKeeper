@@ -191,5 +191,28 @@ class Realtimewarning_model extends CI_Model
             $avgStopDelayKey = "its_realtime_avg_stop_delay_{$cityId}_{$date}";
             $this->redis_model->setEx($avgStopDelayKey, json_encode($result), 24*3600);
         }
+
+        //缓存 指定 hour 实时指标全部信息
+        // key = its_realtime_junction_list_{$cityId}_{$date}_{$hour}
+
+        $result = [];
+        $offset = 0;
+        $value = 100;
+
+        while (true) {
+            $data = $this->db->select('*')
+                ->from($tableName)
+                ->where('hour', $hour)
+                ->where('traj_count >=', 10)
+                ->where('updated_at >=', $date . ' 00:00:00')
+                ->where('updated_at <=', $date . ' 23:59:59')
+                ->limit($value, $offset)
+                ->get()->result_array();
+
+            $result = array_merge($result, $data);
+        }
+
+        $junctionListKey = "its_realtime_junction_list_{$cityId}_{$date}_{$hour}";
+        $this->redis_model->setEx($junctionListKey, json_encode($result), 3 * 60);
     }
 }

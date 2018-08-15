@@ -34,13 +34,7 @@ class Overview_model extends CI_Model
 
         $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
-        $result = $this->db->select('*')
-            ->from($table)
-            ->where('hour', $hour)
-            ->where('traj_count >=', 10)
-            ->where('updated_at >=', $data['date'] . ' 00:00:00')
-            ->where('updated_at <=', $data['date'] . ' 23:59:59')
-            ->get()->result_array();
+        $result = $this->getJunctionList($data['city_id'], $data['date'], $hour);
 
         $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
 
@@ -90,6 +84,11 @@ class Overview_model extends CI_Model
         ];
     }
 
+    /**
+     * 路口概况接口
+     * @param $data
+     * @return array
+     */
     public function junctionSurvey($data)
     {
 //        $table = $this->tb . $data['city_id'];
@@ -190,6 +189,31 @@ class Overview_model extends CI_Model
     }
 
     /**
+     * 从缓存中取全部路口信息数据
+     *
+     * @param $cityId
+     * @param $date
+     * @param $hour
+     * @return string
+     */
+    private function getJunctionList($cityId, $date, $hour)
+    {
+        $junctionListKey = "its_realtime_junction_list_{$cityId}_{$date}_{$hour}";
+
+        if(($junctionList = $this->redis_model->getData($junctionListKey))) {
+            return $junctionListKey;
+        }
+
+        return $this->db->select('*')
+            ->from($this->tb . $cityId)
+            ->where('hour', $hour)
+            ->where('traj_count >=', 10)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->get()->result_array();
+    }
+
+    /**
      * 处理从数据库中取出的原始数据并返回
      *
      * @param $result
@@ -251,6 +275,13 @@ class Overview_model extends CI_Model
         ];
     }
 
+    /**
+     * 获取实时指标表中的报警信息
+     *
+     * @param $data
+     * @param string $key
+     * @return array
+     */
     private function getRealTimeAlarmsInfo($data, $key = 'logic_flow_id')
     {
         $realTimeAlarmsInfo = $this->db->select('type, logic_junction_id, logic_flow_id')
