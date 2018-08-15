@@ -46,7 +46,7 @@ class Overview_model extends CI_Model
             ->from('real_time_alarm')
             ->where('city_id', $data['city_id'])
             ->where('date', $data['date'])
-            ->where(time() . ' - UNIX_TIMESTAMP(last_time) <=', 180)
+            ->where(time() . ' - UNIX_TIMESTAMP(last_time) <=', 130)
             ->get()->result_array();
 
         $realTimeAlarmsInfo = $this->formatRealTimeAlarmsInfo($realTimeAlarmsInfo);
