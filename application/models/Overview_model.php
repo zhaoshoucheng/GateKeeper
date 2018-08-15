@@ -37,6 +37,7 @@ class Overview_model extends CI_Model
         $result = $this->db->select('*')
             ->from($table)
             ->where('hour', $hour)
+            ->where('traj_count >=', 10)
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
             ->get()->result_array();
