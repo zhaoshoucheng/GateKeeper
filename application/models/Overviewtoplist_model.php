@@ -88,7 +88,7 @@ class Overviewtoplist_model extends CI_Model
                 'logic_junction_id' => $item['logic_junction_id'],
                 'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
                 'logic_flow_id' => $item['logic_flow_id'],
-                'flow_name' => $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']],
+                'flow_name' => $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] ?? '未知方向',
                 'stop_time_cycle' => $realTimeQuota['stop_time_cycle']['round']($item['stop_time_cycle']),
                 'quota_unit' => $realTimeQuota['stop_time_cycle']['unit']
             ];
