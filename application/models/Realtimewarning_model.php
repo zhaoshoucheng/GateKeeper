@@ -178,7 +178,7 @@ class Realtimewarning_model extends CI_Model
         $this->redis_model->setEx($redisKey, $hour, 24*3600);
 
         //生成 avg(stop_delay) group by hour
-        $sql = " SELECT `hour`, avg(stop_delay) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
+        $sql = " SELECT `hour`, sum(stop_delay * traj_count) / sum(traj_count) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
         $query = $this->db->query($sql); 
         $result = $query->result_array();
         if (empty($result)) {
