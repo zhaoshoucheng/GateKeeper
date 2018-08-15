@@ -24,12 +24,12 @@ class Overviewtoplist_model extends CI_Model
 
     public function stopDelayTopList($data)
     {
-        return $this->topList('stop_delay', $data, 'avg');
+        return $this->topList('stop_delay', $data, 'sum(stop_delay * traj_count) / sum(traj_count)');
     }
 
     public function stopTimeCycleTopList($data)
     {
-        return $this->topList('stop_time_cycle', $data, 'max');
+        return $this->topList('stop_time_cycle', $data, 'max(stop_time_cycle)');
     }
 
     /**
@@ -40,20 +40,20 @@ class Overviewtoplist_model extends CI_Model
      * @param $method max|sum|avg
      * @return array
      */
-    private function topList($column, $data, $method)
+    private function topList($column, $data, $select)
     {
         $table = $this->tb . $data['city_id'];
 
         $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
-        $result = $this->db->select('logic_junction_id, hour, ' . $method . '(' . $column . ') as ' . $column)
+        $result = $this->db->select('logic_junction_id, hour, ' . $select . ' as ' . $column)
             ->from($table)
-            ->where('updated_at >=', $data['date'] . ' 00:00:00')
-            ->where('updated_at <=', $data['date'] . ' 23:59:59')
             ->where('hour', $hour)
             ->where('traj_count >=', 10)
+            ->where('updated_at >=', $data['date'] . ' 00:00:00')
+            ->where('updated_at <=', $data['date'] . ' 23:59:59')
             ->group_by('logic_junction_id')
-            ->order_by($method . '(' . $column . ')', 'desc')
+            ->order_by($select, 'desc')
             ->limit($data['pagesize'])
             ->get()->result_array();
 
