@@ -28,10 +28,13 @@ class Realtimewarning_model extends CI_Model
      * @return bool
      */
     public function isOverFlow($record,$rule){
-        if(!isset($rule['isOverFlow']['spillover_rate'])){
+        if(!isset($rule['isOverFlow']['spillover_rate']) || !isset($rule['isOverFlow']['stop_delay'])){
             return false;
         }
-        if(!empty($record["spillover_rate"]) && $record["spillover_rate"]>=$rule['isOverFlow']['spillover_rate']){
+        if(!isset($record["spillover_rate"]) || !isset($record["stop_delay"])){
+            return false;
+        }
+        if($record["spillover_rate"]>=$rule['isOverFlow']['spillover_rate'] && $record["stop_delay"]>=$rule['isOverFlow']['stop_delay']){
             return true;
         }
         return false;
@@ -46,7 +49,7 @@ class Realtimewarning_model extends CI_Model
         if(!isset($rule['isSAT']['twice_stop_rate']) || !isset($rule['isSAT']['queue_length']) || !isset($rule['isSAT']['stop_delay'])){
             return false;
         }
-        if(empty($record["twice_stop_rate"] || $record["queue_length"] || $record["stop_delay"])){
+        if(!isset($record["twice_stop_rate"]) || !isset($record["queue_length"]) || !isset($record["stop_delay"])){
             return false;
         }
         if($record["twice_stop_rate"]>=$rule['isSAT']['twice_stop_rate'] && $record["queue_length"]>=$rule['isSAT']['queue_length'] && $record["stop_delay"]>=$rule['isSAT']['stop_delay']){
