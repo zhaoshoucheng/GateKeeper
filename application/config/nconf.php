@@ -384,7 +384,7 @@ $config['diagnose_key'] = [
     'over_saturation'   => [
         'name'                      => '过饱和',
         'junction_diagnose_formula' => function($val) { return $val > 0.9;},
-        'sql_where' => function() { return '`saturation_index` > 1';},
+        'sql_where' => function() { return '`saturation_index` > 0.9';},
         'nature_formula'  => function($val) {
             if ($val > 1.2) {
                 return 1;
