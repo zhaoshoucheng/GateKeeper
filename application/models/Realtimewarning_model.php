@@ -178,8 +178,8 @@ class Realtimewarning_model extends CI_Model
         $this->redis_model->setEx($redisKey, $hour, 24*3600);
 
         //生成 avg(stop_delay) group by hour
-        $sql = " SELECT `hour`, avg(stop_delay) as avg_stop_delay FROM `{$tableName}` force index(idx_updated_at) WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
-        $query = $this->db->query($sql);
+        $sql = " SELECT `hour`, avg(stop_delay) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
+        $query = $this->db->query($sql); 
         $result = $query->result_array();
         if (empty($result)) {
             echo "生成 avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
