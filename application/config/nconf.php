@@ -465,6 +465,7 @@ $config['realtimewarning_rule'] = [
     'default' =>[
         'isOverFlow'=>[
             'spillover_rate'=>0.2,
+            'stop_delay'=>40,
         ],
         'isSAT'=>[
             'twice_stop_rate'=>0.2,
@@ -476,6 +477,7 @@ $config['realtimewarning_rule'] = [
     '12' =>[
         'isOverFlow'=>[
             'spillover_rate'=>0.2,
+            'stop_delay'=>40,
         ],
         'isSAT'=>[
             'twice_stop_rate'=>0.2,
