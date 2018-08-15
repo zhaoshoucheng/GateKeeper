@@ -69,6 +69,27 @@ class Redis_model extends CI_Model
     }
 
     /**
+     * 设置时效
+     * @param $key   string   key
+     * @param $value  json   value
+     * @param $time  interger 秒
+     * @return bool
+     */
+    public function setEx($key, $value, $time)
+    {
+        if (!$this->redis) {
+            return false;
+        }
+        try {
+            $this->redis->setex($key, $time, $value);
+        } catch (RedisException $e) {
+            print_r($e->getMessage());exit;
+            return false;
+        }
+        return true;
+    }
+
+    /**
     * 设置时效
     * @param $key   string   key
     * @param $time  interger 秒
@@ -149,6 +170,23 @@ class Redis_model extends CI_Model
 
         try {
             $this->redis->srem($key, $member);
+        } catch  (RedisException $e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 删除集合
+     */
+    public function delList($key)
+    {
+        if (!$this->redis) {
+            return false;
+        }
+
+        try {
+            $this->redis->del($key);
         } catch  (RedisException $e) {
             return false;
         }

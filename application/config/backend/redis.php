@@ -5,10 +5,7 @@ $config['redis'] = array(
         'timeout'=>0.1,
         'password'=>NULL,
         'servers'=>array(
-            array('host'=>"100.69.139.14","port"=>"3660"),
-            array('host'=>"100.69.138.23","port"=>"3660"),
-            array('host'=>"100.69.101.52","port"=>"3660"),
-            array('host'=>"100.69.143.14","port"=>"3660"),
+            array('host'=>"100.69.239.57","port"=>"3060"),
         )
     ),
 );

@@ -418,7 +418,7 @@ class Timing_model extends CI_Model
         }
 
         $position = ['东'=>1, '西'=>2, '南'=>3, '北'=>4];
-        $turn = ['直'=>1, '左'=>2, '右'=>3];
+        $turn = ['直'=>1, '左'=>2, '右'=>3, '掉头'=>4];
         $phase_position = [];
         $temp_arr = [];
         foreach ($data as $k=>$v) {

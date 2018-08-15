@@ -200,6 +200,7 @@ class Task_model extends CI_Model
                     ));
                     $content = "{$task_id} {$dates} mapversion unready.";
                     sendMail($this->to, $this->subject, $content);
+                    $this->its_tool->trans_commit();
                     return true;
                 }
             }
