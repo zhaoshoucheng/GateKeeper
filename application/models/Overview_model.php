@@ -349,8 +349,10 @@ class Overview_model extends CI_Model
         $target['quota']['stop_time_cycle']   = max($target['quota']['stop_time_cycle'], $item['quota']['stop_time_cycle']);
         $target['quota']['traj_count']        += $item['quota']['traj_count'];
 
-        //合并报警信息
-        $target['alarm_info'] = array_merge($target['alarm_info'], $item['alarm_info']) ?? [];
+        if(isset($target['alarm_info'])) {
+            //合并报警信息
+            $target['alarm_info'] = array_merge($target['alarm_info'], $item['alarm_info']) ?? [];
+        }
 
         return $target;
     }
