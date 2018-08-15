@@ -383,14 +383,14 @@ $config['diagnose_key'] = [
     ],
     'over_saturation'   => [
         'name'                      => '过饱和',
-        'junction_diagnose_formula' => function($val) { return $val > 0.9;},
-        'sql_where' => function() { return '`saturation_index` > 0.9';},
+        'junction_diagnose_formula' => function($val) { return $val > 1;},
+        'sql_where' => function() { return '`saturation_index` > 1';},
         'nature_formula'  => function($val) {
-            if ($val > 1.2) {
+            if ($val > 1.5) {
                 return 1;
-            } else if ($val > 1 && $val <= 1.2) {
+            } else if ($val > 1.2 && $val <= 1.5) {
                 return 2;
-            } else if ($val > 0.9 && $val < 1) {
+            } else if ($val > 1 && $val <= 1.2) {
                 return 3;
             } else {
                 return 0;
