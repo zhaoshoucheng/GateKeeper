@@ -209,6 +209,10 @@ class Realtimewarning_model extends CI_Model
                 ->limit($value, $offset)
                 ->get()->result_array();
 
+            if(empty($data)) {
+                break;
+            }
+
             $result = array_merge($result, $data);
         }
 
