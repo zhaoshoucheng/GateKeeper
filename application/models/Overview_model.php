@@ -201,7 +201,7 @@ class Overview_model extends CI_Model
         $junctionListKey = "its_realtime_junction_list_{$cityId}_{$date}_{$hour}";
 
         if(($junctionList = $this->redis_model->getData($junctionListKey))) {
-            return $junctionListKey;
+            return json_decode($junctionList, true);
         }
 
         return $this->db->select('*')
