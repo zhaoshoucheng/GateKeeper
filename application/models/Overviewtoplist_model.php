@@ -78,7 +78,7 @@ class Overviewtoplist_model extends CI_Model
 
         $junctionIdNames = $this->waymap_model->getJunctionInfo($ids, ['key' => 'logic_junction_id', 'value' => 'name']);
 
-        $flowsInfo = $this->waymao_model->getFlowsInfo($ids);
+        $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
 
         $realTimeQuota = $this->config->item('real_time_quota');
 
