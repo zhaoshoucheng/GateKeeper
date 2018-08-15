@@ -121,11 +121,19 @@ class Evaluate_model extends CI_Model
 
         $where = "hour = '{$lastHour}'";
 
-        $this->db->select("`logic_junction_id`, SUM({$data['quota_key']}) / count(logic_flow_id) as quota_value");
+        $orderby = '';
+        if ($data['quota_key'] == 'stop_delay') {
+            $this->db->select("`logic_junction_id`, SUM({$data['quota_key']} * traj_count) / sum(traj_count) as quota_value");
+            $orderby = "SUM({$data['quota_key']} * traj_count) / sum(traj_count) DESC";
+        } else {
+            $this->db->select("`logic_junction_id`, SUM({$data['quota_key']}) / count(logic_flow_id) as quota_value");
+            $orderby = '(SUM(' . $data['quota_key'] . ') / count(logic_flow_id)) DESC';
+        }
+
         $this->db->from($table);
         $this->db->where($where);
         $this->db->group_by('logic_junction_id');
-        $this->db->order_by('(SUM(' . $data['quota_key'] . ') / count(logic_flow_id)) DESC');
+        $this->db->order_by($orderby);
         $this->db->limit(100);
         $res = $this->db->get()->result_array();
         if (empty($res)) {
