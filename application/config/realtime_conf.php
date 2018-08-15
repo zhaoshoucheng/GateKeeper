@@ -52,9 +52,9 @@ $config['junction_status'] = [
 
 // 路口状态计算规则
 $config['junction_status_formula'] = function($val) {
-    if ($val >= 180) {
+    if ($val >= 50) {
         return 3; // 拥堵
-    } else if ($val < 180 && $val >= 90) {
+    } else if ($val < 50 && $val >= 40) {
         return 2; // 缓行
     } else {
         return 1; // 畅通
