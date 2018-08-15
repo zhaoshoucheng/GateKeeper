@@ -98,7 +98,8 @@ class Overview_model extends CI_Model
 
         $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, 'logic_junction_id');
 
-        $result = $this->db->select('*')
+        $result = $this->db->select('logic_junction_id, logic_flow_id, stop_time_cycle, spillover_rate, queue_length, stop_delay,
+        stop_rate, twice_stop_rate, traj_count')
             ->from($table)
             ->where('hour', $hour)
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
