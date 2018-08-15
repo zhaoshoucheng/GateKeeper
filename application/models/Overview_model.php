@@ -42,7 +42,16 @@ class Overview_model extends CI_Model
             ->where('updated_at <=', $data['date'] . ' 23:59:59')
             ->get()->result_array();
 
-        $result = $this->getJunctionListResult($data['city_id'], $result);
+        $realTimeAlarmsInfo = $this->db->select('type, logic_junction_id, logic_flow_id')
+            ->from('real_time_alarm')
+            ->where('city_id', $data['city_id'])
+            ->where('date', $data['date'])
+            ->where(time() . ' - UNIX_TIMESTAMP(last_time) <=', 180)
+            ->get()->result_array();
+
+        $realTimeAlarmsInfo = $this->formatRealTimeAlarmsInfo($realTimeAlarmsInfo);
+
+        $result = $this->getJunctionListResult($data['city_id'], $result, $realTimeAlarmsInfo);
 
         return $result;
     }
@@ -179,7 +188,7 @@ class Overview_model extends CI_Model
      * @param $result
      * @return array
      */
-    private function getJunctionListResult($cityId, $result)
+    private function getJunctionListResult($cityId, $result, $reslTimeAlarmsInfo)
     {
         //获取全部路口 ID
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
@@ -188,17 +197,17 @@ class Overview_model extends CI_Model
         $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0, ['key' => 'logic_junction_id', 'value' => ['name', 'lng', 'lat']]);
 
         //获取需要报警的全部路口ID
-        $ids = implode(',', $this->getAlarmFlowIds($result));
+        $ids = implode(',', array_column($reslTimeAlarmsInfo, 'logic_junction_id'));
 
-        //获取全部路口的全部方向的信息
+        //获取需要报警的全部路口的全部方向的信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
 
         //数组初步处理，去除无用数据
-        $result = array_map(function ($item) use ($flowsInfo) {
+        $result = array_map(function ($item) use ($flowsInfo, $reslTimeAlarmsInfo) {
             return [
                 'logic_junction_id' => $item['logic_junction_id'],
                 'quota' => $this->getRawQuotaInfo($item),
-                'alarm_info' => $this->getRawAlarmInfo($item, $flowsInfo),
+                'alarm_info' => $this->getRawAlarmInfo($item, $flowsInfo, $reslTimeAlarmsInfo),
             ];
         }, $result);
 
@@ -233,6 +242,11 @@ class Overview_model extends CI_Model
             'dataList' => array_values($temp),
             'center' => $center
         ];
+    }
+
+    private function formatRealTimeAlarmsInfo($realTimeAlarmsInfo)
+    {
+        return array_column($realTimeAlarmsInfo, null, 'logic_flow_id');
     }
 
     /**
@@ -276,23 +290,6 @@ class Overview_model extends CI_Model
     }
 
     /**
-     * 获取全部的报警flow的id
-     *
-     * @param $result
-     * @return array
-     */
-    private function getAlarmFlowIds($result)
-    {
-        $alarmFormula = $this->config->item('alarm_formula');
-
-        $result = array_filter($result, function ($value) use ($alarmFormula) {
-            return !empty($alarmFormula($value));
-        });
-
-        return array_unique(array_column($result, 'logic_junction_id'));
-    }
-
-    /**
      * 获取原始报警信息
      *
      * @param $item
@@ -300,7 +297,7 @@ class Overview_model extends CI_Model
      * @param $flowsInfo
      * @return array|string
      */
-    private function getRawAlarmInfo($item, $flowsInfo)
+    private function getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo)
     {
         $alarmCategory = $this->config->item('alarm_category');
 
@@ -308,9 +305,10 @@ class Overview_model extends CI_Model
 
         $result = $alarmFormula($item);
 
-        $result = array_map(function ($v) use ($item, $flowsInfo, $alarmCategory) {
+        $result = array_map(function ($v) use ($item, $flowsInfo, $alarmCategory, $realTimeAlarmsInfo) {
+
             return isset($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']]) ?
-                $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-' . $alarmCategory[$v]['name']
+                $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-' . $alarmCategory[$realTimeAlarmsInfo[$item['logic_flow_id']]['type']]['name']
                 : [];
             }, $result);
 
