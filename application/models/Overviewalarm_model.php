@@ -184,13 +184,13 @@ class Overviewalarm_model extends CI_Model
         }
 
         $result = [];
-        $nowTime = time();
+        $nowTime = date('Y-m-d H:i:s', (time() - 130));
         $where = 'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"';
-        $where .= " and {$nowTime} - UNIX_TIMESTAMP(last_time) <= 130";
+        $where .= " and last_time >= '{$nowTime}'";
         $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
         $this->db->from($this->tb);
         $this->db->where($where);
-        $this->db->order_by('type asc, (UNIX_TIMESTAMP(last_time) - UNIX_TIMESTAMP(start_time)) desc');
+        $this->db->order_by('type asc, (last_time - start_time) desc');
         $res = $this->db->get()->result_array();
         if (empty($res)) {
             return [];
