@@ -212,7 +212,7 @@ class Realtimewarning_model extends CI_Model
             if(empty($data)) {
                 break;
             }
-
+            $offset+=100;
             $result = array_merge($result, $data);
         }
 
