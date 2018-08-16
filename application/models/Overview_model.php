@@ -339,7 +339,7 @@ class Overview_model extends CI_Model
 
         if(isset($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']])) {
             foreach ($alarmCategory as $key => $value) {
-                if(array_key_exists($item['logic_flow_id']).$key) {
+                if(array_key_exists($item['logic_flow_id'].$key, $realTimeAlarmsInfo)) {
                     $result[] = $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] .
                         '-' . $value['name'];
                 }
