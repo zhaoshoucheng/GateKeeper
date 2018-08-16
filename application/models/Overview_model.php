@@ -197,7 +197,9 @@ class Overview_model extends CI_Model
     /**
      * 处理从数据库中取出的原始数据并返回
      *
+     * @param $cityId
      * @param $result
+     * @param $realTimeAlarmsInfo
      * @return array
      */
     private function getJunctionListResult($cityId, $result, $realTimeAlarmsInfo)
@@ -272,7 +274,13 @@ class Overview_model extends CI_Model
             ->where(time() . ' - UNIX_TIMESTAMP(last_time) <=', 130)
             ->get()->result_array();
 
-        return array_column($realTimeAlarmsInfo, null, $key);
+        $result = [];
+
+        foreach ($realTimeAlarmsInfo as $item) {
+            $result[$item['logic_flow_id'].$item['type']] = $item;
+        }
+
+        return $result;
     }
 
     /**
@@ -327,10 +335,18 @@ class Overview_model extends CI_Model
     {
         $alarmCategory = $this->config->item('alarm_category');
 
-        if(isset($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']]) && isset($realTimeAlarmsInfo[$item['logic_flow_id']]))
-            return [$flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] . '-' . $alarmCategory[$realTimeAlarmsInfo[$item['logic_flow_id']]['type']]['name']];
+        $result = [];
 
-        return [];
+        if(isset($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']])) {
+            foreach ($alarmCategory as $key => $value) {
+                if(array_key_exists($item['logic_flow_id']).$key) {
+                    $result[] = $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] .
+                        '-' . $value['name'];
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**
