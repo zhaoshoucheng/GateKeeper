@@ -189,6 +189,7 @@ class Overview_model extends CI_Model
         return $this->db->select('*')
             ->from($this->tb . $cityId)
             ->where('hour', $hour)
+            ->where('traj_count >=', 10)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->get()->result_array();
