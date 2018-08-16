@@ -223,7 +223,7 @@ class Realtimewarning_model extends CI_Model
 
         $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
 
-        $result = $this->getJunctionListResult($data['city_id'], $result, $realTimeAlarmsInfo);
+        $result = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
 
         $this->redis_model->setEx($junctionListKey, json_encode($result), 3 * 60);
     }
