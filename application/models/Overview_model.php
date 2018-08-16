@@ -91,52 +91,23 @@ class Overview_model extends CI_Model
      */
     public function junctionSurvey($data)
     {
-        $hour = $this->getLastestHour($data['city_id'], $data['date']);
+        $data = $this->junctionsList($data);
 
-        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
-
-        $junctionIds = array_column($realTimeAlarmsInfo, 'logic_junction_id');
-
-        $result = $this->getJunctionList($data['city_id'], $data['date'], $hour);
-
-        //数组初步处理，去除无用数据
-        $result = array_map(function ($item) {
-            return [
-                'logic_junction_id' => $item['logic_junction_id'],
-                'quota' => $this->getRawQuotaInfo($item),
-            ];
-        }, $result);
-
-        //数组按照 logic_junction_id 进行合并
-        $temp = [];
-        foreach($result as $item) {
-            $temp[$item['logic_junction_id']] = isset($temp[$item['logic_junction_id']]) ?
-                $this->mergeFlowInfo($temp[$item['logic_junction_id']], $item) :
-                $item;
-        };
-
-        //处理数据内容格式
-        $temp = array_map(function ($item) {
-            return [
-                'jid' => $item['logic_junction_id'],
-                'quota' => ($quota = $this->getFinalQuotaInfo($item)),
-                'status' => $this->getJunctionStatus($quota),
-            ];
-        }, $temp);
-
-        $data = $temp;
+        $data = $data['dataList'];
 
         $result = [];
 
         $result['junction_total']   = count($data);
-        $result['alarm_total']      = count(array_unique($junctionIds));
+        $result['alarm_total']      = 0;
         $result['congestion_total'] = 0;
 
         foreach ($data as $datum) {
-            $result['congestion_total'] += (int)($datum['status']['key'] == 3);
+            $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
         }
 
         return $result;
+
 
     }
 
