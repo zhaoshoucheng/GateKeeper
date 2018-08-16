@@ -63,6 +63,7 @@ class Realtimewarning extends CI_Controller
 
     public function process($cityId = '12', $hour = '00:00', $date = "", $traceId = "", $uid = "")
     {
+        sleep(10);
         ob_end_flush();
         date_default_timezone_set('Asia/Shanghai');
         if(!is_numeric($cityId)){
