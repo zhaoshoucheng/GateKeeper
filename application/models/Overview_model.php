@@ -30,15 +30,15 @@ class Overview_model extends CI_Model
      */
     public function junctionsList($data)
     {
-        $table = $this->tb . $data['city_id'];
-
+//        $table = $this->tb . $data['city_id'];
+//
         $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
         $result = $this->getJunctionList($data['city_id'], $data['date'], $hour);
 
-        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
-
-        $result = $this->getJunctionListResult($data['city_id'], $result, $realTimeAlarmsInfo);
+//        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
+//
+//        $result = $this->getJunctionListResult($data['city_id'], $result, $realTimeAlarmsInfo);
 
         return $result;
     }
