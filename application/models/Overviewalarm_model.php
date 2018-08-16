@@ -183,10 +183,14 @@ class Overviewalarm_model extends CI_Model
             return [];
         }
 
+        // 获取最近时间
+        $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
+        $lastTime = date('Y-m-d') . ' ' . $lastHour;
+        $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
+
         $result = [];
-        $nowTime = date('Y-m-d H:i:s', (time() - 130));
         $where = 'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"';
-        $where .= " and last_time >= '{$nowTime}'";
+        $where .= " and last_time >= '{$lastTime}' and last_time <= '{$cycleTime}'";
         $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
         $this->db->from($this->tb);
         $this->db->where($where);
@@ -259,5 +263,33 @@ class Overviewalarm_model extends CI_Model
         $result['dataList'] = array_values($result['dataList']);
 
         return $result;
+    }
+
+    /**
+     * 获取指定日期最新的数据时间
+     * @param $table
+     * @param null $date
+     * @return false|string
+     */
+    private function getLastestHour($cityId, $date = null)
+    {
+        if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
+            return $hour;
+        }
+
+        $date = $date ?? date('Y-m-d');
+
+        $result = $this->db->select('hour')
+            ->from('real_time_' . $cityId)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->order_by('hour', 'desc')
+            ->limit(1)
+            ->get()->first_row();
+
+        if(!$result)
+            return date('H:i:s');
+
+        return $result->hour;
     }
 }
