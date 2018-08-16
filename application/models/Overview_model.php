@@ -36,10 +36,6 @@ class Overview_model extends CI_Model
 
         $result = $this->getJunctionList($data['city_id'], $data['date'], $hour);
 
-        $result = array_filter($result, function ($item) {
-           return $item['traj_count'] >= 10;
-        });
-
         $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
 
         $result = $this->getJunctionListResult($data['city_id'], $result, $realTimeAlarmsInfo);
