@@ -220,7 +220,7 @@ class Realtimewarning_model extends CI_Model
         $data['date'] = $date;
         $data['city_id'] = $cityId;
 
-        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
+        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, $hour);
 
         $result = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
 
@@ -303,11 +303,10 @@ class Realtimewarning_model extends CI_Model
      * @param string $key
      * @return array
      */
-    private function getRealTimeAlarmsInfo($data)
+    private function getRealTimeAlarmsInfo($data, $hour)
     {
         // 获取最近时间
-        $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
-        $lastTime = date('Y-m-d') . ' ' . $lastHour;
+        $lastTime = date('Y-m-d') . ' ' . $hour;
         $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
 
         $where = 'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"';
