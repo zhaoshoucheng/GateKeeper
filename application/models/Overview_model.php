@@ -431,7 +431,8 @@ class Overview_model extends CI_Model
         );
 
         $date = $data['date'] . ' ' . $data['time_point'];
-        $where = "updated_at > '" . $data['date'] . " 00:00:00'";
+        $where = "updated_at >= '" . $data['date'] . " 00:00:00'";
+        $where = "updated_at <= '" . $data['date'] . " 23:59:59'";
         $where .= " and hour = '{$lastHour}' and traj_count >= 10";
         $this->db->from($table);
         $this->db->where($where);
