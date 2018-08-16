@@ -85,7 +85,7 @@ class Overviewalarm_model extends CI_Model
 
             $result['ratio'][$k] = [
                 'cate'  => $v['name'],
-                'ratio' => round(($num / $total) * 100 ). '%',
+                'ratio' => ($total >= 1) ? round(($num / $total) * 100 ) . '%' : '0%',
             ];
         }
 
