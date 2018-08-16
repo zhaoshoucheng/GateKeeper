@@ -137,22 +137,8 @@ class Overview_model extends CI_Model
         foreach ($data as $datum) {
             $result['congestion_total'] += (int)($datum['status']['key'] == 3);
         }
-//        $data = $this->junctionsList($data);
-//
-//        $data = $data['dataList'];
-//
-//        $result = [];
-//
-//        $result['junction_total']   = count($data);
-//        $result['alarm_total']      = 0;
-//        $result['congestion_total'] = 0;
-//
-//        foreach ($data as $datum) {
-//            $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
-//            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
-//         }
-//
-//        return $result;
+
+        return $result;
 
     }
 
