@@ -219,7 +219,7 @@ class Realtimewarning_model extends CI_Model
             $result = array_merge($result, $data);
         }
 
-        $junctionListKey = "its_realtime_junction_list_{$cityId}_{$date}_{$hour}";
+        $junctionListKey = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
 
         $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
 
