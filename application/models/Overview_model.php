@@ -424,22 +424,17 @@ class Overview_model extends CI_Model
          * 现数据表记录的是每个路口各相位的指标数据
          * 所以路口的停车延误指标计算暂时定为：路口各相位的(停车延误 * 轨迹数量)相加 / 路口各相位轨迹数量之和
          */
-        $this->db->select('SUM(`stop_delay` * `traj_count`) / SUM(`traj_count`) as stop_delay,
-            logic_junction_id,
-            hour,
-            updated_at'
-        );
+        $sql = '/*{"router":"m"}*/';
+        $sql .= 'select SUM(`stop_delay` * `traj_count`) / SUM(`traj_count`) as stop_delay';
+        $sql .= ', logic_junction_id, hour, updated_at ';
+        $sql .= 'from ' . $table;
+        $sql .= 'where updated_at >= ?';
+        $sql .= 'and updated_at <= ?';
+        $sql .= 'and hour = ?';
+        $sql .= 'and traj_count >= 10';
+        $sql .= 'group by hour, logic_junction_id';
+        $res = $this->db->query($sql, [$data['date'] . " 00:00:00", $data['date'] . " 23:59:59", $lastHour]);
 
-        $date = $data['date'] . ' ' . $data['time_point'];
-        $where = "updated_at >= '" . $data['date'] . " 00:00:00'";
-        $where = "updated_at <= '" . $data['date'] . " 23:59:59'";
-        $where .= " and hour = '{$lastHour}' and traj_count >= 10";
-        $this->db->from($table);
-        $this->db->where($where);
-        $this->db->group_by('hour, logic_junction_id');
-        $res = $this->db->get();
-
-        $res = $res->result_array();
         if (empty($res)) {
             return [];
         }
