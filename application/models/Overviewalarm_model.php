@@ -85,7 +85,7 @@ class Overviewalarm_model extends CI_Model
 
             $result['ratio'][$k] = [
                 'cate'  => $v['name'],
-                'ratio' => round(($num / $total) * 100 ). '%',
+                'ratio' => ($total >= 1) ? round(($num / $total) * 100 ) . '%' : '0%',
             ];
         }
 
@@ -253,6 +253,9 @@ class Overviewalarm_model extends CI_Model
             }
         }
 
+        if (empty($result['dataList'])) {
+            return [];
+        }
         $result['dataList'] = array_values($result['dataList']);
 
         return $result;
