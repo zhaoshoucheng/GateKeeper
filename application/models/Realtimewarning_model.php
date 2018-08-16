@@ -221,6 +221,11 @@ class Realtimewarning_model extends CI_Model
 
         $junctionListKey = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
 
+        $data = [];
+
+        $data['date'] = $date;
+        $data['city_id'] = $cityId;
+
         $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
 
         $result = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
