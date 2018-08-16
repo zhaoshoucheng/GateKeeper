@@ -466,9 +466,10 @@ class Waymap_model extends CI_Model
 
             $getQuery = [
                 'logic_junction_ids' => $junctionIds,
+                'user_id' => $this->config->item('waymap_userid'),
+                'token' => $this->config->item('waymap_token'),
             ];
-            $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase?token='
-                . $this->config->item('waymap_token') . '&userid=' . $this->config->item('waymap_userid');
+            $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
 
             $res = httpPOST($url, $getQuery);
 
