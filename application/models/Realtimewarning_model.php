@@ -220,7 +220,7 @@ class Realtimewarning_model extends CI_Model
         $data['date'] = $date;
         $data['city_id'] = $cityId;
 
-        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, $hour, $tableName);
+        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, $hour);
 
         $result = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
 
@@ -303,7 +303,7 @@ class Realtimewarning_model extends CI_Model
      * @param string $key
      * @return array
      */
-    private function getRealTimeAlarmsInfo($data, $hour, $tableName)
+    private function getRealTimeAlarmsInfo($data, $hour)
     {
         // 获取最近时间
         $lastTime = date('Y-m-d') . ' ' . $hour;
@@ -312,7 +312,7 @@ class Realtimewarning_model extends CI_Model
         $where = 'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"';
         $where .= " and last_time >= '{$lastTime}' and last_time <= '{$cycleTime}'";
         $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
-        $this->db->from($tableName);
+        $this->db->from("real_time_alarm");
         $this->db->where($where);
         $this->db->order_by('type asc, (last_time - start_time) desc');
         $realTimeAlarmsInfo = $this->db->get()->result_array();
