@@ -194,7 +194,7 @@ class Overview_model extends CI_Model
         $sql .= ' and hour = ?';
         $sql .= ' and traj_count >= 10';
         $sql .= ' group by hour, logic_junction_id';
-        $res = $this->db->query($sql, [$data['date'] . " 00:00:00", $data['date'] . " 23:59:59", $lastHour]);
+        $res = $this->db->query($sql, [$data['date'] . " 00:00:00", $data['date'] . " 23:59:59", $lastHour])->result_array();
 
         if (empty($res)) {
             return [];
