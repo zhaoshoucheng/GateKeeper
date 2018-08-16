@@ -19,6 +19,7 @@ class Overviewalarm_model extends CI_Model
         }
         $this->load->config('realtime_conf.php');
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
     }
 
     /**

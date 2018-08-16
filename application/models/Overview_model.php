@@ -426,13 +426,13 @@ class Overview_model extends CI_Model
          */
         $sql = '/*{"router":"m"}*/';
         $sql .= 'select SUM(`stop_delay` * `traj_count`) / SUM(`traj_count`) as stop_delay';
-        $sql .= ', logic_junction_id, hour, updated_at ';
-        $sql .= 'from ' . $table;
-        $sql .= 'where updated_at >= ?';
-        $sql .= 'and updated_at <= ?';
-        $sql .= 'and hour = ?';
-        $sql .= 'and traj_count >= 10';
-        $sql .= 'group by hour, logic_junction_id';
+        $sql .= ', logic_junction_id, hour, updated_at';
+        $sql .= ' from ' . $table;
+        $sql .= ' where updated_at >= ?';
+        $sql .= ' and updated_at <= ?';
+        $sql .= ' and hour = ?';
+        $sql .= ' and traj_count >= 10';
+        $sql .= ' group by hour, logic_junction_id';
         $res = $this->db->query($sql, [$data['date'] . " 00:00:00", $data['date'] . " 23:59:59", $lastHour]);
 
         if (empty($res)) {
