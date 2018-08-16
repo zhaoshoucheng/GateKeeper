@@ -93,7 +93,9 @@ class Overview_model extends CI_Model
     {
         $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
-        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, 'logic_junction_id');
+        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
+
+        $junctionIds = array_column($realTimeAlarmsInfo, 'logic_junction_id');
 
         $result = $this->getJunctionList($data['city_id'], $data['date'], $hour);
 
@@ -127,7 +129,7 @@ class Overview_model extends CI_Model
         $result = [];
 
         $result['junction_total']   = count($data);
-        $result['alarm_total']      = count(array_unique(array_keys($realTimeAlarmsInfo)));
+        $result['alarm_total']      = count(array_unique(array_keys($junctionIds)));
         $result['congestion_total'] = 0;
 
         foreach ($data as $datum) {
@@ -262,7 +264,7 @@ class Overview_model extends CI_Model
      * @param string $key
      * @return array
      */
-    private function getRealTimeAlarmsInfo($data, $key = 'logic_flow_id')
+    private function getRealTimeAlarmsInfo($data)
     {
         $realTimeAlarmsInfo = $this->db->select('type, logic_junction_id, logic_flow_id')
             ->from('real_time_alarm')
