@@ -203,14 +203,10 @@ class Realtimewarning_model extends CI_Model
         $value = 100;
 
         while (true) {
-            $data = $this->db->select('*')
-                ->from($tableName)
-                ->where('hour', $hour)
-                ->where('traj_count >=', 10)
-                ->where('updated_at >=', $date . ' 00:00:00')
-                ->where('updated_at <=', $date . ' 23:59:59')
-                ->limit($value, $offset)
-                ->get()->result_array();
+
+            $sql = "/*{\"router\":\"m\"}*/select * from $tableName where hour = $hour and traj_count >= 10 and updated_at >= '$date 00:00:00' and updated_at <= '$date 23:59:59' limit $value offset $offset";
+
+            $data = $this->db->query($sql)->result_array();
 
             if(empty($data)) {
                 break;
