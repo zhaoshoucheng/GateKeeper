@@ -95,8 +95,6 @@ class Overview_model extends CI_Model
      */
     public function junctionSurvey($data)
     {
-        $table = $this->tb . $data['city_id'];
-
         $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
         $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, 'logic_junction_id');
@@ -216,7 +214,7 @@ class Overview_model extends CI_Model
      * @param $result
      * @return array
      */
-    private function getJunctionListResult($cityId, $result, $reslTimeAlarmsInfo)
+    private function getJunctionListResult($cityId, $result, $realTimeAlarmsInfo)
     {
         //获取全部路口 ID
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
@@ -225,17 +223,17 @@ class Overview_model extends CI_Model
         $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0, ['key' => 'logic_junction_id', 'value' => ['name', 'lng', 'lat']]);
 
         //获取需要报警的全部路口ID
-        $ids = implode(',', array_column($reslTimeAlarmsInfo, 'logic_junction_id'));
+        $ids = implode(',', array_column($realTimeAlarmsInfo, 'logic_junction_id'));
 
         //获取需要报警的全部路口的全部方向的信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
 
         //数组初步处理，去除无用数据
-        $result = array_map(function ($item) use ($flowsInfo, $reslTimeAlarmsInfo) {
+        $result = array_map(function ($item) use ($flowsInfo, $realTimeAlarmsInfo) {
             return [
                 'logic_junction_id' => $item['logic_junction_id'],
                 'quota' => $this->getRawQuotaInfo($item),
-                'alarm_info' => $this->getRawAlarmInfo($item, $flowsInfo, $reslTimeAlarmsInfo),
+                'alarm_info' => $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo),
             ];
         }, $result);
 
