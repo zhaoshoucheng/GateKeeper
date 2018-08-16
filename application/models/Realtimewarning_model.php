@@ -67,7 +67,7 @@ class Realtimewarning_model extends CI_Model
         $logicFlowId = $val['logic_flow_id'];
         $realtimeUpatetime = $val['updated_at'];
         //$this->db->reconnect();
-        //$this->db->trans_begin();
+        $this->db->trans_begin();
         try {
             //判断数据是否存在?
             $warnRecord = $this->db->select("id, start_time, last_time")->from('real_time_alarm')
@@ -115,9 +115,9 @@ class Realtimewarning_model extends CI_Model
                 $this->db->update('real_time_alarm');
                 echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=".$traceId."||junction_id=".$logicJunctionId."||flow_id=".$logicFlowId."||message=update\n\r";
             }
-            //$this->db->trans_commit();
+            $this->db->trans_commit();
         } catch (\Exception $e) {
-            //$this->db->trans_rollback();
+            $this->db->trans_rollback();
             echo "[ERROR] " . date("Y-m-d\TH:i:s") . " trace_id=".$traceId."||junction_id=".$logicJunctionId."||flow_id=".$logicFlowId."||message=".$e->getMessage()."\n\r";
             com_log_warning('_realtimewarning_updatewarning_error', 0, $e->getMessage(), compact("val", "type", "date", "cityId", "traceId"));
         }
@@ -137,7 +137,7 @@ class Realtimewarning_model extends CI_Model
 
         $currentId = 0;
         while (1) {
-            $sql = "SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} {$rtwRule['where']} order by id asc limit 2000"; 
+            $sql = "/*{\"router\":\"m\"}*/SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} {$rtwRule['where']} order by id asc limit 2000";
             $query = $this->db->query($sql);
             $result = $query->result_array();
             if (empty($result)) {
@@ -177,14 +177,12 @@ class Realtimewarning_model extends CI_Model
 
         //todo生成rediskey
         $this->load->model('redis_model');
-        $redisKey = "its_realtime_lasthour_$cityId";
-        $this->redis_model->setEx($redisKey, $hour, 24*3600);
 
         //生成 avg(stop_delay) group by hour
         $splitHour = explode(':',$hour);
         $limitMinus = [5,6,7];  //只在分钟级的5-7之间执行
         if(isset($splitHour[1][1]) && in_array($splitHour[1][1],$limitMinus)){
-            $sql = " SELECT `hour`, sum(stop_delay * traj_count) / sum(traj_count) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
+            $sql = "/*{\"router\":\"m\"}*/SELECT `hour`, sum(stop_delay * traj_count) / sum(traj_count) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
             $query = $this->db->query($sql);
             $result = $query->result_array();
             if (empty($result)) {
@@ -227,6 +225,9 @@ class Realtimewarning_model extends CI_Model
         $result = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
 
         $this->redis_model->setEx($junctionListKey, json_encode($result), 3 * 60);
+
+        $redisKey = "its_realtime_lasthour_$cityId";
+        $this->redis_model->setEx($redisKey, $hour, 24*3600);
     }
 
     //================以下方法全部为数据处理方法=====================//
