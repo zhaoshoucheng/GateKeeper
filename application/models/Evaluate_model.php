@@ -132,6 +132,7 @@ class Evaluate_model extends CI_Model
 
         $this->db->from($table);
         $this->db->where($where);
+        $this->db->where('traj_count >=', 10);
         $this->db->group_by('logic_junction_id');
         $this->db->order_by($orderby);
         $this->db->limit(100);
