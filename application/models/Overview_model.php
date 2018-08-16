@@ -30,15 +30,9 @@ class Overview_model extends CI_Model
      */
     public function junctionsList($data)
     {
-//        $table = $this->tb . $data['city_id'];
-//
         $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
         $result = $this->getJunctionList($data['city_id'], $data['date'], $hour);
-
-//        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data);
-//
-//        $result = $this->getJunctionListResult($data['city_id'], $result, $realTimeAlarmsInfo);
 
         return $result;
     }
@@ -93,7 +87,7 @@ class Overview_model extends CI_Model
     {
         $data = $this->junctionsList($data);
 
-        $data = $data['dataList'];
+        $data = $data['dataList'] ?? [];
 
         $result = [];
 
@@ -155,13 +149,24 @@ class Overview_model extends CI_Model
             return json_decode($junctionList, true);
         }
 
-        return $this->db->select('*')
+        $data = $this->db->select('*')
             ->from($this->tb . $cityId)
             ->where('hour', $hour)
             ->where('traj_count >=', 10)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->get()->result_array();
+
+        $lngs = array_filter(array_column($data, 'lng'));
+        $lats = array_filter(array_column($data, 'lat'));
+
+        $center['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
+        $center['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
+
+        return [
+            'dataList' => $data,
+            'center' => $center
+        ];
     }
 
     /**
