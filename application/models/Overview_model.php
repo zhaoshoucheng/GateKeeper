@@ -95,72 +95,64 @@ class Overview_model extends CI_Model
      */
     public function junctionSurvey($data)
     {
-//        $table = $this->tb . $data['city_id'];
-//
-//        $hour = $this->getLastestHour($data['city_id'], $data['date']);
-//
-//        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, 'logic_junction_id');
-//
-//        $result = $this->db->select('logic_junction_id, logic_flow_id, stop_time_cycle, spillover_rate, queue_length, stop_delay,
-//        stop_rate, twice_stop_rate, traj_count')
-//            ->from($table)
-//            ->where('hour', $hour)
-//            ->where('updated_at >=', $data['date'] . ' 00:00:00')
-//            ->where('updated_at <=', $data['date'] . ' 23:59:59')
-//            ->get()->result_array();
-//
-//        //数组初步处理，去除无用数据
-//        $result = array_map(function ($item) {
-//            return [
-//                'logic_junction_id' => $item['logic_junction_id'],
-//                'quota' => $this->getRawQuotaInfo($item),
-//            ];
-//        }, $result);
-//
-//        //数组按照 logic_junction_id 进行合并
-//        $temp = [];
-//        foreach($result as $item) {
-//            $temp[$item['logic_junction_id']] = isset($temp[$item['logic_junction_id']]) ?
-//                $this->mergeFlowInfo($temp[$item['logic_junction_id']], $item) :
-//                $item;
-//        };
-//
-//        //处理数据内容格式
-//        $temp = array_map(function ($item) {
-//            return [
-//                'jid' => $item['logic_junction_id'],
-//                'quota' => ($quota = $this->getFinalQuotaInfo($item)),
-//                'status' => $this->getJunctionStatus($quota),
-//            ];
-//        }, $temp);
-//
-//        $data = $temp;
-//
-//        $result = [];
-//
-//        $result['junction_total']   = count($data);
-//        $result['alarm_total']      = count(array_unique(array_keys($realTimeAlarmsInfo)));
-//        $result['congestion_total'] = 0;
-//
-//        foreach ($data as $datum) {
-//            $result['congestion_total'] += (int)($datum['status']['key'] == 3);
-//        }
-        $data = $this->junctionsList($data);
+        $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
-        $data = $data['dataList'];
+        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, 'logic_junction_id');
+
+        $result = $this->getJunctionList($data['city_id'], $data['date'], $hour);
+
+        //数组初步处理，去除无用数据
+        $result = array_map(function ($item) {
+            return [
+                'logic_junction_id' => $item['logic_junction_id'],
+                'quota' => $this->getRawQuotaInfo($item),
+            ];
+        }, $result);
+
+        //数组按照 logic_junction_id 进行合并
+        $temp = [];
+        foreach($result as $item) {
+            $temp[$item['logic_junction_id']] = isset($temp[$item['logic_junction_id']]) ?
+                $this->mergeFlowInfo($temp[$item['logic_junction_id']], $item) :
+                $item;
+        };
+
+        //处理数据内容格式
+        $temp = array_map(function ($item) {
+            return [
+                'jid' => $item['logic_junction_id'],
+                'quota' => ($quota = $this->getFinalQuotaInfo($item)),
+                'status' => $this->getJunctionStatus($quota),
+            ];
+        }, $temp);
+
+        $data = $temp;
 
         $result = [];
 
         $result['junction_total']   = count($data);
-        $result['alarm_total']      = 0;
+        $result['alarm_total']      = count(array_unique(array_keys($realTimeAlarmsInfo)));
         $result['congestion_total'] = 0;
 
         foreach ($data as $datum) {
-            $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
-            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
-         }
-
-        return $result;
+            $result['congestion_total'] += (int)($datum['status']['key'] == 3);
+        }
+//        $data = $this->junctionsList($data);
+//
+//        $data = $data['dataList'];
+//
+//        $result = [];
+//
+//        $result['junction_total']   = count($data);
+//        $result['alarm_total']      = 0;
+//        $result['congestion_total'] = 0;
+//
+//        foreach ($data as $datum) {
+//            $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+//            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+//         }
+//
+//        return $result;
 
     }
 
@@ -222,7 +214,7 @@ class Overview_model extends CI_Model
      * @param $result
      * @return array
      */
-    private function getJunctionListResult($cityId, $result, $reslTimeAlarmsInfo)
+    private function getJunctionListResult($cityId, $result, $realTimeAlarmsInfo)
     {
         //获取全部路口 ID
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
@@ -231,17 +223,17 @@ class Overview_model extends CI_Model
         $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0, ['key' => 'logic_junction_id', 'value' => ['name', 'lng', 'lat']]);
 
         //获取需要报警的全部路口ID
-        $ids = implode(',', array_column($reslTimeAlarmsInfo, 'logic_junction_id'));
+        $ids = implode(',', array_column($realTimeAlarmsInfo, 'logic_junction_id'));
 
         //获取需要报警的全部路口的全部方向的信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
 
         //数组初步处理，去除无用数据
-        $result = array_map(function ($item) use ($flowsInfo, $reslTimeAlarmsInfo) {
+        $result = array_map(function ($item) use ($flowsInfo, $realTimeAlarmsInfo) {
             return [
                 'logic_junction_id' => $item['logic_junction_id'],
                 'quota' => $this->getRawQuotaInfo($item),
-                'alarm_info' => $this->getRawAlarmInfo($item, $flowsInfo, $reslTimeAlarmsInfo),
+                'alarm_info' => $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo),
             ];
         }, $result);
 
