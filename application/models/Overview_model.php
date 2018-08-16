@@ -129,7 +129,7 @@ class Overview_model extends CI_Model
         $result = [];
 
         $result['junction_total']   = count($data);
-        $result['alarm_total']      = count(array_unique(array_keys($junctionIds)));
+        $result['alarm_total']      = count(array_unique($junctionIds));
         $result['congestion_total'] = 0;
 
         foreach ($data as $datum) {
