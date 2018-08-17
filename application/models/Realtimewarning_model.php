@@ -213,7 +213,7 @@ class Realtimewarning_model extends CI_Model
 
         // 缓存 junctionSurvey 数据
 
-        $data = $result;
+        $data = $junctionList['dataList'] ?? [];
 
         $result = [];
 
