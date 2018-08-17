@@ -196,22 +196,9 @@ class Realtimewarning_model extends CI_Model
         //缓存 指定 hour 实时指标全部信息
         // key = its_realtime_junction_list_{$cityId}_{$date}_{$hour}
 
-        $result = [];
-        $offset = 0;
-        $value = 100;
+        $sql = "/*{\"router\":\"m\"}*/select * from $tableName where hour = '$hour' and traj_count >= 10 and updated_at >= '$date 00:00:00' and updated_at <= '$date 23:59:59'";
 
-        while (true) {
-
-            $sql = "/*{\"router\":\"m\"}*/select * from $tableName where hour = '$hour' and traj_count >= 10 and updated_at >= '$date 00:00:00' and updated_at <= '$date 23:59:59' limit $value offset $offset";
-
-            $data = $this->db->query($sql)->result_array();
-
-            if(empty($data)) {
-                break;
-            }
-            $offset+=100;
-            $result = array_merge($result, $data);
-        }
+        $result = $this->db->query($sql)->result_array();
 
         $junctionListKey = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
 
@@ -222,9 +209,30 @@ class Realtimewarning_model extends CI_Model
 
         $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, $hour);
 
-        $result = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
+        $junctionList = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
 
-        $this->redis_model->setEx($junctionListKey, json_encode($result), 3 * 60);
+        // 缓存 junctionSurvey 数据
+
+        $data = $result;
+
+        $result = [];
+
+        $result['junction_total']   = count($data);
+        $result['alarm_total']      = 0;
+        $result['congestion_total'] = 0;
+
+        foreach ($data as $datum) {
+            $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+        }
+
+        $junctionSurvey = $result;
+
+
+        $junctionSurveyKey = "its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
+
+        $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 4 * 60);
+        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 4 * 60);
 
         $redisKey = "its_realtime_lasthour_$cityId";
         $this->redis_model->setEx($redisKey, $hour, 24*3600);
