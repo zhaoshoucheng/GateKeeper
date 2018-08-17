@@ -231,8 +231,8 @@ class Realtimewarning_model extends CI_Model
 
         $junctionSurveyKey = "its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
 
-        $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 4 * 60);
-        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 4 * 60);
+        $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
+        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
 
         $redisKey = "its_realtime_lasthour_$cityId";
         $this->redis_model->setEx($redisKey, $hour, 24*3600);
@@ -320,7 +320,7 @@ class Realtimewarning_model extends CI_Model
         $where = 'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"';
         $where .= " and last_time >= '{$lastTime}' and last_time <= '{$cycleTime}'";
         $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
-        $this->db->from($this->tb);
+        $this->db->from("real_time_alarm");
         $this->db->where($where);
         $this->db->order_by('type asc, (last_time - start_time) desc');
         $realTimeAlarmsInfo = $this->db->get()->result_array();
