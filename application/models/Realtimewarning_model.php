@@ -308,7 +308,7 @@ class Realtimewarning_model extends CI_Model
      * 获取实时指标表中的报警信息
      *
      * @param $data
-     * @param string $key
+     * @param $hour
      * @return array
      */
     private function getRealTimeAlarmsInfo($data, $hour)
@@ -317,13 +317,11 @@ class Realtimewarning_model extends CI_Model
         $lastTime = date('Y-m-d') . ' ' . $hour;
         $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
 
-        $where = 'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"';
-        $where .= " and last_time >= '{$lastTime}' and last_time <= '{$cycleTime}'";
-        $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
-        $this->db->from("real_time_alarm");
-        $this->db->where($where);
-        $this->db->order_by('type asc, (last_time - start_time) desc');
-        $realTimeAlarmsInfo = $this->db->get()->result_array();
+        $sql = "/*{\"router\":\"m\"}*/select type, logic_junction_id, logic_flow_id, start_time, last_time from real_time_alarm where " .
+            'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"' . " and last_time >= '{$lastTime}' and last_time <= '{$cycleTime}'" .
+            'order by type asc, (last_time - start_time) desc';
+
+        $realTimeAlarmsInfo = $this->db->query($sql)->result_array();
 
         $result = [];
 
