@@ -210,22 +210,11 @@ class Realtimewarning_model extends CI_Model
         //缓存 指定 hour 实时指标全部信息
         // key = its_realtime_junction_list_{$cityId}_{$date}_{$hour}
 
-        $result = [];
-        $offset = 0;
-        $value = 100;
+        $sql = "/*{\"router\":\"m\"}*/select * from $tableName where hour = ? and traj_count >= ? and updated_at >= ? and updated_at <= ?";
 
-        while (true) {
+        $arr = [$hour, 10, $date.' 00:00:00', $date.' 23:59:59'];
 
-            $sql = "/*{\"router\":\"m\"}*/select * from $tableName where hour = '$hour' and traj_count >= 10 and updated_at >= '$date 00:00:00' and updated_at <= '$date 23:59:59' limit $value offset $offset";
-
-            $data = $this->db->query($sql)->result_array();
-
-            if(empty($data)) {
-                break;
-            }
-            $offset+=100;
-            $result = array_merge($result, $data);
-        }
+        $result = $this->db->query($sql, $arr)->result_array();
 
         $junctionListKey = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
 
@@ -236,9 +225,30 @@ class Realtimewarning_model extends CI_Model
 
         $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, $hour);
 
-        $result = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
+        $junctionList = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
 
-        $this->redis_model->setEx($junctionListKey, json_encode($result), 24 * 3600);
+        // 缓存 junctionSurvey 数据
+
+        $data = $junctionList['dataList'] ?? [];
+
+        $result = [];
+
+        $result['junction_total']   = count($data);
+        $result['alarm_total']      = 0;
+        $result['congestion_total'] = 0;
+
+        foreach ($data as $datum) {
+            $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+        }
+
+        $junctionSurvey = $result;
+
+
+        $junctionSurveyKey = "its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
+
+        $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
+        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
 
         $redisKey = "its_realtime_lasthour_$cityId";
         $this->redis_model->setEx($redisKey, $hour, 24*3600);
@@ -314,7 +324,7 @@ class Realtimewarning_model extends CI_Model
      * 获取实时指标表中的报警信息
      *
      * @param $data
-     * @param string $key
+     * @param $hour
      * @return array
      */
     private function getRealTimeAlarmsInfo($data, $hour)
@@ -323,13 +333,12 @@ class Realtimewarning_model extends CI_Model
         $lastTime = date('Y-m-d') . ' ' . $hour;
         $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
 
-        $where = 'city_id = ' . $data['city_id'] . ' and date = "' . $data['date'] . '"';
-        $where .= " and last_time >= '{$lastTime}' and last_time <= '{$cycleTime}'";
-        $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time');
-        $this->db->from("real_time_alarm");
-        $this->db->where($where);
-        $this->db->order_by('type asc, (last_time - start_time) desc');
-        $realTimeAlarmsInfo = $this->db->get()->result_array();
+        $sql = '/*{"router":"m"}*/select type, logic_junction_id, logic_flow_id, start_time, last_time from real_time_alarm where 
+            city_id = ? and date = ? and last_time >= ? and last_time <= ? order by type asc, (last_time - start_time) desc';
+
+        $arr = [$data['city_id'], $data['date'], $lastTime, $cycleTime];
+
+        $realTimeAlarmsInfo = $this->db->query($sql, $arr)->result_array();
 
         $result = [];
 

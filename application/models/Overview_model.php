@@ -85,6 +85,16 @@ class Overview_model extends CI_Model
      */
     public function junctionSurvey($data)
     {
+        $cityId = $data['city_id'];
+        $date = $data['date'];
+        $hour = $this->getLastestHour($data['city_id'], $data['date']);
+
+        $junctionSurveyKey = "its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
+
+        if(($result = $this->redis_model->getData($junctionSurveyKey))) {
+           return json_decode($result, true);
+        }
+
         $data = $this->junctionsList($data);
 
         $data = $data['dataList'] ?? [];
