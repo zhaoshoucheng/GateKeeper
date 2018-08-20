@@ -102,6 +102,6 @@ $db['default'] = array(
     'stricton' => FALSE,
     'failover' => array(),
     'save_queries' => TRUE,
-    'query_flag' => '',         //查询标记
+    'query_flag' => '0',         //查询标记
     'force_master' => FALSE,    //强制从主库查询
 );
