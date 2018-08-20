@@ -155,6 +155,20 @@ class Realtimewarning_model extends CI_Model
                 //sleep(10);
             }
         }
+
+        //删除30天前数据
+        $splitHour = explode(':',$hour);
+        $limitMinus = [3,4,5];                          //只在分钟级的0-2之间执行
+        if(isset($splitHour[0]) &&
+            $splitHour[0]=='00'  &&                     //小时
+            isset($splitHour[1][1]) &&
+            $splitHour[1][0]=='0' &&                    //分钟第一位
+            in_array($splitHour[1][1],$limitMinus)) {   //分钟第二位
+            $dtime = date("Y-m-d H:i:s", strtotime("-30 day"));
+            $sql = "DELETE FROM `real_time_alarm` WHERE `created_at`<'{$dtime}';";
+            $this->db->query($sql);
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=$traceId||sql=$sql||message=delete_expired_data\n\r";
+        }
     }
 
     /**

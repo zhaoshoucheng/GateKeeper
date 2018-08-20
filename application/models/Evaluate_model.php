@@ -117,7 +117,7 @@ class Evaluate_model extends CI_Model
         $table = $this->realtimetb . $data['city_id'];
 
         // 获取最近时间
-        $lastHour = $this->getLastestHour($table, $data['date']);
+        $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
 
         $where = "hour = '{$lastHour}'";
 
