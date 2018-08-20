@@ -137,8 +137,11 @@ class Realtimewarning_model extends CI_Model
 
         $currentId = 0;
         while (1) {
-            $sql = "/*{\"router\":\"m\"}*/SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} {$rtwRule['where']} order by id asc limit 2000";
+            $sql = "SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} {$rtwRule['where']} order by id asc limit 2000";
+            $this->db->forceMaster();
             $query = $this->db->query($sql);
+            $this->db->ignoreMaster();
+
             $result = $query->result_array();
             if (empty($result)) {
                 echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=$traceId||sql=$sql||message=loop over!\n\r";
@@ -154,6 +157,20 @@ class Realtimewarning_model extends CI_Model
                 }
                 //sleep(10);
             }
+        }
+
+        //删除30天前数据
+        $splitHour = explode(':',$hour);
+        $limitMinus = [3,4,5];                          //只在分钟级的0-2之间执行
+        if(isset($splitHour[0]) &&
+            $splitHour[0]=='00'  &&                     //小时
+            isset($splitHour[1][1]) &&
+            $splitHour[1][0]=='0' &&                    //分钟第一位
+            in_array($splitHour[1][1],$limitMinus)) {   //分钟第二位
+            $dtime = date("Y-m-d H:i:s", strtotime("-30 day"));
+            $sql = "DELETE FROM `real_time_alarm` WHERE `created_at`<'{$dtime}';";
+            $this->db->query($sql);
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=$traceId||sql=$sql||message=delete_expired_data\n\r";
         }
     }
 
@@ -182,8 +199,13 @@ class Realtimewarning_model extends CI_Model
         $splitHour = explode(':',$hour);
         $limitMinus = [5,6,7];  //只在分钟级的5-7之间执行
         if(isset($splitHour[1][1]) && in_array($splitHour[1][1],$limitMinus)){
-            $sql = "/*{\"router\":\"m\"}*/SELECT `hour`, sum(stop_delay * traj_count) / sum(traj_count) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
+            $sql = "SELECT `hour`, sum(stop_delay * traj_count) / sum(traj_count) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
+            $this->db->setQueryFlag("100001");
+            $this->db->forceMaster();
             $query = $this->db->query($sql);
+            $this->db->ignoreMaster();
+            $this->db->setQueryFlag("");
+
             $result = $query->result_array();
             if (empty($result)) {
                 echo "生成 avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
