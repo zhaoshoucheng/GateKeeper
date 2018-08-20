@@ -344,17 +344,17 @@ abstract class CI_DB_driver {
 	 */
 	protected $_random_keyword = array('RAND()', 'RAND(%d)');
 
-	/**
-	 * COUNT string
-	 *
-	 * @used-by	CI_DB_driver::count_all()
-	 * @used-by	CI_DB_query_builder::count_all_results()
-	 *
-	 * @var	string
-	 */
-	protected $_count_string = 'SELECT COUNT(*) AS ';
+    /**
+     * COUNT string
+     *
+     * @used-by	CI_DB_driver::count_all()
+     * @used-by	CI_DB_query_builder::count_all_results()
+     *
+     * @var	string
+     */
+    protected $_count_string = 'SELECT COUNT(*) AS ';
 
-	// --------------------------------------------------------------------
+    // --------------------------------------------------------------------
 
 	/**
 	 * Class constructor
@@ -577,17 +577,49 @@ abstract class CI_DB_driver {
 		return $this->data_cache['version'] = $query->ver;
 	}
 
-	// --------------------------------------------------------------------
+    // --------------------------------------------------------------------
 
-	/**
-	 * Version number query string
-	 *
-	 * @return	string
-	 */
-	protected function _version()
-	{
-		return 'SELECT VERSION() AS ver';
-	}
+    /**
+     * Version number query string
+     *
+     * @return	string
+     */
+    protected function _version()
+    {
+        return 'SELECT VERSION() AS ver';
+    }
+
+    // --------------------------------------------------------------------
+    /**
+     * set query flag
+     *
+     * @param $flag string
+     */
+    public function setQueryFlag($flag)
+    {
+        $this->query_flag = $flag;
+        return $this;
+    }
+
+    // --------------------------------------------------------------------
+    /**
+     * force query in master
+     */
+    public function forceMaster()
+    {
+        $this->force_master = true;
+        return $this;
+    }
+
+    // --------------------------------------------------------------------
+    /**
+     * ignore query in master
+     */
+    public function ignoreMaster()
+    {
+        $this->force_master = false;
+        return $this;
+    }
 
 	// --------------------------------------------------------------------
 
@@ -607,7 +639,12 @@ abstract class CI_DB_driver {
 	 */
 	public function query($sql, $binds = FALSE, $return_object = NULL)
 	{
-		if ($sql === '')
+        $prefix = "/*{\"router\":\"m\"}*/";
+        if(strpos($sql,$prefix)!==0 && $this->force_master){
+            $sql = $prefix.$sql;
+        }
+        
+        if ($sql === '')
 		{
 			log_message('error', 'Invalid query: '.$sql);
 			return ($this->db_debug) ? $this->display_error('db_invalid_query') : FALSE;
@@ -703,7 +740,7 @@ abstract class CI_DB_driver {
 			$this->query_times[] = $time_end - $time_start;
 		}
 
-        com_log_strace('_com_mysql_success', array('host'=>$this->hostname, 'port'=>$this->port, "oper_type"=>"query", 'sql'=>json_encode($sql), 'proc_time' => ($time_end - $time_start)));
+        com_log_strace('_com_mysql_success', array('host'=>$this->hostname, 'port'=>$this->port, "oper_type"=>"query", 'sql'=>json_encode($sql), 'query_flag' => $this->query_flag, 'proc_time' => ($time_end - $time_start)));
 
 		// Increment the query counter
 		$this->query_count++;
