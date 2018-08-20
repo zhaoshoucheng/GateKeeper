@@ -37,12 +37,6 @@ class EvaluateQuota
         return $this->_evaluateQuotaFactory;
     }
 
-    private function _getCityQuotaFactory()
-    {
-        $this->_initQuotaFactory(new CityQuota());
-        return $this->_evaluateQuotaFactory;
-    }
-
     private function _camelize($uncamelized_words,$separator='_')
     {
         $uncamelized_words = $separator. str_replace($separator, " ", strtolower($uncamelized_words));
@@ -66,12 +60,6 @@ class EvaluateQuota
         $feature = explode('_',$name);
         $factory = null;
         switch ($feature[1]){
-            case 'city':
-                $factory = $this->_getCityQuotaFactory();
-                break;
-            case 'road':
-                $factory = $this->_getRoadQuotaFactory();
-                break;
             case 'junction':
                 $factory = $this->_getJunctionQuotaFactory();
                 break;
@@ -99,56 +87,5 @@ class EvaluateQuota
         }
 
     }
-
-
-    /**===============================路口指标相关========================================*/
-
-
-//
-//    /**
-//     * 单个路口延误时间详情
-//    */
-//    public function getJunctionDurationDelay($data,$start_time,$end_time)
-//    {
-//        $factory = $this->_getJunctionQuotaFactory();
-//        $factory->load_data($data);
-//        $ret = $factory->getDurationDelay($start_time,$end_time);
-//        return $ret;
-//    }
-//
-//
-//
-//    /**===============================城市指标相关========================================*/
-//
-//    /**
-//     * 全城路口延误时间概况
-//     */
-//    public function getCityDurationDelay($data)
-//    {
-//        $factory = $this->_getCityQuotaFactory();
-//        $factory->load_data($data);
-//        $ret = $factory->getDurationDelay();
-//        return $ret;
-//    }
-//
-//    /**
-//     * 全城停车次数概况
-//     */
-//    public function getCityStopCount($data)
-//    {
-//        $factory = $this->_getCityQuotaFactory();
-//        $factory->load_data($data);
-//        $ret = $factory->getStopCount();
-//        return $ret;
-//    }
-
-    /**===============================路段指标相关========================================*/
-
-
-
-    /**===============================区域指标相关========================================*/
-
-
-
 }
 
