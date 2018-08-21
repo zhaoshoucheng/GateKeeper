@@ -124,7 +124,14 @@ class Road extends MY_Controller
 
         $result = $this->road_model->editRoad($data);
 
-        return $this->response($result);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        $this->errmsg = 'success.';
+        return;
     }
 
     /**

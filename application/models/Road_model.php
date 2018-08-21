@@ -56,7 +56,7 @@ class Road_model extends CI_Model
 
         $insertData = [
             'city_id'            => intval($data['city_id']),
-            'road_id'            => md5($data['junction_ids']),
+            'road_id'            => md5($data['junction_ids'] . $data['road_name']),
             'road_name'          => strip_tags(trim($data['road_name'])),
             'logic_junction_ids' => strip_tags(trim($data['junction_ids'])),
             'road_direction'     => intval($data['road_direction']),
@@ -94,12 +94,12 @@ class Road_model extends CI_Model
         }
 
         $where = 'road_id = "' . strip_tags(trim($data['road_id'])) . '"';
-        $where .= 'city_id = ' . intval($data['city_id']);
+        $where .= ' and city_id = ' . intval($data['city_id']);
         $this->db->where($where);
 
         $updateData = [
             'road_name'          => strip_tags(trim($data['road_name'])),
-            'logic_junction_ids' => strip_tags(trim($data['logic_junction_ids'])),
+            'logic_junction_ids' => strip_tags(trim($data['junction_ids'])),
             'road_direction'     => intval($data['road_direction']),
             'updated_at'         => date('Y-m-d H:i:s'),
         ];
@@ -119,7 +119,24 @@ class Road_model extends CI_Model
      */
     public function delete($data)
     {
+        if (empty($data)) {
+            return ['errno' => 0, 'errmsg' => ''];
+        }
 
+        $where = 'road_id = "' . strip_tags(trim($data['road_id'])) . '"';
+        $where .= ' and city_id = ' . intval($data['city_id']);
+        $this->db->where($where);
+        $updateData = [
+            'is_delete'  => 1,
+            'deleted_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+        $this->db->update($this->tb, $updateData);
+        if ($this->db->affected_rows() < 1) {
+            return ['errno' => -1, 'errmsg' => '干线更新失败！'];
+        }
+
+        return ['errno' => 0, 'errmsg' => ''];
     }
 
     /**
