@@ -1,6 +1,6 @@
 <?php
 /**
- * 周报模块
+ * 报告相关模块
  */
 
 
@@ -51,7 +51,7 @@ class Report extends MY_Controller
 
     }
 
-    public function junctionOptimizerReportConfig()
+    public function junctionComparisonReportConfig()
     {
 
     }
