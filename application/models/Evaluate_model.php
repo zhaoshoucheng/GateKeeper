@@ -115,6 +115,9 @@ class Evaluate_model extends CI_Model
         $result = [];
 
         $table = $this->realtimetb . $data['city_id'];
+        if (!$this->isTableExisted($table)) {
+            return [];
+        }
 
         // 获取最近时间
         $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
@@ -203,6 +206,9 @@ class Evaluate_model extends CI_Model
         $result = [];
 
         $table = $this->realtimetb . $data['city_id'];
+        if (!$this->isTableExisted($table)) {
+            return [];
+        }
         $where = 'logic_junction_id = "' . $data['junction_id'] . '"';
         $where .= ' and logic_flow_id = "' . $data['flow_id'] . '"';
         $where .= ' and updated_at > "' . $data['date'] . ' 00:00:00"';
@@ -341,6 +347,10 @@ class Evaluate_model extends CI_Model
         $result = [];
 
         $table = $this->offlintb . $data['city_id'];
+
+        if (!$this->isTableExisted($table)) {
+            return [];
+        }
 
         $groupBy = '';
         $where = "logic_junction_id = '{$data['junction_id']}'";
@@ -584,6 +594,10 @@ class Evaluate_model extends CI_Model
             return $hour;
         }
 
+        if (!$this->isTableExisted('real_time_' . $cityId)) {
+            return date('H:i:s');
+        }
+
         $date = $date ?? date('Y-m-d');
 
         $result = $this->db->select('hour')
@@ -598,5 +612,14 @@ class Evaluate_model extends CI_Model
             return date('H:i:s');
 
         return $result->hour;
+    }
+
+    /**
+     * 校验数据表是否存在
+     */
+    private function isTableExisted($table)
+    {
+        $isExisted = $this->dbFlow->table_exists($table);
+        return $isExisted;
     }
 }
