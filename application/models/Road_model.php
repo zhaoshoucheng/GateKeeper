@@ -193,6 +193,8 @@ class Road_model extends CI_Model
      */
     private function formatRoadDetailData($cityId, $ids)
     {
+        $result = [];
+
         $junctionIds = array_filter(explode(',', preg_replace("/(\n)|(\s)|(\t)|(\')|(')|(，)/" ,',' ,$ids)));
 
         // 最新路网版本
@@ -200,12 +202,27 @@ class Road_model extends CI_Model
         $newMapVersion = max($allMapVersions);
 
         $res = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIds);
-        if (empty($res)) {
+        if (empty($res['junctions_info'])) {
             return [];
         }
 
-        return $res['junctions_info'];
+        foreach ($res['junctions_info'] as $k=>$v) {
+            $result['dataList'][$k] = [
+                'logic_junction_id' => $k,
+                'junction_name'     => $v['name'],
+                'lng'               => $v['lng'],
+                'lat'               => $v['lat'],
+                'node_ids'          => $v['node_ids'],
+            ];
+        }
 
+        if (empty($result['dataList'])) {
+            return [];
+        }
+
+        $result['dataList'] = array_values($result['dataList']);
+
+        return $result;
     }
 
     /**
