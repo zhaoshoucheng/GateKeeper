@@ -55,13 +55,14 @@ class Road_model extends CI_Model
         }
 
         $insertData = [
-            'city_id'        => intval($data['city_id']),
-            'road_name'      => strip_tags(trim($data['road_name'])),
-            'junction_ids'   => strip_tags(trim($data['junction_ids'])),
-            'road_direction' => intval($data['road_direction']),
-            'user_id'        => 0,
-            'created_at'     => date('Y-m-d H:i:s'),
-            'updated_at'     => date('Y-m-d H:i:s'),
+            'city_id'            => intval($data['city_id']),
+            'road_id'            => md5($data['junction_ids']),
+            'road_name'          => strip_tags(trim($data['road_name'])),
+            'logic_junction_ids' => strip_tags(trim($data['junction_ids'])),
+            'road_direction'     => intval($data['road_direction']),
+            'user_id'            => 0,
+            'created_at'         => date('Y-m-d H:i:s'),
+            'updated_at'         => date('Y-m-d H:i:s'),
         ];
 
         $res = $this->db->insert($this->tb, $insertData);
@@ -115,9 +116,9 @@ class Road_model extends CI_Model
         $this->db->select('road_id');
         $this->db->from($this->tb);
         $this->db->where('road_name = "' . $name . '"');
-        $res = $this->db->get();
+        $res = $this->db->get()->row_array();
 
-        if (empty($res)) {
+        if (empty($res['road_id'])) {
             return false;
         } else {
             return true;
