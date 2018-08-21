@@ -161,6 +161,46 @@ class Road_model extends CI_Model
      */
     public function getRoadDetail($data)
     {
+        if (empty($data)) {
+            return ['errno' => 0, 'errmsg' => ''];
+        }
+
+        $result = [];
+
+        // 获取详情
+        $where = 'city_id = ' . intval($data['city_id']);
+        $where .= ' and road_id = "' . strip_tags(trim($data['road_id'])) . '"';
+        $where .= ' and is_delete = 0';
+
+        $this->db->select('logic_junction_ids');
+        $this->db->from($this->tb);
+        $this->db->where($where);
+
+        $res = $this->db->get()->row_array();
+        if (!$res || empty($res['logic_junction_ids'])) {
+            return [];
+        }
+
+        $result = $this->formatRoadDetailData($data['city_id'], $res['logic_junction_ids']);
+
+        return $result;
+    }
+
+    /**
+     * 格式化干线详情数据
+     * @param $ids string 路口ID串
+     * @return array
+     */
+    private function formatRoadDetailData($cityId, $ids)
+    {
+        $junctionIds = explode(',', preg_replace("/(\n)|(\s)|(\t)|(\')|(')|(，)/" ,',' ,$ids));
+
+        // 最新路网版本
+        $allMapVersions = $this->waymap_model->getAllMapVersion();
+        $newMapVersion = max($allMapVersions);
+
+        $res = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIds);
+        print_r($res);exit;
 
     }
 
