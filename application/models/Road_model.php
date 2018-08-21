@@ -32,6 +32,20 @@ class Road_model extends CI_Model
      */
     public function queryRoadList($cityId)
     {
+        if (intval($cityId) < 1) {
+            return [];
+        }
+
+        $where = 'city_id = ' . $cityId . ' and is_delete = 0';
+        $this->db->select('road_id, road_name');
+        $this->db->from($this->tb);
+        $this->db->where($where);
+        $res = $this->db->get()->result_array();
+        if (empty($res)) {
+            return [];
+        }
+
+        return $res;
 
     }
 
