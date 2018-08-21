@@ -76,6 +76,7 @@ class Road_model extends CI_Model
     /**
      * 编辑干线
      * @param $data['city_id']        interger Y 城市ID
+     * @param $data['road_id']        string   Y 干线ID
      * @param $data['road_name']      string   Y 干线名称
      * @param $data['junction_ids']   string   Y 干线路口ID 用逗号隔开
      * @param $data['road_direction'] interger Y 干线方向 1：东西 2：南北
@@ -83,7 +84,31 @@ class Road_model extends CI_Model
      */
     public function editRoad($data)
     {
+        if (empty($data)) {
+            return ['errno' => 0, 'errmsg' => ''];
+        }
 
+        // 判断干线名称是否已存在
+        if ($this->isRoadNameExisted($data['road_name'], $data['road_id'])) {
+            return ['errno' => -1, 'errmsg' => '干线名称已存在！'];
+        }
+
+        $where = 'road_id = "' . strip_tags(trim($data['road_id'])) . '"';
+        $where .= 'city_id = ' . intval($data['city_id']);
+        $this->db->where($where);
+
+        $updateData = [
+            'road_name'          => strip_tags(trim($data['road_name'])),
+            'logic_junction_ids' => strip_tags(trim($data['logic_junction_ids'])),
+            'road_direction'     => intval($data['road_direction']),
+            'updated_at'         => date('Y-m-d H:i:s'),
+        ];
+        $this->db->update($this->tb, $updateData);
+        if ($this->db->affected_rows() < 1) {
+            return ['errno' => -1, 'errmsg' => '干线更新失败！'];
+        }
+
+        return ['errno' => 0, 'errmsg' => ''];
     }
 
     /**
@@ -111,14 +136,19 @@ class Road_model extends CI_Model
     /**
      * 校验干线名称是否存在
      */
-    private function isRoadNameExisted($name)
+    private function isRoadNameExisted($name, $roadId = '')
     {
+        $where = 'road_name = "' . $name . '"';
+        if (!empty($roadId)) {
+            $where .= ' and road_id != "' . $roadId . '"';
+        }
+
         $this->db->select('road_id');
         $this->db->from($this->tb);
-        $this->db->where('road_name = "' . $name . '"');
-        $res = $this->db->get()->row_array();
+        $this->db->where($where);
+        $res = $this->db->get()->result_array();
 
-        if (empty($res['road_id'])) {
+        if (empty($res)) {
             return false;
         } else {
             return true;
