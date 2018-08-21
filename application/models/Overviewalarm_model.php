@@ -324,7 +324,7 @@ class Overviewalarm_model extends CI_Model
      */
     private function isTableExisted($table)
     {
-        $isExisted = $this->dbFlow->table_exists($table);
+        $isExisted = $this->db->table_exists($table);
         return $isExisted;
     }
 }
