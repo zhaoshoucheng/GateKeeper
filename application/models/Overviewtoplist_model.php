@@ -8,6 +8,7 @@
 class Overviewtoplist_model extends CI_Model
 {
     private $tb = 'real_time_';
+    private $db = '';
 
     public function __construct()
     {
@@ -25,6 +26,9 @@ class Overviewtoplist_model extends CI_Model
     public function stopDelayTopList($data)
     {
         $table = $this->tb . $data['city_id'];
+        if (!$this->isTableExisted($table)) {
+            return [];
+        }
 
         $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
@@ -61,6 +65,9 @@ class Overviewtoplist_model extends CI_Model
     public function stopTimeCycleTopList($data)
     {
         $table = $this->tb . $data['city_id'];
+        if (!$this->isTableExisted($table)) {
+            return [];
+        }
 
         $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
@@ -109,6 +116,10 @@ class Overviewtoplist_model extends CI_Model
     {
         $table = $this->tb . $data['city_id'];
 
+        if (!$this->isTableExisted($table)) {
+            return [];
+        }
+
         $hour = $this->getLastestHour($data['city_id'], $data['date']);
 
         $result = $this->db->select('logic_junction_id, hour, ' . $select . ' as ' . $column)
@@ -146,6 +157,11 @@ class Overviewtoplist_model extends CI_Model
         if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
             return $hour;
         }
+
+        if (!$this->isTableExisted($this->tb . $cityId)) {
+            return date('H:i:s');
+        }
+
         $date = $date ?? date('Y-m-d');
 
         $result = $this->db->select('hour')
@@ -160,5 +176,14 @@ class Overviewtoplist_model extends CI_Model
             return date('H:i:s');
 
         return $result->hour;
+    }
+
+    /**
+     * 校验数据表是否存在
+     */
+    private function isTableExisted($table)
+    {
+        $isExisted = $this->db->table_exists($table);
+        return $isExisted;
     }
 }
