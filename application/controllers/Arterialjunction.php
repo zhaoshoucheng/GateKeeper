@@ -23,7 +23,7 @@ class Arterialjunction extends MY_Controller
     {
         $params = $this->input->post();
         $validate = Validate::make($params, [
-            'task_id' => 'min:1',
+            //'task_id' => 'min:1',
             'city_id' => 'min:1',
         ]);
         if (!$validate['status']) {
@@ -34,7 +34,7 @@ class Arterialjunction extends MY_Controller
 
         try{
             $data = $this->arterialjunction_model->getAllJunctions([
-                'task_id' => intval($params['task_id']),
+                'task_id' => !empty($params['task_id']) ? intval($params['task_id']) : "",
                 'city_id' => intval($params['city_id']),
             ]);
         }catch (\Exception $e){
