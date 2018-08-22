@@ -206,10 +206,13 @@ class Road_model extends CI_Model
             return [];
         }
 
-        $countData = [];
+        $countData = [
+            'lng' => 0,
+            'lat' => 0,
+        ];
         foreach ($res['junctions_info'] as $k=>$v) {
-            $countData[$k]['lng'] += $v['lng'];
-            $countData[$k]['lat'] += $v['lat'];
+            $countData['lng'] += $v['lng'];
+            $countData['lat'] += $v['lat'];
             $result['dataList'][$k] = [
                 'logic_junction_id' => $k,
                 'junction_name'     => $v['name'],
