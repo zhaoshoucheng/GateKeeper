@@ -58,7 +58,7 @@ class Feedback extends MY_Controller
 
     public function getTypes()
     {
-        $types = [];
+        $types = [ 1 => 0 ];
 
         foreach ($this->types as $key => $type) { $types[$key.''] = $type; }
 
