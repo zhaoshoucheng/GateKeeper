@@ -62,11 +62,11 @@ class Arterialjunction extends MY_Controller
         }
 
         $qJson = json_decode($params['q'],true);
-        if(empty($qJson["task_id"]) || !($qJson["task_id"]>0)){
+        /*if(empty($qJson["task_id"]) || !($qJson["task_id"]>0)){
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The task_id cannot be empty and must be interger.';
             return;
-        }
+        }*/
         if(empty($qJson["city_id"]) || !($qJson["city_id"]>0)){
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The city_id cannot be empty and must be interger.';
