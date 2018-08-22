@@ -55,4 +55,9 @@ class Feedback extends MY_Controller
 
         return $this->response($data);
     }
+
+    public function getTypes()
+    {
+        $this->response($this->types);
+    }
 }
