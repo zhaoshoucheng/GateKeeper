@@ -487,3 +487,5 @@ $config['realtimewarning_rule'] = [
         'where'=>' and traj_count >= 10',
     ],
 ];
+
+

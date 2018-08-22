@@ -14,12 +14,17 @@
 		"php": ">=7.0",
 		"cloud/itsmap" : "dev-master",
 		"apache/thrift": "0.9.2",
-		"monolog/monolog": "^1.23"
+		"monolog/monolog": "^1.23",
+		"niuyufu/php_tracelog": "*"
 	},
 	"repositories" : [
 		{
 			"type": "git",
 			"url" : "git@git.xiaojukeji.com:cloud/itsmap.git"
+		},
+		{
+			"type": "git",
+			"url": "git@git.xiaojukeji.com:niuyufu/php_tracelog.git"
 		}
 	],
 	"suggest": {
@@ -31,6 +36,7 @@
 	},
 	"autoload": {
 		"files": [
+			"application/libraries/SSOSdk.php"
 		]
 	}
 }
