@@ -70,7 +70,7 @@ class Road_model extends CI_Model
 
         $insertData = [
             'city_id'            => intval($data['city_id']),
-            'road_id'            => md5($data['junction_ids'] . $data['road_name']),
+            'road_id'            => md5(implode(',', $data['junction_ids']) . $data['road_name']),
             'road_name'          => strip_tags(trim($data['road_name'])),
             'logic_junction_ids' => implode(',', $data['junction_ids']),
             'road_direction'     => intval($data['road_direction']),
@@ -231,6 +231,7 @@ class Road_model extends CI_Model
             'lat' => count($countData) >= 1 ? $countData['lat'] / count($countData) : 0,
         ];
         $result['dataList'] = array_values($result['dataList']);
+        $result['map_version'] = $newMapVersion;
 
         return $result;
     }
