@@ -100,5 +100,7 @@ $db['default'] = array(
     'compress' => FALSE,
     'stricton' => FALSE,
     'failover' => array(),
-    'save_queries' => TRUE
+    'save_queries' => TRUE,
+    'query_flag' => '0',         //查询标记
+    'force_master' => FALSE,    //强制从主库查询
 );
