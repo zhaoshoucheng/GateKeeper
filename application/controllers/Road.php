@@ -46,7 +46,7 @@ class Road extends MY_Controller
      * 新增干线
      * @param city_id        interger Y 城市ID
      * @param road_name      string   Y 干线名称
-     * @param junction_ids   string   Y 干线路口ID 用逗号隔开
+     * @param junction_ids   array    Y 干线路口ID
      * @param road_direction interger Y 干线方向 1：东西 2：南北
      * @return json
      */
@@ -58,7 +58,6 @@ class Road extends MY_Controller
         $validate = Validate::make($params, [
                 'city_id'        => 'min:1',
                 'road_name'      => 'nullunable',
-                'junction_ids'   => 'nullunable',
                 'road_direction' => 'min:1',
             ]
         );
@@ -68,10 +67,16 @@ class Road extends MY_Controller
             return;
         }
 
+        if (empty($params['junction_ids']) || !is_array($params['junction_ids'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数 junction_ids 不为空且为数组！';
+            return;
+        }
+
         $data = [
             'city_id'        => intval($params['city_id']),
             'road_name'      => strip_tags(trim($params['road_name'])),
-            'junction_ids'   => strip_tags(trim($params['junction_ids'])),
+            'junction_ids'   => $params['junction_ids'],
             'road_direction' => intval($params['road_direction']),
         ];
 
@@ -91,7 +96,7 @@ class Road extends MY_Controller
      * @param city_id        interger Y 城市ID
      * @param road_id        string   Y 干线ID
      * @param road_name      string   Y 干线名称
-     * @param junction_ids   string   Y 干线路口ID 用逗号隔开
+     * @param junction_ids   array    Y 干线路口ID
      * @param road_direction interger Y 干线方向 1：东西 2：南北
      * @return json
      */
@@ -104,7 +109,6 @@ class Road extends MY_Controller
                 'city_id'        => 'min:1',
                 'road_name'      => 'nullunable',
                 'road_id'        => 'nullunable',
-                'junction_ids'   => 'nullunable',
                 'road_direction' => 'min:1',
             ]
         );
@@ -114,11 +118,17 @@ class Road extends MY_Controller
             return;
         }
 
+        if (empty($params['junction_ids']) || !is_array($params['junction_ids'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数 junction_ids 不为空且为数组！';
+            return;
+        }
+
         $data = [
             'city_id'        => intval($params['city_id']),
             'road_id'        => strip_tags(trim($params['road_id'])),
             'road_name'      => strip_tags(trim($params['road_name'])),
-            'junction_ids'   => strip_tags(trim($params['junction_ids'])),
+            'junction_ids'   => $params['junction_ids'],
             'road_direction' => intval($params['road_direction']),
         ];
 
