@@ -53,7 +53,7 @@ class Road_model extends CI_Model
      * 新增干线
      * @param $data['city_id']        interger Y 城市ID
      * @param $data['road_name']      string   Y 干线名称
-     * @param $data['junction_ids']   string   Y 干线路口ID 用逗号隔开
+     * @param $data['junction_ids']   array    Y 干线路口ID
      * @param $data['road_direction'] interger Y 干线方向 1：东西 2：南北
      * @return array
      */
@@ -72,7 +72,7 @@ class Road_model extends CI_Model
             'city_id'            => intval($data['city_id']),
             'road_id'            => md5($data['junction_ids'] . $data['road_name']),
             'road_name'          => strip_tags(trim($data['road_name'])),
-            'logic_junction_ids' => strip_tags(trim($data['junction_ids'])),
+            'logic_junction_ids' => implode(',', $data['junction_ids']),
             'road_direction'     => intval($data['road_direction']),
             'user_id'            => 0,
             'created_at'         => date('Y-m-d H:i:s'),
@@ -92,7 +92,7 @@ class Road_model extends CI_Model
      * @param $data['city_id']        interger Y 城市ID
      * @param $data['road_id']        string   Y 干线ID
      * @param $data['road_name']      string   Y 干线名称
-     * @param $data['junction_ids']   string   Y 干线路口ID 用逗号隔开
+     * @param $data['junction_ids']   array    Y 干线路口ID
      * @param $data['road_direction'] interger Y 干线方向 1：东西 2：南北
      * @return array
      */
@@ -113,7 +113,7 @@ class Road_model extends CI_Model
 
         $updateData = [
             'road_name'          => strip_tags(trim($data['road_name'])),
-            'logic_junction_ids' => strip_tags(trim($data['junction_ids'])),
+            'logic_junction_ids' => implode(',', $data['junction_ids']),
             'road_direction'     => intval($data['road_direction']),
             'updated_at'         => date('Y-m-d H:i:s'),
         ];
