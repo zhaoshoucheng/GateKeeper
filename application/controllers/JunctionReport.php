@@ -56,13 +56,13 @@ class JunctionReport extends MY_Controller
 
         if(!isset($params['schedule_start']) || date('H:i', strtotime($params['schedule_start'])) !== $params['schedule_start']) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of city_id is wrong.';
+            $this->errmsg = 'The value of schedule_start is wrong.';
             return;
         }
 
         if(!isset($params['schedule_end']) || date('H:i', strtotime($params['schedule_end'])) !== $params['schedule_end']) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of city_id is wrong.';
+            $this->errmsg = 'The value of schedule_end is wrong.';
             return;
         }
 
