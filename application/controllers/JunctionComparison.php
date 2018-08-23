@@ -102,6 +102,7 @@ class JunctionComparison extends MY_Controller
             'evaluate_end_date'   => strip_tags(trim($params['evaluate_end_date'])),
             'schedule_start'      => strip_tags(trim($params['schedule_start'])),
             'schedule_end'        => strip_tags(trim($params['schedule_end'])),
+            'week'                => $params['week'],
         ];
 
         $result = [];
@@ -109,7 +110,7 @@ class JunctionComparison extends MY_Controller
         foreach ($params['quota_key'] as $v) {
             $data['quota_key'] = strip_tags(trim($v));
             $result[html_escape(trim($v))]['name'] = html_escape(trim($params['schedule_name']));
-            $result[html_escape(trim($v))]['list'] = $this->getQuotaInfo($data);
+            $result[html_escape(trim($v))]['list'] = $this->junctioncomparison_model->getQuotaInfo($data);
         }
 
         return $this->response($result);

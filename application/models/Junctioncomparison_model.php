@@ -42,7 +42,7 @@ class Junctioncomparison_model extends CI_Model
 
         $table = $this->tb . $data['city_id'];
         // 判断数据表是否存在
-        if ($this->isTableExisted($table)) {
+        if (!$this->isTableExisted($table)) {
             com_log_warning('_itstool_JuctionCompareReport_table_error', 0, '数据表不存在', compact("table"));
             return [];
         }
@@ -57,12 +57,12 @@ class Junctioncomparison_model extends CI_Model
         $baseStartDate = strtotime($data['base_start_date']);
         $baseEndDate = strtotime($data['base_end_date']);
         $baseDateArr = [];
-        $baseWeek = [];
+        $baseWeekDays = [];
         for ($i = $baseStartDate; $i <= $baseEndDate; $i += 24 * 3600) {
             $baseDateArr[] = date('Y-m-d', $i);
             foreach ($data['week'] as $k=>$v) {
                 if (date('w', $i) == $v) {
-                    $baseWeek[$v][$i] = date('Y-m-d', $i);
+                    $baseWeekDays[$i] = date('Y-m-d', $i);
                 }
             }
         }
@@ -73,18 +73,24 @@ class Junctioncomparison_model extends CI_Model
         $evaluateStartDate = strtotime($data['evaluate_start_date']);
         $evaluateEndDate = strtotime($data['evaluate_end_date']);
         $evaluateDateArr = [];
-        $evaluateWeek = [];
+        $evaluateWeekDays = [];
         for ($i = $evaluateStartDate; $i <= $evaluateEndDate; $i += 24 * 3600) {
             $evaluateDateArr[] = date('Y-m-d', $i);
             foreach ($data['week'] as $k=>$v) {
                 if (date('w', $i) == $v) {
-                    $evaluateWeek[$v][$i] = date('Y-m-d', $i);
+                    $evaluateWeekDays[$i] = date('Y-m-d', $i);
                 }
             }
         }
         $publicData['date'] = $evaluateDateArr;
         $evaluateQuotaData = $this->getQuotaInfoByDate($table, $publicData);
 
+        if (empty($baseQuotaData) && empty($evaluateQuotaData)) {
+            com_log_warning('_itstool_JuctionCompareReport_data_error', 0, '评估&基准数据都没有', compact("publicData"));
+            return [];
+        }
+
+        $function = 'format' . $data['quota_key'] . 'Data';
 
         $result = [];
 
