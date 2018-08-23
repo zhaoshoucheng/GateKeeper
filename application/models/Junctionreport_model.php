@@ -36,7 +36,7 @@ class Junctionreport_model extends CI_Model
 
         $hours = $this->getHours($data);
 
-        $result = $this->db->select('avg(' . $data['key'] . ' * traj_count) as ' . $data['key'] . ', hour, logic_flow_id')
+        $result = $this->db->select('sum(' . $data['key'] . ' * traj_count) / sum(traj_count) as ' . $data['key'] . ', hour, logic_flow_id')
             ->from($this->tb . $data['city_id'])
             ->where('logic_junction_id', $data['logic_junction_id'])
             ->where_in('date', $dates)
