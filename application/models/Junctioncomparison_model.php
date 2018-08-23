@@ -37,14 +37,20 @@ class Junctioncomparison_model extends CI_Model
     public function getQuotaInfo($data)
     {
         if (empty($data)) {
-            return [];
+            return (object)[];
         }
 
         $table = $this->tb . $data['city_id'];
         // 判断数据表是否存在
         if (!$this->isTableExisted($table)) {
             com_log_warning('_itstool_JuctionCompareReport_table_error', 0, '数据表不存在', compact("table"));
-            return [];
+            return (object)[];
+        }
+
+        // 获取路口所有相位
+        $allFlows = $this->waymap_model->getFlowsInfo($data['logic_junction_id']);
+        if (empty($allFlows)) {
+            return (object)[];
         }
 
         // 获取基准、评估日期指标加权平均值所需数据
@@ -68,6 +74,11 @@ class Junctioncomparison_model extends CI_Model
         }
         $publicData['date'] = $baseDateArr;
         $baseQuotaData = $this->getQuotaInfoByDate($table, $publicData);
+        // 相位->日期->时间->值
+        $newBaseQuotaData = [];
+        foreach ($baseQuotaData as $val) {
+            $newBaseQuotaData[$val['logic_flow_id']][$val['date']][$val['hour']] = $val['quota_value'];
+        }
 
         /* 获取评估日期指标加权平均值 计算出需要查的周几具体日期*/
         $evaluateStartDate = strtotime($data['evaluate_start_date']);
@@ -84,18 +95,165 @@ class Junctioncomparison_model extends CI_Model
         }
         $publicData['date'] = $evaluateDateArr;
         $evaluateQuotaData = $this->getQuotaInfoByDate($table, $publicData);
-
-        if (empty($baseQuotaData) && empty($evaluateQuotaData)) {
-            com_log_warning('_itstool_JuctionCompareReport_data_error', 0, '评估&基准数据都没有', compact("publicData"));
-            return [];
+        // 相位->日期->时间->值
+        $newEvaluateQuotaData = [];
+        foreach ($evaluateQuotaData as $val) {
+            $newEvaluateQuotaData[$val['logic_flow_id']][$val['date']][$val['hour']] = $val['quota_value'];
         }
 
-        $function = 'format' . $data['quota_key'] . 'Data';
+        if (empty($newBaseQuotaData) && empty($newEvaluateQuotaData)) {
+            com_log_warning('_itstool_JuctionCompareReport_data_error', 0, '评估&基准数据都没有', compact("publicData"));
+            return (object)[];
+        }
 
-        $result = [];
+        // 处理时段
+        $scheduleArr = [];
+        $scheduleStart = strtotime($data['schedule_start']);
+        $scheduleEnd = strtotime($data['schedule_end']);
+        for ($i = $scheduleStart; $i <= $scheduleEnd; $i += 30 * 60) {
+            $scheduleArr[] = date('H:i', $i);
+        }
 
+        $function = $data['quota_key'] . 'DataFormat';
+
+        if (!method_exists($this, $function)) {
+            return (object)[];
+        }
+
+        $formatData = [
+            'baseQuotaData'     => $newBaseQuotaData,
+            'evaluateQuotaData' => $newEvaluateQuotaData,
+            'baseWeekDays'      => $baseWeekDays,
+            'evaluateWeekDays'  => $evaluateWeekDays,
+            'schedule'          => $scheduleArr,
+        ];
+
+        /**
+         * 排队长度 => queue_lengthDataFormat
+         * 停车延误 => stop_delayDataFormat
+         * 通过速度 => speedDataFormat
+         * 停车次数 => stop_time_cycleDataFormat
+         * 停车比率 => stop_rateDataFormat
+         * 溢流指数 => spillover_rateDataFormat
+         */
+        $result = $this->$function($allFlows[$data['logic_junction_id']], $formatData);
 
         return $result;
+    }
+
+    /**
+     * 处理指标 排队长度 数据
+     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
+     * @param $data['baseQuotaData']     array  基准日期指标数据
+     * @param $data['evaluateQuotaData'] array  评估日期指标数据
+     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期 ['2018-08-08', ...]
+     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期 ['2018-08-08', ...]
+     * @param $data['schedule']          array  时段配置时间点 ['07:00', '07:30', ...]
+     * @return array
+     */
+    private function queue_lengthDataFormat($flowData, $data)
+    {
+        $result = [];
+
+        foreach ($flowData as $k=>$v) {
+            // flow信息
+            $result['flow_info'] = [
+                'logic_flow_id' => $k,
+                'flow_name'     => $v,
+            ];
+
+            // 基准
+            foreach ($data['baseWeekDays'] as $day) {
+                foreach ($data['schedule'] as $hour) {
+                    $result['base_list'][$k][$day][$hour] = $data['baseQuotaData'][$k][$day][$hour];
+                }
+            }
+
+            // 评估
+            foreach ($data['evaluateWeekDays'] as $day) {
+                foreach ($data['schedule'] as $hour) {
+                    $result['base_list'][$k][$day][$hour] = $data['evaluateQuotaData'][$k][$day][$hour];
+                }
+            }
+        }
+
+    }
+
+    /**
+     * 处理指标 停车延误 数据
+     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
+     * @param $data['baseQuotaData']     array  基准日期指标数据
+     * @param $data['evaluateQuotaData'] array  评估日期指标数据
+     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期
+     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期
+     * @param $data['schedule_start']    string 时段开始时间
+     * @param $data['schedule_end']      string 时段线束时间
+     */
+    private function stop_delayDataFormat($flowData, $data)
+    {
+        
+    }
+
+    /**
+     * 处理指标 通过速度 数据
+     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
+     * @param $data['baseQuotaData']     array  基准日期指标数据
+     * @param $data['evaluateQuotaData'] array  评估日期指标数据
+     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期
+     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期
+     * @param $data['schedule_start']    string 时段开始时间
+     * @param $data['schedule_end']      string 时段线束时间
+     */
+    private function speedDataFormat($flowData, $data)
+    {
+        
+    }
+
+    /**
+     * 处理指标 停车次数 数据
+     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
+     * @param $data['logic_junction_id'] string 路口ID
+     * @param $data['city_id']           string 城市ID
+     * @param $data['baseQuotaData']     array  基准日期指标数据
+     * @param $data['evaluateQuotaData'] array  评估日期指标数据
+     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期
+     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期
+     * @param $data['schedule_start']    string 时段开始时间
+     * @param $data['schedule_end']      string 时段线束时间
+     */
+    private function stop_time_cycleDataFormat($flowData, $data)
+    {
+        
+    }
+
+    /**
+     * 处理指标 停车比率 数据
+     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
+     * @param $data['baseQuotaData']     array  基准日期指标数据
+     * @param $data['evaluateQuotaData'] array  评估日期指标数据
+     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期
+     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期
+     * @param $data['schedule_start']    string 时段开始时间
+     * @param $data['schedule_end']      string 时段线束时间
+     */
+    private function stop_rateDataFormat($flowData, $data)
+    {
+        
+    }
+
+    /**
+     * 处理指标 溢流指数 数据
+     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
+     * @param $data['baseQuotaData']     array  基准日期指标数据
+     * @param $data['evaluateQuotaData'] array  评估日期指标数据
+     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期
+     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期
+     * @param $data['schedule_start']    string 时段开始时间
+     * @param $data['schedule_end']      string 时段线束时间
+     */
+    private function spillover_rateDataFormat($flowData, $data)
+    {
+        
     }
 
     /**
@@ -118,7 +276,7 @@ class Junctioncomparison_model extends CI_Model
         $this->db->group_by('date, hour');
         $res = $this->db->get()->result_array();
         if (!$res) {
-            return [];
+            return (object)[];
         }
 
         return $res;
