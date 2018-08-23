@@ -18,7 +18,7 @@ class Road_model extends CI_Model
         }
 
         // 判断数据表是否存在
-        if ($this->isTableExisted($this->tb)) {
+        if (!$this->isTableExisted($this->tb)) {
             return [];
         }
 
@@ -40,6 +40,7 @@ class Road_model extends CI_Model
         $this->db->select('road_id, road_name, road_direction');
         $this->db->from($this->tb);
         $this->db->where($where);
+        $this->db->order_by('created_at');
         $res = $this->db->get()->result_array();
         if (empty($res)) {
             return [];
@@ -162,7 +163,7 @@ class Road_model extends CI_Model
     public function getRoadDetail($data)
     {
         if (empty($data)) {
-            return ['errno' => 0, 'errmsg' => ''];
+            return (object)[];
         }
 
         $result = [];
@@ -178,7 +179,7 @@ class Road_model extends CI_Model
 
         $res = $this->db->get()->row_array();
         if (!$res || empty($res['logic_junction_ids'])) {
-            return [];
+            return (object)[];
         }
 
         $result = $this->formatRoadDetailData($data['city_id'], $res['logic_junction_ids']);
@@ -188,7 +189,8 @@ class Road_model extends CI_Model
 
     /**
      * 格式化干线详情数据
-     * @param $ids string 路口ID串
+     * @param $city_id interger 城市ID
+     * @param $ids     string   路口ID串
      * @return array
      */
     private function formatRoadDetailData($cityId, $ids)
@@ -201,9 +203,35 @@ class Road_model extends CI_Model
         $allMapVersions = $this->waymap_model->getAllMapVersion();
         $newMapVersion = max($allMapVersions);
 
+        // 调用路网接口获取干线路口信息
         $res = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIds);
-        if (empty($res['junctions_info'])) {
-            return [];
+        if (empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
+            return (object)[];
+        }
+
+        // 组织正向links串及geojson
+        $links = array_column($res['forward_path_flows'], 'path_links');
+        $geojson = $this->waymap_model->getLinksGeoInfos($links, $cityId, $newMapVersion);
+        $result['geo_info']['forward_geo'] = $geojson;
+
+        // 组织反向links串及geojson
+        $reverseLinks = array_column($res['backward_path_flows'], 'path_links');
+        $reverseGeojson = $this->waymap_model->getLinksGeoInfos($reverseLinks, $cityId, $newMapVersion);
+        $result['geo_info']['reverse_geo'] = $reverseGeojson;
+
+        foreach ($res['forward_path_flows'] as $k=>$v) {
+            $result['road_info'][$k] = [
+                'start_junc_id' => $v['start_junc_id'],
+                'end_junc_id' => $v['end_junc_id'],
+                'links' => $v['path_links'],
+            ];
+            foreach ($res['backward_path_flows'] as $kk=>$vv) {
+                if ($v['start_junc_id'] == $vv['end_junc_id']
+                    && $v['end_junc_id'] == $vv['start_junc_id'])
+                {
+                    $result['road_info'][$k]['reverse_links'] = $vv['path_links'];
+                }
+            }
         }
 
         $countData = [
@@ -213,7 +241,7 @@ class Road_model extends CI_Model
         foreach ($res['junctions_info'] as $k=>$v) {
             $countData['lng'] += $v['lng'];
             $countData['lat'] += $v['lat'];
-            $result['dataList'][$k] = [
+            $result['junctions_info'][$k] = [
                 'logic_junction_id' => $k,
                 'junction_name'     => $v['name'],
                 'lng'               => $v['lng'],
@@ -222,15 +250,15 @@ class Road_model extends CI_Model
             ];
         }
 
-        if (empty($result['dataList'])) {
-            return [];
+        if (empty($result)) {
+            return (object)[];
         }
 
         $result['center'] = [
             'lng' => count($countData) >= 1 ? $countData['lng'] / count($countData) : 0,
             'lat' => count($countData) >= 1 ? $countData['lat'] / count($countData) : 0,
         ];
-        $result['dataList'] = array_values($result['dataList']);
+        $result['junctions_info'] = array_values($result['junctions_info']);
         $result['map_version'] = $newMapVersion;
 
         return $result;
