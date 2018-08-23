@@ -9,37 +9,15 @@ class JunctionReport extends MY_Controller
 {
     protected $weeks = [1,2,3,4,5,6,7];
 
-    protected $quotas = [
-        'stop_delay' => [
-            'name'      => '停车延误',
-            'unit'      => '秒',
-        ],
-        'stop_time_cycle' => [
-            'name'      => '停车次数', // 指标名称
-            'unit'      => '次',
-        ],
-        'spillover_rate' => [
-            'name'      => '溢流指标',
-            'unit'      => '',
-        ],
-        'queue_length' => [
-            'name'      => '排队长度',
-            'unit'      => '米',
-        ],
-        'stop_rate' => [
-            'name'      => '失调指标',
-            'unit'      => '',
-        ],
-        'speed' => [
-            'name'      => '通过速度',
-            'unit'      => '',
-        ]
-    ];
+    protected $quotas;
 
     public function __construct()
     {
         parent::__construct();
         $this->load->model('junctionreport_model');
+        $this->config->load('report_conf');
+
+        $this->quotas = $this->config->item('quotas');
     }
 
     public function queryQuotaInfo()
@@ -70,19 +48,19 @@ class JunctionReport extends MY_Controller
             return;
         }
 
-        if(!isset($params['week']) || !in_array($params['week'], $this->weeks)) {
+        if(!isset($params['week']) || !is_array($params['week'])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The value of week is wrong.';
             return;
         }
 
-        if(!isset($params['schedule_start']) || date('H:i:s', strtotime($params['schedule_start'])) !== $params['schedule_start']) {
+        if(!isset($params['schedule_start']) || date('H:i', strtotime($params['schedule_start'])) !== $params['schedule_start']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The value of city_id is wrong.';
             return;
         }
 
-        if(!isset($params['schedule_end']) || date('H:i:s', strtotime($params['schedule_end'])) !== $params['schedule_end']) {
+        if(!isset($params['schedule_end']) || date('H:i', strtotime($params['schedule_end'])) !== $params['schedule_end']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The value of city_id is wrong.';
             return;

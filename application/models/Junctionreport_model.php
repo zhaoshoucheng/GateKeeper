@@ -9,8 +9,9 @@
 
 class Junctionreport_model extends CI_Model
 {
-
     protected $tb = 'flow_duration_v6_';
+
+    protected $quotas;
 
     public function __construct()
     {
@@ -18,7 +19,219 @@ class Junctionreport_model extends CI_Model
         if (empty($this->db)) {
             $this->db = $this->load->database('default', true);
         }
+
+        $this->load->model('waymap_model');
+        $this->config->load('report_conf');
+
+        $this->quotas = $this->config->item('quotas');
     }
 
+    /**
+     * 单点路口分析–数据查询
+     * @param $data
+     */
+    public function queryQuotaInfo($data)
+    {
+        $dates = $this->getDates($data);
 
+        $hours = $this->getHours($data);
+
+        $result = $this->db->select('avg(\'' . $data['key'] . '\') as ' . $data['key'] . ', hour, logic_flow_id')
+            ->from($this->tb . $data['city_id'])
+            ->where('logic_junction_id', $data['logic_junction_id'])
+            ->where_in('date', $dates)
+            ->where_in('hour', $hours)
+            ->group_by(['logic_flow_id', 'hour'])
+            ->order_by(['logic_flow_id', 'hour'])
+            ->get();
+
+        return $this->formatQueryQuotaInfoData($data, $result);
+
+    }
+
+    /**
+     * 对数据通过一系列的逻辑处理进行格式化
+     * @param $data
+     * @param $result
+     */
+    private function formatQueryQuotaInfoData($data, $result)
+    {
+        $junctionInfo = $this->getJunctionInfo($data);
+
+        $pretreatResultData = $this->getPretreatResultData($data, $result);
+
+        return [
+            'info' => [
+                'junction_name' => $junctionInfo['name'],
+                'quota_name' => $this->quotas[$data['key']]['name'],
+                'quota_unit' => $this->quotas[$data['key']]['unit'],
+                'summery' => $pretreatResultData['summery'],
+                'flow_info' => $pretreatResultData['flow_info'],
+                'base_time_box' => $pretreatResultData['base_time_box']
+            ],
+            'base' => $pretreatResultData['base']
+        ];
+    }
+
+    /**
+     * 获取指定时间段内的半小时划分集合
+     * @param $data
+     * @return array
+     */
+    private function getHours($data)
+    {
+        $start = strtotime($data['schedule_start']);
+        $end = strtotime($data['schedule_end']);
+
+        $results = [];
+
+        $time = $start;
+        while($time <= $end) {
+            $results[] = date('H:i', $time);
+        }
+
+        return $results;
+    }
+
+    /**
+     * 获取指定时间段内指定星期的日期集合
+     * @param $data
+     * @return array
+     */
+    private function getDates($data)
+    {
+        $start = strtotime($data['start_date']);
+        $end = strtotime($data['end_date']);
+        $weeks = $data['week'];
+
+        $results = [];
+
+        $time = $start;
+        while($time <= $end) {
+            if(in_array(date('w', $start) + 1, $weeks)) {
+                $results[] = date('Y-m-d', $start);
+            }
+            $time += (60 * 60 * 24);
+        }
+
+        return $results;
+    }
+
+    /**
+     * 获取指定路口信息
+     * @param array $data
+     * @return mixed
+     */
+    private function getJunctionInfo($data)
+    {
+        $junctionId = $data['logic_junction_id'];
+
+        $junctionInfo = $this->waymap_model->getJunctionInfo($junctionId, [ 'key'=>'logic_junction_id', 'value' => 'name' ]);
+
+        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionId);
+
+        return [
+            'name' => $junctionInfo[$junctionId],
+            'flows' => $flowsInfo[$junctionId]
+        ];
+    }
+
+    /**
+     * 对数据进行预处理，同时获取可以初步获取的信息
+     * @param $data
+     * @param $result
+     * @param $junctionInfo
+     * @return array
+     */
+    private function getPretreatResultData($data, &$result, $junctionInfo)
+    {
+        $key = $data['key'];
+        $flowsName = $junctionInfo['flows'];
+
+        //构建二维数据表以映射折线图，同时创建以时间为依据分组的数据
+        $dataByFlow = [];
+        $dataByHour = [];
+        foreach ($result as $item) {
+            //Flow
+            $dataByFlow[$item['logic_flow_id']] = $dataByFlow[$item['logic_flow_id']] ?? [];
+            $dataByFlow[$item['logic_flow_id']][$item['hour']] = $item[$key];
+            //Hour
+            $dataByHour[$item['hour']] = $dataByHour[$item['hour']] ?? [];
+            $dataByHour[$item['hour']][$item['logic_flow_id']] = $item[$key];
+        }
+
+        //求出每个方向的全天均值中最大的方向 ID
+        $flowsIdArray = [];
+        foreach ($dataByHour as $hour => $quotas) {
+            $flowsId = array_keys($quotas, max($quotas));
+            foreach ($flowsId as $id) {
+                $flowsIdArray[$id] = ($flowsIdArray[$id] ?? 0) + 1;
+            }
+        }
+        $maxFlowIds = array_keys($flowsIdArray, max($flowsIdArray));
+
+        //如果有多个最大值，则取平均求最大
+        if(count($maxFlowIds) >= 2) {
+            $maxFlowId = '';
+            $maxAvgValue = PHP_FLOAT_MIN;
+            foreach ($maxFlowIds as $id) {
+                $avg = array_sum($dataByFlow[$id]) / count($dataByFlow[$id]);
+                if($maxAvgValue < $avg) $maxFlowId = $id;
+            }
+        } elseif (count($maxFlowIds) == 1) {
+            $maxFlowId = reset($maxFlowIds);
+        } else {
+            exit;
+        }
+
+        //格式化二维数据表 - 生成 两类数据 （flow_info | base）
+        $base = [];
+        $flow_info = [];
+        foreach ($dataByFlow as $flowId => $flow) {
+            //base
+            $base[$flowId] = [];
+            foreach ($flow as $k => $v) { $base[$flowId][] = [$v, $k]; }
+            //flow_info
+            $flow_info[$flowId] = [ 'name' => $flowsName[$flowId], 'highlight' => (int)($flowId == $maxFlowId)];
+        }
+
+        //找出均值最大的方向的最大值最长持续时间区域
+        $firstHour = array_keys($dataByFlow[$maxFlowId])[0] ?? '';
+        $start_time = $end_time = $firstHour;
+        $lastLength = 0;
+        $lastStartTime = $lastEndTime = $firstHour;
+        $length = 0;
+
+        foreach ($dataByFlow[$maxFlowId] as $hour => $quota) {
+            $max = max($dataByHour[$hour]);
+            if($quota >= $max) {
+                $end_time = $hour;
+                if($start_time == '') $start_time = $hour;
+                $length++;
+            } else {
+                if($length > $lastLength) {
+                    $lastStartTime = $start_time;
+                    $lastEndTime = $end_time;
+                    $lastLength = $length;
+                }
+                $start_time = $end_time = '';
+                $length = 0;
+            }
+        }
+
+        if($length < $lastLength) {
+            $start_time = $lastStartTime;
+            $end_time = $lastEndTime;
+        }
+
+        $base_time_box = compact('start_time', 'end_time');
+
+        $summery = $this->quotas[$key]['summery']([
+            $junctionInfo['name'],
+            $junctionInfo['flows'][$maxFlowId],
+            $start_time,
+            $end_time]);
+
+        return compact('base', 'flow_info', 'base_time_box', 'summery');
+    }
 }
