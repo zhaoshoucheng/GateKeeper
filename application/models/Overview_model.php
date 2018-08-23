@@ -45,6 +45,9 @@ class Overview_model extends CI_Model
     {
 
         $table = 'real_time_' . $data['city_id'];
+        if (!$this->isTableExisted($table)) {
+            return [];
+        }
 
         $result = $this->redis_model->getData('its_realtime_avg_stop_delay_' . $data['city_id'] . '_' . $data['date']);
         $result = json_decode($result, true);
@@ -127,6 +130,10 @@ class Overview_model extends CI_Model
             return $hour;
         }
 
+        if (!$this->isTableExisted($this->tb . $cityId)) {
+            return date('H:i:s');
+        }
+
         $date = $date ?? date('Y-m-d');
 
         $result = $this->db->select('hour')
@@ -149,7 +156,7 @@ class Overview_model extends CI_Model
      * @param $cityId
      * @param $date
      * @param $hour
-     * @return string
+     * @return array
      */
     private function getJunctionList($cityId, $date, $hour)
     {
@@ -157,6 +164,10 @@ class Overview_model extends CI_Model
 
         if(($junctionList = $this->redis_model->getData($junctionListKey))) {
             return json_decode($junctionList, true);
+        }
+
+        if (!$this->isTableExisted($this->tb . $cityId)) {
+            return [];
         }
 
         $data = $this->db->select('*')
@@ -191,6 +202,9 @@ class Overview_model extends CI_Model
     {
         $result = [];
         $table = $this->tb . $data['city_id'];
+        if (!$this->isTableExisted($table)) {
+            return [];
+        }
 
         // 获取最近时间
         $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
@@ -268,5 +282,14 @@ class Overview_model extends CI_Model
         $result['ratio'] = array_values($result['ratio']);
 
         return $result;
+    }
+
+    /**
+     * 校验数据表是否存在
+     */
+    private function isTableExisted($table)
+    {
+        $isExisted = $this->db->table_exists($table);
+        return $isExisted;
     }
 }

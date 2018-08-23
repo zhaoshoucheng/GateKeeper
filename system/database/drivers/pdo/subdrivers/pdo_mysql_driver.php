@@ -126,29 +126,29 @@ class CI_DB_pdo_mysql_driver extends CI_DB_pdo_driver {
 		{
 			if ($this->stricton)
 			{
-				$sql = 'CONCAT(@@sql_mode, ",", "STRICT_ALL_TABLES")';
+				//$sql = 'CONCAT(@@sql_mode, ",", "STRICT_ALL_TABLES")';
 			}
 			else
 			{
-				$sql = 'REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+				/*$sql = 'REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
                                         @@sql_mode,
                                         "STRICT_ALL_TABLES,", ""),
                                         ",STRICT_ALL_TABLES", ""),
                                         "STRICT_ALL_TABLES", ""),
                                         "STRICT_TRANS_TABLES,", ""),
                                         ",STRICT_TRANS_TABLES", ""),
-                                        "STRICT_TRANS_TABLES", "")';
+                                        "STRICT_TRANS_TABLES", "")';*/
 			}
 
 			if ( ! empty($sql))
 			{
 				if (empty($this->options[PDO::MYSQL_ATTR_INIT_COMMAND]))
 				{
-					$this->options[PDO::MYSQL_ATTR_INIT_COMMAND] = 'SET SESSION sql_mode = '.$sql;
+					//$this->options[PDO::MYSQL_ATTR_INIT_COMMAND] = 'SET SESSION sql_mode = '.$sql;
 				}
 				else
 				{
-					$this->options[PDO::MYSQL_ATTR_INIT_COMMAND] .= ', @@session.sql_mode = '.$sql;
+					//$this->options[PDO::MYSQL_ATTR_INIT_COMMAND] .= ', @@session.sql_mode = '.$sql;
 				}
 			}
 		}

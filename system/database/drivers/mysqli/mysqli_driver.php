@@ -140,11 +140,11 @@ class CI_DB_mysqli_driver extends CI_DB {
 		{
 			if ($this->stricton)
 			{
-				$this->_mysqli->options(MYSQLI_INIT_COMMAND, 'SET SESSION sql_mode = CONCAT(@@sql_mode, ",", "STRICT_ALL_TABLES")');
+				//$this->_mysqli->options(MYSQLI_INIT_COMMAND, 'SET SESSION sql_mode = CONCAT(@@sql_mode, ",", "STRICT_ALL_TABLES")');
 			}
 			else
 			{
-				$this->_mysqli->options(MYSQLI_INIT_COMMAND,
+				/*$this->_mysqli->options(MYSQLI_INIT_COMMAND,
 					'SET SESSION sql_mode =
 					REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
 					@@sql_mode,
@@ -154,7 +154,7 @@ class CI_DB_mysqli_driver extends CI_DB {
 					"STRICT_TRANS_TABLES,", ""),
 					",STRICT_TRANS_TABLES", ""),
 					"STRICT_TRANS_TABLES", "")'
-				);
+				);*/
 			}
 		}
 
@@ -336,8 +336,9 @@ class CI_DB_mysqli_driver extends CI_DB {
 	 */
 	protected function _trans_begin()
 	{
-		$this->conn_id->autocommit(FALSE);
-		return is_php('5.5')
+        //@$this->conn_id->autocommit(FALSE);
+        mysqli_autocommit($this->conn_id,FALSE);
+        return is_php('5.5')
 			? $this->conn_id->begin_transaction()
 			: $this->simple_query('START TRANSACTION'); // can also be BEGIN or BEGIN WORK
 	}
@@ -353,8 +354,9 @@ class CI_DB_mysqli_driver extends CI_DB {
 	{
 		if ($this->conn_id->commit())
 		{
-			$this->conn_id->autocommit(TRUE);
-			return TRUE;
+            //@$this->conn_id->autocommit(TRUE);
+            mysqli_autocommit($this->conn_id,TRUE);
+            return TRUE;
 		}
 
 		return FALSE;
@@ -371,7 +373,8 @@ class CI_DB_mysqli_driver extends CI_DB {
 	{
 		if ($this->conn_id->rollback())
 		{
-			$this->conn_id->autocommit(TRUE);
+            //@$this->conn_id->autocommit(TRUE);
+            mysqli_autocommit($this->conn_id,TRUE);
 			return TRUE;
 		}
 
