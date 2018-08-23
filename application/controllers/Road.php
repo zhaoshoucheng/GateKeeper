@@ -69,7 +69,13 @@ class Road extends MY_Controller
 
         if (empty($params['junction_ids']) || !is_array($params['junction_ids'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数 junction_ids 不为空且为数组！';
+            $this->errmsg = '参数 junction_ids 须为数组且不能为空！';
+            return;
+        }
+
+        if (count($params['junction_ids']) < 4) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '请至少选择4个路口做为干线！';
             return;
         }
 
@@ -120,7 +126,13 @@ class Road extends MY_Controller
 
         if (empty($params['junction_ids']) || !is_array($params['junction_ids'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数 junction_ids 不为空且为数组！';
+            $this->errmsg = '参数 junction_ids 须为数组且不能为空！';
+            return;
+        }
+
+        if (count($params['junction_ids']) < 4) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '请至少选择4个路口做为干线！';
             return;
         }
 

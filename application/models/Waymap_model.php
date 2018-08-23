@@ -148,19 +148,9 @@ class Waymap_model extends CI_Model
 
             $junction_info = json_decode($junction_info, true);
             if ($junction_info['errorCode'] != 0 || empty($junction_info['data'])) {
-                $content = 'data = ' . json_encode($data)
-                    . ' \r\n interface = '
-                    . $this->config->item('waymap_interface') . '/signal-map/map/detail'
-                    . '\r\n result = ' . json_encode($junction_info);
-                sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return [];
             }
         } catch (Exception $e) {
-            $content = 'data = ' . json_encode($data)
-                . ' \r\n interface = '
-                . $this->config->item('waymap_interface') . '/signal-map/map/detail'
-                . '\r\n result = ' . json_encode($junction_info);
-            sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
             return [];
         }
 
@@ -204,10 +194,6 @@ class Waymap_model extends CI_Model
             try {
                 $res = httpGET($this->config->item('waymap_interface') . '/signal-map/map/getList', $data);
                 if (!$res) {
-                    // 添加日志、发送邮件
-                    $content = 'data = ' . json_encode($data)
-                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/signal-map/map/getList';
-                    sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                     return false;
                 }
                 $res = json_decode($res, true);
@@ -221,9 +207,6 @@ class Waymap_model extends CI_Model
                     $city_junctions = $res['data'];
                 }
             } catch (Exception $e) {
-                $content = 'data = ' . json_encode($data)
-                    . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/signal-map/map/getList';
-                sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return false;
             }
         } else {
