@@ -53,22 +53,34 @@ class Junctioncomparison_model extends CI_Model
             'quota_key'         => $data['quota_key'],
         ];
 
-        /* 获取基准日期指标加权平均值 */
+        /* 获取基准日期指标加权平均值 计算出需要查的周几具体日期*/
         $baseStartDate = strtotime($data['base_start_date']);
         $baseEndDate = strtotime($data['base_end_date']);
         $baseDateArr = [];
+        $baseWeek = [];
         for ($i = $baseStartDate; $i <= $baseEndDate; $i += 24 * 3600) {
             $baseDateArr[] = date('Y-m-d', $i);
+            foreach ($data['week'] as $k=>$v) {
+                if (date('w', $i) == $v) {
+                    $baseWeek[$v][$i] = date('Y-m-d', $i);
+                }
+            }
         }
         $publicData['date'] = $baseDateArr;
         $baseQuotaData = $this->getQuotaInfoByDate($table, $publicData);
 
-        /* 获取评估日期指标加权平均值 */
+        /* 获取评估日期指标加权平均值 计算出需要查的周几具体日期*/
         $evaluateStartDate = strtotime($data['evaluate_start_date']);
         $evaluateEndDate = strtotime($data['evaluate_end_date']);
         $evaluateDateArr = [];
+        $evaluateWeek = [];
         for ($i = $evaluateStartDate; $i <= $evaluateEndDate; $i += 24 * 3600) {
             $evaluateDateArr[] = date('Y-m-d', $i);
+            foreach ($data['week'] as $k=>$v) {
+                if (date('w', $i) == $v) {
+                    $evaluateWeek[$v][$i] = date('Y-m-d', $i);
+                }
+            }
         }
         $publicData['date'] = $evaluateDateArr;
         $evaluateQuotaData = $this->getQuotaInfoByDate($table, $publicData);

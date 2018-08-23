@@ -18,7 +18,7 @@ class Road_model extends CI_Model
         }
 
         // 判断数据表是否存在
-        if ($this->isTableExisted($this->tb)) {
+        if (!$this->isTableExisted($this->tb)) {
             return [];
         }
 
