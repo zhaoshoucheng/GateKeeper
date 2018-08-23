@@ -20,7 +20,7 @@ class Period_model extends CI_Model
 
     public function getCityMonthData($cityId,$year,$month)
     {
-        $ret = $this->db->select('stop_delay','speed','spillover_freq','oversaturation_freq','traj_count')->where(
+        $ret = $this->db->where(
             array(
                 'city_id'=>$cityId,
                 'year'=>$year,
@@ -32,7 +32,7 @@ class Period_model extends CI_Model
 
     public function getCityWeekData($cityId,$date)
     {
-        $ret = $this->db->select('stop_delay','speed','spillover_freq','oversaturation_freq','traj_count')->where(
+        $ret = $this->db->where(
             array(
                 'city_id'=>$cityId,
                 'date'=>$date,
@@ -43,7 +43,7 @@ class Period_model extends CI_Model
 
     public function getCityHourData($cityId,$dateList,$hourList = array())
     {
-        $this->db->select('stop_delay','speed','spillover_freq','oversaturation_freq','traj_count','hour','date')->where(
+        $this->db->where(
             array(
                 'city_id'=>$cityId,
             )
