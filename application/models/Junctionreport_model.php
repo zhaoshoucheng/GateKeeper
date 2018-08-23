@@ -36,14 +36,15 @@ class Junctionreport_model extends CI_Model
 
         $hours = $this->getHours($data);
 
-        $result = $this->db->select('avg(\'' . $data['key'] . '\') as ' . $data['key'] . ', hour, logic_flow_id')
+        $result = $this->db->select('sum(' . $data['key'] . ' * traj_count) / sum(traj_count) as ' . $data['key'] . ', hour, logic_flow_id')
             ->from($this->tb . $data['city_id'])
             ->where('logic_junction_id', $data['logic_junction_id'])
             ->where_in('date', $dates)
             ->where_in('hour', $hours)
+            ->where('traj_count >=', 10)
             ->group_by(['logic_flow_id', 'hour'])
-            ->order_by(['logic_flow_id', 'hour'])
-            ->get();
+            ->order_by('logic_flow_id, hour')
+            ->get()->result_array();
 
         return $this->formatQueryQuotaInfoData($data, $result);
 
@@ -53,12 +54,13 @@ class Junctionreport_model extends CI_Model
      * 对数据通过一系列的逻辑处理进行格式化
      * @param $data
      * @param $result
+     * @return array
      */
     private function formatQueryQuotaInfoData($data, $result)
     {
         $junctionInfo = $this->getJunctionInfo($data);
 
-        $pretreatResultData = $this->getPretreatResultData($data, $result);
+        $pretreatResultData = $this->getPretreatResultData($data, $result, $junctionInfo);
 
         return [
             'info' => [
@@ -88,6 +90,7 @@ class Junctionreport_model extends CI_Model
         $time = $start;
         while($time <= $end) {
             $results[] = date('H:i', $time);
+            $time += (30 * 60);
         }
 
         return $results;
@@ -108,8 +111,8 @@ class Junctionreport_model extends CI_Model
 
         $time = $start;
         while($time <= $end) {
-            if(in_array(date('w', $start) + 1, $weeks)) {
-                $results[] = date('Y-m-d', $start);
+            if(in_array(date('w', $time) + 1, $weeks)) {
+                $results[] = date('Y-m-d', $time);
             }
             $time += (60 * 60 * 24);
         }
@@ -131,8 +134,8 @@ class Junctionreport_model extends CI_Model
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionId);
 
         return [
-            'name' => $junctionInfo[$junctionId],
-            'flows' => $flowsInfo[$junctionId]
+            'name' => $junctionInfo[$junctionId] ?? '',
+            'flows' => $flowsInfo[$junctionId] ?? []
         ];
     }
 
@@ -171,64 +174,67 @@ class Junctionreport_model extends CI_Model
         $maxFlowIds = array_keys($flowsIdArray, max($flowsIdArray));
 
         //如果有多个最大值，则取平均求最大
-        if(count($maxFlowIds) >= 2) {
-            $maxFlowId = '';
-            $maxAvgValue = PHP_FLOAT_MIN;
-            foreach ($maxFlowIds as $id) {
-                $avg = array_sum($dataByFlow[$id]) / count($dataByFlow[$id]);
-                if($maxAvgValue < $avg) $maxFlowId = $id;
-            }
-        } elseif (count($maxFlowIds) == 1) {
-            $maxFlowId = reset($maxFlowIds);
-        } else {
-            exit;
+        $avg = [];
+        foreach ($maxFlowIds as $id) {
+            $avg[$id] = array_sum($dataByFlow[$id]) / count($dataByFlow[$id]);
         }
+        $maxFlowIds = array_keys($avg, max($avg));
 
         //格式化二维数据表 - 生成 两类数据 （flow_info | base）
-        $base = [];
-        $flow_info = [];
+        $base = $flow_info = [];
         foreach ($dataByFlow as $flowId => $flow) {
             //base
             $base[$flowId] = [];
             foreach ($flow as $k => $v) { $base[$flowId][] = [$v, $k]; }
             //flow_info
-            $flow_info[$flowId] = [ 'name' => $flowsName[$flowId], 'highlight' => (int)($flowId == $maxFlowId)];
+            $flow_info[$flowId] = [ 'name' => $flowsName[$flowId] ?? '', 'highlight' => (int)(in_array($flowId, $maxFlowIds) )];
         }
 
         //找出均值最大的方向的最大值最长持续时间区域
-        $firstHour = array_keys($dataByFlow[$maxFlowId])[0] ?? '';
-        $start_time = $end_time = $firstHour;
-        $lastLength = 0;
-        $lastStartTime = $lastEndTime = $firstHour;
-        $length = 0;
+        $base_time_box = [];
+        foreach ($maxFlowIds as $maxFlowId) {
+            $firstHour = array_keys($dataByFlow[$maxFlowId])[0] ?? '';
+            $start_time = $end_time = $firstHour;
+            $lastLength = 0;
+            $lastStartTime = $lastEndTime = $firstHour;
+            $length = 0;
 
-        foreach ($dataByFlow[$maxFlowId] as $hour => $quota) {
-            $max = max($dataByHour[$hour]);
-            if($quota >= $max) {
-                $end_time = $hour;
-                if($start_time == '') $start_time = $hour;
-                $length++;
-            } else {
-                if($length > $lastLength) {
-                    $lastStartTime = $start_time;
-                    $lastEndTime = $end_time;
-                    $lastLength = $length;
+            foreach ($dataByFlow[$maxFlowId] as $hour => $quota) {
+                $max = max($dataByHour[$hour]);
+                if($quota >= $max) {
+                    $end_time = $hour;
+                    if($start_time == '') $start_time = $hour;
+                    $length++;
+                } else {
+                    if($length > $lastLength) {
+                        $lastStartTime = $start_time;
+                        $lastEndTime = $end_time;
+                        $lastLength = $length;
+                    }
+                    $start_time = $end_time = '';
+                    $length = 0;
                 }
-                $start_time = $end_time = '';
-                $length = 0;
+            }
+
+            if($length < $lastLength) {
+                $start_time = $lastStartTime;
+                $end_time = $lastEndTime;
+                $length = $lastLength;
+            }
+
+            if(empty($base_time_box)) {
+                $base_time_box[$maxFlowId] = compact('start_time', 'end_time', 'length');
+            } elseif(reset($base_time_box)['length'] == $length) {
+                $base_time_box[$maxFlowId] = compact('start_time', 'end_time', 'length');
+            } elseif(reset($base_time_box)['length'] < $length) {
+                $base_time_box = [$maxFlowId => compact('start_time', 'end_time', 'length')];
             }
         }
 
-        if($length < $lastLength) {
-            $start_time = $lastStartTime;
-            $end_time = $lastEndTime;
-        }
-
-        $base_time_box = compact('start_time', 'end_time');
 
         $summery = $this->quotas[$key]['summery']([
             $junctionInfo['name'],
-            $junctionInfo['flows'][$maxFlowId],
+            $junctionInfo['flows'][$maxFlowId] ?? '',
             $start_time,
             $end_time]);
 

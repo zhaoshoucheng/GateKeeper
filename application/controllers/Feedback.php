@@ -45,12 +45,6 @@ class Feedback extends MY_Controller
             return;
         }
 
-        if(!isset($params['desc']) || empty(trim($params['desc']))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'You must have description.';
-            return;
-        }
-
         $data = $this->feedback_model->addFeedback($params);
 
         return $this->response($data);
