@@ -643,7 +643,7 @@ abstract class CI_DB_driver {
         if(strpos($sql,$prefix)!==0 && $this->force_master){
             $sql = $prefix.$sql;
         }
-        
+
         if ($sql === '')
 		{
 			log_message('error', 'Invalid query: '.$sql);

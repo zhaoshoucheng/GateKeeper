@@ -34,6 +34,11 @@ class Overviewalarm_model extends CI_Model
         if (empty($data)) {
             return [];
         }
+
+        if (!$this->isTableExisted($this->tb)) {
+            return [];
+        }
+
         $result = [];
 
         // 获取溢流报警个数
@@ -109,6 +114,10 @@ class Overviewalarm_model extends CI_Model
             return [];
         }
 
+        if (!$this->isTableExisted($this->tb)) {
+            return [];
+        }
+
         $result = [];
 
         // 七日日期
@@ -181,6 +190,10 @@ class Overviewalarm_model extends CI_Model
     public function realTimeAlarmList($data)
     {
         if (empty($data)) {
+            return [];
+        }
+
+        if (!$this->isTableExisted($this->tb)) {
             return [];
         }
 
@@ -285,6 +298,10 @@ class Overviewalarm_model extends CI_Model
             return $hour;
         }
 
+        if (!$this->isTableExisted('real_time_' . $cityId)) {
+            return date('H:i:s');
+        }
+
         $date = $date ?? date('Y-m-d');
 
         $result = $this->db->select('hour')
@@ -295,9 +312,19 @@ class Overviewalarm_model extends CI_Model
             ->limit(1)
             ->get()->first_row();
 
-        if(!$result)
+        if(!$result) {
             return date('H:i:s');
+        }
 
         return $result->hour;
+    }
+
+    /**
+     * 校验数据表是否存在
+     */
+    private function isTableExisted($table)
+    {
+        $isExisted = $this->db->table_exists($table);
+        return $isExisted;
     }
 }
