@@ -44,8 +44,7 @@ class Junctionreport_model extends CI_Model
             ->group_by(['logic_flow_id', 'hour'])
             ->order_by('logic_flow_id, hour')
             ->get()->result_array();
-        //echo $this->db->last_query();
-        //echo json_encode($result);die();
+
         return $this->formatQueryQuotaInfoData($data, $result);
 
     }
@@ -54,6 +53,7 @@ class Junctionreport_model extends CI_Model
      * 对数据通过一系列的逻辑处理进行格式化
      * @param $data
      * @param $result
+     * @return array
      */
     private function formatQueryQuotaInfoData($data, $result)
     {
