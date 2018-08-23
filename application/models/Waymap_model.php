@@ -23,6 +23,62 @@ class Waymap_model extends CI_Model
     }
 
     /**
+     * 根据关键词获取路口信息
+     * @param $city_id
+     * @param $keyword
+     */
+    public function getSuggestJunction($city_id, $keyword)
+    {
+        $data['token'] = $this->token;
+        $data['user_id'] = $this->userid;
+        $data['city_id'] = $city_id;
+        $data['keyword'] = $keyword;
+
+        try {
+            $junctions = httpGET($this->config->item('waymap_interface') . '/signal-map/mapJunction/suggest', $data);
+            if (!$junctions) {
+                return [];
+            }
+
+            $junctions = json_decode($junctions, true);
+            if ($junctions['errorCode'] != 0 || empty($junctions['data'])) {
+                return [];
+            }
+
+            return $junctions['data'];
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * 获取行政区信息
+     * @param $city_id
+     */
+    public function getDistrictInfo($city_id)
+    {
+        $data['token'] = $this->token;
+        $data['user_id'] = $this->userid;
+        $data['city_id'] = $city_id;
+
+        try {
+            $ret = httpGET($this->config->item('waymap_interface') . '/signal-map/city/districts', $data);
+            if (!$ret) {
+                return [];
+            }
+
+            $ret = json_decode($ret, true);
+            if ($ret['errorCode'] != 0 || empty($ret['data'])) {
+                return [];
+            }
+
+            return $ret['data'];
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    /**
      * 根据路口ID串获取路口名称
      * @param logic_junction_ids     逻辑路口ID串     string
      * @param returnFormat           数据返回格式      array [key => 'id', value => ['name',...]]
@@ -148,19 +204,9 @@ class Waymap_model extends CI_Model
 
             $junction_info = json_decode($junction_info, true);
             if ($junction_info['errorCode'] != 0 || empty($junction_info['data'])) {
-                $content = 'data = ' . json_encode($data)
-                    . ' \r\n interface = '
-                    . $this->config->item('waymap_interface') . '/signal-map/map/detail'
-                    . '\r\n result = ' . json_encode($junction_info);
-                sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return [];
             }
         } catch (Exception $e) {
-            $content = 'data = ' . json_encode($data)
-                . ' \r\n interface = '
-                . $this->config->item('waymap_interface') . '/signal-map/map/detail'
-                . '\r\n result = ' . json_encode($junction_info);
-            sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
             return [];
         }
 
@@ -204,10 +250,6 @@ class Waymap_model extends CI_Model
             try {
                 $res = httpGET($this->config->item('waymap_interface') . '/signal-map/map/getList', $data);
                 if (!$res) {
-                    // 添加日志、发送邮件
-                    $content = 'data = ' . json_encode($data)
-                        . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/signal-map/map/getList';
-                    sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                     return false;
                 }
                 $res = json_decode($res, true);
@@ -221,9 +263,6 @@ class Waymap_model extends CI_Model
                     $city_junctions = $res['data'];
                 }
             } catch (Exception $e) {
-                $content = 'data = ' . json_encode($data)
-                    . ' \r\ninterface = ' . $this->config->item('waymap_interface') . '/signal-map/map/getList';
-                sendMail($this->email_to, 'logs: 获取全城路口失败', $content);
                 return false;
             }
         } else {

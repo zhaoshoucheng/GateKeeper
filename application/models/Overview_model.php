@@ -156,7 +156,7 @@ class Overview_model extends CI_Model
      * @param $cityId
      * @param $date
      * @param $hour
-     * @return string
+     * @return array
      */
     private function getJunctionList($cityId, $date, $hour)
     {

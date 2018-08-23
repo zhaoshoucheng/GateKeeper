@@ -1,13 +1,9 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: didi
- * Date: 2018/5/14
- * Time: 下午4:20
+ * 路口指标工厂类
  */
 
 
-//具体工厂
 class JunctionQuota implements EvaluateQuotaFactory{
 
     private $_loadData = null;
@@ -18,21 +14,32 @@ class JunctionQuota implements EvaluateQuotaFactory{
     }
 
     /**
-     * 路口各方向延误时间
+     * 延误时间表
      */
-
-    public function getDurationDelay($start_time,$end_time)
+    public function getStopDelayAve($trans2Chart=true)
     {
-
         $quotaInfo = new JunctionQuotaInfo();
-        //可以做自定义逻辑处理
+        $quotaInfo->setStopDelay($this->_loadData,'logic_junction_id');
+        $data = $quotaInfo->getStopDelay('hour','traj_count',false);
+        if($trans2Chart){
+            return $quotaInfo->formatQuotaChartData($data);
+        }
 
-        $quotaInfo->setDurationDelay($this->_loadData,$start_time,$end_time);
-
-        return $quotaInfo->getDurationDelay();
+        return $data;
     }
 
-
-
-
+//    /**
+//     * 路口各方向延误时间
+//     */
+//
+//    public function getDurationDelay($start_time,$end_time)
+//    {
+//
+//        $quotaInfo = new JunctionQuotaInfo();
+//        //可以做自定义逻辑处理
+//
+//        $quotaInfo->setDurationDelay($this->_loadData,$start_time,$end_time);
+//
+//        return $quotaInfo->getDurationDelay();
+//    }
 }
