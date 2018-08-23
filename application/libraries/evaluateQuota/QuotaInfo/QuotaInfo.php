@@ -23,21 +23,46 @@ abstract class QuotaInfo
     /**
      * 通用性方法,可重载
      */
-    protected function formatQuotaChartData($series)
+    public function formatQuotaChartData($series)
     {
-        $x_axis = array();
-        for($i = 0; $i < 86400; $i += 30*60) {
-            $hour = intval($i / 3600) % 24;
-            $minute = intval($i % 3600 / 60);
-            $hour = ($hour > 9) ? $hour : "0{$hour}";
-            $minute = ($minute > 9) ? $minute : "0{$minute}";
-            $x_axis[] = "{$hour}:{$minute}";
+        $chartData = array();
+        foreach ($series as $dk => $dv){
+            foreach ($dv as $k => $v){
+                $chartData[$dk][] = array($k,$v['sum']/$v['count']);
+            }
         }
-        return array(
-            "xAxis"  => isset($series[0]['xValues']) ? $series[0]['xValues'] : $x_axis,
-            "series" => $series,
-            "base_series" => array(),
-        );
+        return $chartData;
+    }
+
+    public function getQuotaData($data,$key,$weight,$gather,$quotaName)
+    {
+        $finalData = array();
+        foreach ($data as $value){
+            foreach ($value as $k => $v){
+                if($gather){
+                    $finalData['total'][$k]['sum'] += $v[$quotaName]*$v[$weight];
+                }
+                if($weight){
+                    $finalData[$key][$k]['sum'] += $v[$quotaName]*$v[$weight];
+                    $finalData[$key][$k]['count'] += $v[$weight];
+                }else{
+                    $finalData[$key][$k]['sum'] += $v[$quotaName];
+                    $finalData[$key][$k]['count'] += 1;
+                }
+
+            }
+        }
+
+        return $finalData;
+    }
+
+    public function setQuotaData($data,$key)
+    {
+        $finalData = array();
+        foreach ($data as $k => $v){
+            $finalData[$v[$key]][] = $v;
+        }
+        return $finalData;
     }
 
 
