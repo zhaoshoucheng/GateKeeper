@@ -58,7 +58,7 @@ class Junctionreport_model extends CI_Model
     {
         $junctionInfo = $this->getJunctionInfo($data);
 
-        $pretreatResultData = $this->getPretreatResultData($data, $result);
+        $pretreatResultData = $this->getPretreatResultData($data, $result, $junctionInfo);
 
         return [
             'info' => [
