@@ -11,6 +11,7 @@ class Report extends MY_Controller
         parent::__construct();
         $this->load->model('report_model');
         $this->load->library('EvaluateQuota');
+        $this->load->model('waymap_model');
     }
 
     public function test()
@@ -21,6 +22,36 @@ class Report extends MY_Controller
         //library层处理具体数据
         $ret = $evaluate->getJunctionDurationDelay($jdata,"start","end");
         return $this->response($ret);
+    }
+
+    public function searchJunction()
+    {
+        $params = $this->input->post();
+        $validate = Validate::make($params, [
+                'city_id'        => 'nullunable',
+                'keyword'        => 'nullunable',
+            ]
+        );
+        if(!$validate['status']){
+            return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
+        }
+
+        $cityId = $params['city_id'];
+        $keyword = $params['keyword'];
+
+        $junctions = $this->waymap_model->getSuggestJunction($cityId,$keyword);
+        $final_data = [];
+        foreach ($junctions as $j){
+            $final_data[] = [
+                'logic_junction_id'=>$j['logic_junction_id'],
+                'lng'=>$j['lng'],
+                'lat'=>$j['lat'],
+                'city_id'=>$cityId,
+                'name'=>$j['name'],
+                'name_sim'=>$j['name_sim']
+            ];
+        }
+        return $this->response($final_data);
     }
 
     public function reportConfig()

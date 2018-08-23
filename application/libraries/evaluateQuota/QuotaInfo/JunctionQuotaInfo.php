@@ -1,20 +1,35 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: didi
- * Date: 2018/5/14
- * Time: 下午4:30
+ * 路口级别指标
  */
 
 
 class JunctionQuotaInfo extends QuotaInfo
 {
+    /*
+       * 停车延误
+       * */
+    private $_stopDelay;
 
-    private $_durationDelay;
+    private $__durationDelay;
 
+    public function getStopDelay($key=null, $weight=null,$gather=false)
+    {
+        if($key === null){
+            return $this->_stopDelay;
+        }
+        return self::getQuotaData($this->_stopDelay,$key,$weight,$gather,'stop_delay');
 
+    }
 
+    public function setStopDelay($data, $key=null)
+    {
+        if($key === null){
+            return $this->_stopDelay = $data;
+        }
+        $this->_stopDelay = self::setQuotaData($this->_stopDelay,$key);
 
+    }
 
 
     public function getDurationDelay($type=1)
