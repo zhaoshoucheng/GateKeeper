@@ -37,7 +37,7 @@ class Road_model extends CI_Model
         }
 
         $where = 'city_id = ' . $cityId . ' and is_delete = 0';
-        $this->db->select('road_id, road_name');
+        $this->db->select('road_id, road_name, road_direction');
         $this->db->from($this->tb);
         $this->db->where($where);
         $res = $this->db->get()->result_array();
@@ -70,7 +70,7 @@ class Road_model extends CI_Model
 
         $insertData = [
             'city_id'            => intval($data['city_id']),
-            'road_id'            => md5($data['junction_ids'] . $data['road_name']),
+            'road_id'            => md5(implode(',', $data['junction_ids']) . $data['road_name']),
             'road_name'          => strip_tags(trim($data['road_name'])),
             'logic_junction_ids' => implode(',', $data['junction_ids']),
             'road_direction'     => intval($data['road_direction']),
@@ -206,7 +206,13 @@ class Road_model extends CI_Model
             return [];
         }
 
+        $countData = [
+            'lng' => 0,
+            'lat' => 0,
+        ];
         foreach ($res['junctions_info'] as $k=>$v) {
+            $countData['lng'] += $v['lng'];
+            $countData['lat'] += $v['lat'];
             $result['dataList'][$k] = [
                 'logic_junction_id' => $k,
                 'junction_name'     => $v['name'],
@@ -220,7 +226,12 @@ class Road_model extends CI_Model
             return [];
         }
 
+        $result['center'] = [
+            'lng' => count($countData) >= 1 ? $countData['lng'] / count($countData) : 0,
+            'lat' => count($countData) >= 1 ? $countData['lat'] / count($countData) : 0,
+        ];
         $result['dataList'] = array_values($result['dataList']);
+        $result['map_version'] = $newMapVersion;
 
         return $result;
     }
