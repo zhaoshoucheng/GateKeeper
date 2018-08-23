@@ -42,7 +42,7 @@ class Junctionreport_model extends CI_Model
             ->where_in('date', $dates)
             ->where_in('hour', $hours)
             ->group_by(['logic_flow_id', 'hour'])
-            ->order_by(['logic_flow_id', 'hour'])
+            ->order_by('logic_flow_id, hour')
             ->get();
 
         return $this->formatQueryQuotaInfoData($data, $result);
