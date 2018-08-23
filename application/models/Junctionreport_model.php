@@ -132,8 +132,8 @@ class Junctionreport_model extends CI_Model
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionId);
 
         return [
-            'name' => $junctionInfo[$junctionId],
-            'flows' => $flowsInfo[$junctionId]
+            'name' => $junctionInfo[$junctionId] ?? '',
+            'flows' => $flowsInfo[$junctionId] ?? []
         ];
     }
 
@@ -229,7 +229,7 @@ class Junctionreport_model extends CI_Model
 
         $summery = $this->quotas[$key]['summery']([
             $junctionInfo['name'],
-            $junctionInfo['flows'][$maxFlowId],
+            $junctionInfo['flows'][$maxFlowId] ?? '',
             $start_time,
             $end_time]);
 
