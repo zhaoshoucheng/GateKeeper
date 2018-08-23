@@ -36,7 +36,7 @@ class Junctionreport_model extends CI_Model
 
         $hours = $this->getHours($data);
 
-        $result = $this->db->select('avg(\'' . $data['key'] . '\') as ' . $data['key'] . ', hour, logic_flow_id')
+        $result = $this->db->select('avg(`' . $data['key'] . '`) as ' . $data['key'] . ', hour, logic_flow_id')
             ->from($this->tb . $data['city_id'])
             ->where('logic_junction_id', $data['logic_junction_id'])
             ->where_in('date', $dates)
@@ -44,7 +44,8 @@ class Junctionreport_model extends CI_Model
             ->group_by(['logic_flow_id', 'hour'])
             ->order_by('logic_flow_id, hour')
             ->get()->result_array();
-
+        //echo $this->db->last_query();
+        //echo json_encode($result);die();
         return $this->formatQueryQuotaInfoData($data, $result);
 
     }
@@ -174,7 +175,7 @@ class Junctionreport_model extends CI_Model
         //如果有多个最大值，则取平均求最大
         if(count($maxFlowIds) >= 2) {
             $maxFlowId = '';
-            $maxAvgValue = PHP_FLOAT_MIN;
+            $maxAvgValue = PHP_INT_MIN;
             foreach ($maxFlowIds as $id) {
                 $avg = array_sum($dataByFlow[$id]) / count($dataByFlow[$id]);
                 if($maxAvgValue < $avg) $maxFlowId = $id;
@@ -193,7 +194,7 @@ class Junctionreport_model extends CI_Model
             $base[$flowId] = [];
             foreach ($flow as $k => $v) { $base[$flowId][] = [$v, $k]; }
             //flow_info
-            $flow_info[$flowId] = [ 'name' => $flowsName[$flowId], 'highlight' => (int)($flowId == $maxFlowId)];
+            $flow_info[$flowId] = [ 'name' => $flowsName[$flowId] ?? '', 'highlight' => (int)($flowId == $maxFlowId)];
         }
 
         //找出均值最大的方向的最大值最长持续时间区域
