@@ -36,7 +36,11 @@ class EvaluateQuota
         $this->_initQuotaFactory(new JunctionQuota());
         return $this->_evaluateQuotaFactory;
     }
-
+    private function _getCityQuotaFactory()
+    {
+        $this->_initQuotaFactory(new CityQuota());
+        return $this->_evaluateQuotaFactory;
+    }
     private function _camelize($uncamelized_words,$separator='_')
     {
         $uncamelized_words = $separator. str_replace($separator, " ", strtolower($uncamelized_words));
@@ -65,6 +69,9 @@ class EvaluateQuota
                 break;
             case 'area':
                 $factory = $this->_getAreaQuotaFactory();
+                break;
+            case 'city':
+                $factory = $this->_getCityQuotaFactory();
                 break;
             default:
                 throw new Exception('undefined quota type');
