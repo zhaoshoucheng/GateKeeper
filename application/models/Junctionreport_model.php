@@ -88,6 +88,7 @@ class Junctionreport_model extends CI_Model
         $time = $start;
         while($time <= $end) {
             $results[] = date('H:i', $time);
+            $time += (30 * 60);
         }
 
         return $results;
