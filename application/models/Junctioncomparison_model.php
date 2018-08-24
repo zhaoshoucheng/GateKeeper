@@ -120,13 +120,42 @@ class Junctioncomparison_model extends CI_Model
             return (object)[];
         }
 
-        $formatData = [
-            'baseQuotaData'     => $newBaseQuotaData,
-            'evaluateQuotaData' => $newEvaluateQuotaData,
-            'baseWeekDays'      => $baseWeekDays,
-            'evaluateWeekDays'  => $evaluateWeekDays,
-            'schedule'          => $scheduleArr,
-        ];
+        $formatData = [];
+        foreach ($allFlows[$data['logic_junction_id']] as $k=>$v) {
+            // flow信息
+            $formatData[$k]['flow_info'] = [
+                'logic_flow_id' => $k,
+                'flow_name'     => $v,
+            ];
+
+            // 基准
+            if (array_key_exists($k, $newBaseQuotaData)) {
+                foreach ($baseWeekDays as $day) {
+                    foreach ($scheduleArr as $hour) {
+                        $hourData['base_hour_list'][$hour][$k][$day] = $newBaseQuotaData[$k][$day][$hour] ?? '';
+                        $formatData[$k]['base_time_list'][$hour][$day] = $newBaseQuotaData[$k][$day][$hour] ?? '';
+                    }
+                }
+            }
+
+            // 评估
+            if (array_key_exists($k, $newEvaluateQuotaData)) {
+                foreach ($evaluateWeekDays as $day) {
+                    foreach ($scheduleArr as $hour) {
+                        $hourData['evaluate_hour_list'][$hour][$k][$day] = $newEvaluateQuotaData[$k][$day][$hour] ?? '';
+                        $formatData[$k]['evaluate_time_list'][$hour][$day] = $newEvaluateQuotaData[$k][$day][$hour] ?? '';
+                    }
+                }
+            }
+
+            if (empty($formatData[$k]['evaluate_time_list']) && empty($formatData[$k]['base_time_list'])) {
+                unset($formatData[$k]);
+            }
+        }
+
+        if (empty($formatData)) {
+            return (object)[];
+        }
 
         /**
          * 排队长度 => queue_lengthDataFormat
@@ -136,7 +165,7 @@ class Junctioncomparison_model extends CI_Model
          * 停车比率 => stop_rateDataFormat
          * 溢流指数 => spillover_rateDataFormat
          */
-        $result = $this->$function($allFlows[$data['logic_junction_id']], $formatData);
+        $result = $this->$function($formatData, $hourData);
 
         return $result;
     }
@@ -151,31 +180,38 @@ class Junctioncomparison_model extends CI_Model
      * @param $data['schedule']          array  时段配置时间点 ['07:00', '07:30', ...]
      * @return array
      */
-    private function queue_lengthDataFormat($flowData, $data)
+    private function queue_lengthDataFormat($data, $hourData)
     {
         $result = [];
 
-        foreach ($flowData as $k=>$v) {
-            // flow信息
-            $result['flow_info'] = [
-                'logic_flow_id' => $k,
-                'flow_name'     => $v,
-            ];
-
-            // 基准
-            foreach ($data['baseWeekDays'] as $day) {
-                foreach ($data['schedule'] as $hour) {
-                    $result['base_list'][$k][$day][$hour] = $data['baseQuotaData'][$k][$day][$hour];
-                }
+        foreach ($data as $k=>$v) {
+            $result[$k]['flow_info'] = $v['flow_info'];
+            foreach ($v['base_time_list'] as $hour=>$val) {
+                $result[$k]['base_list'][$hour] = array_sum($val) / count($val);
             }
 
-            // 评估
-            foreach ($data['evaluateWeekDays'] as $day) {
-                foreach ($data['schedule'] as $hour) {
-                    $result['base_list'][$k][$day][$hour] = $data['evaluateQuotaData'][$k][$day][$hour];
-                }
+            foreach ($v['evaluate_time_list'] as $hour=>$val) {
+                $result[$k]['evaluate_list'][$hour] = array_sum($val) / count($val);
             }
         }
+
+        // 基准 每个时间点指标值最大的相位统计容器
+        $baseMaxValueCount = [];
+        // 临时数组 放置每个时间点每个相位的指标平均值
+        $tempBase = [];
+        foreach ($hourData['base_hour_list'] as $hour => $val) {
+            foreach ($val as $direc=>$v) {
+                $tempBase[$hour][$direc] = array_sum($v) / count($v);
+                $baseMaxValueCount[$direc] = 0;
+            }
+        }
+        // 统计指标最大值的相位出现的次数
+        foreach ($tempBase as $k=>$v) {
+            $baseMaxValueCount[array_search(max($v), $v)] += 1;
+        }
+
+        // 需要高亮的相位
+        $highLightPhase = array_search(max($baseMaxValueCount), $baseMaxValueCount);
 
     }
 
@@ -189,7 +225,7 @@ class Junctioncomparison_model extends CI_Model
      * @param $data['schedule_start']    string 时段开始时间
      * @param $data['schedule_end']      string 时段线束时间
      */
-    private function stop_delayDataFormat($flowData, $data)
+    private function stop_delayDataFormat($data)
     {
         
     }
@@ -204,7 +240,7 @@ class Junctioncomparison_model extends CI_Model
      * @param $data['schedule_start']    string 时段开始时间
      * @param $data['schedule_end']      string 时段线束时间
      */
-    private function speedDataFormat($flowData, $data)
+    private function speedDataFormat($data)
     {
         
     }
@@ -221,7 +257,7 @@ class Junctioncomparison_model extends CI_Model
      * @param $data['schedule_start']    string 时段开始时间
      * @param $data['schedule_end']      string 时段线束时间
      */
-    private function stop_time_cycleDataFormat($flowData, $data)
+    private function stop_time_cycleDataFormat($data)
     {
         
     }
@@ -236,7 +272,7 @@ class Junctioncomparison_model extends CI_Model
      * @param $data['schedule_start']    string 时段开始时间
      * @param $data['schedule_end']      string 时段线束时间
      */
-    private function stop_rateDataFormat($flowData, $data)
+    private function stop_rateDataFormat($data)
     {
         
     }
