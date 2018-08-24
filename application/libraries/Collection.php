@@ -6,19 +6,21 @@
  * Time: 下午4:16
  */
 
+require 'Collection/tools.php';
+
 class Collection
 {
     /**
      * 数据源
      * @var array
      */
-    protected $data = [];
+    private $data = [];
 
     /**
      * 支持链式调用的 PHP 原生数组函数
      * @var array
      */
-    private $self = [
+    private static $self = [
         'array_chunk', 'array_filter'
     ];
 
@@ -26,7 +28,7 @@ class Collection
      * 不支持链式调用的 PHP 原生函数
      * @var array
      */
-    private $other = [
+    private static $other = [
         'array_column'
     ];
 
@@ -36,18 +38,12 @@ class Collection
      */
     public function __construct($data = [])
     {
-        $this->setData($data);
+        $this->data = $data;
     }
 
-    /**
-     * 设置数据源
-     * @param $data
-     * @return $this
-     */
-    public function setData($data)
+    public static function make($data = [])
     {
-        $this->data = $data;
-        return $this;
+        return new static($data);
     }
 
     /**
@@ -84,6 +80,8 @@ class Collection
     {
         if(is_string($column)) {
             return $this->groupByString($column, $callable);
+        } elseif (is_array($column)) {
+            return $this->groupByArray($column, $callable);
         }
         throw new Exception('Your type of column is wrong!');
     }
@@ -104,6 +102,32 @@ class Collection
     }
 
     /**
+     * 过滤不符合条件的数据
+     *
+     * @param $column
+     * @param null $compare
+     * @param null $value
+     * @return mixed
+     * @throws Exception
+     */
+    public function where($column, $compare = null, $value = null)
+    {
+        if(is_array($column)) {
+            return $this->whereByArray($column);
+        }
+
+        if($compare == null)
+            throw new Exception('paramater 2 is null, should be string');
+
+        if($value == null) {
+            $value = $compare;
+            $compare = '==';
+        }
+
+        return $this->whereByString($column, $compare, $value);
+    }
+
+    /**
      * 适配 $self 和 $other 中定义的 PHP 自带的数组函数
      * @param $name
      * @param $arguments
@@ -112,21 +136,34 @@ class Collection
      */
     public function __call($name, $arguments)
     {
-        $method = 'array_' . implode('_', array_map(function ($v) {
+        $method = implode('_', array_map(function ($v) {
                 return lcfirst($v);
             }, preg_split("/(?=[A-Z])/", $name)));
 
-        array_unshift($arguments, $this->toArray());
-
-        if(in_array($method, $this->self))
-            return $this->setData(call_user_func_array($method, $arguments));
-        elseif(in_array($method, $this->other))
+        if(in_array($method, self::$self)) {
+            array_unshift($arguments, $this->toArray());
+            return new static(call_user_func_array($method, $arguments));
+        } elseif(in_array($method, self::$other)) {
+            array_unshift($arguments, $this->toArray());
             return call_user_func_array($method, $arguments);
+        } else {
+            switch ($method) {
+                case 'array_map' :
+                    array_push($arguments, $this->toArray());
+                    return new static(call_user_func_array($method, $arguments));
+            }
+        }
 
         throw new Exception('Method ' . $method . ' don\'t exist or method isn\'t allowed!');
     }
 
-    protected function groupByString($column, callable $callable = null)
+    /**
+     * 按照字符串字段分组
+     * @param $column
+     * @param callable|null $callable
+     * @return Collection
+     */
+    private function groupByString($column, callable $callable = null)
     {
         $data = [];
         foreach ($this->toArray() as $item) {
@@ -135,12 +172,38 @@ class Collection
         }
 
         if(!is_null($callable) && is_callable($callable))
-            $data = array_map($callable, $data);
+            foreach ($data as $key => $datum) { $data[$key] = $callable(new static($datum)); }
 
-        return $this->setData($data);
+        return new static($data);
     }
 
-    protected function orderByString($column, $order = SORT_ASC)
+    /**
+     * 按照字符串数组分组
+     * @param $columns
+     * @param callable|null $callable
+     * @return Collection
+     * @throws Exception
+     */
+    private function groupByArray($columns, callable $callable = null)
+    {
+        $first = array_shift($columns);
+        while (!empty($columns)) {
+            $column = array_pop($columns);
+            $callable = function ($collection) use ($column, $callable) {
+                return $collection->groupBy($column, $callable)->toArray();
+            };
+        }
+
+        return $this->groupBy($first, $callable);
+    }
+
+    /**
+     * 按照指定字符串排序
+     * @param $column
+     * @param int $order
+     * @return Collection
+     */
+    private function orderByString($column, $order = SORT_ASC)
     {
         $data = array_column($this->toArray(), null, $column);
         switch ($order) {
@@ -148,6 +211,42 @@ class Collection
             case SORT_DESC: krsort($data); break;
             default: break;
         }
-        return $this->setData(array_values($data));
+        return new static(array_values($data));
+    }
+
+    /**
+     * 根据字符串字段过滤
+     * @param $column
+     * @param $compare
+     * @param $value
+     * @return mixed
+     */
+    private function whereByString($column, $compare, $value)
+    {
+        return $this->arrayFilter(function ($v) use ($column, $compare, $value) {
+            return compare($compare, $v[$column], $value);
+        });
+    }
+
+    /**
+     * 依据数组过滤
+     * @param $array
+     * @return mixed
+     */
+    private function whereByArray($array)
+    {
+        $array = (new static($array))->arrayFilter(function ($v) {
+            return is_array($v) && (count($v) == 2 || count($v) == 3);
+        })->arrayMap(function ($v) {
+            return count($v) == 3 ? $v : [$v[0], '==', $v[1]];
+        })->toArray();
+
+        return $this->arrayFilter(function ($v) use ($array) {
+            foreach ($array as $item) {
+                if(!compare( $item[1],$v[$item[0]] ?? null, $item[2]))
+                    return false;
+            }
+            return true;
+        });
     }
 }
