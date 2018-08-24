@@ -38,12 +38,42 @@ class Area_model extends CI_Model
 
     public function addArea($data)
     {
-        $this->replaceArea([
+        return $this->replaceArea([
             "create_at"=>date("Y-m-d H:i:s"),
             "city_id"=>$data["city_id"],
             "area_name"=>$data["area_name"],
         ]);
+    }
+
+    public function addAreaWithJunction($data)
+    {
+        $areaId = $this->addArea($data);
+        if(!empty($data['junction_ids'])){
+            foreach ($data['junction_ids'] as $junction_id){
+                $this->updateAreaJunction($areaId, $junction_id, 1);
+            }
+        }
+        return $areaId;
+    }
+
+    public function updateAreaWithJunction($data)
+    {
+        $areaId = $this->updateArea($data);
+        $this->deleteAreaJunction($areaId);
+        if(!empty($data['junction_ids'])){
+            foreach ($data['junction_ids'] as $junction_id){
+                $this->updateAreaJunction($areaId, $junction_id, 1);
+            }
+        }
         return true;
+    }
+
+    public function updateArea($data)
+    {
+        return $this->replaceArea([
+            "id"=>$data["area_id"],
+            "area_name"=>$data["area_name"],
+        ]);
     }
 
     public function rename($data)
@@ -65,6 +95,15 @@ class Area_model extends CI_Model
     }
 
     /**
+     * 删除区域相关路口
+     * @param $areaId
+     */
+    public function deleteAreaJunction($areaId){
+        $this->db->where('area_id', $areaId);
+        $this->db->delete('area_junction_relation');
+    }
+
+    /**
      * 更新的区域内路口
      * @param $areaId   int     区域id
      * @param $logicJunctionId  int     路口id
@@ -72,6 +111,16 @@ class Area_model extends CI_Model
      */
     public function updateAreaJunction($areaId, $logicJunctionId, $type){
         if($type==1){
+            //记录是否存在?
+            $junctionInfo = $this->db
+                ->from('area_junction_relation')
+                ->where('area_id', $areaId)
+                ->where('junction_id', $logicJunctionId)->get()->row_array();
+            if(!empty($junctionInfo)){
+                return true;
+            }
+
+            //插入
             $data = [
                 "area_id"=>$areaId,
                 "junction_id"=>$logicJunctionId,
@@ -81,6 +130,7 @@ class Area_model extends CI_Model
             $this->db->insert("area_junction_relation", $data);
         }
         if($type==2){
+            //更新
             $this->db->where('area_id', $areaId);
             $this->db->where('junction_id', $logicJunctionId);
             $this->db->delete('area_junction_relation');
@@ -154,11 +204,13 @@ class Area_model extends CI_Model
         $data["update_at"] = date("Y-m-d H:i:s");   //全局更新
         if(empty($data["id"])) {
             $this->db->insert($this->tb, $data);
+            return $this->db->insert_id();
         }else{
-            $this->db->where('id', $data["id"]);
+            $areaId = $data["id"];
             unset($data["id"]);
+            $this->db->where('id', $areaId);
             $this->db->update($this->tb, $data);
-
+            return $areaId;
         }
     }
 }
