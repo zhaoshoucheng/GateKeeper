@@ -66,7 +66,9 @@ class Junctionreport_model extends CI_Model
 
         return [
             'info' => [
-                'junction_name' => $junctionInfo['name'],
+                'junction_name' => $junctionInfo['junction']['name'] ?? '',
+                'junction_lng' => $junctionInfo['junction']['lng'] ?? '',
+                'junction_lat' => $junctionInfo['junction']['lat'] ?? '',
                 'quota_name' => $this->quotas[$data['key']]['name'],
                 'quota_unit' => $this->quotas[$data['key']]['unit'],
                 'summery' => $pretreatResultData['summery'],
@@ -131,12 +133,12 @@ class Junctionreport_model extends CI_Model
     {
         $junctionId = $data['logic_junction_id'];
 
-        $junctionInfo = $this->waymap_model->getJunctionInfo($junctionId, [ 'key'=>'logic_junction_id', 'value' => 'name' ]);
+        $junctionInfo = $this->waymap_model->getJunctionInfo($junctionId, [ 'key'=>'logic_junction_id', 'value' => ['name', 'lat', 'lng'] ]);
 
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionId);
 
         return [
-            'name' => $junctionInfo[$junctionId] ?? '',
+            'junction' => $junctionInfo[$junctionId] ?? [],
             'flows' => $flowsInfo[$junctionId] ?? []
         ];
     }

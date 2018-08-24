@@ -1,8 +1,5 @@
 <?php
 
-require 'Collection.php';
-require 'V3.0/TwoDimensionCollection.php';
-
 $collection = new Collection([
     ['id' => 1, 'name' => 'aaa', 'age' => 13],
     ['id' => 2, 'name' => 'bbb', 'age' => 12],
