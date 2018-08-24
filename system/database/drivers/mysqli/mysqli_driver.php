@@ -140,11 +140,11 @@ class CI_DB_mysqli_driver extends CI_DB {
 		{
 			if ($this->stricton)
 			{
-				$this->_mysqli->options(MYSQLI_INIT_COMMAND, 'SET SESSION sql_mode = CONCAT(@@sql_mode, ",", "STRICT_ALL_TABLES")');
+				//$this->_mysqli->options(MYSQLI_INIT_COMMAND, 'SET SESSION sql_mode = CONCAT(@@sql_mode, ",", "STRICT_ALL_TABLES")');
 			}
 			else
 			{
-				$this->_mysqli->options(MYSQLI_INIT_COMMAND,
+				/*$this->_mysqli->options(MYSQLI_INIT_COMMAND,
 					'SET SESSION sql_mode =
 					REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
 					@@sql_mode,
@@ -154,7 +154,7 @@ class CI_DB_mysqli_driver extends CI_DB {
 					"STRICT_TRANS_TABLES,", ""),
 					",STRICT_TRANS_TABLES", ""),
 					"STRICT_TRANS_TABLES", "")'
-				);
+				);*/
 			}
 		}
 

@@ -170,10 +170,14 @@ class Validate {
 				return ['status'=>false, 'errmsg'=>self::combinErrmsg('min', $param, 'numeric', $rule_arr[1])];
 			}
 		}else if(is_string($value)){
-			if(mb_strlen($value) < (int)$rule_arr[1]){
-				return ['status'=>false, 'errmsg'=>self::combinErrmsg('min', $param, 'string', $rule_arr[1])];
-			}
-		}else{
+            if(mb_strlen($value) < (int)$rule_arr[1]){
+                return ['status'=>false, 'errmsg'=>self::combinErrmsg('min', $param, 'string', $rule_arr[1])];
+            }
+        }else if(is_array($value)){
+            if(count($value) < (int)$rule_arr[1]){
+                return ['status'=>false, 'errmsg'=>self::combinErrmsg('min', $param, 'array', $rule_arr[1])];
+            }
+        }else{
 			return ['status'=>false, 'errmsg'=>'Other types of validation are not supported for the time being.'];
 		}
 
