@@ -58,16 +58,20 @@ class Junctionreport_model extends CI_Model
      */
     private function formatQueryQuotaInfoData($data, $result)
     {
+        if(empty($result)) return [];
+
         $junctionInfo = $this->getJunctionInfo($data);
 
         $pretreatResultData = $this->getPretreatResultData($data, $result, $junctionInfo);
 
         return [
             'info' => [
-                'junction_name' => $junctionInfo['name'],
+                'junction_name' => $junctionInfo['junction']['name'] ?? '',
+                'junction_lng' => $junctionInfo['junction']['lng'] ?? '',
+                'junction_lat' => $junctionInfo['junction']['lat'] ?? '',
                 'quota_name' => $this->quotas[$data['key']]['name'],
                 'quota_unit' => $this->quotas[$data['key']]['unit'],
-                'summery' => $pretreatResultData['summery'],
+                'summary' => $pretreatResultData['summary'],
                 'flow_info' => $pretreatResultData['flow_info'],
                 'base_time_box' => $pretreatResultData['base_time_box']
             ],
@@ -129,12 +133,12 @@ class Junctionreport_model extends CI_Model
     {
         $junctionId = $data['logic_junction_id'];
 
-        $junctionInfo = $this->waymap_model->getJunctionInfo($junctionId, [ 'key'=>'logic_junction_id', 'value' => 'name' ]);
+        $junctionInfo = $this->waymap_model->getJunctionInfo($junctionId, [ 'key'=>'logic_junction_id', 'value' => ['name', 'lat', 'lng'] ]);
 
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionId);
 
         return [
-            'name' => $junctionInfo[$junctionId] ?? '',
+            'junction' => $junctionInfo[$junctionId] ?? [],
             'flows' => $flowsInfo[$junctionId] ?? []
         ];
     }
@@ -232,12 +236,12 @@ class Junctionreport_model extends CI_Model
         }
 
 
-        $summery = $this->quotas[$key]['summery']([
-            $junctionInfo['name'],
+        $summary = $this->quotas[$key]['summery']([
+            $junctionInfo['junction']['name'] ?? '',
             $junctionInfo['flows'][$maxFlowId] ?? '',
             $start_time,
             $end_time]);
 
-        return compact('base', 'flow_info', 'base_time_box', 'summery');
+        return compact('base', 'flow_info', 'base_time_box', 'summary');
     }
 }
