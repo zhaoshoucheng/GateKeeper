@@ -490,6 +490,16 @@ $config['realtimewarning_rule'] = [
 
 //配置gift
 $config['gift'] = [
-    'itstool_public' =>'http://100.69.238.36:8000/resource/itstool_public/',
-    'itstool_private' =>'http://100.69.238.36:8000/resource/itstool_private/',
+    'upload'=>[
+        'itstool_public' =>'http://100.69.238.36:8000/resource/itstool_public',
+        'itstool_private' =>'http://100.69.238.36:8000/resource/itstool_private',
+    ],
+    'get'=>[
+        'itstool_public' =>'http://100.69.238.37:8000/resource/itstool_public',
+        'itstool_private' =>'http://100.69.238.37:8000/resource/itstool_private',
+    ],
+    'batch'=>[
+        'itstool_public' =>'http://100.69.238.37:8000/batch/resource/itstool_public',
+        'itstool_private' =>'http://100.69.238.37:8000/batch/resource/itstool_private',
+    ],
 ];
