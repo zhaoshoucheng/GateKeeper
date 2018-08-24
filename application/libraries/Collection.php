@@ -135,7 +135,7 @@ class Collection
         }
 
         if(!is_null($callable) && is_callable($callable))
-            $data = $callable($data);
+            $data = array_map($callable, $data);
 
         return $this->setData($data);
     }
