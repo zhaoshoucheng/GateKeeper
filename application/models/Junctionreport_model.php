@@ -73,7 +73,7 @@ class Junctionreport_model extends CI_Model
                 'junction_lat' => $junctionInfo['junction']['lat'] ?? '',
                 'quota_name' => $this->quotas[$data['quota_key']]['name'],
                 'quota_unit' => $this->quotas[$data['quota_key']]['unit'],
-                'quota_desc' => $this->quotas[$data['quota_key']]['desc'][data['type']],
+                'quota_desc' => $this->quotas[$data['quota_key']]['desc'][$data['type']],
                 'summary' => $pretreatResultData['summary'],
                 'flow_info' => $pretreatResultData['flow_info'],
                 'base_time_box' => $pretreatResultData['base_time_box']
