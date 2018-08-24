@@ -12,14 +12,14 @@ class Collection
      * 数据源
      * @var array
      */
-    private $data = [];
+    protected $data = [];
 
     /**
      * 支持链式调用的 PHP 原生数组函数
      * @var array
      */
     private $self = [
-        'array_chunk'
+        'array_chunk', 'array_filter'
     ];
 
     /**
@@ -31,7 +31,7 @@ class Collection
     ];
 
     /**
-     * Collection constructor.
+     * 集合类构造函数
      * @param $data
      */
     public function __construct($data = [])
@@ -126,7 +126,7 @@ class Collection
         throw new Exception('Method ' . $method . ' don\'t exist or method isn\'t allowed!');
     }
 
-    private function groupByString($column, callable $callable = null)
+    protected function groupByString($column, callable $callable = null)
     {
     $data = [];
     foreach ($this->toArray() as $item) {
@@ -140,7 +140,7 @@ class Collection
     return $this->setData($data);
 }
 
-    private function orderByString($column, $order = SORT_ASC)
+    protected function orderByString($column, $order = SORT_ASC)
     {
         $data = array_column($this->toArray(), null, $column);
         switch ($order) {
