@@ -38,6 +38,10 @@ class Area_model extends CI_Model
 
     public function addArea($data)
     {
+        $areaId = $this->getAreaIdByCityAreaName($data["city_id"], $data["area_name"]);
+        if($areaId>0){
+            throw new \Exception("The area_name exists.");
+        }
         return $this->replaceArea([
             "create_at"=>date("Y-m-d H:i:s"),
             "city_id"=>$data["city_id"],
@@ -70,6 +74,17 @@ class Area_model extends CI_Model
 
     public function updateArea($data)
     {
+        //判断area_name是否重复
+        $areaInfo = $this->db->from($this->tb)->where('delete_at', '1970-01-01 00:00:00')->where('id', $data["area_id"])->get()->row_array();
+        if (empty($areaInfo)){
+            throw new \Exception("The area not exists.");
+        }
+        $cityId = $areaInfo['city_id'];
+        $areaId = $this->getAreaIdByCityAreaName($cityId, $data["area_name"]);
+        if($areaId>0 && $areaId!=$data["area_id"]){
+            throw new \Exception("The area_name exists.");
+        }
+
         return $this->replaceArea([
             "id"=>$data["area_id"],
             "area_name"=>$data["area_name"],
@@ -153,7 +168,10 @@ class Area_model extends CI_Model
         $this->db->select('area.id as area_id,area.city_id,junction_id');
         $query = $this->db->get();
         $result = $query->result_array();
-        $areaInfo = $this->db->from($this->tb)->where('id', $areaId)->get()->row_array();
+        $areaInfo = $this->db->from($this->tb)->where('delete_at', '1970-01-01 00:00:00')->where('id', $areaId)->get()->row_array();
+        if (empty($areaInfo)){
+            throw new \Exception("The area not exists.");
+        }
         $junctionCenterFunc = function ($dataList) {
             $count_lng = 0;
             $count_lat = 0;
@@ -191,7 +209,10 @@ class Area_model extends CI_Model
     {
         if(!empty($data["id"])){
             $this->db->from($this->tb);
-            $row = $this->db->where('id', $data["id"])->get()->row_array();
+            $row = $this->db
+                ->where('id', $data["id"])
+                ->where('delete_at', '1970-01-01 00:00:00')
+                ->get()->row_array();
 
             //数据补全
             foreach ($row as $var=>$val){
@@ -211,5 +232,18 @@ class Area_model extends CI_Model
             $this->db->update($this->tb, $data);
             return $areaId;
         }
+    }
+
+    private function getAreaIdByCityAreaName($cityId, $areaName){
+        $this->db->from($this->tb);
+        $row = $this->db
+            ->where('delete_at', '1970-01-01 00:00:00')
+            ->where('city_id', $cityId)
+            ->where('area_name', $areaName)
+            ->get()->row_array();
+        if($row){
+            return $row['id'];
+        }
+        return 0;
     }
 }

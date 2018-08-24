@@ -488,4 +488,8 @@ $config['realtimewarning_rule'] = [
     ],
 ];
 
-
+//配置gift
+$config['gift'] = [
+    'itstool_public' =>'http://100.69.238.36:8000/resource/itstool_public/',
+    'itstool_private' =>'http://100.69.238.36:8000/resource/itstool_private/',
+];

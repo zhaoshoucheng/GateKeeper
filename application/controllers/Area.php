@@ -25,13 +25,14 @@ class Area extends MY_Controller
         $validate = Validate::make($params, [
             'area_name' => 'min:1',
             'city_id' => 'min:1',
-//            'junction_ids' => 'min:1',
+            'junction_ids' => 'min:1',
         ]);
         if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = $validate['errmsg'];
             return;
         }
+
         try{
             $params['junction_ids'] = !empty($params['junction_ids']) ? $params['junction_ids'] : [];
             $data = $this->area_model->addAreaWithJunction([
@@ -59,6 +60,7 @@ class Area extends MY_Controller
         $validate = Validate::make($params, [
             'area_id' => 'min:1',
             'area_name' => 'min:1',
+            'junction_ids' => 'min:1',
         ]);
         if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
@@ -190,6 +192,6 @@ class Area extends MY_Controller
             $this->errmsg = $e->getMessage();
             return;
         }
-        return $this->response(["list"=>$data]);
+        return $this->response($data);
     }
 }
