@@ -25,20 +25,19 @@ class Area extends MY_Controller
         $validate = Validate::make($params, [
             'area_name' => 'min:1',
             'city_id' => 'min:1',
-            //'junction_ids' => 'min:1',
+//            'junction_ids' => 'min:1',
         ]);
         if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = $validate['errmsg'];
             return;
         }
-
         try{
-            $params['junction_ids'] = isset($params['junction_ids']) ? $params['junction_ids'] : "";
+            $params['junction_ids'] = !empty($params['junction_ids']) ? $params['junction_ids'] : [];
             $data = $this->area_model->addAreaWithJunction([
                 'area_name' => $params["area_name"],
                 'city_id' => intval($params['city_id']),
-                'junction_ids' => explode(',', $params['junction_ids']),
+                'junction_ids' => $params['junction_ids'],
             ]);
         }catch (\Exception $e){
             com_log_warning('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_error', 0, $e->getMessage(), compact("params","data"));
@@ -60,7 +59,6 @@ class Area extends MY_Controller
         $validate = Validate::make($params, [
             'area_id' => 'min:1',
             'area_name' => 'min:1',
-            'junction_ids' => 'min:1',
         ]);
         if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;
@@ -69,10 +67,11 @@ class Area extends MY_Controller
         }
 
         try{
+            $params['junction_ids'] = !empty($params['junction_ids']) ? $params['junction_ids'] : [];
             $data = $this->area_model->updateAreaWithJunction([
                 'area_id' => intval($params['area_id']),
                 'area_name' => $params["area_name"],
-                'junction_ids' => explode(',',$params['junction_ids']),
+                'junction_ids' => $params['junction_ids'],
             ]);
         }catch (\Exception $e){
             com_log_warning('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_error', 0, $e->getMessage(), compact("params","data"));
@@ -166,13 +165,14 @@ class Area extends MY_Controller
 
 
     /**
+     * v2
      * 区域路口列表
      */
     public function getAreaJunctionList()
     {
         $params = $this->input->post();
         $validate = Validate::make($params, [
-            'city_id' => 'min:1',
+            //'city_id' => 'min:1',
             'area_id' => 'min:1',
         ]);
         if (!$validate['status']) {
@@ -182,6 +182,7 @@ class Area extends MY_Controller
         }
 
         try{
+            $params['city_id'] = !empty($params['city_id']) ? $params['city_id'] : 0;
             $data = $this->area_model->getAreaJunctionList(intval($params['city_id']), $params['area_id']);
         }catch (\Exception $e){
             com_log_warning('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_error', 0, $e->getMessage(), compact("params","data"));

@@ -153,7 +153,6 @@ class Area_model extends CI_Model
         $this->db->select('area.id as area_id,area.city_id,junction_id');
         $query = $this->db->get();
         $result = $query->result_array();
-
         $areaInfo = $this->db->from($this->tb)->where('id', $areaId)->get()->row_array();
         $junctionCenterFunc = function ($dataList) {
             $count_lng = 0;
