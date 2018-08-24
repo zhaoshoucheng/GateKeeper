@@ -103,8 +103,8 @@ class Junctionreport_model extends CI_Model
      */
     private function getDates($data)
     {
-        $start = strtotime($data['start_date']);
-        $end = strtotime($data['end_date']);
+        $start = strtotime($data['evaluate_start_date']);
+        $end = strtotime($data['evaluate_end_date']);
         $weeks = $data['week'];
 
         $results = [];
