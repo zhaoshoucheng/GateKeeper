@@ -110,6 +110,7 @@ class Road_model extends CI_Model
 
         $where = 'road_id = "' . strip_tags(trim($data['road_id'])) . '"';
         $where .= ' and city_id = ' . intval($data['city_id']);
+        $where .= ' and is_delete = 0';
         $this->db->where($where);
 
         $updateData = [
@@ -209,27 +210,24 @@ class Road_model extends CI_Model
             return (object)[];
         }
 
-        // 组织正向links串及geojson
-        $links = array_column($res['forward_path_flows'], 'path_links');
-        $geojson = $this->waymap_model->getLinksGeoInfos($links, $cityId, $newMapVersion);
-        $result['geo_info']['forward_geo'] = $geojson;
-
-        // 组织反向links串及geojson
-        $reverseLinks = array_column($res['backward_path_flows'], 'path_links');
-        $reverseGeojson = $this->waymap_model->getLinksGeoInfos($reverseLinks, $cityId, $newMapVersion);
-        $result['geo_info']['reverse_geo'] = $reverseGeojson;
-
         foreach ($res['forward_path_flows'] as $k=>$v) {
             $result['road_info'][$k] = [
                 'start_junc_id' => $v['start_junc_id'],
                 'end_junc_id' => $v['end_junc_id'],
                 'links' => $v['path_links'],
             ];
+            // 正向geojson
+            $geojson = $this->waymap_model->getLinksGeoInfos(explode(',', $v['path_links']), $cityId, $newMapVersion);
+            $result['road_info'][$k]['forward_geo'] = $geojson;
+
             foreach ($res['backward_path_flows'] as $kk=>$vv) {
                 if ($v['start_junc_id'] == $vv['end_junc_id']
                     && $v['end_junc_id'] == $vv['start_junc_id'])
                 {
                     $result['road_info'][$k]['reverse_links'] = $vv['path_links'];
+                    // 反向geojson
+                    $geojson = $this->waymap_model->getLinksGeoInfos(explode(',', $vv['path_links']), $cityId, $newMapVersion);
+                    $result['road_info'][$k]['reverse_geo'] = $geojson;
                 }
             }
         }
