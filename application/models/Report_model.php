@@ -72,10 +72,7 @@ class Report_model extends CI_Model
         return $data['itstool_private'];
     }
 
-    public function getReportList($cityId, $type = 1, $pageNum = 1, $pageSize = 100)
-    {
-        $namespace = 'itstool_private';
-
+    private function _reportListscope($cityId, $type = 1, $pageNum = 1, $pageSize = 100, $namespace){
         $this->db->from('report');
         $this->db->join('upload_files', 'upload_files.item_id = report.id');
         $this->db->where('report.delete_at', "1970-01-01 00:00:00");
@@ -83,6 +80,17 @@ class Report_model extends CI_Model
         $this->db->where('upload_files.namespace', $namespace);
         $this->db->where('report.city_id', $cityId);
         $this->db->where('report.type', $type);
+    }
+
+    public function getReportList($cityId, $type = 1, $pageNum = 1, $pageSize = 100)
+    {
+        $namespace = 'itstool_private';
+
+        $this->_reportListscope($cityId, $type, $pageNum, $pageSize, $namespace);
+        $this->db->select('count(*) as num');
+        $statRow = $this->db->get()->row_array();
+
+        $this->_reportListscope($cityId, $type, $pageNum, $pageSize, $namespace);
         $this->db->select('report.id,report.title,report.create_at,file_key,namespace');
         $this->db->order_by('report.id', 'DESC');
         $this->db->limit($pageSize, ($pageNum - 1) * $pageSize);
@@ -90,7 +98,7 @@ class Report_model extends CI_Model
         $result = $query->result_array();
 
 
-        $formatResult = function ($result) use ($namespace) {
+        $formatResult = function ($result) use ($statRow,$namespace,$pageNum,$pageSize) {
             $resourceKeys = array_reduce($result, function ($carry, $item) {
                 if (!empty($item["file_key"])) {
                     $carry[] = $item["file_key"];
@@ -109,7 +117,12 @@ class Report_model extends CI_Model
                     $result[$key]['down_url'] = $baseUrl . "/downReport?key=" . $item["file_key"];
                 }
             }
-            return $result;
+            return [
+                "list"=>$result,
+                "total"=>$statRow['num'],
+                "page_no"=>$pageNum,
+                "page_size"=>$pageSize,
+            ];
         };
         return $formatResult($result);
     }

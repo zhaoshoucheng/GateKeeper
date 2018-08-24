@@ -299,7 +299,7 @@ class Report extends MY_Controller
             $this->errmsg = $validate['errmsg'];
             return;
         }
-        
+
         try{
             $data = $this->gift_model->downResource($params["key"],'itstool_public');
         }catch (\Exception $e){
