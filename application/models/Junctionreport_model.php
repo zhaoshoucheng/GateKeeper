@@ -71,7 +71,7 @@ class Junctionreport_model extends CI_Model
                 'junction_lat' => $junctionInfo['junction']['lat'] ?? '',
                 'quota_name' => $this->quotas[$data['key']]['name'],
                 'quota_unit' => $this->quotas[$data['key']]['unit'],
-                'summery' => $pretreatResultData['summery'],
+                'summary' => $pretreatResultData['summary'],
                 'flow_info' => $pretreatResultData['flow_info'],
                 'base_time_box' => $pretreatResultData['base_time_box']
             ],
@@ -236,12 +236,12 @@ class Junctionreport_model extends CI_Model
         }
 
 
-        $summery = $this->quotas[$key]['summery']([
+        $summary = $this->quotas[$key]['summery']([
             $junctionInfo['name'],
             $junctionInfo['flows'][$maxFlowId] ?? '',
             $start_time,
             $end_time]);
 
-        return compact('base', 'flow_info', 'base_time_box', 'summery');
+        return compact('base', 'flow_info', 'base_time_box', 'summary');
     }
 }
