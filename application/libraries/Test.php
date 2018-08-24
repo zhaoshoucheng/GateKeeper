@@ -21,8 +21,8 @@ $collection = new TwoDimensionCollection([
 
 $res = $collection
     ->filter(function ($v) { return $v['id'] > 1; })
-    ->groupBy('age')
-    ->orderBy('age')
-    ->toArray();
+    ->groupBy('age', function ($v) {
+
+    })->orderBy('age')->toArray();
 
 print_r($res);
