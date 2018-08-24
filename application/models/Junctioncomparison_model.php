@@ -132,7 +132,6 @@ class Junctioncomparison_model extends CI_Model
             if (array_key_exists($k, $newBaseQuotaData)) {
                 foreach ($baseWeekDays as $day) {
                     foreach ($scheduleArr as $hour) {
-                        $hourData['base_hour_list'][$hour][$k][$day] = $newBaseQuotaData[$k][$day][$hour] ?? '';
                         $formatData[$k]['base_time_list'][$hour][$day] = $newBaseQuotaData[$k][$day][$hour] ?? '';
                     }
                 }
@@ -142,7 +141,6 @@ class Junctioncomparison_model extends CI_Model
             if (array_key_exists($k, $newEvaluateQuotaData)) {
                 foreach ($evaluateWeekDays as $day) {
                     foreach ($scheduleArr as $hour) {
-                        $hourData['evaluate_hour_list'][$hour][$k][$day] = $newEvaluateQuotaData[$k][$day][$hour] ?? '';
                         $formatData[$k]['evaluate_time_list'][$hour][$day] = $newEvaluateQuotaData[$k][$day][$hour] ?? '';
                     }
                 }
@@ -165,7 +163,7 @@ class Junctioncomparison_model extends CI_Model
          * 停车比率 => stop_rateDataFormat
          * 溢流指数 => spillover_rateDataFormat
          */
-        $result = $this->$function($formatData, $hourData);
+        $result = $this->$function($formatData);
 
         return $result;
     }
@@ -180,7 +178,7 @@ class Junctioncomparison_model extends CI_Model
      * @param $data['schedule']          array  时段配置时间点 ['07:00', '07:30', ...]
      * @return array
      */
-    private function queue_lengthDataFormat($data, $hourData)
+    private function queue_lengthDataFormat($data)
     {
         $result = [];
 
@@ -199,9 +197,9 @@ class Junctioncomparison_model extends CI_Model
         $baseMaxValueCount = [];
         // 临时数组 放置每个时间点每个相位的指标平均值
         $tempBase = [];
-        foreach ($hourData['base_hour_list'] as $hour => $val) {
-            foreach ($val as $direc=>$v) {
-                $tempBase[$hour][$direc] = array_sum($v) / count($v);
+        foreach ($result as $direc => $val) {
+            foreach ($val['base_list'] as $hour=>$v) {
+                $tempBase[$hour][$direc] = $v;
                 $baseMaxValueCount[$direc] = 0;
             }
         }
