@@ -12,7 +12,6 @@ $online_host = array(
     'ipd-cloud-web00.gz01',
     'ipd-cloud-web01.gz01',
     'ipd-cloud-preweb00.gz01',
-    '10.95.100.106',
 );
 
 $hostname = gethostname();
