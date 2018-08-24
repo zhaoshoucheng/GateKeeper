@@ -21,7 +21,8 @@ class Junctionreport_model extends CI_Model
         }
 
         $this->load->model('waymap_model');
-        $this->config->load('report_conf');
+        $this->load->config('report_conf');
+        $this->load->library('TwoDimensionCollection');
 
         $this->quotas = $this->config->item('quotas');
     }
@@ -29,9 +30,21 @@ class Junctionreport_model extends CI_Model
     /**
      * 单点路口分析–数据查询
      * @param $data
+     * @return array
      */
     public function queryQuotaInfo($data)
     {
+        $twoCollection = new TwoDimensionCollection([
+            '2015' => ['one' => 12, 'two' => 11, 'three' => 13, 'four' => 10],
+            '2016' => ['one' => 12, 'two' => 11, 'three' => 12, 'four' => 10],
+            '2017' => ['one' => 12, 'two' => 11, 'three' => 11, 'four' => 20],
+            '2018' => ['one' => 42, 'two' => 11, 'three' => 10, 'four' => 10],
+        ]);
+
+        print_r($twoCollection->getXMax());
+
+        die();
+
         $dates = $this->getDates($data);
 
         $hours = $this->getHours($data);
