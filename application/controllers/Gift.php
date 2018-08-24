@@ -34,7 +34,7 @@ class Gift extends MY_Controller
         $params = $this->input->post();
         $validate = Validate::make($params, [
             'resource_key' => 'min:1',
-            'mame_space' => 'min:1',
+            'name_space' => 'min:1',
         ]);
         if (!$validate['status']) {
             $this->errno = ERR_PARAMETERS;

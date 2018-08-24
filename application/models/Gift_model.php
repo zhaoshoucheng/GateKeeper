@@ -19,18 +19,177 @@ class Gift_model extends CI_Model
     }
 
     /**
+     * 批量获取resourceUrl
+     * @param $resourceKeys array  最多5个
+     * @param $namespace    string
+     *
+     * @return array
+     */
+    public function getResourceUrlList($resourceKeys, $namespace)
+    {
+        $chunkResult = array_chunk($resourceKeys, 1);
+        $result = [];
+        foreach ($chunkResult as $partKeys) {
+            if (empty($result)) {
+                $result = $this->_getResourceUrlList($partKeys, $namespace);
+            } else {
+                $partResult = $this->_getResourceUrlList($partKeys, $namespace);
+                $result[$namespace] = array_merge($result[$namespace], $partResult[$namespace]);
+            }
+        }
+        return !empty($result[$namespace]) ? $result[$namespace] : [];
+    }
+
+    /**
+     * 下载key资源
+     *
+     * @param $key
+     * @param $namespace
+     * @return array|void
+     */
+    public function downResource($resourceKey, $namespace)
+    {
+        $nconf = $this->config->item('gift');
+        $url = sprintf("%s/%s", $nconf['get'][$namespace], $resourceKey);
+        $out = httpGET($url);
+        $result = $this->formatGet($resourceKey, $url, $out);
+        if (empty($result['url'])) {
+            throw new \Exception("The key source not have.");
+        }
+        $sUrl = $result['url'];
+        $tPath = '/tmp/'.$resourceKey;
+        $content = file_get_contents($sUrl);
+        file_put_contents($tPath, $content);
+        $file_filesize = filesize($tPath);
+        $file = fopen($tPath, "r");
+        Header("Content-type: application/octet-stream");
+        Header("Accept-Ranges: bytes");
+        Header("Accept-Length: " . $file_filesize);
+        Header("Content-Disposition: attachment; filename=" . $resourceKey);
+        echo fread($file, $file_filesize);
+        fclose($file);
+        exit;
+    }
+
+    function download_remote_file_with_fopen($file_url, $save_to)
+    {
+        $in=    fopen($file_url, "rb");
+        $out=   fopen($save_to, "wb");
+        while ($chunk = fread($in,8192))
+        {
+            fwrite($out, $chunk, 8192);
+        }
+        fclose($in);
+        fclose($out);
+    }
+
+    function downloadFile($fullPath)
+    {
+        // Must be fresh start
+        if (headers_sent())
+            die('Headers Sent');
+
+        // Required for some browsers
+        if (ini_get('zlib.output_compression'))
+            ini_set('zlib.output_compression', 'Off');
+
+        // File Exists?
+        if (file_exists($fullPath)) {
+
+            // Parse Info / Get Extension
+            $fsize = filesize($fullPath);
+            $path_parts = pathinfo($fullPath);
+            $ext = strtolower($path_parts["extension"]);
+
+            // Determine Content Type
+            switch ($ext) {
+                case "pdf":
+                    $ctype = "application/pdf";
+                    break;
+                case "exe":
+                    $ctype = "application/octet-stream";
+                    break;
+                case "zip":
+                    $ctype = "application/zip";
+                    break;
+                case "doc":
+                    $ctype = "application/msword";
+                    break;
+                case "xls":
+                    $ctype = "application/vnd.ms-excel";
+                    break;
+                case "ppt":
+                    $ctype = "application/vnd.ms-powerpoint";
+                    break;
+                case "gif":
+                    $ctype = "image/gif";
+                    break;
+                case "png":
+                    $ctype = "image/png";
+                    break;
+                case "jpeg":
+                case "jpg":
+                    $ctype = "image/jpg";
+                    break;
+                default:
+                    $ctype = "application/force-download";
+            }
+
+            header("Pragma: public"); // required
+            header("Expires: 0");
+            header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+            header("Cache-Control: private", false); // required for certain browsers
+            header("Content-Type: $ctype");
+            header("Content-Disposition: attachment; filename=\"" . basename($fullPath) . "\";");
+            header("Content-Transfer-Encoding: binary");
+            header("Content-Length: " . $fsize);
+            ob_clean();
+            flush();
+            readfile($fullPath);
+        } else
+            die('File Not Found');
+    }
+
+
+    /**
+     * 批量获取resourceUrl
+     * @param $resourceKeys array  最多5个
+     * @param $namespace    string
+     *
+     * @return array
+     */
+    private function _getResourceUrlList($resourceKeys, $namespace)
+    {
+        $result = [];
+        $nconf = $this->config->item('gift');
+        $url = sprintf("%s?keys=%s", $nconf['batch'][$namespace], implode(',', $resourceKeys));
+        $out = httpGET($url);
+        $json = json_decode($out, true);
+        if (!empty($json['result'])) {
+            foreach ($json['result'] as $item) {
+                $result[$namespace][$item['key']] = $item;
+            }
+        }
+        return $result;
+    }
+
+    /**
      * 根据md5获取url
      *
      * @param $md5
      * @param $namespace
      * @return array|void
      */
-    public function getResourceUrl($resourceKey, $namespace)
+    public function findResourceUrl($resourceKey, $namespace)
     {
+        $result = [];
         $nconf = $this->config->item('gift');
-        $url = sprintf("%s%s", $nconf[$namespace], $resourceKey);
-        $out = httpGET($url);
-        return $this->formatOut($resourceKey, $url, $out);
+        foreach ($nconf['get'] as $namespace => $gconf) {
+            $url = sprintf("%s/%s", $gconf, $resourceKey);
+            $out = httpGET($url);
+            $result[$namespace] = $this->formatGet($resourceKey, $url, $out);
+        }
+        return $result;
     }
 
     /**
@@ -70,13 +229,12 @@ class Gift_model extends CI_Model
         $result = [];
         $nconf = $this->config->item('gift');
         $fileName = date("YmdHis") . mt_rand(1000, 9999) . "." . $extension;
-        $commandLine = sprintf("curl %s%s -X POST -F filecontent=@%s", $nconf['itstool_public'], $fileName, $_FILES[$field]["tmp_name"]);
-        exec($commandLine, $publicOut);
-        $result["public"] = $this->formatOut($fileName, $commandLine, $publicOut);
-
-        $commandLine = sprintf("curl %s%s -X POST -F filecontent=@%s", $nconf['itstool_private'], $fileName, $_FILES[$field]["tmp_name"]);
-        exec($commandLine, $privateOut);
-        $result["private"] = $this->formatOut($fileName, $commandLine, $privateOut);
+        foreach ($nconf['upload'] as $namespace => $uconf) {
+            $publicOut = [];
+            $commandLine = sprintf("curl %s/%s -X POST -F filecontent=@%s", $uconf, $fileName, $_FILES[$field]["tmp_name"]);
+            exec($commandLine, $publicOut);
+            $result[$namespace] = $this->formatUpload($fileName, $commandLine, $publicOut);
+        }
         return $result;
     }
 
@@ -88,10 +246,31 @@ class Gift_model extends CI_Model
      * @param $out      output
      * @return array
      */
-    public function formatOut($resourceKey, $command, $out)
+    public function formatUpload($resourceKey, $command, $out)
     {
         $json = isset($out[0]) ? $out[0] : "";
         $output = json_decode($json, true);
+        if (!empty($output['download_url']) && !empty($output['md5'])) {
+            return [
+                "resource_key" => $resourceKey,
+                "url" => $output['download_url'],
+            ];
+        }
+        com_log_warning('_itstool_' . __CLASS__ . '_' . __FUNCTION__ . '_uploadError', 0, "uploadError", compact("command", "output"));
+        return [];
+    }
+
+    /**
+     * 输出格式化
+     *
+     * @param $fileName 文件名
+     * @param $command  input
+     * @param $out      output
+     * @return array
+     */
+    public function formatGet($resourceKey, $command, $out)
+    {
+        $output = json_decode($out, true);
         if (!empty($output['download_url']) && !empty($output['md5'])) {
             return [
                 "resource_key" => $resourceKey,

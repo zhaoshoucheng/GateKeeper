@@ -10,7 +10,7 @@ class Report extends MY_Controller
     {
         parent::__construct();
         $this->load->model('report_model');
-        $this->load->library('EvaluateQuota');
+        $this->load->model('gift_model');
         $this->load->model('waymap_model');
     }
 
@@ -237,5 +237,77 @@ class Report extends MY_Controller
                 ]
             ]
         ];
+    }
+
+    public function generate(){
+        $params = $this->input->post();
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+            'title' => 'min:1',
+            'type' => 'min:1',
+        ]);
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        try{
+            $data = $this->report_model->generate($params["city_id"], $params["title"], $params["type"]);
+        }catch (\Exception $e){
+            com_log_warning('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_error', 0, $e->getMessage(), compact("params","data"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+        return $this->response($data);
+    }
+
+
+    public function getReportList(){
+        $params = $this->input->post();
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+            'type' => 'min:1',
+            'page_no' => 'min:1',
+            'page_size' => 'min:1',
+        ]);
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        try{
+            $data = $this->report_model->getReportList($params["city_id"], $params["type"], $params["page_no"], $params["page_size"]);
+        }catch (\Exception $e){
+            com_log_warning('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_error', 0, $e->getMessage(), compact("params","data"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+        return $this->response($data);
+    }
+
+    public function downReport(){
+        $params = $this->input->get();
+        $validate = Validate::make($params, [
+            'key' => 'min:1',
+        ]);
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+        
+        try{
+            $data = $this->gift_model->downResource($params["key"],'itstool_public');
+        }catch (\Exception $e){
+            com_log_warning('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_error', 0, $e->getMessage(), compact("params","data"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+        return $this->response($data);
     }
 }
