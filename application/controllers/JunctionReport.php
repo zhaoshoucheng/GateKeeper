@@ -72,7 +72,7 @@ class JunctionReport extends MY_Controller
             return;
         }
 
-        if(!isset($params['type']) || !array_key_exists($params['type'], [1,2])) {
+        if(!isset($params['type']) || !in_array($params['type'], [1,2])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The value of type is wrong.';
             return;
