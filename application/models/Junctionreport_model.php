@@ -237,7 +237,7 @@ class Junctionreport_model extends CI_Model
 
 
         $summary = $this->quotas[$key]['summery']([
-            $junctionInfo['name'],
+            $junctionInfo['junction']['name'] ?? '',
             $junctionInfo['flows'][$maxFlowId] ?? '',
             $start_time,
             $end_time]);
