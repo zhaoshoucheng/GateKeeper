@@ -11,8 +11,7 @@ class TwoDimensionCollection extends Collection
     private $xData = [];
     private $yData = [];
 
-    const SINGLE = 1;
-    const MULTIPLE = 2;
+    private $xMax = null;
 
     public function setData($data = [])
     {
@@ -20,6 +19,8 @@ class TwoDimensionCollection extends Collection
 
         $this->setXData();
         $this->setYData();
+
+        $this->xMax = null;
 
         return $this;
     }
@@ -44,13 +45,25 @@ class TwoDimensionCollection extends Collection
         return $this->yData;
     }
 
-    public function toLineChart()
+    public function getLineChart()
     {
         $data = [];
-
-        foreach ($this->getXData() as $XDatum) {
-
+        foreach ($this->getXData() as $key => $XDatum) {
+            foreach ($XDatum as $k => $item) {
+                $data[$key] = [ $k, $item ];
+            }
         }
+        return $data;
+    }
+
+    public function getXMax()
+    {
+        if($this->xMax == null) {
+            $this->xMax = array_map(function ($v) {
+                return array_keys($v, max($v));
+            }, $this->getYData());
+        }
+        return $this->xMax;
     }
 
     protected function setYData()
