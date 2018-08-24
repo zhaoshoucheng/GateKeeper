@@ -58,6 +58,8 @@ class Junctionreport_model extends CI_Model
      */
     private function formatQueryQuotaInfoData($data, $result)
     {
+        if(empty($result)) return [];
+
         $junctionInfo = $this->getJunctionInfo($data);
 
         $pretreatResultData = $this->getPretreatResultData($data, $result, $junctionInfo);
