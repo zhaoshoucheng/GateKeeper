@@ -66,9 +66,15 @@ class JunctionReport extends MY_Controller
             return;
         }
 
-        if(!isset($params['key']) || !array_key_exists($params['key'], $this->quotas)) {
+        if(!isset($params['quota_key']) || !array_key_exists($params['quota_key'], $this->quotas)) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of key is wrong.';
+            $this->errmsg = 'The value of quota_key is wrong.';
+            return;
+        }
+
+        if(!isset($params['type']) || !array_key_exists($params['type'], [1,2])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The value of type is wrong.';
             return;
         }
 
