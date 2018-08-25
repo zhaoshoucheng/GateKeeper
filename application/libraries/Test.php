@@ -13,8 +13,6 @@ $collection = Collection::make([
     ['id' => 2, 'name' => 'ddd', 'age' => 12],
 ]);
 
-$res = $collection->groupBy(['id', 'name', 'age'], function ($collection) {
-    return implode(',', $collection->arrayColumn('name'));
+$res = $collection->arrayWalk(function ($c, $k) {
+    echo get_class($c), PHP_EOL;
 })->toArray();
-
-print_r($res);

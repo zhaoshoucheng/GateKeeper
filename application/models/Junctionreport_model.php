@@ -22,7 +22,6 @@ class Junctionreport_model extends CI_Model
 
         $this->load->model('waymap_model');
         $this->load->config('report_conf');
-        $this->load->library('TwoDimensionCollection');
 
         $this->quotas = $this->config->item('quotas');
     }
@@ -152,6 +151,7 @@ class Junctionreport_model extends CI_Model
      * @param $result
      * @param $junctionInfo
      * @return array
+     * @throws Exception
      */
     private function getPretreatResultData($data, &$result, $junctionInfo)
     {
@@ -159,25 +159,25 @@ class Junctionreport_model extends CI_Model
         $flowsName = $junctionInfo['flows'];
 
         //构建二维数据表以映射折线图，同时创建以时间为依据分组的数据
-        $dataByFlow = [];
-        $dataByHour = [];
-        foreach ($result as $item) {
-            //Flow
-            $dataByFlow[$item['logic_flow_id']] = $dataByFlow[$item['logic_flow_id']] ?? [];
-            $dataByFlow[$item['logic_flow_id']][$item['hour']] = $item[$key];
-            //Hour
-            $dataByHour[$item['hour']] = $dataByHour[$item['hour']] ?? [];
-            $dataByHour[$item['hour']][$item['logic_flow_id']] = $item[$key];
-        }
+        $dataByFlow = Collection::make($result)
+            ->groupBy(['logic_flow_id', 'hour'], function ($c) use ($key) {
+                return $c->get($key);
+            });
+        $dataByHour = Collection::make($result)
+            ->groupBy(['hour', 'logic_flow_id'], function ($c) use ($key) {
+                return $c->get($key);
+            });
 
         //求出每个方向的全天均值中最大的方向 ID
         $flowsIdArray = [];
-        foreach ($dataByHour as $hour => $quotas) {
-            $flowsId = array_keys($quotas, max($quotas));
-            foreach ($flowsId as $id) {
-                $flowsIdArray[$id] = ($flowsIdArray[$id] ?? 0) + 1;
-            }
-        }
+
+        $dataByHour->arrayWork(function ($quotas) use (&$flowsIdArray) {
+            $quotas->getKeysOfMaxValue()
+                ->arrayWork(function ($id) use (&$flowsIdArray) {
+                    $flowsIdArray[$id] = ($flowsIdArray[$id] ?? 0) + 1;
+                });
+        });
+
         $maxFlowIds = array_keys($flowsIdArray, max($flowsIdArray));
 
         //如果有多个最大值，则取平均求最大

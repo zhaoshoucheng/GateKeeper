@@ -29,7 +29,7 @@ class Collection
      * @var array
      */
     private static $other = [
-        'array_column'
+        'array_column', 'count', 'max', 'array_keys'
     ];
 
     /**
@@ -41,6 +41,11 @@ class Collection
         $this->data = $data;
     }
 
+    /**
+     * 构建 Collection 对象
+     * @param array $data
+     * @return Collection
+     */
     public static function make($data = [])
     {
         return new static($data);
@@ -52,7 +57,25 @@ class Collection
      */
     public function toArray()
     {
-        return $this->data;
+        return $this->get();
+    }
+
+    public function get($key = null, $default = null)
+    {
+        return $key == null ?
+            $this->data[$key] ?? $default :
+            $this->data;
+    }
+
+    public function set($key, $value)
+    {
+        $this->data[$key] = $value;
+        return $this;
+    }
+
+    public function getKeysOfMaxValue()
+    {
+        return new static($this->arrayKeys($this->max()));
     }
 
     /**
@@ -148,13 +171,38 @@ class Collection
             return call_user_func_array($method, $arguments);
         } else {
             switch ($method) {
-                case 'array_map' :
-                    array_push($arguments, $this->toArray());
-                    return new static(call_user_func_array($method, $arguments));
             }
         }
 
         throw new Exception('Method ' . $method . ' don\'t exist or method isn\'t allowed!');
+    }
+
+    /**
+     * @param callable $callable
+     * @return $this
+     */
+    public function foreach(callable $callable)
+    {
+        $this->arrayWalk($callable);
+        return $this;
+    }
+
+    /**
+     * @param $callable
+     * @return bool
+     */
+    public function arrayWalk($callable)
+    {
+        return array_walk($this->data, function ($v, $k) use ($callable) {
+            return $callable(is_array($v) ? Collection::make($v) : $v, $k);
+        });
+    }
+
+    public function arrayMap($callable)
+    {
+        return new static(array_map(function ($v) use ($callable) {
+            return $callable(is_array($v) ? Collection::make($v) : $v);
+        }, $this->toArray()));
     }
 
     /**

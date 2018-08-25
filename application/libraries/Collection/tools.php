@@ -21,3 +21,31 @@ if(!function_exists('compare')) {
         }
     }
 }
+
+if(!function_exists('dd') && !function_exists('d2')) {
+    function d2($array, $tab = '')
+    {
+        if(is_string($array)) {
+            echo '"', $array, '"', PHP_EOL;
+        } elseif(is_numeric($array)) {
+            echo $array, PHP_EOL;
+        } elseif(is_object($array)) {
+            $array = $array->toArray();
+        }
+        if(is_array($array)) {
+            echo '[', PHP_EOL;
+            foreach ($array as $key => $value) {
+                echo $tab, "    [", $key, "] => ";
+                d2($value,$tab."    ");
+            }
+            echo $tab, ']', PHP_EOL;
+        }
+
+    }
+
+    function dd($array)
+    {
+        d2($array);
+        die();
+    }
+}
