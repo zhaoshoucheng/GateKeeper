@@ -49,7 +49,7 @@ class Junctioncomparison_model extends CI_Model
         }
 
         // 获取路口名称
-        $junctionsInfo = $this->waymap_model->getJunctionInfo($junctionIds);
+        $junctionsInfo = $this->waymap_model->getJunctionInfo($data['logic_junction_id']);
         list($junctionName) = array_column($junctionsInfo, 'name');
 
         // 获取路口所有相位
@@ -137,9 +137,9 @@ class Junctioncomparison_model extends CI_Model
         }
 
         $infoData = [
-            'quota_key'    => $data['quota_key'],
+            'quotaKey'    => $data['quota_key'],
             'junctionName' => $junctionName,
-            'allFlows'     => $allFlows,
+            'allFlows'     => $allFlows[$data['logic_junction_id']],
         ];
         $result = $this->formatData($formatData, $scheduleArr, $infoData);
 
@@ -392,7 +392,7 @@ class Junctioncomparison_model extends CI_Model
         $weekDays = [];
         for ($i = $startDate; $i <= $endDate; $i += 24 * 3600) {
             $dateArr[] = date('Y-m-d', $i);
-            foreach ($data['week'] as $k=>$v) {
+            foreach ($week as $k=>$v) {
                 if (date('w', $i) == $v) {
                     $weekDays[$i] = date('Y-m-d', $i);
                 }
