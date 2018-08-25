@@ -179,19 +179,19 @@ class Junctioncomparison_model extends CI_Model
         $result = [];
 
         foreach ($data as $k=>$v) {
-            $result[$k]['flow_info'] = $v['flow_info'];
+            $result['dataList'][$k]['flow_info'] = $v['flow_info'];
             foreach ($v['base_time_list'] as $hour=>$val) {
-                $result[$k]['base_list'][$hour] = array_sum($val) / count($val);
+                $result['dataList'][$k]['base_list'][$hour] = array_sum($val) / count($val);
             }
 
             foreach ($v['evaluate_time_list'] as $hour=>$val) {
-                $result[$k]['evaluate_list'][$hour] = array_sum($val) / count($val);
+                $result['dataList'][$k]['evaluate_list'][$hour] = array_sum($val) / count($val);
             }
         }
 
         // 获取基准、评估需要高亮的相位及计算高亮相位所需数据
-        $baseHighLightPhaseAndMaxFlowArr = $this->getHighLightPhaseAndMaxFlowArr($result, 'base');
-        $evaluateHighLightPhaseAndMaxFlowArr = $this->getHighLightPhaseAndMaxFlowArr($result, 'evaluate');
+        $baseHighLightPhaseAndMaxFlowArr = $this->getHighLightPhaseAndMaxFlowArr($result['dataList'], 'base');
+        $evaluateHighLightPhaseAndMaxFlowArr = $this->getHighLightPhaseAndMaxFlowArr($result['dataList'], 'evaluate');
 
         /* 统计基准高亮相位连续时段 */
         $baseMaxFlowArr = $baseHighLightPhaseAndMaxFlowArr['maxFlowArr'];
@@ -203,9 +203,19 @@ class Junctioncomparison_model extends CI_Model
         $evaluateHighLightPhase = $evaluateHighLightPhaseAndMaxFlowArr['highLightPhase'];
         $evaluateContinueTime = $this->getHighLightPhaseContinueTime($evaluateMaxFlowArr[$evaluateHighLightPhase]);
 
+        $result['continue_time'] = [
+            'base'     => $baseContinueTime,
+            'evaluate' => $evaluateContinueTime,
+        ];
+
+        $result['highlightflow_info'] = [
+            'base'     => $baseHighLightPhase,
+            'evaluate' => $evaluateHighLightPhase,
+        ];
+
         // 差距最大方向时间点
         $tempHourVal = [];
-        foreach ($result as $flow=>$val) {
+        foreach ($result['dataList'] as $flow=>$val) {
             foreach ($schedule as $hour) {
                 $diffVal = $val['base_list'][$hour] - $val['evaluate_list'][$hour] < 0
                             ? ($val['base_list'][$hour] - $val['evaluate_list'][$hour]) * -1
@@ -213,16 +223,18 @@ class Junctioncomparison_model extends CI_Model
                 $tempHourVal[$flow . '-' . $hour] = $diffVal;
             }
         }
-        echo 'tempHourVal = ';print_r($tempHourVal);
-
-        echo 'result = ';print_r($result);
-        echo 'tempBase = ';print_r($tempBase);
-        echo 'baseMaxValueCount = ';print_r($baseMaxValueCount);
-        echo 'baseMaxFlowArr = ';print_r($baseMaxFlowArr);
-        echo 'tempAvgPhase = ';print_r($tempAvgPhase);
-        echo 'highLightPhase = ' . $highLightPhase;
-        echo 'baseContinueTime = ';print_r($baseContinueTime);
-
+        list($diffMaxFlow, $diffMaxHour) = explode('-', array_search(max($tempHourVal), $tempHourVal));
+        $result['diff_info'] = [
+            'flow_id' => $diffMaxFlow,
+            'base' => [
+                'hour'  => $diffMaxHour,
+                'value' => $result['dataList'][$diffMaxFlow]['base_list'][$diffMaxHour],
+            ],
+            'evaluate' => [
+                'hour'  => $diffMaxHour,
+                'value' => $result['dataList'][$diffMaxFlow]['evaluate_list'][$diffMaxHour],
+            ],
+        ];
     }
 
     /**
@@ -379,7 +391,7 @@ class Junctioncomparison_model extends CI_Model
 
         $maxCountArr = array_keys($countArr, max($countArr));
 
-        if (count($maxCountArr) > 1) {
+        if (count($maxCountArr) >= 1) {
             foreach ($maxCountArr as $k=>$v) {
                 list($start, $end) = explode('-', $v);
                 $totalVal = 0;
