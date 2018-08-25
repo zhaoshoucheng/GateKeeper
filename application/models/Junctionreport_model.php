@@ -171,9 +171,9 @@ class Junctionreport_model extends CI_Model
         //求出每个方向的全天均值中最大的方向 ID
         $flowsIdArray = [];
 
-        $dataByHour->arrayWork(function ($quotas) use (&$flowsIdArray) {
+        $dataByHour->arrayWalk(function ($quotas) use (&$flowsIdArray) {
             $quotas->getKeysOfMaxValue()
-                ->arrayWork(function ($id) use (&$flowsIdArray) {
+                ->arrayWalk(function ($id) use (&$flowsIdArray) {
                     $flowsIdArray[$id] = ($flowsIdArray[$id] ?? 0) + 1;
                 });
         });
