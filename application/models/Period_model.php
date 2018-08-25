@@ -18,6 +18,48 @@ class Period_model extends CI_Model
 
     }
 
+    public function getDistrictMonthData($cityId,$districtList,$year,$month)
+    {
+        $ret = $this->db->where(
+            array(
+                'city_id'=>$cityId,
+                'year'=>$year,
+                'month'=>intval($month)
+            )
+        )->where_in('district_id',$districtList)->get('district_month_report')->result_array();
+
+        return $ret;
+    }
+
+    public function getDistrictWeekData($cityId,$districtList,$dateList)
+    {
+        $ret = $this->db->where(
+            array(
+                'city_id'=>$cityId,
+            )
+        )->where_in('district_id',$districtList)->where_in('date',$dateList)->get('district_week_report')->result_array();
+        return $ret;
+    }
+
+    public function getDistrictHourData($cityId,$districtList,$dateList,$hourList = array())
+    {
+        $this->db->where(
+            array(
+                'city_id'=>$cityId,
+            )
+        )->where_in(
+            'date',$dateList
+        )->where_in(
+            'district_id',$districtList
+        );
+        if(!empty($hourList)){
+            $this->db->where_in('hour',$hourList);
+        }
+
+        $ret = $this->db->get('district_hour_report')->result_array();
+        return $ret;
+    }
+
     public function getCityMonthData($cityId,$year,$month)
     {
         $ret = $this->db->where(

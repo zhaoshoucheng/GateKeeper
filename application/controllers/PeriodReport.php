@@ -15,14 +15,27 @@ class PeriodReport extends MY_Controller
 
     public function __construct()
     {
+
+
         parent::__construct();
         $this->load->model('period_model');
         $this->load->library('EvaluateQuota');
+        $this->load->model('waymap_model');
     }
 
     private static function quotasort($a,$b){
         return $b[1]-$a[1];
 
+    }
+
+    private function getMorningHours()
+    {
+        return array('06:30','07:00','07:30','08:00','08:30','09:00','09:30');
+    }
+
+    private function getNightHours()
+    {
+        return array('16:30','17:00','17:30','18:00','18:30','19:00','19:30');
     }
 
     /**
@@ -85,20 +98,20 @@ class PeriodReport extends MY_Controller
         if($type == self::WEEK){
             $overviewStr = "本周(".$lastTime['start_time']."-".$lastTime['end_time'].")".$cityName."区拥堵程度相对严重,";
             $change = $stop_delay_MoM > 0 ? "增长":"减少";
-            $overviewStr .="市区整体平均延误".$lastData['stop_delay']."秒,环比上周".$change.abs(round($stop_delay_MoM))."%。";
+            $overviewStr .="市区整体平均延误".round($lastData['stop_delay'],2)."秒,环比上周".$change.abs(round($stop_delay_MoM,2))."%。";
             $change = $spillover_freq_MoM > 0 ? "增长":"减少";
-            $overviewStr .="发生溢流路口共".$lastData['spillover_freq']."路口次,环比上周问题路口".$change.abs(round($spillover_freq_MoM))."%。";
+            $overviewStr .="发生溢流路口共".$lastData['spillover_freq']."路口次,环比上周问题路口".$change.abs(round($spillover_freq_MoM,2))."%。";
             $change = $oversaturation_freq_MoM > 0 ? "增长":"减少";
-            $overviewStr .="过饱和路口".$lastData['oversaturation_freq']."路口次,环比上周问题".$change.abs(round($oversaturation_freq_MoM))."%。";
+            $overviewStr .="过饱和路口".$lastData['oversaturation_freq']."路口次,环比上周问题".$change.abs(round($oversaturation_freq_MoM,2))."%。";
 
         }else{
             $overviewStr = "本月(".$lastTime['start_time']."-".$lastTime['end_time'].")".$cityName."区拥堵程度相对严重,";
             $change = $stop_delay_MoM > 0 ? "增长":"减少";
-            $overviewStr .="市区整体平均延误".$lastData['stop_delay']."秒,环比上月".$change.abs(round($stop_delay_MoM))."%。";
+            $overviewStr .="市区整体平均延误".round($lastData['stop_delay'],2)."秒,环比上月".$change.abs(round($stop_delay_MoM,2))."%。";
             $change = $spillover_freq_MoM > 0 ? "增长":"减少";
-            $overviewStr .="发生溢流路口共".$lastData['spillover_freq']."路口次,环比上月问题路口".$change.abs(round($spillover_freq_MoM))."%。";
+            $overviewStr .="发生溢流路口共".$lastData['spillover_freq']."路口次,环比上月问题路口".$change.abs(round($spillover_freq_MoM,2))."%。";
             $change = $oversaturation_freq_MoM > 0 ? "增长":"减少";
-            $overviewStr .="过饱和路口".$lastData['oversaturation_freq']."路口次,环比上月问题".$change.abs(round($oversaturation_freq_MoM))."%。";
+            $overviewStr .="过饱和路口".$lastData['oversaturation_freq']."路口次,环比上月问题".$change.abs(round($oversaturation_freq_MoM,2))."%。";
         }
         return $this->response(array(
             'summary'=>$overviewStr
@@ -156,7 +169,150 @@ class PeriodReport extends MY_Controller
      */
     public function districtReport()
     {
+        $params = $this->input->post();
+        // 校验参数
+        $validate = Validate::make($params,
+            [
+                'city_id'     => 'nullunable',
+                'type'      => 'nullunable',
+                'time_type'      => 'nullunable',
+                'city_name'      => 'nullunable',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
 
+
+        $cityId = $params['city_id'];
+        $type = $params['type'];
+        $timeType = $params['time_type'];
+        $cityName = $params['city_name'];
+        //获取行政区信息
+        $disticts = $this->waymap_model->getDistrictInfo($cityId);
+
+        $distictCodeList = array_keys($disticts['districts']);
+        if($type == self::WEEK){
+            $lastTime = $this->getLastWeek();
+            $prelastTime = $this->getLastWeek(2);
+        }else{
+            $lastTime = $this->getLastMonth();
+            $prelastTime = $this->getLastMonth(2);
+        }
+        $dateList = self::getDateFromRange($lastTime['start_time'],$lastTime['end_time']);
+        $predateList = self::getDateFromRange($prelastTime['start_time'],$prelastTime['end_time']);
+//        if($type == self::WEEK){
+//
+//            $lastdata = $this->period_model->getDistrictWeekData();
+//        }else{
+//            $lastdata = $this->period_model->getDistrictMonthData();
+//        }
+
+        if($timeType == self::ALLDAY){
+            if($type == self::WEEK){
+                $lastData = $this->period_model->getDistrictWeekData($cityId,$distictCodeList,$lastTime['start_time']);
+                $prelastData = $this->period_model->getDistrictWeekData($cityId,$distictCodeList,$prelastTime['start_time']);
+            }else{
+                $lastData = $this->period_model->getDistrictMonthData($cityId,$distictCodeList,explode('-',$lastTime['start_time'])[0],explode('-',$lastTime['start_time'])[1]);
+                $prelastData = $this->period_model->getDistrictMonthData($cityId,$distictCodeList,explode('-',$prelastTime['start_time'])[0],explode('-',$prelastTime['start_time'])[1]);
+            }
+        }elseif($timeType == self::MORNING){
+            $hour = self::getMorningHours();
+            $lastData = $this->period_model->getDistrictHourData($cityId,$distictCodeList,$dateList,$hour);
+        }else{
+            $hour = self::getNightHours();
+            $lastData = $this->period_model->getDistrictHourData($cityId,$distictCodeList,$dateList,$hour);
+        }
+
+
+        $lastDataAve = [];
+        $prelastDataAve = [];
+        foreach ($lastData as $k => $v){
+            if(!isset($lastDataAve[$v['district_id']])){
+                $lastDataAve[$v['district_id']] = [
+                    'stop_delay'=>0,
+                    'speed'=>0,
+                    'traj_count'=>0
+                ];
+            }
+            $lastDataAve[$v['district_id']] = [
+                'district_id'=>$v['district_id'],
+                'stop_delay'=>$lastDataAve[$v['district_id']]['stop_delay']+$v['stop_delay']*$v['traj_count'],
+                'speed'=>$lastDataAve[$v['district_id']]['speed']+$v['speed']*$v['traj_count'],
+                'traj_count'=>$lastDataAve[$v['district_id']]['traj_count']+$v['traj_count']
+            ];
+        }
+        //计算列表
+        $final_data = [];
+        $maxDelay = 0;//本周平均延误最高
+        $maxDelayId = null;
+        foreach ($lastDataAve as $lv){
+            $aveStopDelay = round($lv['stop_delay']/$lv['traj_count']);
+            $final_data[$lv['district_id']] = [
+                'district_id'=>$lv['district_id'],
+                'district_name'=>$disticts['districts'][$lv['district_id']],
+                'stop_delay'=>$aveStopDelay,
+                'speed'=>round($lv['speed']/$lv['traj_count']),
+            ];
+            if($aveStopDelay>$maxDelay){
+                $maxDelay = $aveStopDelay;
+                $maxDelayId = $lv['district_id'];
+            }
+        }
+
+        //计算与上周的对比
+        $preMaxDelay = -99999;
+        $preMaxDelayId = null;
+        $preMinDelay = 99999;
+        $preMinDelayId = null;
+        if($timeType == self::ALLDAY){
+            foreach ($prelastData as $k => $v){
+                $prelastDataAve[$v['district_id']] = [
+                    'district_id'=>$v['district_id'],
+                    'stop_delay'=>$v['stop_delay'],
+                    'speed'=>$v['speed']
+                ];
+                $MoM  = ($final_data[$v['district_id']]['stop_delay'] - $v['stop_delay'])/$v['stop_delay'];
+                if($MoM > $preMaxDelay){
+                    $preMaxDelayId = $v['district_id'];
+                    $preMaxDelay = $MoM;
+                }
+                if($MoM < $preMinDelay){
+                    $preMinDelayId = $v['district_id'];
+                    $preMinDelay = $MoM;
+                }
+
+            }
+        }
+
+        if($timeType == self::ALLDAY && $type ==self::WEEK ){
+            $summary = "其中".$disticts['districts'][$maxDelayId]."在本周最为拥堵。"."环比上周";
+            if($preMaxDelay>0){
+                $summary.=$disticts['districts'][$preMaxDelayId]."改善情况最好。";
+            }
+            if($preMinDelay<0){
+                $summary.=$disticts['districts'][$preMinDelayId]."恶化情况最严重。";
+            }
+        }elseif ($timeType == self::ALLDAY && $type ==self::MONTH ){
+            $summary = "其中".$disticts['districts'][$maxDelayId]."在本月最为拥堵。"."环比上月";
+            if($preMaxDelay>0){
+                $summary.=$disticts['districts'][$preMaxDelayId]."改善情况最好。";
+            }
+            if($preMinDelay<0){
+                $summary.=$disticts['districts'][$preMinDelayId]."恶化情况最严重。";
+            }
+        }else{
+            $summary = "";
+        }
+
+        return $this->response(array(
+            'start_time'=>$lastTime['start_time'],
+            'end_time'=>$lastTime['end_time'],
+            'districtList'=>array_values($final_data),
+            'summary'=>$summary
+        ));
     }
 
     /**
@@ -186,27 +342,35 @@ class PeriodReport extends MY_Controller
 
         if($type == self::WEEK){
             $lastTime = $this->getLastWeek();
+            $preLastTime = $this->getLastWeek(2);
         }else{
             $lastTime = $this->getLastMonth();
+            $preLastTime = $this->getLastMonth(2);
         }
         if($timeType == self::ALLDAY){
             $hour = null;
         }elseif ($timeType == self::MORNING){
-            $hour = array('06:30','07:00','07:30','08:00','08:30','09:00','09:30');
+            $hour = self::getMorningHours();
         }else{
-            $hour = array('16:30','17:00','17:30','18:00','18:30','19:00','19:30');
+            $hour = self::getNightHours();
         }
 
         if($timeType == self::ALLDAY && $type == self::WEEK){
             $data = $this->period_model->getJunctionWeekData($cityId,null,$lastTime['start_time'],'stop_delay desc');
+            $predata = $this->period_model->getJunctionWeekData($cityId,null,$preLastTime['start_time'],'stop_delay desc');
         }elseif($timeType == self::ALLDAY && $type == self::MONTH){
             $data = $this->period_model->getJunctionMonthData($cityId,null,explode('-',$lastTime['start_time'])[0],explode('-',$lastTime['start_time'])[1],'stop_delay desc');
+            $predata = $this->period_model->getJunctionMonthData($cityId,null,$preLastTime['start_time'],'stop_delay desc');
         }else{
             $dateList = self::getDateFromRange($lastTime['start_time'],$lastTime['end_time']);
+            $preDateList = self::getDateFromRange($preLastTime['start_time'],$preLastTime['end_time']);
             $data = $this->period_model->getJunctionHourData($cityId,$dateList,$hour,'stop_delay desc');
+            $predata = $this->period_model->getJunctionHourData($cityId,$preDateList,$hour,'stop_delay desc');
             $evaluate = new EvaluateQuota();
-            $data = $evaluate->getJunctionStopDelayAve($data,false);
-            //TODO sort
+            $data = $evaluate->getJunctionStopDelayAve($data);
+            usort($data, array("PeriodReport","quotasort"));
+            $predata = $evaluate->getJunctionStopDelayAve($predata);
+            usort($predata, array("PeriodReport","quotasort"));
         }
 
         $finalData = array();
@@ -329,22 +493,25 @@ class PeriodReport extends MY_Controller
             $this->errmsg = $validate['errmsg'];
             return;
         }
-
         $cityId = $params['city_id'];
         $type = $params['type'];
         $timeType = $params['time_type'];
 
         if($type == self::WEEK){
+            $preiod = "周";
             $lastTime = $this->getLastWeek();
             $prelastTime = $this->getLastWeek(2);
         }else{
+            $preiod = "月";
             $lastTime = $this->getLastMonth();
             $prelastTime = $this->getLastMonth(2);
         }
 
         if($timeType == self::MORNING){
+            $schedule = "早高峰";
             $hour = array('06:30','07:00','07:30','08:00','08:30','09:00','09:30');
         }else{
+            $schedule = "晚高峰";
             $hour = array('16:30','17:00','17:30','18:00','18:30','19:00','19:30');
         }
         $dateList = self::getDateFromRange($lastTime['start_time'],$lastTime['end_time']);
@@ -352,14 +519,33 @@ class PeriodReport extends MY_Controller
         $data = $this->period_model->getCityHourData($cityId,$dateList,$hour);
         $preData = $this->period_model->getCityHourData($cityId,$preDataList,$hour);
         $evaluate = new EvaluateQuota();
-        $lastcharData = $evaluate->getStopDelayAve($data);
-        $preLastcharData = $evaluate->getStopDelayAve($preData);
+        $lastcharData = $evaluate->getCityStopDelayAve($data);
+        $preLastcharData = $evaluate->getCityStopDelayAve($preData);
+
+        $sum = 0;
+        $count = 0;
+
+        foreach ($lastcharData['total'] as $k => $v){
+            $sum += $v[1];
+            $count += 1;
+        }
+        $aveStopDelay = $sum/$count;
+        $sum = 0;
+        $count = 0;
+        foreach ($preLastcharData['total'] as $k => $v){
+            $sum += $v[1];
+            $count += 1;
+        }
+        $preaveStopDelay = $sum/$count;
+        $stopDelayMoM = (($aveStopDelay - $preaveStopDelay)/$preaveStopDelay) * 100;
+        $change = $stopDelayMoM > 0 ? "增加":"减少";
+        $summary = "本".$preiod.$schedule."平均延误为".round($aveStopDelay)."秒,环比上周".$change.abs(round($stopDelayMoM))."%。";
         return $this->response(array(
             'base'=>array(
                 'period'=>$lastcharData['total'],
                 'last_period'=>$preLastcharData['total']
             ),
-            'summary'=>array()
+            'summary'=>$summary
         ));
 
     }
@@ -383,22 +569,25 @@ class PeriodReport extends MY_Controller
             $this->errmsg = $validate['errmsg'];
             return;
         }
-
         $cityId = $params['city_id'];
         $type = $params['type'];
         $timeType = $params['time_type'];
 
         if($type == self::WEEK){
+            $preiod = "周";
             $lastTime = $this->getLastWeek();
             $prelastTime = $this->getLastWeek(2);
         }else{
+            $preiod = "月";
             $lastTime = $this->getLastMonth();
             $prelastTime = $this->getLastMonth(2);
         }
 
         if($timeType == self::MORNING){
+            $schedule = "早高峰";
             $hour = array('06:30','07:00','07:30','08:00','08:30','09:00','09:30');
         }else{
+            $schedule = "晚高峰";
             $hour = array('16:30','17:00','17:30','18:00','18:30','19:00','19:30');
         }
         $dateList = self::getDateFromRange($lastTime['start_time'],$lastTime['end_time']);
@@ -408,12 +597,31 @@ class PeriodReport extends MY_Controller
         $evaluate = new EvaluateQuota();
         $lastcharData = $evaluate->getCitySpeedAve($data);
         $preLastcharData = $evaluate->getCitySpeedAve($preData);
+
+        $sum = 0;
+        $count = 0;
+
+        foreach ($lastcharData['total'] as $k => $v){
+            $sum += $v[1];
+            $count += 1;
+        }
+        $aveStopDelay = $sum/$count;
+        $sum = 0;
+        $count = 0;
+        foreach ($preLastcharData['total'] as $k => $v){
+            $sum += $v[1];
+            $count += 1;
+        }
+        $preaveStopDelay = $sum/$count;
+        $stopDelayMoM = (($aveStopDelay - $preaveStopDelay)/$preaveStopDelay) * 100;
+        $change = $stopDelayMoM > 0 ? "增加":"减少";
+        $summary = "本".$preiod.$schedule."平均运行速度为".round($aveStopDelay)."秒,环比上周".$change.abs(round($stopDelayMoM))."%。";
         return $this->response(array(
             'base'=>array(
                 'period'=>$lastcharData['total'],
                 'last_period'=>$preLastcharData['total']
             ),
-            'summary'=>array()
+            'summary'=>$summary
         ));
     }
 

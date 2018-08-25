@@ -16,15 +16,21 @@ class JunctionQuota implements EvaluateQuotaFactory{
     /**
      * 延误时间表
      */
-    public function getStopDelayAve($trans2Chart=true)
+    public function getStopDelayAve()
     {
         $quotaInfo = new JunctionQuotaInfo();
         $quotaInfo->setStopDelay($this->_loadData,'logic_junction_id');
-        $data = $quotaInfo->getStopDelay('hour','traj_count',false);
-        if($trans2Chart){
-            return $quotaInfo->formatQuotaChartData($data);
-        }
+        $data = $quotaInfo->getStopDelay('hour','traj_count',true);
+        $data = $quotaInfo->getAveQuotaData($data);
+        return $data;
+    }
 
+    public function getQueueLengthAve()
+    {
+        $quotaInfo = new JunctionQuotaInfo();
+        $quotaInfo->setQueueLength($this->_loadData,'logic_junction_id');
+        $data = $quotaInfo->getQueueLength('hour','traj_count',true);
+        $data = $quotaInfo->getAveQuotaData($data);
         return $data;
     }
 
