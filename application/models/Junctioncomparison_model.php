@@ -255,7 +255,7 @@ class Junctioncomparison_model extends CI_Model
 
         if (count($maxCountArr) > 1) {
             foreach ($maxCountArr as $k=>$v) {
-                [$start, $end] = explode('-', $v);
+                list($start, $end) = explode('-', $v);
                 $totalVal = 0;
                 for ($i = $start; $i <= $end; $i += 30 * 60) {
                     $totalVal += $maxFlowArr[$highLightPhase][$i];
@@ -265,13 +265,20 @@ class Junctioncomparison_model extends CI_Model
         }
         $continueTime = array_keys($avgVal, max($avgVal));
         $continueTime = array_map(function($val){
-            [$start, $end] = explode('-', $val);
+            list($start, $end) = explode('-', $val);
             return [
                 'start' => date('H:i', $start),
                 'end' => date('H:i', $end),
             ];
         }, $continueTime);
 
+        echo 'result = ';print_r($result);
+        echo 'tempBase = ';print_r($tempBase);
+        echo 'baseMaxValueCount = ';print_r($baseMaxValueCount);
+        echo 'maxFlowArr = ';print_r($maxFlowArr);
+        echo 'tempAvgPhase = ';print_r($tempAvgPhase);
+        echo 'highLightPhase = ' . $highLightPhase;
+        echo 'continueTime = ';print_r($continueTime);
 
     }
 
