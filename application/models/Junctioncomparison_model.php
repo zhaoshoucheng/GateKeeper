@@ -142,6 +142,9 @@ class Junctioncomparison_model extends CI_Model
             'allFlows'     => $allFlows[$data['logic_junction_id']],
         ];
         $result = $this->formatData($formatData, $scheduleArr, $infoData);
+        if (empty($result)) {
+            return (object)[];
+        }
 
         return $result;
     }
@@ -163,12 +166,19 @@ class Junctioncomparison_model extends CI_Model
         foreach ($data as $k=>$v) {
             $result['dataList'][$k]['flow_info'] = $v['flow_info'];
             foreach ($v['base_time_list'] as $hour=>$val) {
-                $result['dataList'][$k]['base_list'][$hour] = array_sum($val) / count($val);
+                $value = array_sum($val) / count($val);
+                $result['dataList'][$k]['base_list'][$hour] = $value;
+                $result['dataList'][$k]['base'] = [$value, $hour];
             }
 
             foreach ($v['evaluate_time_list'] as $hour=>$val) {
-                $result['dataList'][$k]['evaluate_list'][$hour] = array_sum($val) / count($val);
+                $value = array_sum($val) / count($val);
+                $result['dataList'][$k]['evaluate_list'][$hour] = $value;
+                $result['dataList'][$k]['evaluate'] = [$value, $hour];
             }
+        }
+        if (empty($result)) {
+            return [];
         }
 
         // 获取基准、评估需要高亮的相位及计算高亮相位所需数据
@@ -256,6 +266,14 @@ class Junctioncomparison_model extends CI_Model
             $maxValue,
             $minValue,
         ];
+
+        foreach ($result['dataList'] as $k=>$v) {
+            unset($result['dataList'][$k]['base_list']);
+            unset($result['dataList'][$k]['evaluate_list']);
+        }
+
+        $result['dataList'] = array_values($result['dataList']);
+
         $result['describe_info'] = $quotaConf[$info['quotaKey']]['describe']($describe);
         $result['summary_info'] = $quotaConf[$info['quotaKey']]['name'] . '由' . $maxValue . '变化为' . $minValue;
 
