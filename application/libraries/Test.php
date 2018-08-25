@@ -13,6 +13,6 @@ $collection = Collection::make([
     ['id' => 2, 'name' => 'ddd', 'age' => 12],
 ]);
 
-$res = $collection->arrayWalk(function ($c, $k) {
+$res = $collection->foreach(function ($c, $k) {
     echo get_class($c), PHP_EOL;
 })->toArray();

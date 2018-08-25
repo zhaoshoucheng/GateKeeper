@@ -181,7 +181,7 @@ class Collection
      * @param callable $callable
      * @return $this
      */
-    public function foreach(callable $callable)
+    public function each(callable $callable)
     {
         $this->arrayWalk($callable);
         return $this;
