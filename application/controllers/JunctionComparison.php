@@ -13,6 +13,7 @@ class JunctionComparison extends MY_Controller
     {
         parent::__construct();
         $this->load->model('junctioncomparison_model');
+        $this->load->config('junctioncomparison_conf');
     }
 
     /**
@@ -91,6 +92,15 @@ class JunctionComparison extends MY_Controller
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数 quota_key 须为数组且不能为空！';
             return;
+        }
+
+        $quotaConf = $this->config->item('quotas');
+        foreach ($params['quota_key'] as $v) {
+            if (!array_key_exists(strip_tags(trim($v)), $quotaConf)) {
+                $this->errno = ERR_PARAMETERS;
+                $this->errmsg = '路口优化对比报告没有 ' . $quotaConf[strip_tags(trim($v))]['name'] . ' 指标！';
+                return;
+            }
         }
 
         $data = [
