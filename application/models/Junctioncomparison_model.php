@@ -175,10 +175,11 @@ class Junctioncomparison_model extends CI_Model
      * @param $data['evaluateQuotaData'] array  评估日期指标数据
      * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期 ['2018-08-08', ...]
      * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期 ['2018-08-08', ...]
-     * @param $data['schedule']          array  时段配置时间点 ['07:00', '07:30', ...]
+     * @param $data['schedule_start']    string 时段配置开始时间
+     * @param $data['schedule_end']      string 时段配置结束时间
      * @return array
      */
-    private function queue_lengthDataFormat($data)
+    private function queue_lengthDataFormat($data, $params)
     {
         $result = [];
 
@@ -204,12 +205,34 @@ class Junctioncomparison_model extends CI_Model
             }
         }
         // 统计指标最大值的相位出现的次数
+        $maxFlowArr = [];
         foreach ($tempBase as $k=>$v) {
-            $baseMaxValueCount[array_search(max($v), $v)] += 1;
+            $maxFlow = array_search(max($v), $v);
+            $baseMaxValueCount[$maxFlow] += 1;
+            $maxFlowArr[$maxFlow][$k] = $v[$maxFlow];
         }
 
         // 需要高亮的相位
-        $highLightPhase = array_search(max($baseMaxValueCount), $baseMaxValueCount);
+        $tempAvgPhase = [];
+        $highLightPhaseArr = array_keys($baseMaxValueCount, max($baseMaxValueCount));
+        if (count($highLightPhaseArr) > 1) { // 有相同次数的相位，取平均值最大的
+            foreach ($highLightPhaseArr as $k=>$v) {
+                $tempAvgPhase[$v] = array_sum(array_column($tempBase, $v)) / $baseMaxValueCount[$v];
+            }
+        }
+        $highLightPhase = array_search(max($tempAvgPhase), $tempAvgPhase);
+
+        // 统计高亮相位连续时段
+        $continueTime = [];
+        $conStart = $conEnd = $params['schedule_start'];
+        if (!empty($maxFlowArr[$highLightPhase])) {
+            for ($i = strtotime($conStart); $i <= strtotime($params['schedule_end']); $i += 30 * 60) {
+                if (isset($maxFlowArr[$highLightPhase][date('H:i', $i)])) {
+                    
+                }
+            }
+        }
+
 
     }
 
