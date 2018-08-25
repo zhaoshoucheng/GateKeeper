@@ -10,7 +10,7 @@ class Report extends MY_Controller
     {
         parent::__construct();
         $this->load->model('report_model');
-        $this->load->library('EvaluateQuota');
+        $this->load->model('gift_model');
         $this->load->model('waymap_model');
     }
 
@@ -176,11 +176,13 @@ class Report extends MY_Controller
                         'id'=>1,
                         'title'=>'延误最大top20路口分析',
                         'desc'=>'本周平均延误最大的20个路口展示',
+                        'quota_key'=>'stop_delay'
                     ],
                     [
                         'id'=>2,
                         'title'=>'排队长度最大top20路口分析',
                         'desc'=>'本周最大排队长度top20路口展示',
+                        'quota_key'=>'queue_length'
                     ],
                     [
                         'id'=>3,
@@ -191,11 +193,13 @@ class Report extends MY_Controller
                         'id'=>4,
                         'title'=>'工作日早高峰分析(6:30 ~ 9:30)',
                         'desc'=>'延误最大top10,排队长度最大top10路口数据与上周排名进行对比,并分析趋势',
+                        'quota_key'=>['queue_length','stop_delay']
                     ],
                     [
                         'id'=>5,
                         'title'=>'工作日晚高峰分析(16:30 ~ 19:30)',
                         'desc'=>'延误最大top10,排队长度最大top10路口数据与上周排名进行对比,并分析趋势',
+                        'quota_key'=>['queue_length','stop_delay']
                     ],
                 ]
             ]
@@ -228,14 +232,88 @@ class Report extends MY_Controller
                         'id'=>4,
                         'title'=>'工作日早高峰分析(6:30 ~ 9:30)',
                         'desc'=>'延误最大top10,排队长度最大top10路口数据与上月排名进行对比,并分析趋势',
+                        'quota_key'=>['queue_length','stop_delay']
                     ],
                     [
                         'id'=>5,
                         'title'=>'工作日晚高峰分析(16:30 ~ 19:30)',
                         'desc'=>'延误最大top10,排队长度最大top10路口数据与上月排名进行对比,并分析趋势',
+                        'quota_key'=>['queue_length','stop_delay']
                     ],
                 ]
             ]
         ];
+    }
+
+    public function generate(){
+        $params = $this->input->post();
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+            'title' => 'min:1',
+            'type' => 'min:1',
+        ]);
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        try{
+            $data = $this->report_model->generate($params["city_id"], $params["title"], $params["type"]);
+        }catch (\Exception $e){
+            com_log_warning('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_error', 0, $e->getMessage(), compact("params","data"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+        return $this->response($data);
+    }
+
+
+    public function getReportList(){
+        $params = $this->input->post();
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+            'type' => 'min:1',
+            'page_no' => 'min:1',
+            'page_size' => 'min:1',
+        ]);
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        try{
+            $data = $this->report_model->getReportList($params["city_id"], $params["type"], $params["page_no"], $params["page_size"]);
+        }catch (\Exception $e){
+            com_log_warning('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_error', 0, $e->getMessage(), compact("params","data"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+        return $this->response($data);
+    }
+
+    public function downReport(){
+        $params = $this->input->get();
+        $validate = Validate::make($params, [
+            'key' => 'min:1',
+        ]);
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        try{
+            $data = $this->gift_model->downResource($params["key"],'itstool_public');
+        }catch (\Exception $e){
+            com_log_warning('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_error', 0, $e->getMessage(), compact("params","data"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+        return $this->response($data);
     }
 }

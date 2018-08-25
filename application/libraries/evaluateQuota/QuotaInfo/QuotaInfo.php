@@ -23,46 +23,96 @@ abstract class QuotaInfo
     /**
      * 通用性方法,可重载
      */
-    public function formatQuotaChartData($series)
+    public function formatQuotaChartData($series,$round=2)
     {
         $chartData = array();
         foreach ($series as $dk => $dv){
             foreach ($dv as $k => $v){
-                $chartData[$dk][] = array($k,$v['sum']/$v['count']);
+                $chartData[$dk][] = array($k,round($v['sum']/$v['count'],$round));
             }
         }
         return $chartData;
     }
 
-    public function getQuotaData($data,$key,$weight,$gather,$quotaName)
+    /**
+     * @param $data 原始数据
+     * @param $key  x轴
+     * @param $weight 权重
+     * @param $gather 汇总
+     * @param $quotaName 指标关键词(y轴)
+     * @return array
+     */
+    public function getQuotaData($data, $key, $weight, $gather, $quotaName)
     {
-        $finalData = array();
-        foreach ($data as $value){
+        $finalData = [];
+        if($gather){
+            $finalData['total']=[];
+        }
+        foreach ($data as $dkey => $value){
             foreach ($value as $k => $v){
-                if($gather){
-                    $finalData['total'][$k]['sum'] += $v[$quotaName]*$v[$weight];
+                if($gather && !isset($finalData['total'][$v[$key]])){
+                    $finalData['total'][$v[$key]]['sum']=0;
+                    $finalData['total'][$v[$key]]['count']=0;
                 }
+                if(!isset($finalData[$dkey][$v[$key]])){
+                    $finalData[$dkey][$v[$key]]['sum']=0;
+                    $finalData[$dkey][$v[$key]]['count']=0;
+                }
+
                 if($weight){
-                    $finalData[$key][$k]['sum'] += $v[$quotaName]*$v[$weight];
-                    $finalData[$key][$k]['count'] += $v[$weight];
+                    $finalData[$dkey][$v[$key]]['sum'] += $v[$quotaName]*$v[$weight];
+                    $finalData[$dkey][$v[$key]]['count'] += $v[$weight];
+                    if($gather){
+                        $finalData['total'][$v[$key]]['sum'] += $v[$quotaName]*$v[$weight];
+                        $finalData['total'][$v[$key]]['count'] += $v[$weight];
+                    }
                 }else{
-                    $finalData[$key][$k]['sum'] += $v[$quotaName];
-                    $finalData[$key][$k]['count'] += 1;
+                    $finalData[$dkey][$v[$key]]['sum'] += $v[$quotaName];
+                    $finalData[$dkey][$v[$key]]['count'] += 1;
+                    if($gather){
+                        $finalData['total'][$v[$key]]['sum'] += $v[$quotaName];
+                        $finalData['total'][$v[$key]]['count'] += 1;
+                    }
                 }
 
             }
         }
 
+
         return $finalData;
     }
 
-    public function setQuotaData($data,$key)
+    /**
+     * @param $data 原始数据
+     * @param $key  分类数据关键词
+     * @return array
+     */
+    public function setQuotaData($data, $key)
     {
         $finalData = array();
         foreach ($data as $k => $v){
             $finalData[$v[$key]][] = $v;
         }
+
         return $finalData;
+    }
+
+    /**
+     * 求某项数据指标的加权平均值
+     */
+    public function getAveQuotaData($data)
+    {
+        $final = [];
+        foreach ($data as $dk => $dv){
+            $sum = 0;
+            $count = 0;
+            foreach ($dv as $k => $v){
+                $sum += $v['sum'];
+                $count += $v['count'];
+            }
+            $final[] = [$dk,$sum/$count];
+        }
+        return $final;
     }
 
 

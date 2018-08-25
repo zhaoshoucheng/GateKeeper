@@ -36,15 +36,15 @@ class JunctionReport extends MY_Controller
             return;
         }
 
-        if(!isset($params['start_date']) || date('Y-m-d', strtotime($params['start_date'])) !== $params['start_date']) {
+        if(!isset($params['evaluate_start_date']) || date('Y-m-d', strtotime($params['evaluate_start_date'])) !== $params['evaluate_start_date']) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of start_date is wrong.';
+            $this->errmsg = 'The value of evaluate_start_date is wrong.';
             return;
         }
 
-        if(!isset($params['end_date']) || date('Y-m-d', strtotime($params['end_date'])) !== $params['end_date']) {
+        if(!isset($params['evaluate_end_date']) || date('Y-m-d', strtotime($params['evaluate_end_date'])) !== $params['evaluate_end_date']) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of end_date is wrong.';
+            $this->errmsg = 'The value of evaluate_end_date is wrong.';
             return;
         }
 
@@ -66,9 +66,15 @@ class JunctionReport extends MY_Controller
             return;
         }
 
-        if(!isset($params['key']) || !array_key_exists($params['key'], $this->quotas)) {
+        if(!isset($params['quota_key']) || !array_key_exists($params['quota_key'], $this->quotas)) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of key is wrong.';
+            $this->errmsg = 'The value of quota_key is wrong.';
+            return;
+        }
+
+        if(!isset($params['type']) || !in_array($params['type'], [1,2])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = 'The value of type is wrong.';
             return;
         }
 
