@@ -163,23 +163,18 @@ class Junctioncomparison_model extends CI_Model
          * 停车比率 => stop_rateDataFormat
          * 溢流指数 => spillover_rateDataFormat
          */
-        $result = $this->$function($formatData);
+        $result = $this->$function($formatData, $scheduleArr);
 
         return $result;
     }
 
     /**
      * 处理指标 排队长度 数据
-     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
-     * @param $data['baseQuotaData']     array  基准日期指标数据
-     * @param $data['evaluateQuotaData'] array  评估日期指标数据
-     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期 ['2018-08-08', ...]
-     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期 ['2018-08-08', ...]
-     * @param $data['schedule_start']    string 时段配置开始时间
-     * @param $data['schedule_end']      string 时段配置结束时间
+     * @param $data     array  数据源
+     * @param $schedule array  时段配置具体时间['07:00', '07:30']
      * @return array
      */
-    private function queue_lengthDataFormat($data, $params)
+    private function queue_lengthDataFormat($data, $schedule)
     {
         $result = [];
 
@@ -194,91 +189,39 @@ class Junctioncomparison_model extends CI_Model
             }
         }
 
-        // 基准 每个时间点指标值最大的相位统计容器
-        $baseMaxValueCount = [];
-        // 临时数组 放置每个时间点每个相位的指标平均值
-        $tempBase = [];
-        foreach ($result as $direc => $val) {
-            foreach ($val['base_list'] as $hour=>$v) {
-                $tempBase[$hour][$direc] = $v;
-                $baseMaxValueCount[$direc] = 0;
+        // 获取基准、评估需要高亮的相位及计算高亮相位所需数据
+        $baseHighLightPhaseAndMaxFlowArr = $this->getHighLightPhaseAndMaxFlowArr($result, 'base');
+        $evaluateHighLightPhaseAndMaxFlowArr = $this->getHighLightPhaseAndMaxFlowArr($result, 'evaluate');
+
+        /* 统计基准高亮相位连续时段 */
+        $baseMaxFlowArr = $baseHighLightPhaseAndMaxFlowArr['maxFlowArr'];
+        $baseHighLightPhase = $baseHighLightPhaseAndMaxFlowArr['highLightPhase'];
+        $baseContinueTime = $this->getHighLightPhaseContinueTime($baseMaxFlowArr[$baseHighLightPhase]);
+
+        /* 统计评估高亮相位连续时段 */
+        $evaluateMaxFlowArr = $evaluateHighLightPhaseAndMaxFlowArr['maxFlowArr'];
+        $evaluateHighLightPhase = $evaluateHighLightPhaseAndMaxFlowArr['highLightPhase'];
+        $evaluateContinueTime = $this->getHighLightPhaseContinueTime($evaluateMaxFlowArr[$evaluateHighLightPhase]);
+
+        // 差距最大方向时间点
+        $tempHourVal = [];
+        foreach ($result as $flow=>$val) {
+            foreach ($schedule as $hour) {
+                $diffVal = $val['base_list'][$hour] - $val['evaluate_list'][$hour] < 0
+                            ? ($val['base_list'][$hour] - $val['evaluate_list'][$hour]) * -1
+                            : $val['base_list'][$hour] - $val['evaluate_list'][$hour];
+                $tempHourVal[$flow . '-' . $hour] = $diffVal;
             }
         }
-        // 统计指标最大值的相位出现的次数
-        $maxFlowArr = [];
-        foreach ($tempBase as $k=>$v) {
-            $maxFlow = array_search(max($v), $v);
-            $baseMaxValueCount[$maxFlow] += 1;
-            $maxFlowArr[$maxFlow][strtotime($k)] = $v[$maxFlow];
-        }
-
-        // 需要高亮的相位
-        $tempAvgPhase = [];
-        $highLightPhaseArr = array_keys($baseMaxValueCount, max($baseMaxValueCount));
-        if (count($highLightPhaseArr) > 1) { // 有相同次数的相位，取平均值最大的
-            foreach ($highLightPhaseArr as $k=>$v) {
-                $tempAvgPhase[$v] = array_sum(array_column($tempBase, $v)) / $baseMaxValueCount[$v];
-            }
-        }
-        $highLightPhase = array_search(max($tempAvgPhase), $tempAvgPhase);
-
-        /* 统计高亮相位连续时段 */
-        // 连续时段
-        $continueTime = [];
-
-        $minTime = min(array_keys($maxFlowArr[$highLightPhase]));
-        $maxTime = max(array_keys($maxFlowArr[$highLightPhase]));
-        $startTime = $endTime = '';
-        $countArr = [];
-
-        while ($minTime <= $maxTime) {
-            if ($startTime == '') {
-                $startTime = $minTime;
-            }
-            if (array_key_exists($startTime, $maxFlowArr[$highLightPhase])) {
-                if (!array_key_exists($minTime + 30 * 60, $maxFlowArr[$highLightPhase])) {
-                    $endTime = $minTime;
-                    $count = $endTime - $startTime == 0 ? 1 : ($endTime - $startTime) / 60 / 30 + 1;
-                    $countArr[$startTime . '-' . $endTime] = $count;
-                    $startTime = '';
-                } else {
-                    $endTime = $minTime + 30 * 60;
-                }
-            } else {
-                $startTime = $endTime = $minTime + 30 * 60;
-            }
-
-            $minTime += (30 * 60);
-        }
-
-        $maxCountArr = array_keys($countArr, max($countArr));
-
-        if (count($maxCountArr) > 1) {
-            foreach ($maxCountArr as $k=>$v) {
-                list($start, $end) = explode('-', $v);
-                $totalVal = 0;
-                for ($i = $start; $i <= $end; $i += 30 * 60) {
-                    $totalVal += $maxFlowArr[$highLightPhase][$i];
-                }
-                $avgVal[$v] = $totalVal / $countArr[$v];
-            }
-        }
-        $continueTime = array_keys($avgVal, max($avgVal));
-        $continueTime = array_map(function($val){
-            list($start, $end) = explode('-', $val);
-            return [
-                'start' => date('H:i', $start),
-                'end' => date('H:i', $end),
-            ];
-        }, $continueTime);
+        echo 'tempHourVal = ';print_r($tempHourVal);
 
         echo 'result = ';print_r($result);
         echo 'tempBase = ';print_r($tempBase);
         echo 'baseMaxValueCount = ';print_r($baseMaxValueCount);
-        echo 'maxFlowArr = ';print_r($maxFlowArr);
+        echo 'baseMaxFlowArr = ';print_r($baseMaxFlowArr);
         echo 'tempAvgPhase = ';print_r($tempAvgPhase);
         echo 'highLightPhase = ' . $highLightPhase;
-        echo 'continueTime = ';print_r($continueTime);
+        echo 'baseContinueTime = ';print_r($baseContinueTime);
 
     }
 
@@ -357,6 +300,106 @@ class Junctioncomparison_model extends CI_Model
     private function spillover_rateDataFormat($flowData, $data)
     {
         
+    }
+
+    /**
+     * 获取基准、评估需要高亮的相位及计算高亮相位所需数据
+     * @param $data 数据源
+     * @param $type 需要计算的类型 base|evaluate
+     * @return array
+     */
+    private function getHighLightPhaseAndMaxFlowArr($data, $type)
+    {
+        // 每个时间点指标值最大的相位统计容器
+        $maxValueCount = [];
+        // 临时数组 放置每个时间点每个相位的指标平均值
+        $tempData = [];
+        foreach ($data as $direc => $val) {
+            foreach ($val['' . $type . '_list'] as $hour=>$v) {
+                $tempData[$hour][$direc] = $v;
+                $maxValueCount[$direc] = 0;
+            }
+        }
+        // 统计指标最大值的相位出现的次数
+        $maxFlowArr = [];
+        foreach ($tempData as $k=>$v) {
+            $maxFlow = array_search(max($v), $v);
+            $maxValueCount[$maxFlow] += 1;
+            $maxFlowArr[$maxFlow][strtotime($k)] = $v[$maxFlow];
+        }
+
+        // 需要高亮的相位
+        $avgPhase = [];
+        $highLightPhaseArr = array_keys($maxValueCount, max($maxValueCount));
+        if (count($highLightPhaseArr) > 1) { // 有相同次数的相位，取平均值最大的
+            foreach ($highLightPhaseArr as $k=>$v) {
+                $avgPhase[$v] = array_sum(array_column($tempData, $v)) / $maxValueCount[$v];
+            }
+        }
+        $highLightPhase = array_search(max($avgPhase), $avgPhase);
+
+        return [
+            'highLightPhase' => $highLightPhase,
+            'maxFlowArr'     => $maxFlowArr,
+        ];
+    }
+
+    /**
+     * 获取高亮相位连续时间段 用于前端画框
+     * 规则：该相位连续次数最多的时间段；若持续时间相同，取该持续时间内平均指标最大的时间段,如果还相同的情况下，则都显示。
+     * @param $data 高亮相伴每个时间点的指标值 [时间点=>指标值] 例：['00:00'=>1, ......]
+     * @return array [['start'=>xx, 'end'=>xx]]
+     */
+    private function getHighLightPhaseContinueTime($data)
+    {
+        $minTime = min(array_keys($data));
+        $maxTime = max(array_keys($data));
+        $startTime = $endTime = '';
+        $countArr = [];
+
+        while ($minTime <= $maxTime) {
+            if ($startTime == '') {
+                $startTime = $minTime;
+            }
+            if (array_key_exists($startTime, $data)) {
+                if (!array_key_exists($minTime + 30 * 60, $data)) {
+                    $endTime = $minTime;
+                    $count = $endTime - $startTime == 0 ? 1 : ($endTime - $startTime) / 60 / 30 + 1;
+                    $countArr[$startTime . '-' . $endTime] = $count;
+                    $startTime = '';
+                } else {
+                    $endTime = $minTime + 30 * 60;
+                }
+            } else {
+                $startTime = $endTime = $minTime + 30 * 60;
+            }
+
+            $minTime += (30 * 60);
+        }
+
+        $maxCountArr = array_keys($countArr, max($countArr));
+
+        if (count($maxCountArr) > 1) {
+            foreach ($maxCountArr as $k=>$v) {
+                list($start, $end) = explode('-', $v);
+                $totalVal = 0;
+                for ($i = $start; $i <= $end; $i += 30 * 60) {
+                    $totalVal += $data[$i];
+                }
+                $avgVal[$v] = $totalVal / $countArr[$v];
+            }
+        }
+
+        $continueTime = array_keys($avgVal, max($avgVal));
+        $continueTime = array_map(function($val){
+            list($start, $end) = explode('-', $val);
+            return [
+                'start' => date('H:i', $start),
+                'end' => date('H:i', $end),
+            ];
+        }, $continueTime);
+
+        return $continueTime;
     }
 
     /**
