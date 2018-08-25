@@ -45,19 +45,24 @@ class Arterialjunction_model extends CI_Model
             if(empty($task["dates"])){
                 throw new \Exception("The task not found.");
             }
-            // 获取地图版本
-            $version = $this->waymap_model->getMapVersion(explode(",",$task['dates']));
-            if (empty($version)) {
-                throw new \Exception("The map_version not found.");
+        }else{
+            $tDates = [];
+            for ($i=30;$i>0;$i--){
+                $tDates[] = date("Y-m-d", strtotime("-".$i." day"));
             }
+            $task['dates'] = implode(",",$tDates);
         }
 
+        // 获取地图版本
+        $version = $this->waymap_model->getMapVersion(explode(",",$task['dates']));
+        if (empty($version)) {
+            throw new \Exception("The map_version not found.");
+        }
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
         $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id'], $version);
         if (count($allCityJunctions) < 1 || !$allCityJunctions || !is_array($allCityJunctions)) {
             return [];
         }
-
         $resultData = [];
         $resultData['dataList'] = array_reduce($allCityJunctions, function ($v, $w) {
             if (empty($v)) {
