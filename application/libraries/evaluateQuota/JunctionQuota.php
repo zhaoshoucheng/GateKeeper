@@ -20,7 +20,7 @@ class JunctionQuota implements EvaluateQuotaFactory{
     {
         $quotaInfo = new JunctionQuotaInfo();
         $quotaInfo->setStopDelay($this->_loadData,'logic_junction_id');
-        $data = $quotaInfo->getStopDelay('hour','traj_count',true);
+        $data = $quotaInfo->getStopDelay('hour','traj_count',false);
         $data = $quotaInfo->getAveQuotaData($data);
         return $data;
     }
@@ -29,7 +29,7 @@ class JunctionQuota implements EvaluateQuotaFactory{
     {
         $quotaInfo = new JunctionQuotaInfo();
         $quotaInfo->setQueueLength($this->_loadData,'logic_junction_id');
-        $data = $quotaInfo->getQueueLength('hour','traj_count',true);
+        $data = $quotaInfo->getQueueLength('hour','traj_count',false);
         $data = $quotaInfo->getAveQuotaData($data);
         return $data;
     }

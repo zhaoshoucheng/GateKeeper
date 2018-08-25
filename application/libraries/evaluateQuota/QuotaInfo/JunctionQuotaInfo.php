@@ -31,7 +31,7 @@ class JunctionQuotaInfo extends QuotaInfo
         if($key === null){
             return $this->_queueLength = $data;
         }
-        $this->_queueLength = self::setQuotaData($this->_queueLength,$key);
+        $this->_queueLength = self::setQuotaData($data,$key);
     }
 
     public function getStopDelay($key=null, $weight=null,$gather=false)
@@ -48,7 +48,7 @@ class JunctionQuotaInfo extends QuotaInfo
         if($key === null){
             return $this->_stopDelay = $data;
         }
-        $this->_stopDelay = self::setQuotaData($this->_stopDelay,$key);
+        $this->_stopDelay = self::setQuotaData($data,$key);
 
     }
 

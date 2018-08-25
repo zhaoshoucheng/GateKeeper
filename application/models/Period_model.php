@@ -112,14 +112,26 @@ class Period_model extends CI_Model
             $where
         )->where_in(
             'date',$dateList
-        )->get('junction_week_report')->order_by($orderBy)->limit(100)->result_array();
+        )->order_by($orderBy)->limit(1000)->get('junction_week_report')->result_array();
 
         return $ret;
     }
 
-    public function getJunctionDayData($cityId,$dateList)
+    public function getJunctionDayData($cityId,$logicJunctionId,$dateList,$orderBy)
     {
+        $where = array(
+            'city_id'=>$cityId,
+        );
+        if(!empty($logicJunctionId)){
+            $where['logic_junction_id'] = $logicJunctionId;
+        }
+        $ret = $this->db->where(
+            $where
+        )->where_in(
+            'date',$dateList
+        )->order_by($orderBy)->limit(1000)->get('junction_week_report')->result_array();
 
+        return $ret;
     }
 
     public function getJunctionHourData($cityId,$dateList,$hour,$orderBy)
@@ -134,7 +146,7 @@ class Period_model extends CI_Model
             'date',$dateList
         )->where_in(
             'hour',$hour
-        )->get('junction_hour_report')->order_by($orderBy)->limit(100)->result_array();
+        )->order_by($orderBy)->limit(1000)->get('junction_hour_report')->result_array();
 
         return $ret;
     }
@@ -151,7 +163,7 @@ class Period_model extends CI_Model
         }
         $ret = $this->db->where(
             $where
-        )->get('junction_month_report')->order_by($orderBy)->limit(100)->result_array();
+        )->order_by($orderBy)->limit(1000)->get('junction_month_report')->result_array();
 
         return $ret;
     }

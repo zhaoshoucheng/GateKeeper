@@ -107,7 +107,7 @@ abstract class QuotaInfo
             $sum = 0;
             $count = 0;
             foreach ($dv as $k => $v){
-                $sum +=$v['sum']*$v['count'];
+                $sum += $v['sum'];
                 $count += $v['count'];
             }
             $final[] = [$dk,$sum/$count];
