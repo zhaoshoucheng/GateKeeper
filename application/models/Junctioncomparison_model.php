@@ -168,13 +168,13 @@ class Junctioncomparison_model extends CI_Model
             foreach ($v['base_time_list'] as $hour=>$val) {
                 $value = array_sum($val) / count($val);
                 $result['dataList'][$k]['base_list'][$hour] = $value;
-                $result['dataList'][$k]['base'] = [$value, $hour];
+                $result['dataList'][$k]['base'][] = [$value, $hour];
             }
 
             foreach ($v['evaluate_time_list'] as $hour=>$val) {
                 $value = array_sum($val) / count($val);
                 $result['dataList'][$k]['evaluate_list'][$hour] = $value;
-                $result['dataList'][$k]['evaluate'] = [$value, $hour];
+                $result['dataList'][$k]['evaluate'][] = [$value, $hour];
             }
         }
         if (empty($result)) {
@@ -237,12 +237,12 @@ class Junctioncomparison_model extends CI_Model
         $result['diff_info'] = [
             'flow_id' => $diffMaxFlow,
             'base' => [
-                'hour'  => $diffMaxHour,
-                'value' => $baseDiffValue,
+                $baseDiffValue,
+                $diffMaxHour,
             ],
             'evaluate' => [
-                'hour'  => $diffMaxHour,
-                'value' => $evaluateDiffValue,
+                $evaluateDiffValue,
+                $diffMaxHour,
             ],
         ];
         $flowName = $info['allFlows'][$diffMaxFlow];
