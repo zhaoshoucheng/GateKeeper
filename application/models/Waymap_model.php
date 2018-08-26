@@ -233,7 +233,6 @@ class Waymap_model extends CI_Model
         -----------------------------------------------------*/
         $this->load->model('redis_model');
         $redis_key = "all_city_junctions_{$city_id}_{$version}";
-
         // 获取redis中数据
         $city_junctions = $this->redis_model->getData($redis_key);
         if (!$city_junctions) {
@@ -306,28 +305,45 @@ class Waymap_model extends CI_Model
             return [];
         }
 
+        //todo
+        //兼容沙盒临时切换线上路网时获取version问题
+        //begin>>>>
+        if (ENVIRONMENT=='development') {
+            $dates = [];
+            for ($i=30;$i>0;$i--){
+                $dates[] = date("Y-m-d", strtotime("-".$i." day"));
+            }
+        }
+        //<<<<<end
+
         $wdata = [
             'date'  => implode(",",$dates),
             'token' => $this->token,
             'user_id' => $this->userid,
         ];
-        $map_version = [];
+        $result_version = '';
         try {
-            $map_version = httpPOST($this->config->item('waymap_interface') . '/signal-map/map/getDateVersion', $wdata);
-            $map_version = json_decode($map_version, true);
-            if (!$map_version) return [];
-        } catch (Exception $e) {
-            return [];
-        }
-        if (!empty($map_version['data'])) {
-            foreach ($map_version['data'] as $k=>$v) {
-                if(!empty($v)){
-                    $map_version = $v;
+            $url = $this->config->item('waymap_interface') . '/signal-map/map/getDateVersion';
+            $map_version = httpPOST($url, $wdata);
+            $retArr = json_decode($map_version, true);
+            if (isset($retArr['errorCode'])
+                && $retArr['errorCode'] == 0
+                && !empty($retArr['data'])) {
+                foreach ($retArr['data'] as $k=>$v) {
+                    if(!empty($v)){
+                        $result_version = $v;
+                    }
                 }
+                return $result_version;
+            }else{
+                $errorMsg = !empty($retArr['errorMsg']) ? $retArr['errorMsg'] : "GetMapVersion error.";
+                com_log_warning('_itstool_waymap_getMapVersion_errorcode', 0, $errorMsg, compact("url","wdata","map_version"));
+                throw new \Exception("waymap:".$errorMsg);
             }
+        } catch (Exception $e) {
+            com_log_warning('_itstool_waymap_getMapVersion_error', 0, $e->getMessage(), compact("url","wdata","map_version"));
+            throw new \Exception($e->getMessage());
         }
-        return $map_version;
-
     }
 
     /**
