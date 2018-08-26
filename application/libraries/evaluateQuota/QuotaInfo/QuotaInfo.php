@@ -77,35 +77,7 @@ abstract class QuotaInfo
 
             }
         }
-//        foreach ($data as $dkey => $value){
-//            foreach ($value as $k => $v){
-//                if($gather && !isset($finalData['total'][$v[$key]])){
-//                    $finalData['total'][$v[$key]]['sum']=0;
-//                    $finalData['total'][$v[$key]]['count']=0;
-//                }
-//                if(!isset($finalData[$v[$key]][$dkey])){
-//                    $finalData[$v[$key]][$dkey]['sum']=0;
-//                    $finalData[$v[$key]][$dkey]['count']=0;
-//                }
-//
-//                if($weight){
-//                    $finalData[$v[$key]][$dkey]['sum'] += $v[$quotaName]*$v[$weight];
-//                    $finalData[$v[$key]][$dkey]['count'] += $v[$weight];
-//                    if($gather){
-//                        $finalData['total'][$v[$key]]['sum'] += $v[$quotaName]*$v[$weight];
-//                        $finalData['total'][$v[$key]]['count'] += $v[$weight];
-//                    }
-//                }else{
-//                    $finalData[$v[$key]][$dkey]['sum'] += $v[$quotaName];
-//                    $finalData[$v[$key]][$dkey]['count'] += 1;
-//                    if($gather){
-//                        $finalData['total'][$v[$key]]['sum'] += $v[$quotaName];
-//                        $finalData['total'][$v[$key]]['count'] += 1;
-//                    }
-//                }
-//
-//            }
-//        }
+
 
         return $finalData;
     }
@@ -123,6 +95,24 @@ abstract class QuotaInfo
         }
 
         return $finalData;
+    }
+
+    /**
+     * 求某项数据指标的加权平均值
+     */
+    public function getAveQuotaData($data)
+    {
+        $final = [];
+        foreach ($data as $dk => $dv){
+            $sum = 0;
+            $count = 0;
+            foreach ($dv as $k => $v){
+                $sum += $v['sum'];
+                $count += $v['count'];
+            }
+            $final[] = [$dk,$sum/$count];
+        }
+        return $final;
     }
 
 

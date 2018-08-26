@@ -13,6 +13,7 @@ class JunctionComparison extends MY_Controller
     {
         parent::__construct();
         $this->load->model('junctioncomparison_model');
+        $this->load->config('junctioncomparison_conf');
     }
 
     /**
@@ -26,7 +27,6 @@ class JunctionComparison extends MY_Controller
      * @param week                array    Y 星期 0-6
      * @param schedule_start      string   Y 时段开始时间 例：00:00
      * @param schedule_end        string   Y 时段结束时间 例：00:30
-     * @param schedule_name       string   Y 时段名称
      * @param quota_key           array    Y 指标key 例['queue_length', 'stop_delay']
      * @return json
      */
@@ -44,7 +44,6 @@ class JunctionComparison extends MY_Controller
                 'evaluate_end_date'   => 'nullunable',
                 'schedule_start'      => 'nullunable',
                 'schedule_end'        => 'nullunable',
-                'schedule_name'       => 'nullunable',
             ]
         );
         if (!$validate['status']) {
@@ -93,6 +92,15 @@ class JunctionComparison extends MY_Controller
             return;
         }
 
+        $quotaConf = $this->config->item('quotas');
+        foreach ($params['quota_key'] as $v) {
+            if (!array_key_exists(strip_tags(trim($v)), $quotaConf)) {
+                $this->errno = ERR_PARAMETERS;
+                $this->errmsg = '路口优化对比报告没有 ' . $quotaConf[strip_tags(trim($v))]['name'] . ' 指标！';
+                return;
+            }
+        }
+
         $data = [
             'city_id'             => intval($params['city_id']),
             'logic_junction_id'   => strip_tags(trim($params['logic_junction_id'])),
@@ -109,8 +117,7 @@ class JunctionComparison extends MY_Controller
 
         foreach ($params['quota_key'] as $v) {
             $data['quota_key'] = strip_tags(trim($v));
-            $result[html_escape(trim($v))]['name'] = html_escape(trim($params['schedule_name']));
-            $result[html_escape(trim($v))]['list'] = $this->junctioncomparison_model->getQuotaInfo($data);
+            $result[html_escape(trim($v))] = $this->junctioncomparison_model->getQuotaInfo($data);
         }
 
         return $this->response($result);

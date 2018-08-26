@@ -128,17 +128,17 @@ class Collection
 
     protected function groupByString($column, callable $callable = null)
     {
-    $data = [];
-    foreach ($this->toArray() as $item) {
-        if(array_key_exists($column, $item))
-            $data[$item[$column]][] = $item;
+        $data = [];
+        foreach ($this->toArray() as $item) {
+            if(array_key_exists($column, $item))
+                $data[$item[$column]][] = $item;
+        }
+
+        if(!is_null($callable) && is_callable($callable))
+            $data = array_map($callable, $data);
+
+        return $this->setData($data);
     }
-
-    if(!is_null($callable) && is_callable($callable))
-        $data = array_map($callable, $data);
-
-    return $this->setData($data);
-}
 
     protected function orderByString($column, $order = SORT_ASC)
     {

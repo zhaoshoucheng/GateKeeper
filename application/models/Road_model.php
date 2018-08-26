@@ -40,7 +40,7 @@ class Road_model extends CI_Model
         $this->db->select('road_id, road_name, road_direction');
         $this->db->from($this->tb);
         $this->db->where($where);
-        $this->db->order_by('created_at');
+        $this->db->order_by('created_at desc');
         $res = $this->db->get()->result_array();
         if (empty($res)) {
             return [];
@@ -253,8 +253,8 @@ class Road_model extends CI_Model
         }
 
         $result['center'] = [
-            'lng' => count($countData) >= 1 ? $countData['lng'] / count($countData) : 0,
-            'lat' => count($countData) >= 1 ? $countData['lat'] / count($countData) : 0,
+            'lng' => count($result['junctions_info']) >= 1 ? $countData['lng'] / count($result['junctions_info']) : 0,
+            'lat' => count($result['junctions_info']) >= 1 ? $countData['lat'] / count($result['junctions_info']) : 0,
         ];
         $result['junctions_info'] = array_values($result['junctions_info']);
         $result['map_version'] = $newMapVersion;

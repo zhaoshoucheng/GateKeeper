@@ -165,29 +165,29 @@ class Overview_model extends CI_Model
         if(($junctionList = $this->redis_model->getData($junctionListKey))) {
             return json_decode($junctionList, true);
         }
-
-        if (!$this->isTableExisted($this->tb . $cityId)) {
-            return [];
-        }
-
-        $data = $this->db->select('*')
-            ->from($this->tb . $cityId)
-            ->where('hour', $hour)
-            ->where('traj_count >=', 10)
-            ->where('updated_at >=', $date . ' 00:00:00')
-            ->where('updated_at <=', $date . ' 23:59:59')
-            ->get()->result_array();
-
-        $lngs = array_filter(array_column($data, 'lng'));
-        $lats = array_filter(array_column($data, 'lat'));
-
-        $center['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
-        $center['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
-
-        return [
-            'dataList' => $data,
-            'center' => $center
-        ];
+        return [];
+//        if (!$this->isTableExisted($this->tb . $cityId)) {
+//            return [];
+//        }
+//
+//        $data = $this->db->select('*')
+//            ->from($this->tb . $cityId)
+//            ->where('hour', $hour)
+//            ->where('traj_count >=', 10)
+//            ->where('updated_at >=', $date . ' 00:00:00')
+//            ->where('updated_at <=', $date . ' 23:59:59')
+//            ->get()->result_array();
+//
+//        $lngs = array_filter(array_column($data, 'lng'));
+//        $lats = array_filter(array_column($data, 'lat'));
+//
+//        $center['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
+//        $center['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
+//
+//        return [
+//            'dataList' => $data,
+//            'center' => $center
+//        ];
     }
 
     /**

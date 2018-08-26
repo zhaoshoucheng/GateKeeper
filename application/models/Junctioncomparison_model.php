@@ -18,6 +18,7 @@ class Junctioncomparison_model extends CI_Model
         }
 
         $this->load->model('waymap_model');
+        $this->load->config('junctioncomparison_conf');
     }
 
     /**
@@ -47,6 +48,10 @@ class Junctioncomparison_model extends CI_Model
             return (object)[];
         }
 
+        // 获取路口名称
+        $junctionsInfo = $this->waymap_model->getJunctionInfo($data['logic_junction_id']);
+        list($junctionName) = array_column($junctionsInfo, 'name');
+
         // 获取路口所有相位
         $allFlows = $this->waymap_model->getFlowsInfo($data['logic_junction_id']);
         if (empty($allFlows)) {
@@ -60,18 +65,9 @@ class Junctioncomparison_model extends CI_Model
         ];
 
         /* 获取基准日期指标加权平均值 计算出需要查的周几具体日期*/
-        $baseStartDate = strtotime($data['base_start_date']);
-        $baseEndDate = strtotime($data['base_end_date']);
-        $baseDateArr = [];
-        $baseWeekDays = [];
-        for ($i = $baseStartDate; $i <= $baseEndDate; $i += 24 * 3600) {
-            $baseDateArr[] = date('Y-m-d', $i);
-            foreach ($data['week'] as $k=>$v) {
-                if (date('w', $i) == $v) {
-                    $baseWeekDays[$i] = date('Y-m-d', $i);
-                }
-            }
-        }
+        $dateWeek = $this->getDate($data['base_start_date'], $data['base_end_date'], $data['week']);
+        $baseDateArr = $dateWeek['date'];
+        $baseWeekDays = $dateWeek['week'];
         $publicData['date'] = $baseDateArr;
         $baseQuotaData = $this->getQuotaInfoByDate($table, $publicData);
         // 相位->日期->时间->值
@@ -81,18 +77,9 @@ class Junctioncomparison_model extends CI_Model
         }
 
         /* 获取评估日期指标加权平均值 计算出需要查的周几具体日期*/
-        $evaluateStartDate = strtotime($data['evaluate_start_date']);
-        $evaluateEndDate = strtotime($data['evaluate_end_date']);
-        $evaluateDateArr = [];
-        $evaluateWeekDays = [];
-        for ($i = $evaluateStartDate; $i <= $evaluateEndDate; $i += 24 * 3600) {
-            $evaluateDateArr[] = date('Y-m-d', $i);
-            foreach ($data['week'] as $k=>$v) {
-                if (date('w', $i) == $v) {
-                    $evaluateWeekDays[$i] = date('Y-m-d', $i);
-                }
-            }
-        }
+        $dateWeek = $this->getDate($data['evaluate_start_date'], $data['evaluate_end_date'], $data['week']);
+        $evaluateDateArr = $dateWeek['date'];
+        $evaluateWeekDays = $dateWeek['week'];
         $publicData['date'] = $evaluateDateArr;
         $evaluateQuotaData = $this->getQuotaInfoByDate($table, $publicData);
         // 相位->日期->时间->值
@@ -114,12 +101,6 @@ class Junctioncomparison_model extends CI_Model
             $scheduleArr[] = date('H:i', $i);
         }
 
-        $function = $data['quota_key'] . 'DataFormat';
-
-        if (!method_exists($this, $function)) {
-            return (object)[];
-        }
-
         $formatData = [];
         foreach ($allFlows[$data['logic_junction_id']] as $k=>$v) {
             // flow信息
@@ -132,7 +113,6 @@ class Junctioncomparison_model extends CI_Model
             if (array_key_exists($k, $newBaseQuotaData)) {
                 foreach ($baseWeekDays as $day) {
                     foreach ($scheduleArr as $hour) {
-                        $hourData['base_hour_list'][$hour][$k][$day] = $newBaseQuotaData[$k][$day][$hour] ?? '';
                         $formatData[$k]['base_time_list'][$hour][$day] = $newBaseQuotaData[$k][$day][$hour] ?? '';
                     }
                 }
@@ -142,7 +122,6 @@ class Junctioncomparison_model extends CI_Model
             if (array_key_exists($k, $newEvaluateQuotaData)) {
                 foreach ($evaluateWeekDays as $day) {
                     foreach ($scheduleArr as $hour) {
-                        $hourData['evaluate_hour_list'][$hour][$k][$day] = $newEvaluateQuotaData[$k][$day][$hour] ?? '';
                         $formatData[$k]['evaluate_time_list'][$hour][$day] = $newEvaluateQuotaData[$k][$day][$hour] ?? '';
                     }
                 }
@@ -157,139 +136,290 @@ class Junctioncomparison_model extends CI_Model
             return (object)[];
         }
 
-        /**
-         * 排队长度 => queue_lengthDataFormat
-         * 停车延误 => stop_delayDataFormat
-         * 通过速度 => speedDataFormat
-         * 停车次数 => stop_time_cycleDataFormat
-         * 停车比率 => stop_rateDataFormat
-         * 溢流指数 => spillover_rateDataFormat
-         */
-        $result = $this->$function($formatData, $hourData);
+        $infoData = [
+            'quotaKey'    => $data['quota_key'],
+            'junctionName' => $junctionName,
+            'allFlows'     => $allFlows[$data['logic_junction_id']],
+        ];
+        $result = $this->formatData($formatData, $scheduleArr, $infoData);
+        if (empty($result)) {
+            return (object)[];
+        }
 
         return $result;
     }
 
     /**
-     * 处理指标 排队长度 数据
-     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
-     * @param $data['baseQuotaData']     array  基准日期指标数据
-     * @param $data['evaluateQuotaData'] array  评估日期指标数据
-     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期 ['2018-08-08', ...]
-     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期 ['2018-08-08', ...]
-     * @param $data['schedule']          array  时段配置时间点 ['07:00', '07:30', ...]
+     * 处理指标数据
+     * @param $data                array  数据源
+     * @param $schedule            array  时段配置具体时间['07:00', '07:30']
+     * @param $info['quotaKey']     string 指标KEY
+     * @param $info['junctionName'] string 路口名称
+     * @param $info['allFlows']     array  flow信息 [相位ID=>相位名称]
      * @return array
      */
-    private function queue_lengthDataFormat($data, $hourData)
+    private function formatData($data, $schedule, $info)
     {
         $result = [];
+        $quotaConf = $this->config->item('quotas');
 
         foreach ($data as $k=>$v) {
-            $result[$k]['flow_info'] = $v['flow_info'];
+            $result['dataList'][$k]['flow_info'] = $v['flow_info'];
             foreach ($v['base_time_list'] as $hour=>$val) {
-                $result[$k]['base_list'][$hour] = array_sum($val) / count($val);
+                $value = array_sum($val) / count($val);
+                $result['dataList'][$k]['base_list'][$hour] = $value;
+                $result['dataList'][$k]['base'][] = [$value, $hour];
             }
 
             foreach ($v['evaluate_time_list'] as $hour=>$val) {
-                $result[$k]['evaluate_list'][$hour] = array_sum($val) / count($val);
+                $value = array_sum($val) / count($val);
+                $result['dataList'][$k]['evaluate_list'][$hour] = $value;
+                $result['dataList'][$k]['evaluate'][] = [$value, $hour];
             }
         }
+        if (empty($result)) {
+            return [];
+        }
 
-        // 基准 每个时间点指标值最大的相位统计容器
-        $baseMaxValueCount = [];
+        // 获取基准、评估需要高亮的相位及计算高亮相位所需数据
+        $baseHighLightPhaseAndMaxFlowArr = $this->getHighLightPhaseAndMaxFlowArr($result['dataList']
+                                                                                , 'base'
+                                                                                , $quotaConf[$info['quotaKey']]['formula']);
+        $evaluateHighLightPhaseAndMaxFlowArr = $this->getHighLightPhaseAndMaxFlowArr($result['dataList']
+                                                                                , 'evaluate'
+                                                                                , $quotaConf[$info['quotaKey']]['formula']);
+
+        /* 统计基准高亮相位连续时段 */
+        $baseMaxFlowArr = $baseHighLightPhaseAndMaxFlowArr['maxFlowArr'];
+        $baseHighLightPhase = $baseHighLightPhaseAndMaxFlowArr['highLightPhase'];
+        $baseContinueTime = $this->getHighLightPhaseContinueTime($baseMaxFlowArr[$baseHighLightPhase]
+                                                                , $quotaConf[$info['quotaKey']]['formula']);
+        $baseFlowName = $info['allFlows'][$baseHighLightPhase];
+        $baseContinue = '';
+        foreach ($baseContinueTime as $k=>$v) {
+            $baseContinue .= empty($baseContinue) ? $v['start'] . '-' . $v['end'] : ',' . $v['start'] . '-' . $v['end'];
+        }
+
+        /* 统计评估高亮相位连续时段 */
+        $evaluateMaxFlowArr = $evaluateHighLightPhaseAndMaxFlowArr['maxFlowArr'];
+        $evaluateHighLightPhase = $evaluateHighLightPhaseAndMaxFlowArr['highLightPhase'];
+        $evaluateContinueTime = $this->getHighLightPhaseContinueTime($evaluateMaxFlowArr[$evaluateHighLightPhase]
+                                                                    , $quotaConf[$info['quotaKey']]['formula']);
+        $evaluateFlowName = $info['allFlows'][$evaluateHighLightPhase];
+        $evaluateContinue = '';
+        foreach ($evaluateContinueTime as $k=>$v) {
+            $evaluateContinue .= empty($evaluateContinue) ? $v['start'] . '-' . $v['end'] : ',' . $v['start'] . '-' . $v['end'];
+        }
+
+        $result['continue_time'] = [
+            'base'     => $baseContinueTime,
+            'evaluate' => $evaluateContinueTime,
+        ];
+
+        $result['highlightflow_info'] = [
+            'base'     => $baseHighLightPhase,
+            'evaluate' => $evaluateHighLightPhase,
+        ];
+
+        // 差距最大方向时间点
+        $tempHourVal = [];
+        foreach ($result['dataList'] as $flow=>$val) {
+            foreach ($schedule as $hour) {
+                $diffVal = $val['base_list'][$hour] - $val['evaluate_list'][$hour] < 0
+                            ? ($val['base_list'][$hour] - $val['evaluate_list'][$hour]) * -1
+                            : $val['base_list'][$hour] - $val['evaluate_list'][$hour];
+                $tempHourVal[$flow . '-' . $hour] = $diffVal;
+            }
+        }
+        list($diffMaxFlow, $diffMaxHour) = explode('-', array_search(max($tempHourVal), $tempHourVal));
+        $baseDiffValue = $result['dataList'][$diffMaxFlow]['base_list'][$diffMaxHour];
+        $evaluateDiffValue = $result['dataList'][$diffMaxFlow]['evaluate_list'][$diffMaxHour];
+        $result['diff_info'] = [
+            'flow_id' => $diffMaxFlow,
+            'base' => [
+                $baseDiffValue,
+                $diffMaxHour,
+            ],
+            'evaluate' => [
+                $evaluateDiffValue,
+                $diffMaxHour,
+            ],
+        ];
+        $flowName = $info['allFlows'][$diffMaxFlow];
+        $descHour = $diffMaxHour;
+        if ($baseDiffValue >= $evaluateDiffValue) {
+            $maxValue = $baseDiffValue;
+            $minValue = $evaluateDiffValue;
+        } else {
+            $maxValue = $evaluateDiffValue;
+            $minValue = $baseDiffValue;
+        }
+
+        $describe = [
+            $info['junctionName'],
+            $baseFlowName,
+            $baseContinue,
+            $evaluateFlowName,
+            $evaluateContinue,
+            $flowName,
+            $descHour,
+            $maxValue,
+            $minValue,
+        ];
+
+        foreach ($result['dataList'] as $k=>$v) {
+            unset($result['dataList'][$k]['base_list']);
+            unset($result['dataList'][$k]['evaluate_list']);
+        }
+
+        $result['dataList'] = array_values($result['dataList']);
+
+        $result['describe_info'] = $quotaConf[$info['quotaKey']]['describe']($describe);
+        $result['summary_info'] = $quotaConf[$info['quotaKey']]['name'] . '由' . $maxValue . '变化为' . $minValue;
+
+        return $result;
+    }
+
+    /**
+     * 获取基准、评估需要高亮的相位及计算高亮相位所需数据
+     * @param $data    数据源
+     * @param $type    需要计算的类型 base|evaluate
+     * @param $formula 计算规则 max | min
+     * @return array
+     */
+    private function getHighLightPhaseAndMaxFlowArr($data, $type, $formula)
+    {
+        // 每个时间点指标值最大的相位统计容器
+        $maxValueCount = [];
         // 临时数组 放置每个时间点每个相位的指标平均值
-        $tempBase = [];
-        foreach ($hourData['base_hour_list'] as $hour => $val) {
-            foreach ($val as $direc=>$v) {
-                $tempBase[$hour][$direc] = array_sum($v) / count($v);
-                $baseMaxValueCount[$direc] = 0;
+        $tempData = [];
+        foreach ($data as $direc => $val) {
+            foreach ($val['' . $type . '_list'] as $hour=>$v) {
+                $tempData[$hour][$direc] = $v;
+                $maxValueCount[$direc] = 0;
             }
         }
         // 统计指标最大值的相位出现的次数
-        foreach ($tempBase as $k=>$v) {
-            $baseMaxValueCount[array_search(max($v), $v)] += 1;
+        $maxFlowArr = [];
+        foreach ($tempData as $k=>$v) {
+            if ($formula == 'max') {
+                $maxFlow = array_search(max($v), $v);
+            } else {
+                $maxFlow = array_search(min($v), $v);
+            }
+            $maxValueCount[$maxFlow] += 1;
+            $maxFlowArr[$maxFlow][strtotime($k)] = $v[$maxFlow];
         }
 
         // 需要高亮的相位
-        $highLightPhase = array_search(max($baseMaxValueCount), $baseMaxValueCount);
+        $avgPhase = [];
+        $highLightPhaseArr = array_keys($maxValueCount, max($maxValueCount));
+        if (count($highLightPhaseArr) >= 1) { // 有相同次数的相位，取平均值最大的
+            foreach ($highLightPhaseArr as $k=>$v) {
+                $avgPhase[$v] = array_sum(array_column($tempData, $v)) / $maxValueCount[$v];
+            }
+        }
+        if ($formula == 'max') {
+            $highLightPhase = array_search(max($avgPhase), $avgPhase);
+        } else {
+            $highLightPhase = array_search(min($avgPhase), $avgPhase);
+        }
 
+        return [
+            'highLightPhase' => $highLightPhase,
+            'maxFlowArr'     => $maxFlowArr,
+        ];
     }
 
     /**
-     * 处理指标 停车延误 数据
-     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
-     * @param $data['baseQuotaData']     array  基准日期指标数据
-     * @param $data['evaluateQuotaData'] array  评估日期指标数据
-     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期
-     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期
-     * @param $data['schedule_start']    string 时段开始时间
-     * @param $data['schedule_end']      string 时段线束时间
+     * 获取高亮相位连续时间段 用于前端画框
+     * 规则：该相位连续次数最多的时间段；若持续时间相同，取该持续时间内平均指标最大(有的指标取最小)的时间段,如果还相同的情况下，则都显示。
+     * @param $data    高亮相伴每个时间点的指标值 [时间点=>指标值] 例：['00:00'=>1, ......]
+     * @param $formula 计算规则 max | min
+     * @return array [['start'=>xx, 'end'=>xx]]
      */
-    private function stop_delayDataFormat($data)
+    private function getHighLightPhaseContinueTime($data, $formula)
     {
-        
+        $minTime = min(array_keys($data));
+        $maxTime = max(array_keys($data));
+        $startTime = $endTime = '';
+        $countArr = [];
+
+        while ($minTime <= $maxTime) {
+            if ($startTime == '') {
+                $startTime = $minTime;
+            }
+            if (array_key_exists($startTime, $data)) {
+                if (!array_key_exists($minTime + 30 * 60, $data)) {
+                    $endTime = $minTime;
+                    $count = $endTime - $startTime == 0 ? 1 : ($endTime - $startTime) / 60 / 30 + 1;
+                    $countArr[$startTime . '-' . $endTime] = $count;
+                    $startTime = '';
+                } else {
+                    $endTime = $minTime + 30 * 60;
+                }
+            } else {
+                $startTime = $endTime = $minTime + 30 * 60;
+            }
+
+            $minTime += (30 * 60);
+        }
+
+        $maxCountArr = array_keys($countArr, max($countArr));
+
+        if (count($maxCountArr) >= 1) {
+            foreach ($maxCountArr as $k=>$v) {
+                list($start, $end) = explode('-', $v);
+                $totalVal = 0;
+                for ($i = $start; $i <= $end; $i += 30 * 60) {
+                    $totalVal += $data[$i];
+                }
+                $avgVal[$v] = $totalVal / $countArr[$v];
+            }
+        }
+
+        if ($formula == 'max') {
+            $continueTime = array_keys($avgVal, max($avgVal));
+        } else {
+            $continueTime = array_keys($avgVal, min($avgVal));
+        }
+
+        $continueTime = array_map(function($val){
+            list($start, $end) = explode('-', $val);
+            return [
+                'start' => date('H:i', $start),
+                'end' => date('H:i', $end),
+            ];
+        }, $continueTime);
+
+        return $continueTime;
     }
 
     /**
-     * 处理指标 通过速度 数据
-     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
-     * @param $data['baseQuotaData']     array  基准日期指标数据
-     * @param $data['evaluateQuotaData'] array  评估日期指标数据
-     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期
-     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期
-     * @param $data['schedule_start']    string 时段开始时间
-     * @param $data['schedule_end']      string 时段线束时间
+     * 根据首尾日期及周几获取全部具体日期
+     * @param $startDate string 首日期 Y-m-d
+     * @param $endDate   string 尾日期 Y-m-d
+     * @param $week      array  周几 0-6
+     * @return array
      */
-    private function speedDataFormat($data)
+    private function getDate($startDate, $endDate, $week)
     {
-        
-    }
-
-    /**
-     * 处理指标 停车次数 数据
-     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
-     * @param $data['logic_junction_id'] string 路口ID
-     * @param $data['city_id']           string 城市ID
-     * @param $data['baseQuotaData']     array  基准日期指标数据
-     * @param $data['evaluateQuotaData'] array  评估日期指标数据
-     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期
-     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期
-     * @param $data['schedule_start']    string 时段开始时间
-     * @param $data['schedule_end']      string 时段线束时间
-     */
-    private function stop_time_cycleDataFormat($data)
-    {
-        
-    }
-
-    /**
-     * 处理指标 停车比率 数据
-     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
-     * @param $data['baseQuotaData']     array  基准日期指标数据
-     * @param $data['evaluateQuotaData'] array  评估日期指标数据
-     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期
-     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期
-     * @param $data['schedule_start']    string 时段开始时间
-     * @param $data['schedule_end']      string 时段线束时间
-     */
-    private function stop_rateDataFormat($data)
-    {
-        
-    }
-
-    /**
-     * 处理指标 溢流指数 数据
-     * @param $flowData                  array  路口flow信息 ['相位ID'=>'相位名称']
-     * @param $data['baseQuotaData']     array  基准日期指标数据
-     * @param $data['evaluateQuotaData'] array  评估日期指标数据
-     * @param $data['baseWeekDays']      array  时段配置在基准日期段中所有星期日期
-     * @param $data['evaluateWeekDays']  array  时段配置在评估日期段中所有星期日期
-     * @param $data['schedule_start']    string 时段开始时间
-     * @param $data['schedule_end']      string 时段线束时间
-     */
-    private function spillover_rateDataFormat($flowData, $data)
-    {
-        
+        $startDate = strtotime($startDate);
+        $endDate = strtotime($endDate);
+        $dateArr = [];
+        $weekDays = [];
+        for ($i = $startDate; $i <= $endDate; $i += 24 * 3600) {
+            $dateArr[] = date('Y-m-d', $i);
+            foreach ($week as $k=>$v) {
+                if (date('w', $i) == $v) {
+                    $weekDays[$i] = date('Y-m-d', $i);
+                }
+            }
+        }
+        return [
+            'date' => $dateArr,
+            'week' => $weekDays,
+        ];
     }
 
     /**

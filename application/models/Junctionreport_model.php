@@ -21,7 +21,8 @@ class Junctionreport_model extends CI_Model
         }
 
         $this->load->model('waymap_model');
-        $this->config->load('report_conf');
+        $this->load->config('report_conf');
+        $this->load->library('TwoDimensionCollection');
 
         $this->quotas = $this->config->item('quotas');
     }
@@ -29,6 +30,7 @@ class Junctionreport_model extends CI_Model
     /**
      * 单点路口分析–数据查询
      * @param $data
+     * @return array
      */
     public function queryQuotaInfo($data)
     {
@@ -36,7 +38,7 @@ class Junctionreport_model extends CI_Model
 
         $hours = $this->getHours($data);
 
-        $result = $this->db->select('sum(' . $data['key'] . ' * traj_count) / sum(traj_count) as ' . $data['key'] . ', hour, logic_flow_id')
+        $result = $this->db->select('sum(' . $data['quota_key'] . ' * traj_count) / sum(traj_count) as ' . $data['quota_key'] . ', hour, logic_flow_id')
             ->from($this->tb . $data['city_id'])
             ->where('logic_junction_id', $data['logic_junction_id'])
             ->where_in('date', $dates)
@@ -69,8 +71,9 @@ class Junctionreport_model extends CI_Model
                 'junction_name' => $junctionInfo['junction']['name'] ?? '',
                 'junction_lng' => $junctionInfo['junction']['lng'] ?? '',
                 'junction_lat' => $junctionInfo['junction']['lat'] ?? '',
-                'quota_name' => $this->quotas[$data['key']]['name'],
-                'quota_unit' => $this->quotas[$data['key']]['unit'],
+                'quota_name' => $this->quotas[$data['quota_key']]['name'],
+                'quota_unit' => $this->quotas[$data['quota_key']]['unit'],
+                'quota_desc' => $this->quotas[$data['quota_key']]['desc'][$data['type']],
                 'summary' => $pretreatResultData['summary'],
                 'flow_info' => $pretreatResultData['flow_info'],
                 'base_time_box' => $pretreatResultData['base_time_box']
@@ -152,7 +155,7 @@ class Junctionreport_model extends CI_Model
      */
     private function getPretreatResultData($data, &$result, $junctionInfo)
     {
-        $key = $data['key'];
+        $key = $data['quota_key'];
         $flowsName = $junctionInfo['flows'];
 
         //构建二维数据表以映射折线图，同时创建以时间为依据分组的数据
