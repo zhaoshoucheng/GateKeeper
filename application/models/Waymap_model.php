@@ -447,6 +447,7 @@ class Waymap_model extends CI_Model
             }else{
                 $errorMsg = !empty($retArr['errorMsg']) ? $retArr['errorMsg'] : "The adj_junctions error format.";
                 com_log_warning('_itstool_waymap_getConnectionAdjJunctions_errorcode', 0, $errorMsg, compact("url","qArr","res"));
+                throw new \Exception("waymap:".$errorMsg);
                 return [];
             }
         } catch (Exception $e) {
