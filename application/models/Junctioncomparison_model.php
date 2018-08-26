@@ -216,10 +216,19 @@ class Junctioncomparison_model extends CI_Model
             'evaluate' => $evaluateContinueTime,
         ];
 
-        $result['highlightflow_info'] = [
-            'base'     => $baseHighLightPhase,
-            'evaluate' => $evaluateHighLightPhase,
-        ];
+        foreach ($result['dataList'] as $flow=>$v) {
+            if ($flow == $baseHighLightPhase) {
+                $result['dataList'][$flow]['flow_info']['base_highlight'] = 1;
+            } else {
+                $result['dataList'][$flow]['flow_info']['base_highlight'] = 0;
+            }
+
+            if ($flow == $evaluateHighLightPhase) {
+                $result['dataList'][$flow]['flow_info']['evaluate_highlight'] = 1;
+            } else {
+                $result['dataList'][$flow]['flow_info']['evaluate_highlight'] = 0;
+            }
+        }
 
         // 差距最大方向时间点
         $tempHourVal = [];
@@ -273,6 +282,10 @@ class Junctioncomparison_model extends CI_Model
         }
 
         $result['dataList'] = array_values($result['dataList']);
+        $result['quota_info'] = [
+            'name' => $quotaConf[$info['quotaKey']]['name'],
+            'desc' => $quotaConf[$info['quotaKey']]['desc'],
+        ];
 
         $result['describe_info'] = $quotaConf[$info['quotaKey']]['describe']($describe);
         $result['summary_info'] = $quotaConf[$info['quotaKey']]['name'] . '由' . $maxValue . '变化为' . $minValue;
