@@ -216,10 +216,19 @@ class Junctioncomparison_model extends CI_Model
             'evaluate' => $evaluateContinueTime,
         ];
 
-        $result['highlightflow_info'] = [
-            'base'     => $baseHighLightPhase,
-            'evaluate' => $evaluateHighLightPhase,
-        ];
+        foreach ($result['dataList'] as $flow=>$v) {
+            if ($flow == $baseHighLightPhase) {
+                $v['flow_info']['base_highlight'] = 1;
+            } else {
+                $v['flow_info']['base_highlight'] = 0;
+            }
+
+            if ($flow == $evaluateHighLightPhase) {
+                $v['flow_info']['evaluate_highlight'] = 1;
+            } else {
+                $v['flow_info']['evaluate_highlight'] = 0;
+            }
+        }
 
         // 差距最大方向时间点
         $tempHourVal = [];
