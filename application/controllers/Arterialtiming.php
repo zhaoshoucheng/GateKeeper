@@ -92,6 +92,7 @@ class Arterialtiming extends MY_Controller
 
         $ret = $this->arterialtiming_model->getJunctionInfos($cityId,$version,$selectJunctions);
         if(empty($ret)){
+            com_log_warning('_itstool_arterialtiming_queryArterialJunctionInfo_getJunctionInfos_empty', 0, '', compact("params","ret"));
             return $this->response(array(), ERR_REQUEST_WAYMAP_API, "路网服务异常");
         }
         $sortJunctions = [];
