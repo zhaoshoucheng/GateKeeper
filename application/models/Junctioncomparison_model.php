@@ -283,8 +283,9 @@ class Junctioncomparison_model extends CI_Model
 
         $result['dataList'] = array_values($result['dataList']);
         $result['quota_info'] = [
-            'name' => $quotaConf[$info['quotaKey']]['name'],
-            'desc' => $quotaConf[$info['quotaKey']]['desc'],
+            'name'  => $quotaConf[$info['quotaKey']]['name'],
+            'title' => $quotaConf[$info['quotaKey']]['title'],
+            'desc'  => $quotaConf[$info['quotaKey']]['desc'],
         ];
 
         $result['describe_info'] = $quotaConf[$info['quotaKey']]['describe']($describe);
