@@ -308,12 +308,12 @@ class Waymap_model extends CI_Model
         //todo
         //兼容沙盒临时切换线上路网时获取version问题
         //begin>>>>
-        if (ENVIRONMENT=='development') {
+        /*if (ENVIRONMENT=='development') {
             $dates = [];
             for ($i=30;$i>0;$i--){
                 $dates[] = date("Y-m-d", strtotime("-".$i." day"));
             }
-        }
+        }*/
         //<<<<<end
 
         $wdata = [
