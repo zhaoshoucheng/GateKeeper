@@ -11,7 +11,28 @@ class JunctionQuotaInfo extends QuotaInfo
        * */
     private $_stopDelay;
 
+    /*
+     * 排队长度
+     * */
+    private $_queueLength;
+
     private $__durationDelay;
+
+    public function getQueueLength($key=null, $weight=null,$gather=false)
+    {
+        if($key === null){
+            return $this->_queueLength;
+        }
+        return self::getQuotaData($this->_queueLength,$key,$weight,$gather,'stop_delay');
+    }
+
+    public function setQueueLength($data, $key=null)
+    {
+        if($key === null){
+            return $this->_queueLength = $data;
+        }
+        $this->_queueLength = self::setQuotaData($data,$key);
+    }
 
     public function getStopDelay($key=null, $weight=null,$gather=false)
     {
@@ -27,7 +48,7 @@ class JunctionQuotaInfo extends QuotaInfo
         if($key === null){
             return $this->_stopDelay = $data;
         }
-        $this->_stopDelay = self::setQuotaData($this->_stopDelay,$key);
+        $this->_stopDelay = self::setQuotaData($data,$key);
 
     }
 
