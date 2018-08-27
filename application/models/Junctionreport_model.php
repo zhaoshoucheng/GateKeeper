@@ -188,23 +188,6 @@ class Junctionreport_model extends CI_Model
         }
         $maxFlowIds = array_keys($avg, max($avg));
 
-        //如果某个时间点某个方向没有数据，则设为 null
-        foreach ($dataByFlow as $flowId => $flow) {
-            foreach ($hours as $hour) {
-                $dataByFlow[$flowId] = $dataByFlow[$flowId] ?? null;
-            }
-        }
-
-        //格式化二维数据表 - 生成 两类数据 （flow_info | base）
-        $base = $flow_info = [];
-        foreach ($dataByFlow as $flowId => $flow) {
-            //base
-            $base[$flowId] = [];
-            foreach ($flow as $k => $v) { $base[$flowId][] = [$v, $k]; }
-            //flow_info
-            $flow_info[$flowId] = [ 'name' => $flowsName[$flowId] ?? '', 'highlight' => (int)(in_array($flowId, $maxFlowIds) )];
-        }
-
         //找出均值最大的方向的最大值最长持续时间区域
         $base_time_box = [];
         foreach ($maxFlowIds as $maxFlowId) {
@@ -244,6 +227,24 @@ class Junctionreport_model extends CI_Model
             } elseif(reset($base_time_box)['length'] < $length) {
                 $base_time_box = [$maxFlowId => compact('start_time', 'end_time', 'length')];
             }
+        }
+
+        //如果某个时间点某个方向没有数据，则设为 null
+        foreach ($dataByFlow as $flowId => $flow) {
+            foreach ($hours as $hour) {
+                $dataByFlow[$flowId][$hour] = $dataByFlow[$flowId][$hour] ?? null;
+            }
+            ksort($dataByFlow[$flowId]);
+        }
+
+        //格式化二维数据表 - 生成 两类数据 （flow_info | base）
+        $base = $flow_info = [];
+        foreach ($dataByFlow as $flowId => $flow) {
+            //base
+            $base[$flowId] = [];
+            foreach ($flow as $k => $v) { $base[$flowId][] = [$v, $k]; }
+            //flow_info
+            $flow_info[$flowId] = [ 'name' => $flowsName[$flowId] ?? '', 'highlight' => (int)(in_array($flowId, $maxFlowIds) )];
         }
 
         $summary = $this->quotas[$key]['summery']([

@@ -79,9 +79,9 @@ trait ArrayRawMethod
         return new static(array_fill_keys($keys, $value));
     }
 
-    public function arrayFilter($callback = null)
+    public function arrayFilter($callback = null, $flag = 0)
     {
-        return new static(array_filter($this->data, $callback));
+        return new static(array_filter($this->data, $callback, $flag));
     }
 
     public function arrayFlip()
@@ -148,7 +148,7 @@ trait ArrayRawMethod
 
     public function arrayMap($callback, ...$_)
     {
-        return new static(array_map($callback, $this->dat, ...$_));
+        return new static(array_map($callback, $this->data, ...$_));
     }
 
     public function arrayMergeRecursive(...$_)
@@ -334,6 +334,11 @@ trait ArrayRawMethod
         return count($this->data, $mode);
     }
 
+    public function empty()
+    {
+        return empty($this->data);
+    }
+
     public function inArray($needle, $strict = false)
     {
         return in_array($needle, $this->data, $strict);
@@ -371,6 +376,11 @@ trait ArrayRawMethod
     public static function range($start, $end, $step = 1)
     {
         return new static(range($start, $end, $step));
+    }
+
+    public function reset()
+    {
+        return reset($this->data);
     }
 
     public function rsort($sortFlags = SORT_REGULAR)
