@@ -6,7 +6,7 @@
  * Time: 下午4:16
  */
 
-if(defined('COLLECTION_DIR'))
+if(!defined('COLLECTION_DIR'))
     define('COLLECTION_DIR', __DIR__ . '/Collection/');
 
 require COLLECTION_DIR .'tools.php';
