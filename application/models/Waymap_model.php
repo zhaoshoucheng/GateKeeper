@@ -557,4 +557,47 @@ class Waymap_model extends CI_Model
             return [];
         }
     }
+
+    /**
+     * 获取路口详情 经纬度、所属城市、行政区、某某交汇口等
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['city_id']           interger Y 城市ID
+     * @param $data['map_version']       string   N 地图版本
+     * @return array
+     */
+    public function gitJunctionDetail($data)
+    {
+        if (empty($data)) {
+            return ['errno' => -1, 'errmsg'=>'参数请求错误！'];
+        }
+
+        $wdata['token'] = $this->token;
+        $wdata['user_id'] = $this->userid;
+        $wdata['city_id'] = $data['city_id'];
+        $wdata['logic_junction_ids'] = $data['logic_junction_id'];
+
+        if (empty($data['map_version'])) {
+            $allVersion = $this->getAllMapVersion();
+            $wdata['map_version'] = max($allVersion);
+        } else {
+            $wdata['map_version'] = $data['map_version'];
+        }
+
+        try {
+            $detail = httpGET($this->config->item('waymap_interface') . '/signal-map/mapJunction/detail', $wdata);
+            if (!$detail) {
+                return ['errno'=>-1, 'errmsg'=>'路网返回路口信息为空！'];
+            }
+
+            $detail = json_decode($detail, true);
+            if ($detail['errorCode'] != 0 || empty($detail['data'])) {
+                return ['errno'=>-1, 'errmsg'=>$detail['errorMsg']];
+            }
+
+            return ['errno'=>0, 'data'=>$detail['data']];
+        } catch (Exception $e) {
+            com_log_warning('_itstool_waymap_gitJunctionDetail_error', 0, $e->getMessage(), compact("wdata","detail"));
+            return ['errno'=>-1, 'errmsg'=>'路网服务异常！'];
+        }
+    }
 }

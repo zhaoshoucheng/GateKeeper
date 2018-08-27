@@ -6,8 +6,8 @@
 class PeriodReport extends MY_Controller
 {
 
-    const WEEK = 1;
-    const MONTH = 2;
+    const WEEK = 3;
+    const MONTH = 4;
 
     const ALLDAY = 1;
     const MORNING = 2;

@@ -95,8 +95,9 @@ class JunctionComparison extends MY_Controller
         $quotaConf = $this->config->item('quotas');
         foreach ($params['quota_key'] as $v) {
             if (!array_key_exists(strip_tags(trim($v)), $quotaConf)) {
+                $msg = $quotaConf[strip_tags(trim($v))]['name'] ?? strip_tags(trim($v));
                 $this->errno = ERR_PARAMETERS;
-                $this->errmsg = '路口优化对比报告没有 ' . $quotaConf[strip_tags(trim($v))]['name'] . ' 指标！';
+                $this->errmsg = '路口优化对比报告没有 ' . $msg . ' 指标！';
                 return;
             }
         }

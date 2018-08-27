@@ -162,7 +162,34 @@ class Report extends MY_Controller
 
     public function junctionComparisonReportConfig()
     {
-        return $this->junctionReportConfig();
+        return [
+            'schedule'=>[
+                [
+                    'id'=>1,
+                    'title'=>'各方向最大排队长度分析',
+                    'desc'=>'平均各个日期中各方向最大排队长度在所在时段中随时间变化规律',
+                    'quota_key'=>'queue_length'
+                ],
+                [
+                    'id'=>2,
+                    'title'=>'各方向延误分析',
+                    'desc'=>'平均各个日期各方向最大延误所在时段中随时间变化规律',
+                    'quota_key'=>'stop_delay'
+                ],
+                [
+                    'id'=>3,
+                    'title'=>'各方向通过速度分析',
+                    'desc'=>'平均各个日期中各方向停车比率在所在时段中随时间变化规律',
+                    'quota_key'=>'speed'
+                ],
+                [
+                    'id'=>4,
+                    'title'=>'各方向最大停车次数分析',
+                    'desc'=>'对各方向最大停车次数在所在时段内的变化情况进行展示并分析',
+                    'quota_key'=>'stop_time_cycle'
+                ],
+            ],
+        ];
     }
 
     public function weekReportConfig()
@@ -176,30 +203,36 @@ class Report extends MY_Controller
                         'id'=>1,
                         'title'=>'延误最大top20路口分析',
                         'desc'=>'本周平均延误最大的20个路口展示',
-                        'quota_key'=>'stop_delay'
+                        'quota_key'=>'stop_delay',
+                        'api_key'=>0
                     ],
                     [
                         'id'=>2,
                         'title'=>'排队长度最大top20路口分析',
                         'desc'=>'本周最大排队长度top20路口展示',
-                        'quota_key'=>'queue_length'
+                        'quota_key'=>'queue_length',
+                        'api_key'=>0
                     ],
                     [
                         'id'=>3,
                         'title'=>'溢流问题分析',
                         'desc'=>'对比本周溢流发生次数在24小时情况对比,以及对比上周平均情况对比',
+                        'quota_key'=>'spillover',
+                        'api_key'=>1
                     ],
                     [
                         'id'=>4,
                         'title'=>'工作日早高峰分析(6:30 ~ 9:30)',
                         'desc'=>'延误最大top10,排队长度最大top10路口数据与上周排名进行对比,并分析趋势',
-                        'quota_key'=>['queue_length','stop_delay']
+                        'quota_key'=>['queue_length','stop_delay'],
+                        'api_key'=>0
                     ],
                     [
                         'id'=>5,
                         'title'=>'工作日晚高峰分析(16:30 ~ 19:30)',
                         'desc'=>'延误最大top10,排队长度最大top10路口数据与上周排名进行对比,并分析趋势',
-                        'quota_key'=>['queue_length','stop_delay']
+                        'quota_key'=>['queue_length','stop_delay'],
+                        'api_key'=>0
                     ],
                 ]
             ]
@@ -217,28 +250,36 @@ class Report extends MY_Controller
                         'id'=>1,
                         'title'=>'延误最大top20路口分析',
                         'desc'=>'本月平均延误最大的20个路口展示',
+                        'quota_key'=>'stop_delay',
+                        'api_key'=>0
                     ],
                     [
                         'id'=>2,
                         'title'=>'排队长度最大top20路口分析',
                         'desc'=>'本月最大排队长度top20路口展示',
+                        'quota_key'=>'queue_length',
+                        'api_key'=>0
                     ],
                     [
                         'id'=>3,
                         'title'=>'溢流问题分析',
                         'desc'=>'对比本月溢流发生次数在24小时情况对比,以及对比上月平均情况对比',
+                        'quota_key'=>'spillover',
+                        'api_key'=>1
                     ],
                     [
                         'id'=>4,
                         'title'=>'工作日早高峰分析(6:30 ~ 9:30)',
                         'desc'=>'延误最大top10,排队长度最大top10路口数据与上月排名进行对比,并分析趋势',
-                        'quota_key'=>['queue_length','stop_delay']
+                        'quota_key'=>['queue_length','stop_delay'],
+                        'api_key'=>0
                     ],
                     [
                         'id'=>5,
                         'title'=>'工作日晚高峰分析(16:30 ~ 19:30)',
                         'desc'=>'延误最大top10,排队长度最大top10路口数据与上月排名进行对比,并分析趋势',
-                        'quota_key'=>['queue_length','stop_delay']
+                        'quota_key'=>['queue_length','stop_delay'],
+                        'api_key'=>0
                     ],
                 ]
             ]
