@@ -31,18 +31,18 @@ class Common_model extends CI_Model
             return ['errno'=>ERR_REQUEST_WAYMAP_API, 'errmsg'=>$result['errmsg']];
         }
 
-        if (empty($result['junctions'])) {
+        if (empty($result['data']['junctions'])) {
             $errmsg = '路网没有返回路口详情！';
             return ['errno'=>ERR_REQUEST_WAYMAP_API, 'errmsg'=>$errmsg];
         }
 
-        foreach ($result['junctions'] as $k=>$v) {
+        foreach ($result['data']['junctions'] as $k=>$v) {
             $junctionName = $v['name'];
             $districtName = $v['district_name'];
             $road1 = $v['road1'];
             $road1 = $v['road2'];
         }
-        $cityName = $result['city_name'];
+        $cityName = $result['data']['city_name'];
 
         $string = $junctionName . '路口位于';
         $string .= $cityName . '市' . $districtName . '区，';

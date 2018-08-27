@@ -591,7 +591,7 @@ class Waymap_model extends CI_Model
 
             $detail = json_decode($detail, true);
             if ($detail['errorCode'] != 0 || empty($detail['data'])) {
-                return ['errno'=>-1, 'errmsg'=>'路网返回路口信息为空！'];
+                return ['errno'=>-1, 'errmsg'=>$detail['errorMsg']];
             }
 
             return ['errno'=>0, 'data'=>$detail['data']];
