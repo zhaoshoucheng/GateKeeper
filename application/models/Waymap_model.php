@@ -573,21 +573,25 @@ class Waymap_model extends CI_Model
 
         $wdata['token'] = $this->token;
         $wdata['user_id'] = $this->userid;
+        $wdata['city_id'] = $data['city_id'];
+        $wdata['logic_junction_ids'] = $data['logic_junction_id'];
+
         if (empty($data['map_version'])) {
             $allVersion = $this->getAllMapVersion();
-            $mapVersion = max($allVersion);
+            $wdata['map_version'] = max($allVersion);
+        } else {
+            $wdata['map_version'] = $data['map_version'];
         }
-        $wdata['map_version'] = $data['map_version'];
 
         try {
-            $detail = httpPOST($this->config->item('waymap_interface') . '/signal-map/mapJunction/detail', $wdata);
+            $detail = httpGET($this->config->item('waymap_interface') . '/signal-map/mapJunction/detail', $wdata);
             if (!$detail) {
                 return ['errno'=>-1, 'errmsg'=>'路网返回路口信息为空！'];
             }
 
-            $detail = json_decode($mapVersions, true);
+            $detail = json_decode($detail, true);
             if ($detail['errorCode'] != 0 || empty($detail['data'])) {
-                return ['errno'=>-1, 'errmsg'=>'路网返回路口信息为空！'];
+                return ['errno'=>-1, 'errmsg'=>$detail['errorMsg']];
             }
 
             return ['errno'=>0, 'data'=>$detail['data']];
