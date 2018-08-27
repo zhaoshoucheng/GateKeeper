@@ -584,7 +584,7 @@ class Waymap_model extends CI_Model
         }
 
         try {
-            $detail = httpPOST($this->config->item('waymap_interface') . '/signal-map/mapJunction/detail', $wdata);
+            $detail = httpGET($this->config->item('waymap_interface') . '/signal-map/mapJunction/detail', $wdata);
             if (!$detail) {
                 return ['errno'=>-1, 'errmsg'=>'路网返回路口信息为空！'];
             }

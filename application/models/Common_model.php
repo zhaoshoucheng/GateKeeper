@@ -39,8 +39,8 @@ class Common_model extends CI_Model
         foreach ($result['data']['junctions'] as $k=>$v) {
             $junctionName = $v['name'];
             $districtName = $v['district_name'];
-            $road1 = $v['road1'];
-            $road1 = $v['road2'];
+            $road1 = $v['road1'] ?? '未知路口';
+            $road2 = $v['road2'] ?? '未知路口';
         }
         $cityName = $result['data']['city_name'];
 
