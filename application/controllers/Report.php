@@ -233,6 +233,7 @@ class Report extends MY_Controller
                         'api_info'=>[
                             'key'=>1,
                             'type'=>3,
+                            'quota_key'=>['spillover']
                         ]
                     ],
                     [
