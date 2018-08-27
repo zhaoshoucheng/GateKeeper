@@ -191,7 +191,7 @@ class Junctionreport_model extends CI_Model
         //如果某个时间点某个方向没有数据，则设为 null
         foreach ($dataByFlow as $flowId => $flow) {
             foreach ($hours as $hour) {
-                $dataByFlow[$flowsId] = $dataByFlow[$flowsId] ?? null;
+                $dataByFlow[$flowId] = $dataByFlow[$flowId] ?? null;
             }
         }
 
