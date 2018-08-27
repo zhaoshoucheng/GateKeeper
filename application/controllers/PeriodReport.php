@@ -498,7 +498,7 @@ class PeriodReport extends MY_Controller
         $summary .= "在".$dayWorstQuota[0]['date'].$quotaInfo[$quotaKey]['name']."最大,达到".round($dayWorstQuota[0][$quotaKey],2)."。";
 
         if($maxMoMJunction['d']>0){
-            $summary .= "环比上".$period.$junctionInfos[$maxMoMJunction['logic_junction_id']]['name']."恶化情况最严重,由上个".$period.$maxMoMJunction['last_rank']."名,提升至本".$period.$maxMoMJunction['rank']."名,";
+            $summary .= "环比上".$period.$junctionInfos[$maxMoMJunction['logic_junction_id']]['name']."恶化情况最严重,由上个".$period.$maxMoMJunction['last_rank']."名,变化至本".$period.$maxMoMJunction['rank']."名,";
             $summary .= "下个".$period."需要重点关注延误变大原因";
         }
 
