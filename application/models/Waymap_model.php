@@ -573,11 +573,15 @@ class Waymap_model extends CI_Model
 
         $wdata['token'] = $this->token;
         $wdata['user_id'] = $this->userid;
+        $wdata['city_id'] = $data['city_id'];
+        $wdata['logic_junction_ids'] = $data['logic_junction_id'];
+
         if (empty($data['map_version'])) {
             $allVersion = $this->getAllMapVersion();
-            $mapVersion = max($allVersion);
+            $wdata['map_version'] = max($allVersion);
+        } else {
+            $wdata['map_version'] = $data['map_version'];
         }
-        $wdata['map_version'] = $data['map_version'];
 
         try {
             $detail = httpPOST($this->config->item('waymap_interface') . '/signal-map/mapJunction/detail', $wdata);
