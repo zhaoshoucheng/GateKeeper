@@ -334,6 +334,11 @@ trait ArrayRawMethod
         return count($this->data, $mode);
     }
 
+    public function end()
+    {
+        return end($this->data);
+    }
+
     public function empty()
     {
         return empty($this->data);
