@@ -191,9 +191,11 @@ class Junctionreport_model extends CI_Model
         //如果某个时间点某个方向没有数据，则设为 null
         foreach ($dataByFlow as $flowId => $flow) {
             foreach ($hours as $hour) {
-                $dataByFlow[$flowId] = $dataByFlow[$flowId] ?? null;
+                $dataByFlow[$flowId][$hour] = $dataByFlow[$flowId][$hour] ?? null;
             }
+            ksort($dataByFlow[$flowId]);
         }
+
 
         //格式化二维数据表 - 生成 两类数据 （flow_info | base）
         $base = $flow_info = [];
