@@ -119,7 +119,7 @@ class Junctionreport_model extends CI_Model
 
         $time = $start;
         while($time <= $end) {
-            if(in_array(date('w', $time) + 1, $weeks)) {
+            if(in_array(date('w', $time), $weeks)) {
                 $results[] = date('Y-m-d', $time);
             }
             $time += (60 * 60 * 24);
@@ -191,7 +191,7 @@ class Junctionreport_model extends CI_Model
         //如果某个时间点某个方向没有数据，则设为 null
         foreach ($dataByFlow as $flowId => $flow) {
             foreach ($hours as $hour) {
-                $dataByFlow[$flowsId] = $dataByFlow[$flowsId] ?? null;
+                $dataByFlow[$flowId] = $dataByFlow[$flowId] ?? null;
             }
         }
 
