@@ -344,7 +344,7 @@ class PeriodReport extends MY_Controller
                 'city_id'     => 'nullunable',
                 'type'      => 'nullunable',
                 'time_type'      => 'nullunable',
-                'top'      => 'nullunable',
+                'top_num'      => 'nullunable',
                 'quota_key' => 'nullunable'
             ]
         );
@@ -357,7 +357,7 @@ class PeriodReport extends MY_Controller
         $cityId = $params['city_id'];
         $type = $params['type'];
         $timeType = $params['time_type'];
-        $topNum = $params['top'];
+        $topNum = $params['top_num'];
         $quotaKey = $params['quota_key'];
         $quotaInfo = array(
             'queue_length'=>array(
