@@ -193,7 +193,9 @@ class Junctionreport_model extends CI_Model
             foreach ($hours as $hour) {
                 $dataByFlow[$flowId][$hour] = $dataByFlow[$flowId][$hour] ?? null;
             }
+            ksort($dataByFlow[$flowId]);
         }
+
 
         //格式化二维数据表 - 生成 两类数据 （flow_info | base）
         $base = $flow_info = [];
