@@ -119,7 +119,7 @@ class Junctionreport_model extends CI_Model
 
         $time = $start;
         while($time <= $end) {
-            if(in_array(date('w', $time) + 1, $weeks)) {
+            if(in_array(date('w', $time), $weeks)) {
                 $results[] = date('Y-m-d', $time);
             }
             $time += (60 * 60 * 24);
