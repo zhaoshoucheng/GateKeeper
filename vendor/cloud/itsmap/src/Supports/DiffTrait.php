@@ -47,7 +47,7 @@ trait DiffTrait
     /*
      * 更新操作
      */
-    public function update($object)
+    public function updateOperate($object)
     {
         foreach($this->updateFields() as $field) {
             $this->$field = $object->$field;

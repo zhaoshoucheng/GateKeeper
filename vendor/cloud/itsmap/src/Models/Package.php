@@ -316,7 +316,7 @@ class Package
         $toUpdate = null;
         if ($oldModel->uniq() == $newModel->uniq()) {
             if ($oldModel->isNeedUpdate($newModel)) {
-                $toUpdate = $oldModel->update($newModel);
+                $toUpdate = $oldModel->updateOperate($newModel);
             }
         }
         return $toUpdate;
@@ -376,7 +376,7 @@ class Package
 
             if ($oldModel->uniq() == $newModel->uniq()) {
                 if ($oldModel->isNeedUpdate($newModel)) {
-                    $toUpdate[] = $oldModel->update($newModel);
+                    $toUpdate[] = $oldModel->updateOperate($newModel);
                 }
 
                 $newI++;
