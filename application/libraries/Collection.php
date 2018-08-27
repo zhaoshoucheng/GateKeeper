@@ -17,19 +17,21 @@ class Collection
     private $data = [];
 
     /**
-     * 支持链式调用的 PHP 原生数组函数
+     * 支持的 PHP 原生数组函数
      * @var array
      */
-    private static $self = [
-        'array_chunk', 'array_filter'
-    ];
-
-    /**
-     * 不支持链式调用的 PHP 原生函数
-     * @var array
-     */
-    private static $other = [
-        'array_column', 'count', 'max', 'array_keys'
+    private static $methods = [
+        1 => [ // 返回 函数本身的结果，如果是数组 则返回 Collection 对象，且数组参数位于第一位
+            'array_chunk', 'array_filter', 'array_column', 'count', 'max', 'array_keys',
+            '',
+        ],
+        2 => [ // 返回 $this 且数组参数为引用 且位于第一位
+            'sort', 'rsort', 'ksort', 'krsort', 'asort', 'arsort',
+            'array_shift', 'array_unshift', 'array_pop', 'array_push',
+        ],
+        3 => [ // 返回 函数本身的结果，如果是数组 则返回 Collection 对象，且数组参数位于最后一位
+            'implode', 'array_key_exists'
+        ]
     ];
 
     /**
@@ -60,22 +62,38 @@ class Collection
         return $this->get();
     }
 
+    /**
+     * 获取数组指定键的值
+     * @param null $key
+     * @param null $default
+     * @return array|mixed|null
+     */
     public function get($key = null, $default = null)
     {
-        return $key == null ?
+        return $key != null ?
             $this->data[$key] ?? $default :
             $this->data;
     }
 
+    /**
+     * 设置数组的指定键的值
+     * @param $key
+     * @param $value
+     * @return $this
+     */
     public function set($key, $value)
     {
         $this->data[$key] = $value;
         return $this;
     }
 
+    /**
+     * 获取数组中最大值所对应的键的集合
+     * @return Collection
+     */
     public function getKeysOfMaxValue()
     {
-        return new static($this->arrayKeys($this->max()));
+        return $this->arrayKeys($this->max());
     }
 
     /**
@@ -93,6 +111,28 @@ class Collection
     }
 
     /**
+     * 指定键自增
+     * @param $key
+     * @param int $value
+     * @return Collection
+     */
+    public function increment($key, $value = 1)
+    {
+        return $this->set($key, $this->get($key, 0) + $value);
+    }
+
+    /**
+     * 指定键自减
+     * @param $key
+     * @param int $value
+     * @return Collection
+     */
+    public function decrement($key, $value = 1)
+    {
+        return $this->set($key, $this->get($key, 0) - $value);
+    }
+
+    /**
      * 将集合按照指定字段分组
      * @param $column
      * @param callable|null $callable
@@ -106,7 +146,7 @@ class Collection
         } elseif (is_array($column)) {
             return $this->groupByArray($column, $callable);
         }
-        throw new Exception('Your type of column is wrong!');
+        return $this;
     }
 
     /**
@@ -151,37 +191,10 @@ class Collection
     }
 
     /**
-     * 适配 $self 和 $other 中定义的 PHP 自带的数组函数
-     * @param $name
-     * @param $arguments
-     * @return Collection|mixed
-     * @throws Exception
-     */
-    public function __call($name, $arguments)
-    {
-        $method = implode('_', array_map(function ($v) {
-                return lcfirst($v);
-            }, preg_split("/(?=[A-Z])/", $name)));
-
-        if(in_array($method, self::$self)) {
-            array_unshift($arguments, $this->toArray());
-            return new static(call_user_func_array($method, $arguments));
-        } elseif(in_array($method, self::$other)) {
-            array_unshift($arguments, $this->toArray());
-            return call_user_func_array($method, $arguments);
-        } else {
-            switch ($method) {
-            }
-        }
-
-        throw new Exception('Method ' . $method . ' don\'t exist or method isn\'t allowed!');
-    }
-
-    /**
      * @param callable $callable
      * @return $this
      */
-    public function each(callable $callable)
+    public function foreach(callable $callable)
     {
         $this->arrayWalk($callable);
         return $this;
@@ -191,18 +204,23 @@ class Collection
      * @param $callable
      * @return bool
      */
-    public function arrayWalk($callable)
+    public function arrayWalk(callable $callable)
     {
         return array_walk($this->data, function ($v, $k) use ($callable) {
-            return $callable(is_array($v) ? Collection::make($v) : $v, $k);
+            $callable(is_array($v) ? Collection::make($v) : $v, $k);
         });
     }
 
-    public function arrayMap($callable)
+    /**
+     * @param $callable
+     * @return Collection
+     */
+    public function arrayMap(callable $callable)
     {
-        return new static(array_map(function ($v) use ($callable) {
+        $this->data = array_map(function ($v) use ($callable) {
             return $callable(is_array($v) ? Collection::make($v) : $v);
-        }, $this->toArray()));
+        }, $this->toArray());
+        return $this;
     }
 
     /**
@@ -214,15 +232,18 @@ class Collection
     private function groupByString($column, callable $callable = null)
     {
         $data = [];
-        foreach ($this->toArray() as $item) {
-            if(array_key_exists($column, $item))
-                $data[$item[$column]][] = $item;
-        }
+        $this->foreach(function ($c) use (&$data, $column) {
+            if($c->arrayKeyExists($column))
+                $data[$c->$column][] = $c instanceof Collection ? $c->toArray() : $c;
+        });
+
+        $collection = Collection::make($data);
 
         if(!is_null($callable) && is_callable($callable))
-            foreach ($data as $key => $datum) { $data[$key] = $callable(new static($datum)); }
-
-        return new static($data);
+            $collection->arrayMap(function ($c) use ($callable) {
+                return $callable($c);
+            });
+        return $collection;
     }
 
     /**
@@ -241,8 +262,7 @@ class Collection
                 return $collection->groupBy($column, $callable)->toArray();
             };
         }
-
-        return $this->groupBy($first, $callable);
+        return $this->groupByString($first, $callable);
     }
 
     /**
@@ -253,13 +273,13 @@ class Collection
      */
     private function orderByString($column, $order = SORT_ASC)
     {
-        $data = array_column($this->toArray(), null, $column);
+        $data = $this->arrayColumn(null, $column);
         switch ($order) {
-            case SORT_ASC: ksort($data); break;
-            case SORT_DESC: krsort($data); break;
+            case SORT_ASC: $data->ksort(); break;
+            case SORT_DESC: $data->krsort(); break;
             default: break;
         }
-        return new static(array_values($data));
+        return $data->arrayValues();
     }
 
     /**
@@ -296,5 +316,57 @@ class Collection
             }
             return true;
         });
+    }
+
+    /**
+     * 适配 未定义的 函数
+     * @param $name
+     * @param $arguments
+     * @return Collection|mixed
+     * @throws Exception
+     */
+    public function __call($name, $arguments)
+    {
+        $method = implode('_', array_map(function ($v) {
+            return lcfirst($v);
+        }, preg_split("/(?=[A-Z])/", $name)));
+
+        if(in_array($method, self::$methods[1])) {
+            array_unshift($arguments, $this->toArray());
+            $result = call_user_func_array($method, $arguments);
+            return is_array($result) ? new static($result) : $result;
+        } elseif(in_array($method, self::$methods[2])) {
+            array_unshift($arguments, $this->data);
+            call_user_func_array($method, $arguments);
+            return $this;
+        } elseif(in_array($method, self::$methods[3])) {
+            array_push($arguments, $this->toArray());
+            $result = call_user_func_array($method, $arguments);
+            return is_array($result) ? new static($result) : $result;
+        } else {
+            switch ($method) {
+            }
+        }
+
+        throw new Exception('Method ' . $method . ' don\'t exist or method isn\'t allowed!');
+    }
+
+    /**
+     * @param $name
+     * @return array|mixed|null
+     */
+    public function __get($name)
+    {
+        return $this->get($name, null);
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     * @return Collection
+     */
+    public function __set($name, $value)
+    {
+        return $this->set($name, $value);
     }
 }
