@@ -20,6 +20,9 @@ class Realtimewarning_model extends CI_Model
         $this->load->helper('http');
         $this->token = $this->config->item('waymap_token');
         $this->userid = $this->config->item('waymap_userid');
+
+        $this->config->load('realtime_conf');
+        $this->load->model('waymap_model');
     }
 
     /**
@@ -64,7 +67,7 @@ class Realtimewarning_model extends CI_Model
         $logicFlowId = $val['logic_flow_id'];
         $realtimeUpatetime = $val['updated_at'];
         //$this->db->reconnect();
-        //$this->db->trans_begin();
+        $this->db->trans_begin();
         try {
             //判断数据是否存在?
             $warnRecord = $this->db->select("id, start_time, last_time")->from('real_time_alarm')
@@ -112,9 +115,9 @@ class Realtimewarning_model extends CI_Model
                 $this->db->update('real_time_alarm');
                 echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=".$traceId."||junction_id=".$logicJunctionId."||flow_id=".$logicFlowId."||message=update\n\r";
             }
-            //$this->db->trans_commit();
+            $this->db->trans_commit();
         } catch (\Exception $e) {
-            //$this->db->trans_rollback();
+            $this->db->trans_rollback();
             echo "[ERROR] " . date("Y-m-d\TH:i:s") . " trace_id=".$traceId."||junction_id=".$logicJunctionId."||flow_id=".$logicFlowId."||message=".$e->getMessage()."\n\r";
             com_log_warning('_realtimewarning_updatewarning_error', 0, $e->getMessage(), compact("val", "type", "date", "cityId", "traceId"));
         }
@@ -134,8 +137,11 @@ class Realtimewarning_model extends CI_Model
 
         $currentId = 0;
         while (1) {
-            $sql = "SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} {$rtwRule['where']} order by id asc limit 2000"; 
+            $sql = "SELECT * FROM `{$tableName}` WHERE `updated_at`>\"{$date}\" and hour=\"{$hour}\" and id>{$currentId} {$rtwRule['where']} order by id asc limit 2000";
+            $this->db->forceMaster();
             $query = $this->db->query($sql);
+            $this->db->ignoreMaster();
+
             $result = $query->result_array();
             if (empty($result)) {
                 echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=$traceId||sql=$sql||message=loop over!\n\r";
@@ -151,6 +157,20 @@ class Realtimewarning_model extends CI_Model
                 }
                 //sleep(10);
             }
+        }
+
+        //删除30天前数据
+        $splitHour = explode(':',$hour);
+        $limitMinus = [3,4,5];                          //只在分钟级的0-2之间执行
+        if(isset($splitHour[0]) &&
+            $splitHour[0]=='00'  &&                     //小时
+            isset($splitHour[1][1]) &&
+            $splitHour[1][0]=='0' &&                    //分钟第一位
+            in_array($splitHour[1][1],$limitMinus)) {   //分钟第二位
+            $dtime = date("Y-m-d H:i:s", strtotime("-30 day"));
+            $sql = "DELETE FROM `real_time_alarm` WHERE `created_at`<'{$dtime}';";
+            $this->db->query($sql);
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " trace_id=$traceId||sql=$sql||message=delete_expired_data\n\r";
         }
     }
 
@@ -174,15 +194,18 @@ class Realtimewarning_model extends CI_Model
 
         //todo生成rediskey
         $this->load->model('redis_model');
-        $redisKey = "its_realtime_lasthour_$cityId";
-        $this->redis_model->setEx($redisKey, $hour, 24*3600);
 
         //生成 avg(stop_delay) group by hour
         $splitHour = explode(':',$hour);
         $limitMinus = [5,6,7];  //只在分钟级的5-7之间执行
         if(isset($splitHour[1][1]) && in_array($splitHour[1][1],$limitMinus)){
-            $sql = " SELECT `hour`, sum(stop_delay * traj_count) / sum(traj_count) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
+            $sql = "SELECT `hour`, sum(stop_delay * traj_count) / sum(traj_count) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
+            $this->db->setQueryFlag("100001");
+            $this->db->forceMaster();
             $query = $this->db->query($sql);
+            $this->db->ignoreMaster();
+            $this->db->setQueryFlag("");
+
             $result = $query->result_array();
             if (empty($result)) {
                 echo "生成 avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
@@ -195,27 +218,262 @@ class Realtimewarning_model extends CI_Model
         //缓存 指定 hour 实时指标全部信息
         // key = its_realtime_junction_list_{$cityId}_{$date}_{$hour}
 
+        $sql = "/*{\"router\":\"m\"}*/select * from $tableName where hour = ? and traj_count >= ? and updated_at >= ? and updated_at <= ?";
+
+        $arr = [$hour, 10, $date.' 00:00:00', $date.' 23:59:59'];
+
+        $result = $this->db->query($sql, $arr)->result_array();
+
+        $junctionListKey = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
+
+        $data = [];
+
+        $data['date'] = $date;
+        $data['city_id'] = $cityId;
+
+        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, $hour);
+
+        $junctionList = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
+
+        // 缓存 junctionSurvey 数据
+
+        $data = $junctionList['dataList'] ?? [];
+
         $result = [];
-        $offset = 0;
-        $value = 100;
 
-        while (true) {
-            $data = $this->db->select('*')
-                ->from($tableName)
-                ->where('hour', $hour)
-                ->where('updated_at >=', $date . ' 00:00:00')
-                ->where('updated_at <=', $date . ' 23:59:59')
-                ->limit($value, $offset)
-                ->get()->result_array();
+        $result['junction_total']   = count($data);
+        $result['alarm_total']      = 0;
+        $result['congestion_total'] = 0;
 
-            if(empty($data)) {
-                break;
-            }
-            $offset+=100;
-            $result = array_merge($result, $data);
+        foreach ($data as $datum) {
+            $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
         }
 
-        $junctionListKey = "its_realtime_junction_list_{$cityId}_{$date}_{$hour}";
-        $this->redis_model->setEx($junctionListKey, json_encode($result), 3 * 60);
+        $junctionSurvey = $result;
+
+
+        $junctionSurveyKey = "its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
+
+        $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
+        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
+
+        $redisKey = "its_realtime_lasthour_$cityId";
+        $this->redis_model->setEx($redisKey, $hour, 24*3600);
     }
+
+    //================以下方法全部为数据处理方法=====================//
+
+    /**
+     * 处理从数据库中取出的原始数据并返回
+     *
+     * @param $cityId
+     * @param $result
+     * @param $realTimeAlarmsInfo
+     * @return array
+     */
+    private function getJunctionListResult($cityId, $result, $realTimeAlarmsInfo)
+    {
+        //获取全部路口 ID
+        $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
+
+        //获取路口信息的自定义返回格式
+        $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0, ['key' => 'logic_junction_id', 'value' => ['name', 'lng', 'lat']]);
+
+        //获取需要报警的全部路口ID
+        $ids = implode(',', array_column($realTimeAlarmsInfo, 'logic_junction_id'));
+
+        //获取需要报警的全部路口的全部方向的信息
+        $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+
+        //数组初步处理，去除无用数据
+        $result = array_map(function ($item) use ($flowsInfo, $realTimeAlarmsInfo) {
+            return [
+                'logic_junction_id' => $item['logic_junction_id'],
+                'quota' => $this->getRawQuotaInfo($item),
+                'alarm_info' => $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo),
+            ];
+        }, $result);
+
+        //数组按照 logic_junction_id 进行合并
+        $temp = [];
+        foreach($result as $item) {
+            $temp[$item['logic_junction_id']] = isset($temp[$item['logic_junction_id']]) ?
+                $this->mergeFlowInfo($temp[$item['logic_junction_id']], $item) :
+                $item;
+        };
+
+        //处理数据内容格式
+        $temp = array_map(function ($item) use ($junctionsInfo) {
+            return [
+                'jid' => $item['logic_junction_id'],
+                'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
+                'lng' => $junctionsInfo[$item['logic_junction_id']]['lng'] ?? '',
+                'lat' => $junctionsInfo[$item['logic_junction_id']]['lat'] ?? '',
+                'quota' => ($quota = $this->getFinalQuotaInfo($item)),
+                'alarm' => $this->getFinalAlarmInfo($item),
+                'status' => $this->getJunctionStatus($quota),
+            ];
+        }, $temp);
+
+        $lngs = array_filter(array_column($temp, 'lng'));
+        $lats = array_filter(array_column($temp, 'lat'));
+
+        $center['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
+        $center['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
+
+        return [
+            'dataList' => array_values($temp),
+            'center' => $center
+        ];
+    }
+
+    /**
+     * 获取实时指标表中的报警信息
+     *
+     * @param $data
+     * @param $hour
+     * @return array
+     */
+    private function getRealTimeAlarmsInfo($data, $hour)
+    {
+        // 获取最近时间
+        $lastTime = date('Y-m-d') . ' ' . $hour;
+        $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
+
+        $sql = '/*{"router":"m"}*/select type, logic_junction_id, logic_flow_id, start_time, last_time from real_time_alarm where 
+            city_id = ? and date = ? and last_time >= ? and last_time <= ? order by type asc, (last_time - start_time) desc';
+
+        $arr = [$data['city_id'], $data['date'], $lastTime, $cycleTime];
+
+        $realTimeAlarmsInfo = $this->db->query($sql, $arr)->result_array();
+
+        $result = [];
+
+        foreach ($realTimeAlarmsInfo as $item) {
+            $result[$item['logic_flow_id'].$item['type']] = $item;
+        }
+
+        return $result;
+    }
+
+    /**
+     * 获取原始指标信息
+     *
+     * @param $item
+     * @return array
+     */
+    private function getRawQuotaInfo($item)
+    {
+        return [
+            'stop_delay_weight' => $item['stop_delay'] * $item['traj_count'],
+            'stop_time_cycle' => $item['stop_time_cycle'],
+            'traj_count' => $item['traj_count']
+        ];
+    }
+
+    /**
+     * 获取最终指标信息
+     *
+     * @param $item
+     * @return array
+     */
+    private function getFinalQuotaInfo($item)
+    {
+        //实时指标配置文件
+        $realTimeQuota = $this->config->item('real_time_quota');
+
+        return [
+            'stop_delay' => [
+                'name' => '平均延误',
+                'value' => $realTimeQuota['stop_delay']['round']($item['quota']['stop_delay_weight'] / $item['quota']['traj_count']),
+                'unit' => $realTimeQuota['stop_delay']['unit'],
+            ],
+            'stop_time_cycle' => [
+                'name' => '最大停车次数',
+                'value' => $realTimeQuota['stop_time_cycle']['round']($item['quota']['stop_time_cycle']),
+                'unit' => $realTimeQuota['stop_time_cycle']['unit'],
+            ]
+        ];
+    }
+
+    /**
+     * 获取原始报警信息
+     *
+     * @param $item
+     * @param $city_id
+     * @param $flowsInfo
+     * @return array|string
+     */
+    private function getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo)
+    {
+        $alarmCategory = $this->config->item('alarm_category');
+
+        $result = [];
+
+        if(isset($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']])) {
+            foreach ($alarmCategory as $key => $value) {
+                if(array_key_exists($item['logic_flow_id'].$key, $realTimeAlarmsInfo)) {
+                    $result[] = $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] .
+                        '-' . $value['name'];
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * 获取最终报警信息
+     *
+     * @param $item
+     * @return array
+     */
+    private function getFinalAlarmInfo($item)
+    {
+        return [
+            'is' => (int)!empty($item['alarm_info']),
+            'comment' => $item['alarm_info']
+        ];
+    }
+
+    /**
+     * 获取当前路口的状态
+     *
+     * @param $item
+     * @return array
+     */
+    private function getJunctionStatus($quota)
+    {
+        $junctionStatus = $this->config->item('junction_status');
+
+        $junctionStatusFormula = $this->config->item('junction_status_formula');
+
+        return $junctionStatus[$junctionStatusFormula($quota['stop_delay']['value'])];
+    }
+
+    /**
+     * 数据处理，多个 flow 记录合并到其对应 junction
+     *
+     * @param $target
+     * @param $item
+     * @return mixed
+     */
+    private function mergeFlowInfo($target, $item)
+    {
+        //合并属性 停车延误加权求和，停车时间求最大，权值求和
+        $target['quota']['stop_delay_weight'] += $item['quota']['stop_delay_weight'];
+        $target['quota']['stop_time_cycle']   = max($target['quota']['stop_time_cycle'], $item['quota']['stop_time_cycle']);
+        $target['quota']['traj_count']        += $item['quota']['traj_count'];
+
+        if(isset($target['alarm_info'])) {
+            //合并报警信息
+            $target['alarm_info'] = array_merge($target['alarm_info'], $item['alarm_info']) ?? [];
+        }
+
+        return $target;
+    }
+
+    //================以上方法全部为数据处理方法=====================//
+
 }

@@ -23,7 +23,7 @@ class Arterialjunction extends MY_Controller
     {
         $params = $this->input->post();
         $validate = Validate::make($params, [
-            'task_id' => 'min:1',
+            //'task_id' => 'min:1',
             'city_id' => 'min:1',
         ]);
         if (!$validate['status']) {
@@ -34,7 +34,7 @@ class Arterialjunction extends MY_Controller
 
         try{
             $data = $this->arterialjunction_model->getAllJunctions([
-                'task_id' => intval($params['task_id']),
+                'task_id' => !empty($params['task_id']) ? intval($params['task_id']) : "",
                 'city_id' => intval($params['city_id']),
             ]);
         }catch (\Exception $e){
@@ -62,11 +62,11 @@ class Arterialjunction extends MY_Controller
         }
 
         $qJson = json_decode($params['q'],true);
-        if(empty($qJson["task_id"]) || !($qJson["task_id"]>0)){
+        /*if(empty($qJson["task_id"]) || !($qJson["task_id"]>0)){
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The task_id cannot be empty and must be interger.';
             return;
-        }
+        }*/
         if(empty($qJson["city_id"]) || !($qJson["city_id"]>0)){
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The city_id cannot be empty and must be interger.';

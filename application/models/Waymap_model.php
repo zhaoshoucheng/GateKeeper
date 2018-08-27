@@ -267,15 +267,11 @@ class Waymap_model extends CI_Model
             return [];
         }
 
-        $maxdate = max($dates);
-        $maxdate = date('Y-m-d', strtotime($maxdate));
-
         $wdata = [
-            'date'  => $maxdate,
+            'date'  => implode(",",$dates),
             'token' => $this->token,
             'user_id' => $this->userid,
         ];
-
         $map_version = [];
         try {
             $map_version = httpPOST($this->config->item('waymap_interface') . '/signal-map/map/getDateVersion', $wdata);
@@ -286,7 +282,9 @@ class Waymap_model extends CI_Model
         }
         if (!empty($map_version['data'])) {
             foreach ($map_version['data'] as $k=>$v) {
-                $map_version = $v;
+                if(!empty($v)){
+                    $map_version = $v;
+                }
             }
         }
         return $map_version;
@@ -466,9 +464,10 @@ class Waymap_model extends CI_Model
 
             $getQuery = [
                 'logic_junction_ids' => $junctionIds,
+                'user_id' => $this->config->item('waymap_userid'),
+                'token' => $this->config->item('waymap_token'),
             ];
-            $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase?token='
-                . $this->config->item('waymap_token') . '&userid=' . $this->config->item('waymap_userid');
+            $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
 
             $res = httpPOST($url, $getQuery);
 

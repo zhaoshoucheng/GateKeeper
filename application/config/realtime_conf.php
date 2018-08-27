@@ -4,6 +4,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 // 指标
 $config['real_time_quota'] = [
+    'stop_delay' => [
+        'name'      => '停车延误',
+        'unit'      => '秒',
+        'round'     => function($val) { return round($val, 2);},
+    ],
     'stop_time_cycle' => [
         'name'      => '停车次数', // 指标名称
         'unit'      => '次',        // 指标单位
@@ -18,11 +23,6 @@ $config['real_time_quota'] = [
         'name'      => '排队长度',
         'unit'      => '米',
         'round'     => function($val) { return round($val);},
-    ],
-    'stop_delay' => [
-        'name'      => '停车延误',
-        'unit'      => '秒',
-        'round'     => function($val) { return round($val, 2);},
     ],
     'stop_rate' => [
         'name'      => '失调指标',
