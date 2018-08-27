@@ -22,7 +22,6 @@ class Junctionreport_model extends CI_Model
 
         $this->load->model('waymap_model');
         $this->load->config('report_conf');
-        $this->load->library('TwoDimensionCollection');
 
         $this->quotas = $this->config->item('quotas');
     }
@@ -64,7 +63,9 @@ class Junctionreport_model extends CI_Model
 
         $junctionInfo = $this->getJunctionInfo($data);
 
-        $pretreatResultData = $this->getPretreatResultData($data, $result, $junctionInfo);
+        $hours = $this->getHours($data);
+
+        $pretreatResultData = $this->getPretreatResultData($data, $result, $junctionInfo, $hours);
 
         return [
             'info' => [
@@ -153,7 +154,7 @@ class Junctionreport_model extends CI_Model
      * @param $junctionInfo
      * @return array
      */
-    private function getPretreatResultData($data, &$result, $junctionInfo)
+    private function getPretreatResultData($data, &$result, $junctionInfo, $hours)
     {
         $key = $data['quota_key'];
         $flowsName = $junctionInfo['flows'];
@@ -186,6 +187,13 @@ class Junctionreport_model extends CI_Model
             $avg[$id] = array_sum($dataByFlow[$id]) / count($dataByFlow[$id]);
         }
         $maxFlowIds = array_keys($avg, max($avg));
+
+        //如果某个时间点某个方向没有数据，则设为 null
+        foreach ($dataByFlow as $flowId => $flow) {
+            foreach ($hours as $hour) {
+                $dataByFlow[$flowsId] = $dataByFlow[$flowsId] ?? null;
+            }
+        }
 
         //格式化二维数据表 - 生成 两类数据 （flow_info | base）
         $base = $flow_info = [];
@@ -237,7 +245,6 @@ class Junctionreport_model extends CI_Model
                 $base_time_box = [$maxFlowId => compact('start_time', 'end_time', 'length')];
             }
         }
-
 
         $summary = $this->quotas[$key]['summery']([
             $junctionInfo['junction']['name'] ?? '',
