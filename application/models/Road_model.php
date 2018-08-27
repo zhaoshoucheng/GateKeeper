@@ -236,16 +236,16 @@ class Road_model extends CI_Model
             'lng' => 0,
             'lat' => 0,
         ];
-        foreach ($res['junctions_info'] as $k=>$v) {
-            $countData['lng'] += $v['lng'];
-            $countData['lat'] += $v['lat'];
-            $result['junctions_info'][$k] = [
-                'logic_junction_id' => $k,
-                'junction_name'     => $v['name'],
-                'lng'               => $v['lng'],
-                'lat'               => $v['lat'],
-                'node_ids'          => $v['node_ids'],
+        foreach ($junctionIds as $v) {
+            $result['junctions_info'][$v] = [
+                'logic_junction_id' => $v,
+                'junction_name'     => $res['junctions_info'][$v]['name'] ?? '未知路口',
+                'lng'               => $res['junctions_info'][$v]['lng'] ?? 0,
+                'lat'               => $res['junctions_info'][$v]['lat'] ?? 0,
+                'node_ids'          => $res['junctions_info'][$v]['node_ids'] ?? [],
             ];
+            $countData['lng'] += $res['junctions_info'][$v]['lng'] ?? 0;
+            $countData['lat'] += $res['junctions_info'][$v]['lat'] ?? 0;
         }
 
         if (empty($result)) {
