@@ -235,7 +235,34 @@ class CI_Exceptions {
 	 */
 	public function show_php_error($severity, $message, $filepath, $line)
 	{
-		$templates_path = config_item('error_views_path');
+        if (ob_get_level() > $this->ob_level + 1)
+        {
+            ob_end_flush();
+        }
+	    //使用json格式标准输出,替换原来输出方式
+        $backtrace = [];
+        foreach (debug_backtrace() as $error){
+            if (isset($error['file']) && strpos($error['file'], realpath(BASEPATH)) !== 0){
+                $backtrace[] = array(
+                    "File"=> $error['file'],
+                    "Line"=> $error['line'],
+                    "Function"=> $error['function'],
+                );
+            }
+        }
+        $output = array(
+            'errno' => ERR_UNKNOWN,
+            'errmsg' => '未知错误',
+            'data' => "",
+            'Message' => $message,
+            'Filename' => $filepath,
+            'Line' => $line,
+            'Backtrace' => $backtrace,
+        );
+        header("Content-Type:application/json;charset=UTF-8");
+        echo json_encode($output);
+
+		/*$templates_path = config_item('error_views_path');
 		if (empty($templates_path))
 		{
 			$templates_path = VIEWPATH.'errors'.DIRECTORY_SEPARATOR;
@@ -268,7 +295,7 @@ class CI_Exceptions {
 		include($templates_path.$template.'.php');
 		$buffer = ob_get_contents();
 		ob_end_clean();
-		echo $buffer;
+		echo $buffer;*/
 	}
 
 }

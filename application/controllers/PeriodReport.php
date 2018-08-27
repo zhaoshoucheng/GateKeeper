@@ -344,7 +344,7 @@ class PeriodReport extends MY_Controller
                 'city_id'     => 'nullunable',
                 'type'      => 'nullunable',
                 'time_type'      => 'nullunable',
-                'top'      => 'nullunable',
+                'top_num'      => 'nullunable',
                 'quota_key' => 'nullunable'
             ]
         );
@@ -357,7 +357,7 @@ class PeriodReport extends MY_Controller
         $cityId = $params['city_id'];
         $type = $params['type'];
         $timeType = $params['time_type'];
-        $topNum = $params['top'];
+        $topNum = $params['top_num'];
         $quotaKey = $params['quota_key'];
         $quotaInfo = array(
             'queue_length'=>array(
@@ -409,11 +409,13 @@ class PeriodReport extends MY_Controller
             $evaluate = new EvaluateQuota();
 
             if($quotaKey == 'stop_delay'){
-                $datatmp = $evaluate->getJunctionStopDelayAve($datatmp);
-                $predatatmp = $evaluate->getJunctionStopDelayAve($predatatmp);
+                $dayWorst = $evaluate->getJunctionStopDelayAve($datatmp);
+                $datatmp = $evaluate->getJunctionStopDelayAveTable($datatmp);
+                $predatatmp = $evaluate->getJunctionStopDelayAveTable($predatatmp);
             }else{
-                $datatmp = $evaluate->getJunctionQueueLengthAve($datatmp);
-                $predatatmp = $evaluate->getJunctionQueueLengthAve($predatatmp);
+                $dayWorst = $evaluate->getJunctionQueueLengthAve($datatmp);
+                $datatmp = $evaluate->getJunctionQueueLengthAveTable($datatmp);
+                $predatatmp = $evaluate->getJunctionQueueLengthAveTable($predatatmp);
             }
 
             usort($datatmp, array("PeriodReport","quotasort"));
@@ -465,7 +467,6 @@ class PeriodReport extends MY_Controller
 
         $junctionInfos = $this->waymap_model->getJunctionInfo(implode(",",$needNameJunctions),['key'=>'logic_junction_id','value'=>['name']]);
 
-        $dayWorstQuota = $this->period_model->getJunctionDayData($cityId,$finalData['junction_list'][0]['logic_junction_id'],$dateList,$quotaKey.' desc');
 
         $summary = "其中".$junctionInfos[$finalData['junction_list'][0]['logic_junction_id']]['name'];
         if($type  == self::WEEK){
@@ -475,11 +476,22 @@ class PeriodReport extends MY_Controller
         }
         $timePeriod = "";
         if($timeType == self::ALLDAY){
-
+            $dayWorstQuota = $this->period_model->getJunctionDayData($cityId,$finalData['junction_list'][0]['logic_junction_id'],$dateList,$quotaKey.' desc');
         }elseif ($timeType == self::MORNING){
             $timePeriod = "早高峰";
+            $dayWorstQuota = [];
+            $dayWorstQuota[] = [
+                'date'=>$dayWorst[$finalData['junction_list'][0]['logic_junction_id']][0][0],
+                $quotaKey => $dayWorst[$finalData['junction_list'][0]['logic_junction_id']][0][1]
+            ];
         }else{
             $timePeriod = "晚高峰";
+            $dayWorstQuota = [];
+            $dayWorstQuota[] = [
+                'date'=>$dayWorst[$finalData['junction_list'][0]['logic_junction_id']][0][0],
+                $quotaKey => $dayWorst[$finalData['junction_list'][0]['logic_junction_id']][0][1]
+            ];
+
         }
 
         $summary .= "本".$period.$timePeriod.$quotaInfo[$quotaKey]['name']."最大。";

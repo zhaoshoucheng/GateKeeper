@@ -32,6 +32,14 @@ class Welcome extends CI_Controller {
 		$this->load->view('welcome_message');
 	}
 
+	public function test(){
+	    $a[1];
+        $qArr = "1122";
+        $res = ["awae","dadad"];
+        com_log_warning('_itstool_waymap_getConnectionAdjJunctions_error', 0, "adasdsad", compact("qArr","res"));
+        exit;
+    }
+
     public function operateLog()
     {
         //追加相应信息
