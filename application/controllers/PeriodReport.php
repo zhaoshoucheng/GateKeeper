@@ -344,7 +344,7 @@ class PeriodReport extends MY_Controller
                 'city_id'     => 'nullunable',
                 'type'      => 'nullunable',
                 'time_type'      => 'nullunable',
-                'top'      => 'nullunable',
+                'top_num'      => 'nullunable',
                 'quota_key' => 'nullunable'
             ]
         );
@@ -357,15 +357,15 @@ class PeriodReport extends MY_Controller
         $cityId = $params['city_id'];
         $type = $params['type'];
         $timeType = $params['time_type'];
-        $topNum = $params['top'];
+        $topNum = $params['top_num'];
         $quotaKey = $params['quota_key'];
         $quotaInfo = array(
             'queue_length'=>array(
-                'name' => '排队长度',
+                'name' => '平均排队长度',
                 'round' => 0
             ),
             'stop_delay'=>array(
-                'name' => '延误时间',
+                'name' => '平均延误时间',
                 'round' => 2
             )
         );
@@ -409,11 +409,13 @@ class PeriodReport extends MY_Controller
             $evaluate = new EvaluateQuota();
 
             if($quotaKey == 'stop_delay'){
-                $datatmp = $evaluate->getJunctionStopDelayAve($datatmp);
-                $predatatmp = $evaluate->getJunctionStopDelayAve($predatatmp);
+                $dayWorst = $evaluate->getJunctionStopDelayAve($datatmp);
+                $datatmp = $evaluate->getJunctionStopDelayAveTable($datatmp);
+                $predatatmp = $evaluate->getJunctionStopDelayAveTable($predatatmp);
             }else{
-                $datatmp = $evaluate->getJunctionQueueLengthAve($datatmp);
-                $predatatmp = $evaluate->getJunctionQueueLengthAve($predatatmp);
+                $dayWorst = $evaluate->getJunctionQueueLengthAve($datatmp);
+                $datatmp = $evaluate->getJunctionQueueLengthAveTable($datatmp);
+                $predatatmp = $evaluate->getJunctionQueueLengthAveTable($predatatmp);
             }
 
             usort($datatmp, array("PeriodReport","quotasort"));
@@ -465,7 +467,6 @@ class PeriodReport extends MY_Controller
 
         $junctionInfos = $this->waymap_model->getJunctionInfo(implode(",",$needNameJunctions),['key'=>'logic_junction_id','value'=>['name']]);
 
-        $dayWorstQuota = $this->period_model->getJunctionDayData($cityId,$finalData['junction_list'][0]['logic_junction_id'],$dateList,$quotaKey.' desc');
 
         $summary = "其中".$junctionInfos[$finalData['junction_list'][0]['logic_junction_id']]['name'];
         if($type  == self::WEEK){
@@ -475,23 +476,40 @@ class PeriodReport extends MY_Controller
         }
         $timePeriod = "";
         if($timeType == self::ALLDAY){
-
+            $dayWorstQuota = $this->period_model->getJunctionDayData($cityId,$finalData['junction_list'][0]['logic_junction_id'],$dateList,$quotaKey.' desc');
         }elseif ($timeType == self::MORNING){
             $timePeriod = "早高峰";
+            $dayWorstQuota = [];
+            $dayWorstQuota[] = [
+                'date'=>$dayWorst[$finalData['junction_list'][0]['logic_junction_id']][0][0],
+                $quotaKey => $dayWorst[$finalData['junction_list'][0]['logic_junction_id']][0][1]
+            ];
         }else{
             $timePeriod = "晚高峰";
+            $dayWorstQuota = [];
+            $dayWorstQuota[] = [
+                'date'=>$dayWorst[$finalData['junction_list'][0]['logic_junction_id']][0][0],
+                $quotaKey => $dayWorst[$finalData['junction_list'][0]['logic_junction_id']][0][1]
+            ];
+
         }
 
         $summary .= "本".$period.$timePeriod.$quotaInfo[$quotaKey]['name']."最大。";
         $summary .= "在".$dayWorstQuota[0]['date'].$quotaInfo[$quotaKey]['name']."最大,达到".round($dayWorstQuota[0][$quotaKey],2)."。";
 
         if($maxMoMJunction['d']>0){
-            $summary .= "环比上".$period.$junctionInfos[$maxMoMJunction['logic_junction_id']]['name']."恶化情况最严重,由上个".$period.$maxMoMJunction['last_rank']."名,提升至本".$period.$maxMoMJunction['rank']."名,";
+            $summary .= "环比上".$period.$junctionInfos[$maxMoMJunction['logic_junction_id']]['name']."恶化情况最严重,由上个".$period.$maxMoMJunction['last_rank']."名,变化至本".$period.$maxMoMJunction['rank']."名,";
             $summary .= "下个".$period."需要重点关注延误变大原因";
         }
 
         $finalData['summary'] = $summary;
         $finalData['junction_list'] = array_slice($finalData['junction_list'],0,$topNum);
+        $finalData['quota_name']=$quotaInfo[$quotaKey]['name'];
+        if($timeType == self::ALLDAY){
+            $finalData['quota_desc']="本".$period.$quotaInfo[$quotaKey]['name']."最大的".$topNum."个路口展示";
+        }else{
+            $finalData['quota_desc']="延误最大top".$topNum.",排队长度最大top".$topNum."路口数据与上".$period."排名进行对比,并分析趋势";
+        }
 
         //补齐路口名称
         foreach ($finalData['junction_list'] as $fjk => $fjv){
@@ -499,8 +517,6 @@ class PeriodReport extends MY_Controller
         }
 
         return $this->response($finalData);
-
-
     }
 
 

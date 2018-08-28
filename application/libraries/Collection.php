@@ -24,7 +24,7 @@ class Collection
      */
     public function get($key = null)
     {
-        return $this->getBy($key);
+        return $this->getByDot($key);
     }
 
     /**
@@ -36,7 +36,7 @@ class Collection
      */
     public function set($key, $value)
     {
-        return $this->setBy($key, $value);
+        return $this->setByDot($key, $value);
     }
 
     /**
@@ -47,7 +47,7 @@ class Collection
      */
     public function has($key)
     {
-        return $this->hasBy($key);
+        return $this->hasByDot($key);
     }
 
     /**
@@ -85,10 +85,10 @@ class Collection
 
     public function except($keys)
     {
-        return $this->exceptBy($keys);
+        return $this->exceptByArray($keys);
     }
 
-    public function first($callback = null, $default)
+    public function first($callback = null, $default = null)
     {
         return $this->firstOn($callback, $default);
     }
@@ -101,5 +101,25 @@ class Collection
     public function forget($key)
     {
         return $this->forgetByDot($key);
+    }
+
+    public function last($callback = null, $default = null)
+    {
+        return $this->lastOn($callback, $default);
+    }
+
+    public function prepend($value, $key = null)
+    {
+        return $this->prependOn($value, $key);
+    }
+
+    public function pull($key)
+    {
+        return $this->pullOn($key);
+    }
+
+    public function where($key, $compare = null, $value = null)
+    {
+        return $this->whereBy($key, $compare, $value);
     }
 }

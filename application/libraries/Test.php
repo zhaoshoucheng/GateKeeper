@@ -15,4 +15,4 @@ $collection = Collection::make([
    ]
 ]);
 
-dd($collection->forget('a.b.c.d'));
+var_dump($collection->last());

@@ -16,21 +16,45 @@ class JunctionQuota implements EvaluateQuotaFactory{
     /**
      * 延误时间表
      */
-    public function getStopDelayAve()
+    public function getStopDelayAveTable()
     {
         $quotaInfo = new JunctionQuotaInfo();
         $quotaInfo->setStopDelay($this->_loadData,'logic_junction_id');
-        $data = $quotaInfo->getStopDelay('hour','traj_count',false);
-        $data = $quotaInfo->getAveQuotaData($data);
-        return $data;
+        $data = $quotaInfo->getStopDelay('date','traj_count',false);
+        return $quotaInfo->getAveQuotaData($data);
+
     }
 
-    public function getQueueLengthAve()
+    /**
+     * 排队长度表
+     */
+    public function getQueueLengthAveTable()
     {
         $quotaInfo = new JunctionQuotaInfo();
         $quotaInfo->setQueueLength($this->_loadData,'logic_junction_id');
-        $data = $quotaInfo->getQueueLength('hour','traj_count',false);
-        $data = $quotaInfo->getAveQuotaData($data);
+        $data = $quotaInfo->getQueueLength('date','traj_count',false);
+        return $quotaInfo->getAveQuotaData($data);
+
+    }
+
+    public function getStopDelayAve($trans2Chart=true)
+    {
+        $quotaInfo = new JunctionQuotaInfo();
+        $quotaInfo->setStopDelay($this->_loadData,'logic_junction_id');
+        $data = $quotaInfo->getStopDelay('date','traj_count',false);
+        if($trans2Chart){
+            return $quotaInfo->formatQuotaChartData($data);
+        }
+        return $data;
+    }
+    public function getQueueLengthAve($trans2Chart=true)
+    {
+        $quotaInfo = new JunctionQuotaInfo();
+        $quotaInfo->setQueueLength($this->_loadData,'logic_junction_id');
+        $data = $quotaInfo->getQueueLength('date','traj_count',false);
+        if($trans2Chart){
+            return $quotaInfo->formatQuotaChartData($data);
+        }
         return $data;
     }
 
