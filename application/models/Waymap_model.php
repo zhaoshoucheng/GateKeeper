@@ -443,7 +443,7 @@ class Waymap_model extends CI_Model
             $url = $this->config->item('waymap_interface') . '/signal-map/connect/adj_junctions';
             $url = $url."?".http_build_query($getQuery);
 
-            $res = httpPOST($url, $qArr, 2000, 'json');
+            $res = httpPOST($url, $qArr, 5000, 'json');
             $retArr = json_decode($res, true);
             if (isset($retArr['errorCode'])
                 && $retArr['errorCode'] == 0

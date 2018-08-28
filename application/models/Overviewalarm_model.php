@@ -192,33 +192,37 @@ class Overviewalarm_model extends CI_Model
         if (empty($data)) {
             return [];
         }
-
-        if (!$this->isTableExisted($this->tb)) {
-            return [];
-        }
-
-        // 获取最近时间
-        $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
-        $lastTime = date('Y-m-d') . ' ' . $lastHour;
-        $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
-
         $result = [];
+        // 先去redis查数据，如果没有则查表
+        $alarmRedisKey = 'its_realtime_alarm_' . $data['city_id'];
 
-        $sql = '/*{"router":"m"}*/';
-        $sql .= 'select type, logic_junction_id, logic_flow_id, start_time, last_time';
-        $sql .= ' from ' . $this->tb;
-        $sql .= ' where city_id = ?  and date = ?';
-        $sql .= ' and last_time >= ? and last_time <= ?';
-        $sql .= ' order by type asc, (last_time - start_time) desc';
-        $res = $this->db->query($sql, [
-            $data['city_id'],
-            $data['date'],
-            $lastTime,
-            $cycleTime
-        ])->result_array();
-
+        $res = $this->redis_model->getData($alarmRedisKey);
         if (empty($res)) {
-            return [];
+            if (!$this->isTableExisted($this->tb)) {
+                return [];
+            }
+
+            // 获取最近时间
+            $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
+            $lastTime = date('Y-m-d') . ' ' . $lastHour;
+            $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
+
+            $sql = '/*{"router":"m"}*/';
+            $sql .= 'select type, logic_junction_id, logic_flow_id, start_time, last_time';
+            $sql .= ' from ' . $this->tb;
+            $sql .= ' where city_id = ?  and date = ?';
+            $sql .= ' and last_time >= ? and last_time <= ?';
+            $sql .= ' order by type asc, (last_time - start_time) desc';
+            $res = $this->db->query($sql, [
+                $data['city_id'],
+                $data['date'],
+                $lastTime,
+                $cycleTime
+            ])->result_array();
+
+            if (empty($res)) {
+                return [];
+            }
         }
 
         $result = $this->formatRealTimeAlarmListData($res);
