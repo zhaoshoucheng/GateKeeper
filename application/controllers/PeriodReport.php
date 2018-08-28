@@ -361,11 +361,11 @@ class PeriodReport extends MY_Controller
         $quotaKey = $params['quota_key'];
         $quotaInfo = array(
             'queue_length'=>array(
-                'name' => '排队长度',
+                'name' => '平均排队长度',
                 'round' => 0
             ),
             'stop_delay'=>array(
-                'name' => '延误时间',
+                'name' => '平均延误时间',
                 'round' => 2
             )
         );
@@ -504,6 +504,12 @@ class PeriodReport extends MY_Controller
 
         $finalData['summary'] = $summary;
         $finalData['junction_list'] = array_slice($finalData['junction_list'],0,$topNum);
+        $finalData['quota_name']=$quotaInfo[$quotaKey]['name'];
+        if($timeType == self::ALLDAY){
+            $finalData['quota_desc']="本".$period.$quotaInfo[$quotaKey]['name']."最大的".$topNum."个路口展示";
+        }else{
+            $finalData['quota_desc']="延误最大top".$topNum.",排队长度最大top".$topNum."路口数据与上".$period."排名进行对比,并分析趋势";
+        }
 
         //补齐路口名称
         foreach ($finalData['junction_list'] as $fjk => $fjv){
@@ -511,8 +517,6 @@ class PeriodReport extends MY_Controller
         }
 
         return $this->response($finalData);
-
-
     }
 
 
