@@ -11,5 +11,4 @@ $array = [
     ['hour' => '11:30', 'flow' => 'aaa', 'value' => 9],
     ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16],
 ];
-
-dd(Collection::make(['a' => ['b' => ['c' => 1]]])->dot());
+echo Collection::make(['a' => 1, 'b' => ['c' => 2]])->forget('b.c');
