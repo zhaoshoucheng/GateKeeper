@@ -16,81 +16,67 @@ class Collection
 {
     use CollectionPrivateMethod;
 
-    /**
-     * 获取指定键值
-     *
-     * @param null $key
-     * @return null
-     */
-    public function get($key = null, $default = null)
+    public function __toString()
     {
-        return $this->getByDot($key, $default);
+        return dump($this->toArray());
     }
 
-    /**
-     * 设置键值
-     *
-     * @param $key
-     * @param $value
-     * @return CollectionPrivateMethod
-     */
-    public function set($key, $value)
-    {
-        return $this->setByDot($key, $value);
-    }
-
-    /**
-     * 判断数组中是否存在指定键
-     *
-     * @param $key
-     * @return bool
-     */
-    public function has($key)
-    {
-        return $this->hasByDot($key);
-    }
-
-    /**
-     * 向数组中添加元素
-     *
-     * @param $key
-     * @param $value
-     * @return $this
-     */
     public function add($key, $value)
     {
         if(!$this->has($key)) $this->set($key, $value);
         return $this;
     }
 
-    /**
-     * 二维数组合并为一维数组
-     *
-     * @return CollectionPrivateMethod
-     */
+    public function all()
+    {
+        return $this->toArray();
+    }
+
+    public function avg($key = null, callable $callback = null)
+    {
+        return $callback == null ? $this->avgBy($key) : $callback($this->avgBy($key));
+    }
+
+    public function cancat($array)
+    {
+        return static::make($array)->each(function ($v) { $this->push($v); });
+    }
+
+    public function contains($param, $value = null)
+    {
+        return $this->containsBy($param, $value);
+    }
+
     public function collapse()
     {
         return $this->collapseTo();
     }
 
-    /**
-     * 获取数组的键值数组
-     *
-     * @return array
-     */
     public function divide()
     {
         return [$this->arrayKeys(), $this->arrayValues()];
     }
 
-    /**
-     * 将多维数组铺开到一维数组，使用 . 表示深度
-     *
-     * @return CollectionPrivateMethod
-     */
     public function dot()
     {
         return $this->dotTo();
+    }
+
+    public function decrement($key, $value = 1)
+    {
+        $this->set($key, $this->get($key, 0) - $value);
+    }
+
+    public function each($callback)
+    {
+        return $this->foreach($callback);
+    }
+
+    public function eachSpread($callback)
+    {
+        return $this->each(function ($v) use ($callback) {
+            return call_user_func_array($callback, $v);
+        });
     }
 
     public function except($keys)
@@ -110,12 +96,49 @@ class Collection
 
     public function forget($key)
     {
-        return $this->forgetByDot($key);
+        return $this->forgetBy($key);
+    }
+
+    public function forPage($offset, $limit)
+    {
+        return $this->arrayFilter(function ($k) use ($offset, $limit) {
+            return $k >= $offset && $k < $offset + $limit;
+        }, ARRAY_FILTER_USE_KEY);
+    }
+
+    public function get($key = null, $default = null)
+    {
+        return $this->getByDot($key, $default);
+    }
+
+    public function group($param, $callback = null, $preserveKeys = false)
+    {
+        return $this->groupBy($param, $callback, $preserveKeys);
+    }
+
+    public function has($key)
+    {
+        return $this->hasByDot($key);
+    }
+
+    public function increment($key, $value = 1)
+    {
+        $this->set($key, $this->get($key, 0) + $value);
     }
 
     public function last($callback = null, $default = null)
     {
         return $this->lastOn($callback, $default);
+    }
+
+    public function only($key)
+    {
+        return $this->onlyBy($key);
+    }
+
+    public function pluck($key)
+    {
+        return $this->pluckBy($key);
     }
 
     public function prepend($value, $key = null)
@@ -128,69 +151,79 @@ class Collection
         return $this->pullOn($key);
     }
 
+    public function set($key, $value)
+    {
+        return $this->setByDot($key, $value);
+    }
+
     public function where($key, $compare = null, $value = null)
     {
         return $this->whereBy($key, $compare, $value);
     }
 
-    public static function wrap($value)
+    public function changeKeyCase($case = CASE_LOWER)
     {
-        return is_array($value) ? $value : [$value];
+        return $this->arrayChangeKeyCase($case);
     }
 
-    public function all()
+    public function chunk($num, $preserveKey = false)
     {
-        return $this->toArray();
+        return $this->arrayChunk($num, $preserveKey);
     }
 
-    public function avg($key = null)
+    public function column($columnKey, $indexKey = null)
     {
-        return $this->avgBy($key);
-    }
-
-    public function chunk($num)
-    {
-        return $this->arrayChunk($num);
+        return $this->arrayColumn($columnKey, $indexKey);
     }
 
     public function combine($array)
     {
-        $array = $array instanceof static ? $array->toArray() : $array;
         return $this->arrayCombine($array);
     }
 
-    public function cancat($array)
+    public function countValues()
     {
-        $collect = $array instanceof static ? $array : static::make($array);
-        return $collect->each(function ($v) { $this->arrayPush($v); });
+        return $this->arrayCountValues();
     }
 
-    public function contains($param, $value = null)
+    public function diffAssoc($array, ...$_)
     {
-        return $this->containsBy($param, $value);
+        return $this->arrayDiffAssoc($array, ...$_);
     }
 
-    public function diff($array)
+    public function diffKey($array, ...$_)
     {
-        $array = $array instanceof static ? $array->toArray() : $array;
-        return $this->arrayDiff($array);
+        return $this->arrayDiffKey($array, ...$_);
     }
 
-    public function each($callback)
+    public function diffUassoc($array, ...$_)
     {
-        return $this->foreach($callback);
+        return $this->arrayDiffUassoc($array, ...$_);
     }
 
-    public function eachSpread($callback)
+    public function diffUkey($array, ...$_)
     {
-        return $this->each(function ($v) use ($callback) {
-            return call_user_func_array($callback, $v);
-        });
+        return $this->arrayDiffUkey($array, ...$_);
     }
 
-    public function filter($callback = null)
+    public function diff($array, ...$_)
     {
-        return $this->arrayFilter($callback);
+        return $this->arrayDiff($array, ...$_);
+    }
+
+    public function fillKeys($keys, $value)
+    {
+        return $this->arrayFillKeys($keys, $value);
+    }
+
+    public function fill($start_index, $num, $value)
+    {
+        return $this->arrayFill($start_index, $num, $value);
+    }
+
+    public function filter($callback = null, $flag = 0)
+    {
+        return $this->arrayFilter($callback, $flag);
     }
 
     public function flip()
@@ -198,30 +231,193 @@ class Collection
         return $this->arrayFlip();
     }
 
-    public function forPage($offset, $limit)
+    public function intersectAssoc($array, ...$_)
     {
-        return $this->arrayFilter(function ($k) use ($offset, $limit) {
-            return $k >= $offset && $k < $offset + $limit;
-        }, ARRAY_FILTER_USE_KEY);
+        return $this->arrayIntersectAssoc($array, ...$_);
     }
 
-    public function group($param, $callback = null, $preserveKeys = false)
+    public function intersectKey($array, ...$_)
     {
-        return $this->groupBy($param, $callback, $preserveKeys);
+        return $this->arrayIntersectKey($array, ...$_);
     }
 
-    public function increment($key, $value = 1)
+    public function intersectUassoc($array, $keyCompareFunc ,...$_)
     {
-        $this->set($key, $this->get($key, 0) + $value);
+        return $this->arrayIntersectUassoc($array, $keyCompareFunc ,...$_);
     }
 
-    public function decrement($key, $value = 1)
+    public function intersectUkey($array, $keyCompareFunc ,...$_)
     {
-        $this->set($key, $this->get($key, 0) - $value);
+        return $this->arrayIntersectUkey($array, $keyCompareFunc ,...$_);
     }
 
-    public function __toString()
+    public function intersect($array)
     {
-        return dump($this->toArray());
+        return $this->arrayIntersect($array);
+    }
+
+    public function keyExists($key)
+    {
+        return $this->arrayKeyExists($key);
+    }
+
+    public function keyFirst()
+    {
+        return $this->arrayKeyFirst();
+    }
+
+    public function keyLast()
+    {
+        return $this->arrayKeyLast();
+    }
+
+    public function keys($searchValue = null, $strict = false)
+    {
+        return $this->arrayKeys($searchValue, $strict);
+    }
+
+    public function map($callback, ...$_)
+    {
+        return $this->arrayMap($callback, ...$_);
+    }
+
+    public function mergeRecursive(...$_)
+    {
+        return $this->arrayMergeRecursive(...$_);
+    }
+
+    public function merge(...$_)
+    {
+        return $this->arrayMerge(...$_);
+    }
+
+    public function multisort($arraySortOrder = SORT_ASC, $arraySortFlags = SORT_REGULAR, ...$_)
+    {
+        return $this->arrayMultisort($arraySortOrder, $arraySortFlags, ...$_);
+    }
+
+    public function pad($size, $value)
+    {
+        return $this->arrayPad($size, $value);
+    }
+
+    public function pop()
+    {
+        return $this->arrayPop();
+    }
+
+    public function product()
+    {
+        return $this->arrayProduct();
+    }
+
+    public function push($value, ...$_)
+    {
+        return $this->arrayPush($value, ...$_);
+    }
+
+    public function rand($num = 1)
+    {
+        return $this->arrayRand($num);
+    }
+
+    public function reduce($callback, $initial = null)
+    {
+        return $this->arrayReduce($callback, $initial);
+    }
+
+    public function replaceRecursive($array, ...$_)
+    {
+        return $this->arrayReplaceRecursive($array, ...$_);
+    }
+
+    public function replace($array, ...$_)
+    {
+        return $this->arrayReplace($array, ...$_);
+    }
+
+    public function reverse($preserveKeys = false)
+    {
+        return $this->arrayReverse($preserveKeys);
+    }
+
+    public function search($needle, $strict = false)
+    {
+        return $this->arraySearch($needle, $strict);
+    }
+
+    public function shift()
+    {
+        return $this->arrayShift();
+    }
+
+    public function slice($offset, $length = null, $preserveKeys = false)
+    {
+        return $this->arraySlice($offset, $length, $preserveKeys);
+    }
+
+    public function splice($offset, $length = null, $replacement = [])
+    {
+        return $this->arraySplice($offset, $length, $replacement);
+    }
+
+    public function sum()
+    {
+        return $this->arraySum();
+    }
+
+    public function udiffAssoc($array, $valueCompareFunc, ...$_)
+    {
+        return $this->arrayUdiffAssoc($array, $valueCompareFunc, ...$_);
+    }
+
+    public function udiffUAssoc($array, $valueCompareFunc, $keyCompareFunc, ...$_)
+    {
+        return $this->arrayUdiffUAssoc($array, $valueCompareFunc, $keyCompareFunc, ...$_);
+    }
+
+    public function udiff($array, $valueCompareFunc, ...$_)
+    {
+        return $this->arrayUdiff($array, $valueCompareFunc, ...$_);
+    }
+
+    public function uintersectAssoc($array, $valueCompareFunc, ...$_)
+    {
+        return $this->arrayUintersectAssoc($array, $valueCompareFunc, ...$_);
+    }
+
+    public function uintersectUassoc($array, $valueCompareFunc, $keyCompareFunc, ...$_)
+    {
+        return $this->arrayUintersectUassoc($array, $valueCompareFunc, $keyCompareFunc, ...$_);
+    }
+
+    public function uintersect($array, $valueCompareFunc, ...$_)
+    {
+        return $this->arrayUintersect($array, $valueCompareFunc, ...$_);
+    }
+
+    public function unique($sortFlags = SORT_STRING)
+    {
+        return $this->arrayUnique($sortFlags);
+    }
+
+    public function unshift($value, ...$_)
+    {
+        return $this->arrayUnshift($value, ...$_);
+    }
+
+    public function values()
+    {
+        return $this->arrayValues();
+    }
+
+    public function walkRecursive($callback, $userdata = null)
+    {
+        return $this->arrayWalkRecursive($callback, $userdata);
+    }
+
+    public function walk($callback, $userdata = null)
+    {
+        return $this->arrayWalk($callback, $userdata);
     }
 }

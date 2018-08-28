@@ -12,7 +12,7 @@ trait ArrayRawMethod
 
     public function __construct($data = [])
     {
-        $this->data = $data;
+        $this->data = is_array($data) ? $data : [$data];
     }
 
     public function arrayChangeKeyCase($case = CASE_LOWER)
@@ -74,7 +74,7 @@ trait ArrayRawMethod
         return new static(array_fill($start_index, $num, $value));
     }
 
-    public function arrayFileKeys($keys, $value)
+    public function arrayFillKeys($keys, $value)
     {
         return new static(array_fill_keys($keys, $value));
     }
@@ -176,8 +176,7 @@ trait ArrayRawMethod
 
     public function arrayPop()
     {
-        array_pop($this->data);
-        return $this;
+        return array_pop($this->data);
     }
 
     public function arrayProduct()
@@ -187,8 +186,7 @@ trait ArrayRawMethod
 
     public function arrayPush($value, ...$_)
     {
-        array_push($this->data, $value, ...$_);
-        return $this;
+        return array_push($this->data, $value, ...$_);
     }
 
     public function arrayRand($num = 1)
@@ -225,8 +223,7 @@ trait ArrayRawMethod
 
     public function arrayShift()
     {
-        array_shift($this->data);
-        return $this;
+        return array_shift($this->data);
     }
 
     public function arraySlice($offset, $length = null, $preserveKeys = false)
@@ -286,15 +283,14 @@ trait ArrayRawMethod
         return new static(call_user_func_array('array_uintersect', $_));
     }
 
-    public function arrayUnique()
+    public function arrayUnique($sortFlags = SORT_STRING)
     {
-        return new static(array_unique($this->data));
+        return new static(array_unique($this->data, $sortFlags));
     }
 
     public function arrayUnshift($value, ...$_)
     {
-        array_unshift($this->data, $value, ...$_);
-        return $this;
+        return array_unshift($this->data, $value, ...$_);
     }
 
     public function arrayValues()
@@ -304,8 +300,7 @@ trait ArrayRawMethod
 
     public function arrayWalkRecursive($callback, $userdata = null)
     {
-        array_walk_recursive($this->data, $callback, $userdata);
-        return $this;
+        return array_walk_recursive($this->data, $callback, $userdata);
     }
 
     public function arrayWalk($callback, $userdata = null)
@@ -349,11 +344,6 @@ trait ArrayRawMethod
     public function inArray($needle, $strict = false)
     {
         return in_array($needle, $this->data, $strict);
-    }
-
-    public function keyExists($key)
-    {
-        return key_exists($key, $this->data);
     }
 
     public function krsort($sortFlags = SORT_REGULAR)

@@ -11,4 +11,6 @@ $array = [
     ['hour' => '11:30', 'flow' => 'aaa', 'value' => 9],
     ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16],
 ];
-echo Collection::make(['a' => 1, 'b' => ['c' => 2]])->forget('b.c');
+
+$arr = [[1,2,3,4,5,6]];
+echo Collection::make($arr)->forget('0.0');

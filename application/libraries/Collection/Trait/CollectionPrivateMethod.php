@@ -166,16 +166,9 @@ trait CollectionPrivateMethod
      */
     private function collapseTo()
     {
-        $result = [];
-        $this->foreach(function($v) use (&$result) {
-            if(is_array($v))
-                static::make($v)->foreach(function ($v) use (&$result) {
-                    $result[] = $v;
-                });
-            else
-                $result[] = $v;
-        });
-        return new static($result);
+        return $this->arrayReduce(function ($carry, $item) {
+            return $carry->arrayMerge($item);
+        }, static::make([]));
     }
 
     /**
@@ -230,11 +223,13 @@ trait CollectionPrivateMethod
      * @param null $default
      * @return mixed|null
      */
-    private function firstOn($callback = null, $default = null)
+    private function firstOn(callable $callback = null, $default = null)
     {
         if($callback == null) return $this->empty() ? $default : $this->reset();
-        $result = $this->arrayFilter($callback);
-        return $result->empty() ? $default : $result->reset();
+        $this->foreach(function ($v, $k) use (&$res, $callback) {
+            if($callback($v, $k)) {$res = $v; return false;}
+        });
+        return $res ?? $default;
     }
 
     /**
@@ -302,8 +297,12 @@ trait CollectionPrivateMethod
     private function lastOn($callback = null, $default = null)
     {
         if($callback == null) return $this->empty() ? $default : $this->end();
-        $result = $this->arrayFilter($callback);
-        return $result->empty() ? $default : $result->end();
+        return $this->arrayReverse()->firstOn($callback);
+    }
+
+    private function onlyBy($key)
+    {
+        return is_array($key) ? $this->onlyByArray($key) : $this->onlyByString($key);
     }
 
     private function onlyByString($key)
@@ -347,9 +346,7 @@ trait CollectionPrivateMethod
     private function prependOn($value, $key = null)
     {
         if($key == null) return $this->arrayUnshift($value);
-        if(!$this->arrayKeyExists($key))
-            return static::make([$key => $value])->arrayMerge($this->toArray());
-        return $this;
+        return static::make([$key => $value])->arrayMerge($this->toArray());
     }
 
     /**
