@@ -22,7 +22,18 @@ if(!function_exists('compare')) {
     }
 }
 
-if(!function_exists('dd') && !function_exists('d2')) {
+if(!function_exists('_isAssocArray')) {
+    function _isAssocArray($arr)
+    {
+        $index = 0;
+        foreach (array_keys($arr) as $key) {
+            if (!is_numeric($key) || $index++ !== $key) return false;
+        }
+        return true;
+    }
+}
+
+if(!function_exists('d2')) {
     function d2($array, $tab = '')
     {
         if(is_string($array)) {
@@ -34,18 +45,36 @@ if(!function_exists('dd') && !function_exists('d2')) {
         }
         if(is_array($array)) {
             echo '[', PHP_EOL;
-            foreach ($array as $key => $value) {
-                echo $tab, "    [", $key, "] => ";
-                d2($value,$tab."    ");
+            if(_isAssocArray($array)) {
+                foreach ($array as $key => $value) {
+                    echo $tab, "    ";
+                    d2($value,$tab."    ");
+                }
+            } else {
+                foreach ($array as $key => $value) {
+                    echo $tab, "    ", is_string($key) ? "\"$key\"" : $key, " => ";
+                    d2($value,$tab."    ");
+                }
             }
+
             echo $tab, ']', PHP_EOL;
         }
 
     }
+}
 
+if(!function_exists('dd')) {
     function dd($array)
     {
         d2($array);
         die();
+    }
+}
+
+if(!function_exists('dump')) {
+    function dump($array)
+    {
+        d2($array);
+        return PHP_EOL;
     }
 }

@@ -1,18 +1,14 @@
 <?php
 
 require __DIR__ . '/Collection.php';
-
-$collection = Collection::make([
-   'a' => [
-       'b' => [
-           'c' => [
-               'd' => 'abcd'
-           ],
-           'e' => [
-               'f' => 'abef'
-           ],
-       ]
-   ]
-]);
-
-var_dump($collection->last());
+$array = [
+    ['hour' => '10:00', 'flow' => 'aaa', 'value' => 10],
+    ['hour' => '10:00', 'flow' => 'bbb', 'value' => 8],
+    ['hour' => '10:30', 'flow' => 'aaa', 'value' => 6],
+    ['hour' => '10:30', 'flow' => 'bbb', 'value' => 15],
+    ['hour' => '11:00', 'flow' => 'aaa', 'value' => 13],
+    ['hour' => '11:00', 'flow' => 'bbb', 'value' => 5],
+    ['hour' => '11:30', 'flow' => 'aaa', 'value' => 9],
+    ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16],
+];
+echo Collection::make(['a' => 1, 'b' => ['c' => 2]])->forget('b.c');

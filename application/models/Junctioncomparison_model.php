@@ -195,6 +195,8 @@ class Junctioncomparison_model extends CI_Model
         $baseContinueTime = $this->getHighLightPhaseContinueTime($baseMaxFlowArr[$baseHighLightPhase]
                                                                 , $quotaConf[$info['quotaKey']]['formula']);
         $baseFlowName = $info['allFlows'][$baseHighLightPhase];
+
+        // 持续时间 用于描述
         $baseContinue = '';
         foreach ($baseContinueTime as $k=>$v) {
             $baseContinue .= empty($baseContinue) ? $v['start'] . '-' . $v['end'] : ',' . $v['start'] . '-' . $v['end'];
@@ -206,16 +208,20 @@ class Junctioncomparison_model extends CI_Model
         $evaluateContinueTime = $this->getHighLightPhaseContinueTime($evaluateMaxFlowArr[$evaluateHighLightPhase]
                                                                     , $quotaConf[$info['quotaKey']]['formula']);
         $evaluateFlowName = $info['allFlows'][$evaluateHighLightPhase];
+
+        // 持续时间 用于描述
         $evaluateContinue = '';
         foreach ($evaluateContinueTime as $k=>$v) {
             $evaluateContinue .= empty($evaluateContinue) ? $v['start'] . '-' . $v['end'] : ',' . $v['start'] . '-' . $v['end'];
         }
 
+        // 基准、评估 持续时间
         $result['continue_time'] = [
             'base'     => $baseContinueTime,
             'evaluate' => $evaluateContinueTime,
         ];
 
+        // 标注相位是否需要高亮
         foreach ($result['dataList'] as $flow=>$v) {
             if ($flow == $baseHighLightPhase) {
                 $result['dataList'][$flow]['flow_info']['base_highlight'] = 1;
@@ -256,6 +262,8 @@ class Junctioncomparison_model extends CI_Model
         ];
         $flowName = $info['allFlows'][$diffMaxFlow];
         $descHour = $diffMaxHour;
+
+        // $maxValue $minValue 用于描述内容
         if ($baseDiffValue >= $evaluateDiffValue) {
             $maxValue = $baseDiffValue;
             $minValue = $evaluateDiffValue;
@@ -264,30 +272,32 @@ class Junctioncomparison_model extends CI_Model
             $minValue = $baseDiffValue;
         }
 
-        $describe = [
-            $info['junctionName'],
-            $baseFlowName,
-            $baseContinue,
-            $evaluateFlowName,
-            $evaluateContinue,
-            $flowName,
-            $descHour,
-            $maxValue,
-            $minValue,
-        ];
-
+        // $result 的base_list、evaluate_list只是临时的，用于计算的，不需要返回，unset掉
         foreach ($result['dataList'] as $k=>$v) {
             unset($result['dataList'][$k]['base_list']);
             unset($result['dataList'][$k]['evaluate_list']);
         }
-
         $result['dataList'] = array_values($result['dataList']);
+
+        // 组织指标信息
         $result['quota_info'] = [
             'name'  => $quotaConf[$info['quotaKey']]['name'],
             'title' => $quotaConf[$info['quotaKey']]['title'],
             'desc'  => $quotaConf[$info['quotaKey']]['desc'],
         ];
 
+        // 指标文案描述所需数据
+        $describe = [
+            $info['junctionName'], // 路口名称
+            $baseFlowName,         // 基准-相位名称 高亮相位
+            $baseContinue,         // 基准-持续时间
+            $evaluateFlowName,     // 评估-相位名称 高亮相位
+            $evaluateContinue,     // 评估-持续时间
+            $flowName,             // 基准与评估同一时间点差距最大的相位名称
+            $descHour,             // 差距最大的时间点
+            $maxValue,             // 差距最大值
+            $minValue,             // 差距最小值
+        ];
         $result['describe_info'] = $quotaConf[$info['quotaKey']]['describe']($describe);
         $result['summary_info'] = $quotaConf[$info['quotaKey']]['name'] . '由' . $maxValue . '变化为' . $minValue;
 

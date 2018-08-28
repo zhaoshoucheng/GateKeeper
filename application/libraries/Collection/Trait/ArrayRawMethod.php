@@ -143,7 +143,9 @@ trait ArrayRawMethod
 
     public function arrayKeys($searchValue = null, $strict = false)
     {
-        return new static(array_keys($this->data, $searchValue, $strict));
+        return new static($searchValue == null ?
+            array_keys($this->data) :
+            array_keys($this->data, $searchValue, $strict));
     }
 
     public function arrayMap($callback, ...$_)
