@@ -197,7 +197,9 @@ class Overviewalarm_model extends CI_Model
         $alarmRedisKey = 'its_realtime_alarm_' . $data['city_id'];
 
         $res = $this->redis_model->getData($alarmRedisKey);
+        $res = json_decode($res, true);
         if (empty($res)) {
+            com_log_warning('_itstool_redis_realtimealarm', 0, '实时报警内容没有存入redis', compact("res", "alarmRedisKey"));
             if (!$this->isTableExisted($this->tb)) {
                 return [];
             }
