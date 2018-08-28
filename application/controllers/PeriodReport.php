@@ -361,11 +361,11 @@ class PeriodReport extends MY_Controller
         $quotaKey = $params['quota_key'];
         $quotaInfo = array(
             'queue_length'=>array(
-                'name' => '排队长度',
+                'name' => '平均排队长度',
                 'round' => 0
             ),
             'stop_delay'=>array(
-                'name' => '延误时间',
+                'name' => '平均延误时间',
                 'round' => 2
             )
         );
@@ -498,12 +498,18 @@ class PeriodReport extends MY_Controller
         $summary .= "在".$dayWorstQuota[0]['date'].$quotaInfo[$quotaKey]['name']."最大,达到".round($dayWorstQuota[0][$quotaKey],2)."。";
 
         if($maxMoMJunction['d']>0){
-            $summary .= "环比上".$period.$junctionInfos[$maxMoMJunction['logic_junction_id']]['name']."恶化情况最严重,由上个".$period.$maxMoMJunction['last_rank']."名,提升至本".$period.$maxMoMJunction['rank']."名,";
+            $summary .= "环比上".$period.$junctionInfos[$maxMoMJunction['logic_junction_id']]['name']."恶化情况最严重,由上个".$period.$maxMoMJunction['last_rank']."名,变化至本".$period.$maxMoMJunction['rank']."名,";
             $summary .= "下个".$period."需要重点关注延误变大原因";
         }
 
         $finalData['summary'] = $summary;
         $finalData['junction_list'] = array_slice($finalData['junction_list'],0,$topNum);
+        $finalData['quota_name']=$quotaInfo[$quotaKey]['name'];
+        if($timeType == self::ALLDAY){
+            $finalData['quota_desc']="本".$period.$quotaInfo[$quotaKey]['name']."最大的".$topNum."个路口展示";
+        }else{
+            $finalData['quota_desc']="延误最大top".$topNum.",排队长度最大top".$topNum."路口数据与上".$period."排名进行对比,并分析趋势";
+        }
 
         //补齐路口名称
         foreach ($finalData['junction_list'] as $fjk => $fjv){
@@ -511,8 +517,6 @@ class PeriodReport extends MY_Controller
         }
 
         return $this->response($finalData);
-
-
     }
 
 
