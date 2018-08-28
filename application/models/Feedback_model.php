@@ -23,6 +23,7 @@ class Feedback_model extends CI_Model
     {
         $data['created_at'] = date('Y-m-d H:i:s');
         $data['updated_at'] = date('Y-m-d H:i:s');
+        $data['description'] = $data['desc'];
         $this->db->insert($this->tb, $data);
 
         return 'success';
