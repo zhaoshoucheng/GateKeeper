@@ -22,9 +22,9 @@ class Collection
      * @param null $key
      * @return null
      */
-    public function get($key = null)
+    public function get($key = null, $default = null)
     {
-        return $this->getByDot($key);
+        return $this->getByDot($key, $default);
     }
 
     /**
