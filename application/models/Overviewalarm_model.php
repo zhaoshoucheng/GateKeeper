@@ -192,12 +192,12 @@ class Overviewalarm_model extends CI_Model
         if (empty($data)) {
             return [];
         }
-
+        $result = [];
         // 先去redis查数据，如果没有则查表
         $alarmRedisKey = 'its_realtime_alarm_' . $data['city_id'];
-        if(($res = $this->redis_model->getData($alarmRedisKey))) {
-            $result = $this->formatRealTimeAlarmListData($res);
-        } else {
+
+        $res = $this->redis_model->getData($alarmRedisKey);
+        if (empty($res)) {
             if (!$this->isTableExisted($this->tb)) {
                 return [];
             }
@@ -206,8 +206,6 @@ class Overviewalarm_model extends CI_Model
             $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
             $lastTime = date('Y-m-d') . ' ' . $lastHour;
             $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
-
-            $result = [];
 
             $sql = '/*{"router":"m"}*/';
             $sql .= 'select type, logic_junction_id, logic_flow_id, start_time, last_time';
