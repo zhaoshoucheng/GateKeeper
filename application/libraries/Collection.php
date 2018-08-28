@@ -32,7 +32,7 @@ class Collection
      *
      * @param $key
      * @param $value
-     * @return Collection
+     * @return CollectionPrivateMethod
      */
     public function set($key, $value)
     {
@@ -50,23 +50,44 @@ class Collection
         return $this->hasByDot($key);
     }
 
+    /**
+     * 向数组中添加元素
+     *
+     * @param $key
+     * @param $value
+     * @return $this
+     */
     public function add($key, $value)
     {
-        if(!$this->has($key))
-            $this->set($key, $value);
+        if(!$this->has($key)) $this->set($key, $value);
         return $this;
     }
 
+    /**
+     * 二维数组合并为一维数组
+     *
+     * @return CollectionPrivateMethod
+     */
     public function collapse()
     {
         return $this->collapseTo();
     }
 
+    /**
+     * 获取数组的键值数组
+     *
+     * @return array
+     */
     public function divide()
     {
         return [$this->arrayKeys(), $this->arrayValues()];
     }
 
+    /**
+     * 将多维数组铺开到一维数组，使用 . 表示深度
+     *
+     * @return CollectionPrivateMethod
+     */
     public function dot()
     {
         return $this->dotTo();
@@ -74,7 +95,7 @@ class Collection
 
     public function except($keys)
     {
-        return $this->exceptByArray($keys);
+        return $this->exceptBy($keys);
     }
 
     public function first($callback = null, $default = null)
@@ -141,17 +162,12 @@ class Collection
     public function cancat($array)
     {
         $collect = $array instanceof static ? $array : static::make($array);
-        $collect->foreach(function ($v) {
-            $this->arrayPush($v);
-        });
-        return $this;
+        return $collect->each(function ($v) { $this->arrayPush($v); });
     }
 
     public function contains($param, $value = null)
     {
-        if($value !== null) return $this->containsByKeyValue($param, $value);
-        if(is_callable($param)) return $this->containsByCallback($param);
-        return $this->containsByValue($param);
+        return $this->containsBy($param, $value);
     }
 
     public function diff($array)
@@ -189,10 +205,23 @@ class Collection
         }, ARRAY_FILTER_USE_KEY);
     }
 
-    public function groupBy($param, $callback = null, $preserveKeys = false)
+    public function group($param, $callback = null, $preserveKeys = false)
     {
-        if(is_callable($param)) return $this->groupByCallback($param, $callback, $preserveKeys);
-        if(is_array($param)) return $this->groupByArray($param, $callback, $preserveKeys);
-        return $this->groupByString($param, $callback, $preserveKeys);
+        return $this->groupBy($param, $callback, $preserveKeys);
+    }
+
+    public function increment($key, $value = 1)
+    {
+        $this->set($key, $this->get($key, 0) + $value);
+    }
+
+    public function decrement($key, $value = 1)
+    {
+        $this->set($key, $this->get($key, 0) - $value);
+    }
+
+    public function __toString()
+    {
+        return dump($this->toArray());
     }
 }

@@ -1,18 +1,15 @@
 <?php
 
 require __DIR__ . '/Collection.php';
+$array = [
+    ['hour' => '10:00', 'flow' => 'aaa', 'value' => 10],
+    ['hour' => '10:00', 'flow' => 'bbb', 'value' => 8],
+    ['hour' => '10:30', 'flow' => 'aaa', 'value' => 6],
+    ['hour' => '10:30', 'flow' => 'bbb', 'value' => 15],
+    ['hour' => '11:00', 'flow' => 'aaa', 'value' => 13],
+    ['hour' => '11:00', 'flow' => 'bbb', 'value' => 5],
+    ['hour' => '11:30', 'flow' => 'aaa', 'value' => 9],
+    ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16],
+];
 
-$collection = Collection::make([
-   ['id' => 1, 'age' => '15', 'name' => 'aaa'],
-   ['id' => 1, 'age' => '14', 'name' => 'aab'],
-   ['id' => 1, 'age' => '15', 'name' => 'ccc'],
-   ['id' => 1, 'age' => '14', 'name' => 'ccd'],
-   ['id' => 2, 'age' => '15', 'name' => 'eee'],
-   ['id' => 2, 'age' => '14', 'name' => 'eef'],
-   ['id' => 2, 'age' => '15', 'name' => 'ggg'],
-   ['id' => 2, 'age' => '14', 'name' => 'ggh'],
-]);
-
-dd($collection->groupBy(function ($v) {
-        return substr($v['name'], 0, 2);
-    }, null));
+dd(Collection::make(['a' => ['b' => ['c' => 1]]])->dot());

@@ -113,8 +113,9 @@ trait CollectionPrivateMethod
      * @param null $default
      * @return array|null
      */
-    private function getByDot($key, $default = null)
+    private function getByDot($key = null, $default = null)
     {
+        if($key == null) return $this->getByString($key, $default);
         $keys = explode('.', $key);
         return $this->getByArray($keys, $default);
     }
@@ -197,6 +198,13 @@ trait CollectionPrivateMethod
         return new static($result);
     }
 
+    private function exceptBy($key)
+    {
+        $key = $key instanceof static ? $key->toArray() : $key;
+        if(is_array($key)) return $this->exceptByArray($key);
+        return $this->exceptByString($key);
+    }
+
     /**
      * 返回不在参数内的键值
      *
@@ -208,6 +216,11 @@ trait CollectionPrivateMethod
         return $this->arrayFilter(function ($key) use ($keys) {
             return !in_array($key, $keys);
         }, ARRAY_FILTER_USE_KEY);
+    }
+
+    private function exceptByString($key)
+    {
+        return $this->exceptByArray([$key]);
     }
 
     /**
@@ -232,6 +245,13 @@ trait CollectionPrivateMethod
     private function flattenTo()
     {
         return $this->dotTo()->arrayValues();
+    }
+
+    private function forgetBy($key)
+    {
+        $key = $key instanceof static ? $key->toArray() : $key;
+        if(is_array($key)) return $this->forgetByArray($key);
+        return $this->forgetByDot($key);
     }
 
     /**
@@ -284,6 +304,11 @@ trait CollectionPrivateMethod
         if($callback == null) return $this->empty() ? $default : $this->end();
         $result = $this->arrayFilter($callback);
         return $result->empty() ? $default : $result->end();
+    }
+
+    private function onlyByString($key)
+    {
+        return $this->onlyByArray([$key]);
     }
 
     /**
@@ -341,6 +366,20 @@ trait CollectionPrivateMethod
     }
 
     /**
+     * 过滤数据
+     *
+     * @param $key
+     * @param null $compare
+     * @param null $value
+     * @return CollectionPrivateMethod
+     */
+    private function whereBy($key, $compare = null, $value = null)
+    {
+        if(is_array($key)) return $this->whereByArray($key);
+        return $this->whereByString($key, $compare, $value);
+    }
+
+    /**
      * 根据字符串过滤不符合回调函数的元素
      *
      * @param $key
@@ -377,20 +416,6 @@ trait CollectionPrivateMethod
     }
 
     /**
-     * 过滤数据
-     *
-     * @param $key
-     * @param null $compare
-     * @param null $value
-     * @return CollectionPrivateMethod
-     */
-    private function whereBy($key, $compare = null, $value = null)
-    {
-        if(is_array($key)) return $this->whereByArray($key);
-        return $this->whereByString($key, $compare, $value);
-    }
-
-    /**
      * 求平均值
      *
      * @param null $key
@@ -400,6 +425,13 @@ trait CollectionPrivateMethod
     {
         $array = $key == null ? $this : $this->arrayColumn($key);
         return $array->arraySum() / $array->count();
+    }
+
+    private function containsBy($param, $value = null)
+    {
+        if($value !== null) return $this->containsByKeyValue($param, $value);
+        if(is_callable($param)) return $this->containsByCallback($param);
+        return $this->containsByValue($param);
     }
 
     /**
@@ -438,6 +470,13 @@ trait CollectionPrivateMethod
     private function containsByCallback($callback)
     {
         return $this->arrayFilter($callback)->count() > 0;
+    }
+
+    public function groupBy($param, $callback = null, $preserveKeys = false)
+    {
+        if(is_callable($param)) return $this->groupByCallback($param, $callback, $preserveKeys);
+        if(is_array($param)) return $this->groupByArray($param, $callback, $preserveKeys);
+        return $this->groupByString($param, $callback, $preserveKeys);
     }
 
     /**
