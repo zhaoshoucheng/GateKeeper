@@ -52,7 +52,7 @@ class Task_model extends CI_Model
         try {
             $this->its_tool->trans_begin();
 
-            $sql = "select * from task_result where id = ? for update";
+            $sql = "/*{\"router\":\"m\"}*/select * from task_result where id = ? for update";
             $query = $this->its_tool->query($sql, array($task_id));
             $result = $query->result_array();
             if (empty($result)) {
@@ -153,7 +153,7 @@ class Task_model extends CI_Model
 
             $task = $result[0];
             $task_id = $task['id'];
-            $sql = "select * from task_result where id = ? and status = ? and task_start_time = ? and expect_try_time <= ? and try_times <= ? for update";
+            $sql = "/*{\"router\":\"m\"}*/select * from task_result where id = ? and status = ? and task_start_time = ? and expect_try_time <= ? and try_times <= ? for update";
             $query = $this->its_tool->query($sql, array($task_id, 0, 0, $now, $this->max_try_times));
             $result = $query->result_array();
             if (empty($result)) {
