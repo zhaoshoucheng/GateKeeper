@@ -231,7 +231,13 @@ class Realtimewarning_model extends CI_Model
         $data['date'] = $date;
         $data['city_id'] = $cityId;
 
-        $realTimeAlarmsInfo = $this->getRealTimeAlarmsInfo($data, $hour);
+        $realTimeAlarmsInfo = [];
+        $realTimeAlarmsInfoResult = $this->getRealTimeAlarmsInfo($data, $hour);
+        $realTimeAlarmRedisKey = 'its_realtime_alarm_' . $cityId;
+        $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 24*3600);
+        foreach ($realTimeAlarmsInfoResult as $item) {
+            $realTimeAlarmsInfo[$item['logic_flow_id'].$item['type']] = $item;
+        }
 
         $junctionList = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
 
@@ -341,20 +347,17 @@ class Realtimewarning_model extends CI_Model
         $lastTime = date('Y-m-d') . ' ' . $hour;
         $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
 
-        $sql = '/*{"router":"m"}*/select type, logic_junction_id, logic_flow_id, start_time, last_time from real_time_alarm where 
-            city_id = ? and date = ? and last_time >= ? and last_time <= ? order by type asc, (last_time - start_time) desc';
+        $sql = '/*{"router":"m"}*';
+        $sql .= '/select type, logic_junction_id, logic_flow_id, start_time, last_time';
+        $sql .= ' from real_time_alarm';
+        $sql .= ' where city_id = ? and date = ? and last_time >= ? and last_time <= ?';
+        $sql .= ' order by type asc, (last_time - start_time) desc';
 
         $arr = [$data['city_id'], $data['date'], $lastTime, $cycleTime];
 
         $realTimeAlarmsInfo = $this->db->query($sql, $arr)->result_array();
 
-        $result = [];
-
-        foreach ($realTimeAlarmsInfo as $item) {
-            $result[$item['logic_flow_id'].$item['type']] = $item;
-        }
-
-        return $result;
+        return $realTimeAlarmsInfo;
     }
 
     /**
