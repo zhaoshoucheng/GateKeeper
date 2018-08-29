@@ -37,6 +37,7 @@ class Cycletask_model extends CI_Model
 
     function process() {
         try {
+            $this->its_tool->reconnect();
             $this->its_tool->trans_begin();
             $now = time();
             $today = strtotime(date('Y-m-d', $now));

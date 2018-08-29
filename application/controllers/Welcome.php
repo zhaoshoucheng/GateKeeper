@@ -32,6 +32,13 @@ class Welcome extends CI_Controller {
 		$this->load->view('welcome_message');
 	}
 
+
+    public function test()
+    {
+        $this->task_model->updateTaskStatus(1,0,0);
+
+    }
+
     public function operateLog()
     {
         //追加相应信息

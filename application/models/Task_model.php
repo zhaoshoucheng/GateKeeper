@@ -50,6 +50,7 @@ class Task_model extends CI_Model
 
     function updateTaskStatus($task_id, $ider, $status, $comment = null) {
         try {
+            $this->its_tool->reconnect();
             $this->its_tool->trans_begin();
 
             $sql = "/*{\"router\":\"m\"}*/select * from task_result where id = ? for update";
@@ -141,7 +142,6 @@ class Task_model extends CI_Model
 
             // 所有超过重试次数任务设置为失败
             // $query = $this->its_tool->where('try_times > ', $this->max_try_times)->update($this->_table, ['status' => -1, 'task_end_time' => $now, 'updated_at' => $now]);
-
             // 取出一条待执行任务
             $query = $this->its_tool->select('*')->from($this->_table)->where('status', 0)->where('task_start_time', 0)->where('expect_try_time <=', $now)->where('try_times <=', $this->max_try_times)->limit(1)->get();
             $result = $query->result_array();
@@ -153,7 +153,7 @@ class Task_model extends CI_Model
 
             $task = $result[0];
             $task_id = $task['id'];
-            $sql = "/*{\"router\":\"m\"}*/select * from task_result where id = ? for update";
+            $sql = "select * from task_result where id = ? for update";
             $query = $this->its_tool->query($sql, array($task_id));
             $result = $query->result_array();
             if (empty($result)) {

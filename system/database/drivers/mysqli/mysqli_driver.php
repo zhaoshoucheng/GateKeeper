@@ -336,15 +336,8 @@ class CI_DB_mysqli_driver extends CI_DB {
 	 */
 	protected function _trans_begin()
 	{
-        //@$this->conn_id->autocommit(FALSE);
-        if ($this->conn_id !== FALSE){
-            mysqli_autocommit($this->conn_id,FALSE);
-        }
-        if(is_php('5.5') && $this->conn_id !== FALSE){
-            return $this->conn_id->begin_transaction();
-        }else{
-            $this->simple_query('START TRANSACTION'); // can also be BEGIN or BEGIN WORK
-        }
+        $this->conn_id->autocommit(FALSE);
+        return is_php('5.5') ? $this->conn_id->begin_transaction() : $this->simple_query('START TRANSACTION');
 	}
 
 	// --------------------------------------------------------------------
@@ -358,10 +351,7 @@ class CI_DB_mysqli_driver extends CI_DB {
 	{
 		if ($this->conn_id->commit())
 		{
-            //@$this->conn_id->autocommit(TRUE);
-            if ($this->conn_id !== FALSE) {
-                mysqli_autocommit($this->conn_id, TRUE);
-            }
+            $this->conn_id->autocommit(TRUE);
             return TRUE;
 		}
 
@@ -379,10 +369,7 @@ class CI_DB_mysqli_driver extends CI_DB {
 	{
 		if ($this->conn_id->rollback())
 		{
-            //@$this->conn_id->autocommit(TRUE);
-            if ($this->conn_id !== FALSE) {
-                mysqli_autocommit($this->conn_id, TRUE);
-            }
+            $this->conn_id->autocommit(TRUE);
 			return TRUE;
 		}
 

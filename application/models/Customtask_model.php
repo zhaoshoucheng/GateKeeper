@@ -36,6 +36,7 @@ class Customtask_model extends CI_Model
 
     function process() {
         try {
+            $this->its_tool->reconnect();
             $this->its_tool->trans_begin();
             // 获取所有待投递的任务
             // $query = $this->its_tool->select('*')->from($this->_table)->where('status', 0)->order_by('id')->get();
