@@ -193,8 +193,12 @@ class Overviewalarm_model extends CI_Model
             return [];
         }
         $result = [];
+
+        // 获取最近时间
+        $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
+
         // 先去redis查数据，如果没有则查表
-        $alarmRedisKey = 'its_realtime_alarm_' . $data['city_id'];
+        $alarmRedisKey = 'its_realtime_alarm_'.$lastHour.'_'.$data['city_id'];
 
         $res = $this->redis_model->getData($alarmRedisKey);
         $res = json_decode($res, true);
@@ -204,8 +208,6 @@ class Overviewalarm_model extends CI_Model
                 return [];
             }
 
-            // 获取最近时间
-            $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
             $lastTime = date('Y-m-d') . ' ' . $lastHour;
             $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
 
