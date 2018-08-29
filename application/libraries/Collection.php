@@ -84,6 +84,11 @@ class Collection
         return $this->exceptBy($keys);
     }
 
+    public function every($callback)
+    {
+//        return $this->reduce(function ($carry, ))
+    }
+
     public function first($callback = null, $default = null)
     {
         return $this->firstOn($callback, $default);
@@ -124,6 +129,26 @@ class Collection
     public function increment($key, $value = 1)
     {
         $this->set($key, $this->get($key, 0) + $value);
+    }
+
+    public function implode($key, $gule = null)
+    {
+        return $gule == null ? implode($key, $this->data) : $this->column($key)->implode($gule);
+    }
+
+    public function isEmpty()
+    {
+        return $this->empty();
+    }
+
+    public function isNotEmpty()
+    {
+        return !$this->isEmpty();
+    }
+
+    public function keyBy($key)
+    {
+        return is_callable($key) ? $this->groupByCallback($key) : $this->groupByString($key);
     }
 
     public function last($callback = null, $default = null)

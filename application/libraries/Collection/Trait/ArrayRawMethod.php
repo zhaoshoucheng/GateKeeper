@@ -415,4 +415,9 @@ trait ArrayRawMethod
         usort($this->data, $valueCompareFunc);
         return $this;
     }
+
+    public function max($value = null, ...$values)
+    {
+        return max($this->data, $value, ...$values);
+    }
 }
