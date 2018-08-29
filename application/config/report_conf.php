@@ -85,6 +85,6 @@ $config['quotas'] = [
             1 => '各方向通过速度时间变化规律',
             2 => '各方向通过速度分析'
         ],
-        'round' => function ($v) { return round($v, 2); }
+        'round' => function ($v) { return round($v * 3.6, 2); }
     ]
 ];
