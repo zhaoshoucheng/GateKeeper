@@ -420,4 +420,14 @@ trait ArrayRawMethod
     {
         return max($this->data, $value, ...$values);
     }
+
+    public function min($value = null, ...$values)
+    {
+        return min($value, ...$values);
+    }
+
+    public function jsonEncode()
+    {
+        return json_encode($this->data);
+    }
 }

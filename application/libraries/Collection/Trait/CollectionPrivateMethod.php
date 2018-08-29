@@ -56,7 +56,7 @@ trait CollectionPrivateMethod
      * @param $value
      * @return $this
      */
-    private function setByString($key, $value)
+    private function setByKey($key, $value)
     {
         $this->data[$key] = $value;
         return $this;
@@ -72,9 +72,9 @@ trait CollectionPrivateMethod
     private function setByArray($keys, $value)
     {
         if(count($keys) == 0) return $this;
-        if(count($keys) == 1) return $this->setByString(current($keys), $value);
+        if(count($keys) == 1) return $this->setByKey(current($keys), $value);
         $key = array_shift($keys);
-        return $this->setByString($key, static::make($this->getByString($key))->setByArray($keys, $value)->toArray());
+        return $this->setByKey($key, static::make($this->getByKey($key))->setByArray($keys, $value)->toArray());
     }
 
     /**
@@ -84,7 +84,7 @@ trait CollectionPrivateMethod
      * @param null $default
      * @return null
      */
-    private function getByString($key, $default = null)
+    private function getByKey($key, $default = null)
     {
         return $this->data[$key] ?? $default;
     }
@@ -99,8 +99,8 @@ trait CollectionPrivateMethod
     private function getByArray($keys, $default = null)
     {
         if(!is_array($keys) || count($keys) == 0) return $this->data;
-        if(count($keys) == 1) return $this->getByString(current($keys), $default);
-        $result = $this->getByString(array_shift($keys), $default);
+        if(count($keys) == 1) return $this->getByKey(current($keys), $default);
+        $result = $this->getByKey(array_shift($keys), $default);
         return static::make($result)->getByArray($keys, $default);
     }
 
@@ -115,7 +115,7 @@ trait CollectionPrivateMethod
      */
     private function getByDot($key = null, $default = null)
     {
-        if($key == null) return $this->getByString($key, $default);
+        if($key == null) return $this->getByKey($key, $default);
         $keys = explode('.', $key);
         return $this->getByArray($keys, $default);
     }
@@ -126,7 +126,7 @@ trait CollectionPrivateMethod
      * @param $key
      * @return bool
      */
-    private function hasByString($key)
+    private function hasByKey($key)
     {
         return $this->arrayKeyExists($key);
     }
@@ -140,10 +140,10 @@ trait CollectionPrivateMethod
     private function hasByArray($keys)
     {
         if(!is_array($keys) || count($keys) == 0) return false;
-        if(count($keys) == 1) return $this->hasByString(current($keys));
+        if(count($keys) == 1) return $this->hasByKey(current($keys));
         $key = array_shift($keys);
-        return $this->hasByString($key) &&
-            static::make($this->getByString($key))->hasByArray($keys);
+        return $this->hasByKey($key) &&
+            static::make($this->getByKey($key))->hasByArray($keys);
 
     }
 
@@ -195,7 +195,7 @@ trait CollectionPrivateMethod
     {
         $key = $key instanceof static ? $key->toArray() : $key;
         if(is_array($key)) return $this->exceptByArray($key);
-        return $this->exceptByString($key);
+        return $this->exceptByKey($key);
     }
 
     /**
@@ -211,7 +211,7 @@ trait CollectionPrivateMethod
         }, ARRAY_FILTER_USE_KEY);
     }
 
-    private function exceptByString($key)
+    private function exceptByKey($key)
     {
         return $this->exceptByArray([$key]);
     }
@@ -255,7 +255,7 @@ trait CollectionPrivateMethod
      * @param $key
      * @return $this
      */
-    private function forgetByString($key)
+    private function forgetByKey($key)
     {
         unset($this->data[$key]);
         return $this;
@@ -270,9 +270,9 @@ trait CollectionPrivateMethod
     private function forgetByArray($keys)
     {
         if(count($keys) == 0) return $this;
-        if(count($keys) == 1) return $this->forgetByString(current($keys));
+        if(count($keys) == 1) return $this->forgetByKey(current($keys));
         $key = array_shift($keys);
-        return $this->setByString($key, static::make($this->getByString($key))->forgetByArray($keys)->toArray());
+        return $this->setByKey($key, static::make($this->getByKey($key))->forgetByArray($keys)->toArray());
     }
 
     /**
@@ -302,10 +302,10 @@ trait CollectionPrivateMethod
 
     private function onlyBy($key)
     {
-        return is_array($key) ? $this->onlyByArray($key) : $this->onlyByString($key);
+        return is_array($key) ? $this->onlyByArray($key) : $this->onlyByKey($key);
     }
 
-    private function onlyByString($key)
+    private function onlyByKey($key)
     {
         return $this->onlyByArray([$key]);
     }
@@ -332,7 +332,7 @@ trait CollectionPrivateMethod
     private function pluckBy($key)
     {
         return $this->arrayMap(function ($v) use ($key) {
-            static::make($v)->getByString($key, null);
+            static::make($v)->getByKey($key, null);
         })->arrayFilter()->arrayValues();
     }
 
@@ -357,8 +357,8 @@ trait CollectionPrivateMethod
      */
     private function pullOn($key = null)
     {
-        $result = $this->getByString($key);
-        $this->forgetByString($key);
+        $result = $this->getByKey($key);
+        $this->forgetByKey($key);
         return $result;
     }
 
@@ -373,7 +373,7 @@ trait CollectionPrivateMethod
     private function whereBy($key, $compare = null, $value = null)
     {
         if(is_array($key)) return $this->whereByArray($key);
-        return $this->whereByString($key, $compare, $value);
+        return $this->whereByKey($key, $compare, $value);
     }
 
     /**
@@ -384,7 +384,7 @@ trait CollectionPrivateMethod
      * @param null $value
      * @return CollectionPrivateMethod
      */
-    private function whereByString($key, $compare, $value = null)
+    private function whereByKey($key, $compare, $value = null)
     {
         if($value == null) { $value = $compare; $compare = '=='; }
         return $this->arrayFilter(function ($v) use ($key, $compare, $value) {
@@ -455,7 +455,7 @@ trait CollectionPrivateMethod
      */
     private function containsByValue($value)
     {
-        return $this->hasByString($value);
+        return $this->hasByKey($value);
     }
 
     /**
@@ -473,7 +473,7 @@ trait CollectionPrivateMethod
     {
         if(is_callable($param)) return $this->groupByCallback($param, $callback, $preserveKeys);
         if(is_array($param)) return $this->groupByArray($param, $callback, $preserveKeys);
-        return $this->groupByString($param, $callback, $preserveKeys);
+        return $this->groupByKey($param, $callback, $preserveKeys);
     }
 
     /**
@@ -484,7 +484,7 @@ trait CollectionPrivateMethod
      * @param bool $preserveKeys
      * @return CollectionPrivateMethod
      */
-    private function groupByString($key, callable $callback = null, $preserveKeys = false)
+    private function groupByKey($key, callable $callback = null, $preserveKeys = false)
     {
         $result = [];
         $this->foreach(function ($v, $k) use (&$result, $preserveKeys, $key) {
@@ -511,9 +511,9 @@ trait CollectionPrivateMethod
      */
     private function groupByArray($keys, callable $callback = null, $preserveKeys = false)
     {
-        if(count($keys) == 1) return $this->groupByString(current($keys), $callback, $preserveKeys);
+        if(count($keys) == 1) return $this->groupByKey(current($keys), $callback, $preserveKeys);
         $key = array_shift($keys);
-        return $this->groupByString($key, function ($v, $k) use ($keys, $callback, $preserveKeys) {
+        return $this->groupByKey($key, function ($v, $k) use ($keys, $callback, $preserveKeys) {
             return static::make($v)->groupByArray($keys, $callback, $preserveKeys)->toArray();
         }, $preserveKeys);
     }
@@ -540,5 +540,15 @@ trait CollectionPrivateMethod
             }
         }
         return new static($result);
+    }
+
+    private function sortByKey($key)
+    {
+        return $this->arrayColumn(null, $key)->sort()->arrayValues();
+    }
+
+    private function sortByCallback(callable $callback)
+    {
+        return $this->groupByCallback($callback)->sort()->arrayValues();
     }
 }
