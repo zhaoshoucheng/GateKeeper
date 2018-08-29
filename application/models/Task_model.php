@@ -163,6 +163,7 @@ class Task_model extends CI_Model
             }
 
             $task = $result[0];
+            com_log_notice('_its_task', $task);
             //已经执行过
             if($task['status']!=0 ||$task['task_start_time']!=0 ||$task['expect_try_time']>$now || $task['try_times']>$this->max_try_times){
                 $this->its_tool->trans_rollback();
@@ -176,15 +177,16 @@ class Task_model extends CI_Model
 
             $ret = $this->getDateVersion($dates);
             $ret = json_decode($ret, true);
+            com_log_notice('_its_task', $ret);
             if ($ret['errorCode'] == -1) {
                 // maptypeversion 未就绪
+                com_log_warning('_its_task_mapversion', $value);
                 if ($task['try_times'] < $this->max_try_times) {
                     $this->updateTask($task_id, array(
                         'expect_try_time' => $now + 10 * 60,
                         'try_times' => intval($task['try_times']) + 1,
                     ));
                     $content = "{$task_id} {$dates} mapversion unready.";
-                    sendMail($this->to, $this->subject, $content);
                 } else {
                     $this->updateTask($task_id, array(
                         'status' => -1,
@@ -192,7 +194,6 @@ class Task_model extends CI_Model
                         'task_end_time' => $now,
                     ));
                     $content = "{$task_id} maptypeversion unready and failed.";
-                    sendMail($this->to, $this->subject, $content);
                 }
                 $this->its_tool->trans_commit();
                 return true;
@@ -200,12 +201,12 @@ class Task_model extends CI_Model
             $dateVersion = $ret['data'];
             foreach ($dateVersion as $date => $version) {
                 if ($version == '') {
+                    com_log_warning('_its_task_mapversion', $value);
                     $this->updateTask($task_id, array(
                         'expect_try_time' => $now + 10 * 60,
                         'try_times' => intval($task['try_times']) + 1,
                     ));
                     $content = "{$task_id} {$dates} mapversion unready.";
-                    sendMail($this->to, $this->subject, $content);
                     $this->its_tool->trans_commit();
                     return true;
                 }

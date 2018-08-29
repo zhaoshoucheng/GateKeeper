@@ -411,7 +411,6 @@ class Task extends MY_Controller
 		if (intval($rate == 100)) {
 			$task['task_end_time'] = time();
 			$content = "{$task_id} succeed.";
-			sendMail($this->to, $this->subject, $content);
 		}
 		$bRet = $this->task_model->updateTask($task_id, $task);
 		if ($bRet === false) {
@@ -459,7 +458,6 @@ class Task extends MY_Controller
 			} elseif ($ider == 1) {
 				$content = "{$task_id} calcute task failed.";
 			}
-			sendMail($this->to, $this->subject, $content);
 		}
 
 		$ider = intval($ider);

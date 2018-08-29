@@ -35,6 +35,7 @@ class Cron extends CI_Controller
 	public function start() {
 		for ($i = 0; ; ) {
 			$task = $this->task_model->process();
+			com_log_notice('_its_task', $task);
 			if ($task === true or $task === false) {
 				$i ++;
 				if ($i === 2) {
@@ -66,6 +67,7 @@ class Cron extends CI_Controller
 					$response = $task->calculate($city_id, $task_id, $trace_id, $hdfs_dir, $start_time . ':00', $end_time . ':00', $dateVersion, $timingType);
 					print_r($response);
 				} catch (\Exception $e) {
+					com_log_warning('_its_task_failed', array_merge($task, ['trace_id' => $trace_id, 'message' => $e]));
 					// todo 失败分类，路网or计算thrift调用失败，计入task_comment，便于排查问题
 					$this->task_model->updateTask($task_id, ['status' => -1, 'task_comment' => 100, 'task_end_time' => time()]);
 				}
