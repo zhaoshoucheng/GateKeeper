@@ -108,6 +108,11 @@ if (!function_exists('httpPOST')) {
         curl_close($ch);
 
         if($responseCode != 200){
+            //临时自适应接口不报警
+            $ignoreUrl = '100.70.160.62:8000';
+            if(strpos($url, $ignoreUrl)!==false){
+                return false;
+            }
             com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$spanId, "url"=>$url, "args"=>$data));
             return false;
         }
