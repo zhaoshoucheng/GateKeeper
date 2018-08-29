@@ -81,7 +81,9 @@ trait ArrayRawMethod
 
     public function arrayFilter($callback = null, $flag = 0)
     {
-        return new static(array_filter($this->data, $callback, $flag));
+        return new static($callback == null ?
+            array_filter($this->data) :
+            array_filter($this->data, $callback, $flag));
     }
 
     public function arrayFlip()
@@ -419,5 +421,15 @@ trait ArrayRawMethod
     public function max($value = null, ...$values)
     {
         return max($this->data, $value, ...$values);
+    }
+
+    public function min($value = null, ...$values)
+    {
+        return min($value, ...$values);
+    }
+
+    public function jsonEncode()
+    {
+        return json_encode($this->data);
     }
 }

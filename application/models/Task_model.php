@@ -50,9 +50,10 @@ class Task_model extends CI_Model
 
     function updateTaskStatus($task_id, $ider, $status, $comment = null) {
         try {
+            $this->its_tool->reconnect();
             $this->its_tool->trans_begin();
 
-            $sql = "select * from task_result where id = ? for update";
+            $sql = "/*{\"router\":\"m\"}*/select * from task_result where id = ? for update";
             $query = $this->its_tool->query($sql, array($task_id));
             $result = $query->result_array();
             if (empty($result)) {
@@ -141,7 +142,6 @@ class Task_model extends CI_Model
 
             // 所有超过重试次数任务设置为失败
             // $query = $this->its_tool->where('try_times > ', $this->max_try_times)->update($this->_table, ['status' => -1, 'task_end_time' => $now, 'updated_at' => $now]);
-
             // 取出一条待执行任务
             $query = $this->its_tool->select('*')->from($this->_table)->where('status', 0)->where('task_start_time', 0)->where('expect_try_time <=', $now)->where('try_times <=', $this->max_try_times)->limit(1)->get();
             $result = $query->result_array();
@@ -153,8 +153,8 @@ class Task_model extends CI_Model
 
             $task = $result[0];
             $task_id = $task['id'];
-            $sql = "select * from task_result where id = ? and status = ? and task_start_time = ? and expect_try_time <= ? and try_times <= ? for update";
-            $query = $this->its_tool->query($sql, array($task_id, 0, 0, $now, $this->max_try_times));
+            $sql = "select * from task_result where id = ? for update";
+            $query = $this->its_tool->query($sql, array($task_id));
             $result = $query->result_array();
             if (empty($result)) {
                 // 获取到的任务已经被处理了
@@ -163,6 +163,12 @@ class Task_model extends CI_Model
             }
 
             $task = $result[0];
+            //已经执行过
+            if($task['status']!=0 ||$task['task_start_time']!=0 ||$task['expect_try_time']>$now || $task['try_times']>$this->max_try_times){
+                $this->its_tool->trans_rollback();
+                return true;
+            }
+
             $city_id = $task['city_id'];
             $dates = $task['dates'];
             $start_time = $task['start_time'];

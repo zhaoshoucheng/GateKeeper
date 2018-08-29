@@ -36,10 +36,11 @@ class Customtask_model extends CI_Model
 
     function process() {
         try {
+            $this->its_tool->reconnect();
             $this->its_tool->trans_begin();
             // 获取所有待投递的任务
             // $query = $this->its_tool->select('*')->from($this->_table)->where('status', 0)->order_by('id')->get();
-            $sql = "select * from custom_task where status = 0 order by id for update";
+            $sql = "/*{\"router\":\"m\"}*/select * from custom_task where status = 0 order by id for update";
             $query = $this->its_tool->query($sql);
             $result = $query->result_array();
             if (empty($result)) {

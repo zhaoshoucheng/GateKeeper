@@ -19,7 +19,8 @@ $config['quotas'] = [
         'desc' => [
             1 => '各方向延误时间变化规律',
             2 => '各方向延误时间分析'
-        ]
+        ],
+        'round' => function ($v) { return round($v, 2); }
     ],
     'stop_time_cycle' => [
         'name'      => '停车次数', // 指标名称
@@ -31,7 +32,8 @@ $config['quotas'] = [
         'desc' => [
             1 => '各方向平均停车次数时间变化规律',
             2 => '各方向平均停车次数分析'
-        ]
+        ],
+        'round' => function ($v) { return round($v, 2); }
     ],
     'spillover_rate' => [
         'name'      => '溢流指标',
@@ -43,7 +45,8 @@ $config['quotas'] = [
         'desc' => [
             1 => '各方向溢流指数时间变化规律',
             2 => '各方向溢流指数分析'
-        ]
+        ],
+        'round' => function ($v) { return round($v, 5); }
     ],
     'queue_length' => [
         'name'      => '排队长度',
@@ -55,7 +58,8 @@ $config['quotas'] = [
         'desc' => [
             1 => '各方向最大排队长度时间变化规律',
             2 => '各方向最大排队长度分析'
-        ]
+        ],
+        'round' => function ($v) { return round($v); }
     ],
     'stop_rate' => [
         'name'      => '停车比率',
@@ -67,7 +71,8 @@ $config['quotas'] = [
         'desc' => [
             1 => '各方向停车比率时间变化规律',
             2 => '各方向停车比率分析'
-        ]
+        ],
+        'round' => function ($v) { return round($v, 4); }
     ],
     'speed' => [
         'name'      => '通过速度',
@@ -79,6 +84,7 @@ $config['quotas'] = [
         'desc' => [
             1 => '各方向通过速度时间变化规律',
             2 => '各方向通过速度分析'
-        ]
+        ],
+        'round' => function ($v) { return round($v * 3.6, 2); }
     ]
 ];

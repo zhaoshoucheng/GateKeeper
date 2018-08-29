@@ -37,7 +37,7 @@ class Collection
         return $callback == null ? $this->avgBy($key) : $callback($this->avgBy($key));
     }
 
-    public function cancat($array)
+    public function concat($array)
     {
         return static::make($array)->each(function ($v) { $this->push($v); });
     }
@@ -82,11 +82,6 @@ class Collection
     public function except($keys)
     {
         return $this->exceptBy($keys);
-    }
-
-    public function every($callback)
-    {
-//        return $this->reduce(function ($carry, ))
     }
 
     public function first($callback = null, $default = null)
@@ -148,7 +143,12 @@ class Collection
 
     public function keyBy($key)
     {
-        return is_callable($key) ? $this->groupByCallback($key) : $this->groupByString($key);
+        return is_callable($key) ? $this->groupByCallback($key) : $this->groupByKey($key);
+    }
+
+    public function keysOfMaxValue()
+    {
+        return $this->keys($this->max());
     }
 
     public function last($callback = null, $default = null)
@@ -181,9 +181,43 @@ class Collection
         return $this->setByDot($key, $value);
     }
 
+    public function sortBy($param)
+    {
+        return is_callable($param) ? $this->sortByCallback($param) : $this->sortByKey($param);
+    }
+
+    public function take($num)
+    {
+        return $num > 0 ? $this->slice(0, $num) : $this->reverse()->slice(0, -$num);
+    }
+
+    public function toJson()
+    {
+        return $this->jsonEncode();
+    }
+
+    public function unless($bool, callable $callable)
+    {
+        if(!$bool) $callable($this);
+        return $this;
+    }
+
+    public function when($bool, callable $callable)
+    {
+        if($bool) $callable($this);
+        return $this;
+    }
+
     public function where($key, $compare = null, $value = null)
     {
         return $this->whereBy($key, $compare, $value);
+    }
+
+    public function whereIn($key, $values)
+    {
+        return $this->filter(function ($v) use ($key, $values) {
+            return in_array($v[$key], $values);
+        });
     }
 
     public function changeKeyCase($case = CASE_LOWER)
@@ -306,6 +340,11 @@ class Collection
         return $this->arrayMap($callback, ...$_);
     }
 
+    public function median($key = null, $callback = null)
+    {
+        return $this->avg($key, $callback);
+    }
+
     public function mergeRecursive(...$_)
     {
         return $this->arrayMergeRecursive(...$_);
@@ -314,6 +353,11 @@ class Collection
     public function merge(...$_)
     {
         return $this->arrayMerge(...$_);
+    }
+
+    public function mode($key = null)
+    {
+        return ($key ==  null ? $this : $this->column($key))->countValues()->keysOfMaxValue();
     }
 
     public function multisort($arraySortOrder = SORT_ASC, $arraySortFlags = SORT_REGULAR, ...$_)

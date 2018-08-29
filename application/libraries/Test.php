@@ -12,5 +12,4 @@ $array = [
     ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16],
 ];
 
-$arr = [[1,2,3,4,5,6]];
-echo Collection::make($arr)->forget('0.0');
+dd(Collection::make($array)->sortBy('hour'));
