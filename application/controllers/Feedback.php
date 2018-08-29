@@ -14,7 +14,7 @@ class Feedback extends MY_Controller
         4 => '评估内容',
         5 => '优化结果',
         6 => '页面交互',
-        0 => '其他',
+        7 => '其他',
     ];
 
     public function __construct()
