@@ -198,7 +198,7 @@ class Overviewalarm_model extends CI_Model
         $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
 
         // 先去redis查数据，如果没有则查表
-        $alarmRedisKey = 'its_realtime_alarm_'.$lastHour.'_'.$data['city_id'];
+        $alarmRedisKey = 'its_realtime_alarm_'.$data['city_id'].'_'.$lastHour;
 
         $res = $this->redis_model->getData($alarmRedisKey);
         $res = json_decode($res, true);

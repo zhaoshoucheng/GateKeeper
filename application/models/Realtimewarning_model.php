@@ -233,7 +233,7 @@ class Realtimewarning_model extends CI_Model
 
         $realTimeAlarmsInfo = [];
         $realTimeAlarmsInfoResult = $this->getRealTimeAlarmsInfo($data, $hour);
-        $realTimeAlarmRedisKey = 'its_realtime_alarm_'.$hour.'_'. $cityId;
+        $realTimeAlarmRedisKey = 'its_realtime_alarm_'.$cityId.'_'.$hour;
         $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 24*3600);
         foreach ($realTimeAlarmsInfoResult as $item) {
             $realTimeAlarmsInfo[$item['logic_flow_id'].$item['type']] = $item;
