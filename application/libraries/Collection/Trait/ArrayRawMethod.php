@@ -81,7 +81,9 @@ trait ArrayRawMethod
 
     public function arrayFilter($callback = null, $flag = 0)
     {
-        return new static(array_filter($this->data, $callback, $flag));
+        return new static($callback == null ?
+            array_filter($this->data) :
+            array_filter($this->data, $callback, $flag));
     }
 
     public function arrayFlip()

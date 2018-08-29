@@ -8,13 +8,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Feedback extends MY_Controller
 {
     protected $types = [
-        0 => '其他',
         1 => '报警信息',
         2 => '指标计算',
         3 => '诊断问题',
         4 => '评估内容',
         5 => '优化结果',
-        6 => '页面交互'
+        6 => '页面交互',
+        7 => '其他',
     ];
 
     public function __construct()

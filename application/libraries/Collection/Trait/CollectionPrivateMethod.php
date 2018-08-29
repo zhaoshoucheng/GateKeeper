@@ -332,7 +332,7 @@ trait CollectionPrivateMethod
     private function pluckBy($key)
     {
         return $this->arrayMap(function ($v) use ($key) {
-            static::make($v)->getByKey($key, null);
+            return $v[$key] ?? null;
         })->arrayFilter()->arrayValues();
     }
 
@@ -544,11 +544,11 @@ trait CollectionPrivateMethod
 
     private function sortByKey($key)
     {
-        return $this->arrayColumn(null, $key)->sort()->arrayValues();
+        return $this->groupByKey($key)->sort()->collapseTo();
     }
 
     private function sortByCallback(callable $callback)
     {
-        return $this->groupByCallback($callback)->sort()->arrayValues();
+        return $this->groupByCallback($callback)->sort()->collapseTo();
     }
 }
