@@ -198,12 +198,26 @@ class Collection
 
     public function unless($bool, callable $callable)
     {
+        if(!$bool) $callable($this);
+        return $this;
+    }
 
+    public function when($bool, callable $callable)
+    {
+        if($bool) $callable($this);
+        return $this;
     }
 
     public function where($key, $compare = null, $value = null)
     {
         return $this->whereBy($key, $compare, $value);
+    }
+
+    public function whereIn($key, $values)
+    {
+        return $this->filter(function ($v) use ($key, $values) {
+            return in_array($v[$key], $values);
+        });
     }
 
     public function changeKeyCase($case = CASE_LOWER)
