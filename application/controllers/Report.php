@@ -35,13 +35,18 @@ class Report extends MY_Controller
         if(!$validate['status']){
             return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
         }
+        $topNum = 15; //限制返回前端数量
 
         $cityId = $params['city_id'];
         $keyword = $params['keyword'];
 
         $junctions = $this->waymap_model->getSuggestJunction($cityId,$keyword);
         $final_data = [];
+        $count = 0;
         foreach ($junctions as $j){
+            if($count >= $topNum){
+                break;
+            }
             $final_data[] = [
                 'logic_junction_id'=>$j['logic_junction_id'],
                 'lng'=>$j['lng'],
@@ -50,6 +55,7 @@ class Report extends MY_Controller
                 'name'=>$j['name'],
                 'name_sim'=>$j['name_sim']
             ];
+            $count +=1;
         }
         return $this->response($final_data);
     }
