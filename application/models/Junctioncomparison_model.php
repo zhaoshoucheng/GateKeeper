@@ -271,6 +271,8 @@ class Junctioncomparison_model extends CI_Model
             $maxValue = $evaluateDiffValue;
             $minValue = $baseDiffValue;
         }
+        $maxValue = $quotaConf[$info['quotaKey']]['round']($maxValue);
+        $minValue = $quotaConf[$info['quotaKey']]['round']($minValue);
 
         // $result 的base_list、evaluate_list只是临时的，用于计算的，不需要返回，unset掉
         foreach ($result['dataList'] as $k=>$v) {
