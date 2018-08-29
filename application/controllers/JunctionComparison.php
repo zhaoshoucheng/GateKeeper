@@ -52,23 +52,27 @@ class JunctionComparison extends MY_Controller
             return;
         }
 
-        if (strtotime($params['base_end_date']) - strtotime($params['base_start_date']) < 24 * 3600 - 1) {
+        $base_end_date = $params['base_end_date'] . ' 23:59:59';
+        $base_start_date = $params['base_start_date'] . ' 00:00:00';
+        if (strtotime($base_end_date) - strtotime($base_start_date) < 24 * 3600 - 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '基准日期段最小为1天！';
             return;
         }
-        if (strtotime($params['base_end_date']) - strtotime($params['base_start_date']) > 31 * 24 * 3600 - 1) {
+        if (strtotime($base_end_date) - strtotime($base_start_date) > 31 * 24 * 3600 - 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '基准日期段最大为31天！';
             return;
         }
 
-        if (strtotime($params['evaluate_end_date']) - strtotime($params['evaluate_start_date']) < 24 * 3600 - 1) {
+        $evaluate_end_date = $params['evaluate_end_date'] . '23:59:59';
+        $evaluate_start_date = $params['evaluate_start_date'] . '00:00:00';
+        if (strtotime($evaluate_end_date) - strtotime($evaluate_start_date) < 24 * 3600 - 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '评估日期段最小为1天！';
             return;
         }
-        if (strtotime($params['evaluate_end_date']) - strtotime($params['evaluate_start_date']) > 31 * 24 * 3600 - 1) {
+        if (strtotime($evaluate_end_date) - strtotime($evaluate_start_date) > 31 * 24 * 3600 - 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '评估日期段最大为31天！';
             return;
