@@ -37,7 +37,7 @@ class Collection
         return $callback == null ? $this->avgBy($key) : $callback($this->avgBy($key));
     }
 
-    public function cancat($array)
+    public function concat($array)
     {
         return static::make($array)->each(function ($v) { $this->push($v); });
     }
