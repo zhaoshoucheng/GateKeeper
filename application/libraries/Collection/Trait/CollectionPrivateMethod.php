@@ -332,7 +332,7 @@ trait CollectionPrivateMethod
     private function pluckBy($key)
     {
         return $this->arrayMap(function ($v) use ($key) {
-            static::make($v)->getByKey($key, null);
+            return $v[$key] ?? null;
         })->arrayFilter()->arrayValues();
     }
 
