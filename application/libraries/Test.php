@@ -12,4 +12,4 @@ $array = [
     ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16],
 ];
 
-dd(Collection::make($array)->pluck('flow'));
+dd(Collection::make($array)->sortBy('hour'));

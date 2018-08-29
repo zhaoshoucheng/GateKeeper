@@ -544,11 +544,11 @@ trait CollectionPrivateMethod
 
     private function sortByKey($key)
     {
-        return $this->arrayColumn(null, $key)->sort()->arrayValues();
+        return $this->groupByKey($key)->sort()->collapseTo();
     }
 
     private function sortByCallback(callable $callback)
     {
-        return $this->groupByCallback($callback)->sort()->arrayValues();
+        return $this->groupByCallback($callback)->sort()->collapseTo();
     }
 }
