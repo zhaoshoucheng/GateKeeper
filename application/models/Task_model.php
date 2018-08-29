@@ -154,7 +154,7 @@ class Task_model extends CI_Model
             $task = $result[0];
             $task_id = $task['id'];
             $sql = "/*{\"router\":\"m\"}*/select * from task_result where id = ? for update";
-            $query = $this->its_tool->query($sql, array($task_id, 0, 0, $now, $this->max_try_times));
+            $query = $this->its_tool->query($sql, array($task_id));
             $result = $query->result_array();
             if (empty($result)) {
                 // 获取到的任务已经被处理了
