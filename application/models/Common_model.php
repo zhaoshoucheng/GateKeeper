@@ -52,7 +52,7 @@ class Common_model extends CI_Model
         $cityName = $result['data']['city_name'];
 
         $string = $junctionName . '路口位于';
-        $string .= $cityName . '市' . $districtName . '区，';
+        $string .= $cityName . $districtName . '，';
         $string .= '是' . $road1 . '和' . $road2 . '交叉的重要节点路口';
         $res['desc'] = $string;
         if (empty($res)) {

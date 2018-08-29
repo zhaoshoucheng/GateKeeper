@@ -66,7 +66,7 @@ class Realtimewarning_model extends CI_Model
         $logicJunctionId = $val['logic_junction_id'];
         $logicFlowId = $val['logic_flow_id'];
         $realtimeUpatetime = $val['updated_at'];
-        //$this->db->reconnect();
+        $this->db->reconnect();
         $this->db->trans_begin();
         try {
             //判断数据是否存在?

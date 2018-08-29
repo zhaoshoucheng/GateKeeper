@@ -33,7 +33,6 @@ class Welcome extends CI_Controller {
 	}
 
 	public function test(){
-	    $a[1];
         $qArr = "1122";
         $res = ["awae","dadad"];
         com_log_warning('_itstool_waymap_getConnectionAdjJunctions_error', 0, "adasdsad", compact("qArr","res"));

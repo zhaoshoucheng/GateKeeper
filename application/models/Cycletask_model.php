@@ -37,13 +37,14 @@ class Cycletask_model extends CI_Model
 
     function process() {
         try {
+            $this->its_tool->reconnect();
             $this->its_tool->trans_begin();
             $now = time();
             $today = strtotime(date('Y-m-d', $now));
             $time = date('H:i:s', $now);
             // 获取所有待投递的任务
             // $query = $this->its_tool->select('*')->from($this->_table)->where('last_exec_time <', $today)->where('expect_exec_time <', $time)->order_by('id')->get();
-            $sql = "select * from cycle_task where last_exec_time < ? and expect_exec_time < ? for update";
+            $sql = "/*{\"router\":\"m\"}*/select * from cycle_task where last_exec_time < ? and expect_exec_time < ? for update";
             $query = $this->its_tool->query($sql, array($today, $time));
             $result = $query->result_array();
             if (empty($result)) {

@@ -302,10 +302,10 @@ class Overviewalarm_model extends CI_Model
      */
     private function getLastestHour($cityId, $date = null)
     {
-        if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
+        $hour = $this->redis_model->getData("its_realtime_lasthour_$cityId");
+        if(!empty($hour)) {
             return $hour;
         }
-
         if (!$this->isTableExisted('real_time_' . $cityId)) {
             return date('H:i:s');
         }
