@@ -19,15 +19,15 @@ class Validate {
 	private static $cfg_message = [
 		'nullunable'	=> 'The :paramname cannot be empty.',
 		'min'			=> [
-								'numeric'	=> 'The :paramname must be greater than :min.',
-								'string'	=> 'The character length of :paramname must be greater than :min.'
+								'numeric'	=> '参数 :paramname 必须大于 :min.',
+								'string'	=> '参数 :paramname 长度必须大于 :min.'
 							],
 		'max'			=> [
-								'numeric'	=> 'The :paramname must be less than :max.',
-								'string'	=> 'The character length of :paramname must be less than :max.'
+								'numeric'	=> '参数 :paramname 必须小于 :max.',
+								'string'	=> '参数 :paramname 长度必须小于 :max.'
 							],
-		'before'		=> 'The :paramname must be before :before.',
-		'after'			=> 'The :paramname must be after :after.',
+		'before'		=> '参数 :paramname 必须在 :before 之前.',
+		'after'			=> '参数 :paramname 必须在 :after 之后.',
 	];
 
 	private static $custom_msg = '';
@@ -41,16 +41,16 @@ class Validate {
 	*/
 	public static function make(&$data, $rules, $custom_msg = ''){
 		if(empty($data)){
-			return ['status'=>false, 'errmsg'=> 'An empty data set.'];
+			return ['status'=>false, 'errmsg'=> '请传递参数.'];
 		}
 		if(count($rules) < 1){
-			return ['status'=>false, 'errmsg'=> 'The rules cannot be empty.'];
+			return ['status'=>false, 'errmsg'=> '校验规则不存在.'];
 		}
 
 		$diff = array_diff_key($rules, $data);
 		if(count($diff) >= 1){
 			foreach($diff as $k=>$v){
-				return ['status'=>false, 'errmsg'=> 'The ' . $k . ' must be set.'];
+				return ['status'=>false, 'errmsg'=> '参数 ' . html_escape($k) . ' 错误.'];
 			}
 		}
 
@@ -117,7 +117,7 @@ class Validate {
 	*/
 	private static function nullunable($param, $value){
 		if(is_object($value)){
-			return ['status'=>false, 'errmsg'=>'The ' . $param . ' is a object.'];
+			return ['status'=>false, 'errmsg'=>'参数 ' . $param . ' 是一个对象.'];
 		}else if(is_array($value)){
 			if(count($value) < 1){
 				return ['status'=>false, 'errmsg'=>self::combinErrmsg('nullunable', $param)];
@@ -149,7 +149,7 @@ class Validate {
 				return ['status'=>false, 'errmsg'=>self::combinErrmsg('max', $param, 'string', $rule_arr[1])];
 			}
 		}else{
-			return ['status'=>false, 'errmsg'=>'Other types of validation are not supported for the time being.'];
+			return ['status'=>false, 'errmsg'=>'暂不支持其它类型数据的校验.'];
 		}
 
 		return ['status'=>true];
@@ -178,7 +178,7 @@ class Validate {
                 return ['status'=>false, 'errmsg'=>self::combinErrmsg('min', $param, 'array', $rule_arr[1])];
             }
         }else{
-			return ['status'=>false, 'errmsg'=>'Other types of validation are not supported for the time being.'];
+			return ['status'=>false, 'errmsg'=>'暂不支持其它类型数据的校验.'];
 		}
 
 		return ['status'=>true];
