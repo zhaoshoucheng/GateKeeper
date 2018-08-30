@@ -96,7 +96,7 @@ class PeriodReport extends MY_Controller
         $spillover_freq_MoM = ($lastData['spillover_freq']-$prelastData['spillover_freq'])/($prelastData['spillover_freq']==0?1:$prelastData['spillover_freq']) * 100;
         $oversaturation_freq_MoM = ($lastData['oversaturation_freq']-$prelastData['oversaturation_freq'])/($prelastData['oversaturation_freq']==0?1:$prelastData['oversaturation_freq'])* 100;
         if($type == self::WEEK){
-            $overviewStr = "本周(".$lastTime['start_time']."-".$lastTime['end_time'].")".$cityName."区拥堵程度相对严重,";
+            $overviewStr = "本周(".self::formatTime($lastTime['start_time'])."-".self::formatTime($lastTime['end_time']).")".$cityName."区拥堵程度相对严重,";
             $change = $stop_delay_MoM > 0 ? "增长":"减少";
             $overviewStr .="市区整体平均延误".round($lastData['stop_delay'],2)."秒,环比上周".$change.abs(round($stop_delay_MoM,2))."%。";
             $change = $spillover_freq_MoM > 0 ? "增长":"减少";
@@ -105,7 +105,7 @@ class PeriodReport extends MY_Controller
             $overviewStr .="过饱和路口".$lastData['oversaturation_freq']."路口次,环比上周问题".$change.abs(round($oversaturation_freq_MoM,2))."%。";
 
         }else{
-            $overviewStr = "本月(".$lastTime['start_time']."-".$lastTime['end_time'].")".$cityName."区拥堵程度相对严重,";
+            $overviewStr = "本月(".self::formatTime($lastTime['start_time'])."-".self::formatTime($lastTime['end_time']).")".$cityName."区拥堵程度相对严重,";
             $change = $stop_delay_MoM > 0 ? "增长":"减少";
             $overviewStr .="市区整体平均延误".round($lastData['stop_delay'],2)."秒,环比上月".$change.abs(round($stop_delay_MoM,2))."%。";
             $change = $spillover_freq_MoM > 0 ? "增长":"减少";
@@ -114,8 +114,15 @@ class PeriodReport extends MY_Controller
             $overviewStr .="过饱和路口".$lastData['oversaturation_freq']."路口次,环比上月问题".$change.abs(round($oversaturation_freq_MoM,2))."%。";
         }
         return $this->response(array(
-            'summary'=>$overviewStr
+            'summary'=>$overviewStr,
+            'start_time'=>self::formatTime($lastTime['start_time']),
+            'end_time'=>self::formatTime($lastTime['end_time'])
         ));
+    }
+
+    private function formatTime($time)
+    {
+        return str_replace('-','.',$time);
     }
 
     /**
