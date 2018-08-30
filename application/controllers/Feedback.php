@@ -45,6 +45,8 @@ class Feedback extends MY_Controller
             return;
         }
 
+        $params['user_id'] = $this->username;
+
         $data = $this->feedback_model->addFeedback($params);
 
         return $this->response($data);

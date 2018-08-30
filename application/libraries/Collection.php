@@ -204,7 +204,7 @@ class Collection
 
     public function when($bool, callable $callable)
     {
-        if($bool) $callable($this);
+        if($bool) return $callable($this);
         return $this;
     }
 

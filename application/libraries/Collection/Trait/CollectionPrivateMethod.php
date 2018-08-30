@@ -486,19 +486,14 @@ trait CollectionPrivateMethod
      */
     private function groupByKey($key, callable $callback = null, $preserveKeys = false)
     {
-        $result = [];
         $this->foreach(function ($v, $k) use (&$result, $preserveKeys, $key) {
-            if(isset($v[$key]))
-                if($preserveKeys) $result[$v[$key]][$k] = $v;
-                else $result[$v[$key]][] = $v;
+            if($preserveKeys) $result[$v[$key]][$k] = $v; else $result[$v[$key]][] = $v;
         });
-
-        if($callback != null) {
-            foreach ($result as $k => $v) {
-                $result[$k] = $callback($v, $k);
-            }
-        }
-        return new static($result);
+        return static::make($result)->when($callback != null, function ($c) use ($callback) {
+            return $c->arrayWalk(function (&$v, $k) use ($callback) {
+                $v = $callback($v, $k);
+            });
+        });
     }
 
     /**
@@ -511,11 +506,11 @@ trait CollectionPrivateMethod
      */
     private function groupByArray($keys, callable $callback = null, $preserveKeys = false)
     {
-        if(count($keys) == 1) return $this->groupByKey(current($keys), $callback, $preserveKeys);
-        $key = array_shift($keys);
-        return $this->groupByKey($key, function ($v, $k) use ($keys, $callback, $preserveKeys) {
-            return static::make($v)->groupByArray($keys, $callback, $preserveKeys)->toArray();
-        }, $preserveKeys);
+        return count($keys) == 1 ?
+            $this->groupByKey(current($keys), $callback, $preserveKeys) :
+            $this->groupByKey(array_shift($keys), function ($v) use ($keys, $callback, $preserveKeys) {
+                return static::make($v)->groupByArray($keys, $callback, $preserveKeys)->toArray();
+            }, $preserveKeys);
     }
 
     /**
@@ -528,18 +523,14 @@ trait CollectionPrivateMethod
      */
     private function groupByCallback(callable $callable, callable $callback = null, $preserveKeys = false)
     {
-        $result = [];
         $this->foreach(function ($v, $k) use (&$result, $preserveKeys, $callable) {
-                if($preserveKeys) $result[$callable($v, $k)][$k] = $v;
-                else $result[$callable($v, $k)][] = $v;
+            if($preserveKeys) $result[$callable($v, $k)][$k] = $v; else $result[$callable($v, $k)][] = $v;
         });
-
-        if($callback != null) {
-            foreach ($result as $k => $v) {
-                $result[$k] = $callback($v, $k);
-            }
-        }
-        return new static($result);
+        return static::make($result)->when($callback != null, function ($c) use ($callback) {
+            return $c->arrayWalk(function (&$v, $k) use ($callback) {
+                $v = $callback($v, $k);
+            });
+        });
     }
 
     private function sortByKey($key)
