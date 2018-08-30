@@ -199,7 +199,7 @@ class Junctionreport_model extends CI_Model
 
             foreach ($dataByFlow[$maxFlowId] as $hour => $quota) {
                 $max = max($dataByHour[$hour]);
-                if($quota >= $max) {
+                if($quota >= $max && $quota > 0) {
                     $end_time = $hour;
                     if($start_time == '') $start_time = $hour;
                     $length++;
@@ -242,7 +242,7 @@ class Junctionreport_model extends CI_Model
         foreach ($dataByFlow as $flowId => $flow) {
             //base
             $base[$flowId] = [];
-            foreach ($flow as $k => $v) { $base[$flowId][] = [$this->quotas[$key]['round']($v), $k]; }
+            foreach ($flow as $k => $v) { $base[$flowId][] = [$v === null ? null : $this->quotas[$key]['round']($v), $k]; }
             //flow_info
             $flow_info[$flowId] = [ 'name' => $flowsName[$flowId] ?? '', 'highlight' => (int)(in_array($flowId, $maxFlowIds) )];
         }
