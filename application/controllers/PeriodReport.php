@@ -515,7 +515,7 @@ class PeriodReport extends MY_Controller
         if($timeType == self::ALLDAY){
             $finalData['quota_desc']="本".$period.$quotaInfo[$quotaKey]['name']."最大的".$topNum."个路口展示";
         }else{
-            $finalData['quota_desc']="延误最大top".$topNum.",排队长度最大top".$topNum."路口数据与上".$period."排名进行对比,并分析趋势";
+            $finalData['quota_desc']="延误top".$topNum.",排队长度top".$topNum."路口数据与上".$period."排名进行对比,并分析趋势";
         }
 
         if($timeType == self::MORNING){
