@@ -81,7 +81,7 @@ class Road extends MY_Controller
         }
 
         $roadDirectionConf = $this->config->item('road_direction');
-        if (!array_key_exists(intval($params('road_direction'), $roadDirectionConf))) {
+        if (!array_key_exists(intval($params['road_direction']), $roadDirectionConf)) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '请选择正确的干线方向！';
             return;
@@ -145,7 +145,7 @@ class Road extends MY_Controller
         }
 
         $roadDirectionConf = $this->config->item('road_direction');
-        if (!array_key_exists(intval($params('road_direction'), $roadDirectionConf))) {
+        if (!array_key_exists(intval($params['road_direction']), $roadDirectionConf)) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '请选择正确的干线方向！';
             return;
