@@ -144,6 +144,13 @@ class Road extends MY_Controller
             return;
         }
 
+        $roadDirectionConf = $this->config->item('road_direction');
+        if (!array_key_exists(intval($params('road_direction'), $roadDirectionConf))) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '请选择正确的干线方向！';
+            return;
+        }
+
         $data = [
             'city_id'        => intval($params['city_id']),
             'road_id'        => strip_tags(trim($params['road_id'])),
