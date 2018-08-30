@@ -29,10 +29,16 @@ class Welcome extends CI_Controller {
 	 */
 	public function index()
 	{
+	    print_r($_SERVER);
 		$this->load->view('welcome_message');
 	}
 
 	public function test(){
+        $tab = $_POST;
+        $file = $_FILES;
+        $_POST = xss_clean($_POST);
+        $_POST = xss_clean($_POST);
+        print_r($file);exit;
 //        ob_start();
 //        echo "ob_started";
 //        $obLevel = ob_get_level();
@@ -40,6 +46,10 @@ class Welcome extends CI_Controller {
 //        print_r($obLevel);
 //        throw new \Exception("hello_exception");
 //        $a[11];
+
+        $result = httpGET("http://10.95.100.106:8088/welcome/index");
+        var_dump($result);exit;
+        echo "13123";
         $qArr = "1122";
         $res = ["awae","dadad"];
         com_log_warning('_itstool_waymap_getConnectionAdjJunctions_error', 0, "adasdsad", compact("qArr","res"));
