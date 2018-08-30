@@ -34,6 +34,9 @@ class Welcome extends CI_Controller {
 	}
 
 	public function test(){
+//        com_log_warn1ing('_asynctask_index_error', 0, '1123123', compact("params"));
+//        echo "123213";
+        exit;
         $tab = $_POST;
         $file = $_FILES;
         $_POST = xss_clean($_POST);
