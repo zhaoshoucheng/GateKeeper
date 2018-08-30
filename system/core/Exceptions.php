@@ -293,6 +293,12 @@ class CI_Exceptions {
             'Line' => $line,
             'Backtrace' => $backtrace,
         );
+        if(ENVIRONMENT=='production'){
+            unset($output['Backtrace']);
+//            unset($output['Filename']);
+//            unset($output['Line']);
+//            unset($output['Message']);
+        }
         header("Content-Type:application/json;charset=UTF-8");
         echo json_encode($output);
 
