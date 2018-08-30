@@ -21,7 +21,7 @@ class Area extends MY_Controller
      */
     public function addAreaWithJunction()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(null,true);
         $validate = Validate::make($params, [
             'area_name' => 'min:1',
             'city_id' => 'min:1',
@@ -56,7 +56,7 @@ class Area extends MY_Controller
      */
     public function updateAreaWithJunction()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(null,true);
         $validate = Validate::make($params, [
             'area_id' => 'min:1',
             'area_name' => 'min:1',

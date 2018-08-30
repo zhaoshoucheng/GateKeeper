@@ -10,6 +10,7 @@ if (!function_exists('httpGET')) {
     function httpGET($url, $query=array(), $msTimeout = 20000, $headers = array()){
 
         $spanId = gen_span_id();
+        $traceId = gen_traceid();
 
         $path = parse_url($url, PHP_URL_PATH);
         $originUrl = $url;
@@ -21,6 +22,10 @@ if (!function_exists('httpGET')) {
         }
 
         $ch = curl_init();
+        curl_setopt ( $ch, CURLOPT_HTTPHEADER, array (
+            'didi-header-rid: ' . $traceId,
+            'didi-header-spanid: ' . $spanId,
+        ));
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
