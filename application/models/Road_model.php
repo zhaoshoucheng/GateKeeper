@@ -79,6 +79,7 @@ class Road_model extends CI_Model
             'created_at'         => date('Y-m-d H:i:s'),
             'updated_at'         => date('Y-m-d H:i:s'),
         ];
+        $insertData = $this->db->escape($insertData);
 
         $res = $this->db->insert($this->tb, $insertData);
         if (!$res) {
