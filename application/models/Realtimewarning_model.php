@@ -233,12 +233,10 @@ class Realtimewarning_model extends CI_Model
 
         $realTimeAlarmsInfo = [];
         $realTimeAlarmsInfoResult = $this->getRealTimeAlarmsInfo($data, $hour);
-        $realTimeAlarmRedisKey = 'its_realtime_alarm_'.$cityId;
-        $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 24*3600);
+        $realTimeAlarmRedisKey = 'its_realtime_alarm_' . $cityId;
         foreach ($realTimeAlarmsInfoResult as $item) {
             $realTimeAlarmsInfo[$item['logic_flow_id'].$item['type']] = $item;
         }
-
         $junctionList = $this->getJunctionListResult($cityId, $result, $realTimeAlarmsInfo);
 
         // 缓存 junctionSurvey 数据
@@ -266,6 +264,8 @@ class Realtimewarning_model extends CI_Model
 
         $redisKey = "its_realtime_lasthour_$cityId";
         $this->redis_model->setEx($redisKey, $hour, 24*3600);
+
+        $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 24*3600);
     }
 
     //================以下方法全部为数据处理方法=====================//
