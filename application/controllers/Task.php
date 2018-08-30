@@ -459,6 +459,12 @@ class Task extends MY_Controller
 				$content = "{$task_id} calcute task failed.";
 			}
 		}
+		com_log_warning('_its_task_failed', [
+			'task_id' => $task_id,
+			'ider' => $ider,
+			'status' => $status,
+			'task_comment' => $task_comment,
+		]);
 
 		$ider = intval($ider);
 
