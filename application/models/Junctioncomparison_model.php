@@ -169,7 +169,13 @@ class Junctioncomparison_model extends CI_Model
                 foreach ($v['base_time_list'] as $hour=>$val) {
                     $value = array_sum($val) / count($val);
                     $result['dataList'][$k]['base_list'][$hour] = $value;
-                    $result['dataList'][$k]['base'][] = [$quotaConf[$info['quotaKey']]['round']($value), $hour];
+                    if (empty(array_filter($val))) {
+                        $value = 'null';
+                    }
+                    $result['dataList'][$k]['base'][] = [
+                        $value == 'null' ? 'null' : $quotaConf[$info['quotaKey']]['round']($value),
+                        $hour
+                    ];
                 }
             } else {
                 $result['dataList'][$k]['base_list'] = [];
@@ -180,7 +186,13 @@ class Junctioncomparison_model extends CI_Model
                 foreach ($v['evaluate_time_list'] as $hour=>$val) {
                     $value = array_sum($val) / count($val);
                     $result['dataList'][$k]['evaluate_list'][$hour] = $value;
-                    $result['dataList'][$k]['evaluate'][] = [$quotaConf[$info['quotaKey']]['round']($value), $hour];
+                    if (empty(array_filter($val))) {
+                        $value = 'null';
+                    }
+                    $result['dataList'][$k]['evaluate'][] = [
+                        $value == 'null' ? 'null' : $quotaConf[$info['quotaKey']]['round']($value),
+                        $hour,
+                    ];
                 }
             } else {
                 $result['dataList'][$k]['evaluate_list'] = [];
