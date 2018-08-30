@@ -35,7 +35,6 @@ class Cron extends CI_Controller
 	public function start() {
 		for ($i = 0; ; ) {
 			$task = $this->task_model->process();
-			com_log_notice('_its_task', $task);
 			if ($task === true or $task === false) {
 				$i ++;
 				if ($i === 2) {
@@ -44,6 +43,7 @@ class Cron extends CI_Controller
 				sleep(5 * 60);
 			} else {
 				print_r($task);
+				com_log_notice('_its_task', $task);
 				try {
 					$trace_id = uniqid();
 					$task_id = $task['id'];
