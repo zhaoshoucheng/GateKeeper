@@ -165,19 +165,29 @@ class Junctioncomparison_model extends CI_Model
 
         foreach ($data as $k=>$v) {
             $result['dataList'][$k]['flow_info'] = $v['flow_info'];
-            foreach ($v['base_time_list'] as $hour=>$val) {
-                $value = array_sum($val) / count($val);
-                $result['dataList'][$k]['base_list'][$hour] = $value;
-                $result['dataList'][$k]['base'][] = [$value, $hour];
+            if (!empty($v['base_time_list'])) {
+                foreach ($v['base_time_list'] as $hour=>$val) {
+                    $value = array_sum($val) / count($val);
+                    $result['dataList'][$k]['base_list'][$hour] = $value;
+                    $result['dataList'][$k]['base'][] = [$quotaConf[$info['quotaKey']]['round']($value), $hour];
+                }
+            } else {
+                $result['dataList'][$k]['base_list'] = [];
+                $result['dataList'][$k]['base'] = [];
             }
 
-            foreach ($v['evaluate_time_list'] as $hour=>$val) {
-                $value = array_sum($val) / count($val);
-                $result['dataList'][$k]['evaluate_list'][$hour] = $value;
-                $result['dataList'][$k]['evaluate'][] = [$value, $hour];
+            if (!empty($v['evaluate_time_list'])) {
+                foreach ($v['evaluate_time_list'] as $hour=>$val) {
+                    $value = array_sum($val) / count($val);
+                    $result['dataList'][$k]['evaluate_list'][$hour] = $value;
+                    $result['dataList'][$k]['evaluate'][] = [$quotaConf[$info['quotaKey']]['round']($value), $hour];
+                }
+            } else {
+                $result['dataList'][$k]['evaluate_list'] = [];
+                $result['dataList'][$k]['evaluate'] = [];
             }
         }
-        if (empty($result)) {
+        if (empty($result['dataList'])) {
             return [];
         }
 
@@ -192,27 +202,37 @@ class Junctioncomparison_model extends CI_Model
         /* 统计基准高亮相位连续时段 */
         $baseMaxFlowArr = $baseHighLightPhaseAndMaxFlowArr['maxFlowArr'];
         $baseHighLightPhase = $baseHighLightPhaseAndMaxFlowArr['highLightPhase'];
-        $baseContinueTime = $this->getHighLightPhaseContinueTime($baseMaxFlowArr[$baseHighLightPhase]
-                                                                , $quotaConf[$info['quotaKey']]['formula']);
-        $baseFlowName = $info['allFlows'][$baseHighLightPhase];
+        $baseContinueTime = [];
+        if (!empty($baseMaxFlowArr)) {
+            $baseContinueTime = $this->getHighLightPhaseContinueTime($baseMaxFlowArr[$baseHighLightPhase]
+                                                                    , $quotaConf[$info['quotaKey']]['formula']);
+        }
+        $baseFlowName = $info['allFlows'][$baseHighLightPhase] ?? '';
 
         // 持续时间 用于描述
         $baseContinue = '';
-        foreach ($baseContinueTime as $k=>$v) {
-            $baseContinue .= empty($baseContinue) ? $v['start'] . '-' . $v['end'] : ',' . $v['start'] . '-' . $v['end'];
+        if (!empty($baseContinueTime)) {
+            foreach ($baseContinueTime as $k=>$v) {
+                $baseContinue .= empty($baseContinue) ? $v['start'] . '-' . $v['end'] : ',' . $v['start'] . '-' . $v['end'];
+            }
         }
 
         /* 统计评估高亮相位连续时段 */
         $evaluateMaxFlowArr = $evaluateHighLightPhaseAndMaxFlowArr['maxFlowArr'];
         $evaluateHighLightPhase = $evaluateHighLightPhaseAndMaxFlowArr['highLightPhase'];
-        $evaluateContinueTime = $this->getHighLightPhaseContinueTime($evaluateMaxFlowArr[$evaluateHighLightPhase]
-                                                                    , $quotaConf[$info['quotaKey']]['formula']);
-        $evaluateFlowName = $info['allFlows'][$evaluateHighLightPhase];
+        $evaluateContinueTime = [];
+        if (!empty($evaluateMaxFlowArr)) {
+            $evaluateContinueTime = $this->getHighLightPhaseContinueTime($evaluateMaxFlowArr[$evaluateHighLightPhase]
+                                                                        , $quotaConf[$info['quotaKey']]['formula']);
+        }
+        $evaluateFlowName = $info['allFlows'][$evaluateHighLightPhase] ?? '';
 
         // 持续时间 用于描述
         $evaluateContinue = '';
-        foreach ($evaluateContinueTime as $k=>$v) {
-            $evaluateContinue .= empty($evaluateContinue) ? $v['start'] . '-' . $v['end'] : ',' . $v['start'] . '-' . $v['end'];
+        if (!empty($evaluateContinueTime)) {
+            foreach ($evaluateContinueTime as $k=>$v) {
+                $evaluateContinue .= empty($evaluateContinue) ? $v['start'] . '-' . $v['end'] : ',' . $v['start'] . '-' . $v['end'];
+            }
         }
 
         // 基准、评估 持续时间
@@ -240,9 +260,12 @@ class Junctioncomparison_model extends CI_Model
         $tempHourVal = [];
         foreach ($result['dataList'] as $flow=>$val) {
             foreach ($schedule as $hour) {
-                $diffVal = $val['base_list'][$hour] - $val['evaluate_list'][$hour] < 0
+                $diffVal = 0;
+                if (!empty($val['base_list'][$hour]) && !empty($val['evaluate_list'][$hour])) {
+                    $diffVal = $val['base_list'][$hour] - $val['evaluate_list'][$hour] < 0
                             ? ($val['base_list'][$hour] - $val['evaluate_list'][$hour]) * -1
                             : $val['base_list'][$hour] - $val['evaluate_list'][$hour];
+                }
                 $tempHourVal[$flow . '-' . $hour] = $diffVal;
             }
         }
@@ -320,11 +343,20 @@ class Junctioncomparison_model extends CI_Model
         // 临时数组 放置每个时间点每个相位的指标平均值
         $tempData = [];
         foreach ($data as $direc => $val) {
-            foreach ($val['' . $type . '_list'] as $hour=>$v) {
-                $tempData[$hour][$direc] = $v;
-                $maxValueCount[$direc] = 0;
+            if (!empty($val['' . $type . '_list'])) {
+                foreach ($val['' . $type . '_list'] as $hour=>$v) {
+                    $tempData[$hour][$direc] = $v;
+                    $maxValueCount[$direc] = 0;
+                }
             }
         }
+        if (empty($tempData)) {
+            return [
+                'highLightPhase' => '',
+                'maxFlowArr'     => [],
+            ];
+        }
+
         // 统计指标最大值的相位出现的次数
         $maxFlowArr = [];
         foreach ($tempData as $k=>$v) {

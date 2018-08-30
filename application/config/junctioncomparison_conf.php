@@ -44,7 +44,12 @@ $config['quotas'] = [
         'describe'  => function($a) {
             return $a[0] . '路口在基准日期内' . $a[1] . '方向通过速度最低，持续时间为' . $a[2] . '，评估日期内' . $a[3] . '方向通过速度最低，持续时间为' . $a[4] . '，同时' . $a[5] . '方向在' . $a[6] . '时刻平均通过速度' . $a[8] . '增至' . $a[7] . '。';
         },
-        'round'     => function($val){ return round($val, 2);},
+        'round'     => function($val){ return round($val * 3.6, 2);}, // $val * 3.6 由米/秒 转换为千米/小时
         'desc'      => '平均各个日期中各方向停车比率在所在时段中随时间变化规律'
     ]
+];
+
+$config['road_direction'] = [
+    1 => '东西',
+    2 => '南北',
 ];

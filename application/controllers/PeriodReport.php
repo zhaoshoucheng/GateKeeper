@@ -271,7 +271,7 @@ class PeriodReport extends MY_Controller
                 'district_id'=>$lv['district_id'],
                 'district_name'=>$disticts['districts'][$lv['district_id']],
                 'stop_delay'=>$aveStopDelay,
-                'speed'=>round($lv['speed']/$lv['traj_count'],2),
+                'speed'=>round(($lv['speed']/$lv['traj_count'])*3.6,2),
             ];
             if($aveStopDelay>$maxDelay){
                 $maxDelay = $aveStopDelay;

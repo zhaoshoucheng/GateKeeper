@@ -13,6 +13,7 @@ class Road extends MY_Controller
     {
         parent::__construct();
         $this->load->model('road_model');
+        $this->load->config('junctioncomparison_conf');
     }
 
     /**
@@ -79,6 +80,13 @@ class Road extends MY_Controller
             return;
         }
 
+        $roadDirectionConf = $this->config->item('road_direction');
+        if (!array_key_exists(intval($params['road_direction']), $roadDirectionConf)) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '请选择正确的干线方向！';
+            return;
+        }
+
         $data = [
             'city_id'        => intval($params['city_id']),
             'road_name'      => strip_tags(trim($params['road_name'])),
@@ -133,6 +141,13 @@ class Road extends MY_Controller
         if (count($params['junction_ids']) < 4) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '请至少选择4个路口做为干线！';
+            return;
+        }
+
+        $roadDirectionConf = $this->config->item('road_direction');
+        if (!array_key_exists(intval($params['road_direction']), $roadDirectionConf)) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '请选择正确的干线方向！';
             return;
         }
 

@@ -28,7 +28,7 @@ class Cycletask_model extends CI_Model
     //     $bRet = $this->its_tool->where('id', $task_id)->update($this->_table, $task);
     //     return $bRet;
     // }
-    
+
     function isWorkday($now) {
         $idx = date('N', $now);
         $idx = intval($idx);
@@ -52,14 +52,15 @@ class Cycletask_model extends CI_Model
                 return;
             }
             foreach ($result as $value) {
+                com_log_notice('_its_task', $value);
                 $conf_id = $value['id'];
-                
+
                 $dates = '';
                 if ($value['type'] == 1) {
                     $dates = date('Y-m-d', $now - 86400);
                 } elseif ($value['type'] == 2) {
                     $is_workday = $this->isWorkday($now);
-                    for ($i=1; $i < 8; $i++) { 
+                    for ($i=1; $i < 8; $i++) {
                         $t = $now - $i * 86400;
                         if ($is_workday == $this->isWorkday($t)) {
                             if ($dates == '') {
@@ -70,7 +71,7 @@ class Cycletask_model extends CI_Model
                         }
                     }
                 } elseif ($value['type'] == 3) {
-                    for ($i=1; $i < 5; $i++) { 
+                    for ($i=1; $i < 5; $i++) {
                         $t = $now - $i * 7 * 86400;
                         if ($dates == '') {
                             $dates .= date('Y-m-d', $t);
@@ -102,12 +103,13 @@ class Cycletask_model extends CI_Model
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s'),
                 ];
+                com_log_notice('_its_task', $task);
                 $query = $this->its_tool->insert('task_result', $task);
             }
             $this->its_tool->trans_commit();
         } catch (\Exception $e) {
             $this->its_tool->trans_rollback();
         }
-        
+
     }
 }
