@@ -160,42 +160,17 @@ trait CollectionPrivateMethod
     }
 
     /**
-     * 二维数组合并为一维数组
-     *
-     * @return CollectionPrivateMethod
-     */
-    private function collapseTo()
-    {
-        return $this->arrayReduce(function ($carry, $item) {
-            return $carry->arrayMerge($item);
-        }, static::make([]));
-    }
-
-    /**
      * 多维数组平铺， . 号代表深度
      *
      * @return CollectionPrivateMethod
      */
     private function dotTo()
     {
-        $result = [];
         $this->foreach(function ($v, $k) use (&$result) {
-            if(is_array($v)) {
-                static::make($v)->dotTo()->foreach(function ($v, $ke) use (&$result, $k) {
-                    $result[$k . '.' . $ke] = $v;
-                });
-            } else {
-                $result[$k] = $v;
-            }
+            if(is_array($v)) { static::make($v)->dotTo()->foreach(function ($v, $ke) use (&$result, $k) { }); }
+            else { $result[$k] = $v; }
         });
         return new static($result);
-    }
-
-    private function exceptBy($key)
-    {
-        $key = $key instanceof static ? $key->toArray() : $key;
-        if(is_array($key)) return $this->exceptByArray($key);
-        return $this->exceptByKey($key);
     }
 
     /**
@@ -211,42 +186,15 @@ trait CollectionPrivateMethod
         }, ARRAY_FILTER_USE_KEY);
     }
 
+    /**
+     * 返回不在参数内的键值
+     *
+     * @param $key
+     * @return CollectionPrivateMethod
+     */
     private function exceptByKey($key)
     {
         return $this->exceptByArray([$key]);
-    }
-
-    /**
-     * 获取第一个回调函数返回 true 的元素
-     *
-     * @param null $callback
-     * @param null $default
-     * @return mixed|null
-     */
-    private function firstOn(callable $callback = null, $default = null)
-    {
-        if($callback == null) return $this->empty() ? $default : $this->reset();
-        $this->foreach(function ($v, $k) use (&$res, $callback) {
-            if($callback($v, $k)) {$res = $v; return false;}
-        });
-        return $res ?? $default;
-    }
-
-    /**
-     * 将数组摊开
-     *
-     * @return CollectionPrivateMethod
-     */
-    private function flattenTo()
-    {
-        return $this->dotTo()->arrayValues();
-    }
-
-    private function forgetBy($key)
-    {
-        $key = $key instanceof static ? $key->toArray() : $key;
-        if(is_array($key)) return $this->forgetByArray($key);
-        return $this->forgetByDot($key);
     }
 
     /**
@@ -288,23 +236,11 @@ trait CollectionPrivateMethod
     }
 
     /**
-     * 获取符合回调函数条件的最后一个元素
+     * 只返回给定键值
      *
-     * @param null $callback
-     * @param null $default
-     * @return mixed|null
+     * @param $key
+     * @return CollectionPrivateMethod
      */
-    private function lastOn($callback = null, $default = null)
-    {
-        if($callback == null) return $this->empty() ? $default : $this->end();
-        return $this->arrayReverse()->firstOn($callback);
-    }
-
-    private function onlyBy($key)
-    {
-        return is_array($key) ? $this->onlyByArray($key) : $this->onlyByKey($key);
-    }
-
     private function onlyByKey($key)
     {
         return $this->onlyByArray([$key]);
@@ -321,59 +257,6 @@ trait CollectionPrivateMethod
         return $this->arrayFilter(function ($key) use ($keys) {
             return in_array($key, $keys);
         }, ARRAY_FILTER_USE_KEY);
-    }
-
-    /**
-     * 获取数组中二层深度指定键值
-     *
-     * @param $key
-     * @return CollectionPrivateMethod
-     */
-    private function pluckBy($key)
-    {
-        return $this->arrayMap(function ($v) use ($key) {
-            return $v[$key] ?? null;
-        })->arrayFilter()->arrayValues();
-    }
-
-    /**
-     * 在数组最前方插入
-     *
-     * @param $value
-     * @param null $key
-     * @return $this|CollectionPrivateMethod
-     */
-    private function prependOn($value, $key = null)
-    {
-        if($key == null) return $this->arrayUnshift($value);
-        return static::make([$key => $value])->arrayMerge($this->toArray());
-    }
-
-    /**
-     * 移除指定元素
-     *
-     * @param null $key
-     * @return null
-     */
-    private function pullOn($key = null)
-    {
-        $result = $this->getByKey($key);
-        $this->forgetByKey($key);
-        return $result;
-    }
-
-    /**
-     * 过滤数据
-     *
-     * @param $key
-     * @param null $compare
-     * @param null $value
-     * @return CollectionPrivateMethod
-     */
-    private function whereBy($key, $compare = null, $value = null)
-    {
-        if(is_array($key)) return $this->whereByArray($key);
-        return $this->whereByKey($key, $compare, $value);
     }
 
     /**
@@ -413,25 +296,6 @@ trait CollectionPrivateMethod
     }
 
     /**
-     * 求平均值
-     *
-     * @param null $key
-     * @return float|int
-     */
-    private function avgBy($key = null)
-    {
-        $array = $key == null ? $this : $this->arrayColumn($key);
-        return $array->arraySum() / $array->count();
-    }
-
-    private function containsBy($param, $value = null)
-    {
-        if($value !== null) return $this->containsByKeyValue($param, $value);
-        if(is_callable($param)) return $this->containsByCallback($param);
-        return $this->containsByValue($param);
-    }
-
-    /**
      * 检查是否包含目标键值对
      *
      * @param $key
@@ -440,6 +304,7 @@ trait CollectionPrivateMethod
      */
     private function containsByKeyValue($key, $value)
     {
+
         $result = false;
         $this->foreach(function ($v) use (&$result, $key, $value) {
              if(isset($v[$key]) && $v[$key] == $value) $result = true;
@@ -467,13 +332,6 @@ trait CollectionPrivateMethod
     private function containsByCallback($callback)
     {
         return $this->arrayFilter($callback)->count() > 0;
-    }
-
-    public function groupBy($param, $callback = null, $preserveKeys = false)
-    {
-        if(is_callable($param)) return $this->groupByCallback($param, $callback, $preserveKeys);
-        if(is_array($param)) return $this->groupByArray($param, $callback, $preserveKeys);
-        return $this->groupByKey($param, $callback, $preserveKeys);
     }
 
     /**
@@ -526,18 +384,30 @@ trait CollectionPrivateMethod
         $this->foreach(function ($v, $k) use (&$result, $preserveKeys, $callable) {
             if($preserveKeys) $result[$callable($v, $k)][$k] = $v; else $result[$callable($v, $k)][] = $v;
         });
-        return static::make($result)->when($callback != null, function ($c) use ($callback) {
+        return static::make($result)->when($callback != null, function (CollectionPrivateMethod $c) use ($callback) {
             return $c->arrayWalk(function (&$v, $k) use ($callback) {
                 $v = $callback($v, $k);
             });
         });
     }
 
+    /**
+     * 根据指定键排序
+     *
+     * @param $key
+     * @return mixed
+     */
     private function sortByKey($key)
     {
         return $this->groupByKey($key)->sort()->collapseTo();
     }
 
+    /**
+     * 根据指定回调函数排序
+     *
+     * @param callable $callback
+     * @return mixed
+     */
     private function sortByCallback(callable $callback)
     {
         return $this->groupByCallback($callback)->sort()->collapseTo();

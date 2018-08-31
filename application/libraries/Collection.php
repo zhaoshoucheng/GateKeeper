@@ -23,8 +23,9 @@ class Collection
 
     public function add($key, $value)
     {
-        if(!$this->has($key)) $this->set($key, $value);
-        return $this;
+        return !$this->has($key) ?
+            $this->set($key, $value) :
+            $this;
     }
 
     public function all()
@@ -34,27 +35,44 @@ class Collection
 
     public function avg($key = null, callable $callback = null)
     {
-        return $callback == null ? $this->avgBy($key) : $callback($this->avgBy($key));
+        $array = $key == null ?
+            $this :
+            $this->column($key);
+
+        return $callback == null ?
+            $array->sum() / $array->count() :
+            $callback($array->sum() / $array->count());
     }
 
     public function concat($array)
     {
-        return static::make($array)->each(function ($v) { $this->push($v); });
+        return static::make($array)
+            ->each(function ($v) {
+                $this->push($v);
+            });
     }
 
     public function contains($param, $value = null)
     {
-        return $this->containsBy($param, $value);
+        return $this->when($value !== null, function (Collection $c) use ($param, $value) {
+            return $c->containsByKeyValue($param, $value);
+        })->when(is_callable($param), function (Collection $c) use ($param) {
+            return $c->containsByCallback($param);
+        })->when($value === null && !is_callable($param), function (Collection $c) use ($param) {
+            return $c->containsByValue($param);
+        });
     }
 
     public function collapse()
     {
-        return $this->collapseTo();
+        return $this->reduce(function (Collection $carry, $item) {
+            return $carry->arrayMerge($item);
+        }, static::make([]));
     }
 
     public function divide()
     {
-        return [$this->arrayKeys(), $this->arrayValues()];
+        return [$this->keys(), $this->values()];
     }
 
     public function dot()
@@ -81,22 +99,29 @@ class Collection
 
     public function except($keys)
     {
-        return $this->exceptBy($keys);
+        if(is_array($keys)) return $this->exceptByArray($keys);
+        return $this->exceptByKey($keys);
     }
 
-    public function first($callback = null, $default = null)
+    public function first(callable $callback = null, $default = null)
     {
-        return $this->firstOn($callback, $default);
+        if($callback == null) return $this->empty() ? $default : $this->reset();
+        $this->foreach(function ($v, $k) use (&$res, $callback) {
+            if($callback($v, $k)) {$res = $v; return false;}
+        });
+        return $res ?? $default;
     }
 
     public function flatten()
     {
-        return $this->flattenTo();
+        return $this->dot()->values();
     }
 
     public function forget($key)
     {
-        return $this->forgetBy($key);
+        $key = $key instanceof static ? $key->toArray() : $key;
+        if(is_array($key)) return $this->forgetByArray($key);
+        return $this->forgetByDot($key);
     }
 
     public function forPage($offset, $limit)
@@ -111,9 +136,11 @@ class Collection
         return $this->getByDot($key, $default);
     }
 
-    public function group($param, $callback = null, $preserveKeys = false)
+    public function groupBy($param, $callback = null, $preserveKeys = false)
     {
-        return $this->groupBy($param, $callback, $preserveKeys);
+        if(is_callable($param)) return $this->groupByCallback($param, $callback, $preserveKeys);
+        if(is_array($param)) return $this->groupByArray($param, $callback, $preserveKeys);
+        return $this->groupByKey($param, $callback, $preserveKeys);
     }
 
     public function has($key)
@@ -153,27 +180,39 @@ class Collection
 
     public function last($callback = null, $default = null)
     {
-        return $this->lastOn($callback, $default);
+        if($callback == null)
+            return $this->empty() ?
+                $default :
+                $this->end();
+
+        return $this->reverse()->first($callback);
     }
 
     public function only($key)
     {
-        return $this->onlyBy($key);
+        return is_array($key) ?
+            $this->onlyByArray($key) :
+            $this->onlyByKey($key);
     }
 
     public function pluck($key)
     {
-        return $this->pluckBy($key);
+        return $this->map(function ($v) use ($key) {
+            return $v[$key] ?? null;
+        })->filter()->values();
     }
 
     public function prepend($value, $key = null)
     {
-        return $this->prependOn($value, $key);
+        if($key == null) { $this->unshift($value); return $this;};
+        return static::make([$key => $value])->merge($this->toArray());
     }
 
     public function pull($key)
     {
-        return $this->pullOn($key);
+        $result = $this->get($key);
+        $this->forget($key);
+        return $result;
     }
 
     public function set($key, $value)
@@ -188,7 +227,9 @@ class Collection
 
     public function take($num)
     {
-        return $num > 0 ? $this->slice(0, $num) : $this->reverse()->slice(0, -$num);
+        return $num > 0 ?
+            $this->slice(0, $num) :
+            $this->reverse()->slice(0, -$num);
     }
 
     public function toJson()
@@ -198,19 +239,25 @@ class Collection
 
     public function unless($bool, callable $callable)
     {
-        if(!$bool) $callable($this);
+        if(!$bool)
+            $callable($this);
+
         return $this;
     }
 
     public function when($bool, callable $callable)
     {
-        if($bool) return $callable($this);
+        if($bool)
+            return $callable($this);
+
         return $this;
     }
 
     public function where($key, $compare = null, $value = null)
     {
-        return $this->whereBy($key, $compare, $value);
+        return is_array($key) ?
+            $this->whereByArray($key) :
+            $this->whereByKey($key, $compare, $value);
     }
 
     public function whereIn($key, $values)
