@@ -57,7 +57,7 @@ if (!function_exists('httpGET')) {
             return false;
         }
 
-        com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>http_build_query($query), "response"=>substr($ret,0,500*1024), "errno"=>$responseCode, 'proc_time'=> $totalTime]);
+        com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>http_build_query($query), "response"=>substr($ret,0,10*1024), "errno"=>$responseCode, 'proc_time'=> $totalTime]);
         return $ret; 
     }
 }
@@ -122,7 +122,7 @@ if (!function_exists('httpPOST')) {
             return false;
         }
 
-        com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>$data, "response"=>substr($ret,0,500*1024), "errno"=>$responseCode, 'proc_time'=> $totalTime]);
+        com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>$data, "response"=>substr($ret,0,10*1024), "errno"=>$responseCode, 'proc_time'=> $totalTime]);
         return $ret;
     }
 }

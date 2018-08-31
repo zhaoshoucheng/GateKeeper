@@ -37,7 +37,7 @@ class MY_Log extends CI_Log {
     const LOG_FATAL     = 1; //致命错误，已经影响到程序的正常进行
     const LOG_WARNING   = 2; //可能存在错误，但是不影响程序的正常进行
     const LOG_STRACE    = 3; //特定日志级别,记录trace信息同时配合采样逻辑。 放在warning和notice日志等级间
-    const LOG_NOTICE    = 4; //往往用于统计一次请求的整体状况 
+    const LOG_NOTICE    = 4; //往往用于统计一次请求的整体状况
     const LOG_TRACE     = 8; //调试日志
     const LOG_DEBUG     = 16; //调试日志，线上严禁打开
     static $LOG_NAME = array (  //用于在日志中输出
@@ -102,6 +102,9 @@ class MY_Log extends CI_Log {
         $level = strtoupper($level);
 
         //将原日志系统映射到现有日志系统中,屏蔽原日志系统
+//        var_dump($this->_levels);
+//        var_dump($level);
+//        exit;
         if(isset($this->_levels[$level])){
             $this->__log__($this->_levels[$level],array($msg));
             $this->flush();
@@ -209,7 +212,13 @@ class MY_Log extends CI_Log {
         if ($this->_enabled === FALSE) return;
 
         //日志级别限制
+//        var_dump($arr);
+        //var_dump($arr);
+        //var_dump($log_level);
+        //var_dump($this->_threshold);
         if($log_level > $this->_threshold) return;
+//        var_dump("======");
+//        var_dump("======");
 
         //获取打印日志 文件和行号
         $bt = debug_backtrace();
@@ -284,17 +293,19 @@ class MY_Log extends CI_Log {
             return preg_replace('/\s/', '', $str);
             return $str;
         };
-        $format = $arr[0];
-        array_shift($arr);
-        if (empty($arr)) {
-            $str.=$lineFormater($format);
-        } else {
-            $arr = array_reduce($arr,function($v,$w) use($lineFormater){
-                if(empty($v)) { $v = [];}
-                $v[] = $lineFormater($w);
-                return $v;
-            });
-            $str .= vsprintf($format, $arr);
+        if(!empty($arr)){
+            $format = $arr[0];
+            array_shift($arr);
+            if (empty($arr)) {
+                $str.=$lineFormater($format);
+            } else {
+                $arr = array_reduce($arr,function($v,$w) use($lineFormater){
+                    if(empty($v)) { $v = [];}
+                    $v[] = $lineFormater($w);
+                    return $v;
+                });
+                $str .= vsprintf($format, $arr);
+            }
         }
 
         switch ($log_level) {
@@ -359,8 +370,8 @@ class MY_Log extends CI_Log {
             //===== [Extra Change][S] =====
             //Changed by liuxuewen@diditaxi.com.cn  2016-03-11 19:36:28
             //$info = is_array($value) ? 'Array info' : $value;
-            ////$this->basic_info_str .= $key.'='.$value.']['; 
-            //$this->basic_info_str .= $key.'='.$info.']['; 
+            ////$this->basic_info_str .= $key.'='.$value.'][';
+            //$this->basic_info_str .= $key.'='.$info.'][';
 
             //$this->basic_info_str .= $key.'='.$value.'||';
             $info = is_array($value) ? json_encode($value, JSON_PARTIAL_OUTPUT_ON_ERROR) : $value;
