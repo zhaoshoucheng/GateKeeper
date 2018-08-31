@@ -57,7 +57,6 @@ class Report_model extends CI_Model
             $this->db->where('create_at >=', date("Y-m-d 00:00:00"));
             $this->db->from('report');
             $num = $this->db->count_all_results();
-            echo $this->db->last_query();die;
             if($num==0){
                 break;
             }
