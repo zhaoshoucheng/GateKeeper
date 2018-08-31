@@ -78,8 +78,70 @@ class JunctionReport extends MY_Controller
             return;
         }
 
-        $data = $this->junctionreport_model->queryQuotaInfo($params);
+        $dates = $this->getDates($params);
+
+        if(empty($dates)) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '选择的日期范围不能为空';
+            return;
+        }
+
+        $hours = $this->getHours($params);
+
+        if(empty($hours)) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '选择的时间范围不能为空';
+            return;
+        }
+
+        $data = $this->junctionreport_model->queryQuotaInfo($params, $dates, $hours);
 
         return $this->response($data);
     }
+
+    /**
+     * 获取指定时间段内的半小时划分集合
+     * @param $data
+     * @return array
+     */
+    private function getHours($data)
+    {
+        $start = strtotime($data['schedule_start']);
+        $end = strtotime($data['schedule_end']);
+
+        $results = [];
+
+        $time = $start;
+        while($time <= $end) {
+            $results[] = date('H:i', $time);
+            $time += (30 * 60);
+        }
+
+        return $results;
+    }
+
+    /**
+     * 获取指定时间段内指定星期的日期集合
+     * @param $data
+     * @return array
+     */
+    private function getDates($data)
+    {
+        $start = strtotime($data['evaluate_start_date']);
+        $end = strtotime($data['evaluate_end_date']);
+        $weeks = $data['week'];
+
+        $results = [];
+
+        $time = $start;
+        while($time <= $end) {
+            if(in_array(date('w', $time), $weeks)) {
+                $results[] = date('Y-m-d', $time);
+            }
+            $time += (60 * 60 * 24);
+        }
+
+        return $results;
+    }
+
 }
