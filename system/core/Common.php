@@ -594,8 +594,7 @@ if ( ! function_exists('_error_handler'))
 	 */
 	function _error_handler($severity, $message, $filepath, $line)
 	{
-		$is_error = (((E_ERROR | E_PARSE | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR) & $severity) === $severity);
-
+		$is_error = (((E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR) & $severity) === $severity);
 		// When an error occurred, set the status header to '500 Internal Server Error'
 		// to indicate to the client something went wrong.
 		// This can't be done within the $_error->show_php_error method because
@@ -613,7 +612,6 @@ if ( ! function_exists('_error_handler'))
 		{
 			return;
 		}
-
 		$_error =& load_class('Exceptions', 'core');
 		$_error->log_exception($severity, $message, $filepath, $line);
 
@@ -621,6 +619,7 @@ if ( ! function_exists('_error_handler'))
 		if (str_ireplace(array('off', 'none', 'no', 'false', 'null'), '', ini_get('display_errors')))
 		{
 			$_error->show_php_error($severity, $message, $filepath, $line);
+            exit;
 		}
 
 		// If the error is fatal, the execution of the script should be stopped because

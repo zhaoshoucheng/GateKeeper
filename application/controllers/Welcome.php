@@ -29,10 +29,29 @@ class Welcome extends CI_Controller {
 	 */
 	public function index()
 	{
+	    print_r($_SERVER);
 		$this->load->view('welcome_message');
 	}
 
 	public function test(){
+//        com_log_warn1ing('_asynctask_index_error', 0, '1123123', compact("params"));
+//        echo "123213";
+//        exit;
+//        $tab = $_POST;
+//        $file = $_FILES;
+//        $_POST = xss_clean($_POST);
+//        $_POST = xss_clean($_POST);
+//        print_r($file);exit;
+//        ob_start();
+//        echo "ob_started";
+//        $obLevel = ob_get_level();
+//        ob_end_flush();
+//        print_r($obLevel);
+//        throw new \Exception("hello_exception");
+//        $a[11];
+        $result = httpGET("http://10.95.100.106:8890/test/hello");
+        var_dump($result);exit;
+        echo "13123";
         $qArr = "1122";
         $res = ["awae","dadad"];
         com_log_warning('_itstool_waymap_getConnectionAdjJunctions_error', 0, "adasdsad", compact("qArr","res"));

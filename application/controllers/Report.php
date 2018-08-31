@@ -217,7 +217,7 @@ class Report extends MY_Controller
                     ],
                     [
                         'id'=>2,
-                        'title'=>'延误最大top20路口分析',
+                        'title'=>'延误top20路口分析',
                         'desc'=>'本周平均延误最大的20个路口展示',
                         'quota_key'=>'stop_delay_day_20',
                         'api_info'=>[
@@ -230,7 +230,7 @@ class Report extends MY_Controller
                     ],
                     [
                         'id'=>3,
-                        'title'=>'排队长度最大top20路口分析',
+                        'title'=>'排队长度top20路口分析',
                         'desc'=>'本周最大排队长度top20路口展示',
                         'quota_key'=>'queue_length_day_20',
                         'api_info'=>[
@@ -255,7 +255,7 @@ class Report extends MY_Controller
                     [
                         'id'=>5,
                         'title'=>'工作日早高峰分析(6:30 ~ 9:30)',
-                        'desc'=>'延误最大top10,排队长度最大top10路口数据与上周排名进行对比,并分析趋势',
+                        'desc'=>'延误top10,排队长度top10路口数据与上周排名进行对比,并分析趋势',
                         'quota_key'=>'quota_morning_10',
                         'api_info'=>[
                             'key'=>0,
@@ -268,7 +268,7 @@ class Report extends MY_Controller
                     [
                         'id'=>6,
                         'title'=>'工作日晚高峰分析(16:30 ~ 19:30)',
-                        'desc'=>'延误最大top10,排队长度最大top10路口数据与上周排名进行对比,并分析趋势',
+                        'desc'=>'延误top10,排队长度top10路口数据与上周排名进行对比,并分析趋势',
                         'quota_key'=>'quota_night_10',
                         'api_info'=>[
                             'key'=>0,
@@ -302,7 +302,7 @@ class Report extends MY_Controller
                     ],
                     [
                         'id'=>2,
-                        'title'=>'延误最大top20路口分析',
+                        'title'=>'延误top20路口分析',
                         'desc'=>'本月平均延误最大的20个路口展示',
                         'quota_key'=>'stop_delay_day_20',
                         'api_info'=>[
@@ -315,7 +315,7 @@ class Report extends MY_Controller
                     ],
                     [
                         'id'=>3,
-                        'title'=>'排队长度最大top20路口分析',
+                        'title'=>'排队长度top20路口分析',
                         'desc'=>'本月最大排队长度top20路口展示',
                         'quota_key'=>'queue_length_day_20',
                         'api_info'=>[
@@ -339,7 +339,7 @@ class Report extends MY_Controller
                     [
                         'id'=>5,
                         'title'=>'工作日早高峰分析(6:30 ~ 9:30)',
-                        'desc'=>'延误最大top10,排队长度最大top10路口数据与上月排名进行对比,并分析趋势',
+                        'desc'=>'延误top10,排队长度top10路口数据与上月排名进行对比,并分析趋势',
                         'quota_key'=>'quota_morning_10',
                         'api_info'=>[
                             'key'=>0,
@@ -352,7 +352,7 @@ class Report extends MY_Controller
                     [
                         'id'=>6,
                         'title'=>'工作日晚高峰分析(16:30 ~ 19:30)',
-                        'desc'=>'延误最大top10,排队长度最大top10路口数据与上月排名进行对比,并分析趋势',
+                        'desc'=>'延误top10,排队长度top10路口数据与上月排名进行对比,并分析趋势',
                         'quota_key'=>'quota_night_10',
                         'api_info'=>[
                             'key'=>0,

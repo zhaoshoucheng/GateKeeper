@@ -96,7 +96,7 @@ class PeriodReport extends MY_Controller
         $spillover_freq_MoM = ($lastData['spillover_freq']-$prelastData['spillover_freq'])/($prelastData['spillover_freq']==0?1:$prelastData['spillover_freq']) * 100;
         $oversaturation_freq_MoM = ($lastData['oversaturation_freq']-$prelastData['oversaturation_freq'])/($prelastData['oversaturation_freq']==0?1:$prelastData['oversaturation_freq'])* 100;
         if($type == self::WEEK){
-            $overviewStr = "本周(".$lastTime['start_time']."-".$lastTime['end_time'].")".$cityName."区拥堵程度相对严重,";
+            $overviewStr = "本周(".self::formatTime($lastTime['start_time'])."-".self::formatTime($lastTime['end_time']).")".$cityName."区拥堵程度相对严重,";
             $change = $stop_delay_MoM > 0 ? "增长":"减少";
             $overviewStr .="市区整体平均延误".round($lastData['stop_delay'],2)."秒,环比上周".$change.abs(round($stop_delay_MoM,2))."%。";
             $change = $spillover_freq_MoM > 0 ? "增长":"减少";
@@ -105,7 +105,7 @@ class PeriodReport extends MY_Controller
             $overviewStr .="过饱和路口".$lastData['oversaturation_freq']."路口次,环比上周问题".$change.abs(round($oversaturation_freq_MoM,2))."%。";
 
         }else{
-            $overviewStr = "本月(".$lastTime['start_time']."-".$lastTime['end_time'].")".$cityName."区拥堵程度相对严重,";
+            $overviewStr = "本月(".self::formatTime($lastTime['start_time'])."-".self::formatTime($lastTime['end_time']).")".$cityName."区拥堵程度相对严重,";
             $change = $stop_delay_MoM > 0 ? "增长":"减少";
             $overviewStr .="市区整体平均延误".round($lastData['stop_delay'],2)."秒,环比上月".$change.abs(round($stop_delay_MoM,2))."%。";
             $change = $spillover_freq_MoM > 0 ? "增长":"减少";
@@ -114,8 +114,15 @@ class PeriodReport extends MY_Controller
             $overviewStr .="过饱和路口".$lastData['oversaturation_freq']."路口次,环比上月问题".$change.abs(round($oversaturation_freq_MoM,2))."%。";
         }
         return $this->response(array(
-            'summary'=>$overviewStr
+            'summary'=>$overviewStr,
+            'start_time'=>self::formatTime($lastTime['start_time']),
+            'end_time'=>self::formatTime($lastTime['end_time'])
         ));
+    }
+
+    private function formatTime($time)
+    {
+        return str_replace('-','.',$time);
     }
 
     /**
@@ -508,7 +515,15 @@ class PeriodReport extends MY_Controller
         if($timeType == self::ALLDAY){
             $finalData['quota_desc']="本".$period.$quotaInfo[$quotaKey]['name']."最大的".$topNum."个路口展示";
         }else{
-            $finalData['quota_desc']="延误最大top".$topNum.",排队长度最大top".$topNum."路口数据与上".$period."排名进行对比,并分析趋势";
+            $finalData['quota_desc']="延误top".$topNum.",排队长度top".$topNum."路口数据与上".$period."排名进行对比,并分析趋势";
+        }
+
+        if($timeType == self::MORNING){
+            $finalData['quota_title']="工作日早高峰分析(06:30 ~ 09:30)";
+        }elseif ($timeType == self::NIGHT){
+            $finalData['quota_title']="工作日晚高峰分析(16:30 ~ 19:30)";
+        }else{
+            $finalData['quota_title']="本".$period.$quotaInfo[$quotaKey]['name']."top".$topNum."路口展示";
         }
 
         //补齐路口名称
@@ -665,7 +680,7 @@ class PeriodReport extends MY_Controller
         $preaveStopDelay = $sum/$count;
         $stopDelayMoM = (($aveStopDelay - $preaveStopDelay)/$preaveStopDelay) * 100;
         $change = $stopDelayMoM > 0 ? "增加":"减少";
-        $summary = "本".$preiod.$schedule."平均延误为".round($aveStopDelay)."秒,环比上周".$change.abs(round($stopDelayMoM))."%。";
+        $summary = "本".$preiod.$schedule."平均延误为".round($aveStopDelay)."秒,环比上周".$change.abs(round($stopDelayMoM,2))."%。";
         return $this->response(array(
             'base'=>array(
                 'period'=>$lastcharData['total'],
@@ -741,7 +756,7 @@ class PeriodReport extends MY_Controller
         $preaveStopDelay = $sum/$count;
         $stopDelayMoM = (($aveStopDelay - $preaveStopDelay)/$preaveStopDelay) * 100;
         $change = $stopDelayMoM > 0 ? "增加":"减少";
-        $summary = "本".$preiod.$schedule."平均运行速度为".round($aveStopDelay)."秒,环比上周".$change.abs(round($stopDelayMoM))."%。";
+        $summary = "本".$preiod.$schedule."平均运行速度为".round($aveStopDelay)."秒,环比上周".$change.abs(round($stopDelayMoM,2))."%。";
         return $this->response(array(
             'base'=>array(
                 'period'=>$lastcharData['total'],

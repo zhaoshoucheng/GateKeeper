@@ -189,7 +189,41 @@ class CI_Exceptions {
 
 	public function show_exception($exception)
 	{
-		$templates_path = config_item('error_views_path');
+        if (ob_get_level() > $this->ob_level + 1)
+        {
+            ob_end_flush();
+        }
+        //使用json格式标准输出,替换原来输出方式
+        $backtrace = [];
+        foreach ($exception->getTrace() as $error){
+            if (isset($error['file']) && strpos($error['file'], realpath(BASEPATH)) !== 0){
+                $backtrace[] = array(
+                    "File"=> $error['file'],
+                    "Line"=> $error['line'],
+                    "Function"=> $error['function'],
+                );
+            }
+        }
+
+        $message = $exception->getMessage();
+        if (empty($message))
+        {
+            $message = '(null)';
+        }
+        $output = array(
+            'errno' => ERR_UNKNOWN,
+            'errmsg' => 'An uncaught Exception was encountered',
+            'data' => "",
+            'Message' => $message,
+            'Filename' => $exception->getFile(),
+            'Line' => $exception->getLine(),
+            'Backtrace' => $backtrace,
+        );
+        header("Content-Type:application/json;charset=UTF-8");
+        echo json_encode($output);
+
+        /*
+	    $templates_path = config_item('error_views_path');
 		if (empty($templates_path))
 		{
 			$templates_path = VIEWPATH.'errors'.DIRECTORY_SEPARATOR;
@@ -219,7 +253,7 @@ class CI_Exceptions {
 		include($templates_path.'error_exception.php');
 		$buffer = ob_get_contents();
 		ob_end_clean();
-		echo $buffer;
+		echo $buffer;*/
 	}
 
 	// --------------------------------------------------------------------
@@ -259,6 +293,12 @@ class CI_Exceptions {
             'Line' => $line,
             'Backtrace' => $backtrace,
         );
+        if(ENVIRONMENT=='production'){
+            unset($output['Backtrace']);
+//            unset($output['Filename']);
+//            unset($output['Line']);
+//            unset($output['Message']);
+        }
         header("Content-Type:application/json;charset=UTF-8");
         echo json_encode($output);
 
