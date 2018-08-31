@@ -530,6 +530,10 @@ if( ! function_exists('log_request'))
         //add span id and parent span id
         $pspanid=t_get_parent_span_id();
         $spanid=t_get_span_id();
+        if($pspanid!='0000000000000000'){
+            $spanid = $pspanid;
+        }
+
         $is_cli = defined('STDIN');
         $cli_params = array();
         if ($is_cli) {
@@ -610,7 +614,7 @@ if( ! function_exists('log_finish'))
 
         //log_notice("time: total=%f load_base=%f ac_exe=%f cache=%f (s)][memory: use=%f peak=%f (MB)"
         com_log_notice("_com_request_out", "response=%s||proc_time=%f||time=[total=%f load_base=%f ac_exe=%f (s)]||memory=[use=%f peak=%f (MB)]"
-            ,$response
+            ,substr($response,0,500*1024)
             ,$total_execution_time
             ,$total_execution_time
             ,$loading_time
