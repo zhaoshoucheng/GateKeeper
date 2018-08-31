@@ -606,7 +606,7 @@ if( ! function_exists('log_finish'))
 
         //log_notice("time: total=%f load_base=%f ac_exe=%f cache=%f (s)][memory: use=%f peak=%f (MB)"
         com_log_notice("_com_request_out", "response=%s||proc_time=%f||time=[total=%f load_base=%f ac_exe=%f (s)]||memory=[use=%f peak=%f (MB)]"
-            ,substr($response,0,50*1024)
+            ,substr($response,0,10*1024)
             ,$total_execution_time
             ,$total_execution_time
             ,$loading_time
