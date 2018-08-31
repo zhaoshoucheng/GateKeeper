@@ -28,14 +28,14 @@ class Junctionreport_model extends CI_Model
 
     /**
      * 单点路口分析–数据查询
+     *
      * @param $data
+     * @param $dates
+     * @param $hours
      * @return array
      */
-    public function queryQuotaInfo($data)
+    public function queryQuotaInfo($data, $dates, $hours)
     {
-        $dates = $this->getDates($data);
-
-        $hours = $this->getHours($data);
 
         $result = $this->db->select('sum(' . $data['quota_key'] . ' * traj_count) / sum(traj_count) as ' . $data['quota_key'] . ', hour, logic_flow_id')
             ->from($this->tb . $data['city_id'])
@@ -75,7 +75,8 @@ class Junctionreport_model extends CI_Model
                 'quota_name' => $this->quotas[$data['quota_key']]['name'],
                 'quota_unit' => $this->quotas[$data['quota_key']]['unit'],
                 'quota_desc' => $this->quotas[$data['quota_key']]['desc'][$data['type']],
-                'summary' => $pretreatResultData['summary'],
+                'summary_info' => $pretreatResultData['summary_info'],
+                'describe_info' => $pretreatResultData['describe_info'],
                 'flow_info' => $pretreatResultData['flow_info'],
                 'base_time_box' => $pretreatResultData['base_time_box']
             ],
@@ -247,12 +248,17 @@ class Junctionreport_model extends CI_Model
             $flow_info[$flowId] = [ 'name' => $flowsName[$flowId] ?? '', 'highlight' => (int)(in_array($flowId, $maxFlowIds) )];
         }
 
-        $summary = $this->quotas[$key]['summery']([
+        $describe_info = $this->quotas[$key]['describe']([
             $junctionInfo['junction']['name'] ?? '',
             $junctionInfo['flows'][$maxFlowId] ?? '',
             $start_time,
             $end_time]);
 
-        return compact('base', 'flow_info', 'base_time_box', 'summary');
+        $summary_info = $this->quotas[$key]['summary']([
+            $start_time,
+            $end_time,
+            $junctionInfo['flows'][$maxFlowId] ?? '']);
+
+        return compact('base', 'flow_info', 'base_time_box', 'describe_info', 'summary_info');
     }
 }

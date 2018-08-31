@@ -237,6 +237,7 @@ if (! function_exists('t_push_formatted_log_message')) {
     function t_push_formatted_log_message() {
         $arr = func_get_arg(0);
         $ret = array();
+        $tmp = [];
         if ( is_array($arr) ) {
             foreach ($arr as $key => $value) {
                 if(is_array($value)){
@@ -394,25 +395,54 @@ if( ! function_exists('log_warning'))
 
 if( ! function_exists('com_log_warning'))
 {
-    function com_log_warning()
+    /**
+     * 报警消息日志===>强烈推荐使用
+     * @param $dltag
+     * @param $errno
+     * @param $errmsg
+     * @param array $extra
+     */
+    function com_log_warning($dltag,$errno=0,$errmsg='',$extra=[])
+    {
+        static $_log;
+        $_log =& load_class('Log');
+        if (is_array($extra)) {
+            $args = t_push_formatted_log_message($extra);
+        }
+        $args = t_unshift_log_message($args, $dltag, $errno, $errmsg);
+        $_log->warning($args, $dltag);
+    }
+}
+
+if( ! function_exists('com_log_notice')) {
+    /**
+     * 普通消息日志===>强烈推荐使用
+     * @param $dltag
+     * @param array $extra
+     */
+    function com_log_notice($dltag, $extra=[])
+    {
+        static $_log;
+        $_log =& load_class('Log');
+        $args = [];
+        if (is_array($extra)) {
+            $args = t_push_formatted_log_message($extra);
+        }
+        $_log->notice($args, $dltag);
+    }
+}
+
+if( ! function_exists('log_notice'))
+{
+    function log_notice()
     {
         static $_log;
         $_log =& load_class('Log');
 
-        $num_args = func_num_args();
         $args = func_get_args();
-        if ($num_args >= 4) {
-            // TODO assert
-            $dltag = array_shift($args);
-            $errno = array_shift($args);
-            $errmsg = array_shift($args);
-            $_format = $args[0];
-            if (is_array($_format)) {
-                $args = t_push_formatted_log_message($_format);
-            }
-            $args = t_unshift_log_message($args, $dltag, $errno, $errmsg);
-            $_log->warning($args, $dltag);
-        }
+        $format = array_shift($args);
+        array_unshift($args, '_msg='.$format);
+        $_log->notice($args);
     }
 }
 
@@ -444,50 +474,12 @@ if( ! function_exists('com_log_strace'))
     }
 }
 
-if( ! function_exists('log_notice'))
-{
-    function log_notice()
-    {
-        static $_log;
-        $_log =& load_class('Log');
-
-        $args = func_get_args();
-        $format = array_shift($args);
-        array_unshift($args, '_msg='.$format);
-        $_log->notice($args);
-    }
-}
-
-if( ! function_exists('com_log_notice')) {
-    // TODO fill logic
-    function com_log_notice()
-    {
-        static $_log;
-        $_log =& load_class('Log');
-
-        $args = func_get_args();
-        $num_args = func_num_args();
-        $dltag = '_undef';
-        if ($num_args >= 2) {
-            // TODO assert
-            $dltag = array_shift($args);
-            $_format = $args[0];
-            // convert array format args as string
-            if (is_array($_format)) {
-                $args = t_push_formatted_log_message($_format);
-            }
-            $_log->notice($args, $dltag);
-        }
-    }
-}
-
 if( ! function_exists('log_trace'))
 {
     function log_trace()
     {
         static $_log;
         $_log =& load_class('Log');
-
         $args = func_get_args();
         $format = array_shift($args);
         array_unshift($args, '_msg='.$format);
@@ -530,6 +522,10 @@ if( ! function_exists('log_request'))
         //add span id and parent span id
         $pspanid=t_get_parent_span_id();
         $spanid=t_get_span_id();
+        if($pspanid!='0000000000000000'){
+            $spanid = $pspanid;
+        }
+
         $is_cli = defined('STDIN');
         $cli_params = array();
         if ($is_cli) {
@@ -610,7 +606,7 @@ if( ! function_exists('log_finish'))
 
         //log_notice("time: total=%f load_base=%f ac_exe=%f cache=%f (s)][memory: use=%f peak=%f (MB)"
         com_log_notice("_com_request_out", "response=%s||proc_time=%f||time=[total=%f load_base=%f ac_exe=%f (s)]||memory=[use=%f peak=%f (MB)]"
-            ,$response
+            ,substr($response,0,10*1024)
             ,$total_execution_time
             ,$total_execution_time
             ,$loading_time
