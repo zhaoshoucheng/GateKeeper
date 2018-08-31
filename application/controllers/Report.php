@@ -47,6 +47,9 @@ class Report extends MY_Controller
             if($count >= $topNum){
                 break;
             }
+            if(!$j['is_traffic']){
+                continue;
+            }
             $final_data[] = [
                 'logic_junction_id'=>$j['logic_junction_id'],
                 'lng'=>$j['lng'],
