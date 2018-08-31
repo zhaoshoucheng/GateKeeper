@@ -523,7 +523,7 @@ class PeriodReport extends MY_Controller
         }elseif ($timeType == self::NIGHT){
             $finalData['quota_title']="工作日晚高峰分析(16:30 ~ 19:30)";
         }else{
-            $finalData['quota_title']="本".$period.$quotaInfo[$quotaKey]['name']."top".$topNum."路口展示";
+            $finalData['quota_title']=$quotaInfo[$quotaKey]['name']."top".$topNum."路口分析";
         }
 
         //补齐路口名称
