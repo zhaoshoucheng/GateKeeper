@@ -8,24 +8,21 @@
 
 if (!function_exists('httpGET')) {
     function httpGET($url, $query=array(), $msTimeout = 20000, $headers = array()){
-        //$path = parse_url($url, PHP_URL_PATH);
+        //初始化参数
         $originUrl = $url;
-
         if(is_array($query) && count($query)>0){
             $url = sprintf("%s?%s", $url, http_build_query($query));
         }elseif (!empty($query)){
             $url = sprintf("%s?%s", $url, $query);
         }
-
-        $ch = curl_init();
-        //echo "start send\n";
-        //var_dump($traceId);
         $cSpanId = gen_span_id();
         $traceId = get_traceid();
-        curl_setopt ( $ch, CURLOPT_HTTPHEADER, array (
+        $headers = array_merge($headers, [
             'didi-header-rid: ' . $traceId,
             'didi-header-spanid: ' . $cSpanId,
-        ));
+        ]);
+
+        $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -35,21 +32,16 @@ if (!function_exists('httpGET')) {
         } else {
             curl_setopt($ch, CURLOPT_TIMEOUT, 2);
         }
-        if (!empty($headers)) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers); //设置header
+
         $timeStart = microtime(true);
-
         $ret = curl_exec($ch);
-
         $timeEnd = microtime(true);
         $totalTime = $timeEnd - $timeStart;
-
         if($errno = curl_errno($ch)){
             $errmsg = curl_error($ch);
-
+            //记录报警
             com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query)));
-
             curl_close($ch);
             return false;
         }
@@ -64,22 +56,23 @@ if (!function_exists('httpGET')) {
             com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query)));
             return false;
         }
-        com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>http_build_query($query), "response"=>$ret, "errno"=>$responseCode, 'proc_time'=> $totalTime]);
+
+        com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>http_build_query($query), "response"=>substr($ret,0,500*1024), "errno"=>$responseCode, 'proc_time'=> $totalTime]);
         return $ret; 
     }
 }
 
 
 if (!function_exists('httpPOST')) {
-    function httpPOST($url, $data, $msTimeout = 0, $contentType='x-www-form-urlencoded'){
-        //$path = parse_url($url, PHP_URL_PATH);
-        $ch = curl_init($url);
+    function httpPOST($url, $data, $msTimeout = 0, $contentType='x-www-form-urlencoded', $headers = array()){
         $cSpanId = gen_span_id();
         $traceId = get_traceid();
-        curl_setopt ( $ch, CURLOPT_HTTPHEADER, array (
+        $headers = array_merge($headers, [
             'didi-header-rid: ' . $traceId,
             'didi-header-spanid: ' . $cSpanId,
-        ));
+        ]);
+
+        $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_ENCODING, "UTF-8");
         curl_setopt($ch, CURLOPT_HEADER, 0);
         if ($msTimeout > 0) {
@@ -93,21 +86,21 @@ if (!function_exists('httpPOST')) {
         curl_setopt($ch, CURLOPT_POST, 1);
         if($contentType == 'json'){
             $data = json_encode($data);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Content-Length: ' . strlen($data)));
+            $headers = array_merge($headers, [
+                'Content-Type: application/json', 'Content-Length: ' . strlen($data),
+            ]);
         } elseif ($contentType == 'raw') {
             $data = $data;
         } else  {
             $data = http_build_query($data);
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers); //设置header
         $timeStart = microtime(true);
-
         $ret = curl_exec($ch);
-
         $timeEnd = microtime(true);
         $totalTime = $timeEnd - $timeStart;
-
+        
         if($errno = curl_errno($ch)){
             $errmsg = curl_error($ch);
 
@@ -129,7 +122,7 @@ if (!function_exists('httpPOST')) {
             return false;
         }
 
-        com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>$data, "response"=>$ret, "errno"=>$responseCode, 'proc_time'=> $totalTime]);
+        com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>$data, "response"=>substr($ret,0,500*1024), "errno"=>$responseCode, 'proc_time'=> $totalTime]);
         return $ret;
     }
 }
