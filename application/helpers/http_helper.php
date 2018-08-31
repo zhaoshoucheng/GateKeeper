@@ -8,11 +8,7 @@
 
 if (!function_exists('httpGET')) {
     function httpGET($url, $query=array(), $msTimeout = 20000, $headers = array()){
-
-        $spanId = gen_span_id();
-        $traceId = gen_traceid();
-
-        $path = parse_url($url, PHP_URL_PATH);
+        //$path = parse_url($url, PHP_URL_PATH);
         $originUrl = $url;
 
         if(is_array($query) && count($query)>0){
@@ -22,9 +18,13 @@ if (!function_exists('httpGET')) {
         }
 
         $ch = curl_init();
+        //echo "start send\n";
+        //var_dump($traceId);
+        $cSpanId = gen_span_id();
+        $traceId = get_traceid();
         curl_setopt ( $ch, CURLOPT_HTTPHEADER, array (
             'didi-header-rid: ' . $traceId,
-            'didi-header-spanid: ' . $spanId,
+            'didi-header-spanid: ' . $cSpanId,
         ));
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -48,7 +48,7 @@ if (!function_exists('httpGET')) {
         if($errno = curl_errno($ch)){
             $errmsg = curl_error($ch);
 
-            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$spanId, "url"=>$originUrl, "args"=>http_build_query($query)));
+            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query)));
 
             curl_close($ch);
             return false;
@@ -61,11 +61,10 @@ if (!function_exists('httpGET')) {
             if(strpos($url, $ignoreUrl)!==false){
                 return false;
             }
-            com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$spanId, "url"=>$originUrl, "args"=>http_build_query($query)));
+            com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query)));
             return false;
         }
-
-        com_log_notice('_com_http_success', ["cspanid"=>$spanId, "url"=>$url, "args"=>http_build_query($query), "response"=>$ret, "errno"=>$responseCode, 'proc_time'=> $totalTime]);
+        com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>http_build_query($query), "response"=>$ret, "errno"=>$responseCode, 'proc_time'=> $totalTime]);
         return $ret; 
     }
 }
@@ -73,11 +72,14 @@ if (!function_exists('httpGET')) {
 
 if (!function_exists('httpPOST')) {
     function httpPOST($url, $data, $msTimeout = 0, $contentType='x-www-form-urlencoded'){
-
-        $spanId = gen_span_id();
-
-        $path = parse_url($url, PHP_URL_PATH);
+        //$path = parse_url($url, PHP_URL_PATH);
         $ch = curl_init($url);
+        $cSpanId = gen_span_id();
+        $traceId = get_traceid();
+        curl_setopt ( $ch, CURLOPT_HTTPHEADER, array (
+            'didi-header-rid: ' . $traceId,
+            'didi-header-spanid: ' . $cSpanId,
+        ));
         curl_setopt($ch, CURLOPT_ENCODING, "UTF-8");
         curl_setopt($ch, CURLOPT_HEADER, 0);
         if ($msTimeout > 0) {
@@ -109,7 +111,7 @@ if (!function_exists('httpPOST')) {
         if($errno = curl_errno($ch)){
             $errmsg = curl_error($ch);
 
-            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$spanId, "url"=>$url, "args"=>$data));
+            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data));
 
             curl_close($ch);
             return false;
@@ -123,11 +125,11 @@ if (!function_exists('httpPOST')) {
             if(strpos($url, $ignoreUrl)!==false){
                 return false;
             }
-            com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$spanId, "url"=>$url, "args"=>$data));
+            com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data));
             return false;
         }
 
-        com_log_notice('_com_http_success', ["cspanid"=>$spanId, "url"=>$url, "args"=>$data, "response"=>$ret, "errno"=>$responseCode, 'proc_time'=> $totalTime]);
+        com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>$data, "response"=>$ret, "errno"=>$responseCode, 'proc_time'=> $totalTime]);
         return $ret;
     }
 }

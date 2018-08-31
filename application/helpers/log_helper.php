@@ -530,6 +530,10 @@ if( ! function_exists('log_request'))
         //add span id and parent span id
         $pspanid=t_get_parent_span_id();
         $spanid=t_get_span_id();
+        if($pspanid!='0000000000000000'){
+            $spanid = $pspanid;
+        }
+
         $is_cli = defined('STDIN');
         $cli_params = array();
         if ($is_cli) {
