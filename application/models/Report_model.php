@@ -46,6 +46,24 @@ class Report_model extends CI_Model
         //上传图片
         $data = $this->gift_model->Upload("file");
 
+        $retryNum = 0;
+        while (1){
+            if($retryNum>1000){
+                throw new \Exception("生成的报告太多.");
+            }
+            $this->db->where('city_id', $cityId);
+            $this->db->where('type', $type);
+            $this->db->where('title', $title);
+            $this->db->where('create_at >=', date("Y-m-d 00:00:00"));
+            $this->db->from('report');
+            $num = $this->db->count_all_results();
+            if($num==0){
+                break;
+            }
+            $title = str_replace("(".$retryNum.")", '', $title)."(".($retryNum+1).")";
+            $retryNum++;
+        }
+
         //插入
         $param = [
             "city_id" => $cityId,
