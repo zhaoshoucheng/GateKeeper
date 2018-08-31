@@ -12,7 +12,7 @@ $config['quotas'] = [
     'stop_delay' => [
         'name'      => '停车延误',
         'unit'      => '秒',
-        'summery'   => function($a) {
+        'summary'   => function($a) {
             $format = '%s-%s时段%s方向延误时间最高';
             return sprintf($format, $a[0] ?? '', $a[1] ?? '', $a[2] ?? '');
         },
@@ -29,7 +29,7 @@ $config['quotas'] = [
     'stop_time_cycle' => [
         'name'      => '停车次数', // 指标名称
         'unit'      => '次',
-        'summery'   => function($a) {
+        'summary'   => function($a) {
             $format = '%s-%s时段%s方向停车次数最高';
             return sprintf($format, $a[0] ?? '', $a[1] ?? '', $a[2] ?? '');
         },
@@ -46,7 +46,7 @@ $config['quotas'] = [
     'spillover_rate' => [
         'name'      => '溢流指标',
         'unit'      => '',
-        'summery'   => function($a) {
+        'summary'   => function($a) {
             $format = '%s-%s时段%s方向溢流指数最高';
             return sprintf($format, $a[0] ?? '', $a[1] ?? '', $a[2] ?? '');
         },
@@ -63,7 +63,7 @@ $config['quotas'] = [
     'queue_length' => [
         'name'      => '排队长度',
         'unit'      => '米',
-        'summery'   => function($a) {
+        'summary'   => function($a) {
             $format = '%s-%s时段%s方向最大排队长度最高';
             return sprintf($format, $a[0] ?? '', $a[1] ?? '', $a[2] ?? '');
         },
@@ -80,7 +80,7 @@ $config['quotas'] = [
     'stop_rate' => [
         'name'      => '停车比率',
         'unit'      => '',
-        'summery'   => function($a) {
+        'summary'   => function($a) {
             $format = '%s-%s时段%s方向停车比率最高';
             return sprintf($format, $a[0] ?? '', $a[1] ?? '', $a[2] ?? '');
         },
@@ -97,7 +97,7 @@ $config['quotas'] = [
     'speed' => [
         'name'      => '通过速度',
         'unit'      => '',
-        'summery'   => function($a) {
+        'summary'   => function($a) {
             $format = '%s-%s时段%s方向通过速度最低';
             return sprintf($format, $a[0] ?? '', $a[1] ?? '', $a[2] ?? '');
         },
