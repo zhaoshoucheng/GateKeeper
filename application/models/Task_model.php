@@ -180,7 +180,7 @@ class Task_model extends CI_Model
             com_log_notice('_its_task', $ret);
             if ($ret['errorCode'] == -1) {
                 // maptypeversion 未就绪
-                com_log_warning('_its_task_mapversion', $value);
+                com_log_warning('_its_task_mapversion',  -1, 'mapversion failed', $value);
                 if ($task['try_times'] < $this->max_try_times) {
                     $this->updateTask($task_id, array(
                         'expect_try_time' => $now + 10 * 60,
@@ -201,7 +201,7 @@ class Task_model extends CI_Model
             $dateVersion = $ret['data'];
             foreach ($dateVersion as $date => $version) {
                 if ($version == '') {
-                    com_log_warning('_its_task_mapversion', $value);
+                    com_log_warning('_its_task_mapversion',  -1, 'mapversion failed', $value);
                     $this->updateTask($task_id, array(
                         'expect_try_time' => $now + 10 * 60,
                         'try_times' => intval($task['try_times']) + 1,
