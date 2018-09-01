@@ -28,14 +28,14 @@ class Junctionreport_model extends CI_Model
 
     /**
      * 单点路口分析–数据查询
+     *
      * @param $data
+     * @param $dates
+     * @param $hours
      * @return array
      */
-    public function queryQuotaInfo($data)
+    public function queryQuotaInfo($data, $dates, $hours)
     {
-        $dates = $this->getDates($data);
-
-        $hours = $this->getHours($data);
 
         $result = $this->db->select('sum(' . $data['quota_key'] . ' * traj_count) / sum(traj_count) as ' . $data['quota_key'] . ', hour, logic_flow_id')
             ->from($this->tb . $data['city_id'])
