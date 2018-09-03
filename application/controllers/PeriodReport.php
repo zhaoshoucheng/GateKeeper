@@ -769,8 +769,14 @@ class PeriodReport extends MY_Controller
     private function getLastWeek($t = 1)
     {
 
+        if(intval(date('w')) == 1){
+            $mon = $t*-1;
+        }else{
+            $mon = ($t+1)*-1;
+        }
+
         return array(
-            'start_time'=>date('Y-m-d', strtotime((($t+1)*-1).' monday', time())),
+            'start_time'=>date('Y-m-d', strtotime($mon.' monday', time())),
             'end_time'=>date('Y-m-d', strtotime((($t)*-1).' sunday', time()))
         );
     }
