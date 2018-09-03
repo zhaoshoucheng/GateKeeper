@@ -106,6 +106,7 @@ class MY_Controller extends CI_Controller {
                 'errno' => $this->errno,
                 'errmsg' => $this->errmsg,
                 'data' => $this->output_data,
+                'traceid' => get_traceid(),
                 'username' => $this->username,
             );
             header("Content-Type:application/json;charset=UTF-8");
