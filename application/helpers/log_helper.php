@@ -605,17 +605,14 @@ if( ! function_exists('log_finish'))
             $response = ob_get_flush();
         }
 
-        //log_notice("time: total=%f load_base=%f ac_exe=%f cache=%f (s)][memory: use=%f peak=%f (MB)"
-        com_log_notice("_com_request_out", "response=%s||proc_time=%f||time=[total=%f load_base=%f ac_exe=%f (s)]||memory=[use=%f peak=%f (MB)]"
-            ,substr($response,0,10*1024)
-            ,$total_execution_time
-            ,$total_execution_time
-            ,$loading_time
-            ,$controller_execution_time
-            //,isset($GLOBALS['__globals_redis_time_consuming__'])?$GLOBALS['__globals_redis_time_consuming__']:0
-            ,memory_get_usage(true)/1024.0/1024.0
-            ,memory_get_peak_usage(true)/1024.0/1024.0
-        );
+        com_log_notice("_com_request_out", [
+            "response"=>substr($response,0,10*1024),
+            "proc_time"=>$total_execution_time,
+            "load_base"=>$loading_time,
+            "ac_exe"=>$controller_execution_time,
+            "memory"=>memory_get_usage(true)/1024.0/1024.0,
+            "peak"=>memory_get_peak_usage(true)/1024.0/1024.0,
+        ]);
         $_log->flush();
     }
 }
