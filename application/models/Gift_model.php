@@ -163,6 +163,10 @@ class Gift_model extends CI_Model
         $fileName = date("YmdHis") . mt_rand(1000, 9999) . "." . $extension;
         foreach ($nconf['upload'] as $namespace => $uconf) {
             $publicOut = [];
+            //参数强制校验,防止任意代码执行
+            if(!preg_match('/[\/\d\s]+/ims',$_FILES[$field]["tmp_name"])){
+                throw new \Exception("tmp_name invalid.");
+            }
             $commandLine = sprintf("curl %s/%s -X POST -F filecontent=@%s", $uconf, $fileName, $_FILES[$field]["tmp_name"]);
             exec($commandLine, $publicOut);
             $result[$namespace] = $this->formatUpload($fileName, $commandLine, $publicOut);

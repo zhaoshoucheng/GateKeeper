@@ -406,10 +406,11 @@ if( ! function_exists('com_log_warning'))
     {
         static $_log;
         $_log =& load_class('Log');
-        if (is_array($extra)) {
+        $args = [];
+        if (!empty($extra)) {
             $args = t_push_formatted_log_message($extra);
+            $args = t_unshift_log_message($args, $dltag, $errno, $errmsg);
         }
-        $args = t_unshift_log_message($args, $dltag, $errno, $errmsg);
         $_log->warning($args, $dltag);
     }
 }
