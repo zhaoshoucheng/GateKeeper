@@ -528,7 +528,7 @@ class Task extends MY_Controller
 			$this->errno = -1;
 			$this->errmsg = 'areaFlowProcess failed.';
 		}
-
+        exit();
 	}
 
 	public function mapVersionCB() {
