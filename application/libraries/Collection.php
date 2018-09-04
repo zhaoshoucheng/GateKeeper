@@ -39,9 +39,12 @@ class Collection
             $this :
             $this->column($key);
 
+        $cnt =  $array->count();
+        if($cnt == 0) return 0;
+
         return $callback == null ?
-            $array->sum() / $array->count() :
-            $callback($array->sum() / $array->count());
+            $array->sum() / $cnt :
+            $callback($array->sum() / $cnt);
     }
 
     public function concat($array)
