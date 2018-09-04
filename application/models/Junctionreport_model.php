@@ -164,25 +164,13 @@ class Junctionreport_model extends CI_Model
         $dataByFlow = [];
         $dataByHour = [];
 
-        $dataByFlow = Collection::make($result)
-            ->groupBy(['logic_flow_id', 'hour'], function ($arr) use ($key) {
+        $dataByFlow = Collection::make($result)->groupBy(['logic_flow_id', 'hour'], function ($arr) use ($key) {
                 return reset($arr)[$key] ?? '';
             })->all();
 
-        $dataByHour = Collection::make($result)
-            ->groupBy(['hour', 'logic_flow_id'], function ($arr) use ($key) {
+        $dataByHour = Collection::make($result)->groupBy(['hour', 'logic_flow_id'], function ($arr) use ($key) {
                 return reset($arr)[$key] ?? '';
             })->all();
-
-
-        foreach ($result as $item) {
-            //Flow
-            $dataByFlow[$item['logic_flow_id']] = $dataByFlow[$item['logic_flow_id']] ?? [];
-            $dataByFlow[$item['logic_flow_id']][$item['hour']] = $item[$key];
-            //Hour
-            $dataByHour[$item['hour']] = $dataByHour[$item['hour']] ?? [];
-            $dataByHour[$item['hour']][$item['logic_flow_id']] = $item[$key];
-        }
 
         //求出每个方向的全天均值中最大的方向 ID
         $flowsIdArray = [];
