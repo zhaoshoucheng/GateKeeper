@@ -185,6 +185,7 @@ class Junctionreport_model extends CI_Model
         $dataByFlow = $dataByFlow->all();
 
 
+
         //找出均值最大的方向的最大值最长持续时间区域
         $base_time_box = [];
         foreach ($maxFlowIds as $maxFlowId) {
