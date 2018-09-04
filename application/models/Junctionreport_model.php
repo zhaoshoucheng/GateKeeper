@@ -192,14 +192,14 @@ class Junctionreport_model extends CI_Model
                 $max = max($dataByHour->get($hour));
                 if($quota >= $max && $quota > 0) {
                     $nowArray['end_time'] = $hour;
-                    $nowArray['start_time'] = $nowArray['start_time'] == '' ? $nowArray['start_time'] : $hour;
+                    $nowArray['start_time'] = $nowArray['start_time'] != '' ? $nowArray['start_time'] : $hour;
                     $nowArray['length']++;
                 } else {
                     if($nowArray['length'] > $maxArray['length']) $maxArray = $nowArray;
                     $nowArray = [ 'start_time' => '', 'end_time' => '', 'length' => 0, ];
                 }
             });
-            if($nowArray['length'] <= $maxArray['length']) $nowArray = $maxArray;
+            if($nowArray['length'] < $maxArray['length']) $nowArray = $maxArray;
             if($carry->isEmpty() || $carry->get('0.length', 0) == $nowArray['length']) {
                 return $carry->set($id, $nowArray);
             } elseif($carry->get('0.length', 0) < $nowArray['length']) {
