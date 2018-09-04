@@ -298,6 +298,9 @@ class PeriodReport extends MY_Controller
                     'stop_delay'=>$v['stop_delay'],
                     'speed'=>$v['speed']
                 ];
+                if(!isset($final_data[$v['district_id']])){
+                    continue;
+                }
                 $MoM  = ($final_data[$v['district_id']]['stop_delay'] - $v['stop_delay'])/$v['stop_delay'];
                 if($MoM > $preMaxDelay){
                     $preMaxDelayId = $v['district_id'];
