@@ -66,7 +66,22 @@ class CityQuotaInfo extends QuotaInfo
             return $this->_speed = $data;
         }
         $this->_speed = self::setQuotaData($data,$key);
+    }
 
+    /**
+     * 设置为km/h的速度
+     * @param $data 原始数据
+     * @param null $key,分类关键词
+     */
+    public function setKmhSpeed($data, $key=null)
+    {
+        foreach ($data as $k => $v){
+            $data[$k]['speed'] = $v['speed']*3.6;
+        }
+        if($key === null){
+            return $this->_speed = $data;
+        }
+        $this->_speed = self::setQuotaData($data,$key);
     }
 
     /**

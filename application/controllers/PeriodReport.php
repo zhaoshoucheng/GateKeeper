@@ -736,14 +736,6 @@ class PeriodReport extends MY_Controller
         $data = $this->period_model->getCityHourData($cityId,$dateList,$hour);
         $preData = $this->period_model->getCityHourData($cityId,$preDataList,$hour);
 
-        //速度单位转换
-        foreach ($data as $dk => $dv){
-            $data[$dk]['speed'] = $dv['speed']*3.6;
-        }
-        foreach ($preData as $pdk => $pdv){
-            $preData[$pdk]['speed'] = $pdv['speed']*3.6;
-        }
-
         $evaluate = new EvaluateQuota();
         $lastcharData = $evaluate->getCitySpeedAve($data);
         $preLastcharData = $evaluate->getCitySpeedAve($preData);
