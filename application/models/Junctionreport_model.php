@@ -161,28 +161,34 @@ class Junctionreport_model extends CI_Model
         $flowsName = $junctionInfo['flows'];
 
         //构建二维数据表以映射折线图，同时创建以时间为依据分组的数据
+        //构建二维数据表以映射折线图，同时创建以时间为依据分组的数据
         $dataByFlow = [];
         $dataByHour = [];
+        foreach ($result as $item) {
+            //Flow
+            $dataByFlow[$item['logic_flow_id']] = $dataByFlow[$item['logic_flow_id']] ?? [];
+            $dataByFlow[$item['logic_flow_id']][$item['hour']] = $item[$key];
+            //Hour
+            $dataByHour[$item['hour']] = $dataByHour[$item['hour']] ?? [];
+            $dataByHour[$item['hour']][$item['logic_flow_id']] = $item[$key];
+        }
 
-        $dataByFlow = Collection::make($result)->groupBy(['logic_flow_id', 'hour'], function ($arr) use ($key) {
-            return reset($arr)[$key] ?? '';
-        });
+        //求出每个方向的全天均值中最大的方向 ID
+        $flowsIdArray = [];
+        foreach ($dataByHour as $hour => $quotas) {
+            $flowsId = array_keys($quotas, max($quotas));
+            foreach ($flowsId as $id) {
+                $flowsIdArray[$id] = ($flowsIdArray[$id] ?? 0) + 1;
+            }
+        }
+        $maxFlowIds = array_keys($flowsIdArray, max($flowsIdArray));
 
-        $dataByHour = Collection::make($result)->groupBy(['hour', 'logic_flow_id'], function ($arr) use ($key) {
-            return reset($arr)[$key] ?? '';
-        });
-
-        //求出每个方向的全天均值中最大的方向 ID //如果有多个最大值，则取平均求最大
-        $maxFlowIds = $dataByHour->reduce(function ($carry, $item){
-            return Collection::make($item)->keysOfMaxValue()->reduce(function (Collection $ca, $it) {
-                $ca->increment($it); return $ca;
-            }, $carry);
-        }, Collection::make([]))->keysOfMaxValue()->reduce(function (Collection $carry, $item) use ($dataByHour) {
-            return $carry->set($item, $dataByHour->avg($item));
-        }, Collection::make([]))->keysOfMaxValue()->all();
-
-        $dataByHour = $dataByHour->all();
-        $dataByFlow = $dataByFlow->all();
+        //如果有多个最大值，则取平均求最大
+        $avg = [];
+        foreach ($maxFlowIds as $id) {
+            $avg[$id] = array_sum($dataByFlow[$id]) / count($dataByFlow[$id]);
+        }
+        $maxFlowIds = array_keys($avg, max($avg));
 
 
         //找出均值最大的方向的最大值最长持续时间区域
