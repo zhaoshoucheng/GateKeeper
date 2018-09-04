@@ -174,8 +174,9 @@ class Junctionreport_model extends CI_Model
 
         //求出每个方向的全天均值中最大的方向 ID
         $maxFlowIds = $dataByHour->reduce(function ($carry, $item){
-            Collection::make($item)->keysOfMaxValue()
-                ->each(function ($v) use (&$carry) { $carry->increment($v); });
+            return Collection::make($item)->keysOfMaxValue()->reduce(function ($ca, $it) {
+                $ca->increment($it);
+            }, $carry);
         }, Collection::make([]))->keysOfMaxValue()->all();
 
         $dataByHour = $dataByHour->all();
