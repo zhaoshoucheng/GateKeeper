@@ -34,7 +34,8 @@ class CityQuota implements EvaluateQuotaFactory{
     public function getSpeedAve($trans2Chart=true)
     {
         $quotaInfo = new CityQuotaInfo();
-        $quotaInfo->setSpeed($this->_loadData,'date');
+//        $quotaInfo->setSpeed($this->_loadData,'date');
+        $quotaInfo->setKmhSpeed($this->_loadData,'date');
         $data = $quotaInfo->getSpeed('hour','traj_count',true);
         if($trans2Chart){
             return $quotaInfo->formatQuotaChartData($data);
