@@ -182,7 +182,7 @@ class Junctionreport_model extends CI_Model
         //找出均值最大的方向的最大值最长持续时间区域
         $base_time_box = $maxFlowIds->reduce(function (Collection $carry, $id) use ($dataByFlow, $dataByHour) {
             $maxFlow = Collection::make($dataByFlow->get($id));
-            $maxFlowFirstKey = $maxFlow->first(null, '');
+            $maxFlowFirstKey = $maxFlow->keys()->first(null, '');
             $maxArray = $nowArray = [
                 'start_time' => $maxFlowFirstKey,
                 'end_time' => $maxFlowFirstKey,
