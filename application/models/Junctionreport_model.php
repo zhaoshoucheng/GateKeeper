@@ -163,6 +163,18 @@ class Junctionreport_model extends CI_Model
         //构建二维数据表以映射折线图，同时创建以时间为依据分组的数据
         $dataByFlow = [];
         $dataByHour = [];
+
+        $dataByFlow = Collection::make($data)
+            ->groupBy(['logic_flow_id', 'hour'], function ($arr) use ($key) {
+                return reset($arr)[$key] ?? '';
+            })->all();
+
+        $dataByHour = Collection::make($data)
+            ->groupBy(['hour', 'logic_flow_id'], function ($arr) use ($key) {
+                return reset($arr)[$key] ?? '';
+            })->all();
+
+
         foreach ($result as $item) {
             //Flow
             $dataByFlow[$item['logic_flow_id']] = $dataByFlow[$item['logic_flow_id']] ?? [];
