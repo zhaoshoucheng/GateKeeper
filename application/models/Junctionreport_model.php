@@ -235,6 +235,7 @@ class Junctionreport_model extends CI_Model
                 $junctionInfo['flows'][$k] ?? '']);
         });
 
+        $base_time_box = $base_time_box->all();
         $describe_info = implode("\n", $describes);
         $summary_info = implode("\n", $summarys);
 
