@@ -38,7 +38,7 @@ class Realtimewarning extends CI_Controller
         //查询当前是否执行任务?
 
         //参数强制校验,防止任意代码执行
-        if(!is_numeric($cityId) || preg_match('/\d{1,2}:\d{1,2}:\d{1,2}/ims',$hour) || preg_match('/\d{1,2}%3A\d{1,2}%3A\d{1,2}/ims',$hour)){
+        if(!is_numeric($cityId) || !preg_match('/\d{1,2}:\d{1,2}:\d{1,2}/ims',$hour) || !preg_match('/\d{1,2}%3A\d{1,2}%3A\d{1,2}/ims',$hour)){
             $output = array(
                 'errno' => ERR_PARAMETERS,
                 'errmsg' => 'city_id 或 hour 格式错误.',
