@@ -217,10 +217,10 @@ class Junctionreport_model extends CI_Model
             }, $flow);
         });
 
-        $dataByFlow->each(function ($value, $key) use (&$base, &$flow_info, &$maxFlowIds, $flowsName) {
-            $base[$key] = [];
-            foreach ($value as $k => $v) { $base[$key][] = [$v === null ? null : $this->quotas[$key]['round']($v), $k]; }
-            $flow_info[$key] = [ 'name' => $flowsName[$key] ?? '', 'highlight' => (int)($maxFlowIds->inArray($key))];
+        $dataByFlow->each(function ($value, $ke) use (&$base, &$flow_info, &$maxFlowIds, $flowsName, $key) {
+            $base[$ke] = [];
+            foreach ($value as $k => $v) { $base[$ke][] = [$v === null ? null : $this->quotas[$key]['round']($v), $k]; }
+            $flow_info[$ke] = [ 'name' => $flowsName[$ke] ?? '', 'highlight' => (int)($maxFlowIds->inArray($ke))];
         });
 
         $base_time_box->each(function ($v, $k) use (&$describes, &$summarys, $key, $junctionInfo) {
