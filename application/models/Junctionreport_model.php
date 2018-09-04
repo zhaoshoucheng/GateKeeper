@@ -165,22 +165,20 @@ class Junctionreport_model extends CI_Model
         $dataByHour = [];
 
         $dataByFlow = Collection::make($result)->groupBy(['logic_flow_id', 'hour'], function ($arr) use ($key) {
-                return reset($arr)[$key] ?? '';
-            })->all();
+            return reset($arr)[$key] ?? '';
+        })->all();
 
         $dataByHour = Collection::make($result)->groupBy(['hour', 'logic_flow_id'], function ($arr) use ($key) {
-                return reset($arr)[$key] ?? '';
-            })->all();
+            return reset($arr)[$key] ?? '';
+        });
 
         //求出每个方向的全天均值中最大的方向 ID
-        $flowsIdArray = [];
-        foreach ($dataByHour as $hour => $quotas) {
-            $flowsId = array_keys($quotas, max($quotas));
-            foreach ($flowsId as $id) {
-                $flowsIdArray[$id] = ($flowsIdArray[$id] ?? 0) + 1;
-            }
-        }
-        $maxFlowIds = array_keys($flowsIdArray, max($flowsIdArray));
+        $maxFlowIds = $dataByHour->reduce(function ($carry, $item){
+            Collection::make($item)->keysOfMaxValue()
+                ->each(function ($v) use (&$carry) { $carry->increment($v); });
+        }, Collection::make([]))->keysOfMaxValue()->all();
+
+        $dataByHour = $dataByHour->all();
 
         //如果有多个最大值，则取平均求最大
         $avg = [];
