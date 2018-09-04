@@ -383,7 +383,7 @@ class Task extends MY_Controller
 	}
 
 	/**
-	* 修改运行任务状态信息
+	* 修改运行任务进度信息
 	* @param task_id			Y 任务ID
 	* @param rate	 			N 进度
 	* @return json
@@ -472,6 +472,50 @@ class Task extends MY_Controller
 		if ($bRet === false) {
 			$this->errno = -1;
 			$this->errmsg = '更新任务状态失败';
+		}
+	}
+
+	/**
+	* 重启任务
+	* @param task_id			Y 任务ID
+	* @return json
+	*/
+	public function rerunTask(){
+		$user = $this->username;
+		if (!in_array($user, ['unknown', '17610177007', '18101292535'])) {
+			return $this->response(array(), -1, 'invalid user');
+		}
+
+		$params = $this->input->get();
+		$validate = Validate::make($params, [
+				'task_ids'		=> 'nullunable',
+			]
+		);
+		if(!$validate['status']){
+			return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
+		}
+
+		$task_ids = $params['task_ids'];
+		$task_ids = explode(',', $task_ids);
+		if ($task_ids == false or empty($task_ids)) {
+			return $this->response(array(), -1, 'invalid task_ids');
+		}
+
+		foreach ($task_ids as $task_id) {
+			$bRet = $this->task_model->updateTask($task_id, [
+				'task_start_time' => 0,
+				'task_end_time' => 0,
+				'rate' => 0,
+				'status' => 0,
+				'try_times' => 0,
+				'expect_try_time' => 0,
+				'trace_id' => '',
+				'task_comment' => '',
+			]);
+			if ($bRet === false) {
+				$this->errno = -1;
+				$this->errmsg = '任务重启失败';
+			}
 		}
 	}
 
