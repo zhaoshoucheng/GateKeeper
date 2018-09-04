@@ -5,6 +5,7 @@
 * date:2018-03-01
 **********************************************/
 
+include_once "Inroute_Controller.php";
 class MY_Controller extends CI_Controller {
 
     public $errno = 0;

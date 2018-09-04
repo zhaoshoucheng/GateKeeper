@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Realtimewarning extends CI_Controller
+class Realtimewarning extends Inroute_Controller
 {
     public function __construct()
     {
@@ -29,23 +29,15 @@ class Realtimewarning extends CI_Controller
             return;
         }
 
+        //权限验证
+        if(ENVIRONMENT!='development'){
+            $this->authToken($params);
+        }
         $hour = $params["hour"];
         $date = $params["date"];
         $cityId = $params["city_id"];
         $traceId = $params["trace_id"];
         $uid = $params["uid"];
-
-        //查询当前是否执行任务?
-
-        //参数强制校验,防止任意代码执行
-        if(!is_numeric($cityId) || !preg_match('/\d{1,2}:\d{1,2}:\d{1,2}/ims',$hour)){
-            $output = array(
-                'errno' => ERR_PARAMETERS,
-                'errmsg' => 'city_id 或 hour 格式错误.',
-            );
-            echo json_encode($output);
-            return;
-        }
 
         exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
@@ -67,6 +59,7 @@ class Realtimewarning extends CI_Controller
             'errno' => ERR_SUCCESS,
             'errmsg' => "",
             'command' => $command,
+            'traceid' => $traceId,
         );
         echo json_encode($output);
         return;

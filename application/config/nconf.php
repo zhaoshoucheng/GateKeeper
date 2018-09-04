@@ -503,3 +503,19 @@ $config['gift'] = [
         'itstool_private' =>'http://100.69.238.37:8000/batch/resource/itstool_private',
     ],
 ];
+
+//配置
+$config['inroute'] = [
+    'default'=>[
+        'allow_host_ip' =>[
+            "10.89.236.25",     //三台jixiang机器
+            "10.89.234.61",
+            "10.89.235.12",
+            "100.90.164.31",    //server01
+            "172.25.32.135",    //web01
+            "100.90.163.52",    //web01
+            "172.25.32.135",    //测试
+        ],
+        'salt_token' =>'99f8698a68a2fa78',
+    ],
+];

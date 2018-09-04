@@ -420,12 +420,16 @@ trait ArrayRawMethod
 
     public function max($value = null, ...$values)
     {
-        return max($this->data, $value, ...$values);
+        return $value == null
+            ? max($this->data)
+            : max($this->data, $value, ...$value);
     }
 
     public function min($value = null, ...$values)
     {
-        return min($value, ...$values);
+        return $value == null
+            ? min($this->data)
+            : min($this->data, $value, ...$value);
     }
 
     public function jsonEncode()

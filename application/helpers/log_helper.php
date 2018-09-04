@@ -409,8 +409,8 @@ if( ! function_exists('com_log_warning'))
         $args = [];
         if (!empty($extra)) {
             $args = t_push_formatted_log_message($extra);
-            $args = t_unshift_log_message($args, $dltag, $errno, $errmsg);
         }
+        $args = t_unshift_log_message($args, $dltag, $errno, $errmsg);
         $_log->warning($args, $dltag);
     }
 }

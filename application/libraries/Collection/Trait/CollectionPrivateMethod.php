@@ -340,7 +340,7 @@ trait CollectionPrivateMethod
      * @param $key
      * @param callable|null $callback
      * @param bool $preserveKeys
-     * @return CollectionPrivateMethod
+     * @return Collection
      */
     private function groupByKey($key, callable $callback = null, $preserveKeys = false)
     {
