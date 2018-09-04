@@ -164,12 +164,12 @@ class Junctionreport_model extends CI_Model
         $dataByFlow = [];
         $dataByHour = [];
 
-        $dataByFlow = Collection::make($data)
+        $dataByFlow = Collection::make($result)
             ->groupBy(['logic_flow_id', 'hour'], function ($arr) use ($key) {
                 return reset($arr)[$key] ?? '';
             })->all();
 
-        $dataByHour = Collection::make($data)
+        $dataByHour = Collection::make($result)
             ->groupBy(['hour', 'logic_flow_id'], function ($arr) use ($key) {
                 return reset($arr)[$key] ?? '';
             })->all();
