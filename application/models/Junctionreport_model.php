@@ -182,7 +182,7 @@ class Junctionreport_model extends CI_Model
         //找出均值最大的方向的最大值最长持续时间区域
         $base_time_box = $maxFlowIds->reduce(function (Collection $carry, $id) use ($dataByFlow, $dataByHour) {
             $maxFlow = Collection::make($dataByFlow->get($id));
-            $maxFlowFirstKey = $maxFlow->first(null);
+            $maxFlowFirstKey = $maxFlow->first(null, '');
             $maxArray = $nowArray = [
                 'start_time' => $maxFlowFirstKey,
                 'end_time' => $maxFlowFirstKey,
@@ -192,11 +192,11 @@ class Junctionreport_model extends CI_Model
                 $max = max($dataByHour->get($hour));
                 if($quota >= $max && $quota > 0) {
                     $nowArray['end_time'] = $hour;
-                    $nowArray['start_time'] = $nowArray['start_time'] ?? $hour;
+                    $nowArray['start_time'] = $nowArray['start_time'] == '' ? $nowArray['start_time'] : $hour;
                     $nowArray['length']++;
                 } else {
                     if($nowArray['length'] > $maxArray['length']) $maxArray = $nowArray;
-                    $nowArray = [ 'start_time' => null, 'end_time' => null, 'length' => 0, ];
+                    $nowArray = [ 'start_time' => '', 'end_time' => '', 'length' => 0, ];
                 }
             });
             if($nowArray['length'] < $maxArray['length']) $nowArray = $maxArray;
@@ -235,6 +235,7 @@ class Junctionreport_model extends CI_Model
                 $junctionInfo['flows'][$k] ?? '']);
         });
 
+        $base_time_box = $base_time_box->all();
         $describe_info = implode("\n", $describes);
         $summary_info = implode("\n", $summarys);
 
