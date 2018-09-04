@@ -166,27 +166,24 @@ class Junctionreport_model extends CI_Model
 
         $dataByFlow = Collection::make($result)->groupBy(['logic_flow_id', 'hour'], function ($arr) use ($key) {
             return reset($arr)[$key] ?? '';
-        })->all();
+        });
 
         $dataByHour = Collection::make($result)->groupBy(['hour', 'logic_flow_id'], function ($arr) use ($key) {
             return reset($arr)[$key] ?? '';
         });
 
-        //求出每个方向的全天均值中最大的方向 ID
+        //求出每个方向的全天均值中最大的方向 ID //如果有多个最大值，则取平均求最大
         $maxFlowIds = $dataByHour->reduce(function ($carry, $item){
-            return Collection::make($item)->keysOfMaxValue()->reduce(function ($ca, $it) {
+            return Collection::make($item)->keysOfMaxValue()->reduce(function (Collection $ca, $it) {
                 $ca->increment($it); return $ca;
             }, $carry);
+        }, Collection::make([]))->keysOfMaxValue()->reduce(function (Collection $carry, $item) use ($dataByFlow) {
+            return $carry->set($item, $dataByFlow->avg($item));
         }, Collection::make([]))->keysOfMaxValue()->all();
 
         $dataByHour = $dataByHour->all();
+        $dataByFlow = $dataByFlow->all();
 
-        //如果有多个最大值，则取平均求最大
-        $avg = [];
-        foreach ($maxFlowIds as $id) {
-            $avg[$id] = array_sum($dataByFlow[$id]) / count($dataByFlow[$id]);
-        }
-        $maxFlowIds = array_keys($avg, max($avg));
 
         //找出均值最大的方向的最大值最长持续时间区域
         $base_time_box = [];
