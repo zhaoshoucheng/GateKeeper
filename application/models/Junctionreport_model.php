@@ -177,8 +177,8 @@ class Junctionreport_model extends CI_Model
             return Collection::make($item)->keysOfMaxValue()->reduce(function (Collection $ca, $it) {
                 $ca->increment($it); return $ca;
             }, $carry);
-        }, Collection::make([]))->keysOfMaxValue()->reduce(function (Collection $carry, $item) use ($dataByFlow) {
-            return $carry->set($item, $dataByFlow->avg($item));
+        }, Collection::make([]))->keysOfMaxValue()->reduce(function (Collection $carry, $item) use ($dataByHour) {
+            return $carry->set($item, $dataByHour->avg($item));
         }, Collection::make([]))->keysOfMaxValue()->all();
 
         $dataByHour = $dataByHour->all();
