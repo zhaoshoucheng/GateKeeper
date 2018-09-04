@@ -218,6 +218,7 @@ class Junctionreport_model extends CI_Model
         });
 
         $dataByFlow->each(function ($value, $key) use (&$base, &$flow_info, &$maxFlowIds, $flowsName) {
+            $base[$key] = [];
             foreach ($value as $k => $v) { $base[$key][] = [$v === null ? null : $this->quotas[$key]['round']($v), $k]; }
             $flow_info[$key] = [ 'name' => $flowsName[$key] ?? '', 'highlight' => (int)($maxFlowIds->inArray($key))];
         });
