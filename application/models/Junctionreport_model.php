@@ -161,8 +161,6 @@ class Junctionreport_model extends CI_Model
         $flowsName = $junctionInfo['flows'];
 
         //构建二维数据表以映射折线图，同时创建以时间为依据分组的数据
-        $dataByFlow = [];
-        $dataByHour = [];
 
         $dataByFlow = Collection::make($result)->groupBy(['logic_flow_id', 'hour'], function ($arr) use ($key) {
             return reset($arr)[$key] ?? '';
@@ -222,7 +220,7 @@ class Junctionreport_model extends CI_Model
             }, $flow);
         });
 
-        $dataByFlow->each(function ($value, $key) use (&$base, &$flow_info, &$maxFlowIds) {
+        $dataByFlow->each(function ($value, $key) use (&$base, &$flow_info, &$maxFlowIds, $flowsName) {
             foreach ($value as $k => $v) { $base[$key][] = [$v === null ? null : $this->quotas[$key]['round']($v), $k]; }
             $flow_info[$key] = [ 'name' => $flowsName[$key] ?? '', 'highlight' => (int)($maxFlowIds->inArray($key))];
         });
