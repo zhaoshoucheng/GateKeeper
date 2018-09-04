@@ -692,7 +692,7 @@ class PeriodReport extends MY_Controller
     }
 
     /**
-     *周、月报–早(晚)高峰平均延误柱状图
+     *周、月报–早(晚)高峰平均速度柱状图
      */
     public function speedChart()
     {
@@ -735,6 +735,15 @@ class PeriodReport extends MY_Controller
         $preDataList = self::getDateFromRange($prelastTime['start_time'],$prelastTime['end_time']);
         $data = $this->period_model->getCityHourData($cityId,$dateList,$hour);
         $preData = $this->period_model->getCityHourData($cityId,$preDataList,$hour);
+
+        //速度单位转换
+        foreach ($data as $dk => $dv){
+            $data[$dk]['speed'] = $dv['speed']*3.6;
+        }
+        foreach ($preData as $pdk => $pdv){
+            $preData[$pdk]['speed'] = $pdv['speed']*3.6;
+        }
+
         $evaluate = new EvaluateQuota();
         $lastcharData = $evaluate->getCitySpeedAve($data);
         $preLastcharData = $evaluate->getCitySpeedAve($preData);
@@ -756,7 +765,7 @@ class PeriodReport extends MY_Controller
         $preaveStopDelay = $sum/$count;
         $stopDelayMoM = (($aveStopDelay - $preaveStopDelay)/$preaveStopDelay) * 100;
         $change = $stopDelayMoM > 0 ? "增加":"减少";
-        $summary = "本".$preiod.$schedule."平均运行速度为".round($aveStopDelay)."秒,环比上周".$change.abs(round($stopDelayMoM,2))."%。";
+        $summary = "本".$preiod.$schedule."平均运行速度为".round($aveStopDelay,2)."km/h,环比上周".$change.abs(round($stopDelayMoM,2))."%。";
         return $this->response(array(
             'base'=>array(
                 'period'=>$lastcharData['total'],

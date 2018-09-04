@@ -51,7 +51,7 @@ class Arterialgreenwave extends MY_Controller
     */
     public function getGreenWaveOptPlan()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         if (empty($params['token'])) {
             $data['token'] = md5(microtime(true) * mt_rand(1, 10000));

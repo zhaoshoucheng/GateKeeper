@@ -30,11 +30,11 @@ class Overview extends MY_Controller
     */
     public function junctionsList()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of city_id is wrong.';
+            $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
@@ -54,11 +54,11 @@ class Overview extends MY_Controller
     */
     public function operationCondition()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of city_id is wrong.';
+            $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
@@ -79,11 +79,11 @@ class Overview extends MY_Controller
     */
     public function junctionSurvey()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of city_id is wrong.';
+            $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
@@ -106,7 +106,7 @@ class Overview extends MY_Controller
     */
     public function getCongestionInfo()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params, [
                 'city_id'    => 'min:1',
@@ -158,11 +158,11 @@ class Overview extends MY_Controller
      */
     public function verifyToken()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['tokenval'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of tokenval is empty.';
+            $this->errmsg = '参数tokenval不能为空！';
             return;
         }
 
