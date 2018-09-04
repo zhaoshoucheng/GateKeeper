@@ -24,11 +24,11 @@ class Evaluate extends MY_Controller
      */
     public function getCityJunctionList()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of city_id is wrong.';
+            $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
@@ -48,11 +48,11 @@ class Evaluate extends MY_Controller
      */
     public function getQuotaList()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of city_id is wrong.';
+            $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
@@ -73,11 +73,11 @@ class Evaluate extends MY_Controller
      */
     public function getDirectionList()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of city_id is wrong.';
+            $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
@@ -85,7 +85,7 @@ class Evaluate extends MY_Controller
 
         if(!isset($params['junction_id']) || empty(trim($params['junction_id']))) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of junction_id is empty.';
+            $this->errmsg = '参数junction_id不能为空！';
             return;
         }
 
@@ -108,7 +108,7 @@ class Evaluate extends MY_Controller
      */
     public function getJunctionQuotaSortList()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params, [
                 'city_id'   => 'min:1',
@@ -159,7 +159,7 @@ class Evaluate extends MY_Controller
      */
     public function getQuotaTrend()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params, [
                 'city_id'     => 'min:1',
@@ -210,7 +210,7 @@ class Evaluate extends MY_Controller
      */
     public function getJunctionMapData()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params, [
                 'city_id'     => 'min:1',
@@ -256,7 +256,7 @@ class Evaluate extends MY_Controller
      */
     public function quotaEvaluateCompare()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params, [
                 'city_id'     => 'min:1',
@@ -366,7 +366,7 @@ class Evaluate extends MY_Controller
      */
     public function downloadEvaluateData()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['download_id'])) {
             $this->errno = ERR_PARAMETERS;

@@ -27,7 +27,7 @@ class Track extends MY_Controller
     */
     public function getScatterMtraj()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params,
             [
@@ -46,19 +46,19 @@ class Track extends MY_Controller
         if ((int)$params['search_type'] == 0) {
             if (empty($params['time_point'])) {
                 $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'The time_point cannot be empty.';
+                $this->errmsg = '参数time_point不可为空！';
                 return;
             }
         } else {
             if (empty($params['time_range'])) {
                 $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'The time_range cannot be empty.';
+                $this->errmsg = '参数time_range不可为空！';
                 return;
             }
             $time_range = array_filter(explode('-', $params['time_range']));
             if (empty($time_range[0]) || empty($time_range[1])) {
                 $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'The time_range is wrong.';
+                $this->errmsg = '参数time_range传递错误！';
                 return;
             }
         }
@@ -90,7 +90,7 @@ class Track extends MY_Controller
     */
     public function getSpaceTimeMtraj()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params,
             [
@@ -109,19 +109,19 @@ class Track extends MY_Controller
         if ((int)$params['search_type'] == 0) {
             if (empty($params['time_point'])) {
                 $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'The time_point cannot be empty.';
+                $this->errmsg = '参数time_point不可为空！';
                 return;
             }
         } else {
             if (empty($params['time_range'])) {
                 $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'The time_range cannot be empty.';
+                $this->errmsg = '参数time_range不可为空！';
                 return;
             }
             $time_range = array_filter(explode('-', $params['time_range']));
             if (empty($time_range[0]) || empty($time_range[1])) {
                 $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'The time_range is wrong.';
+                $this->errmsg = '参数time_range传递错误！';
                 return;
             }
         }
