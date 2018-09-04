@@ -501,7 +501,7 @@ class Task extends MY_Controller
 			return $this->response(array(), -1, 'invalid task_ids');
 		}
 
-		foreach ($task_ids as $task_id => $value) {
+		foreach ($task_ids as $task_id) {
 			$bRet = $this->task_model->updateTask($task_id, [
 				'task_start_time' => 0,
 				'task_end_time' => 0,
