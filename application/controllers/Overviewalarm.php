@@ -27,7 +27,7 @@ class Overviewalarm extends MY_Controller
      */
     public function todayAlarmInfo()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params, [
                 'city_id'    => 'min:1',
@@ -68,7 +68,7 @@ class Overviewalarm extends MY_Controller
      */
     public function sevenDaysAlarmChange()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params, [
                 'city_id'    => 'min:1',
@@ -108,7 +108,7 @@ class Overviewalarm extends MY_Controller
      */
     public function realTimeAlarmList()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params, [
                 'city_id'    => 'min:1',

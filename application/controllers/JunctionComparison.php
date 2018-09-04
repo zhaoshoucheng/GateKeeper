@@ -32,7 +32,7 @@ class JunctionComparison extends MY_Controller
      */
     public function queryQuotaInfo()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         // 校验参数
         $validate = Validate::make($params, [

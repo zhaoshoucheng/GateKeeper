@@ -53,7 +53,7 @@ class Road extends MY_Controller
      */
     public function addRoad()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         // 校验参数
         $validate = Validate::make($params, [
@@ -116,7 +116,7 @@ class Road extends MY_Controller
      */
     public function editRoad()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         // 校验参数
         $validate = Validate::make($params, [
@@ -179,7 +179,7 @@ class Road extends MY_Controller
      */
     public function delete()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         // 校验参数
         $validate = Validate::make($params, [
@@ -217,7 +217,7 @@ class Road extends MY_Controller
      */
     public function getRoadDetail()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         // 校验参数
         $validate = Validate::make($params, [

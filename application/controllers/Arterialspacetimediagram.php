@@ -44,7 +44,7 @@ class Arterialspacetimediagram extends MY_Controller
     */
     public function getSpaceTimeDiagram()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
 
         // 校验参数
         $validate = Validate::make($params,

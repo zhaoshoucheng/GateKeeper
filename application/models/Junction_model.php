@@ -338,9 +338,8 @@ class Junction_model extends CI_Model
         }
 
         $selectstr = empty($this->selectColumns($selectQuotaKey)) ? '' : ',' . $this->selectColumns($selectQuotaKey);
-        $select = 'id, junction_id, stop_delay, avg_speed' . $selectstr;
-
-        $where = "task_id = " . $data['task_id'] . " and type = 0 and time_point = '{$data['time_point']}'";
+        $sql = 'select id, junction_id, stop_delay, avg_speed' . $selectstr . ' from ' . $this->tb;
+        $sql .= "task_id = ? and time_point = ? and type = 0";
 
         // 诊断问题总数
         $diagnoseKeyCount = count($data['diagnose_key']);
@@ -355,19 +354,17 @@ class Junction_model extends CI_Model
         }
         $confidenceThreshold = $this->config->item('diagnose_confidence_threshold');
 
-        $confidenceExpression[1] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '>=' . $confidenceThreshold;
-        $confidenceExpression[2] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '<' . $confidenceThreshold;
+        $confidenceExpression[1] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '>= ?';
+        $confidenceExpression[2] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '< ?';
 
         $confidenceConf = $this->config->item('confidence');
-        if ($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidenceConf)) {
-            $where .= ' and ' . $confidenceExpression[$data['confidence']];
-        }
         $res = [];
-        $res = $this->db->select($select)
-                        ->from($this->tb)
-                        ->where($where)
-                        ->get()
-                        ->result_array();
+        if ($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidenceConf)) {
+            $sql .= ' and ' . $confidenceExpression[$data['confidence']];
+            $res = $this->db->query($sql, [$data['task_id'], $data['time_point'], $confidenceThreshold])->result_array();
+        } else {
+            $res = $this->db->query($sql, [$data['task_id'], $data['time_point']])->result_array();
+        }
         if (!$res) {
             return [];
         }

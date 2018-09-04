@@ -24,7 +24,7 @@ class Timeframeoptimize extends MY_Controller
     */
     public function getAllJunctions()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params,
             [
@@ -56,7 +56,7 @@ class Timeframeoptimize extends MY_Controller
     */
     public function getJunctionMovements()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params,
             [
@@ -73,7 +73,7 @@ class Timeframeoptimize extends MY_Controller
 
         if (!is_array($params['dates']) || empty($params['dates'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The dates cannot be empty and must be array.';
+            $this->errmsg = '参数dates必须为数组且不可为空！';
             return;
         }
 
@@ -99,7 +99,7 @@ class Timeframeoptimize extends MY_Controller
     */
     public function getOptimizeTiming()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params,
             [
@@ -115,7 +115,7 @@ class Timeframeoptimize extends MY_Controller
 
         if (empty($params['dates']) || !is_array($params['dates'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The dates cannot be empty and must be array.';
+            $this->errmsg = '参数dates必须为数组且不可为空！';
             return;
         }
 
@@ -142,7 +142,7 @@ class Timeframeoptimize extends MY_Controller
     */
     public function getTodOptimizePlan()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params,
             [
@@ -159,13 +159,13 @@ class Timeframeoptimize extends MY_Controller
 
         if (empty($params['dates']) || !is_array($params['dates'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The dates cannot be empty and must be array.';
+            $this->errmsg = '参数dates必须为数组且不可为空！';
             return;
         }
 
         if (empty($params['movements']) || !is_array($params['movements'])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The movements cannot be empty and must be array.';
+            $this->errmsg = '参数movements必须为数组且不可为空！';
             return;
         }
 
