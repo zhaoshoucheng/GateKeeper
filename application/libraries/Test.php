@@ -15,6 +15,62 @@ $maxFlowIds = $dataByHour->reduce(function ($carry, $item){
     }, $carry);
 }, Collection::make([]))->keysOfMaxValue()->reduce(function (Collection $carry, $item) use ($dataByHour) {
     return $carry->set($item, $dataByHour->avg($item));
-}, Collection::make([]))->keysOfMaxValue()->all();
+}, Collection::make([]))->keysOfMaxValue();
 
-var_dump($maxFlowIds);
+//找出均值最大的方向的最大值最长持续时间区域
+$base_time_box = $maxFlowIds->reduce(function (Collection $carry, $id) use ($dataByFlow, $dataByHour) {
+    $maxFlow = Collection::make($dataByFlow->get($id));
+    $maxFlowFirstKey = $maxFlow->first(null);
+    $maxArray = $nowArray = [
+        'start_time' => $maxFlowFirstKey,
+        'end_time' => $maxFlowFirstKey,
+        'length' => 0,
+    ];
+    $maxFlow->each(function ($quota, $hour) use ($dataByHour, &$nowArray, &$maxArray) {
+        $max = max($dataByHour->get($hour));
+        if($quota >= $max && $quota > 0) {
+            $nowArray['end_time'] = $hour;
+            $nowArray['start_time'] = $nowArray['start_time'] ?? $hour;
+            $nowArray['length']++;
+        } else {
+            if($nowArray['length'] > $maxArray['length']) $maxArray = $nowArray;
+            $nowArray = [ 'start_time' => null, 'end_time' => null, 'length' => 0, ];
+        }
+    });
+    if($nowArray['length'] < $maxArray['length']) $nowArray = $maxArray;
+    if($carry->isEmpty() || $carry->get('0.length', 0) == $nowArray['length']) {
+        return $carry->set($id, $nowArray);
+    } elseif($carry->get('0.length', 0) < $nowArray['length']) {
+        return Collection::make([$id => $nowArray]);
+    } else {
+        return $carry;
+    }
+}, Collection::make([]));
+
+//如果某个时间点某个方向没有数据，则设为 null
+$hours = Collection::make($hours);
+$dataByFlow = $dataByFlow->map(function ($flow) use ($hours) {
+    return $hours->reduce(function ($carry, $item) {
+        $carry[$item] = $carry[$item] ?? null; return $carry;
+    }, $flow);
+});
+
+$dataByFlow->each(function ($value, $key) use (&$base, &$flow_info, &$maxFlowIds) {
+    foreach ($value as $k => $v) { $base[$key][] = [$v === null ? null : $this->quotas[$key]['round']($v), $k]; }
+    $flow_info[$key] = [ 'name' => $flowsName[$key] ?? '', 'highlight' => (int)($maxFlowIds->inArray($key))];
+});
+
+$base_time_box->each(function ($v, $k) use (&$describes, &$summarys, $key, $junctionInfo) {
+    $describes[] = $this->quotas[$key]['describe']([
+        $junctionInfo['junction']['name'] ?? '',
+        $junctionInfo['flows'][$k] ?? '',
+        $v['start_time'],
+        $v['end_time']]);
+    $summarys[] = $this->quotas[$key]['summary']([
+        $v['start_time'],
+        $v['end_time'],
+        $junctionInfo['flows'][$k] ?? '']);
+});
+
+$describe_info = implode("\n", $describes);
+$summary_info = implode("\n", $summarys);
