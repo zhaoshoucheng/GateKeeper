@@ -102,8 +102,13 @@ class CI_Exceptions {
 	public function log_exception($severity, $message, $filepath, $line)
 	{
 		$severity = isset($this->levels[$severity]) ? $this->levels[$severity] : $severity;
-		log_message('error', 'Severity: '.$severity.' --> '.$message.' '.$filepath.' '.$line);
-	}
+        $message = 'Severity: '.$severity.' --> '.$message.' '.$filepath.' '.$line;
+        if(function_exists('com_log_warning')){
+            com_log_warning('log_exception', 0, $message);
+        }else{
+            log_message('error', 'Severity: '.$severity.' --> '.$message.' '.$filepath.' '.$line);
+        }
+    }
 
 	// --------------------------------------------------------------------
 
@@ -211,7 +216,7 @@ class CI_Exceptions {
             $message = '(null)';
         }
         $output = array(
-            'errno' => ERR_UNKNOWN,
+            'errno' => 900001,
             'errmsg' => 'An uncaught Exception was encountered',
             'data' => "",
             'Message' => $message,
@@ -285,7 +290,7 @@ class CI_Exceptions {
             }
         }
         $output = array(
-            'errno' => ERR_UNKNOWN,
+            'errno' => 900001,
             'errmsg' => '未知错误',
             'data' => "",
             'Message' => $message,
