@@ -199,7 +199,7 @@ class Junctionreport_model extends CI_Model
                     $nowArray = [ 'start_time' => '', 'end_time' => '', 'length' => 0, ];
                 }
             });
-            if($nowArray['length'] < $maxArray['length']) $nowArray = $maxArray;
+            if($nowArray['length'] <= $maxArray['length']) $nowArray = $maxArray;
             if($carry->isEmpty() || $carry->get('0.length', 0) == $nowArray['length']) {
                 return $carry->set($id, $nowArray);
             } elseif($carry->get('0.length', 0) < $nowArray['length']) {
