@@ -44,7 +44,7 @@ class Cycletask_model extends CI_Model
             $time = date('H:i:s', $now);
             // 获取所有待投递的任务
             // $query = $this->its_tool->select('*')->from($this->_table)->where('last_exec_time <', $today)->where('expect_exec_time <', $time)->order_by('id')->get();
-            $sql = "/*{\"router\":\"m\"}*/select * from cycle_task where last_exec_time < ? and expect_exec_time < ? for update";
+            $sql = "/*{\"router\":\"m\"}*/select * from cycle_task where last_exec_time < ? and expect_exec_time < ? and is_valid = 1 for update";
             $query = $this->its_tool->query($sql, array($today, $time));
             $result = $query->result_array();
             if (empty($result)) {
