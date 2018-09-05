@@ -448,10 +448,7 @@ $config['split_opt_suggest'] = [
 // 反推配时名单
 
 $config['back_timing_roll'] = [
-    'unknown',
-    'algorithm_group_sts_p',
-    'lixiaolx_v', 'duzelong', 'wangzhimingjay','tanchenxi', 'tjlifuliang_i',
-    'hanyuhan','umzhaoyan_i','yangjianhao','wangxingmin_i','larrymeiyu_i','mengyuan','wangzihao_i','zhengjianfeng','tianshanshan','wangshengguang',
+    '13114526633', '15589979969', '15011161396', '15210612210', '15893024010', '18661627981',
 ];
 
 
