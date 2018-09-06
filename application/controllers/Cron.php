@@ -37,7 +37,7 @@ class Cron extends CI_Controller
 			$task = $this->task_model->process();
 			if ($task === true or $task === false) {
 				$i ++;
-				if ($i === 2) {
+				if ($i === 3) {
 					break;
 				}
 				sleep(5 * 60);
@@ -71,6 +71,7 @@ class Cron extends CI_Controller
 					// todo 失败分类，路网or计算thrift调用失败，计入task_comment，便于排查问题
 					$this->task_model->updateTask($task_id, ['status' => -1, 'task_comment' => 100, 'task_end_time' => time()]);
 				}
+				exit();
 			}
 		}
 	}
