@@ -327,7 +327,7 @@ class MY_Log extends CI_Log {
             default :
                 break;
         }
-        $this->write(false);
+        $this->write(true);
     }
 
     //public function fatal($args)
