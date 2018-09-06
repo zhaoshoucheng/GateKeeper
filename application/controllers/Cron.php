@@ -109,4 +109,62 @@ class Cron extends CI_Controller
 		log_message('notice', "hello failed");
 		log_message('debug', "hello failed");
 	}
+
+	public function cron() {
+		$webhook = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd3a5a4b7758c55f790fd85aef10fb43130be60d2797a3fd6ee80f9403';
+		$this->load->helper('http');
+		$city_ids = [12];
+		$config = [
+			'type' => 'POST',
+			'url' => '',
+			'params' => [
+			],
+			'checker' => '',
+		];
+		foreach ($city_ids as $city_id) {
+			$all = [];
+			foreach ($configs as $config) {
+				try {
+					try {
+						if ($config['type'] === 'GET') {
+							$ret = httpGET($config['url']);
+							if ($ret === false) {
+								throw new Exception($config['url'] .  json_encode($config['params']), 1);
+							}
+						} elseif ($config['type' === 'POST']) {
+							$ret = httpPOST($config['url']);
+							if ($ret === false) {
+								throw new Exception($config['url'] .  json_encode($config['params']), 1);
+								break;
+							}
+						} else {
+							throw new Exception(json_encode($config), 1);
+						}
+						$all[] = [
+							'url' => $config['url'],
+							'params' => $config['params'],
+							'data' => $ret,
+						];
+					} catch (Exception $e) {
+						$message = $e->getMessage();
+						continue;
+					}
+					$dir = '/home/xiaoju/data/cache/';
+					$date = date('Y-m-d');
+					$fulldir = $dir . $date . '/' . $city_id . '/';
+					if (mkdir($fulldir, 0777, true) === false) {
+						throw new Exception("mkdir {$fulldir} failed", 1);
+					}
+					foreach ($all as $one) {
+						$file = $one['url'] .  json_encode($one['params']);
+						if (file_put_contents($fulldir . $file, $one['data']) === false) {
+							throw new Exception("file_put_contents {$fulldir}{$one['data']} failed", 1);
+						}
+					}
+				} catch (Exception $e) {
+					$message = $e->getMessage();
+				}
+			}
+		}
+	}
 }
