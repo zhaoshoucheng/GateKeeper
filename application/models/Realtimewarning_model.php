@@ -345,15 +345,14 @@ class Realtimewarning_model extends CI_Model
     {
         // 获取最近时间
         $lastTime = date('Y-m-d') . ' ' . $hour;
-        $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
 
         $sql = '/*{"router":"m"}*';
         $sql .= '/select type, logic_junction_id, logic_flow_id, start_time, last_time';
         $sql .= ' from real_time_alarm';
-        $sql .= ' where city_id = ? and date = ? and last_time >= ? and last_time <= ?';
+        $sql .= ' where city_id = ? and date = ? and last_time >= ?';
         $sql .= ' order by type asc, (last_time - start_time) desc';
 
-        $arr = [$data['city_id'], $data['date'], $lastTime, $cycleTime];
+        $arr = [$data['city_id'], $data['date'], $lastTime];
 
         $realTimeAlarmsInfo = $this->db->query($sql, $arr)->result_array();
 
