@@ -161,7 +161,8 @@ class CI_Exceptions {
 	 */
 	public function show_error($heading, $message, $template = 'error_general', $status_code = 500)
 	{
-		$templates_path = config_item('error_views_path');
+        return $this->show_php_error("error", $message, "", "");
+		/*$templates_path = config_item('error_views_path');
 		if (empty($templates_path))
 		{
 			$templates_path = VIEWPATH.'errors'.DIRECTORY_SEPARATOR;
@@ -187,7 +188,7 @@ class CI_Exceptions {
 		include($templates_path.$template.'.php');
 		$buffer = ob_get_contents();
 		ob_end_clean();
-		return $buffer;
+		return $buffer;*/
 	}
 
 	// --------------------------------------------------------------------
@@ -223,6 +224,7 @@ class CI_Exceptions {
             'Filename' => $exception->getFile(),
             'Line' => $exception->getLine(),
             'Backtrace' => $backtrace,
+            'traceid' => get_traceid(),
         );
         header("Content-Type:application/json;charset=UTF-8");
         echo json_encode($output);
@@ -289,6 +291,11 @@ class CI_Exceptions {
                 );
             }
         }
+
+        $traceid = "";
+        if(function_exists("get_traceid")){
+            $traceid = get_traceid();
+        }
         $output = array(
             'errno' => 900001,
             'errmsg' => '未知错误',
@@ -297,6 +304,7 @@ class CI_Exceptions {
             'Filename' => $filepath,
             'Line' => $line,
             'Backtrace' => $backtrace,
+            'traceid' => $traceid,
         );
         if(ENVIRONMENT=='production'){
             unset($output['Backtrace']);
