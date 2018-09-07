@@ -208,6 +208,13 @@ class Collection implements CollectionInterface
         return $this->get();
     }
 
+    public function add($key, $value)
+    {
+        return !$this->has($key)
+            ? $this->set($key, $value)
+            : $this;
+    }
+
     public function eachSpread($callback)
     {
         return $this->each(function ($v) use ($callback) {
@@ -341,13 +348,6 @@ class Collection implements CollectionInterface
     protected function divide()
     {
         return [$this->keys(), $this->values()];
-    }
-
-    protected function add($key, $value)
-    {
-        return !$this->has($key) ?
-            $this->set($key, $value) :
-            $this;
     }
 
     private function forgetByKey($key)
