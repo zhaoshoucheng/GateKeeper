@@ -117,6 +117,7 @@ class Cron extends CI_Controller
         $webHook = $this->config->item('webHook', 'cron');
         $token = $this->config->item('token', 'cron');
         $city_ids = $this->config->item('city_ids', 'cron');
+        $basedir = $this->config->item('basedir', 'cron');
 
 		foreach ($city_ids as $city_id) {
 			try {
@@ -125,12 +126,12 @@ class Cron extends CI_Controller
 					if (isset($item['params']['city_id'])) {
 						$item['params']['city_id'] = $city_id;
 					}
-					if ($item['method'] === 'GET') {
+					if (strtoupper($item['method']) === 'GET') {
 						$ret = httpGET($item['url'], array_merge($item['params'], $token));
 						if ($ret === false) {
 							throw new Exception($item['url'] .  json_encode($item['params']), 1);
 						}
-					} elseif ($item['method'] === 'POST') {
+					} elseif (strtoupper($item['method']) === 'POST') {
 						$ret = httpPOST($item['url'], array_merge($item['params'], $token));
 						if ($ret === false) {
 							throw new Exception($item['url'] .  json_encode($item['params']), 1);
@@ -145,16 +146,16 @@ class Cron extends CI_Controller
 						'data' => $ret,
 					];
 				}
-				$dir = '/home/xiaoju/data/cache/';
+				$basedir = '/home/xiaoju/cache/itstool/';
 				$date = date('Y-m-d');
-				$fulldir = $dir . $date . '/' . $city_id . '/';
+				$fulldir = $basedir . $date . '/' . $city_id . '/';
 				if (!file_exists($fulldir)) {
 					if (mkdir($fulldir, 0777, true) === false) {
 						throw new Exception("mkdir {$fulldir} failed", 1);
 					}
 				}
 				foreach ($all as $one) {
-					$file = $one['url'] .  json_encode($one['params']);
+					$file = $this->getCacheFIleName($config['type'], $config['url'], $config['params']);
 					if (file_put_contents($fulldir . $file, $one['data']) === false) {
 						throw new Exception("file_put_contents {$fulldir}{$one['data']} failed", 1);
 					}
@@ -166,5 +167,12 @@ class Cron extends CI_Controller
 			}
 
 		}
+	}
+
+	private function getCacheFIleName($method, $url, $params) {
+		$method = strtoupper($method);
+		ksort($params);
+		$data = http_build_query();
+		return md5($method, $url, $params);
 	}
 }
