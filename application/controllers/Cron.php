@@ -120,51 +120,50 @@ class Cron extends CI_Controller
 
 		foreach ($city_ids as $city_id) {
 			$all = [];
-			foreach ($checkItems as $item) {
-				try {
-					try {
-						if (isset($item['params']['city_id'])) {
-							$item['params']['city_id'] = $city_id;
-						}
-						if ($item['method'] === 'GET') {
-							$ret = httpGET($item['url'], array_merge($item['params'], $token));
-							if ($ret === false) {
-								throw new Exception($item['url'] .  json_encode($item['params']), 1);
-							}
-						} elseif ($item['method' === 'POST']) {
-							$ret = httpPOST($item['url'], array_merge($item['params'], $token));
-							if ($ret === false) {
-								throw new Exception($item['url'] .  json_encode($item['params']), 1);
-								break;
-							}
-						} else {
-							throw new Exception(json_encode($item), 1);
-						}
-						$all[] = [
-							'url' => $item['url'],
-							'params' => $item['params'],
-							'data' => $ret,
-						];
-					} catch (Exception $e) {
-						$message = $e->getMessage();
-						continue;
+			try {
+				foreach ($checkItems as $item) {
+					if (isset($item['params']['city_id'])) {
+						$item['params']['city_id'] = $city_id;
 					}
-					$dir = '/home/xiaoju/data/cache/';
-					$date = date('Y-m-d');
-					$fulldir = $dir . $date . '/' . $city_id . '/';
+					if ($item['method'] === 'GET') {
+						$ret = httpGET($item['url'], array_merge($item['params'], $token));
+						if ($ret === false) {
+							throw new Exception($item['url'] .  json_encode($item['params']), 1);
+						}
+					} elseif ($item['method'] === 'POST') {
+						$ret = httpPOST($item['url'], array_merge($item['params'], $token));
+						if ($ret === false) {
+							throw new Exception($item['url'] .  json_encode($item['params']), 1);
+							break;
+						}
+					} else {
+						throw new Exception(json_encode($item), 1);
+					}
+					$all[] = [
+						'url' => $item['url'],
+						'params' => $item['params'],
+						'data' => $ret,
+					];
+				}
+				$dir = '/home/xiaoju/data/cache/';
+				$date = date('Y-m-d');
+				$fulldir = $dir . $date . '/' . $city_id . '/';
+				if (!file_exists($fulldir)) {
 					if (mkdir($fulldir, 0777, true) === false) {
 						throw new Exception("mkdir {$fulldir} failed", 1);
 					}
-					foreach ($all as $one) {
-						$file = $one['url'] .  json_encode($one['params']);
-						if (file_put_contents($fulldir . $file, $one['data']) === false) {
-							throw new Exception("file_put_contents {$fulldir}{$one['data']} failed", 1);
-						}
-					}
-				} catch (Exception $e) {
-					$message = $e->getMessage();
 				}
+				foreach ($all as $one) {
+					$file = $one['url'] .  json_encode($one['params']);
+					if (file_put_contents($fulldir . $file, $one['data']) === false) {
+						throw new Exception("file_put_contents {$fulldir}{$one['data']} failed", 1);
+					}
+				}
+			} catch (Exception $e) {
+				$message = $e->getMessage();
+				continue;
 			}
+
 		}
 	}
 }
