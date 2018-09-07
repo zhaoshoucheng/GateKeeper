@@ -123,8 +123,6 @@ class Cron extends CI_Controller
 			try {
 				$all = [];
 				foreach ($checkItems as $item) {
-					$data = array ('msgtype' => 'text','text' => array ('content' => json_encode($item)));
-					$this->requestByCurl($webhook, $data);
 					if (isset($item['params']['city_id'])) {
 						$item['params']['city_id'] = $city_id;
 					}
