@@ -123,6 +123,9 @@ class Cron extends CI_Controller
 			try {
 				$all = [];
 				foreach ($checkItems as $item) {
+					$data = array ('msgtype' => 'text','text' => array ('content' => json_encode($item)));
+					$data_string = json_encode($data);
+					httpPOST($webhook, $data_string);
 					if (isset($item['params']['city_id'])) {
 						$item['params']['city_id'] = $city_id;
 					}
@@ -161,6 +164,9 @@ class Cron extends CI_Controller
 			} catch (Exception $e) {
 				$message = $e->getMessage();
 				var_dump($message);
+				$data = array ('msgtype' => 'text','text' => array ('content' => $message));
+				$data_string = json_encode($data);
+				httpPOST($webhook, $data_string);
 				continue;
 			}
 
