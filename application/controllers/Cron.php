@@ -114,7 +114,7 @@ class Cron extends CI_Controller
 		$this->load->helper('http');
 		$this->config->load('cron', TRUE);
         $checkItems = $this->config->item('checkItems', 'cron');
-        $webHook = $this->config->item('webHook', 'cron');
+        $webhook = $this->config->item('webhook', 'cron');
         $token = $this->config->item('token', 'cron');
         $city_ids = $this->config->item('city_ids', 'cron');
         $basedir = $this->config->item('basedir', 'cron');
