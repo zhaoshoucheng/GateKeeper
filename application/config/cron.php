@@ -21,7 +21,7 @@ $config['checkItems'] = [
 	],
 	[
 		'method' => 'POST',
-		'url' => 'https://sts.didichuxing.com/signalpro/api/Overview/sevenDaysAlarmChange',
+		'url' => 'https://sts.didichuxing.com/signalpro/api/Overviewalarm/sevenDaysAlarmChange',
 		'params' => [
 			'city_id' => 0,
 		],
@@ -29,7 +29,7 @@ $config['checkItems'] = [
 	],
 	[
 		'method' => 'POST',
-		'url' => 'https://sts.didichuxing.com/signalpro/api/Overview/todayAlarmInfo',
+		'url' => 'https://sts.didichuxing.com/signalpro/api/Overviewalarm/todayAlarmInfo',
 		'params' => [
 			'city_id' => 0,
 		],
@@ -45,7 +45,7 @@ $config['checkItems'] = [
 	],
 	[
 		'method' => 'POST',
-		'url' => 'https://sts.didichuxing.com/signalpro/api/Overview/realTimeAlarmList',
+		'url' => 'https://sts.didichuxing.com/signalpro/api/Overviewalarm/realTimeAlarmList',
 		'params' => [
 			'city_id' => 0,
 		],
@@ -69,7 +69,7 @@ $config['checkItems'] = [
 	],
 	[
 		'method' => 'POST',
-		'url' => 'https://sts.didichuxing.com/signalpro/api/Overview/stopDelayTopList',
+		'url' => 'https://sts.didichuxing.com/signalpro/api/Overviewtoplist/stopDelayTopList',
 		'params' => [
 			'city_id' => 0,
 			'pagesize' => 20,
@@ -78,7 +78,7 @@ $config['checkItems'] = [
 	],
 	[
 		'method' => 'POST',
-		'url' => 'https://sts.didichuxing.com/signalpro/api/Overview/stopTimeCycleTopList',
+		'url' => 'https://sts.didichuxing.com/signalpro/api/Overviewtoplist/stopTimeCycleTopList',
 		'params' => [
 			'city_id' => 0,
 			'pagesize' => 20,
