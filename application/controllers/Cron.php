@@ -111,38 +111,35 @@ class Cron extends CI_Controller
 	}
 
 	public function cron() {
-		$webhook = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd3a5a4b7758c55f790fd85aef10fb43130be60d2797a3fd6ee80f9403';
 		$this->load->helper('http');
-		$city_ids = [12];
-		$config = [
-			'type' => 'POST',
-			'url' => '',
-			'params' => [
-			],
-			'checker' => '',
-		];
+		$this->config->load('cron', TRUE);
+        $checkItems = $this->config->item('checkItems', 'cron');
+        $webHook = $this->config->item('webHook', 'cron');
+        $token = $this->config->item('token', 'cron');
+        $city_ids = $this->config->item('city_ids', 'cron');
+
 		foreach ($city_ids as $city_id) {
 			$all = [];
-			foreach ($configs as $config) {
+			foreach ($checkItems as $item) {
 				try {
 					try {
-						if ($config['type'] === 'GET') {
-							$ret = httpGET($config['url']);
+						if ($item['method'] === 'GET') {
+							$ret = httpGET($item['url'], array_merge($item['params'], $token));
 							if ($ret === false) {
-								throw new Exception($config['url'] .  json_encode($config['params']), 1);
+								throw new Exception($item['url'] .  json_encode($item['params']), 1);
 							}
-						} elseif ($config['type' === 'POST']) {
-							$ret = httpPOST($config['url']);
+						} elseif ($item['method' === 'POST']) {
+							$ret = httpPOST($item['url'], array_merge($item['params'], $token));
 							if ($ret === false) {
-								throw new Exception($config['url'] .  json_encode($config['params']), 1);
+								throw new Exception($item['url'] .  json_encode($item['params']), 1);
 								break;
 							}
 						} else {
-							throw new Exception(json_encode($config), 1);
+							throw new Exception(json_encode($item), 1);
 						}
 						$all[] = [
-							'url' => $config['url'],
-							'params' => $config['params'],
+							'url' => $item['url'],
+							'params' => $item['params'],
 							'data' => $ret,
 						];
 					} catch (Exception $e) {
