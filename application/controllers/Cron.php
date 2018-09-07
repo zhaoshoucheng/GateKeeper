@@ -174,6 +174,6 @@ class Cron extends CI_Controller
 		$method = strtoupper($method);
 		ksort($params);
 		$data = http_build_query($params);
-		return md5($method . $url . $params);
+		return md5($method . $url . $data);
 	}
 }
