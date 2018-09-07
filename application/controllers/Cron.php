@@ -119,8 +119,8 @@ class Cron extends CI_Controller
         $city_ids = $this->config->item('city_ids', 'cron');
 
 		foreach ($city_ids as $city_id) {
-			$all = [];
 			try {
+				$all = [];
 				foreach ($checkItems as $item) {
 					if (isset($item['params']['city_id'])) {
 						$item['params']['city_id'] = $city_id;
@@ -161,6 +161,7 @@ class Cron extends CI_Controller
 				}
 			} catch (Exception $e) {
 				$message = $e->getMessage();
+				var_dump($message);
 				continue;
 			}
 
