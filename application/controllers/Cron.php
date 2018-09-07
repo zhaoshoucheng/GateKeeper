@@ -169,6 +169,7 @@ class Cron extends CI_Controller
 		}
 	}
 
+	// /home/xiaoju/webroot/cache/itstool/Y-m-d/city_id/
 	private function getCacheFileName($method, $url, $params) {
 		$method = strtoupper($method);
 		ksort($params);
