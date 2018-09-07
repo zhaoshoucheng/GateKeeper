@@ -173,7 +173,7 @@ class Cron extends CI_Controller
 	private function getCacheFileName($method, $url, $params) {
 		$method = strtoupper($method);
 		ksort($params);
-		$data = http_build_query();
+		$data = http_build_query($params);
 		return md5($method, $url, $params);
 	}
 }
