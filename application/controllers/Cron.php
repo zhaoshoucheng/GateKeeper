@@ -141,6 +141,7 @@ class Cron extends CI_Controller
 						throw new Exception(json_encode($item), 1);
 					}
 					$all[] = [
+						'method' => strtoupper($item['method']),
 						'url' => $item['url'],
 						'params' => $item['params'],
 						'data' => $ret,
@@ -155,7 +156,7 @@ class Cron extends CI_Controller
 					}
 				}
 				foreach ($all as $one) {
-					$file = $this->getCacheFIleName($config['type'], $config['url'], $config['params']);
+					$file = $this->getCacheFIleName($one['method'], $one['url'], $one['params']);
 					if (file_put_contents($fulldir . $file, $one['data']) === false) {
 						throw new Exception("file_put_contents {$fulldir}{$one['data']} failed", 1);
 					}
