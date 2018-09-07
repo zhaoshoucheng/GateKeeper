@@ -123,6 +123,9 @@ class Cron extends CI_Controller
 			foreach ($checkItems as $item) {
 				try {
 					try {
+						if (isset($item['params']['city_id'])) {
+							$item['params']['city_id'] = $city_id;
+						}
 						if ($item['method'] === 'GET') {
 							$ret = httpGET($item['url'], array_merge($item['params'], $token));
 							if ($ret === false) {
