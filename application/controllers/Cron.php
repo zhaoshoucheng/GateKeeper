@@ -147,17 +147,15 @@ class Cron extends CI_Controller
 						'data' => $ret,
 					];
 				}
-				$date = date('Y-m-d');
-				$fulldir = $basedir . $date . '/' . $city_id . '/';
-				if (!file_exists($fulldir)) {
-					if (mkdir($fulldir, 0777, true) === false) {
-						throw new Exception("mkdir {$fulldir} failed", 1);
+				if (!file_exists($basedir)) {
+					if (mkdir($basedir, 0777, true) === false) {
+						throw new Exception("mkdir {$basedir} failed", 1);
 					}
 				}
 				foreach ($all as $one) {
 					$file = $this->getCacheFileName($one['method'], $one['url'], $one['params']);
-					if (file_put_contents($fulldir . $file, $one['data']) === false) {
-						throw new Exception("file_put_contents {$fulldir}{$one['data']} failed", 1);
+					if (file_put_contents($basedir . $file, $one['data']) === false) {
+						throw new Exception("file_put_contents {$basedir}{$one['data']} failed", 1);
 					}
 				}
 			} catch (Exception $e) {
@@ -169,11 +167,11 @@ class Cron extends CI_Controller
 		}
 	}
 
-	// /home/xiaoju/webroot/cache/itstool/Y-m-d/city_id/
+	// /home/xiaoju/webroot/cache/itstool/
 	private function getCacheFileName($method, $url, $params) {
 		$method = strtoupper($method);
 		ksort($params);
 		$data = http_build_query($params);
-		return md5($method . $url . $data);
+		return md5($method . $url . $data) . '.json';
 	}
 }
