@@ -156,7 +156,7 @@ class Cron extends CI_Controller
 					}
 				}
 				foreach ($all as $one) {
-					$file = $this->getCacheFIleName($one['method'], $one['url'], $one['params']);
+					$file = $this->getCacheFileName($one['method'], $one['url'], $one['params']);
 					if (file_put_contents($fulldir . $file, $one['data']) === false) {
 						throw new Exception("file_put_contents {$fulldir}{$one['data']} failed", 1);
 					}
@@ -170,7 +170,7 @@ class Cron extends CI_Controller
 		}
 	}
 
-	private function getCacheFIleName($method, $url, $params) {
+	private function getCacheFileName($method, $url, $params) {
 		$method = strtoupper($method);
 		ksort($params);
 		$data = http_build_query();
