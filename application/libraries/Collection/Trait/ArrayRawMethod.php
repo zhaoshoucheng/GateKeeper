@@ -15,6 +15,11 @@ trait ArrayRawMethod
         $this->data = is_array($data) ? $data : [$data];
     }
 
+    public static function make($data = [])
+    {
+        return new static($data);
+    }
+
     public function arrayChangeKeyCase($case = CASE_LOWER)
     {
         return new static(array_change_key_case($this->data, $case));
