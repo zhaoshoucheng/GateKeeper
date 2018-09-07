@@ -392,7 +392,7 @@ class Collection implements CollectionInterface
                 ? $result[$v[$key]][$k] = $v
                 : $result[$v[$key]][] = $v;
         });
-        return static::make($result)->when($callback != null, function (BaseCollection $c) use ($callback) {
+        return static::make($result)->when($callback != null, function (Collection $c) use ($callback) {
             return $c->arrayWalk(function (&$v, $k) use ($callback) {
                 $v = $callback($v, $k);
             });
@@ -413,7 +413,7 @@ class Collection implements CollectionInterface
         $this->each(function ($v, $k) use (&$result, $preserveKey, $callable) {
             if($preserveKey) $result[$callable($v, $k)][$k] = $v; else $result[$callable($v, $k)][] = $v;
         });
-        return static::make($result)->when($callback != null, function (BaseCollection $c) use ($callback) {
+        return static::make($result)->when($callback != null, function (Collection $c) use ($callback) {
             return $c->arrayWalk(function (&$v, $k) use ($callback) {
                 $v = $callback($v, $k);
             });
