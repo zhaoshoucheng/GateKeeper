@@ -147,7 +147,6 @@ class Cron extends CI_Controller
 						'data' => $ret,
 					];
 				}
-				$basedir = '/home/xiaoju/cache/itstool/';
 				$date = date('Y-m-d');
 				$fulldir = $basedir . $date . '/' . $city_id . '/';
 				if (!file_exists($fulldir)) {

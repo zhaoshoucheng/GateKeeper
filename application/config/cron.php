@@ -89,5 +89,5 @@ $config['checkItems'] = [
 
 $config['webHook'] = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd3a5a4b7758c55f790fd85aef10fb43130be60d2797a3fd6ee80f9403';
 $config['token'] = ['token' => 'aedadf3e3795b933db2883bd02f31e1d'];
-$config['basedir'] = '/home/xiaoju/cache/itstool/';
+$config['basedir'] = '/home/xiaoju/webroot/cache/itstool/';
 
