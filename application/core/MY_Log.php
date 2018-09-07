@@ -32,7 +32,10 @@ class MY_Log extends CI_Log {
     protected $_enabled	= TRUE;
 
     //已有代码中使用的
-    protected $_levels	= array('ERROR' => '2', 'DEBUG' => '16',  'INFO' => '16', 'ALL' => '16');
+    //通过 log_message 可以打印的错误级别为
+    //1、存在于$_levels数组中的级别, 将key转换为小写就是 log_message("warning",xxxx);
+    //2、控制在$_threshold阈值以下的级别,当前系统默认设定为7,只打印ERROR错误
+    protected $_levels	= array('ERROR' => '2', 'WARNING' => '2', 'STRACE' => '3', 'DEBUG' => '16',  'INFO' => '16', 'ALL' => '16');
 
     const LOG_FATAL     = 1; //致命错误，已经影响到程序的正常进行
     const LOG_WARNING   = 2; //可能存在错误，但是不影响程序的正常进行
@@ -324,7 +327,7 @@ class MY_Log extends CI_Log {
             default :
                 break;
         }
-        $this->write(false);
+        $this->write(true);
     }
 
     //public function fatal($args)

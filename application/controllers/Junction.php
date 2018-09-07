@@ -416,7 +416,7 @@ class Junction extends MY_Controller
     */
     public function getQuestionTrend()
     {
-        $params = $this->input->post(NULL, TURE);
+        $params = $this->input->post(NULL, TRUE);
         if (!isset($params['task_id']) || $params['task_id'] < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数task_id传递错误！';

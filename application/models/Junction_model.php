@@ -340,7 +340,7 @@ class Junction_model extends CI_Model
         $selectstr = empty($this->selectColumns($selectQuotaKey)) ? '' : ',' . $this->selectColumns($selectQuotaKey);
         $sql = 'select id, junction_id, stop_delay, avg_speed' . $selectstr . ' from ' . $this->tb;
         $sql .= " where task_id = ? and time_point = ? and type = 0";
-        
+
         // 诊断问题总数
         $diagnoseKeyCount = count($data['diagnose_key']);
 

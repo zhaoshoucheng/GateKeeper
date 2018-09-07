@@ -453,18 +453,14 @@ class Task extends MY_Controller
 		}
 
 		if ($status == 2) {
-			if ($ider == 0) {
-				$content = "{$task_id} mapdata flow failed.";
-			} elseif ($ider == 1) {
-				$content = "{$task_id} calcute task failed.";
-			}
+			com_log_warning('_its_task_failed', -1, 'task failed', [
+				'task_id' => $task_id,
+				'ider' => $ider,
+				'status' => $status,
+				'task_comment' => $task_comment,
+			]);
 		}
-		com_log_warning('_its_task_failed', [
-			'task_id' => $task_id,
-			'ider' => $ider,
-			'status' => $status,
-			'task_comment' => $task_comment,
-		]);
+
 
 		$ider = intval($ider);
 
