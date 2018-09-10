@@ -248,16 +248,12 @@ class Task_model extends CI_Model
             foreach ($result as $one) {
                 $city_ids[] = $one['city_id'];
             }
-            return $aRet;
         } else {
             $city_ids = [$city_id];
         }
         foreach ($city_ids as $city_id) {
-            if ($is_forced == 0) {
-                $sql = 'select id from task_result where city_id = ? and user = "admin" and status != 11 order by id desc limit ?';
-            } else {
-                $sql = 'select id from task_result where city_id = ? and user = "admin" order by id desc limit ?';
-            }
+
+            $sql = 'select id, status from task_result where city_id = ? and user = "admin" order by id desc limit ?';
             $query = $this->its_tool->query($sql, [$city_id, $limit]);
             $result = $query->result_array();
             var_dump($this->its_tool->last_query());
@@ -267,7 +263,13 @@ class Task_model extends CI_Model
             }
             $task_ids = [];
             foreach ($result as $one) {
-                $city_ids[] = $one['task_id'];
+                if ($is_forced == 0 and $one['status'] == 11) {
+                    continue;
+                }
+                $task_ids[] = $one['id'];
+            }
+            if (empty($task_ids)) {
+                return;
             }
             foreach ($task_ids as $task_id) {
                 $result = $this->updateTask($task_id, [
