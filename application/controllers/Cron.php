@@ -162,7 +162,7 @@ class Cron extends CI_Controller
 				$message = $e->getMessage();
 				var_dump($message);
 				$data = array ('msgtype' => 'text','text' => array ('content' => $message));
-				$this->requestByCurl($webhook, $data);
+				httpPOST($webhook, $data, 0, 'json');
 				continue;
 			}
 
@@ -177,20 +177,11 @@ class Cron extends CI_Controller
 		return md5($method . $url . $data) . '.json';
 	}
 
-	private function requestByCurl($remote_server, $post_data) {
-		$post_string = json_encode($post_data);
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $remote_server);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array ('Content-Type: application/json;charset=utf-8'));
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_string);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        // 线下环境不用开启curl证书验证, 未调通情况可尝试添加该代码
-        // curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        // curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        $data = curl_exec($ch);
-        curl_close($ch);
-        return $data;
-    }
+	public function testding() {
+		$webhook = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd3a5a4b7758c55f790fd85aef10fb43130be60d2797a3fd6ee80f9403';
+		$message = 'Just for testing, please ignore this message.';
+		$data = array ('msgtype' => 'text','text' => array ('content' => $message));
+		$this->load->helper('http');
+		httpPOST($webhook, $data, 0, 'json');
+	}
 }

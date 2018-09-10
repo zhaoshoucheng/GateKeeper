@@ -2,7 +2,7 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-$config['city_ids'] = [1, 12];
+$config['city_ids'] = [1, 3, 12, 18, 23, 38, 85, 134];
 $config['checkItems'] = [
 	[
 		'method' => 'POST',
