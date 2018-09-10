@@ -76,6 +76,10 @@ class Cron extends CI_Controller
 		}
 	}
 
+	public function rerun() {
+		$this->task_model->rerun();
+	}
+
 	public function test() {
 		$city_id = strval(12);
 		$trace_id = uniqid();

@@ -178,7 +178,7 @@ class Task_model extends CI_Model
             $ret = $this->getDateVersion($dates);
             $ret = json_decode($ret, true);
             com_log_notice('_its_task', $ret);
-            if ($ret['errorCode'] == -1) {
+            if ($ret['errorCode'] != -1) {
                 // maptypeversion 未就绪
                 com_log_warning('_its_task_mapversion', $ret);
                 if ($task['try_times'] < $this->max_try_times) {
@@ -232,5 +232,55 @@ class Task_model extends CI_Model
                 ];
         $res = httpPOST($this->config->item('waymap_interface') . '/signal-map/map/getDateVersion', $data);
         return $res;
+    }
+
+    function rerun($city_id = 0, $is_forced = 0, $limit = 3) {
+        $city_ids = [];
+        if ($city_id == 0) {
+            $sql = 'select distinct(city_id) as city_id from cycle_task where is_valid = 1';
+            $query = $this->its_tool->query($sql);
+            $result = $query->result_array();
+            var_dump($this->its_tool->last_query());
+            var_dump($result);
+            if (empty($result)) {
+                return;
+            }
+            foreach ($result as $one) {
+                $city_ids[] = $one['city_id'];
+            }
+            return $aRet;
+        } else {
+            $city_ids = [$city_id];
+        }
+        foreach ($city_ids as $city_id) {
+            if ($is_forced == 0) {
+                $sql = 'select id from task_result where city_id = ? and user = "admin" and status != 11 order by id desc limit ?';
+            } else {
+                $sql = 'select id from task_result where city_id = ? and user = "admin" order by id desc limit ?';
+            }
+            $query = $this->its_tool->query($sql, [$city_id, $limit]);
+            $result = $query->result_array();
+            var_dump($this->its_tool->last_query());
+            var_dump($result);
+            if (empty($result)) {
+                return;
+            }
+            $task_ids = [];
+            foreach ($result as $one) {
+                $city_ids[] = $one['task_id'];
+            }
+            foreach ($task_ids as $task_id) {
+                $result = $this->updateTask($task_id, [
+                    'task_start_time' => 0,
+                    'task_end_time' => 0,
+                    'rate' => 0,
+                    'status' => 0,
+                    'try_times' => 0,
+                    'expect_try_time' => 0,
+                    'trace_id' => '',
+                    'task_comment' => '',
+                ]);
+            }
+        }
     }
 }

@@ -422,8 +422,8 @@ class Task extends MY_Controller
 	/**
 	* 修改运行任务状态信息
 	* @param task_id			Y 任务ID
-	* @param ider	 			N 身份	0 mapflow, 1 calcute
-	* @param status	 			N 执行状态，0 待执行/执行中；1 成功；2 失败
+	* @param ider	 			Y 身份	0 mapflow, 1 calcute
+	* @param status	 			Y 执行状态，0 待执行/执行中；1 成功；2 失败
 	* @param task_comment	 	N 注释
 	* @return json
 	*/
@@ -472,7 +472,7 @@ class Task extends MY_Controller
 	}
 
 	/**
-	* 重启任务
+	* 重跑任务，基于任务id
 	* @param task_id			Y 任务ID
 	* @return json
 	*/
@@ -513,6 +513,40 @@ class Task extends MY_Controller
 				$this->errmsg = '任务重启失败';
 			}
 		}
+	}
+
+	/**
+	* 重跑任务，基于城市id
+	* @param city_id			N 城市ID，默认所有
+	* @param is_forced			N 重跑所有or失败的，默认0——失败
+	* @param limit				N limit
+	* @return json
+	*/
+	public function rerun(){
+		$user = $this->username;
+		if (!in_array($user, ['unknown', '17610177007', '18101292535'])) {
+			return $this->response(array(), -1, 'invalid user');
+		}
+
+		$params = $this->input->get();
+
+		if (isset($params['city_id'])) {
+			$city_id = $params['city_id'];
+		} else {
+			$city_id = 0;
+		}
+		if (isset($params['is_forced'])) {
+			$is_forced = $params['is_forced'];
+		} else {
+			$is_forced = 0;
+		}
+		if (isset($params['limit'])) {
+			$limit = $params['limit'];
+		} else {
+			$limit = 3;
+		}
+
+		$this->task_model->rerun($city_id, $is_forced, $limit);
 	}
 
 	public function areaFlowProcess() {
