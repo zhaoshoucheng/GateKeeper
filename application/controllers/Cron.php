@@ -109,4 +109,88 @@ class Cron extends CI_Controller
 		log_message('notice', "hello failed");
 		log_message('debug', "hello failed");
 	}
+
+	public function cron() {
+		$this->load->helper('http');
+		$this->config->load('cron', TRUE);
+        $checkItems = $this->config->item('checkItems', 'cron');
+        $webhook = $this->config->item('webhook', 'cron');
+        $token = $this->config->item('token', 'cron');
+        $city_ids = $this->config->item('city_ids', 'cron');
+        $basedir = $this->config->item('basedir', 'cron');
+
+		foreach ($city_ids as $city_id) {
+			try {
+				$all = [];
+				foreach ($checkItems as $item) {
+					if (isset($item['params']['city_id'])) {
+						$item['params']['city_id'] = $city_id;
+					}
+					if (strtoupper($item['method']) === 'GET') {
+						$ret = httpGET($item['url'], array_merge($item['params'], $token));
+						if ($ret === false) {
+							throw new Exception($item['url'] .  json_encode($item['params']), 1);
+						}
+					} elseif (strtoupper($item['method']) === 'POST') {
+						$ret = httpPOST($item['url'], array_merge($item['params'], $token));
+						if ($ret === false) {
+							throw new Exception($item['url'] .  json_encode($item['params']), 1);
+							break;
+						}
+					} else {
+						throw new Exception(json_encode($item), 1);
+					}
+					$all[] = [
+						'method' => strtoupper($item['method']),
+						'url' => $item['url'],
+						'params' => $item['params'],
+						'data' => $ret,
+					];
+				}
+				if (!file_exists($basedir)) {
+					if (mkdir($basedir, 0777, true) === false) {
+						throw new Exception("mkdir {$basedir} failed", 1);
+					}
+				}
+				foreach ($all as $one) {
+					$file = $this->getCacheFileName($one['method'], $one['url'], $one['params']);
+					if (file_put_contents($basedir . $file, $one['data']) === false) {
+						throw new Exception("file_put_contents {$basedir}{$one['data']} failed", 1);
+					}
+				}
+			} catch (Exception $e) {
+				$message = $e->getMessage();
+				var_dump($message);
+				$data = array ('msgtype' => 'text','text' => array ('content' => $message));
+				$this->requestByCurl($webhook, $data);
+				continue;
+			}
+
+		}
+	}
+
+	// /home/xiaoju/webroot/cache/itstool/
+	private function getCacheFileName($method, $url, $params) {
+		$method = strtoupper($method);
+		ksort($params);
+		$data = http_build_query($params);
+		return md5($method . $url . $data) . '.json';
+	}
+
+	private function requestByCurl($remote_server, $post_data) {
+		$post_string = json_encode($post_data);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $remote_server);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array ('Content-Type: application/json;charset=utf-8'));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_string);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        // 线下环境不用开启curl证书验证, 未调通情况可尝试添加该代码
+        // curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        // curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        $data = curl_exec($ch);
+        curl_close($ch);
+        return $data;
+    }
 }
