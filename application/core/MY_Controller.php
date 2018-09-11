@@ -28,8 +28,10 @@ class MY_Controller extends CI_Controller {
             $this->is_check_login = 1;
 
             $this->load->model('user/user', 'user');
+            $this->routerUri = $this->uri->ruri_string();
             // 此处采用appid+appkey的验证
             if (isset($_REQUEST['app_id']) && isset($_REQUEST['sign'])) {
+                com_log_notice('_com_sign', ['uri' => $this->routerUri, 'request' => $_REQUEST]);
                 if (!$this->_checkAuthorizedApp()) {
                     $this->_output();
                     exit();
@@ -116,6 +118,7 @@ class MY_Controller extends CI_Controller {
         }
         // 获取所有的参数
         $params = $this->input->post();
+        com_log_notice('_com_sign', ['params' => $params]);
         unset($params['sign']);
         if (!isset($params['ts'])) {
             $params['ts'] = time();
@@ -133,6 +136,7 @@ class MY_Controller extends CI_Controller {
         $app_id = $_REQUEST['app_id'];
         $this->load->config('appkey', true);
         $app_config = $this->config->item('authirized_apps', 'appkey');
+        com_log_notice('_com_sign', ['client_sign' => $client_sign, 'app_id' => $app_id, 'app_config' => $app_config]);
         if (!isset($app_config[$app_id]) || !isset($app_config[$app_id]['secret'])) {
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "该appid:{$app_id}没有授权";
