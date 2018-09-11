@@ -153,15 +153,16 @@ class Cron extends CI_Controller
                  	$params['ts'] = time();
                  	$params['app_id'] = $app_id;
                     $sign = $this->genSign($params, $secret);
+                 	$params['sign'] = $sign;
                     if (strtoupper($item['method']) === 'GET') {
                         $ret = httpGET($url, $params);
                         if ($ret === false) {
-                            throw new Exception($item['url'] . json_encode(array_merge($item['params'], $token))." get content exception ", 1);
+                            throw new Exception($url . json_encode($params)." get content exception ", 1);
                         }
                     } elseif (strtoupper($item['method']) === 'POST') {
                         $ret = httpPOST($url, $params);
                         if ($ret === false) {
-                            throw new Exception($url . json_encode(array_merge($item['params'], $token))." get content exception ", 1);
+                            throw new Exception($url . json_encode($params)." get content exception ", 1);
                             break;
                         }
                     } else {
