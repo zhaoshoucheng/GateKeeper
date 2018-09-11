@@ -58,7 +58,7 @@ if (!function_exists('httpGET')) {
         }
 
         com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>http_build_query($query), "response"=>substr($ret,0,10*1024), "errno"=>$responseCode, 'proc_time'=> $totalTime]);
-        return $ret; 
+        return $ret;
     }
 }
 
@@ -100,7 +100,7 @@ if (!function_exists('httpPOST')) {
         $ret = curl_exec($ch);
         $timeEnd = microtime(true);
         $totalTime = $timeEnd - $timeStart;
-        
+
         if($errno = curl_errno($ch)){
             $errmsg = curl_error($ch);
 

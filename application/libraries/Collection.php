@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: didi
+ * User: LiCxi
  * Date: 2018/8/23
  * Time: 下午4:16
  */
@@ -9,88 +9,210 @@
 if(!defined('COLLECTION_DIR'))
     define('COLLECTION_DIR', __DIR__ . '/Collection/');
 
-require COLLECTION_DIR .'tools.php';
-require COLLECTION_DIR .'Trait/CollectionPrivateMethod.php';
+require COLLECTION_DIR . 'tools.php';
+require COLLECTION_DIR . 'Trait/ArrayRawMethod.php';
+require COLLECTION_DIR . 'Interface/CollectionInterface.php';
 
-class Collection
+class Collection implements CollectionInterface
 {
-    use CollectionPrivateMethod;
+    use ArrayRawMethod;
 
-    public function __toString()
+    /**
+     * 求数组的平均值，并对结果进行回调处理（保留两位小数...）
+     *
+     * @param string|int|null $key 二维数组元素的键名，求一位数组则设为 null
+     * @param callable|null $callback 处理结果的回调函数，可用来处理小数位数
+     * @return float|int|null
+     */
+    public function avg($key = null, $callback = null)
     {
-        return dump($this->toArray());
-    }
-
-    public function add($key, $value)
-    {
-        return !$this->has($key) ?
-            $this->set($key, $value) :
-            $this;
-    }
-
-    public function all()
-    {
-        return $this->toArray();
-    }
-
-    public function avg($key = null, callable $callback = null)
-    {
+        /*
+         * 获取求平均值的目标数组
+         */
         $array = $key == null ?
             $this :
             $this->column($key);
 
-        $cnt =  $array->count();
-        if($cnt == 0) return 0;
+        /*
+         * 如果数组为空则返回 null
+         */
+        if($array->isEmpty())
+            return null;
 
+        /*
+         * 如果传入函数参数不为 null 则回调处理结果
+         */
         return $callback == null ?
-            $array->sum() / $cnt :
-            $callback($array->sum() / $cnt);
+            $array->sum() / $array->count() :
+            $callback($array->sum() / $array->count());
     }
 
-    public function concat($array)
-    {
-        return static::make($array)
-            ->each(function ($v) {
-                $this->push($v);
-            });
-    }
-
-    public function contains($param, $value = null)
-    {
-        return $this->when($value !== null, function (Collection $c) use ($param, $value) {
-            return $c->containsByKeyValue($param, $value);
-        })->when(is_callable($param), function (Collection $c) use ($param) {
-            return $c->containsByCallback($param);
-        })->when($value === null && !is_callable($param), function (Collection $c) use ($param) {
-            return $c->containsByValue($param);
-        });
-    }
-
-    public function collapse()
-    {
-        return $this->reduce(function (Collection $carry, $item) {
-            return $carry->arrayMerge($item);
-        }, static::make([]));
-    }
-
-    public function divide()
-    {
-        return [$this->keys(), $this->values()];
-    }
-
-    public function dot()
-    {
-        return $this->dotTo();
-    }
-
-    public function decrement($key, $value = 1)
-    {
-        $this->set($key, $this->get($key, 0) - $value);
-    }
-
+    /**
+     * 遍历数组，回调函数返回 false 则跳出循环
+     *
+     * @param Callable $callback function($k, $v) { ... }
+     * @return $this
+     */
     public function each($callback)
     {
-        return $this->foreach($callback);
+        foreach ($this->data as $k => $v) {
+            /*
+             * 使用回调函数对元素键值对进行处理，如果返回 false 则跳出循环
+             */
+            if($callback($v, $k) === false) break;
+        }
+        return $this;
+    }
+
+    /**
+     * 移除指定键值，支持 . 表示深度，可关闭对 . 的支持
+     *
+     * @param string|int $key 想要移除的键名，可包含 .
+     * @param bool $dotKey 是否关闭对 . 的支持
+     * @return Collection
+     */
+    public function forget($key, $dotKey = true)
+    {
+        $key = $dotKey
+            ? explode('.', $key)
+            : [$key];
+
+        return $this->forgetByArray($key);
+    }
+
+    /**
+     * 获取集合指定键值的元素，支持 . 表示深度，可关闭对 . 的支持
+     *
+     * @param null $key 想要获取的键名，可包含 . ，为 null 则获取完整的集合元素
+     * @param null $default 集合中不存在目标元素则返回 $default
+     * @param bool $dotKey 是否关闭对 . 的支持
+     * @return array|mixed
+     */
+    public function get($key = null, $default = null, $dotKey = true)
+    {
+        if($key === null)
+            return $this->data;
+
+        $key = $dotKey
+            ? explode('.', $key)
+            : [$key];
+
+        return $this->getByArray($key, $default);
+    }
+
+    /**
+     * 将集合按照指定参数分组
+     *
+     * @param string|int|array|callable $param 分组依据的字段
+     * @param callable|null $callback 分组后每组数据的处理
+     * @param bool $preserveKey 分组后是否保留原有的键名
+     * @return Collection|mixed 返回分组后的集合对象
+     */
+    public function groupBy($param, $callback = null, $preserveKey = false)
+    {
+        /*
+         * 第一个参数传入的是函数，则按照函数分组
+         */
+        if(is_callable($param))
+            return $this->groupByCallback($param, $callback, $preserveKey);
+        /*
+         * 第一个参数传入的是数组，则按照数组递归分组
+         */
+        if(is_array($param))
+            return $this->groupByArray($param, $callback, $preserveKey);
+
+        /*
+         * 其他类型的参数则按照键名分组
+         */
+        return $this->groupByKey($param, $callback, $preserveKey);
+    }
+
+    /**
+     * 判断集合是否存在指定键名，支持 . 表示深度
+     *
+     * @param array|string $key 指定键名
+     * @param mixed $value 指定键值
+     * @param bool $dotKey 是否开启 . 表示深度
+     * @return bool|mixed
+     */
+    public function has($key, $value = null, $dotKey = true)
+    {
+        /*
+         * 如果 $key 为 string 类型 且 开启 . 表示深度
+         * 则将字符串按 . 分割为数组
+         * 否则将其本身作为数组元素
+         */
+        if(is_string($key))
+            $key = $dotKey
+                ? explode('.', $key)
+                : [$key];
+
+        /*
+         * 如果 $key 既不是 string，也不是 numeric
+         * 则返回 null
+         */
+        elseif(!is_numeric($key))
+            return null;
+
+        return $value === null
+            ? $this->hasByArrayKey($key)
+            : $this->hasByArrayKeyValue($key, $value);
+    }
+
+    /**
+     * 设置指定键值，支持 . 表示深度
+     *
+     * @param string $key
+     * @param mixed $value
+     * @param bool $dotKey
+     * @return Collection|mixed|null
+     */
+    public function set($key, $value, $dotKey = true)
+    {
+        /*
+         * 如果 $key 为 string 类型 且 开启 . 表示深度
+         * 则将字符串按 . 分割为数组
+         * 否则将其本身作为数组元素
+         */
+        if(is_string($key))
+            $key = $dotKey
+                ? explode('.', $key)
+                : [$key];
+
+        /*
+         * 如果 $key 既不是 string，也不是 numeric
+         * 则返回 null
+         */
+        elseif(!is_numeric($key))
+            return null;
+
+        return $this->setByArray($key, $value);
+    }
+
+    /**
+     * 将二维数组按照指定字段排序
+     *
+     * @param string|int|callable $param 排序字段
+     * @param int $arraySortOrder 排序方式
+     * @return Collection|mixed
+     */
+    public function sortBy($param, $arraySortOrder = SORT_ASC)
+    {
+        return is_callable($param)
+            ? $this->sortByCallback($param, $arraySortOrder)
+            : $this->sortByKey($param, $arraySortOrder);
+    }
+
+    public function all()
+    {
+        return $this->get();
+    }
+
+    public function add($key, $value)
+    {
+        return !$this->has($key)
+            ? $this->set($key, $value)
+            : $this;
     }
 
     public function eachSpread($callback)
@@ -100,60 +222,21 @@ class Collection
         });
     }
 
-    public function except($keys)
+    public function collapse()
     {
-        if(is_array($keys)) return $this->exceptByArray($keys);
-        return $this->exceptByKey($keys);
+        return $this->reduce(function (Collection $carry, $item) {
+            return $carry->merge($item);
+        }, static::make([]));
     }
 
-    public function first(callable $callback = null, $default = null)
+    public function decrement($key, $value = 1)
     {
-        if($callback == null) return $this->empty() ? $default : $this->reset();
-        $this->foreach(function ($v, $k) use (&$res, $callback) {
-            if($callback($v, $k)) {$res = $v; return false;}
-        });
-        return $res ?? $default;
-    }
-
-    public function flatten()
-    {
-        return $this->dot()->values();
-    }
-
-    public function forget($key)
-    {
-        $key = $key instanceof static ? $key->toArray() : $key;
-        if(is_array($key)) return $this->forgetByArray($key);
-        return $this->forgetByDot($key);
-    }
-
-    public function forPage($offset, $limit)
-    {
-        return $this->arrayFilter(function ($k) use ($offset, $limit) {
-            return $k >= $offset && $k < $offset + $limit;
-        }, ARRAY_FILTER_USE_KEY);
-    }
-
-    public function get($key = null, $default = null)
-    {
-        return $this->getByDot($key, $default);
-    }
-
-    public function groupBy($param, $callback = null, $preserveKeys = false)
-    {
-        if(is_callable($param)) return $this->groupByCallback($param, $callback, $preserveKeys);
-        if(is_array($param)) return $this->groupByArray($param, $callback, $preserveKeys);
-        return $this->groupByKey($param, $callback, $preserveKeys);
-    }
-
-    public function has($key)
-    {
-        return $this->hasByDot($key);
+        $this->set($key, $this->get($key, 0, false) - $value, false);
     }
 
     public function increment($key, $value = 1)
     {
-        $this->set($key, $this->get($key, 0) + $value);
+        $this->set($key, $this->get($key, 0, false) + $value, false);
     }
 
     public function implode($key, $gule = null)
@@ -166,22 +249,12 @@ class Collection
         return $this->empty();
     }
 
-    public function isNotEmpty()
-    {
-        return !$this->isEmpty();
-    }
-
-    public function keyBy($key)
-    {
-        return is_callable($key) ? $this->groupByCallback($key) : $this->groupByKey($key);
-    }
-
     public function keysOfMaxValue()
     {
         return $this->keys($this->max());
     }
 
-    public function last($callback = null, $default = null)
+    public function last(callable $callback = null, $default = null)
     {
         if($callback == null)
             return $this->empty() ?
@@ -191,24 +264,13 @@ class Collection
         return $this->reverse()->first($callback);
     }
 
-    public function only($key)
+    public function first(callable $callback = null, $default = null)
     {
-        return is_array($key) ?
-            $this->onlyByArray($key) :
-            $this->onlyByKey($key);
-    }
-
-    public function pluck($key)
-    {
-        return $this->map(function ($v) use ($key) {
-            return $v[$key] ?? null;
-        })->filter()->values();
-    }
-
-    public function prepend($value, $key = null)
-    {
-        if($key == null) { $this->unshift($value); return $this;};
-        return static::make([$key => $value])->merge($this->toArray());
+        if($callback == null) return $this->empty() ? $default : $this->reset();
+        $this->each(function ($v, $k) use (&$res, $callback) {
+            if($callback($v, $k)) { $res = $v; return false; }
+        });
+        return $res ?? $default;
     }
 
     public function pull($key)
@@ -218,34 +280,9 @@ class Collection
         return $result;
     }
 
-    public function set($key, $value)
-    {
-        return $this->setByDot($key, $value);
-    }
-
-    public function sortBy($param)
-    {
-        return is_callable($param) ? $this->sortByCallback($param) : $this->sortByKey($param);
-    }
-
-    public function take($num)
-    {
-        return $num > 0 ?
-            $this->slice(0, $num) :
-            $this->reverse()->slice(0, -$num);
-    }
-
     public function toJson()
     {
         return $this->jsonEncode();
-    }
-
-    public function unless($bool, callable $callable)
-    {
-        if(!$bool)
-            $callable($this);
-
-        return $this;
     }
 
     public function when($bool, callable $callable)
@@ -258,15 +295,207 @@ class Collection
 
     public function where($key, $compare = null, $value = null)
     {
-        return is_array($key) ?
-            $this->whereByArray($key) :
-            $this->whereByKey($key, $compare, $value);
+        return $this->whereByKey($key, $compare, $value);
     }
 
     public function whereIn($key, $values)
     {
         return $this->filter(function ($v) use ($key, $values) {
             return in_array($v[$key], $values);
+        });
+    }
+
+    protected function concat($array)
+    {
+        return static::make($array)
+            ->each(function ($v) {
+                $this->push($v);
+            });
+    }
+
+    protected function except(...$keys)
+    {
+        return $this->filter(function ($k) use ($keys) {
+            return !in_array($k, $keys);
+        }, ARRAY_FILTER_USE_KEY);
+    }
+
+    protected function only(...$keys)
+    {
+        return $this->filter(function ($k) use ($keys) {
+            return in_array($k, $keys);
+        }, ARRAY_FILTER_USE_KEY);
+    }
+
+    protected function pluck($key)
+    {
+        return $this->map(function ($v) use ($key) {
+            return $v[$key] ?? null;
+        })->filter()->values();
+    }
+
+    protected function prepend($value, $key = null)
+    {
+        if($key == null) {
+            $this->unshift($value);
+            return $this;
+        };
+
+        return static::make([$key => $value])
+            ->merge($this->get());
+    }
+
+    protected function divide()
+    {
+        return [$this->keys(), $this->values()];
+    }
+
+    private function forgetByKey($key)
+    {
+        unset($this->data[$key]);
+        return $this;
+    }
+
+    private function forgetByArray($keys)
+    {
+        if(empty($keys))
+            return $this;
+
+        if(count($keys) == 1)
+            return $this->forgetByKey(current($keys));
+
+        $key = array_shift($keys);
+        return $this->set($key, static::make($this->get($key))->forgetByArray($keys)->get());
+    }
+
+    private function getByKey($key, $default)
+    {
+        return $this->data[$key] ?? $default;
+    }
+
+    private function getByArray($keys, $default)
+    {
+        if(empty($keys))
+            return $this->data;
+
+        if(count($keys) == 1)
+            return $this->getByKey(current($keys), $default);
+
+        return static::make($this->getByKey(array_shift($keys), $default))
+                ->getByArray($keys, $default);
+    }
+
+    private function groupByKey($key, callable $callback = null, $preserveKey = false)
+    {
+        $this->each(function ($v, $k) use (&$result, $preserveKey, $key) {
+            $preserveKey
+                ? $result[$v[$key]][$k] = $v
+                : $result[$v[$key]][] = $v;
+        });
+        return static::make($result)->when($callback != null, function (Collection $c) use ($callback) {
+            return $c->arrayWalk(function (&$v, $k) use ($callback) {
+                $v = $callback($v, $k);
+            });
+        });
+    }
+
+    private function groupByArray($keys, callable $callback = null, $preserveKey = false)
+    {
+        return count($keys) == 1
+            ? $this->groupByKey(current($keys), $callback, $preserveKey)
+            : $this->groupByKey(array_shift($keys), function ($v) use ($keys, $callback, $preserveKey) {
+                return static::make($v)->groupByArray($keys, $callback, $preserveKey)->get();
+            }, $preserveKey);
+    }
+
+    private function groupByCallback(callable $callable, callable $callback = null, $preserveKey = false)
+    {
+        $this->each(function ($v, $k) use (&$result, $preserveKey, $callable) {
+            if($preserveKey) $result[$callable($v, $k)][$k] = $v; else $result[$callable($v, $k)][] = $v;
+        });
+        return static::make($result)->when($callback != null, function (Collection $c) use ($callback) {
+            return $c->arrayWalk(function (&$v, $k) use ($callback) {
+                $v = $callback($v, $k);
+            });
+        });
+    }
+
+    private function hasByKey($key)
+    {
+        if(is_array($key))
+            return $this->hasByArrayKey($key);
+
+        return $this->keyExists($key);
+    }
+
+    private function hasByKeyValue($key, $value)
+    {
+        return $this->hasByKey($key)
+            && $this->getByKey($key, null) === $value;
+    }
+
+    private function hasByArrayKey($keys)
+    {
+        if(empty($keys))
+            return false;
+
+        if(count($keys) == 1)
+            return $this->hasByKey(current($keys));
+
+        $key = array_shift($keys);
+        return $this->hasByKey($key) &&
+            static::make($this->get($key, null, false))->hasByArrayKey($keys);
+    }
+
+    private function hasByArrayKeyValue($keys, $value)
+    {
+        if(empty($keys))
+            return false;
+
+        if(count($keys) == 1)
+            return $this->hasByKeyValue(current($keys), $value);
+
+        $key = array_shift($keys);
+        return $this->hasByKey($key) &&
+            static::make($this->get($key, null, false))->hasByArrayKeyValue($keys, $value);
+    }
+
+    private function setByKey($key, $value)
+    {
+        $this->data[$key] = $value;
+        return $this;
+    }
+
+    private function setByArray($keys, $value)
+    {
+        if(empty($keys))
+            return $this;
+
+        if(count($keys) == 1)
+            return $this->setByKey(current($keys), $value);
+
+        $key = array_shift($keys);
+        return $this->setByKey($key,
+            static::make($this->getByKey($key, []))->setByArray($keys, $value)->get());
+    }
+
+    private function sortByKey($key, $arraySortOrder = SORT_ASC)
+    {
+        return $this->multisort($this->column($key), $arraySortOrder, $this->get());
+    }
+
+    private function sortByCallback(callable $callback, $arraySortOrder = SORT_ASC)
+    {
+        return $this->multisort($this->map($callback), $arraySortOrder, $this->get());
+    }
+
+    private function whereByKey($key, $compare, $value = null)
+    {
+        if($value == null)
+            list($value, $compare) = [$compare, '=='];
+
+        return $this->filter(function ($v) use ($key, $compare, $value) {
+            return compare($compare, $v[$key], $value);
         });
     }
 
@@ -455,9 +684,9 @@ class Collection
         return $this->arrayReplace($array, ...$_);
     }
 
-    public function reverse($preserveKeys = false)
+    public function reverse($preserveKey = false)
     {
-        return $this->arrayReverse($preserveKeys);
+        return $this->arrayReverse($preserveKey);
     }
 
     public function search($needle, $strict = false)
@@ -470,9 +699,9 @@ class Collection
         return $this->arrayShift();
     }
 
-    public function slice($offset, $length = null, $preserveKeys = false)
+    public function slice($offset, $length = null, $preserveKey = false)
     {
-        return $this->arraySlice($offset, $length, $preserveKeys);
+        return $this->arraySlice($offset, $length, $preserveKey);
     }
 
     public function splice($offset, $length = null, $replacement = [])

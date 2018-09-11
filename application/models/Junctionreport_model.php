@@ -213,8 +213,8 @@ class Junctionreport_model extends CI_Model
         $hours = Collection::make($hours);
         $dataByFlow = $dataByFlow->map(function ($flow) use ($hours) {
             return $hours->reduce(function ($carry, $item) {
-                $carry[$item] = $carry[$item] ?? null; return $carry;
-            }, $flow);
+                return $carry->add($item, null);
+            }, Collection::make($flow))->ksort()->get();
         });
 
         $dataByFlow->each(function ($value, $ke) use (&$base, &$flow_info, &$maxFlowIds, $flowsName, $key) {

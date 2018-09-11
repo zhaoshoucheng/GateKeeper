@@ -37,10 +37,10 @@ class Cron extends CI_Controller
 			$task = $this->task_model->process();
 			if ($task === true or $task === false) {
 				$i ++;
-				if ($i === 2) {
+				if ($i === 5) {
 					break;
 				}
-				sleep(5 * 60);
+				sleep(1 * 60);
 			} else {
 				print_r($task);
 				com_log_notice('_its_task', $task);
@@ -71,8 +71,13 @@ class Cron extends CI_Controller
 					// todo 失败分类，路网or计算thrift调用失败，计入task_comment，便于排查问题
 					$this->task_model->updateTask($task_id, ['status' => -1, 'task_comment' => 100, 'task_end_time' => time()]);
 				}
+				exit();
 			}
 		}
+	}
+
+	public function rerun() {
+		$this->task_model->rerun();
 	}
 
 	public function test() {
@@ -107,5 +112,80 @@ class Cron extends CI_Controller
 		log_message('error', "hello failed");
 		log_message('notice', "hello failed");
 		log_message('debug', "hello failed");
+	}
+
+	public function cron() {
+		$this->load->helper('http');
+		$this->config->load('cron', TRUE);
+        $checkItems = $this->config->item('checkItems', 'cron');
+        $webhook = $this->config->item('webhook', 'cron');
+        $token = $this->config->item('token', 'cron');
+        $city_ids = $this->config->item('city_ids', 'cron');
+        $basedir = $this->config->item('basedir', 'cron');
+
+		foreach ($city_ids as $city_id) {
+			try {
+				$all = [];
+				foreach ($checkItems as $item) {
+					if (isset($item['params']['city_id'])) {
+						$item['params']['city_id'] = $city_id;
+					}
+					if (strtoupper($item['method']) === 'GET') {
+						$ret = httpGET($item['url'], array_merge($item['params'], $token));
+						if ($ret === false) {
+							throw new Exception($item['url'] .  json_encode($item['params']), 1);
+						}
+					} elseif (strtoupper($item['method']) === 'POST') {
+						$ret = httpPOST($item['url'], array_merge($item['params'], $token));
+						if ($ret === false) {
+							throw new Exception($item['url'] .  json_encode($item['params']), 1);
+							break;
+						}
+					} else {
+						throw new Exception(json_encode($item), 1);
+					}
+					$all[] = [
+						'method' => strtoupper($item['method']),
+						'url' => $item['url'],
+						'params' => $item['params'],
+						'data' => $ret,
+					];
+				}
+				if (!file_exists($basedir)) {
+					if (mkdir($basedir, 0777, true) === false) {
+						throw new Exception("mkdir {$basedir} failed", 1);
+					}
+				}
+				foreach ($all as $one) {
+					$file = $this->getCacheFileName($one['method'], $one['url'], $one['params']);
+					if (file_put_contents($basedir . $file, $one['data']) === false) {
+						throw new Exception("file_put_contents {$basedir}{$one['data']} failed", 1);
+					}
+				}
+			} catch (Exception $e) {
+				$message = $e->getMessage();
+				var_dump($message);
+				$data = array ('msgtype' => 'text','text' => array ('content' => $message));
+				httpPOST($webhook, $data, 0, 'json');
+				continue;
+			}
+
+		}
+	}
+
+	// /home/xiaoju/webroot/cache/itstool/
+	private function getCacheFileName($method, $url, $params) {
+		$method = strtoupper($method);
+		ksort($params);
+		$data = http_build_query($params);
+		return md5($method . $url . $data) . '.json';
+	}
+
+	public function testding() {
+		$webhook = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd3a5a4b7758c55f790fd85aef10fb43130be60d2797a3fd6ee80f9403';
+		$message = 'Just for testing, please ignore this message.';
+		$data = array ('msgtype' => 'text','text' => array ('content' => $message));
+		$this->load->helper('http');
+		httpPOST($webhook, $data, 0, 'json');
 	}
 }

@@ -208,7 +208,7 @@ class Overviewalarm_model extends CI_Model
             }
 
             $lastTime = date('Y-m-d') . ' ' . $lastHour;
-            $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 120);
+            $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 300);
 
             $sql = '/*{"router":"m"}*/';
             $sql .= 'select type, logic_junction_id, logic_flow_id, start_time, last_time';

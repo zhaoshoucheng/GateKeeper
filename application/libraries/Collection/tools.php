@@ -40,8 +40,8 @@ if(!function_exists('d2')) {
             echo '"', $array, '"', PHP_EOL;
         } elseif(is_numeric($array)) {
             echo $array, PHP_EOL;
-        } elseif(is_object($array)) {
-            $array = $array->toArray();
+        } elseif($array instanceof Collection) {
+            $array = $array->get();
         }
         if(is_array($array)) {
             echo '[', PHP_EOL;
