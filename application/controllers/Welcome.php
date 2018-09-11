@@ -326,8 +326,8 @@ class Welcome extends CI_Controller {
     public function token() {
     	$remote_ip = $_SERVER["REMOTE_ADDR"];
     	$uri = $_SERVER["REQUEST_URI"];
-    	$uri = $_SERVER["HTTP_HOST"];
-    	var_dump([$remote_ip, $uri]);
+    	$host = $_SERVER["HTTP_HOST"];
+    	var_dump([$remote_ip, $uri, $host]);
     	$secret = '310173de4b64b866e6f0cf4841178b84';
     	$get = $this->input->get();
     	$post = $this->input->post();
