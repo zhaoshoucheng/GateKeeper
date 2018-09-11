@@ -338,6 +338,8 @@ class Welcome extends CI_Controller {
     	var_dump($this->Router->fetch_class());
     	var_dump($this->Router->fetch_method());
     	var_dump($this->uri->segment_array());
+    	var_dump($this->uri->uri_string());
+    	var_dump($this->uri->ruri_string());
 
     }
 
