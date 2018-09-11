@@ -328,9 +328,9 @@ class Welcome extends CI_Controller {
     	$get = $this->input->get();
     	$post = $this->input->post();
     	$params = array_merge($get, $post);
-    	var_dump(gen1($params, $secret));
-    	var_dump(gen2($params, $secret));
-    	var_dump(gen3($params, $secret));
+    	var_dump($this->gen1($params, $secret));
+    	var_dump($this->gen2($params, $secret));
+    	var_dump($this->gen3($params, $secret));
     }
 
     private function gen1($params, $secret) {
