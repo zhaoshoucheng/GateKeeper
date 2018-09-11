@@ -516,3 +516,7 @@ $config['inroute'] = [
         'salt_token' =>'99f8698a68a2fa78',
     ],
 ];
+
+
+// 屏控服务开关
+$config['security_frequency_switch'] = true;

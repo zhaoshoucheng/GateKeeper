@@ -41,8 +41,10 @@ class MY_Controller extends CI_Controller {
                     $this->_output();
                     exit();
                 }
-            } elseif (isset($_REQUEST['token']) && (in_array($_REQUEST['token'], [
-                    "aedadf3e3795b933db2883bd02f31e1d", ])) ) {
+            } elseif (isset($_REQUEST['token']) && in_array($_REQUEST['token'], [
+                    "aedadf3e3795b933db2883bd02f31e1d", ]) and in_array($_SERVER["REMOTE_ADDR"], ['100.90.164.31', '100.90.163.51', '100.90.163.52', '10.93.94.36
+', '100.90.165.26', '10.89.236.26', '10.86.108.35']) and in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus'])) {
+                // token and whitelist ip server01, web00, web01, collector03, shuhao*3
                 return;
             } else {
                 if(!$this->_checkUser()) {
@@ -126,7 +128,7 @@ class MY_Controller extends CI_Controller {
             $params['ts'] = time();
         }
         // 带时间戳的sign的时效时间为1s
-        if (abs(time() - $params['ts']) > 2) {
+        if (abs(time() - $params['ts']) > 3) {
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "该签名已经过时";
             return false;
@@ -190,7 +192,7 @@ class MY_Controller extends CI_Controller {
         if($this->is_check_login == 0){
             return true;
         }
- 
+
         $ret = $this->user->getAuthorizedCityid();
         //$ret = $this->user->getCityAuth();
         if(empty($ret)){
