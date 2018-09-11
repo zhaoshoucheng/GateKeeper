@@ -354,6 +354,12 @@ abstract class CI_DB_driver {
      */
     protected $_count_string = 'SELECT COUNT(*) AS ';
 
+    //强制从主库查询
+    protected $force_master = FALSE;
+
+    //查询标记
+    protected $query_flag = 0;
+
     // --------------------------------------------------------------------
 
 	/**
