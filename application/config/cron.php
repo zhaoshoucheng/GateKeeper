@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 $config['city_ids'] = [1, 3, 12, 18, 23, 38, 85, 134];
 $config['base_url'] = 'http://100.90.163.52:8000/signalpro/api';
+// $config['base_url'] = 'http://100.90.164.31:8100/itstool/';
 $config['open_file'] = 'open.json';
 $config['checkItems'] = [
     [
@@ -176,6 +177,7 @@ $config['checkItems'] = [
 ];
 
 $config['webhook'] = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd3a5a4b7758c55f790fd85aef10fb43130be60d2797a3fd6ee80f9403';
-$config['token'] = ['token' => 'aedadf3e3795b933db2883bd02f31e1d'];
+$config['app_id'] = '1001';
+$config['secret'] = 'e9b0a9042d1840dcdb9b9c7095391949';
 $config['basedir'] = '/home/xiaoju/webroot/cache/itstool/';
 

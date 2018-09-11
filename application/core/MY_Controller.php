@@ -24,19 +24,14 @@ class MY_Controller extends CI_Controller {
         $host = $_SERVER['HTTP_HOST'];
         $this->load->model('junction_model');
 
-        if ($host != '100.90.164.31:8088'
-            && $host != 'www.itstool.com'
-            && $host != '100.90.164.31:8089'
-            && $host != '10.179.132.61:8088'
-            && $host != '100.90.164.31:8099'
-            && $host != '100.90.164.31:8013'
-            && $host != '100.95.100.106:8088'
-            && $host != '100.90.164.31:8082') {
+        if (!in_array($host, ['100.90.164.31:8013', '100.90.164.31:8082', '100.90.164.31:8088', '100.90.164.31:8089', '100.90.164.31:8099', '10.179.132.61:8088', '100.95.100.106:8088', 'www.itstool.com'])) {
             $this->is_check_login = 1;
 
             $this->load->model('user/user', 'user');
+            $this->routerUri = $this->uri->ruri_string();
             // 此处采用appid+appkey的验证
             if (isset($_REQUEST['app_id']) && isset($_REQUEST['sign'])) {
+                com_log_notice('_com_sign', ['uri' => $this->routerUri, 'request' => $_REQUEST]);
                 if (!$this->_checkAuthorizedApp()) {
                     $this->_output();
                     exit();
@@ -123,6 +118,7 @@ class MY_Controller extends CI_Controller {
         }
         // 获取所有的参数
         $params = $this->input->post();
+        com_log_notice('_com_sign', ['params' => $params]);
         unset($params['sign']);
         if (!isset($params['ts'])) {
             $params['ts'] = time();
@@ -140,6 +136,7 @@ class MY_Controller extends CI_Controller {
         $app_id = $_REQUEST['app_id'];
         $this->load->config('appkey', true);
         $app_config = $this->config->item('authirized_apps', 'appkey');
+        com_log_notice('_com_sign', ['client_sign' => $client_sign, 'app_id' => $app_id, 'app_config' => $app_config]);
         if (!isset($app_config[$app_id]) || !isset($app_config[$app_id]['secret'])) {
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "该appid:{$app_id}没有授权";
@@ -148,7 +145,6 @@ class MY_Controller extends CI_Controller {
         $app_key = $app_config[$app_id]['secret'];
         $open_api = isset($app_config[$app_id]['open_api']) ? $app_config[$app_id]['open_api'] : array();
         $server_sign = substr(md5($query_str . "&" . $app_key), 7, 16);
-        MyLog::debug("check authorized by app secrect - app_id:{$app_id} - query_str:{$query_str} - client_sign:{$client_sign} - server_sign:{$server_sign}");
         if ($server_sign != $client_sign) {
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "签名的sign不正确";

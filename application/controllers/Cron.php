@@ -138,6 +138,8 @@ class Cron extends CI_Controller
         $city_ids = $this->config->item('city_ids', 'cron');
         $basedir = $this->config->item('basedir', 'cron');
         $baseUrl = $this->config->item('base_url', 'cron');
+        $app_id = $this->config->item('app_id', 'cron');
+        $secret = $this->config->item('secret', 'cron');
 
         foreach ($city_ids as $city_id) {
             try {
@@ -148,15 +150,20 @@ class Cron extends CI_Controller
                     if (isset($item['params']['city_id'])) {
                         $item['params']['city_id'] = $city_id;
                     }
+                    $params = $item['params'];
+                 	$params['ts'] = time();
+                 	$params['app_id'] = $app_id;
+                    $sign = $this->genSign($params, $secret);
+                 	$params['sign'] = $sign;
                     if (strtoupper($item['method']) === 'GET') {
-                        $ret = httpGET($url, array_merge($item['params'], $token));
+                        $ret = httpGET($url, $params);
                         if ($ret === false) {
-                            throw new Exception($item['url'] . json_encode(array_merge($item['params'], $token))." get content exception ", 1);
+                            throw new Exception($url . json_encode($params)." get content exception ", 1);
                         }
                     } elseif (strtoupper($item['method']) === 'POST') {
-                        $ret = httpPOST($url, array_merge($item['params'], $token));
+                        $ret = httpPOST($url, $params);
                         if ($ret === false) {
-                            throw new Exception($url . json_encode(array_merge($item['params'], $token))." get content exception ", 1);
+                            throw new Exception($url . json_encode($params)." get content exception ", 1);
                             break;
                         }
                     } else {
@@ -216,6 +223,32 @@ class Cron extends CI_Controller
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
     }
 
+	private function genSign($params, $secret) {
+		ksort($params);
+		$query_str = http_build_query($params);
+		$sign = substr(md5($query_str . "&" . $secret), 7, 16);
+		return $sign;
+	}
+
+	private function checkSign($params, $secret) {
+		if (abs(time() - $params['ts']) > 3) {
+			return false;
+		}
+		$client_sign = $params['sign'];
+		unset($params['sign']);
+		$server_sign = $this->genSign($params, $secret);
+		return $client_sign = $client_sign;
+	}
+
+    // /home/xiaoju/webroot/cache/itstool/
+    private function getCacheFileName($method, $url, $params)
+    {
+        $method = strtoupper($method);
+        $url = strtoupper($url);
+        ksort($params);
+        $data = http_build_query($params);
+        return md5($method . $url . $data) . '.json';
+    }
 
     public function testding()
     {
