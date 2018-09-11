@@ -23,6 +23,7 @@ class Cron extends CI_Controller
         $this->load->model('customtask_model');
         $this->load->model('task_model');
         $this->load->model('taskdateversion_model');
+        $this->load->model('downgrade_model');
     }
 
     public function scan_custom_task()
@@ -215,14 +216,6 @@ class Cron extends CI_Controller
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
     }
 
-    private function getCacheFileName($method, $url, $params)
-    {
-        $method = strtoupper($method);
-        $url = strtoupper($url);
-        ksort($params);
-        $data = http_build_query($params);
-        return md5($method . $url . $data) . '.json';
-    }
 
     public function testding()
     {

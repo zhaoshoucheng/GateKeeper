@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 $config['city_ids'] = [1, 3, 12, 18, 23, 38, 85, 134];
 $config['base_url'] = 'http://100.90.163.52:8000/signalpro/api';
+$config['open_file'] = 'open.json';
 $config['checkItems'] = [
     [
         'method' => 'POST',
