@@ -20,7 +20,7 @@ $config['authirized_apps'] = array(
             'Overview/getCongestionInfo',
             'Overview/operationCondition',
             'Overviewtoplist/stopDelayTopList',
-            'Overviewtoplist/stopTimeCycleTopList'
+            'Overviewtoplist/stopTimeCycleTopList',
         ),
         'white_ips' => array(
         )
