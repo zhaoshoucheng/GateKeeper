@@ -24,14 +24,7 @@ class MY_Controller extends CI_Controller {
         $host = $_SERVER['HTTP_HOST'];
         $this->load->model('junction_model');
 
-        if ($host != '100.90.164.31:8088'
-            && $host != 'www.itstool.com'
-            && $host != '100.90.164.31:8089'
-            && $host != '10.179.132.61:8088'
-            && $host != '100.90.164.31:8099'
-            && $host != '100.90.164.31:8013'
-            && $host != '100.95.100.106:8088'
-            && $host != '100.90.164.31:8082') {
+        if (!in_array($host, ['100.90.164.31:8013', '100.90.164.31:8082', '100.90.164.31:8088', '100.90.164.31:8089', '100.90.164.31:8099', '10.179.132.61:8088', '100.95.100.106:8088', 'www.itstool.com'])) {
             $this->is_check_login = 1;
 
             $this->load->model('user/user', 'user');

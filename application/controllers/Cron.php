@@ -181,6 +181,23 @@ class Cron extends CI_Controller
 		return md5($method . $url . $data) . '.json';
 	}
 
+	private function genSign($params, $secret) {
+		ksort($params);
+		$query_str = http_build_query($params);
+		$sign = substr(md5($query_str . "&" . $secret), 7, 16);
+		return $sign;
+	}
+
+	private function checkSign($params, $secret) {
+		if (abs(time() - $params['ts']) > 3) {
+			return false;
+		}
+		$client_sign = $params['sign'];
+		unset($params['sign']);
+		$server_sign = $this->genSign($params, $secret);
+		return $client_sign = $client_sign;
+	}
+
 	public function testding() {
 		$webhook = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd3a5a4b7758c55f790fd85aef10fb43130be60d2797a3fd6ee80f9403';
 		$message = 'Just for testing, please ignore this message.';
