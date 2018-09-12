@@ -240,4 +240,19 @@ class Road extends MY_Controller
 
         return $this->response($result);
     }
+
+    public function comparison()
+    {
+        $params = $this->input->post();
+
+        $validator = Validator::make($params, [
+            'city_id' => 'required;numeric',
+            'area_id' => 'required;numeric',
+            'quota_key' => 'required',
+            'base_start_date' =>'required;date:Y-m-d',
+            'base_end_date' =>'required;date:Y-m-d',
+            'evaluate_start_date' =>'required;date:Y-m-d',
+            'evaluate_end_date' =>'required;date:Y-m-d',
+        ]);
+    }
 }
