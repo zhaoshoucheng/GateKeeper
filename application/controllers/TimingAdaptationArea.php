@@ -37,14 +37,14 @@ class TimingAdaptationArea extends MY_Controller
             if (empty($result)) {
                 return (object)[];
             }
-            $res = json_decode($result, true);
-            if ($res['errorCode'] != 0) {
+            $result = json_decode($result, true);
+            if ($result['errorCode'] != 0) {
                 $this->errno = ERR_DEFAULT;
-                $this->errmsg = $res['errorMsg'];
+                $this->errmsg = $result['errorMsg'];
                 return;
             }
-
-            return $this->response($res['data']);
+            $res['dataList'] = $result['data'] ?? (object)[];
+            return $this->response($res);
         } catch (Exception $e) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '调用signal-mis的getAreaList接口出错！';
