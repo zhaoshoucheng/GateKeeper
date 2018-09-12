@@ -22,8 +22,8 @@ class Validator2
     private $data = [];
 
     private $messages = [];
-	
-	public function create($data, $rules)
+
+    public function create($data, $rules)
 	{
 		$this->data = $data;
 
@@ -37,6 +37,8 @@ class Validator2
                     call_user_func_array([$this, $method], $params);
             });
         });
+
+		return $this;
 	}
 
 	public static function make($data, $rules)
