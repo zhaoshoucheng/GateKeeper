@@ -87,11 +87,11 @@ class Overview_model extends CI_Model
             return $now;
         }, strtotime('00:00'));
 
-        array_merge($result, array_map(function ($v) {
+        $result = array_merge($result, array_map(function ($v) {
             return [null, date('H:i', $v)];
         }, $ext));
 
-        $result = array_multisort(array_column($result, 1), SORT_ASC, $result);
+        array_multisort(array_column($result, 1), SORT_ASC, $result);
 
         return [
             'dataList' => $result,
