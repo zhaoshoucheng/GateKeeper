@@ -120,7 +120,11 @@ class Timingadaptationarea_model extends CI_Model
             $stop_delay_trend = 0;
 
             // 获取每个区域的路口ID串
-            $junctions = $this->getAreaJunctionsIds($cityId, $v['id']);
+            $jdata = [
+                'city_id' => $cityId,
+                'area_id' => $v['id'],
+            ];
+            $junctions = $this->getAreaJunctionList($jdata);
             if (!empty($junctions['data'])) {
                 // 调用数据组接口 参数 路口id串 暂时没有接口，先随机
                 $speed = rand(1000, 10000000);
@@ -164,6 +168,14 @@ class Timingadaptationarea_model extends CI_Model
             $data[$k]['stop_delay'] = $stop_delay;
             $data[$k]['speed_trend'] = $speed_trend;
             $data[$k]['stop_delay_trend'] = $stop_delay_trend;
+
+            // unset掉多余字段
+            if (isset($v['status'])) {
+                unset($data[$k]['status']);
+            }
+            if (isset($v['adaptive'])) {
+                unset($data[$k]['adaptive']);
+            }
         }
 
         // 更新平均速度、平均延误数据的redis
@@ -174,16 +186,16 @@ class Timingadaptationarea_model extends CI_Model
 
     /**
      * 获取区域路口信息
-     * @param cityId interger Y 城市ID
-     * @param areaId interger Y 区域ID
+     * @param $data['cityId'] interger Y 城市ID
+     * @param $data['areaId'] interger Y 区域ID
      * @return array
      */
-    private function getAreaJunctionsIds($cityId, $areaId)
+    public function getAreaJunctionList($data)
     {
         $url = $this->signal_mis_interface . '/TimingAdaptation/getAreaJunctionList';
         $data = [
-            'city_id' => $cityId,
-            'area_id' => $areaId,
+            'city_id' => $data['city_id'],
+            'area_id' => $data['area_id'],
         ];
 
         $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>[]];
@@ -191,7 +203,8 @@ class Timingadaptationarea_model extends CI_Model
         try {
             $junctions = httpPOST($url, $data);
             if (empty($junctions)) {
-                return [];
+                $result['errno'] = 0;
+                return $result;
             }
             $junctions = json_decode($junctions, true);
             if ($junctions['errorCode'] != 0) {
