@@ -23,8 +23,9 @@ class Validator2
 
     private $messages = [];
 	
-	public function __construct($data, $rules)
+	private function __construct($arr)
 	{
+	    list($data, $rules) = $arr;
 		$this->data = $data;
 
 		array_walk($rules, function ($rule, $key) {
@@ -41,7 +42,7 @@ class Validator2
 
 	public static function make($data, $rules)
     {
-        return new static($data, $rules);
+        return new static([$data, $rules]);
     }
 
     public function fail()
