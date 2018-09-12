@@ -404,14 +404,14 @@ class Collection implements CollectionInterface
         if(empty($keys)) return [];
         $key = array_shift($keys);
         return count($keys) == 0
-            ? (is_callable($key)
-                ? $this->groupByCallback($key, $callback, $preserveKey)
-                : $this->groupByKey($key, $callback, $preserveKey))
-            : (is_callable($key)
-                ? $this->groupByCallback($key, function ($v) use ($keys, $callback, $preserveKey) {
+            ? (is_string($key) || is_numeric($key)
+                ? $this->groupByKey($key, $callback, $preserveKey)
+                : $this->groupByCallback($key, $callback, $preserveKey))
+            : (is_string($key) || is_numeric($key)
+                ? $this->groupByKey($key, function ($v) use ($keys, $callback, $preserveKey) {
                     return static::make($v)->groupByArray($keys, $callback, $preserveKey)->get();
                 }, $preserveKey)
-                : $this->groupByKey($key, function ($v) use ($keys, $callback, $preserveKey) {
+                : $this->groupByCallback($key, function ($v) use ($keys, $callback, $preserveKey) {
                 return static::make($v)->groupByArray($keys, $callback, $preserveKey)->get();
             }, $preserveKey));
     }
