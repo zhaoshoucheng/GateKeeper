@@ -219,7 +219,7 @@ class Area_model extends CI_Model
 
         $result = $this->db->select('date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'])
             ->from('junction_hour_report')
-            ->where_in('date', $baseDates + $evaluateDates)
+            ->where_in('date', array_merge($baseDates, $evaluateDates))
             ->where_in('logic_junction_id', $junctionList)
             ->group_by(['date', 'hour'])->get()->result_array();
 
