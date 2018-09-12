@@ -79,19 +79,19 @@ class Overview_model extends CI_Model
 
         $ext = [];
 
-        array_reduce($result, function ($carry, $item) use ($ext) {
-            $now = strtotime($item[0] ?? '00:00');
+        array_reduce($result, function ($carry, $item) use (&$ext) {
+            $now = strtotime($item[1] ?? '00:00');
             if($now - $carry >= 30 * 60) {
-                $ext = array_merge($ext, range($carry + 5 * 30, $now - 5 * 30, 5 * 30));
+                $ext = array_merge($ext, range($carry + 5 * 60, $now - 5 * 60, 5 * 60));
             }
             return $now;
         }, strtotime('00:00'));
 
         $result = array_merge($result, array_map(function ($v) {
-            return [date('H:i', $v), null];
+            return [null, date('H:i', $v)];
         }, $ext));
 
-        $result = array_multisort(array_column($result, 0), SORT_ASC, $result);
+        $result = array_multisort(array_column($result, 1), SORT_ASC, $result);
 
         return [
             'dataList' => $result,
