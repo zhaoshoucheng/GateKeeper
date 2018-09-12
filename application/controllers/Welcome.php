@@ -9,6 +9,7 @@ class Welcome extends CI_Controller {
         parent::__construct();
         $this->load->helper('http');
         $this->load->model('task_model');
+        $this->load->model('overview_model');
     }
 
 
@@ -34,6 +35,8 @@ class Welcome extends CI_Controller {
 	}
 
 	public function test(){
+        $hour = $this->overview_model->getLastestHour(12,"2018-09-12");
+        var_dump($hour);exit;
         com_log_warning('_asynctask_index_error', 0, '1123123', []);
 //        echo "123213";
 //        exit;
