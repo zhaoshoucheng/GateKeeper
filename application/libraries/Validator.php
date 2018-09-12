@@ -3,7 +3,7 @@
 /**
  * 
  */
-class Validator2
+class Validator
 {
     private $message = [
         'required' => '',
@@ -48,7 +48,7 @@ class Validator2
 
     public function fail()
     {
-        return empty($this->messages);
+        return !empty($this->messages);
     }
 
     public function messages()
@@ -58,7 +58,7 @@ class Validator2
 
     public function firstError()
     {
-    	return $this->messages[0] ?? '';
+    	return $this->messages[0] ?? 'Error';
     }
 
     private function required($key)

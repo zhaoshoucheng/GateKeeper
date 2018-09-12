@@ -197,11 +197,9 @@ class Area extends MY_Controller
 
     public function comparison()
     {
-        $this->load->library('Validator2', [[], []]);
-
         $params = $this->input->post();
 
-        $validator = Validator2::make($params, [
+        $validator = Validator::make($params, [
             'city_id' => 'required;numeric',
             'area_id' => 'required;numeric',
             'quota_key' => 'required',
