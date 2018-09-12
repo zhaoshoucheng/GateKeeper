@@ -23,7 +23,7 @@ class Validator2
 
     private $messages = [];
 	
-	public function __construct($data, $rules)
+	public function create($data, $rules)
 	{
 		$this->data = $data;
 
@@ -41,7 +41,7 @@ class Validator2
 
 	public static function make($data, $rules)
     {
-        return new static($data, $rules);
+        return (new static)->create($data, $rules);
     }
 
     public function fail()
