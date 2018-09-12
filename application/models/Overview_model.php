@@ -87,7 +87,7 @@ class Overview_model extends CI_Model
             return $now;
         }, strtotime('00:00'));
 
-        $result = array_merge($result, array_map(function ($v) {
+        array_merge($result, array_map(function ($v) {
             return [null, date('H:i', $v)];
         }, $ext));
 
