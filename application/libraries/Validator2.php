@@ -23,7 +23,7 @@ class Validator2
 
     private $messages = [];
 	
-	private function __construct($data, $rules)
+	public function __construct($data, $rules)
 	{
 		$this->data = $data;
 
