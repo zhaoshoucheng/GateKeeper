@@ -29,6 +29,7 @@ class MY_Controller extends CI_Controller {
 
             $this->load->model('user/user', 'user');
             $this->routerUri = $this->uri->ruri_string();
+            com_log_notice('_com_sign', ['ip' => $_SERVER["REMOTE_ADDR"], 'ip' => $this->input->get_request_header('X-Real-Ip')]);
             // 此处采用appid+appkey的验证
             if (isset($_REQUEST['app_id']) && isset($_REQUEST['sign'])) {
                 com_log_notice('_com_sign', ['uri' => $this->routerUri, 'request' => $_REQUEST]);
@@ -36,9 +37,10 @@ class MY_Controller extends CI_Controller {
                     $this->_output();
                     exit();
                 }
-            } elseif (isset($_REQUEST['token']) && in_array($_REQUEST['token'], [
-                    "aedadf3e3795b933db2883bd02f31e1d", ]) and in_array($_SERVER["REMOTE_ADDR"], ['100.90.164.31', '100.90.163.51', '100.90.163.52', '10.93.94.36
-', '100.90.165.26', '10.89.236.26', '10.86.108.35']) and in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus'])) {
+            } elseif (isset($_REQUEST['token'])
+                and in_array($_REQUEST['token'], ["aedadf3e3795b933db2883bd02f31e1d", ])
+                and in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus', 'overview/verifytoken'])) {
+                // and in_array($this->input->get_request_header('X-Real-Ip'), ['100.90.164.31', '100.90.163.51', '100.90.163.52', '10.93.94.36', '100.90.165.26', '10.89.236.26', '10.86.108.35'])
                 // token and whitelist ip server01, web00, web01, collector03, shuhao*3
                 return;
             } else {
