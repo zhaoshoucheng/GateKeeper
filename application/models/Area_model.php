@@ -208,6 +208,7 @@ class Area_model extends CI_Model
     {
         $junctionList = $this->db->select('junction_id')
             ->from('area_junction_relation')
+            ->where('area_id', $params['area_id'])
             ->where('delete_at', '1970-01-01 00:00:00')
             ->get()->result_array();
 
