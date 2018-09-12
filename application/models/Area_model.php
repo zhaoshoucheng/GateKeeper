@@ -225,7 +225,9 @@ class Area_model extends CI_Model
         return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
         }, 'date'], function ($v) use ($params) {
-            return [$v['hour'], $v[$params['quota_key']]];
+            return array_map(function ($v) use ($params) {
+                return [$v['hour'], $v[$params['quota_key']]];
+            }, $v);
         })->get();
     }
 
