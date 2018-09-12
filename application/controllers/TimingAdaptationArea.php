@@ -12,7 +12,7 @@ class TimingAdaptationArea extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('timingadaptatinarea_model');
+        $this->load->model('timingadaptationarea_model');
     }
 
     /**
@@ -34,8 +34,17 @@ class TimingAdaptationArea extends MY_Controller
             $data['city_id'] = intval($params['city_id']);
 
             $result = httpPOST($url, $data);
-            var_dump($result);
+            if (empty($result)) {
+                return (object)[];
+            }
+            $res = json_decode($result, true);
+            if ($res['errorCode'] != 0) {
+                $this->errno = ERR_DEFAULT;
+                $this->errmsg = $res['errorMsg'];
+                return;
+            }
 
+            return $this->response($res['data']);
         } catch (Exception $e) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '调用signal-mis的getAreaList接口出错！';
