@@ -86,7 +86,7 @@ class Timingadaptationarea_model extends CI_Model
      */
     private function formatGetAreaListData($cityId, $data)
     {
-        if (empty($data) || (int)$city_id < 1) {
+        if (empty($data) || (int)$cityId < 1) {
             return [];
         }
 
@@ -120,7 +120,7 @@ class Timingadaptationarea_model extends CI_Model
             $stop_delay_trend = 0;
 
             // 获取每个区域的路口ID串
-            $junctions = $this->getAreaJunctionsIds($city_id, $v['id']);
+            $junctions = $this->getAreaJunctionsIds($cityId, $v['id']);
             if (!empty($junctions['data'])) {
                 // 调用数据组接口 参数 路口id串 暂时没有接口，先随机
                 $speed = rand(1000, 10000000);
@@ -153,13 +153,13 @@ class Timingadaptationarea_model extends CI_Model
                     } else {
                         $stop_delay_trend = 0; // 无变化
                     }
-
-                    // 更新redis中平均速度与平均延误
-                    $redisData[$v['id']]['speed'] = $speed;
-                    $redisData[$v['id']]['stop_delay'] = $stop_delay;
                 }
             }
+            // 更新redis中平均速度与平均延误
+            $redisData[$v['id']]['speed'] = $speed;
+            $redisData[$v['id']]['stop_delay'] = $stop_delay;
 
+            // 为平均速度、平均延误、平均速度变化趋势、平均延误变化趋势赋值
             $data[$k]['speed'] = $speed;
             $data[$k]['stop_delay'] = $stop_delay;
             $data[$k]['speed_trend'] = $speed_trend;
@@ -167,7 +167,7 @@ class Timingadaptationarea_model extends CI_Model
         }
 
         // 更新平均速度、平均延误数据的redis
-        $this->redis_model->setEx($areaRedisKey, json_encode($redisData), 24*3600);
+        $this->redis_model->setEx($areaRedisKey, json_encode($redisData), 24 * 3600);
 
         return $data;
     }
@@ -180,7 +180,7 @@ class Timingadaptationarea_model extends CI_Model
      */
     private function getAreaJunctionsIds($cityId, $areaId)
     {
-        $url = $this->signal_mis_interface . '/getAreaJunctionList';
+        $url = $this->signal_mis_interface . '/TimingAdaptation/getAreaJunctionList';
         $data = [
             'city_id' => $cityId,
             'area_id' => $areaId,
