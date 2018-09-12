@@ -13,3 +13,5 @@ $array = [
     ['hour' => '11:30', 'flow' => 'aaa', 'value' => 9],
     ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16],
 ];
+
+dd(Collection::make($array)->groupBy([function($v, $k) { return '10'; }, 'flow'])->get());

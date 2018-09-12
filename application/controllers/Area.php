@@ -194,4 +194,29 @@ class Area extends MY_Controller
         }
         return $this->response($data);
     }
+
+    public function comparison()
+    {
+        $params = $this->input->post();
+
+        $validator = Validator2::make($params, [
+            'city_id' => 'required;numeric',
+            'area_id' => 'required;numeric',
+            'quota_key' => 'required',
+            'base_start_date' =>'date:Y-m-d',
+            'base_end_date' =>'date:Y-m-d',
+            'evaluate_start_date' =>'date:Y-m-d',
+            'evaluate_end_date' =>'date:Y-m-d',
+        ]);
+
+        if($validator->fail()) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validator->firstError();
+            return;
+        }
+
+        $data = $this->area_model->comparison($params);
+
+        return $this->response($data);
+    }
 }
