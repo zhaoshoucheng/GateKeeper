@@ -203,10 +203,10 @@ class Area extends MY_Controller
             'city_id' => 'required;numeric',
             'area_id' => 'required;numeric',
             'quota_key' => 'required',
-            'base_start_date' =>'date:Y-m-d',
-            'base_end_date' =>'date:Y-m-d',
-            'evaluate_start_date' =>'date:Y-m-d',
-            'evaluate_end_date' =>'date:Y-m-d',
+            'base_start_date' =>'required;date:Y-m-d',
+            'base_end_date' =>'required;date:Y-m-d',
+            'evaluate_start_date' =>'required;date:Y-m-d',
+            'evaluate_end_date' =>'required;date:Y-m-d',
         ]);
 
         if($validator->fail()) {
