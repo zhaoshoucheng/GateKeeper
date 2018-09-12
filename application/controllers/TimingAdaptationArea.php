@@ -18,6 +18,7 @@ class TimingAdaptationArea extends MY_Controller
     /**
      * 获取自适应区域列表
      * @param city_id    interger Y 城市ID
+     * @return json
      */
     public function getAreaList()
     {
@@ -28,27 +29,21 @@ class TimingAdaptationArea extends MY_Controller
             return;
         }
 
-        // 调用signal-mis接口
-        try {
-            $url = $this->config->item('signal_mis_interface') . '/TimingAdaptation/getAreaList';
-            $data['city_id'] = intval($params['city_id']);
+        $data['city_id'] = intval($params['city_id']);
 
-            $result = httpPOST($url, $data);
-            if (empty($result)) {
-                return (object)[];
-            }
-            $result = json_decode($result, true);
-            if ($result['errorCode'] != 0) {
-                $this->errno = ERR_DEFAULT;
-                $this->errmsg = $result['errorMsg'];
-                return;
-            }
-            $res['dataList'] = $result['data'] ?? (object)[];
+        $result = $this->timingadaptationarea_model->getAreaList($data);
+        if (empty($result)) {
+            $res['dataList'] = (object)[];
             return $this->response($res);
-        } catch (Exception $e) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '调用signal-mis的getAreaList接口出错！';
+        }
+
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
             return;
         }
+
+        $res['dataList'] = $result['data'] ?? (object)[];
+        return $this->response($res);
     }
 }
