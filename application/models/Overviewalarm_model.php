@@ -242,7 +242,7 @@ class Overviewalarm_model extends CI_Model
     {
         $result = [];
 
-        // 需要获取路口name的路口ID口中
+        // 需要获取路口name的路口ID串
         $junctionIds = implode(',', array_unique(array_column($data, 'logic_junction_id')));
 
         // 获取路口信息
