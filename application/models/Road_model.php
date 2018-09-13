@@ -188,6 +188,25 @@ class Road_model extends CI_Model
         return $result;
     }
 
+    public function comparison($params)
+    {
+        $junctionList = $this->db->select('logic_junction_ids')
+            ->where('city_id', $params['city_id'])
+            ->where('road_id', $params['road_id'])
+            ->where('is_delete', 0)
+            ->get()->first_row();
+
+        if(!$junctionList) {
+            return [];
+        }
+
+        $junctionIdList = $junctionList['logic_junction_ids'];
+
+        $roadInfo = $this->formatRoadDetailData($params['city_id'], $junctionIdList);
+
+        echo json_encode($roadInfo);die();
+    }
+
     /**
      * 格式化干线详情数据
      * @param $city_id interger 城市ID
