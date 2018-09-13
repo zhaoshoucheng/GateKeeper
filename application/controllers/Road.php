@@ -247,12 +247,23 @@ class Road extends MY_Controller
 
         $validator = Validator::make($params, [
             'city_id' => 'required;numeric',
-            'area_id' => 'required;numeric',
+            'road_id' => 'required',
             'quota_key' => 'required',
+            'direction' => 'required;in:1,2',
             'base_start_date' =>'required;date:Y-m-d',
             'base_end_date' =>'required;date:Y-m-d',
             'evaluate_start_date' =>'required;date:Y-m-d',
             'evaluate_end_date' =>'required;date:Y-m-d',
         ]);
+
+        if($validator->fail()) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validator->firstError();
+            return;
+        }
+
+        $data = $this->road_model->comparison($params);
+
+        return $this->response($data);
     }
 }
