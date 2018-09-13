@@ -41,7 +41,6 @@ $config['authirized_apps'] = array(
         'secret'=> '3a01e6c56bcce94ee5de073df3d512d1',
         'open_api'   => array(
             'Overview/verifyToken',
-            'Overview/getToken'
         ),
         'white_ips' => array(
         )
