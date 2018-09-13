@@ -154,13 +154,13 @@ $config['checkItems'] = [
             return true;
         },
     ],
-	[
-		'method' => 'POST',
-		'url' => 'Overview/junctionsList',
-		'params' => [
-			'city_id' => 0,
-		],
-		'checker' => function($result){
+    [
+        'method' => 'POST',
+        'url' => 'Overview/junctionsList',
+        'params' => [
+            'city_id' => 0,
+        ],
+        'checker' => function($result){
             $ret = json_decode($result,true);
             if(!isset($ret['errno']) || $ret['errno']!=0){
                 return false;
@@ -173,7 +173,22 @@ $config['checkItems'] = [
             }
             return true;
         },
-	],
+    ],
+    [
+        'method' => 'POST',
+        'url' => 'Feedback/getTypes',
+        'params' => [],
+        'checker' => function($result){
+            $ret = json_decode($result,true);
+            if(!isset($ret['errno']) || $ret['errno']!=0){
+                return false;
+            }
+            if(!isset($ret['data']) || count($ret['data'])==0){
+                return false;
+            }
+            return true;
+        },
+    ],
 ];
 
 $config['webhook'] = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd3a5a4b7758c55f790fd85aef10fb43130be60d2797a3fd6ee80f9403';
