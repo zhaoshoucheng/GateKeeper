@@ -200,11 +200,11 @@ class Road_model extends CI_Model
             return [];
         }
 
-        $junctionIdList = $junctionList['logic_junction_ids'];
+        $junctionIds = $junctionList['logic_junction_ids'];
 
-        $roadInfo = $this->formatRoadDetailData($params['city_id'], $junctionIdList);
+        $roadInfo = $this->formatRoadDetailData($params['city_id'], $junctionIds);
 
-        echo json_encode($roadInfo);die();
+
     }
 
     /**

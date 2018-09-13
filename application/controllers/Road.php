@@ -247,7 +247,7 @@ class Road extends MY_Controller
 
         $validator = Validator::make($params, [
             'city_id' => 'required;numeric',
-            'area_id' => 'required;numeric',
+            'road_id' => 'required;numeric',
             'quota_key' => 'required',
             'direction' => 'required;in:1,2',
             'base_start_date' =>'required;date:Y-m-d',
