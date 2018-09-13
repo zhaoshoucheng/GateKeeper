@@ -219,10 +219,15 @@ class Road_model extends CI_Model
 
         $baseDates = $this->dateRange($params['base_start_date'], $params['base_end_date']);
         $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
+        $hours = $this->hourRange('00:00', '23:30');
+
+        //echo 'select ' . 'date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'] . ' from ' . 'flow_duration_v6_' . $params['city_id'] . ' where logic_flow_id in ( \'' . implode('\',\'', $junctionIds). '\' ) and date in ( \'' .           implode('\',\'', array_merge($baseDates, $evaluateDates))  . '\' ) group by date, hour';die();
 
         $result = $this->db->select('date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'])
             ->from('flow_duration_v6_' . $params['city_id'])
             ->where_in('date', array_merge($baseDates, $evaluateDates))
+            ->where_in('hour', $hours)
+            ->where_in('logic_junction_id', $junctionIds)
             ->where_in('logic_flow_id', $logic_flow_ids)
             ->group_by(['date', 'hour'])->get()->result_array();
 
@@ -240,6 +245,13 @@ class Road_model extends CI_Model
         return array_map(function ($v) {
             return date('Y-m-d', $v);
         }, range(strtotime($start), strtotime($end), 60 * 60 * 24));
+    }
+
+    private function hourRange($start, $end)
+    {
+        return array_map(function ($v) {
+            return date('H:i', $v);
+        }, range(strtotime($start), strtotime($end), 30 * 60));
     }
 
     /**
