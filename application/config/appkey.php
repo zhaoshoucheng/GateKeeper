@@ -21,6 +21,7 @@ $config['authirized_apps'] = array(
             'Overview/operationCondition',
             'Overviewtoplist/stopDelayTopList',
             'Overviewtoplist/stopTimeCycleTopList',
+            'Feedback/getTypes',
         ),
         'white_ips' => array(
         )
@@ -31,6 +32,16 @@ $config['authirized_apps'] = array(
         'open_api'   => array(
             'task/getTaskRate',
             'task/getTaskStatus',
+        ),
+        'white_ips' => array(
+        )
+    ),
+    '1003' => array(
+        'name'  => 'token',
+        'secret'=> '3a01e6c56bcce94ee5de073df3d512d1',
+        'open_api'   => array(
+            'Overview/verifyToken',
+            'Overview/getToken'
         ),
         'white_ips' => array(
         )
