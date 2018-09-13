@@ -197,9 +197,8 @@ class Road_model extends CI_Model
             ->where('is_delete', 0)
             ->get()->first_row();
 
-        if(!$junctionList) {
-            return [];
-        }
+        if(!$junctionList) return [];
+
 
         $junctionIds = explode(',', $junctionList->logic_junction_ids);
 
@@ -210,7 +209,37 @@ class Road_model extends CI_Model
         // 调用路网接口获取干线路口信息
         $res = $this->waymap_model->getConnectPath($params['city_id'], $newMapVersion, $junctionIds);
 
-        echo json_encode($res);die();
+        $dataKey = $params['direction'] == 1 ? 'forward_path_flows' : 'backward_path_flows';
+
+        if(!isset($res[$dataKey])) return [];
+
+        $logic_flow_ids = array_map(function ($v) {
+            return $v['logic_flow']['logic_flow_id'] ?? '';
+        }, $res[$dataKey]);
+
+        $baseDates = $this->dateRange($params['base_start_date'], $params['base_end_date']);
+        $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
+
+        $result = $this->db->select('date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'])
+            ->from('flow_duration_v6_' . $params['city_id'])
+            ->where_in('date', array_merge($baseDates, $evaluateDates))
+            ->where_in('logic_flow_id', $logic_flow_ids)
+            ->group_by(['date', 'hour'])->get()->result_array();
+
+        return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
+            return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
+        }, 'date'], function ($v) use ($params) {
+            return array_map(function ($v) use ($params) {
+                return [$v['hour'], $v[$params['quota_key']]];
+            }, $v);
+        })->get();
+    }
+
+    private function dateRange($start, $end)
+    {
+        return array_map(function ($v) {
+            return date('Y-m-d', $v);
+        }, range(strtotime($start), strtotime($end), 60 * 60 * 24));
     }
 
     /**
