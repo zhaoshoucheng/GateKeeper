@@ -191,6 +191,7 @@ class Road_model extends CI_Model
     public function comparison($params)
     {
         $junctionList = $this->db->select('logic_junction_ids')
+            ->from('road')
             ->where('city_id', $params['city_id'])
             ->where('road_id', $params['road_id'])
             ->where('is_delete', 0)
