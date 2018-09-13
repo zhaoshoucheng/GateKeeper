@@ -201,7 +201,7 @@ class Road_model extends CI_Model
             return [];
         }
 
-        $junctionIds = $junctionList['logic_junction_ids'];
+        $junctionIds = $junctionList->logic_junction_ids;
 
         // 最新路网版本
         $allMapVersions = $this->waymap_model->getAllMapVersion();
