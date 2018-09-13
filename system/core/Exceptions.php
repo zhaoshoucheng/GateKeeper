@@ -205,6 +205,7 @@ class CI_Exceptions {
         if(defined("ERROR_AUTO_DOWNGRADE") && ERROR_AUTO_DOWNGRADE && !empty($cacheContent)){
             $cacheArr = json_decode($cacheContent,true);
             $cacheArr['error_auto_downgrade'] = 1;
+            set_status_header(200);
             echo json_encode($cacheArr);
             exit;
         }
@@ -301,6 +302,7 @@ class CI_Exceptions {
         if(defined("ERROR_AUTO_DOWNGRADE") && ERROR_AUTO_DOWNGRADE && !empty($cacheContent)){
             $cacheArr = json_decode($cacheContent,true);
             $cacheArr['error_auto_downgrade'] = 1;
+            set_status_header(200);
             echo json_encode($cacheArr);
             exit;
         }
