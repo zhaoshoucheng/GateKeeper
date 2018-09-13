@@ -96,13 +96,17 @@ class MY_Controller extends CI_Controller {
         $taskId = $this->input->get_post('task_id', true);
 
         // 暂时先这么做
-        $this->load->model('junction_model');
-        $taskUser = $this->junction_model->getTaskUser($taskId);
-        if (in_array($taskUser, $back_timing_roll, true)) {
-            $this->timingType = 2;
+        try{
+            $this->load->model('junction_model');
+            $taskUser = $this->junction_model->getTaskUser($taskId);
+            if (in_array($taskUser, $back_timing_roll, true)) {
+                $this->timingType = 2;
+            }
+        }catch (\Exception $e){
+            com_log_warning('my_controller_set_timingtype_error', 0, $e->getMessage(), compact("taskId"));
         }
-
     }
+    
     public function response($data, $errno = 0, $errmsg = '') {
         $this->output_data = $data;
         $this->errno = $errno;
