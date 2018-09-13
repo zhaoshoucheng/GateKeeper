@@ -89,15 +89,15 @@ class MY_Controller extends CI_Controller {
             exit;
         }
         //<============降级结束
+    }
 
-        // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时
-        $this->load->config('nconf');
-        $back_timing_roll = $this->config->item('back_timing_roll');
-        $taskId = $this->input->get_post('task_id', true);
-
-        // 暂时先这么做
+    // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时
+    protected function setTimingType(){
         try{
+            $this->load->config('nconf');
             $this->load->model('junction_model');
+            $back_timing_roll = $this->config->item('back_timing_roll');
+            $taskId = $this->input->get_post('task_id', true);
             $taskUser = $this->junction_model->getTaskUser($taskId);
             if (in_array($taskUser, $back_timing_roll, true)) {
                 $this->timingType = 2;
@@ -106,7 +106,7 @@ class MY_Controller extends CI_Controller {
             com_log_warning('my_controller_set_timingtype_error', 0, $e->getMessage(), compact("taskId"));
         }
     }
-    
+
     public function response($data, $errno = 0, $errmsg = '') {
         $this->output_data = $data;
         $this->errno = $errno;

@@ -181,6 +181,4 @@ $config['app_id'] = '1001';
 $config['secret'] = 'e9b0a9042d1840dcdb9b9c7095391949';
 $config['basedir'] = '/home/xiaoju/webroot/cache/itstool/';
 
-//遇到错误是否自动降级
-const ERROR_AUTO_DOWNGRADE = true;
 

@@ -202,7 +202,7 @@ class CI_Exceptions {
 
         //============>错误自动降级开始
         global $cacheContent;
-        if(ERROR_AUTO_DOWNGRADE && !empty($cacheContent)){
+        if(defined("ERROR_AUTO_DOWNGRADE") && ERROR_AUTO_DOWNGRADE && !empty($cacheContent)){
             $cacheArr = json_decode($cacheContent,true);
             $cacheArr['error_auto_downgrade'] = 1;
             echo json_encode($cacheArr);
@@ -227,6 +227,10 @@ class CI_Exceptions {
         {
             $message = '(null)';
         }
+        $traceid = "";
+        if(function_exists("get_traceid")){
+            $traceid = get_traceid();
+        }
         $output = array(
             'errno' => 900001,
             'errmsg' => 'An uncaught Exception was encountered',
@@ -235,7 +239,7 @@ class CI_Exceptions {
             'Filename' => $exception->getFile(),
             'Line' => $exception->getLine(),
             'Backtrace' => $backtrace,
-            'traceid' => get_traceid(),
+            'traceid' => $traceid,
         );
         header("Content-Type:application/json;charset=UTF-8");
         echo json_encode($output);
@@ -294,7 +298,7 @@ class CI_Exceptions {
 
         //============>错误自动降级开始
         global $cacheContent;
-        if(ERROR_AUTO_DOWNGRADE && !empty($cacheContent)){
+        if(defined("ERROR_AUTO_DOWNGRADE") && ERROR_AUTO_DOWNGRADE && !empty($cacheContent)){
             $cacheArr = json_decode($cacheContent,true);
             $cacheArr['error_auto_downgrade'] = 1;
             echo json_encode($cacheArr);
