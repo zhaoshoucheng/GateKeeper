@@ -84,7 +84,9 @@ class MY_Controller extends CI_Controller {
             $cacheContent = $this->Downgrade_model->getUrlCache($route, $_SERVER['REQUEST_METHOD'], $params);
         }
         //输出降级内容
-        if($this->Downgrade_model->isOpen() && !empty($cacheContent)){
+        $downgradeCityId = isset($params['city_id']) ? intval($params['city_id']) : 0;
+        if($this->Downgrade_model->isOpen($downgradeCityId) && !empty($cacheContent)){
+            header("Content-Type:application/json;charset=UTF-8");
             echo $cacheContent;
             exit;
         }

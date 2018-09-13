@@ -52,7 +52,7 @@ class Downgrade_model extends CI_Model
         $cacheFile = $this->getCacheFileName($route, $method, $params);
         try {
             if (!file_exists($basedir . $cacheFile)) {
-                throw new \Exception($basedir . $cacheFile." not exists.");
+                throw new \Exception($basedir . $cacheFile . " not exists.");
             }
             $content = file_get_contents($basedir . $cacheFile);
             return $content;
@@ -64,30 +64,30 @@ class Downgrade_model extends CI_Model
 
     public function saveOpen($params)
     {
-        $open = intval($params["open"]);
+        /*$open = intval($params["open"]);
         $expired = $params["expired"];//过期时间戳
         $notice = $params["notice"];
         $openData = [
             "open" => $open,
             "expired" => $expired,
             "notice" => $notice,
-        ];
+        ];*/
         $this->config->load('cron', TRUE);
         $basedir = $this->config->item('basedir', 'cron');
         $openFile = $this->config->item('open_file', 'cron');
-        if (file_put_contents($basedir . $openFile, json_encode($openData)) === false) {
+        if (file_put_contents($basedir . $openFile, json_encode($params)) === false) {
             throw new Exception("file_put_contents {$basedir}{$openFile} failed", 1);
         }
         return true;
     }
 
-    public function isOpen()
+    public function isOpen($cityId = 0)
     {
-        $openInfo = $this->getOpen();
+        $openInfo = $this->getOpen($cityId);
         return $openInfo['open'];
     }
 
-    public function getOpen()
+    public function getOpen($cityId = 0)
     {
         $this->config->load('cron', TRUE);
         $basedir = $this->config->item('basedir', 'cron');
@@ -96,14 +96,42 @@ class Downgrade_model extends CI_Model
             if (file_exists($basedir . $openFile)) {
                 $openContent = file_get_contents($basedir . $openFile);
                 $openInfo = json_decode($openContent, true);
+
+                //降级城市列表
+                $cityIds = [];
+                if (!empty($openInfo['city_ids'])) {
+                    $cityIds = explode(",", $openInfo['city_ids']);
+                }
+
+                //是否开启降级
+                $downgradeFlag = 0;
                 if (isset($openInfo['open']) &&
                     isset($openInfo['expired']) &&
-                    isset($openInfo['notice']) &&
                     $openInfo['open'] == 1 &&
                     strtotime($openInfo['expired']) > time()
                 ) {
+
+                    $downgradeFlag = 1;
+                }
+
+                //=========>城市降级判断逻辑
+                //1、已降级且未设定城市时
+                if($downgradeFlag && empty($cityIds)){
                     return $openInfo;
                 }
+
+                //2、已降级且设定了"降级城市列表"
+                //2.1、"不带城市的接口"降级
+                //2.2、"带城市的接口"且城市在"降级城市列表"中降级
+                if($downgradeFlag && !empty($cityIds)){
+                    if($cityId==0){
+                        return $openInfo;
+                    }
+                    if($cityId!=0 && in_array($cityId, $cityIds)){
+                        return $openInfo;
+                    }
+                }
+                //<=========城市降级判断逻辑
             }
         } catch (\Exception $e) {
             com_log_warning('downgrade_model_getopen', 0, $e->getMessage(), compact("openFile"));
