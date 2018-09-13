@@ -177,7 +177,8 @@ $config['checkItems'] = [
     [
         'method' => 'POST',
         'url' => 'Feedback/getTypes',
-        'params' => [],
+        'params' => [
+        ],
         'checker' => function($result){
             $ret = json_decode($result,true);
             if(!isset($ret['errno']) || $ret['errno']!=0){
