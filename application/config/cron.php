@@ -9,6 +9,24 @@ $config['open_file'] = 'open.json';
 $config['checkItems'] = [
     [
         'method' => 'POST',
+        'url' => 'Overviewalarm/realTimeAlarmList',
+        'params' => [
+            'city_id' => 0,
+        ],
+        'checker' => function($result){
+            global $realTimeAlarmListCount;
+            $ret = json_decode($result,true);
+            if(!isset($ret['errno']) || $ret['errno']!=0){
+                return false;
+            }
+            if(isset($ret['data']['dataList'])){
+                $realTimeAlarmListCount = count($ret['data']['dataList']);
+            }
+            return true;
+        },
+    ],
+    [
+        'method' => 'POST',
         'url' => 'Overviewtoplist/stopTimeCycleTopList',
         'params' => [
             'city_id' => 0,
@@ -76,24 +94,6 @@ $config['checkItems'] = [
             }
             if(!isset($ret['data']['count']) || count($ret['data']['count'])==0){
                 return false;
-            }
-            return true;
-        },
-    ],
-    [
-        'method' => 'POST',
-        'url' => 'Overviewalarm/realTimeAlarmList',
-        'params' => [
-            'city_id' => 0,
-        ],
-        'checker' => function($result){
-            global $realTimeAlarmListCount;
-            $ret = json_decode($result,true);
-            if(!isset($ret['errno']) || $ret['errno']!=0){
-                return false;
-            }
-            if(isset($ret['data']['dataList'])){
-                $realTimeAlarmListCount = count($ret['data']['dataList']);
             }
             return true;
         },
@@ -180,4 +180,7 @@ $config['webhook'] = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd
 $config['app_id'] = '1001';
 $config['secret'] = 'e9b0a9042d1840dcdb9b9c7095391949';
 $config['basedir'] = '/home/xiaoju/webroot/cache/itstool/';
+
+//遇到错误是否自动降级
+const ERROR_AUTO_DOWNGRADE = true;
 

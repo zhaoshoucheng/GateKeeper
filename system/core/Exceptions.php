@@ -199,6 +199,17 @@ class CI_Exceptions {
         {
             ob_end_flush();
         }
+
+        //============>错误自动降级开始
+        global $cacheContent;
+        if(ERROR_AUTO_DOWNGRADE && !empty($cacheContent)){
+            $cacheArr = json_decode($cacheContent,true);
+            $cacheArr['error_auto_downgrade'] = 1;
+            echo json_encode($cacheArr);
+            exit;
+        }
+        //<============错误自动降级结束
+
         //使用json格式标准输出,替换原来输出方式
         $backtrace = [];
         foreach ($exception->getTrace() as $error){
@@ -280,6 +291,17 @@ class CI_Exceptions {
         {
             ob_end_flush();
         }
+
+        //============>错误自动降级开始
+        global $cacheContent;
+        if(ERROR_AUTO_DOWNGRADE && !empty($cacheContent)){
+            $cacheArr = json_decode($cacheContent,true);
+            $cacheArr['error_auto_downgrade'] = 1;
+            echo json_encode($cacheArr);
+            exit;
+        }
+        //<============错误自动降级结束
+
 	    //使用json格式标准输出,替换原来输出方式
         $backtrace = [];
         foreach (debug_backtrace() as $error){
