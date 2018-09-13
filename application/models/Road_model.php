@@ -205,7 +205,7 @@ class Road_model extends CI_Model
 
         $roadInfo = $this->formatRoadDetailData($params['city_id'], $junctionIds);
 
-
+        echo json_encode($roadInfo);die();
     }
 
     /**
