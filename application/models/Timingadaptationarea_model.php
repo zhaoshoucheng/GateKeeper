@@ -8,6 +8,8 @@
 class Timingadaptationarea_model extends CI_Model
 {
     private $signal_mis_interface = '';
+    private $tb = 'real_time_alarm';
+    private $db = '';
 
     public function __construct()
     {
@@ -16,6 +18,11 @@ class Timingadaptationarea_model extends CI_Model
         // signal-mis 接口域名
         $this->signal_mis_interface = $this->config->item('signal_mis_interface');
 
+        if (empty($this->db)) {
+            $this->db = $this->load->database('default', true);
+        }
+        $this->load->config('realtime_conf.php');
+        $this->load->model('waymap_model');
         $this->load->model('redis_model');
     }
 
@@ -186,8 +193,8 @@ class Timingadaptationarea_model extends CI_Model
 
     /**
      * 获取区域路口信息
-     * @param $data['cityId'] interger Y 城市ID
-     * @param $data['areaId'] interger Y 区域ID
+     * @param $data['city_id'] interger Y 城市ID
+     * @param $data['area_id'] interger Y 区域ID
      * @return array
      */
     public function getAreaJunctionList($data)
@@ -213,12 +220,97 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $result['errno'] = 0;
-            $result['data'] = $junctions['data'] ?? [];
+            $result['data'] = $this->formatGetAreaJunctionListData($data['city_id'], $junctions['data']);
             return $result;
         } catch (Exception $e) {
             com_log_warning('_signal-mis_getAreaJunctionList_failed', 0, $e->getMessage(), compact("url","data","junctions"));
             $result['errmsg'] = '调用signal-mis的getAreaJunctionList接口出错！';
             return $result;
         }
+    }
+
+    /**
+     * 格式化区域路口集合数据
+     * 添加路口报警状态
+     * @param $cityId interger Y 城市ID
+     * @param $data   array    Y 数据
+     * $data = [
+     *     [
+     *         'logic_junction_id'=>xxxx, // 路口ID
+     *         'lat'              =>xxxx, // 纬度
+     *         'lon'              =>xxxx, // 经度
+     *         'status'           =>xxxx, // 路口类型：0:无配时；1:有配时；2:自适应；9:配时异常
+     *         'source'           =>xxxx, // 数据来源
+     *         'junction_name'    =>xxxx, // 路口名称
+     *         'is_upload'        =>xxxx, // 自适应下发状态 0：否 1：是
+     *     ],
+     * ]
+     * @return array
+     */
+    private function formatGetAreaJunctionListData($cityId, $data)
+    {
+        if (empty($data) || intval($cityId) < 1) {
+            return [];
+        }
+
+        // 获取实时报警路口信息
+        $alarmJunctions = $this->getRealTimeAlarmJunctions($cityId);
+        print_r($alarmJunctions);
+
+    }
+
+    /**
+     * 获取实时报警路口信息
+     * @param $cityId interger Y 城市ID
+     * @return array
+     */
+    private function getRealTimeAlarmJunctions($cityId)
+    {
+        $result = [];
+
+        // 先去redis查数据，如果没有则查表
+        $alarmRedisKey = 'its_realtime_alarm_' . $cityId;
+
+        $result = $this->redis_model->getData($alarmRedisKey);
+        $result = json_decode($result, true);
+        if (empty($result)) {
+            if (!$this->isTableExisted($this->tb)) {
+                return [];
+            }
+
+            // 获取最近时间
+            $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
+
+            $lastTime = date('Y-m-d') . ' ' . $lastHour;
+            $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 300);
+
+            $sql = '/*{"router":"m"}*/';
+            $sql .= 'select type, logic_junction_id, logic_flow_id, start_time, last_time';
+            $sql .= ' from ' . $this->tb;
+            $sql .= ' where city_id = ?  and date = ?';
+            $sql .= ' and last_time >= ? and last_time <= ?';
+            $sql .= ' order by type asc, (last_time - start_time) desc';
+            $result = $this->db->query($sql, [
+                $data['city_id'],
+                $data['date'],
+                $lastTime,
+                $cycleTime
+            ])->result_array();
+
+            if (empty($result)) {
+                return [];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * 校验数据表是否存在
+     */
+    private function isTableExisted($table)
+    {
+        $isExisted = $this->db->table_exists($table);
+        return $isExisted;
     }
 }
