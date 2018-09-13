@@ -69,6 +69,7 @@ class MY_Controller extends CI_Controller {
                 }
             }
         }
+        $this->load->config('nconf');
 
         //============>降级开始
         //判断是否符合降级规则,是则直接输出
@@ -96,7 +97,6 @@ class MY_Controller extends CI_Controller {
     // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时
     protected function setTimingType(){
         try{
-            $this->load->config('nconf');
             $this->load->model('junction_model');
             $back_timing_roll = $this->config->item('back_timing_roll');
             $taskId = $this->input->get_post('task_id', true);
