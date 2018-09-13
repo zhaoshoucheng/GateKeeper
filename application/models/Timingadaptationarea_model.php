@@ -255,8 +255,53 @@ class Timingadaptationarea_model extends CI_Model
 
         // 获取实时报警路口信息
         $alarmJunctions = $this->getRealTimeAlarmJunctions($cityId);
-        print_r($alarmJunctions);
+        if (empty($alarmJunctions)) {
+            return [];
+        }
 
+        // 路口ID串
+        $junctionIds = implode(',', array_unique(array_column($alarmJunctions, 'logic_junction_id')));
+        // 获取路口相位信息
+        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        // 报警类别
+        $alarmCate = $this->config->item('alarm_category');
+
+        /**
+         格式alarmJunctions使其为：
+         $alarmJunctions = [
+            '路口ID' => [
+                '报警内容：方向-报警原因 例：东直-溢流',
+                '报警内容：方向-报警原因 例：东直-溢流',
+            ],
+         ]
+         */
+        $alarmData = [];
+        foreach ($alarmJunctions as $v) {
+            $flowName = $flowsInfo[$v['logic_junction_id']][$v['logic_flow_id']] ?? '未知方向';
+            $alarmComment = $alarmCate[$v['type']]['name'] ?? '未知报警';
+            $alarmContent =  $flowName . '-' . $alarmComment;
+            if (empty($alarmData[$v['logic_junction_id']])) {
+                $alarmData[$v['logic_junction_id']] = [];
+            }
+            array_push($alarmData[$v['logic_junction_id']], $alarmContent);
+        }
+        array_filter($alarmData);
+
+        foreach ($data as $k=>$v) {
+            // 组织路口报警信息
+            $data[$k]['alarm'] = [
+                    'is' => 0,
+                    'comment' => '',
+                ];
+            if (array_key_exists($v['logic_junction_id'], $alarmData)) {
+                $data[$k]['alarm'] = [
+                    'is' => 1,
+                    'comment' => $alarmData[$v['logic_junction_id']] ?? '',
+                ];
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -279,7 +324,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             // 获取最近时间
-            $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
+            $lastHour = $this->getLastestHour($cityId);
 
             $lastTime = date('Y-m-d') . ' ' . $lastHour;
             $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 300);
@@ -303,6 +348,39 @@ class Timingadaptationarea_model extends CI_Model
         }
 
         return $result;
+    }
+
+    /**
+     * 获取指定日期最新的数据时间
+     * @param $table
+     * @param null $date
+     * @return false|string
+     */
+    private function getLastestHour($cityId, $date = null)
+    {
+        $hour = $this->redis_model->getData("its_realtime_lasthour_$cityId");
+        if(!empty($hour)) {
+            return $hour;
+        }
+        if (!$this->isTableExisted('real_time_' . $cityId)) {
+            return date('H:i:s');
+        }
+
+        $date = $date ?? date('Y-m-d');
+
+        $result = $this->db->select('hour')
+            ->from('real_time_' . $cityId)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->order_by('hour', 'desc')
+            ->limit(1)
+            ->get()->first_row();
+
+        if(!$result) {
+            return date('H:i:s');
+        }
+
+        return $result->hour;
     }
 
     /**
