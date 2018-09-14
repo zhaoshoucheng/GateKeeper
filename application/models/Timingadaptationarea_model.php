@@ -297,7 +297,7 @@ class Timingadaptationarea_model extends CI_Model
      */
     public function realTimeAlarmList($data)
     {
-        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>(object)[]];
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>[]];
 
         if (empty($data)) {
             $result['errmsg'] = 'data 不能为空！';
@@ -402,7 +402,7 @@ class Timingadaptationarea_model extends CI_Model
         $junctionId = array_column($areaAlarmJunctions, 'logic_junction_id');
         // flowID
         $flowId = array_column($areaAlarmJunctions, 'logic_flow_id');
-        $alarmRemarks = $this->getAlarmRemarks($data['city_id'], $junctionId, $flowId);
+        $alarmRemarks = $this->getAlarmRemarks($data['city_id'], $data['area_id'], $junctionId, $flowId);
         // 人工校验信息 [flowid => type]
         $alarmRemarksFlowKeyTypeValue = [];
         if (!empty($alarmRemarks)) {
@@ -411,7 +411,7 @@ class Timingadaptationarea_model extends CI_Model
 
         foreach ($areaAlarmJunctions as $k=>$val) {
             // 持续时间
-            $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
+            $durationTime = (strtotime($val['last_time']) - strtotime($val['start_time'])) / 60;
             if ($durationTime == 0) {
                 // 当前时间
                 $nowTime = time();
@@ -441,7 +441,7 @@ class Timingadaptationarea_model extends CI_Model
                 && !empty($flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']])) {
                 $result['data'][$k] = [
                     'start_time'        => date('H:i', strtotime($val['start_time'])),
-                    'duration_time'     => $durationTime,
+                    'duration_time'     => round($durationTime),
                     'logic_junction_id' => $val['logic_junction_id'],
                     'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '',
                     'logic_flow_id'     => $val['logic_flow_id'],
@@ -458,6 +458,44 @@ class Timingadaptationarea_model extends CI_Model
         }
 
         $result['errno'] = 0;
+        return $result;
+    }
+
+    /**
+     * 人工标注报警信息
+     * @param $data['city_id']           interger Y 城市ID
+     * @param $data['area_id']           interger Y 区域ID
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['logic_flow_id']     string   Y 相位ID
+     * @param $data['is_correct']        interger Y 是否正确 1：正确 2：错误
+     * @param $data['comment']           string   N 备注信息
+     * @return array
+     */
+    public function addAlarmRemark($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        $ret = $this->db->insert('time_alarm_remarks', [
+            'city_id'           => $data['city_id'],
+            'area_id'           => $data['area_id'],
+            'logic_junction_id' => $data['logic_junction_id'],
+            'logic_flow_id'     => $data['logic_flow_id'],
+            'type'              => $data['is_correct'],
+            'comment'           => $data['comment'],
+            'username'          => 0
+        ]);
+        if (!$res) {
+            $result['errmsg'] = '添加失败！';
+            return $result;
+        }
+
+        $result['errno'] = 0;
+        $result['data'] = 'success.';
         return $result;
     }
 
@@ -548,11 +586,12 @@ class Timingadaptationarea_model extends CI_Model
     /**
      * 获取报警人工校验信息
      * @param $cityId     interger Y 城市ID
+     * @param $areaId     interger Y 区域ID
      * @param $junctionId array    Y 路口ID ['xxxxx', 'xxxxx']
      * @param $flowId     array    Y 相位ID ['xxxx', 'xxxxxx']
      * @return array
      */
-    private function getAlarmRemarks($cityId, $junctionId, $flowId)
+    private function getAlarmRemarks($cityId, $areaId, $junctionId, $flowId)
     {
         $table = 'time_alarm_remarks';
         if (!$this->isTableExisted($table)) {
@@ -561,6 +600,7 @@ class Timingadaptationarea_model extends CI_Model
 
         $sql = 'select logic_flow_id, type from ' . $table;
         $sql .= ' where city_id = ?';
+        $sql .= ' and area_id = ?';
         $sql .= ' and logic_junction_id in (';
 
         $junctionIn = '';
@@ -576,7 +616,7 @@ class Timingadaptationarea_model extends CI_Model
         }
         $sql .= $flowIn . ')';
 
-        $result = $this->db->query($sql, [$cityId])->result_array();
+        $result = $this->db->query($sql, [$cityId, $areaId])->result_array();
         return $result;
     }
 

@@ -161,4 +161,76 @@ class TimingAdaptationArea extends MY_Controller
         }
         return $this->response($res);
     }
+
+    /**
+     * 人工标注报警信息
+     * @param city_id           interger Y 城市ID
+     * @param area_id           interger Y 区域ID
+     * @param logic_junction_id string   Y 路口ID
+     * @param logic_flow_id     string   Y 相位ID
+     * @param is_correct        interger Y 是否正确 1：正确 2：错误
+     * @param comment           string   N 备注信息
+     */
+    public function addAlarmRemark()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if (intval($params['city_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数city_id传递错误！';
+            return;
+        }
+
+        if (intval($params['area_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数area_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_junction_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_junction_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_flow_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_flow_id传递错误！';
+            return;
+        }
+
+        if (empty($params['is_correct'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数is_correct传递错误！';
+            return;
+        }
+
+        if (!empty($params['comment'])) {
+            $comment = trim($params['comment']);
+        }
+
+        $data = [
+            'city_id'           => intval($params['city_id']),
+            'area_id'           => intval($params['area_id']),
+            'logic_junction_id' => trim($params['logic_junction_id']),
+            'logic_flow_id'     => trim($params['logic_flow_id']),
+            'is_correct'        => intval($params['is_correct']),
+            'comment'           => $comment,
+        ];
+
+        $result = $this->timingadaptationarea_model->addAlarmRemark($data);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        if (empty($result['data'])) {
+            $res = (object)[];
+        } else {
+            $res = $result['data'];
+        }
+        return $this->response($res);
+
+    }
 }
