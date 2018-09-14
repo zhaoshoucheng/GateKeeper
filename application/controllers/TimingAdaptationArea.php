@@ -295,9 +295,9 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (intval($params['is_upload']) < 1) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数city_id传递错误！';
+            $this->errmsg = '参数is_upload传递错误！';
             return;
         }
 
@@ -314,7 +314,7 @@ class TimingAdaptationArea extends MY_Controller
         }
 
         $data = [
-            'city_id'           => intval($params['city_id']),
+            'is_upload'         => intval($params['is_upload']),
             'area_id'           => intval($params['area_id']),
             'logic_junction_id' => trim($params['logic_junction_id']),
         ];
