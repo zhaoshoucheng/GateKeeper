@@ -295,7 +295,7 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['is_upload']) < 1) {
+        if (!in_array(intval($params['is_upload']), [0, 1])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数is_upload传递错误！';
             return;
