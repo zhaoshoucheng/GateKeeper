@@ -19,10 +19,10 @@ class Redis_model extends CI_Model
         if (isset($redis_conf['host'])) {
             $host = $redis_conf['host'];
             $port = $redis_conf['port'];
-            try {
-                $this->redis->connect($host, $port);
-            } catch (RedisException $e) {
-                $this->redis = false;
+            $timeout = $redis_conf['timeout'];  //增加超时时间
+            $connResult = $this->redis->connect($host, $port, $timeout);
+            if(!$connResult){
+                throw new \Exception("redis connection error:".json_encode($redis_conf));
             }
         }
     }

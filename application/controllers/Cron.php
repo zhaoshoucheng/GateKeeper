@@ -176,11 +176,14 @@ class Cron extends CI_Controller
                         throw new Exception(json_encode($item)." checker false", 1);
                     }
 
+                    //设置缓存时间
+                    $retArr = json_decode($ret,true);
+                    $retArr['cache_time'] = date("Y-m-d H:i:s");
                     $all[] = [
                         'method' => strtoupper($item['method']),
                         'url' => $item['url'],
                         'params' => $item['params'],
-                        'data' => $ret,
+                        'data' => json_encode($retArr),
                     ];
 
                     $message = sprintf("get %s success.",json_encode($item));
@@ -202,7 +205,7 @@ class Cron extends CI_Controller
                 }
 
                 foreach ($all as $one) {
-                    $file = $this->getCacheFileName($one['method'], $one['url'], $one['params']);
+                    $file = $this->downgrade_model->getCacheFileName($one['url'], $one['method'], $one['params']);
                     if (file_put_contents($basedir . $file, $one['data']) === false) {
                         throw new Exception("file_put_contents {$basedir}{$one['data']} failed", 1);
                     }
@@ -239,16 +242,6 @@ class Cron extends CI_Controller
 		$server_sign = $this->genSign($params, $secret);
 		return $client_sign = $client_sign;
 	}
-
-    // /home/xiaoju/webroot/cache/itstool/
-    private function getCacheFileName($method, $url, $params)
-    {
-        $method = strtoupper($method);
-        $url = strtoupper($url);
-        ksort($params);
-        $data = http_build_query($params);
-        return md5($method . $url . $data) . '.json';
-    }
 
     public function testding()
     {

@@ -13,6 +13,7 @@ class Track extends MY_Controller
     {
         parent::__construct();
         $this->load->model('track_model');
+        $this->setTimingType();
     }
 
     /**

@@ -401,11 +401,19 @@ class Collection implements CollectionInterface
 
     private function groupByArray($keys, callable $callback = null, $preserveKey = false)
     {
-        return count($keys) == 1
-            ? $this->groupByKey(current($keys), $callback, $preserveKey)
-            : $this->groupByKey(array_shift($keys), function ($v) use ($keys, $callback, $preserveKey) {
+        if(empty($keys)) return [];
+        $key = array_shift($keys);
+        return count($keys) == 0
+            ? (is_string($key) || is_numeric($key)
+                ? $this->groupByKey($key, $callback, $preserveKey)
+                : $this->groupByCallback($key, $callback, $preserveKey))
+            : (is_string($key) || is_numeric($key)
+                ? $this->groupByKey($key, function ($v) use ($keys, $callback, $preserveKey) {
+                    return static::make($v)->groupByArray($keys, $callback, $preserveKey)->get();
+                }, $preserveKey)
+                : $this->groupByCallback($key, function ($v) use ($keys, $callback, $preserveKey) {
                 return static::make($v)->groupByArray($keys, $callback, $preserveKey)->get();
-            }, $preserveKey);
+            }, $preserveKey));
     }
 
     private function groupByCallback(callable $callable, callable $callback = null, $preserveKey = false)

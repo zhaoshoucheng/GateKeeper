@@ -69,11 +69,29 @@ class Overview_model extends CI_Model
                 substr($v['hour'],0, 5)
             ];
         }, $result);
+
+
         $allStopDelay = array_column($result, 0);
         $info         = [
             'value' => count($allStopDelay) == 0 ? 0 : $realTimeQuota['stop_delay']['round'](array_sum($allStopDelay) / count($allStopDelay)),
             'unit' => $realTimeQuota['stop_delay']['unit']
         ];
+
+        $ext = [];
+
+        array_reduce($result, function ($carry, $item) use (&$ext) {
+            $now = strtotime($item[1] ?? '00:00');
+            if($now - $carry >= 30 * 60) {
+                $ext = array_merge($ext, range($carry + 5 * 60, $now - 5 * 60, 5 * 60));
+            }
+            return $now;
+        }, strtotime('00:00'));
+
+        $result = array_merge($result, array_map(function ($v) {
+            return [null, date('H:i', $v)];
+        }, $ext));
+
+        array_multisort(array_column($result, 1), SORT_ASC, $result);
 
         return [
             'dataList' => $result,
@@ -124,7 +142,7 @@ class Overview_model extends CI_Model
      * @param null $date
      * @return false|string
      */
-    private function getLastestHour($cityId, $date = null)
+    public function getLastestHour($cityId, $date = null)
     {
         if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
             return $hour;
@@ -135,15 +153,16 @@ class Overview_model extends CI_Model
         }
 
         $date = $date ?? date('Y-m-d');
-
-        $result = $this->db->select('hour')
+        /*$result = $this->db->select('hour')
             ->from($this->tb . $cityId)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->order_by('hour', 'desc')
             ->limit(1)
-            ->get()->first_row();
-
+            ->get()->first_row();*/
+        // 查询优化
+        $sql = "SELECT `hour` FROM `real_time_{$cityId}`  WHERE 1 ORDER BY updated_at DESC,hour DESC LIMIT 1";
+        $result = $this->db->query($sql)->first_row();
         if(!$result)
             return date('H:i:s');
 

@@ -17,8 +17,7 @@ class Overview extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
+        //不要在此处设置load->model,因为会加载资源
     }
 
     /**
@@ -30,6 +29,8 @@ class Overview extends MY_Controller
     */
     public function junctionsList()
     {
+        $this->load->model('overview_model');
+        $this->load->model('redis_model');
         $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
@@ -54,6 +55,9 @@ class Overview extends MY_Controller
     */
     public function operationCondition()
     {
+        $this->load->model('overview_model');
+        $this->load->model('redis_model');
+
         $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
@@ -79,6 +83,9 @@ class Overview extends MY_Controller
     */
     public function junctionSurvey()
     {
+        $this->load->model('overview_model');
+        $this->load->model('redis_model');
+
         $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
@@ -106,6 +113,9 @@ class Overview extends MY_Controller
     */
     public function getCongestionInfo()
     {
+        $this->load->model('overview_model');
+        $this->load->model('redis_model');
+
         $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params, [
@@ -143,6 +153,9 @@ class Overview extends MY_Controller
     */
     public function getToken()
     {
+        $this->load->model('overview_model');
+        $this->load->model('redis_model');
+
         $token = md5(time() . rand(1, 10000) * rand(1, 10000));
 
         $this->redis_model->setData('Token_' . $token, $token);
@@ -158,6 +171,9 @@ class Overview extends MY_Controller
      */
     public function verifyToken()
     {
+        $this->load->model('overview_model');
+        $this->load->model('redis_model');
+
         $params = $this->input->post(NULL, TRUE);
 
         if(!isset($params['tokenval'])) {

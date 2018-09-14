@@ -204,6 +204,41 @@ class Area_model extends CI_Model
         return $formatResult($result);
     }
 
+    public function comparison($params)
+    {
+        $junctionList = $this->db->select('junction_id')
+            ->from('area_junction_relation')
+            ->where('area_id', $params['area_id'])
+            ->where('delete_at', '1970-01-01 00:00:00')
+            ->get()->result_array();
+
+        $junctionList = array_column($junctionList, 'junction_id');
+
+        $baseDates = $this->dateRange($params['base_start_date'], $params['base_end_date']);
+        $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
+
+        $result = $this->db->select('date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'])
+            ->from('junction_hour_report')
+            ->where_in('date', array_merge($baseDates, $evaluateDates))
+            ->where_in('logic_junction_id', $junctionList)
+            ->group_by(['date', 'hour'])->get()->result_array();
+
+        return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
+            return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
+        }, 'date'], function ($v) use ($params) {
+            return array_map(function ($v) use ($params) {
+                return [$v['hour'], $v[$params['quota_key']]];
+            }, $v);
+        })->get();
+    }
+
+    private function dateRange($start, $end)
+    {
+        return array_map(function ($v) {
+            return date('Y-m-d', $v);
+        }, range(strtotime($start), strtotime($end), 60 * 60 * 24));
+    }
+
     //自动替换model数据
     private function replaceArea($data)
     {
