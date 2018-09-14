@@ -313,7 +313,7 @@ class Timingadaptationarea_model extends CI_Model
 
         // 根据alarm_type过滤路口
         if ($data['alarm_type'] != 0 && in_array($data['alarm_type'], [1, 2])) {
-            $alarmJunctions = array_map(function($item){
+            $alarmJunctions = array_map(function($item) use ($data) {
                 if ($item['type'] == $data['alarm_type']) {
                     return $item;
                 }
@@ -337,28 +337,34 @@ class Timingadaptationarea_model extends CI_Model
              ];
              */
             $areaIgnoreJunctionFlows = json_decode($areaIgnoreJunctionFlows, true);
+        }
 
-            // 根据ignore_type过滤所需路口 1:已忽略 2:未忽略
-            if ($data['ignore_type'] != 0 && in_array($data['ignore_type'], [1, 2])) {
-                if ($data['ignore_type'] == 1) {
+        // 根据ignore_type过滤所需路口 1:已忽略 2:未忽略
+        if ($data['ignore_type'] != 0 && in_array($data['ignore_type'], [1, 2])) {
+            if ($data['ignore_type'] == 1) {
+                if (empty($areaIgnoreJunctionFlows)) {
+                    $alarmJunctions = [];
+                } else {
                     $alarmJunctions = array_map(function($item) use ($areaIgnoreJunctionFlows){
                         if (in_array($item['logic_flow_id'], $areaIgnoreJunctionFlows, true)) {
                             return $item;
                         }
                     }, $alarmJunctions);
-                } else {
+                }
+            } else {
+                if (!empty($areaIgnoreJunctionFlows)) {
                     $alarmJunctions = array_map(function($item) use ($areaIgnoreJunctionFlows){
                         if (!in_array($item['logic_flow_id'], $areaIgnoreJunctionFlows, true)) {
                             return $item;
                         }
                     }, $alarmJunctions);
                 }
-                $alarmJunctions = array_filter($alarmJunctions);
             }
-            if (empty($alarmJunctions)) {
-                $result['errno'] = 0;
-                return $result;
-            }
+            $alarmJunctions = array_filter($alarmJunctions);
+        }
+        if (empty($alarmJunctions)) {
+            $result['errno'] = 0;
+            return $result;
         }
 
         // 获取区域路口
