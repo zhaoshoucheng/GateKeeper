@@ -504,7 +504,7 @@ class Timingadaptationarea_model extends CI_Model
      * @param city_id       interger Y 城市ID
      * @param area_id       interger Y 区域ID
      * @param logic_flow_id string   Y 相位ID
-     * @return json
+     * @return array
      */
     public function ignoreAlarm($data)
     {
@@ -539,6 +539,44 @@ class Timingadaptationarea_model extends CI_Model
         $result['errno'] = 0;
         $result['data'] = 'success.';
         return $result;
+    }
+
+    /**
+     * 更新自适应路口开关
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['area_id']           interger Y 区域ID
+     * @param $data['is_upload']         interger Y 变更状态 0：关闭；1：打开
+     * @return array
+     */
+    public function junctionSwitch($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        // 调用signal-mis接口
+        try {
+            $url = $this->signal_mis_interface . '/TimingAdaptation/junctionSwitch';
+
+            $res = httpPOST($url, $data);
+            $res = json_decode($res, true);
+            if ($res['errorCode'] != 0) {
+                $result['errmsg'] = $res['errorMsg'];
+                return $result;
+            }
+
+            $result['errno'] = 0;
+            $result['data'] = $res['data'];
+
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_signal-mis_junctionSwitch_failed', 0, $e->getMessage(), compact("url","data","res"));
+            $result['errmsg'] = '调用signal-mis的junctionSwitch接口出错！';
+            return $result;
+        }
     }
 
     /**

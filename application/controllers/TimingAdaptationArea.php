@@ -283,4 +283,54 @@ class TimingAdaptationArea extends MY_Controller
         }
         return $this->response($res);
     }
+
+    /**
+     * 更新自适应路口开关
+     * @param logic_junction_id string   Y 路口ID
+     * @param area_id           interger Y 区域ID
+     * @param is_upload         interger Y 变更状态 0：关闭；1：打开
+     * @return json
+     */
+    public function junctionSwitch()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if (intval($params['city_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数city_id传递错误！';
+            return;
+        }
+
+        if (intval($params['area_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数area_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_junction_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_junction_id传递错误！';
+            return;
+        }
+
+        $data = [
+            'city_id'           => intval($params['city_id']),
+            'area_id'           => intval($params['area_id']),
+            'logic_junction_id' => trim($params['logic_junction_id']),
+        ];
+
+        $result = $this->timingadaptationarea_model->junctionSwitch($data);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        if (empty($result['data'])) {
+            $res = (object)[];
+        } else {
+            $res = $result['data'];
+        }
+        return $this->response($res);
+    }
 }
