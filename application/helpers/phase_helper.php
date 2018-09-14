@@ -51,14 +51,14 @@ if(function_exists('phase_map')) {
     {
         if($in < 0 || $in > 360 || $out < 0 || $out > 360)
             return false;
-        $direction = direction($in);
-        $action = action($in, $out);
+        $direction = phase_direction($in);
+        $action = phase_direction($in, $out);
         return constant($direction . '_' . $action);
     }
 }
 
-if(function_exists('direction')) {
-    function direction($link)
+if(function_exists('phase_direction')) {
+    function phase_direction($link)
     {
         $BASE = 22.5;
 
@@ -76,8 +76,8 @@ if(function_exists('direction')) {
     }
 }
 
-if(function_exists('action')) {
-    function action($in, $out)
+if(function_exists('phase_action')) {
+    function phase_action($in, $out)
     {
         //规则
         $rule = [
