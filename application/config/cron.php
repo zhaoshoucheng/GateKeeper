@@ -19,6 +19,7 @@ $config['checkItems'] = [
             if(!isset($ret['errno']) || $ret['errno']!=0){
                 return false;
             }
+            $realTimeAlarmListCount = 0;
             if(isset($ret['data']['dataList'])){
                 $realTimeAlarmListCount = count($ret['data']['dataList']);
             }
