@@ -326,7 +326,7 @@ class Timingadaptationarea_model extends CI_Model
         }
 
         // 获取redis中忽略的路口相位
-        $areaIgnoreJunctionRedisKey = 'area_ignore_Junction_flow_' . $data['city_id'];
+        $areaIgnoreJunctionRedisKey = 'area_ignore_Junction_flow_' . $data['area_id'] . '_' . $data['city_id'];
         $areaIgnoreJunctionFlows = $this->redis_model->getData($areaIgnoreJunctionRedisKey);
         if (!empty($areaIgnoreJunctionFlows)) {
             /**
@@ -489,10 +489,52 @@ class Timingadaptationarea_model extends CI_Model
             'comment'           => $data['comment'],
             'username'          => 0
         ]);
-        if (!$res) {
+        if (!$ret) {
             $result['errmsg'] = '添加失败！';
             return $result;
         }
+
+        $result['errno'] = 0;
+        $result['data'] = 'success.';
+        return $result;
+    }
+
+    /**
+     * 忽略报警 将忽略的flow存入redis时效30分钟
+     * @param city_id       interger Y 城市ID
+     * @param area_id       interger Y 区域ID
+     * @param logic_flow_id string   Y 相位ID
+     * @return json
+     */
+    public function ignoreAlarm($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        // redis KEY
+        $areaIgnoreJunctionRedisKey = 'area_ignore_Junction_flow_' . $data['area_id'] . '_' . $data['city_id'];
+        $areaIgnoreJunctionFlows = $this->redis_model->getData($areaIgnoreJunctionRedisKey);
+        if (!empty($areaIgnoreJunctionFlows)) {
+            /**
+             redids中存在的是json格式的,json_decode后格式：
+             $areaIgnoreJunctionFlows = [
+                'xxxxxxxxxxxx', // logic_junction_id
+                'xxxxxxxxxxxx',
+             ];
+             */
+            $areaIgnoreJunctionFlows = json_decode($areaIgnoreJunctionFlows, true);
+        } else {
+            $areaIgnoreJunctionFlows = [];
+        }
+
+        // 向数组中添加新的数据
+        array_push($areaIgnoreJunctionFlows, $data['logic_flow_id']);
+
+        $this->redis_model->setEx($areaIgnoreJunctionRedisKey, json_encode($areaIgnoreJunctionFlows), 30 * 60);
 
         $result['errno'] = 0;
         $result['data'] = 'success.';

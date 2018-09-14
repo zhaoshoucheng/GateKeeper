@@ -205,6 +205,7 @@ class TimingAdaptationArea extends MY_Controller
             return;
         }
 
+        $comment = '';
         if (!empty($params['comment'])) {
             $comment = trim($params['comment']);
         }
@@ -231,6 +232,55 @@ class TimingAdaptationArea extends MY_Controller
             $res = $result['data'];
         }
         return $this->response($res);
+    }
 
+    /**
+     * 忽略报警
+     * @param city_id       interger Y 城市ID
+     * @param area_id       interger Y 区域ID
+     * @param logic_flow_id string   Y 相位ID
+     * @return json
+     */
+    public function ignoreAlarm()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if (intval($params['city_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数city_id传递错误！';
+            return;
+        }
+
+        if (intval($params['area_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数area_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_flow_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_flow_id传递错误！';
+            return;
+        }
+
+        $data = [
+            'city_id'           => intval($params['city_id']),
+            'area_id'           => intval($params['area_id']),
+            'logic_flow_id'     => trim($params['logic_flow_id']),
+        ];
+
+        $result = $this->timingadaptationarea_model->ignoreAlarm($data);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        if (empty($result['data'])) {
+            $res = (object)[];
+        } else {
+            $res = $result['data'];
+        }
+        return $this->response($res);
     }
 }
