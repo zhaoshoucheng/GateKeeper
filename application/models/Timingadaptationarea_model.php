@@ -297,7 +297,7 @@ class Timingadaptationarea_model extends CI_Model
      */
     public function realTimeAlarmList($data)
     {
-        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>[]];
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>(object)[]];
 
         if (empty($data)) {
             $result['errmsg'] = 'data 不能为空！';
