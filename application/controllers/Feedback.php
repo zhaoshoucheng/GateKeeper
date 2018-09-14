@@ -20,11 +20,12 @@ class Feedback extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('feedback_model');
+        //考虑降级问题model尽量放到action中初始化
     }
 
     public function addFeedback()
     {
+        $this->load->model('feedback_model');
         $params = $this->input->post();
 
         if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {

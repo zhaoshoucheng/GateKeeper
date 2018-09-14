@@ -37,7 +37,8 @@ if($development == 2){
 
     $config['redis'] = [
         'host' => '100.69.239.57',
-        'port' => '3060'
+        'port' => '3060',
+        'timeout' => '3',
     ];
 
     // signal-mis
@@ -62,7 +63,8 @@ if($development == 2){
 
     $config['redis'] = [
         'host' => '127.0.0.1',
-        'port' => '6379'
+        'port' => '6379',
+        'timeout' => '3',
     ];
 
     // signal-mis

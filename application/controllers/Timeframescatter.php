@@ -13,6 +13,7 @@ class Timeframescatter extends MY_Controller
     {
         parent::__construct();
         $this->load->model('scatter_model');
+        $this->setTimingType();
     }
 
     /**
