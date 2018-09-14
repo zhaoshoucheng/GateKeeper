@@ -333,4 +333,54 @@ class TimingAdaptationArea extends MY_Controller
         }
         return $this->response($res);
     }
+
+    /**
+     * 更新自适应区域开关
+     * @param city_id   interger Y 城市ID
+     * @param area_id   interger Y 区域ID
+     * @param is_upload interger Y 变更状态 0：关闭；1：打开
+     * @return json
+     */
+    public function areaSwitch()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if (intval($params['city_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数city_id传递错误！';
+            return;
+        }
+
+        if (intval($params['area_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数area_id传递错误！';
+            return;
+        }
+
+        if (!in_array(intval($params['is_upload']), [0, 1])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数is_upload传递错误！';
+            return;
+        }
+
+        $data = [
+            'is_upload' => intval($params['is_upload']),
+            'area_id'   => intval($params['area_id']),
+            'city_id'   => intval($params['city_id']),
+        ];
+
+        $result = $this->timingadaptationarea_model->areaSwitch($data);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        if (empty($result['data'])) {
+            $res = (object)[];
+        } else {
+            $res = $result['data'];
+        }
+        return $this->response($res);
+    }
 }
