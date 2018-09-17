@@ -61,4 +61,28 @@ class Common_model extends CI_Model
 
         return ['errno'=>0, 'data'=>$res];
     }
+
+    /**
+     * 获取路口相位信息
+     * @param $data['city_id']           interger Y 城市ID
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @return array
+     */
+    public function getJunctionMovements($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>(object)[]];
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空';
+            return $result;
+        }
+
+        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        if (!empty($flowsInfo)) {
+            $result['data'] = $flowsInfo;
+        }
+
+        $result['errno'] = 0;
+
+        return $result;
+    }
 }
