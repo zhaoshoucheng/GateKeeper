@@ -36,7 +36,7 @@ class TimingAdaptationArea extends MY_Controller
         $address = 'http://100.90.164.31:8006/signal-mis';
         $data = httpPOST($address . '/TimingAdaptation/junctionSwitch', $params);
 
-        $data = json_decode($data, true);
-        return $this->response($data);
+        echo $data;
+        exit();
     }
 }
