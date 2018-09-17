@@ -12,11 +12,33 @@ class Timingadaptation_model extends CI_Model
     {
         $logic_junction_id = $params['logic_junction_id'];
 
-        $result = $this->db->select('*')
+        $res = $this->db->select('*')
             ->from('adapt_timing_mirror')
             ->where('logic_junction_id', $logic_junction_id)
             ->get()->first_row('array');
 
-        return $result;
+        $data = json_decode($res['timing_info'], true);
+
+        $data['tod'] = array_map(function ($v) {
+             return [
+                 'plan_id' => $v['plan_id'] ?? '',
+                 'extra_time' => $v['extra_time'] ?? '',
+                 'movement_timing' => array_map(function ($movement) {
+                     $flow = $movement['flow'] ?? [];
+                     $timing = $movement['timing'] ?? [];
+                     return [
+                         'flow' => $flow,
+                         'movement_id' => $movement['movement_id'],
+                         'channel' => $movement['channel'],
+                         'phase_id' => $movement['phase_id'],
+                         'phase_seq' => $movement['phase_seq'],
+                         'yellow' => '',
+                         'timing' => $timing,
+                     ];
+                 }, $v['movement_timing'])
+             ];
+        }, $data['tod']);
+
+        return $data;
     }
 }
