@@ -37,11 +37,15 @@ class MY_Controller extends CI_Controller {
                     exit();
                 }
             } elseif (isset($_REQUEST['token'])
-                and in_array($_REQUEST['token'], ["aedadf3e3795b933db2883bd02f31e1d", ])
-                and in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus', 'overview/verifytoken'])) {
-                // and in_array($this->input->get_request_header('X-Real-Ip'), ['100.90.164.31', '100.90.163.51', '100.90.163.52', '10.93.94.36', '100.90.165.26', '10.89.236.26', '10.86.108.35'])
+                and in_array($_REQUEST['token'], ["aedadf3e3795b933db2883bd02f31e1d", "d4971d281aee77720a00a5795bb38f85"])) {
+                if (in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus', 'overview/verifytoken', '/task/areaflowprocess'])
+                    and in_array($host, ['100.69.238.11:8000'])) {
+                    return;
+                } else {
+                    exit();
+                }
                 // token and whitelist ip server01, web00, web01, collector03, shuhao*3
-                return;
+                // in_array($this->input->get_request_header('X-Real-Ip'), ['100.90.164.31', '100.90.163.51', '100.90.163.52', '10.93.94.36', '100.90.165.26', '10.89.236.26', '10.86.108.35'])
             } else {
                 if(!$this->_checkUser()) {
                     $currentUrl = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; //线上是https, 获取当前页面的地址
