@@ -76,9 +76,9 @@ class Common_model extends CI_Model
             return $result;
         }
 
-        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        $flowsInfo = $this->waymap_model->getFlowsInfo($data['logic_junction_id']);
         if (!empty($flowsInfo)) {
-            $result['data'] = $flowsInfo;
+            $result['data'] = $flowsInfo[$data['logic_junction_id']];
         }
 
         $result['errno'] = 0;
