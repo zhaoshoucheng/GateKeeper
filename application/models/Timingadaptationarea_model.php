@@ -133,9 +133,27 @@ class Timingadaptationarea_model extends CI_Model
             ];
             $junctions = $this->getAreaJunctionList($jdata);
             if (!empty($junctions['data'])) {
-                // 调用数据组接口 参数 路口id串 暂时没有接口，先随机
-                $speed = rand(1000, 10000000);
-                $stop_delay = rand(1000, 10000000);
+                /* 调用es接口获取区域平均延误、平均速度 */
+                $esData = [
+                    'city_id' => $cityId,
+                    'area_id' => $v['id'],
+                ];
+
+                // 获取区域平均速度
+                $esData['quota_key'] = 'speed';
+                $esSpeed = $this->getEsAreaQuotaValue($esData);
+                if ($esSpeed['errno'] != 0) {
+                    $speed = 0;
+                }
+                $speed = $esSpeed['data'];
+
+                // 获取区域平均延误
+                $esData['quota_key'] = 'stopDelay';
+                $esStopDelay = $this->getEsAreaQuotaValue($esData);
+                if ($esStopDelay['errno'] != 0) {
+                    $stop_delay = 0;
+                }
+                $stop_delay = $esStopDelay['data'];
 
                 /**
                  * 获取上一次的平均延误、平均速度数据
@@ -189,6 +207,76 @@ class Timingadaptationarea_model extends CI_Model
         $this->redis_model->setEx($areaRedisKey, json_encode($redisData), 24 * 3600);
 
         return $data;
+    }
+
+    /**
+     * 调用ES接口，获取区域指标值
+     * @param $data['city_id']   interger Y 城市ID
+     * @param $data['area_id']   interger Y 区域ID
+     * @param $data['quota_key'] string   Y 指标
+     * @return array
+     */
+    private function getEsAreaQuotaValue($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>[]];
+
+        // 获取区域路口ID
+        $junctionIds = $this->getAreaJunctions($data);
+        if ($junctionIds['errno'] != 0) {
+            $result['errmsg'] = $junctionIds['errmsg'];
+            return $result;
+        }
+        if (empty($junctionIds['data'])) {
+            $result['errno'] = 0;
+            return $result;
+        }
+        $esJunctionIds = implode(',', array_filter(array_column($junctionIds['data'], 'logic_junction_id')));
+
+        // 获取数据最近更新时间
+        $hour = $this->getLastestHour($data['city_id']);
+
+        $esUrl = $this->config->item('es_interface') . '/estimate/diagnosis/queryQuota';
+        $esData = [
+            'source'        => 'trajectory',
+            'cityId'        => $data['city_id'],
+            'junctionId'    => $esJunctionIds,
+            'dayTime'       => $hour,
+            'andOperations' => [
+                'junctionId' => 'in',
+                'cityId'     => 'eq',
+                'dayTime'    => 'eq',
+            ],
+            'quotaRequest'  => [
+                "groupField" => "dayTime",
+                "quotaType"  => "weight_avg",
+                "quotas"     => "sum_{$data['quota_key']}*trailNum, sum_trailNum",
+                "limit"      => 50,
+                "orderField" => "weight_avg",
+            ],
+        ];
+
+        try {
+            $quotaInfo = httpPOST($esUrl, $esData, 0, 'json');
+            if (!$quotaInfo) {
+                $result['errmsg'] = '调用es接口 queryQuota 失败！';
+                return $result;
+            }
+            $quotaInfo = json_decode($quotaInfo, true);
+            if ($quotaInfo['code'] != '000000') {
+                $result['errmsg'] = $quotaInfo['message'];
+                return $result;
+            }
+            list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
+            $quotaValue = round($quotaValueInfo['quotaMap']['weight_avg'], 2);
+
+            $result['errno'] = 0;
+            $result['data'] = $quotaValue;
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_es_queryQuota_failed', 0, $e->getMessage(), compact("esUrl","esData","quotaInfo"));
+            $result['errmsg'] = '调用es的queryQuota接口出错！';
+            return $result;
+        }
     }
 
     /**
