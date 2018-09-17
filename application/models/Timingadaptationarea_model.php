@@ -198,8 +198,8 @@ class Timingadaptationarea_model extends CI_Model
             $redisData[$v['id']]['stop_delay'] = $stop_delay;
 
             // 为平均速度、平均延误、平均速度变化趋势、平均延误变化趋势赋值
-            $data[$k]['speed'] = $speed;
-            $data[$k]['stop_delay'] = $stop_delay;
+            $data[$k]['speed'] = round($speed * 3.6, 2) . 'km/h';
+            $data[$k]['stop_delay'] = round($stop_delay, 2) . '/s';
             $data[$k]['speed_trend'] = $speed_trend;
             $data[$k]['stop_delay_trend'] = $stop_delay_trend;
 
@@ -266,7 +266,7 @@ class Timingadaptationarea_model extends CI_Model
             $quotaValue = 0;
             if (!empty($quotaInfo['result']['quotaResults'])) {
                 list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
-                $quotaValue = round($quotaValueInfo['quotaMap']['weight_avg'], 2);
+                $quotaValue = $quotaValueInfo['quotaMap']['weight_avg'];
             }
 
             $result['errno'] = 0;
@@ -734,10 +734,7 @@ class Timingadaptationarea_model extends CI_Model
             "source" => "trajectory",
             "cityId" =>  $data['city_id'],
             "junctionId" => $esJunctionIds,
-            "timestamp"  => [
-                $startTime,
-                $endTime,
-            ],
+            "timestamp"  => "[{$startTime}, {$endTime}]",
             "andOperations" => [
                 "junctionId" => "in",
                 "cityId"     => "eq",
@@ -769,17 +766,17 @@ class Timingadaptationarea_model extends CI_Model
             if (!empty($quotaInfo['result']['quotaResults'])) {
                 list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
             }
-            if (!empty($quotaValueInfo)) {
-                $quotaValueInfo = array_map(function($item){
-                    return [
-                        date('H:i:s', strtotime($item['quotaMap']['dayTime'])), // 时间 X轴
-                        round($item['quotaMap']['weight_avg'], 2),
-                    ];
-                }, $quotaValueInfo);
+
+            $ret = [];
+            foreach ($quotaValueInfo as $k=>$item) {
+                $ret[$k] =  [
+                    date('H:i:s', strtotime($item['quotaMap']['dayTime'])), // 时间 X轴
+                    round($item['quotaMap']['weight_avg'], 2),              // 值   Y轴
+                ];
             }
 
             $result['errno'] = 0;
-            $result['data'] = empty($quotaValueInfo) ?? (object)[];
+            $result['data'] = !empty($ret) ?? (object)[];
             return $result;
         } catch (Exception $e) {
             com_log_warning('_es_queryQuota_failed', 0, $e->getMessage(), compact("esUrl","esData","quotaInfo"));
