@@ -1,9 +1,4 @@
 <?php
-/***************************************************************
-# 时段优化全天路口散点图类
-# user:ningxiangbing@didichuxing.com
-# date:2018-06-07
- ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
