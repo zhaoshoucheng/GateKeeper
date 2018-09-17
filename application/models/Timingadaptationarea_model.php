@@ -764,7 +764,7 @@ class Timingadaptationarea_model extends CI_Model
             }
             $quotaValueInfo = [];
             if (!empty($quotaInfo['result']['quotaResults'])) {
-                list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
+                $quotaValueInfo = $quotaInfo['result']['quotaResults'];
             }
 
             $ret = [];
