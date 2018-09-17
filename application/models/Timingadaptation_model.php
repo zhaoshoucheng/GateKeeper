@@ -17,7 +17,7 @@ class Timingadaptation_model extends CI_Model
             ->where('logic_junction_id', $logic_junction_id)
             ->get()->first_row('array');
 
-        $data = json_decode($res['timing_info'], true);
+        $data = json_decode($res['timing_info'], true)['data'];
 
         $data['tod'] = array_map(function ($v) {
              return [
