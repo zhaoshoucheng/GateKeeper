@@ -199,34 +199,17 @@ class Timingadaptationarea_model extends CI_Model
      */
     public function getAreaJunctionList($data)
     {
-        $url = $this->signal_mis_interface . '/TimingAdaptation/getAreaJunctionList';
-        $data = [
-            'city_id' => $data['city_id'],
-            'area_id' => $data['area_id'],
-        ];
-
         $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>[]];
 
-        try {
-            $junctions = httpPOST($url, $data);
-            if (empty($junctions)) {
-                $result['errno'] = 0;
-                return $result;
-            }
-            $junctions = json_decode($junctions, true);
-            if ($junctions['errorCode'] != 0) {
-                $result['errmsg'] = $junctions['errorMsg'];
-                return $result;
-            }
-
-            $result['errno'] = 0;
-            $result['data'] = $this->formatGetAreaJunctionListData($data['city_id'], $junctions['data']);
-            return $result;
-        } catch (Exception $e) {
-            com_log_warning('_signal-mis_getAreaJunctionList_failed', 0, $e->getMessage(), compact("url","data","junctions"));
-            $result['errmsg'] = '调用signal-mis的getAreaJunctionList接口出错！';
+        // 获取区域路口
+        $areaJunctions = $this->getAreaJunctions($data);
+        if ($areaJunctions['errno'] != 0) {
+            $result['errmsg'] = $areaJunctions['errmsg'];
             return $result;
         }
+        $result['errno'] = 0;
+        $result['data'] = $this->formatGetAreaJunctionListData($data['city_id'], $areaJunctions['data']);
+        return $result;
     }
 
     /**
@@ -305,6 +288,372 @@ class Timingadaptationarea_model extends CI_Model
     }
 
     /**
+     * 获取区域实时报警信息
+     * @param $data['city_id']     interger Y 城市ID
+     * @param $data['area_id']     interger Y 区域ID
+     * @param $data['alarm_type']  interger N 报警类型：0：全部；1：过饱和；2：溢流。默认0
+     * @param $data['ignore_type'] interger N 忽略类型：0：全部；1：已忽略；2：未忽略。默认0
+     * @return array
+     */
+    public function realTimeAlarmList($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>[]];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        // 获取实时报警路口信息（全城）
+        $alarmJunctions = $this->getRealTimeAlarmJunctions($data['city_id']);
+        if (empty($alarmJunctions)) {
+            $result['errno'] = 0;
+            return $result;
+        }
+
+        // 根据alarm_type过滤路口
+        if ($data['alarm_type'] != 0 && in_array($data['alarm_type'], [1, 2])) {
+            $alarmJunctions = array_map(function($item) use ($data) {
+                if ($item['type'] == $data['alarm_type']) {
+                    return $item;
+                }
+            }, $alarmJunctions);
+        }
+        $alarmJunctions = array_filter($alarmJunctions);
+        if (empty($alarmJunctions)) {
+            $result['errno'] = 0;
+            return $result;
+        }
+
+        // 获取redis中忽略的路口相位
+        $areaIgnoreJunctionRedisKey = 'area_ignore_Junction_flow_' . $data['area_id'] . '_' . $data['city_id'];
+        $areaIgnoreJunctionFlows = $this->redis_model->getData($areaIgnoreJunctionRedisKey);
+        if (!empty($areaIgnoreJunctionFlows)) {
+            /**
+             redids中存在的是json格式的,json_decode后格式：
+             $areaIgnoreJunctionFlows = [
+                'xxxxxxxxxxxx', // logic_junction_id
+                'xxxxxxxxxxxx',
+             ];
+             */
+            $areaIgnoreJunctionFlows = json_decode($areaIgnoreJunctionFlows, true);
+        }
+
+        // 根据ignore_type过滤所需路口 1:已忽略 2:未忽略
+        if ($data['ignore_type'] != 0 && in_array($data['ignore_type'], [1, 2])) {
+            if ($data['ignore_type'] == 1) {
+                if (empty($areaIgnoreJunctionFlows)) {
+                    $alarmJunctions = [];
+                } else {
+                    $alarmJunctions = array_map(function($item) use ($areaIgnoreJunctionFlows){
+                        if (in_array($item['logic_flow_id'], $areaIgnoreJunctionFlows, true)) {
+                            return $item;
+                        }
+                    }, $alarmJunctions);
+                }
+            } else {
+                if (!empty($areaIgnoreJunctionFlows)) {
+                    $alarmJunctions = array_map(function($item) use ($areaIgnoreJunctionFlows){
+                        if (!in_array($item['logic_flow_id'], $areaIgnoreJunctionFlows, true)) {
+                            return $item;
+                        }
+                    }, $alarmJunctions);
+                }
+            }
+            $alarmJunctions = array_filter($alarmJunctions);
+        }
+        if (empty($alarmJunctions)) {
+            $result['errno'] = 0;
+            return $result;
+        }
+
+        // 获取区域路口
+        $areaJunctions = $this->getAreaJunctions($data);
+        if ($areaJunctions['errno'] != 0) {
+            $result['errmsg'] = $areaJunctions['errmsg'];
+            return $result;
+        }
+        $areaJuncitonIds = array_column($areaJunctions['data'], 'logic_junction_id');
+
+        // 从全城报警路口中取出区域报警路口
+        $areaAlarmJunctions = [];
+        foreach ($alarmJunctions as $k=>$v) {
+            if (in_array($v['logic_junction_id'], $areaJuncitonIds, true)) {
+                $areaAlarmJunctions[$k] = $v;
+            }
+        }
+        if (empty($areaAlarmJunctions)) {
+            $result['errno'] = 0;
+            return $result;
+        }
+
+        // 需要获取路口name的路口ID串
+        $junctionIds = implode(',', array_unique(array_column($areaAlarmJunctions, 'logic_junction_id')));
+        // 获取路口信息
+        $junctionsInfo = $this->waymap_model->getJunctionInfo($junctionIds);
+        $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
+        // 获取路口相位信息
+        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        // 报警类别
+        $alarmCate = $this->config->item('alarm_category');
+
+        /* 获取报警信息人工校验信息 */
+        // 路口ID
+        $junctionId = array_column($areaAlarmJunctions, 'logic_junction_id');
+        // flowID
+        $flowId = array_column($areaAlarmJunctions, 'logic_flow_id');
+        $alarmRemarks = $this->getAlarmRemarks($data['city_id'], $data['area_id'], $junctionId, $flowId);
+        // 人工校验信息 [flowid => type]
+        $alarmRemarksFlowKeyTypeValue = [];
+        if (!empty($alarmRemarks)) {
+            $alarmRemarksFlowKeyTypeValue = array_column($alarmRemarks, 'type', 'logic_flow_id');
+        }
+
+        foreach ($areaAlarmJunctions as $k=>$val) {
+            // 持续时间
+            $durationTime = (strtotime($val['last_time']) - strtotime($val['start_time'])) / 60;
+            if ($durationTime == 0) {
+                // 当前时间
+                $nowTime = time();
+                $tempDurationTime = ($nowTime - strtotime($val['start_time'])) / 60;
+                // 默认持续时间为1分钟 有的只出现一次，表里记录last_time与start_time相等
+                if ($tempDurationTime < 1) {
+                    $durationTime = 1;
+                } else {
+                    $durationTime = $tempDurationTime;
+                }
+            }
+
+            $is_ignore = 2; // 是否忽略 默认未忽略
+            if (!empty($areaIgnoreJunctionFlows)) {
+                if (in_array($val['logic_flow_id'], $areaIgnoreJunctionFlows, true)) {
+                    $is_ignore = 1;
+                }
+            }
+
+            // 人工标注
+            $check = 0;
+            if (!empty($alarmRemarksFlowKeyTypeValue)) {
+                $check = $alarmRemarksFlowKeyTypeValue[$val['logic_flow_id']] ?? 0;
+            }
+
+            if (!empty($junctionIdName[$val['logic_junction_id']])
+                && !empty($flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']])) {
+                $result['data'][$k] = [
+                    'start_time'        => date('H:i', strtotime($val['start_time'])),
+                    'duration_time'     => round($durationTime),
+                    'logic_junction_id' => $val['logic_junction_id'],
+                    'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '',
+                    'logic_flow_id'     => $val['logic_flow_id'],
+                    'flow_name'         => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
+                    'alarm_comment'     => $alarmCate[$val['type']]['name'] ?? '',
+                    'alarm_key'         => $val['type'],
+                    'is_ignore'         => $is_ignore,
+                    'check'             => $check,
+                ];
+            }
+        }
+        if (!empty($result['data'])) {
+            $result['data'] = array_values($result['data']);
+        }
+
+        $result['errno'] = 0;
+        return $result;
+    }
+
+    /**
+     * 人工标注报警信息
+     * @param $data['city_id']           interger Y 城市ID
+     * @param $data['area_id']           interger Y 区域ID
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['logic_flow_id']     string   Y 相位ID
+     * @param $data['is_correct']        interger Y 是否正确 1：正确 2：错误
+     * @param $data['comment']           string   N 备注信息
+     * @return array
+     */
+    public function addAlarmRemark($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        $ret = $this->db->insert('time_alarm_remarks', [
+            'city_id'           => $data['city_id'],
+            'area_id'           => $data['area_id'],
+            'logic_junction_id' => $data['logic_junction_id'],
+            'logic_flow_id'     => $data['logic_flow_id'],
+            'type'              => $data['is_correct'],
+            'comment'           => $data['comment'],
+            'username'          => 0
+        ]);
+        if (!$ret) {
+            $result['errmsg'] = '添加失败！';
+            return $result;
+        }
+
+        $result['errno'] = 0;
+        $result['data'] = 'success.';
+        return $result;
+    }
+
+    /**
+     * 忽略报警 将忽略的flow存入redis时效30分钟
+     * @param city_id       interger Y 城市ID
+     * @param area_id       interger Y 区域ID
+     * @param logic_flow_id string   Y 相位ID
+     * @return array
+     */
+    public function ignoreAlarm($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        // redis KEY
+        $areaIgnoreJunctionRedisKey = 'area_ignore_Junction_flow_' . $data['area_id'] . '_' . $data['city_id'];
+        $areaIgnoreJunctionFlows = $this->redis_model->getData($areaIgnoreJunctionRedisKey);
+        if (!empty($areaIgnoreJunctionFlows)) {
+            /**
+             redids中存在的是json格式的,json_decode后格式：
+             $areaIgnoreJunctionFlows = [
+                'xxxxxxxxxxxx', // logic_junction_id
+                'xxxxxxxxxxxx',
+             ];
+             */
+            $areaIgnoreJunctionFlows = json_decode($areaIgnoreJunctionFlows, true);
+        } else {
+            $areaIgnoreJunctionFlows = [];
+        }
+
+        // 向数组中添加新的数据
+        array_push($areaIgnoreJunctionFlows, $data['logic_flow_id']);
+
+        $this->redis_model->setEx($areaIgnoreJunctionRedisKey, json_encode($areaIgnoreJunctionFlows), 30 * 60);
+
+        $result['errno'] = 0;
+        $result['data'] = 'success.';
+        return $result;
+    }
+
+    /**
+     * 更新自适应路口开关
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['area_id']           interger Y 区域ID
+     * @param $data['is_upload']         interger Y 变更状态 0：关闭；1：打开
+     * @return array
+     */
+    public function junctionSwitch($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        // 调用signal-mis接口
+        try {
+            $url = $this->signal_mis_interface . '/TimingAdaptation/junctionSwitch';
+
+            $res = httpPOST($url, $data);
+            $res = json_decode($res, true);
+            if ($res['errorCode'] != 0) {
+                $result['errmsg'] = $res['errorMsg'];
+                return $result;
+            }
+
+            $result['errno'] = 0;
+            $result['data'] = 'success.';
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_signal-mis_junctionSwitch_failed', 0, $e->getMessage(), compact("url","data","res"));
+            $result['errmsg'] = '调用signal-mis的junctionSwitch接口出错！';
+            return $result;
+        }
+    }
+
+    /**
+     * 更新自适应区域开关
+     * @param $data['city_id']   interger Y 城市ID
+     * @param $data['area_id']   interger Y 区域ID
+     * @param $data['is_upload'] interger Y 变更状态 0：关闭；1：打开
+     * @return array
+     */
+    public function areaSwitch($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        // 调用signal-mis接口
+        try {
+            $url = $this->signal_mis_interface . '/TimingAdaptation/areaSwitch';
+
+            $res = httpPOST($url, $data);
+            $res = json_decode($res, true);
+            if ($res['errorCode'] != 0) {
+                $result['errmsg'] = $res['errorMsg'];
+                return $result;
+            }
+
+            $result['errno'] = 0;
+            $result['data'] = 'success.';
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_signal-mis_areaSwitch_failed', 0, $e->getMessage(), compact("url","data","res"));
+            $result['errmsg'] = '调用signal-mis的areaSwitch接口出错！';
+            return $result;
+        }
+    }
+
+    /**
+     * 获取区域路口信息(公用)
+     * @param $data['city_id'] interger Y 城市ID
+     * @param $data['area_id'] interger Y 区域ID
+     * @return array
+     */
+    private function getAreaJunctions($data)
+    {
+        $url = $this->signal_mis_interface . '/TimingAdaptation/getAreaJunctionList';
+        $data = [
+            'city_id' => $data['city_id'],
+            'area_id' => $data['area_id'],
+        ];
+
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>[]];
+
+        try {
+            $junctions = httpPOST($url, $data);
+            if (empty($junctions)) {
+                $result['errno'] = 0;
+                return $result;
+            }
+            $junctions = json_decode($junctions, true);
+            if ($junctions['errorCode'] != 0) {
+                $result['errmsg'] = $junctions['errorMsg'];
+                return $result;
+            }
+
+            $result['errno'] = 0;
+            $result['data'] = $junctions['data'] ?? [];
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_signal-mis_getAreaJunctionList_failed', 0, $e->getMessage(), compact("url","data","junctions"));
+            $result['errmsg'] = '调用signal-mis的getAreaJunctionList接口出错！';
+            return $result;
+        }
+    }
+
+    /**
      * 获取实时报警路口信息
      * @param $cityId interger Y 城市ID
      * @return array
@@ -347,6 +696,43 @@ class Timingadaptationarea_model extends CI_Model
             }
         }
 
+        return $result;
+    }
+
+    /**
+     * 获取报警人工校验信息
+     * @param $cityId     interger Y 城市ID
+     * @param $areaId     interger Y 区域ID
+     * @param $junctionId array    Y 路口ID ['xxxxx', 'xxxxx']
+     * @param $flowId     array    Y 相位ID ['xxxx', 'xxxxxx']
+     * @return array
+     */
+    private function getAlarmRemarks($cityId, $areaId, $junctionId, $flowId)
+    {
+        $table = 'time_alarm_remarks';
+        if (!$this->isTableExisted($table)) {
+            return [];
+        }
+
+        $sql = 'select logic_flow_id, type from ' . $table;
+        $sql .= ' where city_id = ?';
+        $sql .= ' and area_id = ?';
+        $sql .= ' and logic_junction_id in (';
+
+        $junctionIn = '';
+        foreach ($junctionId as $v) {
+            $junctionIn .= empty($junctionIn) ? "'{$v}'" : ", '{$v}'";
+        }
+        $sql .= $junctionIn . ')';
+        $sql .= ' and logic_flow_id in (';
+
+        $flowIn = '';
+        foreach ($flowId as $v) {
+            $flowIn .= empty($flowIn) ? "'{$v}'" : ", '{$v}'";
+        }
+        $sql .= $flowIn . ')';
+
+        $result = $this->db->query($sql, [$cityId, $areaId])->result_array();
         return $result;
     }
 
