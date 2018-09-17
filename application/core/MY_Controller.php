@@ -38,7 +38,7 @@ class MY_Controller extends CI_Controller {
                 }
             } elseif (isset($_REQUEST['token'])
                 and in_array($_REQUEST['token'], ["aedadf3e3795b933db2883bd02f31e1d", "d4971d281aee77720a00a5795bb38f85"])) {
-                if (in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus', 'overview/verifytoken', 'task/areaflowprocess'])
+                if (in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus', 'overview/verifytoken', 'task/areaflowprocess', 'task/mapversioncb'])
                     and in_array($host, ['100.69.238.11:8000'])) {
                     return;
                 } else {
