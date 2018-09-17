@@ -264,7 +264,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $quotaValue = 0;
-            if (!empty($$quotaInfo['result']['quotaResults'])) {
+            if (!empty($quotaInfo['result']['quotaResults'])) {
                 list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
                 $quotaValue = round($quotaValueInfo['quotaMap']['weight_avg'], 2);
             }
@@ -766,7 +766,7 @@ class Timingadaptationarea_model extends CI_Model
                 return $result;
             }
             $quotaValueInfo = [];
-            if (!empty($$quotaInfo['result']['quotaResults'])) {
+            if (!empty($quotaInfo['result']['quotaResults'])) {
                 list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
             }
             if (!empty($quotaValueInfo)) {
