@@ -776,7 +776,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $result['errno'] = 0;
-            $result['data'] = !empty($ret) ?? (object)[];
+            $result['data'] = !empty($ret) ? $ret : (object)[];
             return $result;
         } catch (Exception $e) {
             com_log_warning('_es_queryQuota_failed', 0, $e->getMessage(), compact("esUrl","esData","quotaInfo"));
