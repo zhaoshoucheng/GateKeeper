@@ -233,14 +233,15 @@ class Timingadaptationarea_model extends CI_Model
         $esJunctionIds = implode(',', array_filter(array_column($junctionIds['data'], 'logic_junction_id')));
 
         // 获取数据最近更新时间
-        $hour = $this->getLastestHour($data['city_id']);
+        $lastHour = $this->getLastestHour($data['city_id']);
+        $time = date('Y-m-d') . ' ' . $lastHour;
 
         $esUrl = $this->config->item('es_interface') . '/estimate/diagnosis/queryQuota';
         $esData = [
             'source'        => 'trajectory',
             'cityId'        => $data['city_id'],
             'junctionId'    => $esJunctionIds,
-            'dayTime'       => $hour,
+            'dayTime'       => $time,
             'andOperations' => [
                 'junctionId' => 'in',
                 'cityId'     => 'eq',
@@ -266,7 +267,9 @@ class Timingadaptationarea_model extends CI_Model
                 $result['errmsg'] = $quotaInfo['message'];
                 return $result;
             }
-            list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
+            if (!empty($$quotaInfo['result']['quotaResults'])) {
+                list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
+            }
             $quotaValue = round($quotaValueInfo['quotaMap']['weight_avg'], 2);
 
             $result['errno'] = 0;
