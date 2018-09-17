@@ -383,4 +383,54 @@ class TimingAdaptationArea extends MY_Controller
         }
         return $this->response($res);
     }
+
+    /**
+     * 获取区域指标折线图
+     * @param city_id   interger Y 城市ID
+     * @param area_id   interger Y 区域ID
+     * @param quota_key string   Y 指标KEY speed / stopDelay
+     * @return json
+     */
+    public function getAreaQuotaInfo()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if (intval($params['city_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数city_id传递错误！';
+            return;
+        }
+
+        if (intval($params['area_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数area_id传递错误！';
+            return;
+        }
+
+        if (empty($params['quota_key'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数quota_key传递错误！';
+            return;
+        }
+
+        $data = [
+            'quota_key' => trim($params['quota_key']),
+            'area_id'   => intval($params['area_id']),
+            'city_id'   => intval($params['city_id']),
+        ];
+
+        $result = $this->timingadaptationarea_model->getAreaQuotaInfo($data);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        if (empty($result['data'])) {
+            $res = (object)[];
+        } else {
+            $res['dataList'] = $result['data'];
+        }
+        return $this->response($res);
+    }
 }
