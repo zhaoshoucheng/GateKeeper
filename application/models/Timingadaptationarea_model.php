@@ -115,6 +115,10 @@ class Timingadaptationarea_model extends CI_Model
             $redisData = json_decode($redisData, true);
         }
 
+        // 获取数组更新最新时间 用于获取每个区域平均延误、平均速度
+        $lastHour = $this->getLastestHour($cityId);
+        $esTime = date('Y-m-d H:i:s', strtotime($lastHour));
+
         foreach ($data as $k=>$v) {
             // 平均速度
             $speed = 0;
@@ -131,11 +135,34 @@ class Timingadaptationarea_model extends CI_Model
                 'city_id' => $cityId,
                 'area_id' => $v['id'],
             ];
-            $junctions = $this->getAreaJunctionList($jdata);
+            $junctions = $this->getAreaJunctions($jdata);
             if (!empty($junctions['data'])) {
-                // 调用数据组接口 参数 路口id串 暂时没有接口，先随机
-                $speed = rand(1000, 10000000);
-                $stop_delay = rand(1000, 10000000);
+                // 路口ID串
+                $esJunctionIds = implode(',', array_filter(array_column($junctions['data'], 'logic_junction_id')));
+
+                /* 调用es接口获取区域平均延误、平均速度 */
+                $esData = [
+                    'city_id'     => $cityId,
+                    'area_id'     => $v['id'],
+                    'junctionIds' => $esJunctionIds,
+                    'time'        => $esTime,
+                ];
+
+                // 获取区域平均速度
+                $esData['quota_key'] = 'speed';
+                $esSpeed = $this->getEsAreaQuotaValue($esData);
+                if ($esSpeed['errno'] != 0) {
+                    $speed = 0;
+                }
+                $speed = $esSpeed['data'];
+
+                // 获取区域平均延误
+                $esData['quota_key'] = 'stopDelay';
+                $esStopDelay = $this->getEsAreaQuotaValue($esData);
+                if ($esStopDelay['errno'] != 0) {
+                    $stop_delay = 0;
+                }
+                $stop_delay = $esStopDelay['data'];
 
                 /**
                  * 获取上一次的平均延误、平均速度数据
@@ -171,8 +198,8 @@ class Timingadaptationarea_model extends CI_Model
             $redisData[$v['id']]['stop_delay'] = $stop_delay;
 
             // 为平均速度、平均延误、平均速度变化趋势、平均延误变化趋势赋值
-            $data[$k]['speed'] = $speed;
-            $data[$k]['stop_delay'] = $stop_delay;
+            $data[$k]['speed'] = round($speed * 3.6, 2) . 'km/h';
+            $data[$k]['stop_delay'] = round($stop_delay, 2) . '/s';
             $data[$k]['speed_trend'] = $speed_trend;
             $data[$k]['stop_delay_trend'] = $stop_delay_trend;
 
@@ -189,6 +216,67 @@ class Timingadaptationarea_model extends CI_Model
         $this->redis_model->setEx($areaRedisKey, json_encode($redisData), 24 * 3600);
 
         return $data;
+    }
+
+    /**
+     * 调用ES接口，获取区域指标值
+     * @param $data['city_id']     interger Y 城市ID
+     * @param $data['area_id']     interger Y 区域ID
+     * @param $data['quota_key']   string   Y 指标
+     * @param $data['time']        string   Y 数据更新最新时间 Y-m-d H:i:s
+     * @param $data['junctionIds'] string   Y 路口ID串 xxxx,xxx,xxxxxx
+     * @return array
+     */
+    private function getEsAreaQuotaValue($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>[]];
+
+        $esUrl = $this->config->item('es_interface') . '/estimate/diagnosis/queryQuota';
+        $esData = [
+            'source'        => 'trajectory',
+            'cityId'        => $data['city_id'],
+            'junctionId'    => $data['junctionIds'],
+            'dayTime'       => $data['time'],
+            'andOperations' => [
+                'junctionId' => 'in',
+                'cityId'     => 'eq',
+                'dayTime'    => 'eq',
+            ],
+            'quotaRequest'  => [
+                "groupField" => "dayTime",
+                "quotaType"  => "weight_avg",
+                "quotas"     => "sum_{$data['quota_key']}*trailNum, sum_trailNum",
+                "limit"      => 50,
+                "orderField" => "weight_avg",
+            ],
+        ];
+
+        try {
+            $quotaInfo = httpPOST($esUrl, $esData, 0, 'json');
+            if (!$quotaInfo) {
+                $result['errmsg'] = '调用es接口 queryQuota 失败！';
+                return $result;
+            }
+            $quotaInfo = json_decode($quotaInfo, true);
+            if ($quotaInfo['code'] != '000000') {
+                $result['errmsg'] = $quotaInfo['message'];
+                return $result;
+            }
+
+            $quotaValue = 0;
+            if (!empty($quotaInfo['result']['quotaResults'])) {
+                list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
+                $quotaValue = $quotaValueInfo['quotaMap']['weight_avg'];
+            }
+
+            $result['errno'] = 0;
+            $result['data'] = $quotaValue;
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_es_queryQuota_failed', 0, $e->getMessage(), compact("esUrl","esData","quotaInfo"));
+            $result['errmsg'] = '调用es的queryQuota接口出错！';
+            return $result;
+        }
     }
 
     /**
@@ -611,6 +699,88 @@ class Timingadaptationarea_model extends CI_Model
         } catch (Exception $e) {
             com_log_warning('_signal-mis_areaSwitch_failed', 0, $e->getMessage(), compact("url","data","res"));
             $result['errmsg'] = '调用signal-mis的areaSwitch接口出错！';
+            return $result;
+        }
+    }
+
+    /**
+     * 获取区域指标折线图
+     * @param $data['city_id']   interger Y 城市ID
+     * @param $data['area_id']   interger Y 区域ID
+     * @param $data['quota_key'] string   Y 指标KEY speed / stopDelay
+     * @return array
+     */
+    public function getAreaQuotaInfo($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        // 获取路口ID串
+        $junctions = $this->getAreaJunctions($data);
+        if (!empty($junctions['data'])) {
+            $esJunctionIds = implode(',', array_filter(array_column($junctions['data'], 'logic_junction_id')));
+        }
+
+        // 当前时间 毫秒级时间戳
+        $endTime = (int)(microtime(true) * 1000);
+        // 开始时间 当天开始时间 毫秒级时间戳
+        $startTime = strtotime('00:00:00') * 1000;
+
+        $esData = [
+            "source" => "trajectory",
+            "cityId" =>  $data['city_id'],
+            "junctionId" => $esJunctionIds,
+            "timestamp"  => "[{$startTime}, {$endTime}]",
+            "andOperations" => [
+                "junctionId" => "in",
+                "cityId"     => "eq",
+                "timestamp"  => "range"
+            ],
+            "quotaRequest"  => [
+                "quotaType"   => "weight_avg",
+                "quotas"      => "sum_{$data['quota_key']}*trailNum, sum_trailNum",
+                "groupField"  => "dayTime",
+                "orderField"  => "dayTime",
+                "asc"         => "true",
+            ],
+        ];
+
+        $esUrl = $this->config->item('es_interface') . '/estimate/diagnosis/queryQuota';
+
+        try {
+            $quotaInfo = httpPOST($esUrl, $esData, 0, 'json');
+            if (!$quotaInfo) {
+                $result['errmsg'] = '调用es接口 获取区域指标折线图 失败！';
+                return $result;
+            }
+            $quotaInfo = json_decode($quotaInfo, true);
+            if ($quotaInfo['code'] != '000000') {
+                $result['errmsg'] = $quotaInfo['message'];
+                return $result;
+            }
+            $quotaValueInfo = [];
+            if (!empty($quotaInfo['result']['quotaResults'])) {
+                $quotaValueInfo = $quotaInfo['result']['quotaResults'];
+            }
+
+            $ret = [];
+            foreach ($quotaValueInfo as $k=>$item) {
+                $ret[$k] =  [
+                    date('H:i:s', strtotime($item['quotaMap']['dayTime'])), // 时间 X轴
+                    round($item['quotaMap']['weight_avg'], 2),              // 值   Y轴
+                ];
+            }
+
+            $result['errno'] = 0;
+            $result['data'] = !empty($ret) ? $ret : (object)[];
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_es_queryQuota_failed', 0, $e->getMessage(), compact("esUrl","esData","quotaInfo"));
+            $result['errmsg'] = '调用es的获取区域指标折线图接口出错！';
             return $result;
         }
     }
