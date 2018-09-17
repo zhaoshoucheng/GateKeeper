@@ -5,6 +5,7 @@ class TimingAdaptation extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('timingadaptation_model');
     }
 
     public function getAdaptTimingInfo()
