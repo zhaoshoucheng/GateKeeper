@@ -330,8 +330,10 @@ class Timingadaptationarea_model extends CI_Model
 
         // 路口ID串
         $junctionIds = implode(',', array_unique(array_column($alarmJunctions, 'logic_junction_id')));
+
         // 获取路口信息
-        $junctionInfo = $this->waymap_model->getJunctionInfo($junctionIds);
+        $allJunctionIds = implode(',', array_unique(array_column($data, 'logic_junction_id')));
+        $junctionInfo = $this->waymap_model->getJunctionInfo($allJunctionIds);
 
         // 组织路口ID=>路口经纬度的数据  ['路口ID' =>['lng'=>xx, 'lat'=>xx], ...]
         $junctionIdByLatAndLog = [];
