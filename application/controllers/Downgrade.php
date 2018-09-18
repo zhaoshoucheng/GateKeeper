@@ -11,8 +11,20 @@ class Downgrade extends Inroute_Controller
     }
 
     public function getOpen(){
-        //$isOpen = $this->Downgrade_model->isOpen();
-        $openInfo = $this->Downgrade_model->getOpen();
+        $params = array_merge($this->input->get(), $this->input->post());
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+        ]);
+        if (!$validate['status']) {
+            $output = array(
+                'errno' => ERR_PARAMETERS,
+                'errmsg' => $validate['errmsg'],
+            );
+            echo json_encode($output);
+            return;
+        }
+        $cityId = intval($params['city_id']);
+        $openInfo = $this->Downgrade_model->getOpen($cityId);
         $output = array(
             'errno' => ERR_SUCCESS,
             'errmsg' => "",
@@ -30,6 +42,7 @@ class Downgrade extends Inroute_Controller
             'open' => 'min:0',
             'expired' => 'min:1',
             'notice' => 'min:1',
+            'city_ids' => 'min:0',
         ]);
         if (!$validate['status']) {
             $output = array(

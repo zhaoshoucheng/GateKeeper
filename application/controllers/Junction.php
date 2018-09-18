@@ -16,6 +16,7 @@ class Junction extends MY_Controller
         $this->load->model('junction_model');
         $this->load->model('timing_model');
         $this->load->config('nconf');
+        $this->setTimingType();
     }
 
     /**

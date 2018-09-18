@@ -18,12 +18,11 @@ class MY_Controller extends CI_Controller {
     protected $is_check_login = 0;
     protected $timingType = 1; // 0，全部；1，人工；2，配时反推；3，信号机上报
 
+
     public function __construct(){
         parent::__construct();
         date_default_timezone_set('Asia/Shanghai');
         $host = $_SERVER['HTTP_HOST'];
-        $this->load->model('junction_model');
-
         if (!in_array($host, ['100.90.164.31:8013', '100.90.164.31:8082', '100.90.164.31:8088', '100.90.164.31:8089', '100.90.164.31:8099', '10.179.132.61:8088', '100.95.100.106:8088', 'www.itstool.com'])) {
             $this->is_check_login = 1;
 
@@ -38,31 +37,35 @@ class MY_Controller extends CI_Controller {
                     exit();
                 }
             } elseif (isset($_REQUEST['token'])
-                and in_array($_REQUEST['token'], ["aedadf3e3795b933db2883bd02f31e1d", ])
-                and in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus', 'overview/verifytoken'])) {
-                // and in_array($this->input->get_request_header('X-Real-Ip'), ['100.90.164.31', '100.90.163.51', '100.90.163.52', '10.93.94.36', '100.90.165.26', '10.89.236.26', '10.86.108.35'])
+                and in_array($_REQUEST['token'], ["aedadf3e3795b933db2883bd02f31e1d", "d4971d281aee77720a00a5795bb38f85"])) {
+                if (in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus', 'overview/verifytoken', 'task/areaflowprocess', 'task/mapversioncb'])
+                    and in_array($host, ['100.69.238.11:8000'])) {
+                    return;
+                } else {
+                    exit();
+                }
                 // token and whitelist ip server01, web00, web01, collector03, shuhao*3
-                return;
+                // in_array($this->input->get_request_header('X-Real-Ip'), ['100.90.164.31', '100.90.163.51', '100.90.163.52', '10.93.94.36', '100.90.165.26', '10.89.236.26', '10.86.108.35'])
             } else {
                 if(!$this->_checkUser()) {
                     $currentUrl = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; //线上是https, 获取当前页面的地址
                     if( (isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) == "xmlhttprequest")
                         || (isset($_SERVER["HTTP_ACCEPT"]) && strstr($_SERVER["HTTP_ACCEPT"], 'application/json')) ) {
-                            $this->_output();
-                            exit();
-                        }else{
-                            // 页面请求
-                            $redirect = $this->user->getLoginUrl() . '&jumpto='.urlencode($currentUrl);
-                            header("location: " . $redirect);
-                            exit();
-                        };
+                        $this->_output();
+                        exit();
+                    }else{
+                        // 页面请求
+                        $redirect = $this->user->getLoginUrl() . '&jumpto='.urlencode($currentUrl);
+                        header("location: " . $redirect);
+                        exit();
+                    };
                 }
                 // 目前还未按照接口设置权限，所以暂时注释掉
-               /*
-                if(!$this->_validateURI()){
-                    $this->_output();
-                    exit();
-                }*/
+                /*
+                 if(!$this->_validateURI()){
+                     $this->_output();
+                     exit();
+                 }*/
 
                 if(isset($_REQUEST['city_id']) && !$this->_validateCity($_REQUEST['city_id'])){
                     $this->_output();
@@ -70,17 +73,44 @@ class MY_Controller extends CI_Controller {
                 }
             }
         }
-
-        // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时
         $this->load->config('nconf');
-        $back_timing_roll = $this->config->item('back_timing_roll');
 
-        $taskId = $this->input->get_post('task_id', true);
-        // 暂时先这么做
-        $taskUser = $this->junction_model->getTaskUser($taskId);
+        //============>降级开始
+        //判断是否符合降级规则,是则直接输出
+        //避免后面资源报错问题
+        $this->load->model('Downgrade_model');
+        $params = $this->input->get();
+        $params = array_merge($params, $this->input->post());
+        $route = $this->router->class."/".$this->router->method;
 
-        if (in_array($taskUser, $back_timing_roll, true)) {
-            $this->timingType = 2;
+        //提前准备好content
+        global $cacheContent;
+        if($this->Downgrade_model->isCacheUrl($route, $_SERVER['REQUEST_METHOD'],$params)){
+            $cacheContent = $this->Downgrade_model->getUrlCache($route, $_SERVER['REQUEST_METHOD'], $params);
+        }
+
+        //输出降级内容
+        $downgradeCityId = isset($params['city_id']) ? intval($params['city_id']) : 0;
+        if($this->Downgrade_model->isOpen($downgradeCityId) && !empty($cacheContent)){
+            header("Content-Type:application/json;charset=UTF-8");
+            echo $cacheContent;
+            exit;
+        }
+        //<============降级结束
+    }
+
+    // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时
+    protected function setTimingType(){
+        try{
+            $this->load->model('junction_model');
+            $back_timing_roll = $this->config->item('back_timing_roll');
+            $taskId = $this->input->get_post('task_id', true);
+            $taskUser = $this->junction_model->getTaskUser($taskId);
+            if (in_array($taskUser, $back_timing_roll, true)) {
+                $this->timingType = 2;
+            }
+        }catch (\Exception $e){
+            com_log_warning('my_controller_set_timingtype_error', 0, $e->getMessage(), compact("taskId"));
         }
     }
 

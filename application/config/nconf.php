@@ -37,13 +37,19 @@ if($development == 2){
 
     $config['redis'] = [
         'host' => '100.69.239.57',
-        'port' => '3060'
+        'port' => '3060',
+        'timeout' => '3',
     ];
 
     // signal-mis
     $signal_mis_server = '100.90.164.31';
     $signal_mis_port = '8006';
     $signal_mis_ext = '/signal-mis';
+
+    // es
+    $es_server = '10.89.236.25';
+    $es_port = '8087';
+    $es_ext = '';
 
 }else{
     // 路网接口服务器地址
@@ -62,18 +68,25 @@ if($development == 2){
 
     $config['redis'] = [
         'host' => '127.0.0.1',
-        'port' => '6379'
+        'port' => '6379',
+        'timeout' => '3',
     ];
 
     // signal-mis
     $signal_mis_server = '100.90.164.31';
     $signal_mis_port = '8006';
     $signal_mis_ext = '/signal-mis';
+
+    // es
+    $es_server = '10.89.236.25';
+    $es_port = '8087';
+    $es_ext = '';
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
 $temp_timing_port = !empty($timing_port) ? ":" . $timing_port : "";
 $signal_mis_port = !empty($signal_mis_port) ? ":" . $signal_mis_port : "";
+$es_port = !empty($es_port) ? ":" . $es_port : "";
 
 // 路网接口地址
 $config['waymap_interface'] = 'http://' . $waymap_server . $temp_waymap_port . $waymap_ext;
@@ -86,6 +99,9 @@ $config['timing_interface'] = 'http://' . $timing_server . $temp_timing_port . $
 
 // signal-mis接口地址
 $config['signal_mis_interface'] = 'http://' . $signal_mis_server . $signal_mis_port . $signal_mis_ext;
+
+// es接口地址
+$config['es_interface'] = 'http://' . $es_server . $es_port . $es_ext;
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;
