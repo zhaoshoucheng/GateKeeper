@@ -18,7 +18,7 @@ class Timingadaptation_model extends CI_Model
         return $this->formatAdaptionTimingInfo(json_decode($adapt['timing_info'], true)['data'] ?? '', $current);
     }
 
-    private function formatAdaptionTimingInfo($adapt, $current)
+    private function formatAdaptionTimingInfo($current, $adapt)
     {
         foreach ($adapt['tod'] as $tk => &$tod) {
             foreach ($tod['movement_timing'] as $mk => &$movement) {
