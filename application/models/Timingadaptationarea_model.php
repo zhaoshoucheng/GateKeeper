@@ -308,8 +308,6 @@ class Timingadaptationarea_model extends CI_Model
      * $data = [
      *     [
      *         'logic_junction_id'=>xxxx, // 路口ID
-     *         'lat'              =>xxxx, // 纬度
-     *         'lon'              =>xxxx, // 经度
      *         'status'           =>xxxx, // 路口类型：0:无配时；1:有配时；2:自适应；9:配时异常
      *         'source'           =>xxxx, // 数据来源
      *         'junction_name'    =>xxxx, // 路口名称
@@ -332,6 +330,20 @@ class Timingadaptationarea_model extends CI_Model
 
         // 路口ID串
         $junctionIds = implode(',', array_unique(array_column($alarmJunctions, 'logic_junction_id')));
+
+        // 获取路口信息
+        $allJunctionIds = implode(',', array_unique(array_column($data, 'logic_junction_id')));
+        $junctionInfo = $this->waymap_model->getJunctionInfo($allJunctionIds);
+
+        // 组织路口ID=>路口经纬度的数据  ['路口ID' =>['lng'=>xx, 'lat'=>xx], ...]
+        $junctionIdByLatAndLog = [];
+        foreach ($junctionInfo as $v) {
+            $junctionIdByLatAndLog[$v['logic_junction_id']] = [
+                'lng' => $v['lng'],
+                'lat' => $v['lat'],
+            ];
+        }
+
         // 获取路口相位信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
         // 报警类别
@@ -359,6 +371,10 @@ class Timingadaptationarea_model extends CI_Model
         array_filter($alarmData);
 
         foreach ($data as $k=>$v) {
+            // 路口经纬度
+            $data[$k]['lng'] = $junctionIdByLatAndLog[$v['logic_junction_id']]['lng'] ?? 0;
+            $data[$k]['lat'] = $junctionIdByLatAndLog[$v['logic_junction_id']]['lat'] ?? 0;
+
             // 组织路口报警信息
             $data[$k]['alarm'] = [
                     'is' => 0,
@@ -855,8 +871,8 @@ class Timingadaptationarea_model extends CI_Model
             $sql .= ' and last_time >= ? and last_time <= ?';
             $sql .= ' order by type asc, (last_time - start_time) desc';
             $result = $this->db->query($sql, [
-                $data['city_id'],
-                $data['date'],
+                $cityId,
+                date('Y-m-d'),
                 $lastTime,
                 $cycleTime
             ])->result_array();
