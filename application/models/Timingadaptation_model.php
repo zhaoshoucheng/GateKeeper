@@ -12,33 +12,66 @@ class Timingadaptation_model extends CI_Model
     {
         $logic_junction_id = $params['logic_junction_id'];
 
-        $res = $this->db->select('*')
+        $adapt = $this->getAdaptInfo($logic_junction_id);
+        $current = $this->getCurrentInfo($logic_junction_id);
+
+        $data = array_merge_recursive($adapt, $current);
+//        $tod_movement = Collection::make($current['tod'] ?? [])
+//            ->column(null, 'tod_id')->map(function ($tod) {
+//                return Collection::make($tod['movement_timing'] ?? [])
+//                    ->column(null, 'movement_id')->map(function ($movement) {
+//                        return Collection::make($movement['timing'] ?? [])
+//                            ->column('state')->get();
+//                    })->get();
+//            });
+//
+//        $data['tod'] = array_map(function ($tod) use ($tod_movement) {
+//            return [
+//                'plan_id' => $tod['plan_id'],
+//                'extra_time' => $tod['extra_time'],
+//                'movement_timing' => array_map(function ($movement) use ($tod, $tod_movement)  {
+//                    return [
+//                        'movement_id' => $movement['movement_id'] ?? '',
+//                        'channel' => $movement['channel'] ?? '',
+//                        'phase_id' => $movement['phase_id'] ?? '',
+//                        'phase_seq' => $movement['phase_seq'] ?? '',
+//                        'yellow' => $tod_movement[$tod['plan_id']][$movement['movement_id']][2]['duration'] ?? '',
+//                        'timing' => [
+//                            'start_time' => $tod_movement[$tod['plan_id']][$movement['movement_id']][1]['start_time'] ?? '',
+//                            'suggest_start_time' => $movement['timing'][1]['start_time'] ?? '',
+//                            'duration' => $tod_movement[$tod['plan_id']][$movement['movement_id']][1]['duration'] ?? '',
+//                            'suggest_duration' => $movement['timing'][1]['duration'] ?? '',
+//                            'max' => $tod_movement[$tod['plan_id']][$movement['movement_id']][1]['max'] ?? '',
+//                            'suggest_max' => $movement['timing'][1]['max'] ?? '',
+//                            'min' => $tod_movement[$tod['plan_id']][$movement['movement_id']][1]['min'] ?? '',
+//                            'suggest_min' => $movement['timing'][1]['min'] ?? '',
+//                        ],
+//                        'flow' => $movement['flow'],
+//                    ];
+//                }, $tod['movement_timing']),
+//            ];
+//        }, $data['tod'] ?? []);
+
+        return $data;
+    }
+
+    /**
+     * 获取算法组给定的配时信息方案
+     * @param $logic_junction_id
+     * @return mixed
+     */
+    private function getAdaptInfo($logic_junction_id)
+    {
+        return $this->db->select('*')
             ->from('adapt_timing_mirror')
             ->where('logic_junction_id', $logic_junction_id)
             ->get()->first_row('array');
+    }
 
-        $data = json_decode($res['timing_info'], true)['data'];
-
-        $data['tod'] = array_map(function ($v) {
-             return [
-                 'plan_id' => $v['plan_id'] ?? '',
-                 'extra_time' => $v['extra_time'] ?? '',
-                 'movement_timing' => array_map(function ($movement) {
-                     $flow = $movement['flow'] ?? [];
-                     $timing = $movement['timing'] ?? [];
-                     return [
-                         'flow' => $flow,
-                         'movement_id' => $movement['movement_id'],
-                         'channel' => $movement['channel'],
-                         'phase_id' => $movement['phase_id'],
-                         'phase_seq' => $movement['phase_seq'],
-                         'yellow' => '',
-                         'timing' => $timing,
-                     ];
-                 }, $v['movement_timing'])
-             ];
-        }, $data['tod']);
-
-        return $data;
+    private function getCurrentInfo($logic_junction_id)
+    {
+        $address = 'http://100.90.164.31:8006/signal-mis/TimingAdaptation/getCurrentTimingInfo';
+        $res = httpGET($address, compact('logic_junction_id'));
+        return json_decode($res, true)['data'] ?? [];
     }
 }
