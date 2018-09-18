@@ -22,8 +22,8 @@ class Timingadaptation_model extends CI_Model
     {
         foreach ($adapt['tod'] as $tk => &$tod) {
             foreach ($tod['movement_timing'] as $mk => &$movement) {
-                $adaptTimings = Collection::make($movement['timing']);
-                $currentTimings = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing']);
+                $adaptTimings = Collection::make($movement['timing'] ?? []);
+                $currentTimings = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? []);
                 $movement['yellow'] = $adaptTimings->first(function ($timing) { return $timing['state'] == 2; })['duration'] ?? '';
                 $greenAdapts = $adaptTimings->where('state', 1)->get();
                 $greenCurrents = $currentTimings->where('state', 1)->get();
