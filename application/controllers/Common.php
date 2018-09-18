@@ -25,7 +25,7 @@ class Common extends MY_Controller
      */
     public function getJunctionAdAndCross()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(null, true);
 
         // 校验参数
         $validate = Validate::make($params, [
@@ -54,5 +54,43 @@ class Common extends MY_Controller
         }
 
         return $this->response($result['data']);
+    }
+
+    /**
+     * 获取路口相位信息
+     * @param city_id           interger Y 城市ID
+     * @param logic_junction_id string   Y 路口ID
+     * @return json
+     */
+    public function getJunctionMovements()
+    {
+        $params = $this->input->post(null, true);
+
+        // 校验参数
+        $validate = Validate::make($params, [
+                'city_id'             => 'min:1',
+                'logic_junction_id'   => 'nullunable',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        $data['city_id'] = intval($params['city_id']);
+        $data['logic_junction_id'] = strip_tags(trim($params['logic_junction_id']));
+
+        $result = $this->common_model->getJunctionMovements($data);
+
+        if ($result['errno'] != 0) {
+            $this->errno = $result['errno'];
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        $res['dataList'] = $result['data'];
+
+        return $this->response($res);
     }
 }

@@ -198,7 +198,7 @@ class Thrift
                 'transport' => 'Thrift\Transport\TFramedTransport',
             ],
             'caculator' => [
-                'host' => '10.93.94.36',
+                'host' => '10.79.38.52',
                 'port' => "8383",
                 'read_timeout' => 30,
                 'write_timeout' => 30,
