@@ -435,29 +435,4 @@ class TimingAdaptationArea extends MY_Controller
         return $this->response($res);
     }
 
-    /**
-     * 更新自适应路口开关
-     */
-    public function junctionSwitch()
-    {
-        $params = $this->input->post();
-
-        $validator = Validator::make($params, [
-            'logic_junction_id' => 'required',
-            'area_id' => 'required',
-            'is_upload' => 'required;in:0,1',
-        ]);
-
-        if($validator->fail()) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validator->firstError();
-            return;
-        }
-
-        $address = 'http://100.90.164.31:8006/signal-mis';
-        $data = httpPOST($address . '/TimingAdaptation/junctionSwitch', $params);
-
-        echo $data;
-        exit();
-    }
 }
