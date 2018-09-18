@@ -13,14 +13,26 @@ $array = [
     ['hour' => '11:30', 'flow' => 'aaa', 'value' => 9 , 'item' => [ 'name' => 'bbb', 'age' => 15 ]],
     ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16, 'item' => [ 'name' => 'aaa', 'age' => 17 ]],
 ];
+$array2 = [
+    ['hour' => '10:00', 'flow' => 'aaa', 'value' => 10, 'item' => [ 'name' => 'bbb', 'age' => 10 ]],
+    ['hour' => '10:00', 'flow' => 'bbb', 'value' => 8 , 'item' => [ 'name' => 'aaa', 'age' => 11 ]],
+    ['hour' => '10:30', 'flow' => 'aaa', 'value' => 6 , 'item' => [ 'name' => 'bbb', 'age' => 12 ]],
+    ['hour' => '10:30', 'flow' => 'bbb', 'value' => 15, 'item' => [ 'name' => 'aaa', 'age' => 13 ]],
+    ['hour' => '11:00', 'flow' => 'aaa', 'value' => 13, 'item' => [ 'name' => 'bbb', 'age' => 12 ]],
+    ['hour' => '11:00', 'flow' => 'bbb', 'value' => 5 , 'item' => [ 'name' => 'aaa', 'age' => 13 ]],
+    ['hour' => '11:30', 'flow' => 'aaa', 'value' => 9 , 'item' => [ 'name' => 'bbb', 'age' => 15 ]],
+    ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16, 'item' => [ 'name' => 'aaa', 'age' => 17 ]],
+];
 
-dd(
+dd(array_merge_recursive($array, $array2));
 
-    Collection::make($array)
-        ->groupBy(['flow', 'item.name'])
-        ->get()
-
-);
+//dd(
+//
+//    Collection::make($array)
+//        ->groupBy(['flow', 'item.name'])
+//        ->get()
+//
+//);
 
 
 

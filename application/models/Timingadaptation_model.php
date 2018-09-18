@@ -15,45 +15,34 @@ class Timingadaptation_model extends CI_Model
         $adapt = $this->getAdaptInfo($logic_junction_id);
         $current = $this->getCurrentInfo($logic_junction_id);
 
-        $tod_movement = Collection::make($current['tod'] ?? [])
-            ->column(null, 'tod_id')->map(function ($tod) {
-                return Collection::make($tod['movement_timing'] ?? [])
-                    ->column(null, 'movement_id')->map(function ($movement) {
-                        return Collection::make($movement['timing'] ?? [])
-                            ->column('state')->get();
-                    })->get();
-            });
+        return $this->formatAdaptionTimingInfo(json_decode($adapt['timing_info'], true)['data'] ?? '', $current);
+    }
 
-        return $tod_movement;
-//
-//        $data['tod'] = array_map(function ($tod) use ($tod_movement) {
-//            return [
-//                'plan_id' => $tod['plan_id'],
-//                'extra_time' => $tod['extra_time'],
-//                'movement_timing' => array_map(function ($movement) use ($tod, $tod_movement)  {
-//                    return [
-//                        'movement_id' => $movement['movement_id'] ?? '',
-//                        'channel' => $movement['channel'] ?? '',
-//                        'phase_id' => $movement['phase_id'] ?? '',
-//                        'phase_seq' => $movement['phase_seq'] ?? '',
-//                        'yellow' => $tod_movement[$tod['plan_id']][$movement['movement_id']][2]['duration'] ?? '',
-//                        'timing' => [
-//                            'start_time' => $tod_movement[$tod['plan_id']][$movement['movement_id']][1]['start_time'] ?? '',
-//                            'suggest_start_time' => $movement['timing'][1]['start_time'] ?? '',
-//                            'duration' => $tod_movement[$tod['plan_id']][$movement['movement_id']][1]['duration'] ?? '',
-//                            'suggest_duration' => $movement['timing'][1]['duration'] ?? '',
-//                            'max' => $tod_movement[$tod['plan_id']][$movement['movement_id']][1]['max'] ?? '',
-//                            'suggest_max' => $movement['timing'][1]['max'] ?? '',
-//                            'min' => $tod_movement[$tod['plan_id']][$movement['movement_id']][1]['min'] ?? '',
-//                            'suggest_min' => $movement['timing'][1]['min'] ?? '',
-//                        ],
-//                        'flow' => $movement['flow'],
-//                    ];
-//                }, $tod['movement_timing']),
-//            ];
-//        }, $data['tod'] ?? []);
-
-
+    private function formatAdaptionTimingInfo($adapt, $current)
+    {
+        foreach ($adapt['tod'] as $tk => &$tod) {
+            foreach ($tod['movement_timing'] as $mk => &$movement) {
+                $adaptTimings = Collection::make($movement['timing']);
+                $currentTimings = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing']);
+                $movement['yellow'] = $adaptTimings->first(function ($timing) { return $timing['state'] == 2; })['duration'] ?? '';
+                $greenAdapts = $adaptTimings->where('state', 1)->get();
+                $greenCurrents = $currentTimings->where('state', 1)->get();
+                $greens = $this->arrayMergeRecursive($greenAdapts, $greenCurrents);
+                $movement['timing'] = array_map(function ($timing) {
+                    return [
+                        'start_time' => $timing['start_time'][1] ?? '',
+                        'suggest_start_time' => $timing['start_time'][0] ?? '',
+                        'duration' => $timing['duration'][1] ?? '',
+                        'suggest_duration' => $timing['duration'][1] ?? '',
+                        'max' => $timing['max'][1] ?? '',
+                        'suggest_max' => $timing['max'][1] ?? '',
+                        'min' => $timing['min'][1] ?? '',
+                        'suggest_min' => $timing['min'][1] ?? '',
+                    ];
+                }, $greens);
+            }
+        }
+        return $adapt;
     }
 
     /**
