@@ -16,9 +16,7 @@ class Timingadaptation_model extends CI_Model
         $current = $this->getCurrentInfo($logic_junction_id);
 
         return $this->formatAdaptionTimingInfo(
-            json_decode($adapt['timing_info'], true)['data'] ?? '',
-            $current,
-            $params['city_id']);
+            json_decode($adapt['timing_info'], true)['data'] ?? '', $current, $params['city_id']);
     }
 
     private function formatAdaptionTimingInfo($adapt, $current, $cityId)
@@ -68,6 +66,9 @@ class Timingadaptation_model extends CI_Model
     {
         $address = 'http://100.90.164.31:8006/signal-mis/TimingAdaptation/getCurrentTimingInfo';
         $res = httpGET($address, compact('logic_junction_id'));
+
+        if(!$res) return [];
+
         return json_decode($res, true)['data'] ?? [];
     }
 
