@@ -435,4 +435,153 @@ class TimingAdaptationArea extends MY_Controller
         return $this->response($res);
     }
 
+    /**
+     * 获取时空图
+     * @param city_id           interger Y 城市ID
+     * @param logic_junction_id string   Y 路口ID
+     * @param logic_flow_id     string   Y 相位ID
+     * @return json
+     */
+    public function getSpaceTimeMtraj()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数city_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_junction_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_junction_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_flow_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_flow_id传递错误！';
+            return;
+        }
+
+        $data = [
+            'city_id'           => intval($params['city_id']),
+            'logic_junction_id' => trim($params['logic_junction_id']),
+            'logic_flow_id'     => trim($params['logic_flow_id']),
+        ];
+
+        $result = $this->timingadaptationarea_model->getSpaceTimeMtraj($data);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        if (empty($result['data'])) {
+            $res = (object)[];
+        } else {
+            $res['dataList'] = $result['data'];
+        }
+        return $this->response($res);
+    }
+
+    /**
+     * 获取散点图
+     * @param city_id           interger Y 城市ID
+     * @param logic_junction_id string   Y 路口ID
+     * @param logic_flow_id     string   Y 相位ID
+     * @return json
+     */
+    public function getScatterMtraj()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数city_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_junction_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_junction_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_flow_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_flow_id传递错误！';
+            return;
+        }
+
+        $data = [
+            'city_id'           => intval($params['city_id']),
+            'logic_junction_id' => trim($params['logic_junction_id']),
+            'logic_flow_id'     => trim($params['logic_flow_id']),
+        ];
+
+        $result = $this->timingadaptationarea_model->getScatterMtraj($data);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        if (empty($result['data'])) {
+            $res = (object)[];
+        } else {
+            $res['dataList'] = $result['data'];
+        }
+        return $this->response($res);
+    }
+
+    /**
+     * 获取排队长度图
+     * @param city_id           interger Y 城市ID
+     * @param logic_junction_id string   Y 路口ID
+     * @param logic_flow_id     string   Y 相位ID
+     * @return json
+     */
+    public function getQueueLengthMtraj()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数city_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_junction_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_junction_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_flow_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_flow_id传递错误！';
+            return;
+        }
+
+        $data = [
+            'city_id'           => intval($params['city_id']),
+            'logic_junction_id' => trim($params['logic_junction_id']),
+            'logic_flow_id'     => trim($params['logic_flow_id']),
+        ];
+
+        $result = $this->timingadaptationarea_model->getQueueLengthMtraj($data);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        if (empty($result['data'])) {
+            $res = (object)[];
+        } else {
+            $res['dataList'] = $result['data'];
+        }
+        return $this->response($res);
+    }
 }
