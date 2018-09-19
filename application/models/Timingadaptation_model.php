@@ -15,7 +15,10 @@ class Timingadaptation_model extends CI_Model
         $adapt = $this->getAdaptInfo($logic_junction_id);
         $current = $this->getCurrentInfo($logic_junction_id);
 
-        return $this->formatAdaptionTimingInfo(json_decode($adapt['timing_info'], true)['data'] ?? '', $current, $params['city_id']);
+        return $this->formatAdaptionTimingInfo(
+            json_decode($adapt['timing_info'], true)['data'] ?? '',
+            $current,
+            $params['city_id']);
     }
 
     private function formatAdaptionTimingInfo($adapt, $current, $cityId)
@@ -108,7 +111,7 @@ class Timingadaptation_model extends CI_Model
             return $hour;
         }
 
-        if (!$this->isTableExisted($this->tb . $cityId)) {
+        if (!$this->isTableExisted('flow_duration_v6_' . $cityId)) {
             return date('H:i:s');
         }
 
