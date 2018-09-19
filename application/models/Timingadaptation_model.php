@@ -21,6 +21,11 @@ class Timingadaptation_model extends CI_Model
             json_decode($adapt['timing_info'], true)['data'] ?? '', $current, $params['city_id']);
     }
 
+    public function getCurrentTimingInfo($params)
+    {
+        return $this->getCurrentInfo($params['logic_junction_id']);
+    }
+
     private function formatAdaptionTimingInfo($adapt, $current, $cityId)
     {
         if(empty($adapt) || empty($current))
