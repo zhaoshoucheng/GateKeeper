@@ -853,7 +853,7 @@ class Timingadaptationarea_model extends CI_Model
 
             $ret = [];
             if (!empty($detail['result'])) {
-                foreach ($detail['result'] as $k=>&$v) {
+                foreach ($detail['result'] as $k=>$v) {
                     // 按时间正序排序
                     $timestampArr = array_column($v, 'timestamp');
                     sort($timestampArr);
@@ -864,8 +864,8 @@ class Timingadaptationarea_model extends CI_Model
                         $time = date_parse(date("H:i:s", $vv['timestamp']));
                         $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
                         $ret[$k][$kk] = [
-                            $second,                 // 时间 X轴
-                            $vv['stopDistance'] * -1 // 值   Y轴
+                            $second,                      // 时间秒数 X轴
+                            $vv['distanceToStopBar'] * -1 // 值      Y轴
                         ];
                     }
                 }
@@ -926,7 +926,17 @@ class Timingadaptationarea_model extends CI_Model
             print_r($detail);exit;
 
             $ret = [];
-            
+            if (!empty($detail['result'])) {
+                foreach ($detail['result'] as $k=>$v) {
+                    // 将时间转为秒数
+                    $time = date_parse(date("H:i:s", $v['timestamp']));
+                    $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
+                    $ret[$k] = [
+                        $second,                 // 时间秒数 X轴
+                        $v['stopDelayBefore'],  // 值      Y轴
+                    ];
+                }
+            }
 
             $result['errno'] = 0;
             $result['data'] = empty($ret) ? (object)[] : $ret;
