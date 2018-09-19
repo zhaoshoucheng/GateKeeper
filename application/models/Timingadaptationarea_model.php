@@ -737,9 +737,12 @@ class Timingadaptationarea_model extends CI_Model
 
         // 获取路口ID串
         $junctions = $this->getAreaJunctions($data);
-        if (!empty($junctions['data'])) {
-            $esJunctionIds = implode(',', array_filter(array_column($junctions['data'], 'logic_junction_id')));
+        if (empty($junctions['data'])) {
+            $result['errmsg'] = '此区域没有路口！';
+            return $result;
         }
+
+        $esJunctionIds = implode(',', array_filter(array_column($junctions['data'], 'logic_junction_id')));
 
         // 当前时间 毫秒级时间戳
         $endTime = (int)(microtime(true) * 1000);
