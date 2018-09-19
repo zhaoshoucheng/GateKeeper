@@ -30,10 +30,12 @@ class Timingadaptation_model extends CI_Model
 
     private function formatCurrentTimingInfo($current)
     {
-        foreach ($current['tod']['stage'] as &$stage)
+        foreach ($current['tod'] as &$tod)
         {
-            $stage['suggest_green_max'] = $stage['green_max'];
-            $stage['suggest_green_min'] = $stage['green_min'];
+            foreach ($tod['stage'] as &$stage) {
+                $stage['suggest_green_max'] = $stage['green_max'];
+                $stage['suggest_green_min'] = $stage['green_min'];
+            }
         }
         return $current;
     }
