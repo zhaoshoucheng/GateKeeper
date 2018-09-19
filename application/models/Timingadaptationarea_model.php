@@ -750,10 +750,11 @@ class Timingadaptationarea_model extends CI_Model
         $startTime = strtotime('00:00:00') * 1000;
 
         $esData = [
-            "source" => "trajectory",
-            "cityId" =>  $data['city_id'],
-            "junctionId" => $esJunctionIds,
-            "timestamp"  => "[{$startTime}, {$endTime}]",
+            "source"        => "trajectory",
+            "cityId"        => $data['city_id'],
+            "junctionId"    => $esJunctionIds,
+            "timestamp"     => "[{$startTime}, {$endTime}]",
+            "source"        => 'signal_control',
             "andOperations" => [
                 "junctionId" => "in",
                 "cityId"     => "eq",
@@ -805,6 +806,56 @@ class Timingadaptationarea_model extends CI_Model
         } catch (Exception $e) {
             com_log_warning('_es_queryQuota_failed', 0, $e->getMessage(), compact("esUrl","esData","quotaInfo"));
             $result['errmsg'] = '调用es的获取区域指标折线图接口出错！';
+            return $result;
+        }
+    }
+
+    /**
+     * 获取时空图
+     * @param $data['city_id']           interger Y 城市ID
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['logic_flow_id']     string   Y 相位ID
+     * @return array
+     */
+    public function getSpaceTimeMtraj($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        $endTime = time();
+        $startTime = $endTime - 30 * 60;
+
+        $esData = [
+            "cityId"     => $data['city_id'],
+            "endTime"    => $endTime,
+            "movementId" => $data['logic_flow_id'],
+            "source"     => "signal_control",
+            "startTime"  => $startTime,
+        ];
+
+        $esUrl = $this->config->item('es_interface') . '/estimate/queue/query';
+
+        try {
+            $detail = httpPOST($esUrl, $esData, 0, 'json');
+            if (!$detail) {
+                $result['errmsg'] = '调用es接口 获取时空图 失败！';
+                return $result;
+            }
+            $detail = json_decode($detail, true);
+            if ($detail['code'] != '000000') {
+                $result['errmsg'] = $detail['message'];
+                return $result;
+            }
+            print_r($detail);exit;
+
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_es_query_failed', 0, $e->getMessage(), compact("esUrl","esData","detail"));
+            $result['errmsg'] = '调用es的获取时空图接口出错！';
             return $result;
         }
     }
