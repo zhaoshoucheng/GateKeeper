@@ -23,7 +23,7 @@ class TimingAdaptationArea extends MY_Controller
     public function getAreaList()
     {
         $params = $this->input->post(NULL, TRUE);
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
@@ -62,13 +62,13 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
@@ -118,13 +118,13 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
@@ -175,13 +175,13 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
@@ -245,13 +245,13 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
@@ -295,15 +295,15 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (!in_array(intval($params['is_upload']), [0, 1])) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数is_upload传递错误！';
+            $this->errmsg = '参数area_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['is_upload']) || !in_array(intval($params['is_upload']), [0, 1])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数area_id传递错误！';
+            $this->errmsg = '参数is_upload传递错误！';
             return;
         }
 
@@ -345,19 +345,19 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
         }
 
-        if (!in_array(intval($params['is_upload']), [0, 1])) {
+        if (!isset($params['is_upload']) || !in_array(intval($params['is_upload']), [0, 1])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数is_upload传递错误！';
             return;
@@ -395,13 +395,13 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
