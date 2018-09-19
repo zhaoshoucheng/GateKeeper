@@ -8,6 +8,7 @@ class Timingadaptation_model extends CI_Model
         $this->db = $this->load->database('default', true);
         $this->load->helper('http_helper');
         $this->load->model('redis_model');
+        $this->load->config('adaption_conf');
     }
 
     public function getAdaptTimingInfo($params)
@@ -26,6 +27,12 @@ class Timingadaptation_model extends CI_Model
         $data = $this->getCurrentInfo($params['logic_junction_id']);
 
         return $this->formatCurrentTimingInfo($data);
+    }
+
+    public function updateCurrentTiming($params)
+    {
+        echo httpGET($this->config->item('url') . '/TimingAdaptation/uploadSignalTiming', $params);
+        exit();
     }
 
     private function formatCurrentTimingInfo($current)
@@ -88,7 +95,7 @@ class Timingadaptation_model extends CI_Model
 
     private function getCurrentInfo($logic_junction_id)
     {
-        $address = 'http://100.90.164.31:8006/signal-mis/TimingAdaptation/getCurrentTimingInfo';
+        $address = $this->config->item('url') . '/TimingAdaptation/getCurrentTimingInfo';
         $res = httpGET($address, compact('logic_junction_id'));
 
         if(!$res) return [];
