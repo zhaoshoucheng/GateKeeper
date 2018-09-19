@@ -850,7 +850,21 @@ class Timingadaptationarea_model extends CI_Model
                 $result['errmsg'] = $detail['message'];
                 return $result;
             }
-            print_r($detail);exit;
+
+            $ret = [];
+            if (!empty($detail['result'])) {
+                foreach ($detail['result'] as $k=>$v) {
+                    foreach ($v as $kk=>$vv) {
+                        $ret[$k][$kk] = [
+                            date('H:i', $vv['timestamp']), // 时间 X轴
+                            $vv['stopDistance'] * -1       // 值   Y轴
+                        ];
+                    }
+                }
+            }
+
+            $result['errno'] = 0;
+            $result['data'] = empty($ret) ? (object)[] : $ret;
 
             return $result;
         } catch (Exception $e) {
