@@ -23,7 +23,19 @@ class Timingadaptation_model extends CI_Model
 
     public function getCurrentTimingInfo($params)
     {
-        return $this->getCurrentInfo($params['logic_junction_id']);
+        $data = $this->getCurrentInfo($params['logic_junction_id']);
+
+        return $this->formatCurrentTimingInfo($data);
+    }
+
+    private function formatCurrentTimingInfo($current)
+    {
+        foreach ($current['tod']['stage'] as &$stage)
+        {
+            $stage['suggest_green_max'] = $stage['green_max'];
+            $stage['suggest_green_min'] = $stage['green_min'];
+        }
+        return $current;
     }
 
     private function formatAdaptionTimingInfo($adapt, $current, $cityId)
