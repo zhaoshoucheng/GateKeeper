@@ -97,6 +97,8 @@ class Timingadaptation_model extends CI_Model
 
     private function getTwiceStopRate($flowIds, $cityId)
     {
+        if(empty($flowIds)) return [];
+
         $hour = $this->getLastestHour($cityId);
 
         $flows = $this->db->select('logic_flow_id, twice_stop_rate')
