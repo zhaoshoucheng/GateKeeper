@@ -23,6 +23,9 @@ class Timingadaptation_model extends CI_Model
 
     private function formatAdaptionTimingInfo($adapt, $current, $cityId)
     {
+        if(empty($adapt) || empty($current))
+            return [];
+
         foreach ($adapt['tod'] as $tk => &$tod) {
             $flowIds = array_column(array_column($tod, 'flow'), 'logic_flow_id');
             $flows = $this->getTwiceStopRate($flowIds, $cityId);
