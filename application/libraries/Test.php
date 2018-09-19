@@ -24,8 +24,11 @@ $array2 = [
     ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16, 'item' => [ 'name' => 'aaa', 'age' => 17 ]],
 ];
 
-dd(array_merge_recursive($array, $array2));
+//dd(array_merge_recursive($array, $array2));
+$a = 1;
+$b = &$a;
 
+echo (++$b) + (++$b);
 //dd(
 //
 //    Collection::make($array)

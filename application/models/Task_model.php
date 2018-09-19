@@ -268,7 +268,7 @@ class Task_model extends CI_Model
                 $task_ids[] = $one['id'];
             }
             if (empty($task_ids)) {
-                return;
+                continue;
             }
             foreach ($task_ids as $task_id) {
                 $result = $this->updateTask($task_id, [

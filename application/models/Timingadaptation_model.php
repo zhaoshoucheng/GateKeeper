@@ -15,13 +15,16 @@ class Timingadaptation_model extends CI_Model
         $adapt = $this->getAdaptInfo($logic_junction_id);
         $current = $this->getCurrentInfo($logic_junction_id);
 
-        return $this->formatAdaptionTimingInfo(json_decode($adapt['timing_info'], true)['data'] ?? '', $current);
+        return $this->formatAdaptionTimingInfo(json_decode($adapt['timing_info'], true)['data'] ?? '', $current, $params['city_id']);
     }
 
-    private function formatAdaptionTimingInfo($current, $adapt)
+    private function formatAdaptionTimingInfo($adapt, $current, $cityId)
     {
         foreach ($adapt['tod'] as $tk => &$tod) {
+            $flowIds = array_column(array_column($tod, 'flow'), 'logic_flow_id');
+            $flows = $this->getTwiceStopRate($flowIds, $cityId);
             foreach ($tod['movement_timing'] as $mk => &$movement) {
+                $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '';
                 $adaptTimings = Collection::make($movement['timing'] ?? []);
                 $currentTimings = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? []);
                 $movement['yellow'] = $adaptTimings->first(function ($timing) { return $timing['state'] == 2; })['duration'] ?? '';
@@ -84,5 +87,45 @@ class Timingadaptation_model extends CI_Model
             }
         }
         return $target;
+    }
+
+    private function getTwiceStopRate($flowIds, $cityId)
+    {
+        $hour = $this->getLastestHour($cityId);
+
+        $flows = $this->db->select('logic_flow_id, twice_stop_rate')
+            ->from('flow_duration_v6_' . $cityId)
+            ->where('hour', $hour)
+            ->where_in('logic_flow_id', $flowIds)
+            ->get()->result_array();
+
+        return array_column($flows, 'twice_stop_rate', 'logic_flow_id');
+    }
+
+    public function getLastestHour($cityId, $date = null)
+    {
+        if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
+            return $hour;
+        }
+
+        if (!$this->isTableExisted($this->tb . $cityId)) {
+            return date('H:i:s');
+        }
+
+        $date = $date ?? date('Y-m-d');
+        /*$result = $this->db->select('hour')
+            ->from($this->tb . $cityId)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->order_by('hour', 'desc')
+            ->limit(1)
+            ->get()->first_row();*/
+        // 查询优化
+        $sql = "SELECT `hour` FROM `real_time_{$cityId}`  WHERE 1 ORDER BY updated_at DESC,hour DESC LIMIT 1";
+        $result = $this->db->query($sql)->first_row();
+        if(!$result)
+            return date('H:i:s');
+
+        return $result->hour;
     }
 }

@@ -14,6 +14,7 @@ class Timeframeoptimize extends MY_Controller
         parent::__construct();
         $this->load->model('timeframeoptimize_model');
         $this->load->model('timing_model');
+        $this->setTimingType();
     }
 
     /**

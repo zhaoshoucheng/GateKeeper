@@ -9,6 +9,7 @@ class Welcome extends CI_Controller {
         parent::__construct();
         $this->load->helper('http');
         $this->load->model('task_model');
+        $this->load->model('overview_model');
     }
 
 
@@ -34,6 +35,8 @@ class Welcome extends CI_Controller {
 	}
 
 	public function test(){
+        $hour = $this->overview_model->getLastestHour(12,"2018-09-12");
+        var_dump($hour);exit;
         com_log_warning('_asynctask_index_error', 0, '1123123', []);
 //        echo "123213";
 //        exit;
@@ -321,5 +324,49 @@ class Welcome extends CI_Controller {
         com_log_warning('_itstool_welcome_demo_id_error', ['id' => 1]);
 
         echo json_encode("ok");
+    }
+
+    public function token() {
+    	$remote_ip = $_SERVER["REMOTE_ADDR"];
+    	$uri = $_SERVER["REQUEST_URI"];
+    	$host = $_SERVER["HTTP_HOST"];
+    	var_dump([$remote_ip, $uri, $host]);
+    	$secret = '310173de4b64b866e6f0cf4841178b84';
+    	$get = $this->input->get();
+    	$post = $this->input->post();
+    	$params = array_merge($get, $post);
+    	var_dump($this->gen1($params, $secret));
+    	var_dump($this->gen2($params, $secret));
+    	var_dump($this->gen3($params, $secret));
+    	var_dump($this->router->fetch_directory());
+    	var_dump($this->router->fetch_class());
+    	var_dump($this->router->fetch_method());
+    	var_dump($this->uri->segment_array());
+    	var_dump($this->uri->uri_string());
+    	var_dump($this->uri->ruri_string());
+
+    }
+
+    private function gen1($params, $secret) {
+    	ksort($params);
+    	$str = '';
+    	foreach ($params as $k => $v) {
+    	    $str .= "$k=" . urldecode($v);
+    	}
+    	$str .= $secret;
+    	return md5($str);
+    }
+
+    private function gen2($params, $secret) {
+    	ksort($params);
+    	$str = http_build_query($params) . '&' . $secret;
+    	return md5($str);
+    }
+
+    private function gen3($params, $secret) {
+    	ksort($params);
+    	$query_str = http_build_query($params);
+    	$str = substr(md5($query_str . "&" . $secret), 7, 16);
+    	return $str;
     }
 }

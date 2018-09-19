@@ -142,7 +142,7 @@ class Overview_model extends CI_Model
      * @param null $date
      * @return false|string
      */
-    private function getLastestHour($cityId, $date = null)
+    public function getLastestHour($cityId, $date = null)
     {
         if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
             return $hour;
@@ -153,15 +153,16 @@ class Overview_model extends CI_Model
         }
 
         $date = $date ?? date('Y-m-d');
-
-        $result = $this->db->select('hour')
+        /*$result = $this->db->select('hour')
             ->from($this->tb . $cityId)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->order_by('hour', 'desc')
             ->limit(1)
-            ->get()->first_row();
-
+            ->get()->first_row();*/
+        // 查询优化
+        $sql = "SELECT `hour` FROM `real_time_{$cityId}`  WHERE 1 ORDER BY updated_at DESC,hour DESC LIMIT 1";
+        $result = $this->db->query($sql)->first_row();
         if(!$result)
             return date('H:i:s');
 
