@@ -923,8 +923,6 @@ class Timingadaptationarea_model extends CI_Model
                 return $result;
             }
 
-            print_r($detail);exit;
-
             $ret = [];
             if (!empty($detail['result'])) {
                 foreach ($detail['result'] as $k=>$v) {
@@ -945,6 +943,79 @@ class Timingadaptationarea_model extends CI_Model
         } catch (Exception $e) {
             com_log_warning('_es_scatter_query_failed', 0, $e->getMessage(), compact("esUrl","esData","detail"));
             $result['errmsg'] = '调用es的获取散点图接口出错！';
+            return $result;
+        }
+    }
+
+    /**
+     * 获取排队长度图
+     * @param $data['city_id']           interger Y 城市ID
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['logic_flow_id']     string   Y 相位ID
+     * @return array
+     */
+    public function getQueueLengthMtraj($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        $endTime = time();
+        $startTime = $endTime - 30 * 60;
+
+        $esData = [
+            "cityId"     => $data['city_id'],
+            "endTime"    => $endTime,
+            "movementId" => $data['logic_flow_id'],
+            "source"     => "signal_control",
+            "startTime"  => $startTime,
+        ];
+
+        $esUrl = $this->config->item('es_interface') . '/estimate/queue/query';
+
+        try {
+            $detail = httpPOST($esUrl, $esData, 0, 'json');
+            if (!$detail) {
+                $result['errmsg'] = '调用es接口 排队长度图 失败！';
+                return $result;
+            }
+            $detail = json_decode($detail, true);
+            if ($detail['code'] != '000000') {
+                $result['errmsg'] = $detail['message'];
+                return $result;
+            }
+            print_r($detail);exit;
+
+            $ret = [];
+            if (!empty($detail['result'])) {
+                foreach ($detail['result'] as $k=>$v) {
+                    // 按时间正序排序
+                    $timestampArr = array_column($v, 'timestamp');
+                    sort($timestampArr);
+                    array_multisort($timestampArr, SORT_DESC, $v);
+
+                    foreach ($v as $kk=>$vv) {
+                        // 将时间转为秒数
+                        $time = date_parse(date("H:i:s", $vv['timestamp']));
+                        $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
+                        $ret[$k][$kk] = [
+                            $second,                      // 时间秒数 X轴
+                            $vv['distanceToStopBar'] * -1 // 值      Y轴
+                        ];
+                    }
+                }
+            }
+
+            $result['errno'] = 0;
+            $result['data'] = empty($ret) ? (object)[] : $ret;
+
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_es_queue_query_failed', 0, $e->getMessage(), compact("esUrl","esData","detail"));
+            $result['errmsg'] = '调用es的获取排队长度图接口出错！';
             return $result;
         }
     }
