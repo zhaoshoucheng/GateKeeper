@@ -6,6 +6,7 @@ class Timingadaptation_model extends CI_Model
     {
         parent::__construct();
         $this->db = $this->load->database('default', true);
+        $this->load->helper('http_helper');
     }
 
     public function getAdaptTimingInfo($params)
