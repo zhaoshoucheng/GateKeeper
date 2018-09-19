@@ -723,7 +723,7 @@ class Timingadaptationarea_model extends CI_Model
      * 获取区域指标折线图
      * @param $data['city_id']   interger Y 城市ID
      * @param $data['area_id']   interger Y 区域ID
-     * @param $data['quota_key'] string   Y 指标KEY speed / stopDelay
+     * @param $data['quota_key'] string   Y 指标KEY avgSpeed / stopDelay
      * @return array
      */
     public function getAreaQuotaInfo($data)
@@ -788,9 +788,14 @@ class Timingadaptationarea_model extends CI_Model
 
             $ret = [];
             foreach ($quotaValueInfo as $k=>$item) {
+                $value = $item['quotaMap']['weight_avg'];
+                if ($data['quota_key'] == 'avgSpeed') {
+                    // 速度m/s转换为km/h
+                    $value = $item['quotaMap']['weight_avg'] * 3.6;
+                }
                 $ret[$k] =  [
                     date('H:i:s', strtotime($item['quotaMap']['dayTime'])), // 时间 X轴
-                    round($item['quotaMap']['weight_avg'], 2),              // 值   Y轴
+                    round($value, 2),                                       // 值   Y轴
                 ];
             }
 
