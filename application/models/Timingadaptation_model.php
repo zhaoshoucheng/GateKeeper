@@ -31,7 +31,7 @@ class Timingadaptation_model extends CI_Model
 
     public function updateCurrentTiming($params)
     {
-        echo httpGET($this->config->item('url') . '/TimingAdaptation/uploadSignalTiming', $params);
+        echo httpPOST($this->config->item('url') . '/TimingAdaptation/uploadSignalTiming', $params);
         exit();
     }
 
