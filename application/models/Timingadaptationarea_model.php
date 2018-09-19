@@ -987,7 +987,6 @@ class Timingadaptationarea_model extends CI_Model
                 $result['errmsg'] = $detail['message'];
                 return $result;
             }
-            print_r($detail);exit;
 
             $ret = [];
             if (!empty($detail['result'])) {
@@ -1002,8 +1001,8 @@ class Timingadaptationarea_model extends CI_Model
                         $time = date_parse(date("H:i:s", $vv['timestamp']));
                         $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
                         $ret[$k][$kk] = [
-                            $second,                      // 时间秒数 X轴
-                            $vv['distanceToStopBar'] * -1 // 值      Y轴
+                            $second,             // 时间秒数 X轴
+                            $vv['stopDistance'], // 值      Y轴
                         ];
                     }
                 }
