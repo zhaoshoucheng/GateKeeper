@@ -837,7 +837,7 @@ class Timingadaptationarea_model extends CI_Model
             "startTime"  => $startTime,
         ];
 
-        $esUrl = $this->config->item('es_interface') . '/estimate/queue/query';
+        $esUrl = $this->config->item('es_interface') . '/estimate/space/query';
 
         try {
             $detail = httpPOST($esUrl, $esData, 0, 'json');
@@ -876,8 +876,65 @@ class Timingadaptationarea_model extends CI_Model
 
             return $result;
         } catch (Exception $e) {
-            com_log_warning('_es_query_failed', 0, $e->getMessage(), compact("esUrl","esData","detail"));
+            com_log_warning('_es_space_query_failed', 0, $e->getMessage(), compact("esUrl","esData","detail"));
             $result['errmsg'] = '调用es的获取时空图接口出错！';
+            return $result;
+        }
+    }
+
+    /**
+     * 获取散点图
+     * @param $data['city_id']           interger Y 城市ID
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['logic_flow_id']     string   Y 相位ID
+     * @return array
+     */
+    public function getScatterMtraj($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        $endTime = time();
+        $startTime = $endTime - 30 * 60;
+
+        $esData = [
+            "cityId"     => $data['city_id'],
+            "endTime"    => $endTime,
+            "movementId" => $data['logic_flow_id'],
+            "source"     => "signal_control",
+            "startTime"  => $startTime,
+        ];
+
+        $esUrl = $this->config->item('es_interface') . '/estimate/scatter/query';
+
+        try {
+            $detail = httpPOST($esUrl, $esData, 0, 'json');
+            if (!$detail) {
+                $result['errmsg'] = '调用es接口 获取散点图 失败！';
+                return $result;
+            }
+            $detail = json_decode($detail, true);
+            if ($detail['code'] != '000000') {
+                $result['errmsg'] = $detail['message'];
+                return $result;
+            }
+
+            print_r($detail);exit;
+
+            $ret = [];
+            
+
+            $result['errno'] = 0;
+            $result['data'] = empty($ret) ? (object)[] : $ret;
+
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_es_scatter_query_failed', 0, $e->getMessage(), compact("esUrl","esData","detail"));
+            $result['errmsg'] = '调用es的获取散点图接口出错！';
             return $result;
         }
     }
