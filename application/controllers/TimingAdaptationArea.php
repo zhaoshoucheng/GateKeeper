@@ -408,7 +408,7 @@ class TimingAdaptationArea extends MY_Controller
             return;
         }
 
-        if (empty($params['quota_key']) || !in_array(trim($params['quota_key']), ['speed', 'stopDelay'], true)) {
+        if (empty($params['quota_key']) || !in_array(trim($params['quota_key']), ['avgSpeed', 'stopDelay'], true)) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数quota_key传递错误！';
             return;
