@@ -40,7 +40,7 @@ class Timingadaptation_model extends CI_Model
 
         $data = [
             'update_time' => date('Y-m-d H:i:s'),
-            'status' => (!$res || $res['errno'] != 0 || $res['data'] != 'success') ? 0 : 1,
+            'status' => (!$res || $res['errorCode'] != 0 || $res['data'] != 'success') ? 0 : 1,
             'changed' => $offset == null ? 0 : ($offset == $params['offset']),
         ];
 
