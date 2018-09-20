@@ -48,7 +48,7 @@ class Timingadaptation_model extends CI_Model
             ->where('logic_junction_id', $params['logic_junction_id'])
             ->update('adapt_timing_mirror');
 
-        return $res['data'] ?? false;
+        return $res['data'] ?? [];
     }
 
     public function getAdapteStatus($params)
