@@ -427,11 +427,7 @@ class TimingAdaptationArea extends MY_Controller
             return;
         }
 
-        if (empty($result['data'])) {
-            $res = (object)[];
-        } else {
-            $res['dataList'] = $result['data'];
-        }
+        $res['dataList'] = $result['data'];
         return $this->response($res);
     }
 
@@ -477,11 +473,7 @@ class TimingAdaptationArea extends MY_Controller
             return;
         }
 
-        if (empty($result['data'])) {
-            $res = (object)[];
-        } else {
-            $res['dataList'] = $result['data'];
-        }
+        $res['dataList'] = $result['data'];
         return $this->response($res);
     }
 
@@ -527,11 +519,7 @@ class TimingAdaptationArea extends MY_Controller
             return;
         }
 
-        if (empty($result['data'])) {
-            $res = (object)[];
-        } else {
-            $res['dataList'] = $result['data'];
-        }
+        $res['dataList'] = $result['data'];
         return $this->response($res);
     }
 
@@ -577,11 +565,7 @@ class TimingAdaptationArea extends MY_Controller
             return;
         }
 
-        if (empty($result['data'])) {
-            $res = (object)[];
-        } else {
-            $res['dataList'] = $result['data'];
-        }
+        $res['dataList'] = $result['data'];
         return $this->response($res);
     }
 }
