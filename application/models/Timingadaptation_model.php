@@ -40,7 +40,6 @@ class Timingadaptation_model extends CI_Model
 
         $data = [
             'update_time' => time(),
-            'status' => (!$res || $res['errorCode'] != 0 || !$res['data']) ? 0 : 1,
             'changed' => $offset == null ? 0 : ($offset == $params['offset']),
         ];
 
@@ -74,10 +73,10 @@ class Timingadaptation_model extends CI_Model
         elseif (!$current_info || empty($current_info))
             // 按钮开启 没有下发基准配时
             list($status, $tmp) = [2, 'b'];
-        elseif ($current_result == null || $current_info['update_time'] > $current_result)
+        elseif ($current_result == null || $current_info['update_time'] > $current_result['timestamp'])
             // 按钮开启 下发基准配时过程中
             list($status, $tmp) = [3, 'e'];
-        elseif (!$current_info['status'])
+        elseif (!$current_result['status'])
             // 按钮开启 下发基准配时失败
             list($status, $tmp) = [2, 'c'];
         elseif (!$current_info['changed'])
@@ -92,9 +91,9 @@ class Timingadaptation_model extends CI_Model
 
         return [
             'get_current_plan_time' => date('H:i:s'),
-            'last_upload_time' => $res['down_time'],
+            'last_upload_time' => date('Y-m-d H:i:s', $current_info['update_time']),
             'adapte_time' => $res['timing_update_time'],
-            'next_upload_time' => date('H:i:s', strtotime('+5 minutes', strtotime($res['down_time']))),
+            'next_upload_time' => date('H:i:s', strtotime('+5 minutes', strtotime($current_info['update_time']))),
             'status' => $status,
             'tmp' => $tmp,
             'message' => ''
@@ -107,7 +106,15 @@ class Timingadaptation_model extends CI_Model
      */
     private function getCurrentUpdateResult()
     {
-        return time();
+        $address = $this->config->item('url') . '/TimingAdaptation/getUploadStatus';
+        $res = httpGET($address, compact('logic_junction_id'));
+
+        $res = json_decode($res, true);
+
+        if(!$res || $res['errorCode'] != 0)
+            return null;
+
+        return $res['data'][0] ?? [];
     }
 
     /**
@@ -190,9 +197,12 @@ class Timingadaptation_model extends CI_Model
         $address = $this->config->item('url') . '/TimingAdaptation/getCurrentTimingInfo';
         $res = httpGET($address, compact('logic_junction_id'));
 
-        if(!$res) return [];
+        $res = json_decode($res, true);
 
-        return json_decode($res, true)['data'] ?? [];
+        if(!$res || $res['errorCode'] != 0)
+            return null;
+
+        return $res['data'] ?? [];
     }
 
     /**

@@ -61,4 +61,25 @@ class TimingAdaptation extends MY_Controller
 
         $this->response($data);
     }
+
+    public function getAdapteStatus()
+    {
+        $params = $this->input->post();
+
+        $validator = Validator::make($params, [
+            'logic_junction_id' => 'required',
+            'is_open' => 'required'
+        ]);
+
+
+        if($validator->fail()) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validator->firstError();
+            return;
+        }
+
+        $data = $this->timingadaptation_model->getAdapteStatus($params);
+
+        $this->response($data);
+    }
 }
