@@ -62,7 +62,7 @@ class Timingadaptation_model extends CI_Model
         if(!$res || $res['error_code'])
             throw new Exception('该路口数据有误');
 
-        $current_info = json_decode($res['current'], true);
+        $current_info = json_decode($res['current_info'], true);
         $current_result = $this->getCurrentUpdateResult();
 
         list($status, $tmp) = [null, null];
