@@ -223,6 +223,9 @@ class Area_model extends CI_Model
             ->where_in('logic_junction_id', $junctionList)
             ->group_by(['date', 'hour'])->get()->result_array();
 
+        if(!$result || empty($result))
+            return [];
+
         return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
         }, 'date'], function ($v) use ($params) {
