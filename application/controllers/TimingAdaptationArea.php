@@ -33,7 +33,7 @@ class TimingAdaptationArea extends MY_Controller
 
         $result = $this->timingadaptationarea_model->getAreaList($data);
         if (empty($result)) {
-            $res['dataList'] = (object)[];
+            $res['dataList'] = [];
             return $this->response($res);
         }
 
@@ -88,7 +88,7 @@ class TimingAdaptationArea extends MY_Controller
 
         $result = $this->timingadaptationarea_model->getAreaJunctionList($data);
         if (empty($result)) {
-            $res['dataList'] = (object)[];
+            $res['dataList'] = [];
             return $this->response($res);
         }
 

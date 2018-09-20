@@ -872,7 +872,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $result['errno'] = 0;
-            $result['data'] = empty($ret) ? (object)[] : $ret;
+            $result['data'] = $ret;
 
             return $result;
         } catch (Exception $e) {
@@ -937,7 +937,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $result['errno'] = 0;
-            $result['data'] = empty($ret) ? (object)[] : $ret;
+            $result['data'] = $ret;
 
             return $result;
         } catch (Exception $e) {
@@ -1009,7 +1009,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $result['errno'] = 0;
-            $result['data'] = empty($ret) ? (object)[] : $ret;
+            $result['data'] = $ret;
 
             return $result;
         } catch (Exception $e) {
