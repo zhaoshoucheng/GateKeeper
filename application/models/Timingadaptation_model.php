@@ -93,7 +93,7 @@ class Timingadaptation_model extends CI_Model
             'get_current_plan_time' => date('Y-m-d H:i:s'),
             'last_upload_time' => date('Y-m-d H:i:s', $current_info['update_time']),
             'adapte_time' => $res['timing_update_time'],
-            'next_upload_time' => date('Y-m-d H:i:s', strtotime('+5 minutes', strtotime($current_info['update_time']))),
+            'next_upload_time' => date('Y-m-d H:i:s', strtotime('+5 minute', $current_info['update_time'])),
             'status' => $status,
             'tmp' => $tmp,
             'message' => ''

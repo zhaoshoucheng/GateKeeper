@@ -71,7 +71,6 @@ class TimingAdaptation extends MY_Controller
             'is_open' => 'required'
         ]);
 
-
         if($validator->fail()) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = $validator->firstError();
