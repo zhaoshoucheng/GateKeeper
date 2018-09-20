@@ -39,7 +39,7 @@ class Timingadaptation_model extends CI_Model
         $res = json_decode($res, true);
 
         $data = [
-            'update_time' => date('Y-m-d H:i:s'),
+            'update_time' => time(),
             'status' => (!$res || $res['errorCode'] != 0 || !$res['data']) ? 0 : 1,
             'changed' => $offset == null ? 0 : ($offset == $params['offset']),
         ];
@@ -63,47 +63,58 @@ class Timingadaptation_model extends CI_Model
         if(!$res || !$res['error_code'])
             throw new Exception('该路口数据有误');
 
-        $status = null;
-        $tmp = null;
+        $current_info = json_decode($res['current'], true);
+        $current_result = $this->getCurrentUpdateResult();
+
+        list($status, $tmp) = [null, null];
 
         if(!$params['is_open'])
-        {
             // 路口下发按钮未开启
-            $status = 1;
-            $tmp = 'a';
-        }
+            list($status, $tmp) = [1, 'a'];
+        elseif (!$current_info || empty($current_info))
+            // 按钮开启 没有下发基准配时
+            list($status, $tmp) = [2, 'b'];
+        elseif ($current_result == null || $current_info['update_time'] > $current_result)
+            // 按钮开启 下发基准配时过程中
+            list($status, $tmp) = [3, 'e'];
+        elseif (!$current_info['status'])
+            // 按钮开启 下发基准配时失败
+            list($status, $tmp) = [2, 'c'];
+        elseif (!$current_info['changed'])
+            // 按钮开启 下发基准配时成功 方案未修改
+            list($status, $tmp) = [2, 'd3'];
+        elseif (time() - $current_info['update_time'] <= 10 * 60)
+            // 按钮开启 下发成功 相位改变 10分钟内
+            list($status, $tmp) = [3, 'd1'];
         else
-        {
-            // 按钮开启
-            // Question : 无法判断没有下发基准配时
-            // Question : 无法判断下发基准配时失败
+            // 按钮开启 下发成功 相位改变 10分钟外
+            list($status, $tmp) = [2, 'd2'];
 
-            if(strtotime($res['timing_update_time']) > strtotime($res['down_time']))
-            {
-                // 基准配时下发中
-                $status = 3;
-                $tmp = 'e';
-            }
-            else
-            {
-                // 基准配时下发成功
-                $tmp = 'd';
-
-
-            }
-
-        }
-
-        $result = [
+        return [
             'get_current_plan_time' => date('H:i:s'),
             'last_upload_time' => $res['down_time'],
             'adapte_time' => $res['timing_update_time'],
             'next_upload_time' => date('H:i:s', strtotime('+5 minutes', strtotime($res['down_time']))),
-//            'status' =>
+            'status' => $status,
+            'tmp' => $tmp,
+            'message' => ''
         ];
 
     }
 
+    /**
+     * 获取配时下发结果
+     */
+    private function getCurrentUpdateResult()
+    {
+        return time();
+    }
+
+    /**
+     * 格式化基准配时方案
+     * @param $current
+     * @return mixed
+     */
     private function formatCurrentTimingInfo($current)
     {
         foreach ($current['tod'] ?? [] as &$tod)
@@ -116,6 +127,13 @@ class Timingadaptation_model extends CI_Model
         return $current;
     }
 
+    /**
+     * 格式化自适应配时方案
+     * @param $adapt
+     * @param $current
+     * @param $cityId
+     * @return array
+     */
     private function formatAdaptionTimingInfo($adapt, $current, $cityId)
     {
         if(empty($adapt) || empty($current))
@@ -162,6 +180,11 @@ class Timingadaptation_model extends CI_Model
             ->get()->first_row('array');
     }
 
+    /**
+     * 获取当前的基准配时方案
+     * @param $logic_junction_id
+     * @return array
+     */
     private function getCurrentInfo($logic_junction_id)
     {
         $address = $this->config->item('url') . '/TimingAdaptation/getCurrentTimingInfo';
@@ -172,6 +195,12 @@ class Timingadaptation_model extends CI_Model
         return json_decode($res, true)['data'] ?? [];
     }
 
+    /**
+     * 递归合并数组（支持数字键数组）
+     * @param $target
+     * @param $source
+     * @return mixed
+     */
     private function arrayMergeRecursive($target, $source)
     {
         $tkeys = array_keys($target);
@@ -193,6 +222,12 @@ class Timingadaptation_model extends CI_Model
         return $target;
     }
 
+    /**
+     * 获取指定 flowIds 集合的对应 二次停车比率
+     * @param $flowIds
+     * @param $cityId
+     * @return array
+     */
     private function getTwiceStopRate($flowIds, $cityId)
     {
         if(empty($flowIds)) return [];
@@ -208,6 +243,12 @@ class Timingadaptation_model extends CI_Model
         return array_column($flows, 'twice_stop_rate', 'logic_flow_id');
     }
 
+    /**
+     * 获取最新批次的 hour
+     * @param $cityId
+     * @param null $date
+     * @return false|string
+     */
     public function getLastestHour($cityId, $date = null)
     {
         if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
