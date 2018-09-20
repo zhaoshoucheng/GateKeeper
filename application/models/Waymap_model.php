@@ -91,8 +91,9 @@ class Waymap_model extends CI_Model
 
         // 获取最新版本
         $mapVersions = $this->getAllMapVersion();
-        $newMapVersion = max($mapVersions);
-        $data['version'] = $newMapVersion;
+        if (!empty($mapVersions)) {
+            $data['version'] = max($mapVersions);
+        }
 
         try {
             $ids_array = explode(',', $ids);
