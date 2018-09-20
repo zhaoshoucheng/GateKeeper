@@ -36,7 +36,7 @@ class Timingadaptation_model extends CI_Model
         $current = $this->getCurrentInfo($params['logic_junction_id']);
         $offset = ($current['tod'][0]['extra_time']['offset'] ?? null);
 
-        $res = json_decode($res);
+        $res = json_decode($res, true);
 
         $data = [
             'update_time' => date('Y-m-d H:i:s'),
