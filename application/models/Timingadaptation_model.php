@@ -26,12 +26,21 @@ class Timingadaptation_model extends CI_Model
     {
         $data = $this->getCurrentInfo($params['logic_junction_id']);
 
+        if($data == null)
+            throw new Exception('数据获取失败！');
+
         return $this->formatCurrentTimingInfo($data);
     }
 
     public function updateCurrentTiming($params)
     {
         $res = httpPOST($this->config->item('url') . '/TimingAdaptation/uploadSignalTiming', $params);
+
+        if(!$res)
+            throw new Exception('配时下发失败！');
+
+        if($res['errorCode'] ?? true)
+            throw new Exception($res['errorMsg'] ?? '未知错误');
 
         $current = $this->getCurrentInfo($params['logic_junction_id']);
         $offset = ($current['tod'][0]['extra_time']['offset'] ?? null);
