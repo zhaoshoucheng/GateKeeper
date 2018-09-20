@@ -35,6 +35,58 @@ class Timingadaptation_model extends CI_Model
         exit();
     }
 
+    public function getAdapteStatus($params)
+    {
+        $res = $this->db->select('*')
+            ->from('adapt_timing_mirror')
+            ->where('logic_junction_id', $params['logic_junction_id'])
+            ->limit(1)
+            ->get()->first_row('array');
+
+        if(!$res || !$res['error_code'])
+            throw new Exception('该路口数据有误');
+
+        $status = null;
+        $tmp = null;
+
+        if(!$params['is_open'])
+        {
+            // 路口下发按钮未开启
+            $status = 1;
+            $tmp = 'a';
+        }
+        else
+        {
+            // 按钮开启
+            // Question : 无法判断没有下发基准配时
+            // Question : 无法判断下发基准配时失败
+
+            if(strtotime($res['timing_update_time']) > strtotime($res['down_time']))
+            {
+                // 基准配时下发中
+                $status = 3;
+                $tmp = 'e';
+            }
+            else
+            {
+                // 基准配时下发成功
+                $tmp = 'd';
+
+
+            }
+
+        }
+
+        $result = [
+            'get_current_plan_time' => date('H:i:s'),
+            'last_upload_time' => $res['down_time'],
+            'adapte_time' => $res['timing_update_time'],
+            'next_upload_time' => date('H:i:s', strtotime('+5 minutes', strtotime($res['down_time']))),
+//            'status' =>
+        ];
+
+    }
+
     private function formatCurrentTimingInfo($current)
     {
         foreach ($current['tod'] as &$tod)
