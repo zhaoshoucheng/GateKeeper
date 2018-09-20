@@ -31,7 +31,24 @@ class Timingadaptation_model extends CI_Model
 
     public function updateCurrentTiming($params)
     {
-        echo httpPOST($this->config->item('url') . '/TimingAdaptation/uploadSignalTiming', $params);
+        $res = httpPOST($this->config->item('url') . '/TimingAdaptation/uploadSignalTiming', $params);
+        echo $res;
+
+        $current = $this->getCurrentInfo($params['logic_junction_id']);
+        $offset = ($current['tod'][0]['extra_time']['offset'] ?? null);
+
+        $res = json_decode($res);
+
+        $data = [
+            'update_time' => date('Y-m-d H:i:s'),
+            'status' => (!$res || $res['errno'] != 0 || $res['data'] != 'success') ? 0 : 1,
+            'changed' => $offset == null ? 0 : ($offset == $params['offset']),
+        ];
+
+        $this->db
+            ->set('current_info', json_encode($data))
+            ->where('logic_junction_id', $params['logic_junction_id'])
+            ->update('adapt_timing_mirror');
         exit();
     }
 
