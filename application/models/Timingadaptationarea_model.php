@@ -801,7 +801,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $result['errno'] = 0;
-            $result['data'] = !empty($ret) ? $ret : (object)[];
+            $result['data'] = !empty($ret) ? $ret : [];
             return $result;
         } catch (Exception $e) {
             com_log_warning('_es_queryQuota_failed', 0, $e->getMessage(), compact("esUrl","esData","quotaInfo"));
@@ -872,7 +872,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $result['errno'] = 0;
-            $result['data'] = $ret;
+            $result['data'] = empty($ret) ? [] : $ret;
 
             return $result;
         } catch (Exception $e) {
@@ -937,7 +937,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $result['errno'] = 0;
-            $result['data'] = $ret;
+            $result['data'] = empty($ret) ? [] : $ret;
 
             return $result;
         } catch (Exception $e) {
@@ -1009,7 +1009,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $result['errno'] = 0;
-            $result['data'] = $ret;
+            $result['data'] = empty($ret) ? [] : $ret;
 
             return $result;
         } catch (Exception $e) {
