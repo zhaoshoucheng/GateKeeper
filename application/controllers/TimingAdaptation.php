@@ -57,6 +57,8 @@ class TimingAdaptation extends MY_Controller
     {
         $params = $this->input->post();
 
-        return $this->timingadaptation_model->updateCurrentTiming($params);
+        $data = $this->timingadaptation_model->updateCurrentTiming($params);
+
+        $this->response($data);
     }
 }
