@@ -249,7 +249,7 @@ class Area_model extends CI_Model
         $end = strtotime('23:30');
 
         return array_map(function ($v) {
-            return date('Y-m-d', $v);
+            return date('H:i', $v);
         }, range($start, $end, 30 * 60));
     }
 
