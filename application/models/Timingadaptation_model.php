@@ -39,13 +39,13 @@ class Timingadaptation_model extends CI_Model
         if(!$res)
             throw new Exception('配时下发失败！');
 
+        $res = json_decode($res, true);
+
         if($res['errorCode'] ?? true)
             throw new Exception($res['errorMsg'] ?? '未知错误');
 
         $current = $this->getCurrentInfo($params['logic_junction_id']);
         $offset = ($current['tod'][0]['extra_time']['offset'] ?? null);
-
-        $res = json_decode($res, true);
 
         $data = [
             'update_time' => time(),
