@@ -218,7 +218,8 @@ class Cron extends CI_Controller
                 $message = $e->getMessage();
                 echo "[ERROR] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
                 $data = array('msgtype' => 'text', 'text' => array('content' => "兜底数据写入报警: ".$message));
-                //httpPOST($webhook, $data, 0, 'json');
+                com_log_warning('downgradeWrite_error', 0, $e->getMessage());
+                httpPOST($webhook, $data, 0, 'json');
                 continue;
             }
         }
