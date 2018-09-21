@@ -26,9 +26,13 @@ class TimingAdaptation extends MY_Controller
             return;
         }
 
-        $data = $this->timingadaptation_model->getAdaptTimingInfo($params);
-
-        $this->response($data);
+        try {
+            $data = $this->timingadaptation_model->getAdaptTimingInfo($params);
+            $this->response($data);
+        } catch (Exception $e) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $e->getMessage();
+        }
     }
 
     /**
@@ -48,18 +52,26 @@ class TimingAdaptation extends MY_Controller
             return;
         }
 
-        $data = $this->timingadaptation_model->getCurrentTimingInfo($params);
-
-        $this->response($data);
+        try {
+            $data = $this->timingadaptation_model->getCurrentTimingInfo($params);
+            $this->response($data);
+        } catch (Exception $e) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $e->getMessage();
+        }
     }
 
     public function updateCurrentTiming()
     {
         $params = $this->input->post();
 
-        $data = $this->timingadaptation_model->updateCurrentTiming($params);
-
-        $this->response($data);
+        try {
+            $data = $this->timingadaptation_model->updateCurrentTiming($params);
+            $this->response($data);
+        } catch (Exception $e) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $e->getMessage();
+        }
     }
 
     public function getAdapteStatus()
