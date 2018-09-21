@@ -1019,7 +1019,7 @@ class Timingadaptationarea_model extends CI_Model
                     "max" => 0,
                     "min" => 0,
                 ],
-                "Y" => [
+                "y" => [
                     "max" => 0,
                     "min" => 0,
                 ],
@@ -1081,13 +1081,13 @@ class Timingadaptationarea_model extends CI_Model
         $sql = 'select timing_info from ' . $table;
         $sql .= ' where logic_junction_id = ?';
 
-        $data = $this->db->query($sql, [$data['logic_junction_id']])->row_array();
-        if (empty($data['timing_info'])) {
+        $resData = $this->db->query($sql, [$data['logic_junction_id']])->row_array();
+        if (empty($resData['timing_info'])) {
             $result['errno'] = 0;
             return $result;
         }
 
-        $Info = jsondecode($data['timing_info'], true);
+        $Info = json_decode($resData['timing_info'], true);
 
         list($timingInfo) = $Info['data']['tod'];
         if (empty($timingInfo)) {
@@ -1103,7 +1103,7 @@ class Timingadaptationarea_model extends CI_Model
 
         // 信息灯信息
         foreach ($timingInfo['movement_timing'] as $k=>$v) {
-            if ($v['logic_flow_id'] == $data['logic_flow_id']) {
+            if ($v['flow']['logic_flow_id'] == $data['logic_flow_id']) {
                 $res['yellow'] = $v['yellow'];
                 foreach ($v['timing'] as $kk=>$vv) {
                     $res['green'][$kk] = [
