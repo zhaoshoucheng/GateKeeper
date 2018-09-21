@@ -229,9 +229,10 @@ class Area_model extends CI_Model
         return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
         }, 'date'], function ($v) use ($params) {
-            return array_map(function ($v) use ($params) {
-                return [$v['hour'], $v[$params['quota_key']]];
-            }, $v);
+                return Collection::make(array_combine($this->hourRange(), array_fill(0, 48, null)))
+                    ->merge(array_column($v, 'hour', $params['quota_key']))
+                    ->walk(function (&$v, $k) { $v = [$k, $v]; })
+                    ->values()->get();
         })->get();
     }
 
@@ -240,6 +241,16 @@ class Area_model extends CI_Model
         return array_map(function ($v) {
             return date('Y-m-d', $v);
         }, range(strtotime($start), strtotime($end), 60 * 60 * 24));
+    }
+
+    private function hourRange()
+    {
+        $start = strtotime('00:00');
+        $end = strtotime('23:30');
+
+        return array_map(function ($v) {
+            return date('Y-m-d', $v);
+        }, range($start, $end, 30 * 60));
     }
 
     //自动替换model数据
