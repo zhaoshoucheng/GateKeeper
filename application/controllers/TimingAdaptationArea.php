@@ -472,8 +472,7 @@ class TimingAdaptationArea extends MY_Controller
             return;
         }
 
-        $res['dataList'] = $result['data'];
-        return $this->response($res);
+        return $this->response($result['data']);
     }
 
     /**
@@ -518,8 +517,7 @@ class TimingAdaptationArea extends MY_Controller
             return;
         }
 
-        $res['dataList'] = $result['data'];
-        return $this->response($res);
+        return $this->response($result['data']);
     }
 
     /**

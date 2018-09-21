@@ -851,7 +851,12 @@ class Timingadaptationarea_model extends CI_Model
                 return $result;
             }
 
-            $ret = [];
+            $ret['dataList'] = [];
+
+            // 用于存储所有时间
+            $timestamp = [];
+            // 用于存储所有值
+            $value = [];
             if (!empty($detail['result'])) {
                 foreach ($detail['result'] as $k=>$v) {
                     // 按时间正序排序
@@ -863,13 +868,50 @@ class Timingadaptationarea_model extends CI_Model
                         // 将时间转为秒数
                         $time = date_parse(date("H:i:s", $vv['timestamp']));
                         $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
-                        $ret[$k][$kk] = [
+                        $ret['dataList'][$k][$kk] = [
                             $second,                      // 时间秒数 X轴
                             $vv['distanceToStopBar'] * -1 // 值      Y轴
                         ];
+                        // 记录所有时间 用于获取最大最小值
+                        $timestamp[$vv['timestamp']] = $second;
+                        // 记录所有值 用于获取最大最小值
+                        $value[$vv['timestamp']] = $vv['distanceToStopBar'] * -1;
                     }
                 }
             }
+
+            // X轴 Y轴 信息集合
+            $ret['info'] = [
+                "x" => [
+                    "max" => 0,
+                    "min" => 0,
+                ],
+                "y" => [
+                    "max" => 0,
+                    "min" => 0,
+                ],
+            ];
+            if (!empty($timestamp)) {
+                $ret['info']['x'] = [
+                    'max' => max($timestamp),
+                    'min' => min($timestamp),
+                ];
+            }
+            if (!empty($value)) {
+                $ret['info']['y'] = [
+                    'max' => max($value),
+                    'min' => min($value),
+                ];
+            }
+
+            // 获取相位配时信息
+            $timingInfo = $this->getFlowTimingInfo($data);
+            if ($timingInfo['errno'] != 0) {
+                $result['errmsg'] = $timingInfo['errmsg'];
+                return $result;
+            }
+
+            $ret['signal_info'] = $timingInfo['data'];
 
             $result['errno'] = 0;
             $result['data'] = $ret;
@@ -923,18 +965,61 @@ class Timingadaptationarea_model extends CI_Model
                 return $result;
             }
 
-            $ret = [];
+            $ret['dataList'] = [];
+            // 用于存储所有时间
+            $timestamp = [];
+            // 用于存储所有值
+            $value = [];
+
             if (!empty($detail['result'])) {
                 foreach ($detail['result'] as $k=>$v) {
                     // 将时间转为秒数
                     $time = date_parse(date("H:i:s", $v['timestamp']));
                     $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
-                    $ret[$k] = [
+                    $ret['dataList'][$k] = [
                         $second,                 // 时间秒数 X轴
                         $v['stopDelayBefore'],  // 值      Y轴
                     ];
+
+                    // 记录所有时间 用于获取最大最小值
+                    $timestamp[$k] = $second;
+                    // 记录所有值 用于获取最大最小值
+                    $value[$k] = $vv['stopDelayBefore'];
                 }
             }
+
+            // X轴 Y轴 信息集合
+            $ret['info'] = [
+                "x" => [
+                    "max" => 0,
+                    "min" => 0,
+                ],
+                "y" => [
+                    "max" => 0,
+                    "min" => 0,
+                ],
+            ];
+            if (!empty($timestamp)) {
+                $ret['info']['x'] = [
+                    'max' => max($timestamp),
+                    'min' => min($timestamp),
+                ];
+            }
+            if (!empty($value)) {
+                $ret['info']['y'] = [
+                    'max' => max($value),
+                    'min' => min($value),
+                ];
+            }
+
+            // 获取相位配时信息
+            $timingInfo = $this->getFlowTimingInfo($data);
+            if ($timingInfo['errno'] != 0) {
+                $result['errmsg'] = $timingInfo['errmsg'];
+                return $result;
+            }
+
+            $ret['signal_info'] = $timingInfo['data'];
 
             $result['errno'] = 0;
             $result['data'] = $ret;
