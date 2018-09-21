@@ -23,7 +23,7 @@ class MY_Controller extends CI_Controller {
         parent::__construct();
         date_default_timezone_set('Asia/Shanghai');
         $host = $_SERVER['HTTP_HOST'];
-        if (!in_array($host, ['100.90.164.31:8013', '100.90.164.31:8082', '100.90.164.31:8088', '100.90.164.31:8089', '100.90.164.31:8099', '10.179.132.61:8088', '100.95.100.106:8088', 'www.itstool.com'])) {
+        if (!in_array($host, ['100.90.164.31:8013', '100.90.164.31:8082', '100.90.164.31:8088', '100.90.164.31:8089', '100.90.164.31:8099', '10.179.132.61:8088', '100.95.100.106:8088', 'www.itstool.com', '100.90.165.32:8088'])) {
             $this->is_check_login = 1;
 
             $this->load->model('user/user', 'user');
