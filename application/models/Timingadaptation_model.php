@@ -19,7 +19,7 @@ class Timingadaptation_model extends CI_Model
         $current = $this->getCurrentInfo($logic_junction_id);
 
         return $this->formatAdaptionTimingInfo(
-            json_decode($adapt['timing_info'], true)['data'] ?? '', $current, $params['city_id']);
+            json_decode($adapt['timing_info'], true)['data'] ?? '', $current, $params);
     }
 
     public function getCurrentTimingInfo($params)
@@ -150,14 +150,14 @@ class Timingadaptation_model extends CI_Model
      * @param $cityId
      * @return array
      */
-    private function formatAdaptionTimingInfo($adapt, $current, $cityId)
+    private function formatAdaptionTimingInfo($adapt, $current, $params)
     {
         if(empty($adapt) || empty($current))
             return [];
 
         foreach ($adapt['tod'] as $tk => &$tod) {
-            $flowIds = array_column(array_column($tod, 'flow'), 'logic_flow_id');
-            $flows = $this->getTwiceStopRate($flowIds, $cityId);
+            $flowIds = array_column(array_column($tod['movement_timing'], 'flow'), 'logic_flow_id');
+            $flows = $this->getTwiceStopRate($flowIds, $params);
             foreach ($tod['movement_timing'] as $mk => &$movement) {
                 $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '';
                 $adaptTimings = Collection::make($movement['timing'] ?? []);
@@ -247,15 +247,17 @@ class Timingadaptation_model extends CI_Model
      * @param $cityId
      * @return array
      */
-    private function getTwiceStopRate($flowIds, $cityId)
+    private function getTwiceStopRate($flowIds, $params)
     {
         if(empty($flowIds)) return [];
 
-        $hour = $this->getLastestHour($cityId);
+        $hour = $this->getLastestHour($params['city_id']);
 
         $flows = $this->db->select('logic_flow_id, twice_stop_rate')
-            ->from('flow_duration_v6_' . $cityId)
+            ->from('flow_duration_v6_' . $params['city_id'])
             ->where('hour', $hour)
+            ->where('logic_junction_id', $params['logic_junction_id'])
+            ->where('date', date('Y-m-d'))
             ->where_in('logic_flow_id', $flowIds)
             ->get()->result_array();
 
