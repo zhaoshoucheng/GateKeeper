@@ -160,22 +160,20 @@ class Timingadaptation_model extends CI_Model
             $flows = $this->getTwiceStopRate($flowIds, $params);
             foreach ($tod['movement_timing'] as $mk => &$movement) {
                 $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '';
-                //$adaptTimings = Collection::make($movement['timing'] ?? []);
-                $currentTimings = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? []);
-                //$movement['yellow'] = $adaptTimings->first(function ($timing) { return $timing['state'] == 2; })['duration'] ?? '';
-                //$greenAdapts = $adaptTimings->where('state', 1)->get();
-                $greenCurrents = $currentTimings->where('state', 1)->get();
+                $greenCurrents = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [])->where('state', 1)->get();
                 $greens = $this->arrayMergeRecursive($movement['timing'], $greenCurrents);
                 $movement['timing'] = array_map(function ($timing) {
                     return [
                         'start_time' => $timing['start_time'][1] ?? '',
                         'suggest_start_time' => $timing['start_time'][0] ?? '',
                         'duration' => $timing['duration'][1] ?? '',
-                        'suggest_duration' => $timing['duration'][1] ?? '',
+                        'suggest_duration' => $timing['duration'][0] ?? '',
                         'max' => $timing['max'][1] ?? '',
-                        'suggest_max' => $timing['max'][1] ?? '',
+                        'suggest_max' => $timing['max'][0] ?? '',
                         'min' => $timing['min'][1] ?? '',
-                        'suggest_min' => $timing['min'][1] ?? '',
+                        'suggest_min' => $timing['min'][0] ?? '',
+                        'start_time_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
+                        'duration_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
                     ];
                 }, $greens);
             }
