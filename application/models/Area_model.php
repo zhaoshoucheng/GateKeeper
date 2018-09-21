@@ -212,6 +212,9 @@ class Area_model extends CI_Model
             ->where('delete_at', '1970-01-01 00:00:00')
             ->get()->result_array();
 
+        if(!$junctionList)
+            throw new Exception('数据异常');
+
         $junctionList = array_column($junctionList, 'junction_id');
 
         $baseDates = $this->dateRange($params['base_start_date'], $params['base_end_date']);
@@ -224,7 +227,7 @@ class Area_model extends CI_Model
             ->group_by(['date', 'hour'])->get()->result_array();
 
         if(!$result || empty($result))
-            return [];
+            throw new Exception('数据异常');
 
         return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
