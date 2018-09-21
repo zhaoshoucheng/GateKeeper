@@ -872,7 +872,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $result['errno'] = 0;
-            $result['data'] = empty($ret) ? [] : $ret;
+            $result['data'] = $ret;
 
             return $result;
         } catch (Exception $e) {
@@ -937,7 +937,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $result['errno'] = 0;
-            $result['data'] = empty($ret) ? [] : $ret;
+            $result['data'] = $ret;
 
             return $result;
         } catch (Exception $e) {
@@ -991,25 +991,24 @@ class Timingadaptationarea_model extends CI_Model
             $ret = [];
             if (!empty($detail['result'])) {
                 foreach ($detail['result'] as $k=>$v) {
-                    // 按时间正序排序
-                    $timestampArr = array_column($v, 'timestamp');
-                    sort($timestampArr);
-                    array_multisort($timestampArr, SORT_DESC, $v);
-
                     foreach ($v as $kk=>$vv) {
                         // 将时间转为秒数
                         $time = date_parse(date("H:i:s", $vv['timestamp']));
                         $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
-                        $ret[$k][$kk] = [
+                        $ret[$vv['timestamp']] = [
                             $second,             // 时间秒数 X轴
                             $vv['stopDistance'], // 值      Y轴
                         ];
                     }
                 }
             }
+            if (!empty($ret)) {
+                ksort($ret);
+                $ret = array_values($ret);
+            }
 
             $result['errno'] = 0;
-            $result['data'] = empty($ret) ? [] : $ret;
+            $result['data'] = $ret;
 
             return $result;
         } catch (Exception $e) {
