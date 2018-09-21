@@ -984,7 +984,7 @@ class Timingadaptationarea_model extends CI_Model
                     // 记录所有时间 用于获取最大最小值
                     $timestamp[$k] = $second;
                     // 记录所有值 用于获取最大最小值
-                    $value[$k] = $vv['stopDelayBefore'];
+                    $value[$k] = $v['stopDelayBefore'];
                 }
             }
 
