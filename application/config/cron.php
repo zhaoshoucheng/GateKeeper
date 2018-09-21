@@ -9,7 +9,7 @@ $config['open_file'] = 'open.json';
 $config['checkItems'] = [
     [
         'method' => 'POST',
-        'url' => 'Overviewalarm/realTimeAlarmList',
+        'url' => 'Overviewalarm/realTimeAlarmList', //实时报警列表
         'params' => [
             'city_id' => 0,
         ],
@@ -28,7 +28,7 @@ $config['checkItems'] = [
     ],
     [
         'method' => 'POST',
-        'url' => 'Overviewtoplist/stopTimeCycleTopList',
+        'url' => 'Overviewtoplist/stopTimeCycleTopList',    //停车次数top列表
         'params' => [
             'city_id' => 0,
             'pagesize' => 20,
@@ -46,7 +46,7 @@ $config['checkItems'] = [
     ],
     [
         'method' => 'POST',
-        'url' => 'Overviewtoplist/stopDelayTopList',
+        'url' => 'Overviewtoplist/stopDelayTopList',    //停车时间top列表
         'params' => [
             'city_id' => 0,
             'pagesize' => 20,
