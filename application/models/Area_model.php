@@ -230,7 +230,7 @@ class Area_model extends CI_Model
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
         }, 'date'], function ($v) use ($params) {
                 return Collection::make(array_combine($this->hourRange(), array_fill(0, 48, null)))
-                    ->merge(array_column($v, 'hour', $params['quota_key']))
+                    ->merge(array_column($v, $params['quota_key'], 'hour'))
                     ->walk(function (&$v, $k) { $v = [$k, $v]; })
                     ->values()->get();
         })->get();
