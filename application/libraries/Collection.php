@@ -389,8 +389,8 @@ class Collection implements CollectionInterface
     {
         $this->each(function ($v, $k) use (&$result, $preserveKey, $key) {
             $preserveKey
-                ? $result[$v[$key]][$k] = $v
-                : $result[$v[$key]][] = $v;
+                ? $result[Collection::make($v)->get($key)][$k] = $v
+                : $result[Collection::make($v)->get($key)][] = $v;
         });
         return static::make($result)->when($callback != null, function (Collection $c) use ($callback) {
             return $c->arrayWalk(function (&$v, $k) use ($callback) {

@@ -333,15 +333,16 @@ class Road_model extends CI_Model
      */
     private function isRoadNameExisted($name, $roadId = '')
     {
-        $where = 'road_name = "' . $name . '"';
+        $sqlArr = [$name];
+
+        $sql = 'select road_id from ' . $this->tb;
+        $sql .= ' where road_name = ?';
         if (!empty($roadId)) {
-            $where .= ' and road_id != "' . $roadId . '"';
+            $sql .= ' and road_id != ?';
+            array_push($sqlArr, $roadId);
         }
 
-        $this->db->select('road_id');
-        $this->db->from($this->tb);
-        $this->db->where($where);
-        $res = $this->db->get()->result_array();
+        $res = $this->db->query($sql, $sqlArr)->result_array();
 
         if (empty($res)) {
             return false;

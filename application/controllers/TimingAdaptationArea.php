@@ -5,6 +5,7 @@
 # date:2018-09-10
 ***************************************************************/
 
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class TimingAdaptationArea extends MY_Controller
@@ -23,7 +24,7 @@ class TimingAdaptationArea extends MY_Controller
     public function getAreaList()
     {
         $params = $this->input->post(NULL, TRUE);
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
@@ -33,7 +34,7 @@ class TimingAdaptationArea extends MY_Controller
 
         $result = $this->timingadaptationarea_model->getAreaList($data);
         if (empty($result)) {
-            $res['dataList'] = (object)[];
+            $res['dataList'] = [];
             return $this->response($res);
         }
 
@@ -62,13 +63,13 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
@@ -88,7 +89,7 @@ class TimingAdaptationArea extends MY_Controller
 
         $result = $this->timingadaptationarea_model->getAreaJunctionList($data);
         if (empty($result)) {
-            $res['dataList'] = (object)[];
+            $res['dataList'] = [];
             return $this->response($res);
         }
 
@@ -118,13 +119,13 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
@@ -175,13 +176,13 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
@@ -245,13 +246,13 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
@@ -295,15 +296,15 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (!in_array(intval($params['is_upload']), [0, 1])) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数is_upload传递错误！';
+            $this->errmsg = '参数area_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['is_upload']) || !in_array(intval($params['is_upload']), [0, 1])) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数area_id传递错误！';
+            $this->errmsg = '参数is_upload传递错误！';
             return;
         }
 
@@ -345,19 +346,19 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
         }
 
-        if (!in_array(intval($params['is_upload']), [0, 1])) {
+        if (!isset($params['is_upload']) || !in_array(intval($params['is_upload']), [0, 1])) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数is_upload传递错误！';
             return;
@@ -395,19 +396,19 @@ class TimingAdaptationArea extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
 
-        if (intval($params['city_id']) < 1) {
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
 
-        if (intval($params['area_id']) < 1) {
+        if (!isset($params['area_id']) || intval($params['area_id']) < 1) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数area_id传递错误！';
             return;
         }
 
-        if (empty($params['quota_key'])) {
+        if (empty($params['quota_key']) || !in_array(trim($params['quota_key']), ['avgSpeed', 'stopDelay'], true)) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '参数quota_key传递错误！';
             return;
@@ -426,11 +427,145 @@ class TimingAdaptationArea extends MY_Controller
             return;
         }
 
-        if (empty($result['data'])) {
-            $res = (object)[];
-        } else {
-            $res['dataList'] = $result['data'];
+        $res['dataList'] = $result['data'];
+        return $this->response($res);
+    }
+
+    /**
+     * 获取时空图
+     * @param city_id           interger Y 城市ID
+     * @param logic_junction_id string   Y 路口ID
+     * @param logic_flow_id     string   Y 相位ID
+     * @return json
+     */
+    public function getSpaceTimeMtraj()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数city_id传递错误！';
+            return;
         }
+
+        if (empty($params['logic_junction_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_junction_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_flow_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_flow_id传递错误！';
+            return;
+        }
+
+        $data = [
+            'city_id'           => intval($params['city_id']),
+            'logic_junction_id' => trim($params['logic_junction_id']),
+            'logic_flow_id'     => trim($params['logic_flow_id']),
+        ];
+
+        $result = $this->timingadaptationarea_model->getSpaceTimeMtraj($data);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        $res['dataList'] = $result['data'];
+        return $this->response($res);
+    }
+
+    /**
+     * 获取散点图
+     * @param city_id           interger Y 城市ID
+     * @param logic_junction_id string   Y 路口ID
+     * @param logic_flow_id     string   Y 相位ID
+     * @return json
+     */
+    public function getScatterMtraj()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数city_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_junction_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_junction_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_flow_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_flow_id传递错误！';
+            return;
+        }
+
+        $data = [
+            'city_id'           => intval($params['city_id']),
+            'logic_junction_id' => trim($params['logic_junction_id']),
+            'logic_flow_id'     => trim($params['logic_flow_id']),
+        ];
+
+        $result = $this->timingadaptationarea_model->getScatterMtraj($data);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        $res['dataList'] = $result['data'];
+        return $this->response($res);
+    }
+
+    /**
+     * 获取排队长度图
+     * @param city_id           interger Y 城市ID
+     * @param logic_junction_id string   Y 路口ID
+     * @param logic_flow_id     string   Y 相位ID
+     * @return json
+     */
+    public function getQueueLengthMtraj()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if (!isset($params['city_id']) || intval($params['city_id']) < 1) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数city_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_junction_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_junction_id传递错误！';
+            return;
+        }
+
+        if (empty($params['logic_flow_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数logic_flow_id传递错误！';
+            return;
+        }
+
+        $data = [
+            'city_id'           => intval($params['city_id']),
+            'logic_junction_id' => trim($params['logic_junction_id']),
+            'logic_flow_id'     => trim($params['logic_flow_id']),
+        ];
+
+        $result = $this->timingadaptationarea_model->getQueueLengthMtraj($data);
+        if ($result['errno'] != 0) {
+            $this->errno = ERR_DEFAULT;
+            $this->errmsg = $result['errmsg'];
+            return;
+        }
+
+        $res['dataList'] = $result['data'];
         return $this->response($res);
     }
 }
