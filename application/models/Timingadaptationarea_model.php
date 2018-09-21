@@ -989,6 +989,11 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $ret['dataList'] = [];
+
+            // 用于存储所有时间
+            $timestamp = [];
+            // 用于存储所有值
+            $value = [];
             if (!empty($detail['result'])) {
                 foreach ($detail['result'] as $k=>$v) {
                     foreach ($v as $kk=>$vv) {
@@ -999,25 +1004,40 @@ class Timingadaptationarea_model extends CI_Model
                             $second,             // 时间秒数 X轴
                             $vv['stopDistance'], // 值      Y轴
                         ];
+
+                        // 记录所有时间 用于获取最大最小值
+                        $timestamp[$vv['timestamp']] = $second;
+                        // 记录所有值 用于获取最大最小值
+                        $value[$vv['timestamp']] = $vv['stopDistance'];
                     }
                 }
             }
 
-            $ret['info'] = [];
-            if (!empty($ret['dataList'])) {
-                // 提取所有时间 用于获取最大最小值
-                $timestamp = array_column($$ret['dataList'], '0');
+            // X轴 Y轴 信息集合
+            $ret['info'] = [
+                "x" => [
+                    "max" => 0,
+                    "min" => 0,
+                ],
+                "Y" => [
+                    "max" => 0,
+                    "min" => 0,
+                ],
+            ];
+            if (!empty($timestamp)) {
                 $ret['info']['x'] = [
                     'max' => max($timestamp),
                     'min' => min($timestamp),
                 ];
-                // 提取所有值 用于获取最大最小值
-                $value = array_column($$ret['dataList'], '1');
+            }
+            if (!empty($value)) {
                 $ret['info']['y'] = [
                     'max' => max($value),
                     'min' => min($value),
                 ];
+            }
 
+            if (!empty($ret['dataList'])) {
                 ksort($ret['dataList']);
                 $ret['dataList'] = array_values($ret['dataList']);
             }
