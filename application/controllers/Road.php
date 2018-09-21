@@ -74,7 +74,7 @@ class Road extends MY_Controller
             return;
         }
 
-        if (count($params['junction_ids']) < 4) {
+        if (!isset($params['junction_ids']) || count($params['junction_ids']) < 4) {
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = '请至少选择4个路口做为干线！';
             return;
