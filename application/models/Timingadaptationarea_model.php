@@ -988,24 +988,48 @@ class Timingadaptationarea_model extends CI_Model
                 return $result;
             }
 
-            $ret = [];
+            $ret['dataList'] = [];
             if (!empty($detail['result'])) {
                 foreach ($detail['result'] as $k=>$v) {
                     foreach ($v as $kk=>$vv) {
                         // 将时间转为秒数
                         $time = date_parse(date("H:i:s", $vv['timestamp']));
                         $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
-                        $ret[$vv['timestamp']] = [
+                        $ret['dataList'][$vv['timestamp']] = [
                             $second,             // 时间秒数 X轴
                             $vv['stopDistance'], // 值      Y轴
                         ];
                     }
                 }
             }
-            if (!empty($ret)) {
-                ksort($ret);
-                $ret = array_values($ret);
+
+            $ret['info'] = [];
+            if (!empty($ret['dataList'])) {
+                // 提取所有时间 用于获取最大最小值
+                $timestamp = array_column($$ret['dataList'], '0');
+                $ret['info']['x'] = [
+                    'max' => max($timestamp),
+                    'min' => min($timestamp),
+                ];
+                // 提取所有值 用于获取最大最小值
+                $value = array_column($$ret['dataList'], '1');
+                $ret['info']['y'] = [
+                    'max' => max($value),
+                    'min' => min($value),
+                ];
+
+                ksort($ret['dataList']);
+                $ret['dataList'] = array_values($ret['dataList']);
             }
+
+            // 获取相位配时信息
+            $timingInfo = $this->getFlowTimingInfo($data);
+            if ($timingInfo['errno'] != 0) {
+                $result['errmsg'] = $timingInfo['errmsg'];
+                return $result;
+            }
+
+            $ret['signal_info'] = $timingInfo['data'];
 
             $result['errno'] = 0;
             $result['data'] = $ret;
@@ -1016,6 +1040,63 @@ class Timingadaptationarea_model extends CI_Model
             $result['errmsg'] = '调用es的获取排队长度图接口出错！';
             return $result;
         }
+    }
+
+    /**
+     * 获取某一相位的自适应配置信息
+     * @param $data['logic_junction_id'] string Y 路口ID
+     * @param $data['logic_flow_id']     string Y 相位ID
+     * @return array
+     */
+    private function getFlowTimingInfo($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        $table = 'adapt_timing_mirror';
+        if (!$this->isTableExisted($table)) {
+            $result['errmsg'] = '数据adapt_timing_mirror表不存在！';
+            return $result;
+        }
+
+        $sql = 'select timing_info from ' . $table;
+        $sql .= ' where logic_junction_id = ?';
+
+        $data = $this->db->query($sql, [$data['logic_junction_id']])->row_array();
+        if (empty($data['timing_info'])) {
+            $result['errno'] = 0;
+            return $result;
+        }
+
+        $Info = jsondecode($data['timing_info'], true);
+
+        list($timingInfo) = $Info['data']['tod'];
+        if (empty($timingInfo)) {
+            $result['errno'] = 0;
+            return $result;
+        }
+
+        // 周期 相位差
+        $res = [
+            'cycle'  => $timingInfo['extra_time']['cycle'],
+            'offset' => $timingInfo['extra_time']['offset'],
+        ];
+
+        // 信息灯信息
+        foreach ($timingInfo['movement_timing'] as $k=>$v) {
+            if ($v['logic_flow_id'] == $data['logic_flow_id']) {
+                $res['yellow'] = $v['yellow'];
+                foreach ($v['timing'] as $kk=>$vv) {
+                    $res['green'][$kk] = [
+                        'start_time' => $vv['start_time'],
+                        'duration'   => $vv['duration'],
+                    ];
+                }
+            }
+        }
+
+        $result['errno'] = 0;
+        $result['data'] = $res;
+        return $result;
     }
 
     /**
