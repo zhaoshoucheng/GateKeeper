@@ -160,12 +160,12 @@ class Timingadaptation_model extends CI_Model
             $flows = $this->getTwiceStopRate($flowIds, $params);
             foreach ($tod['movement_timing'] as $mk => &$movement) {
                 $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '';
-                $adaptTimings = Collection::make($movement['timing'] ?? []);
+                //$adaptTimings = Collection::make($movement['timing'] ?? []);
                 $currentTimings = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? []);
-                $movement['yellow'] = $adaptTimings->first(function ($timing) { return $timing['state'] == 2; })['duration'] ?? '';
-                $greenAdapts = $adaptTimings->where('state', 1)->get();
+                //$movement['yellow'] = $adaptTimings->first(function ($timing) { return $timing['state'] == 2; })['duration'] ?? '';
+                //$greenAdapts = $adaptTimings->where('state', 1)->get();
                 $greenCurrents = $currentTimings->where('state', 1)->get();
-                $greens = $this->arrayMergeRecursive($greenAdapts, $greenCurrents);
+                $greens = $this->arrayMergeRecursive($movement['timing'], $greenCurrents);
                 $movement['timing'] = array_map(function ($timing) {
                     return [
                         'start_time' => $timing['start_time'][1] ?? '',
