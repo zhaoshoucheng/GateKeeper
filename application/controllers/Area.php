@@ -215,8 +215,13 @@ class Area extends MY_Controller
             return;
         }
 
-        $data = $this->area_model->comparison($params);
-
-        return $this->response($data);
+        try {
+            $data = $this->area_model->comparison($params);
+            return $this->response($data);
+        } catch (Exception $e) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validator->firstError();
+            return;
+        }
     }
 }

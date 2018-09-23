@@ -19,12 +19,15 @@ class Timingadaptation_model extends CI_Model
         $current = $this->getCurrentInfo($logic_junction_id);
 
         return $this->formatAdaptionTimingInfo(
-            json_decode($adapt['timing_info'], true)['data'] ?? '', $current, $params['city_id']);
+            json_decode($adapt['timing_info'], true)['data'] ?? '', $current, $params);
     }
 
     public function getCurrentTimingInfo($params)
     {
         $data = $this->getCurrentInfo($params['logic_junction_id']);
+
+        if($data == null)
+            throw new Exception('数据获取失败！');
 
         return $this->formatCurrentTimingInfo($data);
     }
@@ -33,10 +36,16 @@ class Timingadaptation_model extends CI_Model
     {
         $res = httpPOST($this->config->item('url') . '/TimingAdaptation/uploadSignalTiming', $params);
 
-        $current = $this->getCurrentInfo($params['logic_junction_id']);
-        $offset = ($current['tod'][0]['extra_time']['offset'] ?? null);
+        if(!$res)
+            throw new Exception('配时下发失败！');
 
         $res = json_decode($res, true);
+
+        if($res['errorCode'] ?? true)
+            throw new Exception($res['errorMsg'] ?? '未知错误');
+
+        $current = $this->getCurrentInfo($params['logic_junction_id']);
+        $offset = ($current['tod'][0]['extra_time']['offset'] ?? null);
 
         $data = [
             'update_time' => time(),
@@ -141,32 +150,30 @@ class Timingadaptation_model extends CI_Model
      * @param $cityId
      * @return array
      */
-    private function formatAdaptionTimingInfo($adapt, $current, $cityId)
+    private function formatAdaptionTimingInfo($adapt, $current, $params)
     {
         if(empty($adapt) || empty($current))
             return [];
 
         foreach ($adapt['tod'] as $tk => &$tod) {
-            $flowIds = array_column(array_column($tod, 'flow'), 'logic_flow_id');
-            $flows = $this->getTwiceStopRate($flowIds, $cityId);
+            $flowIds = array_column(array_column($tod['movement_timing'], 'flow'), 'logic_flow_id');
+            $flows = $this->getTwiceStopRate($flowIds, $params);
             foreach ($tod['movement_timing'] as $mk => &$movement) {
                 $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '';
-                $adaptTimings = Collection::make($movement['timing'] ?? []);
-                $currentTimings = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? []);
-                $movement['yellow'] = $adaptTimings->first(function ($timing) { return $timing['state'] == 2; })['duration'] ?? '';
-                $greenAdapts = $adaptTimings->where('state', 1)->get();
-                $greenCurrents = $currentTimings->where('state', 1)->get();
-                $greens = $this->arrayMergeRecursive($greenAdapts, $greenCurrents);
+                $greenCurrents = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [])->where('state', 1)->get();
+                $greens = $this->arrayMergeRecursive($movement['timing'], $greenCurrents);
                 $movement['timing'] = array_map(function ($timing) {
                     return [
                         'start_time' => $timing['start_time'][1] ?? '',
                         'suggest_start_time' => $timing['start_time'][0] ?? '',
                         'duration' => $timing['duration'][1] ?? '',
-                        'suggest_duration' => $timing['duration'][1] ?? '',
+                        'suggest_duration' => $timing['duration'][0] ?? '',
                         'max' => $timing['max'][1] ?? '',
-                        'suggest_max' => $timing['max'][1] ?? '',
+                        'suggest_max' => $timing['max'][0] ?? '',
                         'min' => $timing['min'][1] ?? '',
-                        'suggest_min' => $timing['min'][1] ?? '',
+                        'suggest_min' => $timing['min'][0] ?? '',
+                        'start_time_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
+                        'duration_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
                     ];
                 }, $greens);
             }
@@ -238,15 +245,17 @@ class Timingadaptation_model extends CI_Model
      * @param $cityId
      * @return array
      */
-    private function getTwiceStopRate($flowIds, $cityId)
+    private function getTwiceStopRate($flowIds, $params)
     {
         if(empty($flowIds)) return [];
 
-        $hour = $this->getLastestHour($cityId);
+        $hour = $this->getLastestHour($params['city_id']);
 
         $flows = $this->db->select('logic_flow_id, twice_stop_rate')
-            ->from('flow_duration_v6_' . $cityId)
+            ->from('flow_duration_v6_' . $params['city_id'])
             ->where('hour', $hour)
+            ->where('logic_junction_id', $params['logic_junction_id'])
+            ->where('date', date('Y-m-d'))
             ->where_in('logic_flow_id', $flowIds)
             ->get()->result_array();
 
