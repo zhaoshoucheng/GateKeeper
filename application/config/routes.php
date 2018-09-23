@@ -52,6 +52,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+$route['Flow/(:any)'] = 'flow/proxy/$1';
 $route['itstool/(.+)'] = "$1";
 $route['signalpro/api/(.+)'] = "$1";
 $route['signalpro/proxy/zsy/(.+)'] = "proxy/zsy/$1";
