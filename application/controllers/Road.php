@@ -262,8 +262,13 @@ class Road extends MY_Controller
             return;
         }
 
-        $data = $this->road_model->comparison($params);
-
-        return $this->response($data);
+        try {
+            $data = $this->road_model->comparison($params);
+            return $this->response($data);
+        } catch (Exception $e) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validator->firstError();
+            return;
+        }
     }
 }

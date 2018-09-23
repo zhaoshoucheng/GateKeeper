@@ -212,6 +212,9 @@ class Area_model extends CI_Model
             ->where('delete_at', '1970-01-01 00:00:00')
             ->get()->result_array();
 
+        if(!$junctionList)
+            throw new Exception('数据异常');
+
         $junctionList = array_column($junctionList, 'junction_id');
 
         $baseDates = $this->dateRange($params['base_start_date'], $params['base_end_date']);
@@ -224,14 +227,15 @@ class Area_model extends CI_Model
             ->group_by(['date', 'hour'])->get()->result_array();
 
         if(!$result || empty($result))
-            return [];
+            throw new Exception('数据异常');
 
         return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
         }, 'date'], function ($v) use ($params) {
-            return array_map(function ($v) use ($params) {
-                return [$v['hour'], $v[$params['quota_key']]];
-            }, $v);
+                return Collection::make(array_combine($this->hourRange(), array_fill(0, 48, null)))
+                    ->merge(array_column($v, $params['quota_key'], 'hour'))
+                    ->walk(function (&$v, $k) { $v = [$k, $v]; })
+                    ->values()->get();
         })->get();
     }
 
@@ -240,6 +244,16 @@ class Area_model extends CI_Model
         return array_map(function ($v) {
             return date('Y-m-d', $v);
         }, range(strtotime($start), strtotime($end), 60 * 60 * 24));
+    }
+
+    private function hourRange()
+    {
+        $start = strtotime('00:00');
+        $end = strtotime('23:30');
+
+        return array_map(function ($v) {
+            return date('H:i', $v);
+        }, range($start, $end, 30 * 60));
     }
 
     //自动替换model数据
