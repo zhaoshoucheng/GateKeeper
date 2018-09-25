@@ -51,6 +51,11 @@ if($development == 2){
     $es_port = '8087';
     $es_ext = '';
 
+    // new timing
+    $signal_control_server = '100.90.164.31';
+    $signal_control_port = '8031';
+    $signal_control_ext = '/signal-timing';
+
 }else{
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
@@ -81,6 +86,11 @@ if($development == 2){
     $es_server = '10.89.236.25';
     $es_port = '8087';
     $es_ext = '';
+
+        // new timing
+    $signal_control_server = '100.90.164.31';
+    $signal_control_port = '8031';
+    $signal_control_ext = '/signal-timing';
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -102,6 +112,9 @@ $config['signal_mis_interface'] = 'http://' . $signal_mis_server . $signal_mis_p
 
 // es接口地址
 $config['es_interface'] = 'http://' . $es_server . $es_port . $es_ext;
+
+// 新版配时地址
+$config['signal_control_interface'] = 'http://' . $signal_control_server.":" . $signal_control_port . $signal_control_ext;
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;

@@ -172,6 +172,7 @@ trait ArrayRawMethod
 
     public function arrayMultisort($arraySortOrder = SORT_ASC, $arraySortFlags = SORT_REGULAR, ...$_)
     {
+        print_r($arraySortOrder);die();
         array_multisort($this->data, $arraySortOrder, $arraySortFlags, ...$_);
         return $this;
     }
@@ -377,7 +378,7 @@ trait ArrayRawMethod
         return $this;
     }
 
-    public static function range($start, $end, $step = 1)
+    protected static function range($start, $end, $step = 1)
     {
         return new static(range($start, $end, $step));
     }

@@ -61,6 +61,9 @@ class TimingAdaptation extends MY_Controller
         }
     }
 
+    /**
+     * 基准配时下发
+     */
     public function updateCurrentTiming()
     {
         $params = $this->input->post();
@@ -74,6 +77,9 @@ class TimingAdaptation extends MY_Controller
         }
     }
 
+    /**
+     * 获取自适应配时状态
+     */
     public function getAdapteStatus()
     {
         $params = $this->input->post();

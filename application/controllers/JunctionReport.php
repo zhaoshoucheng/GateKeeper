@@ -20,6 +20,9 @@ class JunctionReport extends MY_Controller
         $this->quotas = $this->config->item('quotas');
     }
 
+    /**
+     * 单点路口分析 - 数据获取
+     */
     public function queryQuotaInfo()
     {
         $params = $this->input->post();
