@@ -224,6 +224,8 @@ class Area_model extends CI_Model
             ->from('junction_hour_report')
             ->where_in('date', array_merge($baseDates, $evaluateDates))
             ->where_in('logic_junction_id', $junctionList)
+            ->where_in('hour', $this->hourRange())
+            ->where('city_id', $params['city_id'])
             ->group_by(['date', 'hour'])->get()->result_array();
 
         if(!$result || empty($result))

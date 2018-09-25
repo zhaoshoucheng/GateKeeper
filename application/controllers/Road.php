@@ -241,10 +241,14 @@ class Road extends MY_Controller
         return $this->response($result);
     }
 
+    /**
+     * 干线评估
+     */
     public function comparison()
     {
         $params = $this->input->post();
 
+        // 数据校验
         $validator = Validator::make($params, [
             'city_id' => 'required;numeric',
             'road_id' => 'required',
@@ -262,6 +266,7 @@ class Road extends MY_Controller
             return;
         }
 
+        // 异常处理
         try {
             $data = $this->road_model->comparison($params);
             return $this->response($data);
