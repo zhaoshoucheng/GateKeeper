@@ -59,7 +59,7 @@ class Collection implements CollectionInterface
             /*
              * 使用回调函数对元素键值对进行处理，如果返回 false 则跳出循环
              */
-            if($callback($v, $k) === false) break;
+            if(call_user_func($callback, $v, $k) === false) break;
         }
         return $this;
     }
@@ -73,11 +73,25 @@ class Collection implements CollectionInterface
      */
     public function forget($key, $dotKey = true)
     {
-        $key = $dotKey
+        $keys = $dotKey && is_string($key)
             ? explode('.', $key)
             : [$key];
 
-        return $this->forgetByArray($key);
+        $array = &$this->data;
+
+        while (count($keys) > 1) {
+            $part = array_shift($keys);
+
+            if (isset($array[$part]) && is_array($array[$part])) {
+                $array = &$array[$part];
+            } else {
+                return $this;
+            }
+        }
+
+        unset($array[array_shift($keys)]);
+
+        return $this;
     }
 
     /**
@@ -93,11 +107,21 @@ class Collection implements CollectionInterface
         if($key === null)
             return $this->data;
 
-        $key = $dotKey
-            ? explode('.', $key)
-            : [$key];
+        if(!$dotKey || strpos($key, '.') === false) {
+            return $this->data[$key] ?? $default;
+        }
 
-        return $this->getByArray($key, $default);
+        $array = $this->data;
+
+        foreach (explode('.', $key) as $segment) {
+            if(is_array($array) && isset($array[$segment])) {
+                $array = $array[$segment];
+            } else {
+                return $default;
+            }
+        }
+
+        return $array;
     }
 
     /**
@@ -332,7 +356,9 @@ class Collection implements CollectionInterface
     public function last(callable $callback = null, $default = null)
     {
         if($callback == null || !is_callable($callback))
-            return empty($this->data) ? $default : end($this->data);
+            return empty($this->data)
+                ? $default
+                : end($this->data);
 
         return $this->reverse()->first($callback);
     }
@@ -340,7 +366,9 @@ class Collection implements CollectionInterface
     public function first(callable $callback = null, $default = null)
     {
         if($callback == null || !is_callable($callback))
-            return empty($this->data) ? $default : reset($this->data);
+            return empty($this->data)
+                ? $default
+                : reset($this->data);
 
         foreach ($this->data as $key => $datum)
             if(call_user_func($callback, $datum, $key))

@@ -2,50 +2,39 @@
 //
 require __DIR__ . '/Collection.php';
 
-//$array = [
-//    ['hour' => '10:00', 'flow' => 'aaa', 'value' => 10],
-//    ['hour' => '10:00', 'flow' => 'bbb', 'value' => 8],
-//    ['hour' => '10:30', 'flow' => 'aaa', 'value' => 6],
-//    ['hour' => '10:30', 'flow' => 'bbb', 'value' => 15],
-//    ['hour' => '11:00', 'flow' => 'aaa', 'value' => 13],
-//    ['hour' => '11:00', 'flow' => 'bbb', 'value' => 5],
-//    ['hour' => '11:30', 'flow' => 'aaa', 'value' => 9],
-//    ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16],
-//];
+$array = [
+    ['hour' => '10:00', 'flow' => 'aaa', 'value' => 10],
+    ['hour' => '10:00', 'flow' => 'bbb', 'value' => 8],
+    ['hour' => '10:30', 'flow' => 'aaa', 'value' => 6],
+    ['hour' => '10:30', 'flow' => 'bbb', 'value' => 15],
+    ['hour' => '11:00', 'flow' => 'aaa', 'value' => 13],
+    ['hour' => '11:00', 'flow' => 'bbb', 'value' => 5],
+    ['hour' => '11:30', 'flow' => 'aaa', 'value' => 9],
+    ['hour' => '11:30', 'flow' => 'bbb', 'value' => 16],
+];
 
-$array = [];
+//dd(Collection::make($array)->forget(1));
 
-$h = range(0, 23);
-$m = [':00', ':30'];
-
-$f = ['aaa', 'bbb', 'ccc', 'ddd', 'eee', 'fff', 'ggg'];
-
-for ($i = 0; $i < 100000; ++$i)
-{
-    $array[] = [
-        'hour' => array_rand($h) . $m[array_rand($m)],
-        'name' => $f[array_rand($f)],
-        'value' => rand(0, 1000)
-    ];
+function fun($v, $k) {
+    return '';
 }
 
-$time1 = microtime(true);
-Collection::make($array)->groupBy(['name', function($v) {return $v['hour'];}, 'value'], function ($v) {
-    return array_map(function ($v) {
-        return $v['value'];
-    }, $v);
-});
+$v = '$v';
+$k = '$k';
 
-$time2 = microtime(true);
+$name = 'fun';
 
-$res = [];
-foreach ($array as $value)
-{
-    $res[$value['name']][$value['hour']][$value['value']][] = $value['value'];
-}
+$num = 100000000;
 
-$time3 = microtime(true);
+$ar = [$v, $k];
 
-echo $time2 - $time1, PHP_EOL;
-echo $time3 - $time2;
-
+echo microtime(true), PHP_EOL;
+for ($i = 0; $i < $num; $i++)
+    $name($v, $k);
+echo microtime(true), PHP_EOL;
+for ($i = 0; $i < $num; $i++)
+    call_user_func($name, $v, $k);
+echo microtime(true), PHP_EOL;
+for ($i = 0; $i < $num; $i++)
+    call_user_func_array($name, $ar);
+echo microtime(true), PHP_EOL;
