@@ -840,6 +840,26 @@ class Timingadaptationarea_model extends CI_Model
         $esUrl = $this->config->item('es_interface') . '/estimate/space/query';
 
         try {
+
+            // 获取相位配时信息
+            $timingInfo = $this->getFlowTimingInfo($data);
+            if ($timingInfo['errno'] != 0) {
+                $result['errmsg'] = $timingInfo['errmsg'];
+                return $result;
+            }
+
+            if (empty($timingInfo['data'])) {
+                $result['errmsg'] = '路口该方向无配时信息';
+                return $result;
+            }
+
+            $cycleLength = $timingInfo['data']['cycle'];
+            $offset = $timingInfo['data']['offset'];
+            if (empty($cycleLength)) {
+                $result['errmsg'] = '路口该方向相位差为空';
+                return $result;
+            }
+
             $detail = httpPOST($esUrl, $esData, 0, 'json');
             if (!$detail) {
                 $result['errmsg'] = '调用es接口 获取时空图 失败！';
@@ -877,6 +897,8 @@ class Timingadaptationarea_model extends CI_Model
                         // 记录所有值 用于获取最大最小值
                         $value[$vv['timestamp']] = $vv['distanceToStopBar'] * -1;
                     }
+
+                    $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k]);
                 }
             }
 
@@ -904,13 +926,6 @@ class Timingadaptationarea_model extends CI_Model
                 ];
             }
 
-            // 获取相位配时信息
-            $timingInfo = $this->getFlowTimingInfo($data);
-            if ($timingInfo['errno'] != 0) {
-                $result['errmsg'] = $timingInfo['errmsg'];
-                return $result;
-            }
-
             $ret['signal_info'] = $timingInfo['data'];
 
             $result['errno'] = 0;
@@ -923,6 +938,32 @@ class Timingadaptationarea_model extends CI_Model
             return $result;
         }
     }
+
+    /**
+     * 获取把时空图轨迹压缩在一个周期内
+     * @param $trajs 轨迹数据,二维数组
+     * @param $cycleLength 周期时长
+     * @param $offset 相位差
+     * @return array 调整后的轨迹
+     */
+    private function getTrajsInOneCycle(array $trajs, int $cycleLength, int $offset)
+    {
+        $trajs = Collection::make($trajs);
+
+        $crossTime = $trajs->keys($trajs->column(1)->min())->first(); // 过路口时间
+        $shiftTime = $crossTime - ($crossTime - $offset) % $cycleLength;
+        $minTime = $crossTime - 1.5 * $cycleLength;
+        $maxTime = $crossTime + 1.5 * $cycleLength;
+
+        return $trajs->map(function($item) use($shiftTime, $minTime, $maxTime){
+            $time = $item[1] - $shiftTime;
+            if ($time < $minTime || $time > $maxTime) {
+                return [];
+            }
+            return [$item[0], $time];
+        })->filter();
+    }
+
 
     /**
      * 获取散点图
