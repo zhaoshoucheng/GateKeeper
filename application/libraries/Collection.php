@@ -199,7 +199,24 @@ class Collection implements CollectionInterface
     public function sortBy($param, $arraySortOrder = SORT_ASC)
     {
         return is_callable($param)
+
+            /*
+             * 根据函数参数的返回值进行排序
+             * 例：
+             * [
+             *     ['id' => 1, 'name' => 'Joe'],
+             *     ['id' => 2, 'name' => 'John']
+             * ]
+             * 函数格式：
+             * function ($v) {
+             *     return $v['id'];
+             * }
+             */
             ? $this->sortByCallback($param, $arraySortOrder)
+
+            /**
+             * 根据集合元素的某一个键值进行排序
+             */
             : $this->sortByKey($param, $arraySortOrder);
     }
 
@@ -208,13 +225,45 @@ class Collection implements CollectionInterface
         return $this->get();
     }
 
+    /**
+     * 向数组中添加指定键值对
+     * 不支持 . 表示深度
+     *
+     * @param $key
+     * @param $value
+     * @return Collection|mixed|null
+     */
     public function add($key, $value)
     {
-        return !$this->has($key)
-            ? $this->set($key, $value)
-            : $this;
+        return $this->has($key, null, false)
+
+            /**
+             * 目标键已存在，不进行任何操作
+             */
+            ? $this
+
+            /**
+             * 目标建不存在则创建
+             */
+            : $this->set($key, $value, false);
     }
 
+    /**
+     * 遍历集合的每个元素，
+     * 并将每个元素（格式必须为数组）作为传入的函数的参数进行运算
+     * 例：
+     * [
+     *     ['id' => 1, 'name' => 'Joe'],
+     *     ['id' => 2, 'name' => 'John']
+     * ]
+     * 函数格式：
+     * function ($id, $name) {
+     *     //...
+     * }
+     *
+     * @param $callback
+     * @return Collection
+     */
     public function eachSpread($callback)
     {
         return $this->each(function ($v) use ($callback) {
@@ -222,18 +271,42 @@ class Collection implements CollectionInterface
         });
     }
 
+    /**
+     * 将二位数组铺开，
+     * 保留原有非数字键，
+     * 键名冲突则后者覆盖前者
+     *
+     * @return Collection
+     */
     public function collapse()
     {
-        return $this->reduce(function (Collection $carry, $item) {
-            return $carry->merge($item);
-        }, static::make([]));
+        $result = [];
+
+        foreach ($this->data as $datum)
+            array_merge($result, $datum);
+
+        return new static($result);
     }
 
+    /**
+     * 指定键值递减
+     * 不支持 . 表示深度
+     *
+     * @param $key
+     * @param int $value
+     */
     public function decrement($key, $value = 1)
     {
         $this->set($key, $this->get($key, 0, false) - $value, false);
     }
 
+    /**
+     * 指定键值递增
+     * 不支持 . 表示深度
+     *
+     * @param $key
+     * @param int $value
+     */
     public function increment($key, $value = 1)
     {
         $this->set($key, $this->get($key, 0, false) + $value, false);
@@ -241,7 +314,9 @@ class Collection implements CollectionInterface
 
     public function implode($key, $gule = null)
     {
-        return $gule == null ? implode($key, $this->data) : $this->column($key)->implode($gule);
+        return $gule == null
+            ? implode($key, $this->data)
+            : $this->column($key)->implode($gule);
     }
 
     public function isEmpty()
@@ -256,28 +331,29 @@ class Collection implements CollectionInterface
 
     public function last(callable $callback = null, $default = null)
     {
-        if($callback == null)
-            return $this->empty() ?
-                $default :
-                $this->end();
+        if($callback == null || !is_callable($callback))
+            return empty($this->data) ? $default : end($this->data);
 
         return $this->reverse()->first($callback);
     }
 
     public function first(callable $callback = null, $default = null)
     {
-        if($callback == null) return $this->empty() ? $default : $this->reset();
-        $this->each(function ($v, $k) use (&$res, $callback) {
-            if($callback($v, $k)) { $res = $v; return false; }
-        });
-        return $res ?? $default;
+        if($callback == null || !is_callable($callback))
+            return empty($this->data) ? $default : reset($this->data);
+
+        foreach ($this->data as $key => $datum)
+            if(call_user_func($callback, $datum, $key))
+                return $datum;
+
+        return $default;
     }
 
-    public function pull($key)
+    public function pull($key, $default = null)
     {
-        $result = $this->get($key);
-        $this->forget($key);
-        return $result;
+        $res = $this->get($key, $default, false);
+        $this->forget($key, false);
+        return $res;
     }
 
     public function toJson()
@@ -307,10 +383,9 @@ class Collection implements CollectionInterface
 
     protected function concat($array)
     {
-        return static::make($array)
-            ->each(function ($v) {
-                $this->push($v);
-            });
+        array_merge($this->data, array_values($array));
+
+        return $this;
     }
 
     protected function except(...$keys)
@@ -327,11 +402,14 @@ class Collection implements CollectionInterface
         }, ARRAY_FILTER_USE_KEY);
     }
 
+    /**
+     * @deprecated 方法已过期（可用 column 代替）
+     * @param $key
+     * @return Collection
+     */
     protected function pluck($key)
     {
-        return $this->map(function ($v) use ($key) {
-            return $v[$key] ?? null;
-        })->filter()->values();
+        return $this->column($key);
     }
 
     protected function prepend($value, $key = null)
@@ -341,8 +419,7 @@ class Collection implements CollectionInterface
             return $this;
         };
 
-        return static::make([$key => $value])
-            ->merge($this->get());
+        return static::make(array_merge([$value => $key, $this->data]));
     }
 
     protected function divide()
@@ -389,8 +466,8 @@ class Collection implements CollectionInterface
     {
         $this->each(function ($v, $k) use (&$result, $preserveKey, $key) {
             $preserveKey
-                ? $result[Collection::make($v)->get($key)][$k] = $v
-                : $result[Collection::make($v)->get($key)][] = $v;
+                ? $result[static::make($v)->get($key)][$k] = $v
+                : $result[static::make($v)->get($key)][] = $v;
         });
         return static::make($result)->when($callback != null, function (Collection $c) use ($callback) {
             return $c->arrayWalk(function (&$v, $k) use ($callback) {
@@ -412,8 +489,8 @@ class Collection implements CollectionInterface
                     return static::make($v)->groupByArray($keys, $callback, $preserveKey)->get();
                 }, $preserveKey)
                 : $this->groupByCallback($key, function ($v) use ($keys, $callback, $preserveKey) {
-                return static::make($v)->groupByArray($keys, $callback, $preserveKey)->get();
-            }, $preserveKey));
+                    return static::make($v)->groupByArray($keys, $callback, $preserveKey)->get();
+                }, $preserveKey));
     }
 
     private function groupByCallback(callable $callable, callable $callback = null, $preserveKey = false)
@@ -489,12 +566,19 @@ class Collection implements CollectionInterface
 
     private function sortByKey($key, $arraySortOrder = SORT_ASC)
     {
-        return $this->multisort($this->column($key), $arraySortOrder, $this->get());
+        switch ($arraySortOrder) {
+            case SORT_ASC:
+                return $this->groupBy($key)->ksort()->collapse();
+            case SORT_DESC:
+                return $this->groupBy($key)->krsort()->collapse();
+            default:
+                return $this;
+        }
     }
 
     private function sortByCallback(callable $callback, $arraySortOrder = SORT_ASC)
     {
-        return $this->multisort($this->map($callback), $arraySortOrder, $this->get());
+        return $this->sortByKey($callback, $arraySortOrder);
     }
 
     private function whereByKey($key, $compare, $value = null)
