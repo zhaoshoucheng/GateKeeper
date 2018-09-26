@@ -190,16 +190,16 @@ class Road_model extends CI_Model
 
     public function getAllRoadDetail($params)
     {
-        $result = $this->db->select('road_id', 'logic_junction_ids', 'road_name', 'road_direction')
+        $result = $this->db->select('road_id, logic_junction_ids, road_name, road_direction')
             ->from($this->tb)
             ->where('city_id', $params['city_id'])
             ->where('is_delete', 0)
-            ->get()->array_result();
-
+            ->get()->result_array();
+        
         $results = [];
 
         foreach ($result as $item) {
-            $results = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
+            $results[] = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
         }
 
         return $results;
