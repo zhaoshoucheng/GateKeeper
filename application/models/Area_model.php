@@ -229,7 +229,10 @@ class Area_model extends CI_Model
         $results = [];
 
         foreach ($areaIdJunctionList as $areaId => $junctionIds) {
-
+            $result = [
+                'center_lat' => 0,
+                'center_lng' => 0,
+            ];
         }
     }
 
