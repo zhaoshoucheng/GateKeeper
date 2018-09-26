@@ -871,27 +871,30 @@ class Timingadaptationarea_model extends CI_Model
                 return $result;
             }
 
+            if (empty($detail['result'])) {
+                $result['errmsg'] = '该方向无轨迹';
+                return $result;
+            }
+
             $ret['dataList'] = [];
 
-            if (!empty($detail['result'])) {
-                foreach ($detail['result'] as $k=>$v) {
-                    // 按时间正序排序
-                    $timestampArr = array_column($v, 'timestamp');
-                    sort($timestampArr);
-                    array_multisort($timestampArr, SORT_DESC, $v);
+            foreach ($detail['result'] as $k=>$v) {
+                // 按时间正序排序
+                $timestampArr = array_column($v, 'timestamp');
+                sort($timestampArr);
+                array_multisort($timestampArr, SORT_DESC, $v);
 
-                    foreach ($v as $kk=>$vv) {
-                        // 将时间转为秒数
-                        $time = date_parse(date("H:i:s", $vv['timestamp']));
-                        $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
-                        $ret['dataList'][$k][$kk] = [
-                            $second,                      // 时间秒数 X轴
-                            $vv['distanceToStopBar'] * -1 // 值      Y轴
-                        ];
-                    }
-
-                    $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k], $cycleLength, $offset);
+                foreach ($v as $kk=>$vv) {
+                    // 将时间转为秒数
+                    $time = date_parse(date("H:i:s", $vv['timestamp']));
+                    $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
+                    $ret['dataList'][$k][$kk] = [
+                        $second,                      // 时间秒数 X轴
+                        $vv['distanceToStopBar'] * -1 // 值      Y轴
+                    ];
                 }
+
+                $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k], $cycleLength, $offset);
             }
 
             $trajs = Collection::make($ret['dataList']);
