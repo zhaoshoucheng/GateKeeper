@@ -204,6 +204,62 @@ class Area_model extends CI_Model
         return $formatResult($result);
     }
 
+    public function getAllAreaJunctionList($params)
+    {
+        $areas = $this->db->select('area_name, id')
+            ->from('area')
+            ->where('city_id', $params['city_id'])
+            ->where('delete_at', '1970-01-01 00:00:00')
+            ->get()->result_array();
+
+        $areaIds = array_column($areas, 'id');
+
+        $areaIdNames = array_column($areas, 'area_name', 'id');
+
+        $areaJunctions = $this->db->select('area_id, junction_id')
+            ->from('area_junction_relation')
+            ->where_in('area_id', $areaIds)
+            ->where('delete_at', '1970-01-01 00:00:00')
+            ->get()->result_array();
+
+        $junctionIds = array_column($areaJunctions, 'junction_id');
+
+        $junctionList = $this->waymap_model->getJunctionInfo(implode(",",$junctionIds));
+
+        $junctionIdList = array_column($junctionList, null, 'logic_junction_id');
+
+        $areaIdJunctionList = Collection::make($areaJunctions)
+            ->groupBy('area_id', function ($v) {
+                return array_column($v, 'junction_id');
+            })->get();
+
+        $results = [];
+
+        foreach ($areaIdJunctionList as $areaId => $junctionIds) {
+            $result = [
+                'area_id' => $areaId,
+                'area_name' => $areaIdNames[$areaId] ?? '',
+            ];
+
+            $cnt_lng = 0;
+            $cnt_lat = 0;
+            foreach ($junctionIds as $id) {
+                $result['junction_list'][] = $junctionIdList[$id] ?? '';
+                $cnt_lat += $junctionIdList[$id]['lat'] ?? 0;
+                $cnt_lng += $junctionIdList[$id]['lng'] ?? 0;
+            }
+
+            $len = count($result['junction_list']);
+
+            $result['center_lat'] = $len == 0 ? 0 : $cnt_lat / $len;
+            $result['center_lng'] = $len == 0 ? 0 : $cnt_lng / $len;
+
+            $results[$areaId] = $result;
+        }
+
+        return $results;
+    }
+
     public function comparison($params)
     {
         $junctionList = $this->db->select('junction_id')

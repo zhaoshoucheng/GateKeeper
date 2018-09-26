@@ -195,6 +195,31 @@ class Area extends MY_Controller
         return $this->response($data);
     }
 
+    public function getAllAreaJunctionList()
+    {
+        $params = $this->input->post();
+
+        $validator = Validator::make($params, [
+            'city_id' => 'required',
+        ]);
+
+        if($validator->fail()) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validator->firstError();
+            return;
+        }
+
+        //异常处理
+        try {
+            $data = $this->area_model->getAllAreaJunctionList($params);
+            return $this->response($data);
+        } catch (Exception $e) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+    }
+
     /**
      * 区域评估
      */
