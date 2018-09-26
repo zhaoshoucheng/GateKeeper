@@ -214,7 +214,7 @@ class Area_model extends CI_Model
 
         $areaIds = array_column($areas, 'id');
 
-        $areaIdNames = array_column($areas, 'name', 'id');
+        $areaIdNames = array_column($areas, 'area_name', 'id');
 
         $areaJunctions = $this->db->select('area_id, junction_id')
             ->from('area_junction_relation')
