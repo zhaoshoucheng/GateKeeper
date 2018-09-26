@@ -235,15 +235,15 @@ class Area_model extends CI_Model
         foreach ($areaIdJunctionList as $areaId => $junctionIds) {
             $result = [
                 'area_id' => $areaId,
-                'area_name' => $areaIdNames[$areaId],
+                'area_name' => $areaIdNames[$areaId] ?? '',
             ];
 
             $cnt_lng = 0;
             $cnt_lat = 0;
             foreach ($junctionIds as $id) {
                 $result['junction_list'][] = $junctionIdList[$id];
-                $cnt_lat += $junctionIdList[$id]['lat'];
-                $cnt_lng += $junctionIdList[$id]['lng'];
+                $cnt_lat += $junctionIdList[$id]['lat'] ?? 0;
+                $cnt_lng += $junctionIdList[$id]['lng'] ?? 0;
             }
 
             $result['center_lat'] = $cnt_lat / count($result['junction_list']);
