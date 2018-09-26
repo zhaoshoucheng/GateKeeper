@@ -898,7 +898,7 @@ class Timingadaptationarea_model extends CI_Model
                         $value[$vv['timestamp']] = $vv['distanceToStopBar'] * -1;
                     }
 
-                    $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k]);
+                    $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k], $cycleLength, $offset);
                 }
             }
 
