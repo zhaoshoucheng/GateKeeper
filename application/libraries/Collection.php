@@ -307,7 +307,7 @@ class Collection implements CollectionInterface
         $result = [];
 
         foreach ($this->data as $datum)
-            array_merge($result, $datum);
+            $result = array_merge($result, $datum);
 
         return new static($result);
     }

@@ -873,10 +873,6 @@ class Timingadaptationarea_model extends CI_Model
 
             $ret['dataList'] = [];
 
-            // 用于存储所有时间
-            $timestamp = [];
-            // 用于存储所有值
-            $value = [];
             if (!empty($detail['result'])) {
                 foreach ($detail['result'] as $k=>$v) {
                     // 按时间正序排序
@@ -892,39 +888,25 @@ class Timingadaptationarea_model extends CI_Model
                             $second,                      // 时间秒数 X轴
                             $vv['distanceToStopBar'] * -1 // 值      Y轴
                         ];
-                        // 记录所有时间 用于获取最大最小值
-                        $timestamp[$vv['timestamp']] = $second;
-                        // 记录所有值 用于获取最大最小值
-                        $value[$vv['timestamp']] = $vv['distanceToStopBar'] * -1;
                     }
 
                     $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k], $cycleLength, $offset);
                 }
             }
 
+            $trajs = Collection::make($ret['dataList']);
+
             // X轴 Y轴 信息集合
             $ret['info'] = [
                 "x" => [
-                    "max" => 0,
-                    "min" => 0,
+                    "max" => $trajs->collapse()->column(0)->max(),
+                    "min" => $trajs->collapse()->column(0)->min(),
                 ],
                 "y" => [
-                    "max" => 0,
-                    "min" => 0,
+                    "max" => $trajs->collapse()->column(1)->min(),
+                    "min" => $trajs->collapse()->column(1)->min(),
                 ],
             ];
-            if (!empty($timestamp)) {
-                $ret['info']['x'] = [
-                    'max' => max($timestamp),
-                    'min' => min($timestamp),
-                ];
-            }
-            if (!empty($value)) {
-                $ret['info']['y'] = [
-                    'max' => max($value),
-                    'min' => min($value),
-                ];
-            }
 
             $ret['signal_info'] = $timingInfo['data'];
 
