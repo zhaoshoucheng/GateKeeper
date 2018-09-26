@@ -199,7 +199,9 @@ class Road_model extends CI_Model
         $results = [];
 
         foreach ($result as $item) {
-            $results[] = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
+            $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
+            $tmp['road'] = $item;
+            $results[] = $tmp;
         }
 
         return $results;
@@ -274,6 +276,11 @@ class Road_model extends CI_Model
         return array_map(function ($v) {
             return date('H:i', $v);
         }, range(strtotime($start), strtotime($end), 30 * 60));
+    }
+
+    private function formatAllRoadDetailData($result, $cityId)
+    {
+
     }
 
     /**

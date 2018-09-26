@@ -204,6 +204,35 @@ class Area_model extends CI_Model
         return $formatResult($result);
     }
 
+    public function getAllAreaJunctionList($params)
+    {
+        $areas = $this->db->select('area_name', 'id')
+            ->where('city_id', $params['city_id'])
+            ->where('delete_at', '1970-01-01 00:00:00')
+            ->get()->result_array();
+
+        $areaIds = array_column($areas, 'id');
+
+        $areaJunctions = $this->db->select('area_id', 'junction_id')
+            ->where_in('area_id', $areaIds)
+            ->where('delete_at', '1970-01-01 00:00:00')
+            ->get()->result_array();
+
+        $junctionIds = array_column($areaJunctions, 'junction_id');
+
+        $junctionList = $this->waymap_model->getJunctionInfo(implode(",",$junctionIds));
+
+        $junctionIdList = array_column($junctionList, null, 'id');
+
+        $areaIdJunctionList = array_column($areaJunctions, 'junction_id', 'area_id');
+
+        $results = [];
+
+        foreach ($areaIdJunctionList as $areaId => $junctionIds) {
+
+        }
+    }
+
     public function comparison($params)
     {
         $junctionList = $this->db->select('junction_id')
