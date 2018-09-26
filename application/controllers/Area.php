@@ -225,7 +225,7 @@ class Area extends MY_Controller
             return $this->response($data);
         } catch (Exception $e) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validator->firstError();
+            $this->errmsg = $e->getMessage();
             return;
         }
     }

@@ -241,6 +241,31 @@ class Road extends MY_Controller
         return $this->response($result);
     }
 
+    public function getAllRoadDetail()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        $validator = Validator::make($params, [
+            'city_id' => 'required',
+        ]);
+
+        if($validator->fail()) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validator->firstError();
+            return;
+        }
+
+        // 异常处理
+        try {
+            $data = $this->road_model->getAllRoadDetail($params);
+            return $this->response($data);
+        } catch (Exception $e) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+    }
+
     /**
      * 干线评估
      */
@@ -272,7 +297,7 @@ class Road extends MY_Controller
             return $this->response($data);
         } catch (Exception $e) {
             $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validator->firstError();
+            $this->errmsg = $e->getMessage();
             return;
         }
     }
