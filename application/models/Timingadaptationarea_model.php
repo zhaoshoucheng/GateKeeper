@@ -950,18 +950,28 @@ class Timingadaptationarea_model extends CI_Model
     {
         $trajs = Collection::make($trajs);
 
-        $crossTime = $trajs->keys($trajs->column(1)->min())->first(); // 过路口时间
-        $shiftTime = $crossTime - ($crossTime - $offset) % $cycleLength;
-        $minTime = $crossTime - 1.5 * $cycleLength;
-        $maxTime = $crossTime + 1.5 * $cycleLength;
+        $trajs->reduce(function($a, $b){
+           if ($a == null) {
+               return $b;
+           }
+           if (abs($a[1]) < abs($b[1])) {
+               return $a;
+           }
+           return $b;
+        });
+
+        $crossTime = $min[0]; // 过路口时间
+        $shiftTime = $crossTime - (($crossTime - $offset) % $cycleLength);
+        $minTime = $crossTime - $shiftTime - 1.5 * $cycleLength;
+        $maxTime = $crossTime - $shiftTime + 1.5 * $cycleLength;
 
         return $trajs->map(function($item) use($shiftTime, $minTime, $maxTime){
-            $time = $item[1] - $shiftTime;
+            $time = $item[0] - $shiftTime;
             if ($time < $minTime || $time > $maxTime) {
                 return [];
             }
-            return [$item[0], $time];
-        })->filter();
+            return [$time, $item[1]];
+        })->filter()->all();
     }
 
 
