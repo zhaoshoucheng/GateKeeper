@@ -903,7 +903,7 @@ class Timingadaptationarea_model extends CI_Model
                     "min" => $trajs->collapse()->column(0)->min(),
                 ],
                 "y" => [
-                    "max" => $trajs->collapse()->column(1)->min(),
+                    "max" => $trajs->collapse()->column(1)->max(),
                     "min" => $trajs->collapse()->column(1)->min(),
                 ],
             ];
