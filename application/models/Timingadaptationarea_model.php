@@ -1001,27 +1001,30 @@ class Timingadaptationarea_model extends CI_Model
                 return $result;
             }
 
+            if(empty($detail['result'])) {
+                $result['errmsg'] = '该方向没有轨迹数据';
+                return $result;
+            }
+
             $ret['dataList'] = [];
             // 用于存储所有时间
             $timestamp = [];
             // 用于存储所有值
             $value = [];
 
-            if (!empty($detail['result'])) {
-                foreach ($detail['result'] as $k=>$v) {
-                    // 将时间转为秒数
-                    $time = date_parse(date("H:i:s", $v['timestamp']));
-                    $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
-                    $ret['dataList'][$k] = [
-                        $second,                 // 时间秒数 X轴
-                        $v['stopDelayBefore'],  // 值      Y轴
-                    ];
+            foreach ($detail['result'] as $k=>$v) {
+                // 将时间转为秒数
+                $time = date_parse(date("H:i:s", $v['timestamp']));
+                $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
+                $ret['dataList'][$k] = [
+                    $second,                 // 时间秒数 X轴
+                    $v['stopDelayBefore'],  // 值      Y轴
+                ];
 
-                    // 记录所有时间 用于获取最大最小值
-                    $timestamp[$k] = $second;
-                    // 记录所有值 用于获取最大最小值
-                    $value[$k] = $v['stopDelayBefore'];
-                }
+                // 记录所有时间 用于获取最大最小值
+                $timestamp[$k] = $second;
+                // 记录所有值 用于获取最大最小值
+                $value[$k] = $v['stopDelayBefore'];
             }
 
             // X轴 Y轴 信息集合
@@ -1109,28 +1112,31 @@ class Timingadaptationarea_model extends CI_Model
                 return $result;
             }
 
+            if (empty($detail['result'])) {
+                $result['errmsg'] = '该方向没有轨迹数据';
+                return $result;
+            }
+
             $ret['dataList'] = [];
 
             // 用于存储所有时间
             $timestamp = [];
             // 用于存储所有值
             $value = [];
-            if (!empty($detail['result'])) {
-                foreach ($detail['result'] as $k=>$v) {
-                    foreach ($v as $kk=>$vv) {
-                        // 将时间转为秒数
-                        $time = date_parse(date("H:i:s", $vv['timestamp']));
-                        $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
-                        $ret['dataList'][$vv['timestamp']] = [
-                            $second,             // 时间秒数 X轴
-                            $vv['stopDistance'], // 值      Y轴
-                        ];
+            foreach ($detail['result'] as $k=>$v) {
+                foreach ($v as $kk=>$vv) {
+                    // 将时间转为秒数
+                    $time = date_parse(date("H:i:s", $vv['timestamp']));
+                    $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
+                    $ret['dataList'][$vv['timestamp']] = [
+                        $second,             // 时间秒数 X轴
+                        $vv['stopDistance'], // 值      Y轴
+                    ];
 
-                        // 记录所有时间 用于获取最大最小值
-                        $timestamp[$vv['timestamp']] = $second;
-                        // 记录所有值 用于获取最大最小值
-                        $value[$vv['timestamp']] = $vv['stopDistance'];
-                    }
+                    // 记录所有时间 用于获取最大最小值
+                    $timestamp[$vv['timestamp']] = $second;
+                    // 记录所有值 用于获取最大最小值
+                    $value[$vv['timestamp']] = $vv['stopDistance'];
                 }
             }
 
