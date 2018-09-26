@@ -226,7 +226,7 @@ class Area_model extends CI_Model
 
         $junctionList = $this->waymap_model->getJunctionInfo(implode(",",$junctionIds));
 
-        $junctionIdList = array_column($junctionList, null, 'id');
+        $junctionIdList = array_column($junctionList, null, 'logic_junction_id');
 
         $areaIdJunctionList = Collection::make($areaJunctions)
             ->groupBy('area_id', function ($v) {
@@ -249,8 +249,10 @@ class Area_model extends CI_Model
                 $cnt_lng += $junctionIdList[$id]['lng'] ?? 0;
             }
 
-            $result['center_lat'] = $cnt_lat / count($result['junction_list']);
-            $result['center_lng'] = $cnt_lng / count($result['junction_list']);
+            $len = count($result['junction_list']);
+
+            $result['center_lat'] = $len == 0 ? 0 : $cnt_lat / $len;
+            $result['center_lng'] = $len == 0 ? 0 : $cnt_lng / $len;
 
             $results[$areaId] = $result;
         }
