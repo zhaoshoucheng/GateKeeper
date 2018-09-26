@@ -213,6 +213,8 @@ class Area_model extends CI_Model
 
         $areaIds = array_column($areas, 'id');
 
+        $areaIdNames = array_column($areas, 'name', 'id');
+
         $areaJunctions = $this->db->select('area_id', 'junction_id')
             ->where_in('area_id', $areaIds)
             ->where('delete_at', '1970-01-01 00:00:00')
@@ -230,10 +232,25 @@ class Area_model extends CI_Model
 
         foreach ($areaIdJunctionList as $areaId => $junctionIds) {
             $result = [
-                'center_lat' => 0,
-                'center_lng' => 0,
+                'area_id' => $areaId,
+                'area_name' => $areaIdNames[$areaId],
             ];
+
+            $cnt_lng = 0;
+            $cnt_lat = 0;
+            foreach ($junctionIds as $id) {
+                $result['junction_list'][] = $junctionIdList[$id];
+                $cnt_lat += $junctionIdList[$id]['lat'];
+                $cnt_lng += $junctionIdList[$id]['lng'];
+            }
+
+            $result['center_lat'] = $cnt_lat / count($result['junction_list']);
+            $result['center_lng'] = $cnt_lng / count($result['junction_list']);
+
+            $results[$areaId] = $result;
         }
+
+        return $results;
     }
 
     public function comparison($params)
