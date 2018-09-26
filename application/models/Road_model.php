@@ -284,7 +284,26 @@ class Road_model extends CI_Model
 
     private function formatAllRoadDetailData($result, $cityId)
     {
+        // 最新路网版本
+        $allMapVersions = $this->waymap_model->getAllMapVersion();
+        $newMapVersion = max($allMapVersions);
 
+        $links = [];
+
+        $connectPaths = [];
+
+        foreach ($result as $item) {
+            $junctionIds = explode(',', $item['logic_junction_ids']);
+            $res = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIds);
+
+            $connectPaths[$item['road_id']] = $res;
+
+            if (empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
+                continue;
+            }
+
+
+        }
     }
 
     /**
