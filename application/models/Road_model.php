@@ -188,6 +188,23 @@ class Road_model extends CI_Model
         return $result;
     }
 
+    public function getAllRoadDetail($params)
+    {
+        $result = $this->db->select('road_id, logic_junction_ids, road_name, road_direction')
+            ->from($this->tb)
+            ->where('city_id', $params['city_id'])
+            ->where('is_delete', 0)
+            ->get()->result_array();
+        
+        $results = [];
+
+        foreach ($result as $item) {
+            $results[] = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
+        }
+
+        return $results;
+    }
+
     public function comparison($params)
     {
         $junctionList = $this->db->select('logic_junction_ids')
