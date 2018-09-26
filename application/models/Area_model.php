@@ -244,7 +244,7 @@ class Area_model extends CI_Model
             $cnt_lng = 0;
             $cnt_lat = 0;
             foreach ($junctionIds as $id) {
-                $result['junction_list'][] = $junctionIdList[$id];
+                $result['junction_list'][] = $junctionIdList[$id] ?? '';
                 $cnt_lat += $junctionIdList[$id]['lat'] ?? 0;
                 $cnt_lng += $junctionIdList[$id]['lng'] ?? 0;
             }
