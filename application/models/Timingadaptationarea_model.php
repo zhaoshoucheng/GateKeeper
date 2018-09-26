@@ -950,7 +950,7 @@ class Timingadaptationarea_model extends CI_Model
     {
         $trajs = Collection::make($trajs);
 
-        $trajs->reduce(function($a, $b){
+        $min = $trajs->reduce(function($a, $b){
            if ($a == null) {
                return $b;
            }
