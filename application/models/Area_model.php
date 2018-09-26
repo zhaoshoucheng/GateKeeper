@@ -228,7 +228,10 @@ class Area_model extends CI_Model
 
         $junctionIdList = array_column($junctionList, null, 'id');
 
-        $areaIdJunctionList = array_column($areaJunctions, 'junction_id', 'area_id');
+        $areaIdJunctionList = Collection::make($areaJunctions)
+            ->groupBy('area_id', function ($v) {
+                return array_column($v, 'junction_id');
+            })->get();
 
         $results = [];
 
