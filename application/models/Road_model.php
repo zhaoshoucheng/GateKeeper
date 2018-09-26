@@ -200,6 +200,10 @@ class Road_model extends CI_Model
 
         foreach ($result as $item) {
             $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
+
+            if(is_object($tmp))
+                continue;
+
             $tmp['road'] = $item;
             $results[] = $tmp;
         }
