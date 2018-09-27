@@ -269,7 +269,7 @@ class Area_model extends CI_Model
             ->get()->result_array();
 
         if(!$junctionList)
-            throw new Exception('数据异常');
+            return [];
 
         $junctionList = array_column($junctionList, 'junction_id');
 
@@ -285,7 +285,7 @@ class Area_model extends CI_Model
             ->group_by(['date', 'hour'])->get()->result_array();
 
         if(!$result || empty($result))
-            throw new Exception('数据异常');
+            return [];
 
         return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
