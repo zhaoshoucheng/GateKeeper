@@ -97,7 +97,7 @@ class Common_model extends CI_Model
     {
         // 过滤有"掉头"字样的
         $flowInfos = array_filter($flowInfos, function($direction) {
-            return strpos($direction, '掉头') !== False;
+            return strpos($direction, '掉头') === False;
         });
 
         // nema排序
@@ -115,9 +115,12 @@ class Common_model extends CI_Model
 
         $ret = [];
         foreach ($flowInfos as $flowId => $direction) {
-            $score1 = $num1[$direction[0]] ?? 0;
-            $score2 = $num2[$direction[1]] ?? 0;
-            $score3 = isset($direction[2]) && is_numeric($direction[2]) ? intval($direction[2]) : 0;
+            $char1 = mb_substr($direction, 0, 1);
+            $char2 = mb_substr($direction, 1, 1);
+            $char3 = mb_substr($direction, 2, 1);
+            $score1 = $num1[$char1] ?? 0;
+            $score2 = $num2[$char2] ?? 0;
+            $score3 = is_numeric($char3) ? intval($char3) : 0;
             $order = $score1 + $score2 - $score3;
             $ret[] = [
                 'flow_id' => $flowId,
@@ -130,7 +133,7 @@ class Common_model extends CI_Model
             if ($a['order'] == $b['order']) {
                 return 0;
             }
-            return ($a['order'] < $b['order']) ? -1 : 1;
+            return ($a['order'] > $b['order']) ? -1 : 1;
         });
         return $ret;
     }
