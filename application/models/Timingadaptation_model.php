@@ -188,6 +188,8 @@ class Timingadaptation_model extends CI_Model
                     ];
                 }, $greens);
             }
+
+            $tod['movement_timing'] = array_values($tod['movement_timing']);
         }
         return $adapt;
     }
