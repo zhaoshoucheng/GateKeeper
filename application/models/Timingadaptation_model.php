@@ -274,7 +274,7 @@ class Timingadaptation_model extends CI_Model
             ->from('real_time_' . $params['city_id'])
             ->where('hour', $hour)
             ->where('logic_junction_id', $params['logic_junction_id'])
-            ->where('updated_time > ', date('Y-m-d', strtotime('-10  minutes')))
+            ->where('updated_at > ', date('Y-m-d', strtotime('-10  minutes')))
             ->where_in('logic_flow_id', $flowIds)
             ->get()->result_array();
 
