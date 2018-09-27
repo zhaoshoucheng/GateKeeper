@@ -271,10 +271,10 @@ class Timingadaptation_model extends CI_Model
         $hour = $this->getLastestHour($params['city_id']);
 
         $flows = $this->db->select('logic_flow_id, twice_stop_rate')
-            ->from('flow_duration_v6_' . $params['city_id'])
+            ->from('real_time_' . $params['city_id'])
             ->where('hour', $hour)
             ->where('logic_junction_id', $params['logic_junction_id'])
-            ->where('date', date('Y-m-d'))
+            ->where('updated_time > ', date('Y-m-d', strtotime('-10  minutes')))
             ->where_in('logic_flow_id', $flowIds)
             ->get()->result_array();
 
