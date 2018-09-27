@@ -213,6 +213,12 @@ class Road_model extends CI_Model
 
     public function comparison($params)
     {
+        $methods = [
+            'stop_time_cycle' => 'sum(stop_time_cycle) as stop_time_cycle',
+            'stop_delay' => 'sum(stop_delay) as stop_delay',
+            'speed' => 'avg(speed) as speed'
+        ];
+
         $junctionList = $this->db->select('logic_junction_ids')
             ->from('road')
             ->where('city_id', $params['city_id'])
@@ -245,9 +251,7 @@ class Road_model extends CI_Model
         $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
         $hours = $this->hourRange('00:00', '23:30');
 
-        //echo 'select ' . 'date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'] . ' from ' . 'flow_duration_v6_' . $params['city_id'] . ' where logic_flow_id in ( \'' . implode('\',\'', $junctionIds). '\' ) and date in ( \'' .           implode('\',\'', array_merge($baseDates, $evaluateDates))  . '\' ) group by date, hour';die();
-
-        $result = $this->db->select('date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'])
+        $result = $this->db->select('date, hour, ' . $methods[$params['quota_key']])
             ->from('flow_duration_v6_' . $params['city_id'])
             ->where_in('date', array_merge($baseDates, $evaluateDates))
             ->where_in('hour', $hours)
