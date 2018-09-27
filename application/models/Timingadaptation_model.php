@@ -98,6 +98,12 @@ class Timingadaptation_model extends CI_Model
             // 按钮开启 下发成功 相位改变 10分钟外
             list($status, $tmp) = [2, 'd2'];
 
+        $messages = [
+            '1' => '正在优化',
+            '2' => '正在进行自适应控制',
+            '3' => '正在切换基本方案',
+        ];
+
         return [
             'get_current_plan_time' => date('Y-m-d H:i:s'),
             'last_upload_time' => date('Y-m-d H:i:s', $current_info['update_time']),
@@ -105,7 +111,7 @@ class Timingadaptation_model extends CI_Model
             'next_upload_time' => date('Y-m-d H:i:s', strtotime('+5 minute', $current_info['update_time'])),
             'status' => $status,
             'tmp' => $tmp,
-            'message' => ''
+            'message' => $messages[$status],
         ];
 
     }
