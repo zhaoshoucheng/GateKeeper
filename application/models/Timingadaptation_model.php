@@ -98,6 +98,12 @@ class Timingadaptation_model extends CI_Model
             // 按钮开启 下发成功 相位改变 10分钟外
             list($status, $tmp) = [2, 'd2'];
 
+        $messages = [
+            '1' => '正在优化',
+            '2' => '正在进行自适应控制',
+            '3' => '正在切换基本方案',
+        ];
+
         return [
             'get_current_plan_time' => date('Y-m-d H:i:s'),
             'last_upload_time' => date('Y-m-d H:i:s', $current_info['update_time']),
@@ -105,7 +111,7 @@ class Timingadaptation_model extends CI_Model
             'next_upload_time' => date('Y-m-d H:i:s', strtotime('+5 minute', $current_info['update_time'])),
             'status' => $status,
             'tmp' => $tmp,
-            'message' => ''
+            'message' => $messages[$status],
         ];
 
     }
@@ -156,9 +162,21 @@ class Timingadaptation_model extends CI_Model
             return [];
 
         foreach ($adapt['tod'] as $tk => &$tod) {
-            $flowIds = array_column(array_column($tod['movement_timing'], 'flow'), 'logic_flow_id');
+            $flowIds = array_filter(
+                array_column(
+                    array_column($tod['movement_timing'], 'flow')
+                    , 'logic_flow_id'),
+                function ($v) {
+                    return $v != '';
+                }
+            );
             $flows = $this->getTwiceStopRate($flowIds, $params);
             foreach ($tod['movement_timing'] as $mk => &$movement) {
+                if($movement['flow']['logic_flow_id'] == '') {
+                    unset($tod['movement_timing'][$mk]);
+                    continue;
+                }
+
                 $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '';
                 $greenCurrents = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [])->where('state', 1)->get();
                 $greens = $this->arrayMergeRecursive($movement['timing'], $greenCurrents);
@@ -177,6 +195,7 @@ class Timingadaptation_model extends CI_Model
                     ];
                 }, $greens);
             }
+            $tod['movement_timing'] = array_values($tod['movement_timing']);
         }
         return $adapt;
     }
@@ -252,10 +271,10 @@ class Timingadaptation_model extends CI_Model
         $hour = $this->getLastestHour($params['city_id']);
 
         $flows = $this->db->select('logic_flow_id, twice_stop_rate')
-            ->from('flow_duration_v6_' . $params['city_id'])
+            ->from('real_time_' . $params['city_id'])
             ->where('hour', $hour)
             ->where('logic_junction_id', $params['logic_junction_id'])
-            ->where('date', date('Y-m-d'))
+            ->where('updated_at > ', date('Y-m-d', strtotime('-10  minutes')))
             ->where_in('logic_flow_id', $flowIds)
             ->get()->result_array();
 

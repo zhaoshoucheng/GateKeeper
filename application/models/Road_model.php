@@ -213,6 +213,12 @@ class Road_model extends CI_Model
 
     public function comparison($params)
     {
+        $methods = [
+            'stop_time_cycle' => 'sum(stop_time_cycle) as stop_time_cycle',
+            'stop_delay' => 'sum(stop_delay) as stop_delay',
+            'speed' => 'avg(speed) as speed'
+        ];
+
         $junctionList = $this->db->select('logic_junction_ids')
             ->from('road')
             ->where('city_id', $params['city_id'])
@@ -221,7 +227,7 @@ class Road_model extends CI_Model
             ->get()->first_row();
 
         if(!$junctionList)
-            throw new Exception('数据异常');
+            return [];
 
         $junctionIds = explode(',', $junctionList->logic_junction_ids);
 
@@ -235,7 +241,7 @@ class Road_model extends CI_Model
         $dataKey = $params['direction'] == 1 ? 'forward_path_flows' : 'backward_path_flows';
 
         if(!isset($res[$dataKey]))
-            throw new Exception('路网数据异常');
+            return [];
 
         $logic_flow_ids = array_map(function ($v) {
             return $v['logic_flow']['logic_flow_id'] ?? '';
@@ -245,9 +251,7 @@ class Road_model extends CI_Model
         $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
         $hours = $this->hourRange('00:00', '23:30');
 
-        //echo 'select ' . 'date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'] . ' from ' . 'flow_duration_v6_' . $params['city_id'] . ' where logic_flow_id in ( \'' . implode('\',\'', $junctionIds). '\' ) and date in ( \'' .           implode('\',\'', array_merge($baseDates, $evaluateDates))  . '\' ) group by date, hour';die();
-
-        $result = $this->db->select('date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'])
+        $result = $this->db->select('date, hour, ' . $methods[$params['quota_key']])
             ->from('flow_duration_v6_' . $params['city_id'])
             ->where_in('date', array_merge($baseDates, $evaluateDates))
             ->where_in('hour', $hours)
@@ -256,7 +260,7 @@ class Road_model extends CI_Model
             ->group_by(['date', 'hour'])->get()->result_array();
 
         if(!$result || empty($result))
-            throw new Exception('数据异常');
+            return [];
 
         return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
@@ -284,7 +288,26 @@ class Road_model extends CI_Model
 
     private function formatAllRoadDetailData($result, $cityId)
     {
+        // 最新路网版本
+        $allMapVersions = $this->waymap_model->getAllMapVersion();
+        $newMapVersion = max($allMapVersions);
 
+        $links = [];
+
+        $connectPaths = [];
+
+        foreach ($result as $item) {
+            $junctionIds = explode(',', $item['logic_junction_ids']);
+            $res = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIds);
+
+            $connectPaths[$item['road_id']] = $res;
+
+            if (empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
+                continue;
+            }
+
+
+        }
     }
 
     /**
