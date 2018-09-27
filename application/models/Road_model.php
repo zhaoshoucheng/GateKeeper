@@ -219,6 +219,10 @@ class Road_model extends CI_Model
             'speed' => 'avg(speed) as speed'
         ];
 
+        if(!array_key_exists($params['quota_key'], $methods)) {
+            return [];
+        }
+
         $junctionList = $this->db->select('logic_junction_ids')
             ->from('road')
             ->where('city_id', $params['city_id'])
