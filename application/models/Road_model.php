@@ -221,7 +221,7 @@ class Road_model extends CI_Model
             ->get()->first_row();
 
         if(!$junctionList)
-            throw new Exception('数据异常');
+            return [];
 
         $junctionIds = explode(',', $junctionList->logic_junction_ids);
 
@@ -235,7 +235,7 @@ class Road_model extends CI_Model
         $dataKey = $params['direction'] == 1 ? 'forward_path_flows' : 'backward_path_flows';
 
         if(!isset($res[$dataKey]))
-            throw new Exception('路网数据异常');
+            return [];
 
         $logic_flow_ids = array_map(function ($v) {
             return $v['logic_flow']['logic_flow_id'] ?? '';
@@ -256,7 +256,7 @@ class Road_model extends CI_Model
             ->group_by(['date', 'hour'])->get()->result_array();
 
         if(!$result || empty($result))
-            throw new Exception('数据异常');
+            return [];
 
         return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
@@ -284,7 +284,26 @@ class Road_model extends CI_Model
 
     private function formatAllRoadDetailData($result, $cityId)
     {
+        // 最新路网版本
+        $allMapVersions = $this->waymap_model->getAllMapVersion();
+        $newMapVersion = max($allMapVersions);
 
+        $links = [];
+
+        $connectPaths = [];
+
+        foreach ($result as $item) {
+            $junctionIds = explode(',', $item['logic_junction_ids']);
+            $res = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIds);
+
+            $connectPaths[$item['road_id']] = $res;
+
+            if (empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
+                continue;
+            }
+
+
+        }
     }
 
     /**
