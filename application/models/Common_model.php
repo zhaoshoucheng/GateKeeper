@@ -81,8 +81,57 @@ class Common_model extends CI_Model
             $result['data'] = $flowsInfo[$data['logic_junction_id']];
         }
 
+        $result['data'] = $this->sortByNema($result['data']);
+
         $result['errno'] = 0;
 
         return $result;
+    }
+
+
+    /**
+     * @param $flowInfos array['logic_flow_id' => 'direction']
+     * @return array [['flow_id', 'flow_name', 'order']]
+     */
+    public function sortByNema($flowInfos)
+    {
+        // 过滤有"掉头"字样的
+        $flowInfos = array_filter($flowInfos, function($direction) {
+            return strpos($direction, '掉头') !== False;
+        });
+
+        // nema排序
+        $num1 = [
+            '北' => 4 * 10,
+            '东' => 3 * 10,
+            '南' => 2 * 10,
+            '西' => 1 * 10,
+        ];
+        $num2 = [
+            '左' => 5 * 1,
+            '直' => 4 * 1,
+            '右' => 3 * 1,
+        ];
+
+        $ret = [];
+        foreach ($flowInfos as $flowId => $direction) {
+            $score1 = $num1[$direction[0]] ?? 0;
+            $score2 = $num2[$direction[1]] ?? 0;
+            $score3 = isset($direction[2]) && is_numeric($direction[2]) ? intval($direction[2]) : 0;
+            $order = $score1 + $score2 - $score3;
+            $ret[] = [
+                'flow_id' => $flowId,
+                'flow_name' => $direction,
+                'order' => $order,
+            ];
+        }
+
+        usort($ret, function($a, $b) {
+            if ($a['order'] == $b['order']) {
+                return 0;
+            }
+            return ($a['order'] < $b['order']) ? -1 : 1;
+        });
+        return $ret;
     }
 }
