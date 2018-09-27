@@ -162,7 +162,14 @@ class Timingadaptation_model extends CI_Model
             return [];
 
         foreach ($adapt['tod'] as $tk => &$tod) {
-            $flowIds = array_column(array_column($tod['movement_timing'], 'flow'), 'logic_flow_id');
+            $flowIds = array_filter(
+                array_column(
+                    array_column($tod['movement_timing'], 'flow')
+                    , 'logic_flow_id'),
+                function ($v) {
+                    return $v != '';
+                }
+            );
             $flows = $this->getTwiceStopRate($flowIds, $params);
             foreach ($tod['movement_timing'] as $mk => &$movement) {
                 if($movement['flow']['logic_flow_id'] == '') {
@@ -188,7 +195,6 @@ class Timingadaptation_model extends CI_Model
                     ];
                 }, $greens);
             }
-
             $tod['movement_timing'] = array_values($tod['movement_timing']);
         }
         return $adapt;
