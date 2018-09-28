@@ -27,7 +27,7 @@ class Timingadaptation_model extends CI_Model
         $data = $this->getCurrentInfo($params['logic_junction_id']);
 
         if($data == null)
-            throw new Exception('数据获取失败！');
+            throw new Exception('无法获取路口的基准配时信息');
 
         return $this->formatCurrentTimingInfo($data);
     }
@@ -165,14 +165,7 @@ class Timingadaptation_model extends CI_Model
             return [];
 
         foreach ($adapt['tod'] as $tk => &$tod) {
-            $flowIds = array_filter(
-                array_column(
-                    array_column($tod['movement_timing'], 'flow')
-                    , 'logic_flow_id'),
-                function ($v) {
-                    return $v != '';
-                }
-            );
+            $flowIds = array_filter(array_column(array_column($tod['movement_timing'], 'flow'), 'logic_flow_id'), function ($v) { return $v != ''; });
             $flows = $this->getTwiceStopRate($flowIds, $params);
             foreach ($tod['movement_timing'] as $mk => &$movement) {
                 if($movement['flow']['logic_flow_id'] == '') {
