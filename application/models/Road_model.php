@@ -23,6 +23,7 @@ class Road_model extends CI_Model
         }
 
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
     }
 
     /**
@@ -85,6 +86,13 @@ class Road_model extends CI_Model
             return ['errno' => -1, 'errmsg' => '新增干线入库失败！'];
         }
 
+        $tmp = $this->formatRoadDetailData($insertData['city_id'], $insertData['logic_junction_ids']);
+
+        if(is_object($tmp))
+            $tmp = [];
+
+        $this->redis_model->setData('Road_' . $insertData['road_id'], json_encode($tmp));
+
         return ['errno' => 0, 'errmsg' => ''];
     }
 
@@ -124,6 +132,13 @@ class Road_model extends CI_Model
             return ['errno' => -1, 'errmsg' => '干线更新失败！'];
         }
 
+        $tmp = $this->formatRoadDetailData(intval($data['city_id']), $updateData['logic_junction_ids']);
+
+        if(is_object($tmp))
+            $tmp = [];
+
+        $this->redis_model->setData('Road_' . trim($data['road_id']), json_encode($tmp));
+
         return ['errno' => 0, 'errmsg' => ''];
     }
 
@@ -151,6 +166,8 @@ class Road_model extends CI_Model
         if ($this->db->affected_rows() < 1) {
             return ['errno' => -1, 'errmsg' => '干线更新失败！'];
         }
+
+        $this->redis_model->deleteData('Road_' . trim($data['road_id']));
 
         return ['errno' => 0, 'errmsg' => ''];
     }
@@ -188,6 +205,12 @@ class Road_model extends CI_Model
         return $result;
     }
 
+    /**
+     * 获取指定城市全部干线的详情
+     *
+     * @param $params
+     * @return array
+     */
     public function getAllRoadDetail($params)
     {
         $result = $this->db->select('road_id, logic_junction_ids, road_name, road_direction')
@@ -195,14 +218,27 @@ class Road_model extends CI_Model
             ->where('city_id', $params['city_id'])
             ->where('is_delete', 0)
             ->get()->result_array();
+
+        if(!$result)
+            return [];
         
         $results = [];
 
         foreach ($result as $item) {
-            $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
 
-            if(is_object($tmp))
-                continue;
+            if(!($tmp = $this->redis_model->getData('Road_' . $item['road_id'])))
+            {
+                $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
+
+                if(is_object($tmp))
+                    $tmp = [];
+
+                $this->redis_model->setData('Road_' . $item['road_id'], json_encode($tmp));
+            }
+            else
+            {
+                $tmp = json_decode($tmp, true);
+            }
 
             $tmp['road'] = $item;
             $results[] = $tmp;
@@ -211,14 +247,28 @@ class Road_model extends CI_Model
         return $results;
     }
 
+    /**
+     * 干线评估
+     * @param $params
+     * @return array|mixed
+     */
     public function comparison($params)
     {
+        // 指标算法映射
         $methods = [
             'stop_time_cycle' => 'sum(stop_time_cycle) as stop_time_cycle',
             'stop_delay' => 'sum(stop_delay) as stop_delay',
             'speed' => 'avg(speed) as speed'
         ];
 
+        if(!isset($methods[$params['quota_key']]))
+            return [];
+
+        if(!array_key_exists($params['quota_key'], $methods)) {
+            return [];
+        }
+
+        // 获取干线路口数据
         $junctionList = $this->db->select('logic_junction_ids')
             ->from('road')
             ->where('city_id', $params['city_id'])
@@ -251,6 +301,7 @@ class Road_model extends CI_Model
         $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
         $hours = $this->hourRange('00:00', '23:30');
 
+        // 获取数据源集合
         $result = $this->db->select('date, hour, ' . $methods[$params['quota_key']])
             ->from('flow_duration_v6_' . $params['city_id'])
             ->where_in('date', array_merge($baseDates, $evaluateDates))
@@ -262,6 +313,7 @@ class Road_model extends CI_Model
         if(!$result || empty($result))
             return [];
 
+        // 数据处理
         return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
         }, 'date'], function ($v) use ($params) {
@@ -272,6 +324,12 @@ class Road_model extends CI_Model
         })->get();
     }
 
+    /**
+     * 获取指定范围的 date 集合（每天）
+     * @param $start
+     * @param $end
+     * @return array
+     */
     private function dateRange($start, $end)
     {
         return array_map(function ($v) {
@@ -279,35 +337,17 @@ class Road_model extends CI_Model
         }, range(strtotime($start), strtotime($end), 60 * 60 * 24));
     }
 
+    /**
+     * 获取指定范围的 hour 集合（每 30 分钟）
+     * @param $start
+     * @param $end
+     * @return array
+     */
     private function hourRange($start, $end)
     {
         return array_map(function ($v) {
             return date('H:i', $v);
         }, range(strtotime($start), strtotime($end), 30 * 60));
-    }
-
-    private function formatAllRoadDetailData($result, $cityId)
-    {
-        // 最新路网版本
-        $allMapVersions = $this->waymap_model->getAllMapVersion();
-        $newMapVersion = max($allMapVersions);
-
-        $links = [];
-
-        $connectPaths = [];
-
-        foreach ($result as $item) {
-            $junctionIds = explode(',', $item['logic_junction_ids']);
-            $res = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIds);
-
-            $connectPaths[$item['road_id']] = $res;
-
-            if (empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
-                continue;
-            }
-
-
-        }
     }
 
     /**

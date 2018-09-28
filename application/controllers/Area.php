@@ -13,6 +13,7 @@ class Area extends MY_Controller
     {
         parent::__construct();
         $this->load->model('area_model');
+        $this->load->config('evaluate_conf');
     }
 
     /**
@@ -48,7 +49,6 @@ class Area extends MY_Controller
         }
         return $this->response($data);
     }
-
 
     /**
      * v2
@@ -136,7 +136,6 @@ class Area extends MY_Controller
         return $this->response(["list"=>$data]);
     }
 
-
     /**
      * v2
      * 删除区域路口
@@ -164,7 +163,6 @@ class Area extends MY_Controller
         }
         return $this->response($data);
     }
-
 
     /**
      * v2
@@ -195,6 +193,9 @@ class Area extends MY_Controller
         return $this->response($data);
     }
 
+    /**
+     * 获取城市全部区域的详细信息
+     */
     public function getAllAreaJunctionList()
     {
         $params = $this->input->post();
@@ -218,6 +219,14 @@ class Area extends MY_Controller
             $this->errmsg = $e->getMessage();
             return;
         }
+    }
+
+    /**
+     * 获取区域评估指标
+     */
+    public function getQuotas()
+    {
+        $this->response($this->config->item('area'));
     }
 
     /**

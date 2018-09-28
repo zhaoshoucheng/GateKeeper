@@ -14,6 +14,7 @@ class Road extends MY_Controller
         parent::__construct();
         $this->load->model('road_model');
         $this->load->config('junctioncomparison_conf');
+        $this->load->config('evaluate_conf');
     }
 
     /**
@@ -241,6 +242,9 @@ class Road extends MY_Controller
         return $this->response($result);
     }
 
+    /**
+     * 获取全部的干线信息
+     */
     public function getAllRoadDetail()
     {
         $params = $this->input->post(NULL, TRUE);
@@ -264,6 +268,14 @@ class Road extends MY_Controller
             $this->errmsg = $e->getMessage();
             return;
         }
+    }
+
+    /**
+     * 获取干线评估指标
+     */
+    public function getQuotas()
+    {
+        $this->response($this->config->item('road'));
     }
 
     /**
