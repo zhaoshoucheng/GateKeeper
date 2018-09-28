@@ -77,11 +77,10 @@ class Common_model extends CI_Model
         }
 
         $flowsInfo = $this->waymap_model->getFlowsInfo($data['logic_junction_id']);
-        if (!empty($flowsInfo)) {
-            $result['data'] = $flowsInfo[$data['logic_junction_id']];
-        }
 
-        $result['data'] = $this->sortByNema($result['data']);
+        if (!empty($flowsInfo)) {
+            $result['data'] = $this->sortByNema($flowsInfo[$data['logic_junction_id']]);
+        }
 
         $result['errno'] = 0;
 
