@@ -23,7 +23,11 @@ class MY_Controller extends CI_Controller {
         parent::__construct();
         date_default_timezone_set('Asia/Shanghai');
         $host = $_SERVER['HTTP_HOST'];
-        if (!in_array($host, ['100.90.164.31:8013', '100.90.164.31:8082', '100.90.164.31:8088', '100.90.164.31:8089', '100.90.164.31:8099', '10.179.132.61:8088', '100.95.100.106:8088', 'www.itstool.com', '100.90.165.32:8088', 'localhost:8000'])) {
+        
+        $this->load->config('white');
+        $escapeSso = $this->config->item('white_escape_sso');
+
+        if (!in_array($host, $escapeSso)) {
             $this->is_check_login = 1;
 
             $this->load->model('user/user', 'user');
