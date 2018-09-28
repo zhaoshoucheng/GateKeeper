@@ -213,30 +213,35 @@ class Road_model extends CI_Model
      */
     public function getAllRoadDetail($params)
     {
+        // 获取数据
         $result = $this->db->select('road_id, logic_junction_ids, road_name, road_direction')
             ->from($this->tb)
             ->where('city_id', $params['city_id'])
             ->where('is_delete', 0)
             ->get()->result_array();
 
-        if(!$result)
+        // 如果数据为空或者获取数据失败，则返回空数组
+        if(!$result) {
             return [];
+        }
         
         $results = [];
 
         foreach ($result as $item) {
 
-            if(!($tmp = $this->redis_model->getData('Road_' . $item['road_id'])))
-            {
+            //从 Redis 获取数据失败
+            if(!($tmp = $this->redis_model->getData('Road_' . $item['road_id']))) {
+
+                // 从数据库中获取数据
                 $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
 
+                // 数据控获取数据为空
                 if(is_object($tmp))
                     $tmp = [];
 
+                // 将数据刷新到 Redis
                 $this->redis_model->setData('Road_' . $item['road_id'], json_encode($tmp));
-            }
-            else
-            {
+            } else {
                 $tmp = json_decode($tmp, true);
             }
 
@@ -261,10 +266,8 @@ class Road_model extends CI_Model
             'speed' => 'avg(speed) as speed'
         ];
 
-        if(!isset($methods[$params['quota_key']]))
-            return [];
-
-        if(!array_key_exists($params['quota_key'], $methods)) {
+        // 如果指标不在映射数组中，返回空数组
+        if(!isset($methods[$params['quota_key']])) {
             return [];
         }
 
@@ -276,8 +279,10 @@ class Road_model extends CI_Model
             ->where('is_delete', 0)
             ->get()->first_row();
 
-        if(!$junctionList)
+        // 获取干线数据失败
+        if(!$junctionList) {
             return [];
+        }
 
         $junctionIds = explode(',', $junctionList->logic_junction_ids);
 
@@ -288,17 +293,28 @@ class Road_model extends CI_Model
         // 调用路网接口获取干线路口信息
         $res = $this->waymap_model->getConnectPath($params['city_id'], $newMapVersion, $junctionIds);
 
-        $dataKey = $params['direction'] == 1 ? 'forward_path_flows' : 'backward_path_flows';
+        // 根据参数决定获取数据指定方向的 flow 集合
+        $dataKey = $params['direction'] == 1
+            ? 'forward_path_flows'
+            : 'backward_path_flows';
 
-        if(!isset($res[$dataKey]))
+        // 路网数据没有该方向
+        if(!isset($res[$dataKey])) {
             return [];
+        }
 
-        $logic_flow_ids = array_map(function ($v) {
-            return $v['logic_flow']['logic_flow_id'] ?? '';
+        // 获取干线某个方向的全部 flow id
+        $logic_flow_ids = array_map(function ($item) {
+            return $item['logic_flow']['logic_flow_id'] ?? '';
         }, $res[$dataKey]);
 
+        // 生成指定时间范围内的 基准日期集合数组
         $baseDates = $this->dateRange($params['base_start_date'], $params['base_end_date']);
+
+        // 生成指定时间范围内的 评估日期集合数组
         $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
+
+        // 生成 00:00 - 23:30 间的 粒度为 30 分钟的时间集合数组
         $hours = $this->hourRange('00:00', '23:30');
 
         // 获取数据源集合
@@ -310,18 +326,37 @@ class Road_model extends CI_Model
             ->where_in('logic_flow_id', $logic_flow_ids)
             ->group_by(['date', 'hour'])->get()->result_array();
 
-        if(!$result || empty($result))
+        // 获取数据源失败 或者 数据源为空
+        if(!$result || empty($result)) {
             return [];
+        }
+
+        // 将数据按照 日期（基准 和 评估）进行分组的键名函数
+        $baseOrEvaluateCallback = function ($item) use ($baseDates) {
+            return in_array($item['date'], $baseDates)
+                ? 'base'
+                : 'evaluate';
+        };
+
+        // 数据分组后，将每组数据进行处理的函数
+        $groupByItemFormatCallback = function ($item) use ($params, $hours) {
+            $hourToNull = array_combine($hours, array_fill(0, 48, null));
+            $item = array_column($item, $params['quota_key'], 'hour');
+            $hourToValue = array_merge($hourToNull, $item);
+
+            $result = [];
+
+            foreach ($hourToValue as $hour => $value) {
+                $result[] = [$hour, $value];
+            }
+
+            return $result;
+        };
 
         // 数据处理
-        return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
-            return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
-        }, 'date'], function ($v) use ($params) {
-            return Collection::make(array_combine($this->hourRange('00:00', '23:30'), array_fill(0, 48, null)))
-                ->merge(array_column($v, $params['quota_key'], 'hour'))
-                ->walk(function (&$v, $k) { $v = [$k, $v]; })
-                ->values()->get();
-        })->get();
+        return Collection::make($result)
+            ->groupBy([$baseOrEvaluateCallback, 'date'], $groupByItemFormatCallback)
+            ->get();
     }
 
     /**
