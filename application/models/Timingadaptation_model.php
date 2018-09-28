@@ -107,11 +107,13 @@ class Timingadaptation_model extends CI_Model
             '3' => '正在切换基本方案',
         ];
 
+        $baseTime = $current_info['update_time'] + 5 * 60 > time() ? $current_info['update_time'] : time() + 5 * 60;
+
         return [
             'get_current_plan_time' => date('Y-m-d H:i:s'),
             'last_upload_time' => date('Y-m-d H:i:s', $current_info['update_time']),
             'adapte_time' => $res['timing_update_time'],
-            'next_upload_time' => date('Y-m-d H:i:s', strtotime('+5 minute', $current_info['update_time'])),
+            'next_upload_time' => date('Y-m-d H:i:s', $baseTime),
             'status' => $status,
             'tmp' => $tmp,
             'message' => $messages[$status],
