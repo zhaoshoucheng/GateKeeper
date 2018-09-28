@@ -207,7 +207,7 @@ class Road_model extends CI_Model
             if(!($tmp = $this->redis_model->getData('Road_' . $item['road_id'])))
             {
                 $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
-                $this->redis_model->setData(json_encode($tmp));
+                $this->redis_model->setData('Road_' . $item['road_id'], json_encode($tmp));
             }
             else
             {
