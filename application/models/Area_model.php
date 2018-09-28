@@ -288,13 +288,13 @@ class Area_model extends CI_Model
         $junctionList = array_column($junctionList, 'junction_id');
 
         // 基准时间范围
-        $baseDates = $this->dateRange($params['base_start_date'], $params['base_end_date']);
+        $baseDates = dateRange($params['base_start_date'], $params['base_end_date']);
 
         // 评估时间范围
-        $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
+        $evaluateDates = dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
 
         // 生成 00:00 - 23:30 间的 粒度为 30 分钟的时间集合数组
-        $hours = $this->hourRange();
+        $hours = hourRange('00:00', '23:30');
 
         // 获取数据
         $result = $this->db->select('date, hour, ' . $methods[$params['quota_key']])

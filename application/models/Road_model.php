@@ -309,13 +309,13 @@ class Road_model extends CI_Model
         }, $res[$dataKey]);
 
         // 生成指定时间范围内的 基准日期集合数组
-        $baseDates = $this->dateRange($params['base_start_date'], $params['base_end_date']);
+        $baseDates = dateRange($params['base_start_date'], $params['base_end_date']);
 
         // 生成指定时间范围内的 评估日期集合数组
-        $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
+        $evaluateDates = dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
 
         // 生成 00:00 - 23:30 间的 粒度为 30 分钟的时间集合数组
-        $hours = $this->hourRange('00:00', '23:30');
+        $hours = hourRange('00:00', '23:30');
 
         // 获取数据源集合
         $result = $this->db->select('date, hour, ' . $methods[$params['quota_key']])
@@ -357,32 +357,6 @@ class Road_model extends CI_Model
         return Collection::make($result)
             ->groupBy([$baseOrEvaluateCallback, 'date'], $groupByItemFormatCallback)
             ->get();
-    }
-
-    /**
-     * 获取指定范围的 date 集合（每天）
-     * @param $start
-     * @param $end
-     * @return array
-     */
-    private function dateRange($start, $end)
-    {
-        return array_map(function ($v) {
-            return date('Y-m-d', $v);
-        }, range(strtotime($start), strtotime($end), 60 * 60 * 24));
-    }
-
-    /**
-     * 获取指定范围的 hour 集合（每 30 分钟）
-     * @param $start
-     * @param $end
-     * @return array
-     */
-    private function hourRange($start, $end)
-    {
-        return array_map(function ($v) {
-            return date('H:i', $v);
-        }, range(strtotime($start), strtotime($end), 30 * 60));
     }
 
     /**
