@@ -243,6 +243,7 @@ class Road_model extends CI_Model
 
     public function comparison($params)
     {
+        // 指标算法映射
         $methods = [
             'stop_time_cycle' => 'sum(stop_time_cycle) as stop_time_cycle',
             'stop_delay' => 'sum(stop_delay) as stop_delay',
@@ -256,6 +257,7 @@ class Road_model extends CI_Model
             return [];
         }
 
+        // 获取干线路口数据
         $junctionList = $this->db->select('logic_junction_ids')
             ->from('road')
             ->where('city_id', $params['city_id'])
@@ -288,6 +290,7 @@ class Road_model extends CI_Model
         $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
         $hours = $this->hourRange('00:00', '23:30');
 
+        // 获取数据源集合
         $result = $this->db->select('date, hour, ' . $methods[$params['quota_key']])
             ->from('flow_duration_v6_' . $params['city_id'])
             ->where_in('date', array_merge($baseDates, $evaluateDates))
@@ -299,6 +302,7 @@ class Road_model extends CI_Model
         if(!$result || empty($result))
             return [];
 
+        // 数据处理
         return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
         }, 'date'], function ($v) use ($params) {
