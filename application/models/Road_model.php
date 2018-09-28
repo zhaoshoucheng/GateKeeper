@@ -205,6 +205,12 @@ class Road_model extends CI_Model
         return $result;
     }
 
+    /**
+     * 获取指定城市全部干线的详情
+     *
+     * @param $params
+     * @return array
+     */
     public function getAllRoadDetail($params)
     {
         $result = $this->db->select('road_id, logic_junction_ids, road_name, road_direction')
@@ -241,6 +247,11 @@ class Road_model extends CI_Model
         return $results;
     }
 
+    /**
+     * 干线评估
+     * @param $params
+     * @return array|mixed
+     */
     public function comparison($params)
     {
         // 指标算法映射
@@ -313,6 +324,12 @@ class Road_model extends CI_Model
         })->get();
     }
 
+    /**
+     * 获取指定范围的 date 集合（每天）
+     * @param $start
+     * @param $end
+     * @return array
+     */
     private function dateRange($start, $end)
     {
         return array_map(function ($v) {
@@ -320,6 +337,12 @@ class Road_model extends CI_Model
         }, range(strtotime($start), strtotime($end), 60 * 60 * 24));
     }
 
+    /**
+     * 获取指定范围的 hour 集合（每 30 分钟）
+     * @param $start
+     * @param $end
+     * @return array
+     */
     private function hourRange($start, $end)
     {
         return array_map(function ($v) {
