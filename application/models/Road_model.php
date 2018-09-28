@@ -86,6 +86,13 @@ class Road_model extends CI_Model
             return ['errno' => -1, 'errmsg' => '新增干线入库失败！'];
         }
 
+        $tmp = $this->formatRoadDetailData($insertData['city_id'], $insertData['logic_junction_ids']);
+
+        if(is_object($tmp))
+            $tmp = [];
+
+        $this->redis_model->setData('Road_' . $insertData['road_id'], json_encode($tmp));
+
         return ['errno' => 0, 'errmsg' => ''];
     }
 
@@ -125,6 +132,13 @@ class Road_model extends CI_Model
             return ['errno' => -1, 'errmsg' => '干线更新失败！'];
         }
 
+        $tmp = $this->formatRoadDetailData(intval($data['city_id']), $updateData['logic_junction_ids']);
+
+        if(is_object($tmp))
+            $tmp = [];
+
+        $this->redis_model->setData('Road_' . trim($data['road_id']), json_encode($tmp));
+
         return ['errno' => 0, 'errmsg' => ''];
     }
 
@@ -152,6 +166,8 @@ class Road_model extends CI_Model
         if ($this->db->affected_rows() < 1) {
             return ['errno' => -1, 'errmsg' => '干线更新失败！'];
         }
+
+        $this->redis_model->deleteData('Road_' . trim($data['road_id']));
 
         return ['errno' => 0, 'errmsg' => ''];
     }
