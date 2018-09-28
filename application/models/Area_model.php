@@ -268,6 +268,9 @@ class Area_model extends CI_Model
             'stop_delay' => 'avg(stop_delay) as stop_delay'
         ];
 
+        if(!isset($methods[$params['quota_key']]))
+            return [];
+
         // 获取该区域全部路口ID
         $junctionList = $this->db->select('junction_id')
             ->from('area_junction_relation')

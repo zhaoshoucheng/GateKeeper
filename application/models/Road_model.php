@@ -249,6 +249,9 @@ class Road_model extends CI_Model
             'speed' => 'avg(speed) as speed'
         ];
 
+        if(!isset($methods[$params['quota_key']]))
+            return [];
+
         if(!array_key_exists($params['quota_key'], $methods)) {
             return [];
         }
