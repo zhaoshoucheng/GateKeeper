@@ -168,11 +168,6 @@ class Timingadaptation_model extends CI_Model
             $flowIds = array_filter(array_column(array_column($tod['movement_timing'], 'flow'), 'logic_flow_id'), function ($v) { return $v != ''; });
             $flows = $this->getTwiceStopRate($flowIds, $params);
             foreach ($tod['movement_timing'] as $mk => &$movement) {
-                if($movement['flow']['logic_flow_id'] == '') {
-                    unset($tod['movement_timing'][$mk]);
-                    continue;
-                }
-
                 $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '';
                 $greenCurrents = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [])->where('state', 1)->get();
                 $greens = $this->arrayMergeRecursive($movement['timing'], $greenCurrents);
@@ -191,7 +186,10 @@ class Timingadaptation_model extends CI_Model
                     ];
                 }, $greens);
             }
-            $tod['movement_timing'] = array_values($tod['movement_timing']);
+
+            $tod['movement_timing'] = array_values(array_filter($tod['movement_timing'], function ($item) {
+                return $item['flow']['logic_flow_id'] != '';
+            }));
         }
         return $adapt;
     }
