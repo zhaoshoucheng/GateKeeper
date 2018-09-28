@@ -268,8 +268,10 @@ class Area_model extends CI_Model
             'stop_delay' => 'avg(stop_delay) as stop_delay'
         ];
 
-        if(!isset($methods[$params['quota_key']]))
+        // 指标不存在与映射数组中
+        if(!isset($methods[$params['quota_key']])) {
             return [];
+        }
 
         // 获取该区域全部路口ID
         $junctionList = $this->db->select('junction_id')
@@ -278,8 +280,10 @@ class Area_model extends CI_Model
             ->where('delete_at', '1970-01-01 00:00:00')
             ->get()->result_array();
 
-        if(!$junctionList)
+        // 数据获取失败 或者 数据为空
+        if(!$junctionList || empty($junctionList)) {
             return [];
+        }
 
         $junctionList = array_column($junctionList, 'junction_id');
 
@@ -289,27 +293,48 @@ class Area_model extends CI_Model
         // 评估时间范围
         $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
 
+        // 生成 00:00 - 23:30 间的 粒度为 30 分钟的时间集合数组
+        $hours = $this->hourRange();
+
         // 获取数据
         $result = $this->db->select('date, hour, ' . $methods[$params['quota_key']])
             ->from('junction_hour_report')
             ->where_in('date', array_merge($baseDates, $evaluateDates))
             ->where_in('logic_junction_id', $junctionList)
-            ->where_in('hour', $this->hourRange())
+            ->where_in('hour', $hours)
             ->where('city_id', $params['city_id'])
             ->group_by(['date', 'hour'])->get()->result_array();
 
         if(!$result || empty($result))
             return [];
 
+
+        // 将数据按照 日期（基准 和 评估）进行分组的键名函数
+        $baseOrEvaluateCallback = function ($item) use ($baseDates) {
+            return in_array($item['date'], $baseDates)
+                ? 'base'
+                : 'evaluate';
+        };
+
+        // 数据分组后，将每组数据进行处理的函数
+        $groupByItemFormatCallback = function ($item) use ($params, $hours) {
+            $hourToNull = array_combine($hours, array_fill(0, 48, null));
+            $item = array_column($item, $params['quota_key'], 'hour');
+            $hourToValue = array_merge($hourToNull, $item);
+
+            $result = [];
+
+            foreach ($hourToValue as $hour => $value) {
+                $result[] = [$hour, $value];
+            }
+
+            return $result;
+        };
+
         // 数据处理
-        return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
-            return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
-        }, 'date'], function ($v) use ($params) {
-                return Collection::make(array_combine($this->hourRange(), array_fill(0, 48, null)))
-                    ->merge(array_column($v, $params['quota_key'], 'hour'))
-                    ->walk(function (&$v, $k) { $v = [$k, $v]; })
-                    ->values()->get();
-        })->get();
+        return Collection::make($result)
+            ->groupBy([$baseOrEvaluateCallback, 'date'], $groupByItemFormatCallback)
+            ->get();
     }
 
     private function dateRange($start, $end)
