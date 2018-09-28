@@ -23,6 +23,7 @@ class Road_model extends CI_Model
         }
 
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
     }
 
     /**
@@ -195,14 +196,23 @@ class Road_model extends CI_Model
             ->where('city_id', $params['city_id'])
             ->where('is_delete', 0)
             ->get()->result_array();
+
+        if(!$result)
+            return [];
         
         $results = [];
 
         foreach ($result as $item) {
-            $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
 
-            if(is_object($tmp))
-                continue;
+            if(!($tmp = $this->redis_model->getData('Road_' . $item['road_id'])))
+            {
+                $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
+                $this->redis_model->setData(json_encode($tmp));
+            }
+            else
+            {
+                $tmp = json_decode($tmp, true);
+            }
 
             $tmp['road'] = $item;
             $results[] = $tmp;
@@ -288,30 +298,6 @@ class Road_model extends CI_Model
         return array_map(function ($v) {
             return date('H:i', $v);
         }, range(strtotime($start), strtotime($end), 30 * 60));
-    }
-
-    private function formatAllRoadDetailData($result, $cityId)
-    {
-        // 最新路网版本
-        $allMapVersions = $this->waymap_model->getAllMapVersion();
-        $newMapVersion = max($allMapVersions);
-
-        $links = [];
-
-        $connectPaths = [];
-
-        foreach ($result as $item) {
-            $junctionIds = explode(',', $item['logic_junction_ids']);
-            $res = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIds);
-
-            $connectPaths[$item['road_id']] = $res;
-
-            if (empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
-                continue;
-            }
-
-
-        }
     }
 
     /**
