@@ -262,6 +262,13 @@ class Area_model extends CI_Model
 
     public function comparison($params)
     {
+        // 指标算法映射
+        $methods = [
+            'speed' => 'avg(speed) as speed',
+            'stop_delay' => 'avg(stop_delay) as stop_delay'
+        ];
+
+        // 获取该区域全部路口ID
         $junctionList = $this->db->select('junction_id')
             ->from('area_junction_relation')
             ->where('area_id', $params['area_id'])
@@ -273,10 +280,14 @@ class Area_model extends CI_Model
 
         $junctionList = array_column($junctionList, 'junction_id');
 
+        // 基准时间范围
         $baseDates = $this->dateRange($params['base_start_date'], $params['base_end_date']);
+
+        // 评估时间范围
         $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
 
-        $result = $this->db->select('date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'])
+        // 获取数据
+        $result = $this->db->select('date, hour, ' . $methods[$params['quota_key']])
             ->from('junction_hour_report')
             ->where_in('date', array_merge($baseDates, $evaluateDates))
             ->where_in('logic_junction_id', $junctionList)
@@ -287,6 +298,7 @@ class Area_model extends CI_Model
         if(!$result || empty($result))
             return [];
 
+        // 数据处理
         return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
             return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
         }, 'date'], function ($v) use ($params) {
