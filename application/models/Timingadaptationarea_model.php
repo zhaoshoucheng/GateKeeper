@@ -5,7 +5,7 @@
  * # date:    2018-07-25
  ********************************************/
 
-use Licxisky\Collection\Collection;
+use Didi\Cloud\Collection\Collection;
 
 class Timingadaptationarea_model extends CI_Model
 {

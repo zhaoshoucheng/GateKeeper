@@ -5,7 +5,7 @@
 # date:    2018-08-21
 ********************************************/
 
-use Licxisky\Collection\Collection;
+use Didi\Cloud\Collection\Collection;
 
 class Road_model extends CI_Model
 {

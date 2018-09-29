@@ -6,7 +6,7 @@
  * # date:    2018-08-23
  ********************************************/
 
-use Licxisky\Collection\Collection;
+use Didi\Cloud\Collection\Collection;
 
 class Area_model extends CI_Model
 {

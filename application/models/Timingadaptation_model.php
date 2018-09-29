@@ -1,6 +1,6 @@
 <?php
 
-use Licxisky\Collection\Collection;
+use Didi\Cloud\Collection\Collection;
 
 class Timingadaptation_model extends CI_Model
 {

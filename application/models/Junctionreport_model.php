@@ -6,7 +6,7 @@
  * Time: 上午10:06
  */
 
-use Licxisky\Collection\Collection;
+use Didi\Cloud\Collection\Collection;
 
 class Junctionreport_model extends CI_Model
 {
