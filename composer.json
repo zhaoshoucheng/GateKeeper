@@ -15,8 +15,8 @@
 		"cloud/itsmap" : "dev-master",
 		"apache/thrift": "0.9.2",
 		"monolog/monolog": "^1.23",
-		"niuyufu/php_tracelog": "*",
-		"licxisky/collection": "dev-master"
+		"licxisky/collection": "dev-master",
+		"niuyufu/php_tracelog": "^1.0"
 	},
 	"repositories" : [
 		{
