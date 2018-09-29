@@ -62,19 +62,25 @@ class Timingadaptation_model extends CI_Model
 
     public function getAdapteStatus($params)
     {
+        // 获取数据源
         $res = $this->db->select('*')
             ->from('adapt_timing_mirror')
             ->where('logic_junction_id', $params['logic_junction_id'])
             ->limit(1)
             ->get()->first_row('array');
 
+
+        // 没有数据
         if(!$res)
             throw new Exception('该路口无配时');
 
+        // 配时错误
         if($res['error_code'])
             throw new Exception('改路口配时错误');
 
         $current_info = json_decode($res['current_info'], true);
+
+        // 获取基准配时数据
         $current_result = $this->getCurrentUpdateResult();
 
         list($status, $tmp) = [null, null];
@@ -107,7 +113,10 @@ class Timingadaptation_model extends CI_Model
             '3' => '正在切换基本方案',
         ];
 
-        $baseTime = $current_info['update_time'] + 5 * 60 > time() ? $current_info['update_time'] : time() + 5 * 60;
+        $baseTime = $current_info['update_time'] + 5 * 60 > time()
+            ? $current_info['update_time']
+            : time()
+            + 5 * 60;
 
         return [
             'get_current_plan_time' => date('Y-m-d H:i:s'),
@@ -163,35 +172,67 @@ class Timingadaptation_model extends CI_Model
      */
     private function formatAdaptionTimingInfo($adapt, $current, $params)
     {
+        // 从 movement_timing 数据中抽出 flow id
+        $getFlowIdsCallback = function ($movementTiming) {
+              return array_filter(
+                  array_column(array_column($movementTiming, 'flow'), 'logic_flow_id')
+              );
+        };
+
+        // 自适应和基准数据合并之后的格式化处理
+        $formatTimingCallback = function ($timing) {
+            return [
+                'start_time' => $timing['start_time'][1] ?? '',
+                'suggest_start_time' => $timing['start_time'][0] ?? '',
+                'duration' => $timing['duration'][1] ?? '',
+                'suggest_duration' => $timing['duration'][0] ?? '',
+                'max' => $timing['max'][1] ?? '',
+                'suggest_max' => $timing['max'][0] ?? '',
+                'min' => $timing['min'][1] ?? '',
+                'suggest_min' => $timing['min'][0] ?? '',
+                'start_time_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
+                'duration_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
+            ];
+        };
+
+        // 移除 flow id 为空的元素
+        $removeEmptyFlowIdItemCallback = function ($movement_timing) {
+            return array_values(
+                array_filter($movement_timing, function ($item) {
+                    return $item['flow']['logic_flow_id'] != '';
+                })
+            );
+        };
+
         if(empty($adapt) || empty($current))
             return [];
 
         foreach ($adapt['tod'] as $tk => &$tod) {
-            $flowIds = array_filter(array_column(array_column($tod['movement_timing'], 'flow'), 'logic_flow_id'), function ($v) { return $v != ''; });
+
+            // 获取 该方向 flow Ids
+            $flowIds = call_user_func($getFlowIdsCallback, $tod['movement_timing']);
+
+            // 根据 flow id 获取 二次停车比率
             $flows = $this->getTwiceStopRate($flowIds, $params);
+
+            // 数据处理
             foreach ($tod['movement_timing'] as $mk => &$movement) {
+
                 $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '';
-                $greenCurrents = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [])->where('state', 1)->get();
-                $greens = $this->arrayMergeRecursive($movement['timing'], $greenCurrents);
-                $movement['timing'] = array_map(function ($timing) {
-                    return [
-                        'start_time' => $timing['start_time'][1] ?? '',
-                        'suggest_start_time' => $timing['start_time'][0] ?? '',
-                        'duration' => $timing['duration'][1] ?? '',
-                        'suggest_duration' => $timing['duration'][0] ?? '',
-                        'max' => $timing['max'][1] ?? '',
-                        'suggest_max' => $timing['max'][0] ?? '',
-                        'min' => $timing['min'][1] ?? '',
-                        'suggest_min' => $timing['min'][0] ?? '',
-                        'start_time_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
-                        'duration_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
-                    ];
-                }, $greens);
+
+                // 获取并过滤出 基准配时中的绿灯
+                $currentTiming = &$current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];
+                $greenCurrents = Collection::make($currentTiming)->where('state', 1)->get();
+
+                // 自适应和基准配时数据递归合并
+                $greens = arrayMergeRecursive($movement['timing'], $greenCurrents);
+
+                // 数据处理
+                $movement['timing'] = array_map($formatTimingCallback, $greens);
             }
 
-            $tod['movement_timing'] = array_values(array_filter($tod['movement_timing'], function ($item) {
-                return $item['flow']['logic_flow_id'] != '';
-            }));
+            // 移除 flow id 为空的元素
+            $tod['movement_timing'] = call_user_func($removeEmptyFlowIdItemCallback, $tod['movement_timing']);
         }
         return $adapt;
     }
@@ -225,33 +266,6 @@ class Timingadaptation_model extends CI_Model
             return null;
 
         return $res['data'] ?? [];
-    }
-
-    /**
-     * 递归合并数组（支持数字键数组）
-     * @param $target
-     * @param $source
-     * @return mixed
-     */
-    private function arrayMergeRecursive($target, $source)
-    {
-        $tkeys = array_keys($target);
-        $skeys = array_keys($source);
-
-        $keys = array_unique(array_merge($tkeys, $skeys));
-
-        foreach ($keys as $key) {
-            if(array_key_exists($key, $source) && !array_key_exists($key, $target)) {
-                $target[$key] = $source[$key];
-            } elseif (array_key_exists($key, $source) && array_key_exists($key, $target)) {
-                if(is_array($target[$key]) && is_array($source[$key])) {
-                    $target[$key] = $this->arrayMergeRecursive($target[$key], $source[$key]);
-                } else {
-                    $target[$key] = [$target[$key], $source[$key]];
-                }
-            }
-        }
-        return $target;
     }
 
     /**
@@ -289,18 +303,6 @@ class Timingadaptation_model extends CI_Model
             return $hour;
         }
 
-        if (!$this->isTableExisted('flow_duration_v6_' . $cityId)) {
-            return date('H:i:s');
-        }
-
-        $date = $date ?? date('Y-m-d');
-        /*$result = $this->db->select('hour')
-            ->from($this->tb . $cityId)
-            ->where('updated_at >=', $date . ' 00:00:00')
-            ->where('updated_at <=', $date . ' 23:59:59')
-            ->order_by('hour', 'desc')
-            ->limit(1)
-            ->get()->first_row();*/
         // 查询优化
         $sql = "SELECT `hour` FROM `real_time_{$cityId}`  WHERE 1 ORDER BY updated_at DESC,hour DESC LIMIT 1";
         $result = $this->db->query($sql)->first_row();

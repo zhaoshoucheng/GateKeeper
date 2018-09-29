@@ -148,3 +148,32 @@ if(!function_exists('hourRange')) {
         }, range(strtotime($start), strtotime($end), $skip * 60));
     }
 }
+
+if(!function_exists('arrayMergeRecursive')) {
+    /**
+     * 递归合并数组（支持数字键数组）
+     * @param $target
+     * @param $source
+     * @return mixed
+     */
+    function arrayMergeRecursive($target, $source)
+    {
+        $tKeys = array_keys($target);
+        $sKeys = array_keys($source);
+
+        $keys = array_unique(array_merge($tKeys, $sKeys));
+
+        foreach ($keys as $key) {
+            if(array_key_exists($key, $source) && !array_key_exists($key, $target)) {
+                $target[$key] = $source[$key];
+            } elseif (array_key_exists($key, $source) && array_key_exists($key, $target)) {
+                if(is_array($target[$key]) && is_array($source[$key])) {
+                    $target[$key] = arrayMergeRecursive($target[$key], $source[$key]);
+                } else {
+                    $target[$key] = [$target[$key], $source[$key]];
+                }
+            }
+        }
+        return $target;
+    }
+}

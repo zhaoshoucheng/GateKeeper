@@ -176,7 +176,7 @@ class Road_model extends CI_Model
      * 查询干线详情
      * @param $data['city_id'] interger Y 城市ID
      * @param $data['road_id'] string   Y 干线ID
-     * @return json
+     * @return array
      */
     public function getRoadDetail($data)
     {

@@ -337,23 +337,6 @@ class Area_model extends CI_Model
             ->get();
     }
 
-    private function dateRange($start, $end)
-    {
-        return array_map(function ($v) {
-            return date('Y-m-d', $v);
-        }, range(strtotime($start), strtotime($end), 60 * 60 * 24));
-    }
-
-    private function hourRange()
-    {
-        $start = strtotime('00:00');
-        $end = strtotime('23:30');
-
-        return array_map(function ($v) {
-            return date('H:i', $v);
-        }, range($start, $end, 30 * 60));
-    }
-
     //自动替换model数据
     private function replaceArea($data)
     {
