@@ -1,5 +1,7 @@
 <?php
 
+use Licxisky\Collection\Collection;
+
 class Timingadaptation_model extends CI_Model
 {
     function __construct()

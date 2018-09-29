@@ -5,6 +5,8 @@
  * # date:    2018-07-25
  ********************************************/
 
+use Licxisky\Collection\Collection;
+
 class Timingadaptationarea_model extends CI_Model
 {
     private $signal_mis_interface = '';
