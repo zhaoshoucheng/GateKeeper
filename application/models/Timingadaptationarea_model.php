@@ -5,6 +5,8 @@
  * # date:    2018-07-25
  ********************************************/
 
+use Didi\Cloud\Collection\Collection;
+
 class Timingadaptationarea_model extends CI_Model
 {
     private $signal_mis_interface = '';
@@ -324,9 +326,6 @@ class Timingadaptationarea_model extends CI_Model
 
         // 获取实时报警路口信息
         $alarmJunctions = $this->getRealTimeAlarmJunctions($cityId);
-        if (empty($alarmJunctions)) {
-            return [];
-        }
 
         // 路口ID串
         $junctionIds = implode(',', array_unique(array_column($alarmJunctions, 'logic_junction_id')));

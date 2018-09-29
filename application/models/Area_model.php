@@ -5,6 +5,9 @@
  * # author:  niuyufu@didichuxing.com
  * # date:    2018-08-23
  ********************************************/
+
+use Didi\Cloud\Collection\Collection;
+
 class Area_model extends CI_Model
 {
     private $tb = 'area';
@@ -22,7 +25,9 @@ class Area_model extends CI_Model
             return [];
         }
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
         $this->load->config('nconf');
+        $this->load->config('realtime_conf');
     }
 
     public function getList($city_id){
@@ -273,6 +278,10 @@ class Area_model extends CI_Model
             return [];
         }
 
+        if(!($areaInfo = $this->getAreaInfo($params['area_id']))) {
+            throw new Exception('该区域已被删除');
+        }
+
         // 获取该区域全部路口ID
         $junctionList = $this->db->select('junction_id')
             ->from('area_junction_relation')
@@ -332,9 +341,46 @@ class Area_model extends CI_Model
         };
 
         // 数据处理
-        return Collection::make($result)
+        $result = Collection::make($result)
             ->groupBy([$baseOrEvaluateCallback, 'date'], $groupByItemFormatCallback)
             ->get();
+
+        $result['info'] = [
+            'area_name' => $areaInfo['area_name'],
+            'quota_name' => $params['quota_key'],
+            'quota_unit' => '',
+            'base_time' => $params['base_start_date'] . ' ~ ' . $params['base_end_date'],
+            'evaluate_time' => $params['evaluate_start_date'] . ' ~ ' . $params['evaluate_end_date'],
+        ];
+
+        $jsonResult = json_encode($result);
+
+        $downloadId = md5($jsonResult);
+
+        $result['info']['download_id'] = $downloadId;
+
+        $redisKey = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
+
+        $this->redis_model->setData($redisKey, $jsonResult);
+
+        $this->redis_model->setExpire($redisKey, 30 * 60);
+
+        return $result;
+    }
+
+    private function getAreaInfo($areaId)
+    {
+        $result = $this->db->select('*')
+            ->from('area')
+            ->where('id', $areaId)
+            ->where('delete_at', '1970-01-01')
+            ->get()->first_row('array');
+
+        if(!$result || empty($result)) {
+            return false;
+        }
+
+        return $result;
     }
 
     //自动替换model数据

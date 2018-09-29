@@ -14,6 +14,7 @@ class Area extends MY_Controller
         parent::__construct();
         $this->load->model('area_model');
         $this->load->config('evaluate_conf');
+        $this->load->config('realtime_conf');
     }
 
     /**
@@ -262,5 +263,134 @@ class Area extends MY_Controller
             $this->errmsg = $e->getMessage();
             return;
         }
+    }
+
+    /**
+     * 获取数据下载链接
+     */
+    public function downloadEvaluateData()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        if(!isset($params['download_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = "download_id 的值不能为空";
+            return;
+        }
+
+        $key = $this->config->item('quota_evaluate_key_prefix') . $params['download_id'];
+
+        if(!$this->redis_model->getData($key)) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = "请先评估再下载";
+            return;
+        }
+
+        $data = [
+            'download_url' => '/api/area/download?download_id='. $params['download_id']
+        ];
+
+        $this->response($data);
+    }
+
+    public function download()
+    {
+
+        $params = $this->input->get();
+
+        if(!isset($params['download_id'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = "download_id 的值不能为空";
+            return;
+        }
+
+        $key = $this->config->item('quota_evaluate_key_prefix') . $params['download_id'];
+
+        if(!($data = $this->redis_model->getData($key))) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = "请先评估再下载";
+            return;
+        }
+
+        $data = json_decode($data, true);
+
+        $fileName = "{$data['info']['junction_name']}_{$data['info']['quota_name']}_" . date('Ymd');
+
+        $objPHPExcel = new PHPExcel();
+        $objSheet = $objPHPExcel->getActiveSheet();
+        $objSheet->setTitle('数据');
+
+        $detailParams = [
+            ['指标名', $data['info']['quota_name']],
+            ['方向', $data['info']['direction']],
+            ['基准时间', implode(' ~ ', $data['info']['base_time'])],
+        ];
+        foreach ($data['info']['evaluate_time'] as $key => $item) {
+            $detailParams[] = ['评估时间'.($key+1), implode(' ~ ', $item)];
+        }
+
+        $detailParams[] = ['指标单位', $data['info']['quota_unit']];
+
+        $objSheet->mergeCells('A1:F1');
+        $objSheet->setCellValue('A1', $fileName);
+        $objSheet->fromArray($detailParams, NULL, 'A4');
+
+        $styles = $this->getExcelStyle();
+        $objSheet->getStyle('A1')->applyFromArray($styles['title']);
+        $rows_idx = count($detailParams) + 3;
+        $objSheet->getStyle("A4:A{$rows_idx}")->getFont()->setSize(12)->setBold(true);
+
+        $line = 6 + count($detailParams);
+
+        if(!empty($data['base'])) {
+
+            $table = $this->getExcelArray($data['base']);
+
+            $objSheet->fromArray($table, NULL, 'A' . $line);
+
+            $styles = $this->getExcelStyle();
+            $rows_cnt = count($table);
+            $cols_cnt = count($table[0]) - 1;
+            $rows_index = $rows_cnt + $line - 1;
+
+            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $rows_index)->applyFromArray($styles['content']);
+            $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($styles['header']);
+            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $line)->applyFromArray($styles['header']);
+
+            $line += ($rows_cnt + 2);
+        }
+
+        if(!empty($data['evaluate'])) {
+
+            foreach ($data['evaluate'] as $datum) {
+                $table = $this->getExcelArray($datum);
+
+                $objSheet->fromArray($table, NULL, 'A' . $line);
+
+                $styles = $this->getExcelStyle();
+                $rows_cnt = count($table);
+                $cols_cnt = count($table[0]) - 1;
+                $rows_index = $rows_cnt + $line - 1;
+                $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $rows_index)->applyFromArray($styles['content']);
+                $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($styles['header']);
+                $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $line)->applyFromArray($styles['header']);
+
+                $line += ($rows_cnt + 2);
+            }
+        }
+
+        $objWriter = new PHPExcel_Writer_Excel5($objPHPExcel);
+
+        header('Content-Type: application/x-xls;');
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename='.$fileName . '.xls');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: 0'); // Date in the past
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+        ob_end_clean();
+        $objWriter->save('php://output');
+        exit();
     }
 }
