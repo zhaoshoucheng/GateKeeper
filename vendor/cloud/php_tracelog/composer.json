@@ -1,0 +1,24 @@
+{
+  "description": "php日志基础库",
+  "name": "cloud/php_tracelog",
+  "type": "library",
+  "license": "Didi",
+  "authors": [
+      {
+          "name": "niuyufu",
+          "email": "niuyufu@didichuxing.com"
+      }
+  ],
+  "require": {
+      "php": ">=5.2.4",
+      "monolog/monolog": "^1.23"
+  },
+  "autoload": {
+      "psr-4": {
+          "Didi\\Cloud\\TraceLog\\": "src/TraceLog"
+      },
+      "files": [
+        "src/common_helper.php"
+      ]
+  }
+}

@@ -9,7 +9,7 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '72579e7bd17821bb1321b87411366eae' => __DIR__ . '/..' . '/illuminate/support/helpers.php',
-        '9937fe4496a0ac77b255d131c17706fc' => __DIR__ . '/..' . '/niuyufu/php_tracelog/src/common_helper.php',
+        'fd9fa1133c6769dc92b22b78849e62a6' => __DIR__ . '/..' . '/cloud/php_tracelog/src/common_helper.php',
         'fe18e5f124e9dce0838cb6ac71e52dc9' => __DIR__ . '/../..' . '/application/libraries/SSOSdk.php',
     );
 
@@ -75,7 +75,7 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
         ),
         'Licxisky\\Collection\\' => 
         array (
-            0 => __DIR__ . '/..' . '/licxisky/collection/src',
+            0 => __DIR__ . '/..' . '/cloud/collection/src',
         ),
         'Illuminate\\Support\\' => 
         array (
@@ -99,7 +99,7 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
         ),
         'Didi\\Cloud\\TraceLog\\' => 
         array (
-            0 => __DIR__ . '/..' . '/niuyufu/php_tracelog/src/TraceLog',
+            0 => __DIR__ . '/..' . '/cloud/php_tracelog/src/TraceLog',
         ),
         'Didi\\Cloud\\ItsMap\\' => 
         array (
@@ -122,10 +122,10 @@ class ComposerStaticInit888500e56924b79efc7fdab85c25f2e1
     );
 
     public static $classMap = array (
-        'CollectionTest' => __DIR__ . '/..' . '/licxisky/collection/tests/CollectionTest/CollectionTest.php',
-        'Licxisky\\Collection\\Collection' => __DIR__ . '/..' . '/licxisky/collection/src/Collection.php',
-        'Licxisky\\Collection\\Collection\\ArrayRawMethod' => __DIR__ . '/..' . '/licxisky/collection/src/Collection/ArrayRawMethod.php',
-        'Licxisky\\Collection\\Collection\\CollectionInterface' => __DIR__ . '/..' . '/licxisky/collection/src/Collection/CollectionInterface.php',
+        'CollectionTest' => __DIR__ . '/..' . '/cloud/collection/tests/CollectionTest/CollectionTest.php',
+        'Licxisky\\Collection\\Collection' => __DIR__ . '/..' . '/cloud/collection/src/Collection.php',
+        'Licxisky\\Collection\\Collection\\ArrayRawMethod' => __DIR__ . '/..' . '/cloud/collection/src/Collection/ArrayRawMethod.php',
+        'Licxisky\\Collection\\Collection\\CollectionInterface' => __DIR__ . '/..' . '/cloud/collection/src/Collection/CollectionInterface.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

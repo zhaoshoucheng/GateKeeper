@@ -6,8 +6,8 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'CollectionTest' => $vendorDir . '/licxisky/collection/tests/CollectionTest/CollectionTest.php',
-    'Licxisky\\Collection\\Collection' => $vendorDir . '/licxisky/collection/src/Collection.php',
-    'Licxisky\\Collection\\Collection\\ArrayRawMethod' => $vendorDir . '/licxisky/collection/src/Collection/ArrayRawMethod.php',
-    'Licxisky\\Collection\\Collection\\CollectionInterface' => $vendorDir . '/licxisky/collection/src/Collection/CollectionInterface.php',
+    'CollectionTest' => $vendorDir . '/cloud/collection/tests/CollectionTest/CollectionTest.php',
+    'Licxisky\\Collection\\Collection' => $vendorDir . '/cloud/collection/src/Collection.php',
+    'Licxisky\\Collection\\Collection\\ArrayRawMethod' => $vendorDir . '/cloud/collection/src/Collection/ArrayRawMethod.php',
+    'Licxisky\\Collection\\Collection\\CollectionInterface' => $vendorDir . '/cloud/collection/src/Collection/CollectionInterface.php',
 );

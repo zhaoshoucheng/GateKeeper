@@ -39,6 +39,43 @@
         "homepage": "http://thrift.apache.org/"
     },
     {
+        "name": "cloud/collection",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "git@git.xiaojukeji.com:cloud/collection.git",
+            "reference": "d9c6ccc19cd82d1b09638c9eceb31add1f517bb9"
+        },
+        "require": {
+            "php": ">=7.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "^7.3@dev"
+        },
+        "time": "2018-09-29T14:49:23+00:00",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-4": {
+                "Licxisky\\Collection\\": "src/"
+            },
+            "classmap": [
+                "./"
+            ]
+        },
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "licxisky",
+                "email": "licxisky@gmail.com"
+            }
+        ],
+        "description": "PHP array collection"
+    },
+    {
         "name": "cloud/itsmap",
         "version": "dev-master",
         "version_normalized": "9999999-dev",
@@ -70,6 +107,41 @@
             }
         ],
         "description": "Didi交通路网基础库"
+    },
+    {
+        "name": "cloud/php_tracelog",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "git@git.xiaojukeji.com:cloud/php_tracelog.git",
+            "reference": "c45ff9147485c8b4519e1630209871d356dc3467"
+        },
+        "require": {
+            "monolog/monolog": "^1.23",
+            "php": ">=5.2.4"
+        },
+        "time": "2018-09-29T14:49:02+00:00",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-4": {
+                "Didi\\Cloud\\TraceLog\\": "src/TraceLog"
+            },
+            "files": [
+                "src/common_helper.php"
+            ]
+        },
+        "license": [
+            "Didi"
+        ],
+        "authors": [
+            {
+                "name": "niuyufu",
+                "email": "niuyufu@didichuxing.com"
+            }
+        ],
+        "description": "php日志基础库"
     },
     {
         "name": "doctrine/inflector",
@@ -351,43 +423,6 @@
         "homepage": "https://laravel.com"
     },
     {
-        "name": "licxisky/collection",
-        "version": "dev-master",
-        "version_normalized": "9999999-dev",
-        "source": {
-            "type": "git",
-            "url": "git@git.xiaojukeji.com:cloud/collection.git",
-            "reference": "faed1ca3b346a1c2c6c109800db59019f545f022"
-        },
-        "require": {
-            "php": ">=7.0"
-        },
-        "require-dev": {
-            "phpunit/phpunit": "^7.3@dev"
-        },
-        "time": "2018-09-29T12:12:11+00:00",
-        "type": "library",
-        "installation-source": "source",
-        "autoload": {
-            "psr-4": {
-                "Licxisky\\Collection\\": "src/"
-            },
-            "classmap": [
-                "./"
-            ]
-        },
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "licxisky",
-                "email": "licxisky@gmail.com"
-            }
-        ],
-        "description": "PHP array collection"
-    },
-    {
         "name": "monolog/monolog",
         "version": "1.23.0",
         "version_normalized": "1.23.0.0",
@@ -494,41 +529,6 @@
             "datetime",
             "time"
         ]
-    },
-    {
-        "name": "niuyufu/php_tracelog",
-        "version": "v1.0.4",
-        "version_normalized": "1.0.4.0",
-        "source": {
-            "type": "git",
-            "url": "git@git.xiaojukeji.com:niuyufu/php_tracelog.git",
-            "reference": "e17480a23a67db4527540c95e4a3f12ff64a89a7"
-        },
-        "require": {
-            "monolog/monolog": "^1.23",
-            "php": ">=5.2.4"
-        },
-        "time": "2018-07-29T12:41:11+00:00",
-        "type": "library",
-        "installation-source": "source",
-        "autoload": {
-            "psr-4": {
-                "Didi\\Cloud\\TraceLog\\": "src/TraceLog"
-            },
-            "files": [
-                "src/common_helper.php"
-            ]
-        },
-        "license": [
-            "Didi"
-        ],
-        "authors": [
-            {
-                "name": "niuyufu",
-                "email": "niuyufu@didichuxing.com"
-            }
-        ],
-        "description": "php日志基础库"
     },
     {
         "name": "psr/container",
