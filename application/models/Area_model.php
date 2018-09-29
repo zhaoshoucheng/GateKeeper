@@ -27,7 +27,7 @@ class Area_model extends CI_Model
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
         $this->load->config('nconf');
-        $this->load->config('readtime_conf');
+        $this->load->config('realtime_conf');
     }
 
     public function getList($city_id){
@@ -349,7 +349,7 @@ class Area_model extends CI_Model
             'area_name' => $areaInfo['area_name'],
             'quota_name' => $params['quota_key'],
             'quota_unit' => '',
-            'base_time' => $params['base_start_date'] . ' ~ ' . $params['basae_end_date'],
+            'base_time' => $params['base_start_date'] . ' ~ ' . $params['base_end_date'],
             'evaluate_time' => $params['evaluate_start_date'] . ' ~ ' . $params['evaluate_end_date'],
         ];
 
@@ -362,6 +362,8 @@ class Area_model extends CI_Model
         $redisKey = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
 
         $this->redis_model->setData($redisKey, $jsonResult);
+
+        $this->redis_model->setExpire($redisKey, 30 * 60);
 
         return $result;
     }

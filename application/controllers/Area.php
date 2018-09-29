@@ -14,7 +14,7 @@ class Area extends MY_Controller
         parent::__construct();
         $this->load->model('area_model');
         $this->load->config('evaluate_conf');
-        $this->load->config('readtime_conf');
+        $this->load->config('realtime_conf');
     }
 
     /**
@@ -257,9 +257,6 @@ class Area extends MY_Controller
         //异常处理
         try {
             $data = $this->area_model->comparison($params);
-
-
-
             return $this->response($data);
         } catch (Exception $e) {
             $this->errno = ERR_PARAMETERS;
