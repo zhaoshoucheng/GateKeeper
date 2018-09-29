@@ -27,7 +27,7 @@ class Timingadaptation_model extends CI_Model
         $data = $this->getCurrentInfo($params['logic_junction_id']);
 
         if($data == null)
-            throw new Exception('数据获取失败！');
+            throw new Exception('无法获取路口的基准配时信息');
 
         return $this->formatCurrentTimingInfo($data);
     }
@@ -68,8 +68,11 @@ class Timingadaptation_model extends CI_Model
             ->limit(1)
             ->get()->first_row('array');
 
-        if(!$res || $res['error_code'])
-            throw new Exception('该路口数据有误');
+        if(!$res)
+            throw new Exception('该路口无配时');
+
+        if($res['error_code'])
+            throw new Exception('改路口配时错误');
 
         $current_info = json_decode($res['current_info'], true);
         $current_result = $this->getCurrentUpdateResult();
@@ -104,11 +107,13 @@ class Timingadaptation_model extends CI_Model
             '3' => '正在切换基本方案',
         ];
 
+        $baseTime = $current_info['update_time'] + 5 * 60 > time() ? $current_info['update_time'] : time() + 5 * 60;
+
         return [
             'get_current_plan_time' => date('Y-m-d H:i:s'),
             'last_upload_time' => date('Y-m-d H:i:s', $current_info['update_time']),
             'adapte_time' => $res['timing_update_time'],
-            'next_upload_time' => date('Y-m-d H:i:s', strtotime('+5 minute', $current_info['update_time'])),
+            'next_upload_time' => date('Y-m-d H:i:s', $baseTime),
             'status' => $status,
             'tmp' => $tmp,
             'message' => $messages[$status],
@@ -162,21 +167,9 @@ class Timingadaptation_model extends CI_Model
             return [];
 
         foreach ($adapt['tod'] as $tk => &$tod) {
-            $flowIds = array_filter(
-                array_column(
-                    array_column($tod['movement_timing'], 'flow')
-                    , 'logic_flow_id'),
-                function ($v) {
-                    return $v != '';
-                }
-            );
+            $flowIds = array_filter(array_column(array_column($tod['movement_timing'], 'flow'), 'logic_flow_id'), function ($v) { return $v != ''; });
             $flows = $this->getTwiceStopRate($flowIds, $params);
             foreach ($tod['movement_timing'] as $mk => &$movement) {
-                if($movement['flow']['logic_flow_id'] == '') {
-                    unset($tod['movement_timing'][$mk]);
-                    continue;
-                }
-
                 $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '';
                 $greenCurrents = Collection::make($current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [])->where('state', 1)->get();
                 $greens = $this->arrayMergeRecursive($movement['timing'], $greenCurrents);
@@ -195,7 +188,10 @@ class Timingadaptation_model extends CI_Model
                     ];
                 }, $greens);
             }
-            $tod['movement_timing'] = array_values($tod['movement_timing']);
+
+            $tod['movement_timing'] = array_values(array_filter($tod['movement_timing'], function ($item) {
+                return $item['flow']['logic_flow_id'] != '';
+            }));
         }
         return $adapt;
     }
