@@ -1,0 +1,27 @@
+{
+    "name": "licxisky/collection",
+    "description": "PHP array collection",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "licxisky",
+            "email": "licxisky@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Licxisky\\Collection\\" : "src/"
+        },
+        "classmap": [
+            "./"
+        ]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.3@dev"
+    }
+}
