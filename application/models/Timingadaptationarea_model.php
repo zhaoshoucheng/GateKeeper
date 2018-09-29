@@ -326,9 +326,6 @@ class Timingadaptationarea_model extends CI_Model
 
         // 获取实时报警路口信息
         $alarmJunctions = $this->getRealTimeAlarmJunctions($cityId);
-        if (empty($alarmJunctions)) {
-            return [];
-        }
 
         // 路口ID串
         $junctionIds = implode(',', array_unique(array_column($alarmJunctions, 'logic_junction_id')));
