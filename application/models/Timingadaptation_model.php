@@ -254,7 +254,7 @@ class Timingadaptation_model extends CI_Model
             // 数据处理
             foreach ($tod['movement_timing'] as $mk => &$movement) {
 
-                $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '';
+                $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '/';
 
                 // 获取并过滤出 基准配时中的绿灯
                 $currentTiming = &$current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];
