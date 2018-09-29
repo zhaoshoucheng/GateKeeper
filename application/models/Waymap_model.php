@@ -314,6 +314,7 @@ class Waymap_model extends CI_Model
         $result_version = '';
         try {
             $url = $this->config->item('waymap_interface') . '/signal-map/map/getDateVersion';
+
             $map_version = httpPOST($url, $wdata);
             $retArr = json_decode($map_version, true);
             if (isset($retArr['errorCode'])
@@ -511,7 +512,7 @@ class Waymap_model extends CI_Model
         }
 
         try {
-
+            $this->load->helper('phase');
             $getQuery = [
                 'logic_junction_ids' => $junctionIds,
                 'user_id' => $this->config->item('waymap_userid'),
@@ -527,6 +528,8 @@ class Waymap_model extends CI_Model
             }
 
             $res = array_map(function ($v) {
+                // 纠正这里的phase_id和phase_name
+                $v = $this->adjustPhase($v);
                 return array_column($v, 'phase_name', 'logic_flow_id');
             }, $res['data']);
 
@@ -535,6 +538,23 @@ class Waymap_model extends CI_Model
 
             return [];
         }
+    }
+
+
+    /**
+     * 修改路口的flow，校准phase_id和phase_name
+     * @param $flows flow数据
+     * @return array
+     */
+    private function adjustPhase($flows)
+    {
+        foreach ($flows as $key => $flow) {
+            $phaseId = phase_map($flow['in_degree'], $flow['out_degree']);
+            $phaseName = phase_name($phaseId);
+            $flows[$key]['phase_id'] = $phaseId;
+            $flows[$key]['phase_name'] = $phaseName;
+        }
+        return $flows;
     }
 
     /**
