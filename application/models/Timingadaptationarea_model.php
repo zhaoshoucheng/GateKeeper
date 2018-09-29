@@ -854,9 +854,6 @@ class Timingadaptationarea_model extends CI_Model
 
             $cycleLength = $timingInfo['data']['cycle'];
             $offset = $timingInfo['data']['offset'];
-            $todStartTime = $timingInfo['data']['tod_start_time'];
-            $time = date_parse($todStartTime);
-            $todStartSecond = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
             if (empty($cycleLength)) {
                 $result['errmsg'] = '路口该方向相位差为空';
                 return $result;
@@ -896,7 +893,7 @@ class Timingadaptationarea_model extends CI_Model
                     ];
                 }
 
-                $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k], $cycleLength, $offset, $todStartSecond);
+                $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k], $cycleLength, $offset);
             }
             $ret['dataList'] = array_filter($ret['dataList']);
 
@@ -934,7 +931,7 @@ class Timingadaptationarea_model extends CI_Model
      * @param $offset 相位差
      * @return array 调整后的轨迹
      */
-    private function getTrajsInOneCycle(array $trajs, int $cycleLength, int $offset, int $startTime)
+    private function getTrajsInOneCycle(array $trajs, int $cycleLength, int $offset)
     {
         $trajsCol = Collection::make($trajs);
 
@@ -949,8 +946,8 @@ class Timingadaptationarea_model extends CI_Model
         });
 
         $crossTime = $min[0]; // 过路口时间
-        $shiftTime = $crossTime -  (($crossTime - $startTime - $offset) % $cycleLength);
-        $minTime = $crossTime - $shiftTime - 1.5 * $cycleLength;
+        $shiftTime = $crossTime -  (($crossTime - $offset) % $cycleLength);
+        $minTime = $crossTime - $shiftTime - 2 * $cycleLength;
         $maxTime = $crossTime - $shiftTime + 1.5 * $cycleLength;
 
         $ret = [];
@@ -1123,6 +1120,14 @@ class Timingadaptationarea_model extends CI_Model
                 return $result;
             }
 
+            // 获取某个方向的flow长度
+            $flowMovement = $this->waymap_model->getFlowMovement($data['city_id'], $data['logic_junction_id'], $data['logic_flow_id']);
+            if (empty($flowMovement) || empty($flowMovement['in_link_length'])) {
+                $result['errmsg'] = 'flow长度获取错误';
+                return $result;
+            }
+            $inLinkLength = $flowMovement['in_link_length'];
+
             $ret['dataList'] = [];
 
             // 用于存储所有时间
@@ -1136,7 +1141,7 @@ class Timingadaptationarea_model extends CI_Model
                     $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
                     $ret['dataList'][$vv['timestamp']] = [
                         $second,             // 时间秒数 X轴
-                        $vv['stopDistance'], // 值      Y轴
+                        round($vv['stopDistance'] / $inLinkLength * 100, 2), // 值      Y轴
                     ];
 
                     // 记录所有时间 用于获取最大最小值
@@ -1198,7 +1203,6 @@ class Timingadaptationarea_model extends CI_Model
     /**
      * 获取某一相位的自适应配置信息
      * @param $data['logic_junction_id'] string Y 路口ID
-     * @param $data['logic_flow_id']     string Y 相位ID
      * @return array
      */
     private function getFlowTimingInfo($data)
