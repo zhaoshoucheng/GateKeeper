@@ -11,6 +11,12 @@ class Timingadaptation_model extends CI_Model
         $this->load->config('adaption_conf');
     }
 
+    /**
+     * 获取自适应配时详情
+     *
+     * @param $params
+     * @return array
+     */
     public function getAdaptTimingInfo($params)
     {
         $logic_junction_id = $params['logic_junction_id'];
@@ -18,32 +24,51 @@ class Timingadaptation_model extends CI_Model
         $adapt = $this->getAdaptInfo($logic_junction_id);
         $current = $this->getCurrentInfo($logic_junction_id);
 
-        return $this->formatAdaptionTimingInfo(
-            json_decode($adapt['timing_info'], true)['data'] ?? '', $current, $params);
+        $timingInfo = json_decode($adapt['timing_info'], true)['data'] ?? '';
+        return $this->formatAdaptionTimingInfo($timingInfo, $current, $params);
     }
 
+    /**
+     * 获取基准配时详情
+     *
+     * @param $params
+     * @return mixed
+     * @throws Exception
+     */
     public function getCurrentTimingInfo($params)
     {
         $data = $this->getCurrentInfo($params['logic_junction_id']);
 
-        if($data == null)
+        if($data == null) {
             throw new Exception('无法获取路口的基准配时信息');
+        }
 
         return $this->formatCurrentTimingInfo($data);
     }
 
+    /**
+     * 基准配时下发
+     *
+     * @param $params
+     * @return array
+     * @throws Exception
+     */
     public function updateCurrentTiming($params)
     {
+        // 通过路网接口获取数据
         $res = httpPOST($this->config->item('url') . '/TimingAdaptation/uploadSignalTiming', $params);
 
-        if(!$res)
+        if(!$res) {
             throw new Exception('配时下发失败！');
+        }
 
         $res = json_decode($res, true);
 
-        if($res['errorCode'] ?? true)
+        if($res['errorCode'] ?? true) {
             throw new Exception($res['errorMsg'] ?? '未知错误');
+        }
 
+        // 获取基准配时数据
         $current = $this->getCurrentInfo($params['logic_junction_id']);
         $offset = ($current['tod'][0]['extra_time']['offset'] ?? null);
 
@@ -52,14 +77,20 @@ class Timingadaptation_model extends CI_Model
             'changed' => $offset == null ? 0 : ($offset == $params['offset']),
         ];
 
-        $this->db
-            ->set('current_info', json_encode($data))
+        $this->db->set('current_info', json_encode($data))
             ->where('logic_junction_id', $params['logic_junction_id'])
             ->update('adapt_timing_mirror');
 
         return $res['data'] ?? [];
     }
 
+    /**
+     * 获取自适应配时状态
+     *
+     * @param $params
+     * @return array
+     * @throws Exception
+     */
     public function getAdapteStatus($params)
     {
         // 获取数据源
@@ -71,12 +102,14 @@ class Timingadaptation_model extends CI_Model
 
 
         // 没有数据
-        if(!$res)
+        if(!$res) {
             throw new Exception('该路口无配时');
+        }
 
         // 配时错误
-        if($res['error_code'])
+        if($res['error_code']) {
             throw new Exception('改路口配时错误');
+        }
 
         $current_info = json_decode($res['current_info'], true);
 
@@ -140,8 +173,9 @@ class Timingadaptation_model extends CI_Model
 
         $res = json_decode($res, true);
 
-        if(!$res || $res['errorCode'] != 0)
+        if(!$res || $res['errorCode'] != 0) {
             return null;
+        }
 
         return $res['data'][0] ?? [];
     }
@@ -155,7 +189,8 @@ class Timingadaptation_model extends CI_Model
     {
         foreach ($current['tod'] ?? [] as &$tod)
         {
-            foreach ($tod['stage'] ?? [] as &$stage) {
+            foreach ($tod['stage'] ?? [] as &$stage)
+            {
                 $stage['suggest_green_max'] = $stage['green_max'];
                 $stage['suggest_green_min'] = $stage['green_min'];
             }
@@ -167,7 +202,7 @@ class Timingadaptation_model extends CI_Model
      * 格式化自适应配时方案
      * @param $adapt
      * @param $current
-     * @param $cityId
+     * @param $params
      * @return array
      */
     private function formatAdaptionTimingInfo($adapt, $current, $params)
@@ -204,8 +239,9 @@ class Timingadaptation_model extends CI_Model
             );
         };
 
-        if(empty($adapt) || empty($current))
+        if(empty($adapt) || empty($current)) {
             return [];
+        }
 
         foreach ($adapt['tod'] as $tk => &$tod) {
 
@@ -213,7 +249,7 @@ class Timingadaptation_model extends CI_Model
             $flowIds = call_user_func($getFlowIdsCallback, $tod['movement_timing']);
 
             // 根据 flow id 获取 二次停车比率
-            $flows = $this->getTwiceStopRate($flowIds, $params);
+            $flows = $this->getTwiceStopRate($flowIds, $params['logic_junction_id'], $params['city_id']);
 
             // 数据处理
             foreach ($tod['movement_timing'] as $mk => &$movement) {
@@ -262,8 +298,9 @@ class Timingadaptation_model extends CI_Model
 
         $res = json_decode($res, true);
 
-        if(!$res || $res['errorCode'] != 0)
+        if(!$res || $res['errorCode'] != 0) {
             return null;
+        }
 
         return $res['data'] ?? [];
     }
@@ -274,16 +311,18 @@ class Timingadaptation_model extends CI_Model
      * @param $cityId
      * @return array
      */
-    private function getTwiceStopRate($flowIds, $params)
+    private function getTwiceStopRate($flowIds, $logicJunctionId, $cityId)
     {
-        if(empty($flowIds)) return [];
+        if(empty($flowIds)) {
+            return [];
+        }
 
-        $hour = $this->getLastestHour($params['city_id']);
+        $hour = $this->getLastestHour($cityId);
 
         $flows = $this->db->select('logic_flow_id, twice_stop_rate')
-            ->from('real_time_' . $params['city_id'])
+            ->from('real_time_' . $cityId)
             ->where('hour', $hour)
-            ->where('logic_junction_id', $params['logic_junction_id'])
+            ->where('logic_junction_id', $logicJunctionId)
             ->where('updated_at > ', date('Y-m-d', strtotime('-10  minutes')))
             ->where_in('logic_flow_id', $flowIds)
             ->get()->result_array();
