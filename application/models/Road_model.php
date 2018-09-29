@@ -261,9 +261,10 @@ class Road_model extends CI_Model
     {
         // 指标算法映射
         $methods = [
-            'stop_time_cycle' => 'sum(stop_time_cycle) as stop_time_cycle',
-            'stop_delay' => 'sum(stop_delay) as stop_delay',
-            'speed' => 'avg(speed) as speed'
+            'stop_time_cycle' => 'round(sum(stop_time_cycle), 2) as stop_time_cycle',
+            'stop_delay' => 'round(sum(stop_delay), 2) as stop_delay',
+            'speed' => 'round(avg(speed), 2) as speed',
+            'time' => 's',
         ];
 
         // 如果指标不在映射数组中，返回空数组
@@ -303,11 +304,6 @@ class Road_model extends CI_Model
             return [];
         }
 
-        // 获取干线某个方向的全部 flow id
-        $logic_flow_ids = array_map(function ($item) {
-            return $item['logic_flow']['logic_flow_id'] ?? '';
-        }, $res[$dataKey]);
-
         // 生成指定时间范围内的 基准日期集合数组
         $baseDates = dateRange($params['base_start_date'], $params['base_end_date']);
 
@@ -317,13 +313,36 @@ class Road_model extends CI_Model
         // 生成 00:00 - 23:30 间的 粒度为 30 分钟的时间集合数组
         $hours = hourRange('00:00', '23:30');
 
+        $logicFlowIds = array_map(function ($v) {
+            return $v['logic_flow']['logic_flow_id'] ?? '';
+        }, $res[$dataKey]);
+
+        if($params['quota_key'] == 'time') {
+
+            $timeCaseWhen = 'round(sum(CASE WHEN speed = 0 THEN 0 ';
+
+            // 获取每个 flow 的长度
+            foreach ($res[$dataKey] as $item)
+            {
+                if(isset($item['logic_flow']['logic_flow_id']) && $item['logic_flow']['logic_flow_id'] != '') {
+
+                    $timeCaseWhen .= 'WHEN logic_flow_id = \'' . $item['logic_flow']['logic_flow_id']
+                        . '\' THEN ' . $item['length'] . ' / speed ';
+                }
+            }
+
+            $timeCaseWhen .= 'ELSE 0 END), 2) time';
+
+            $methods['time'] = $timeCaseWhen;
+        }
+
         // 获取数据源集合
         $result = $this->db->select('date, hour, ' . $methods[$params['quota_key']])
             ->from('flow_duration_v6_' . $params['city_id'])
             ->where_in('date', array_merge($baseDates, $evaluateDates))
             ->where_in('hour', $hours)
             ->where_in('logic_junction_id', $junctionIds)
-            ->where_in('logic_flow_id', $logic_flow_ids)
+            ->where_in('logic_flow_id', $logicFlowIds)
             ->group_by(['date', 'hour'])->get()->result_array();
 
         // 获取数据源失败 或者 数据源为空
