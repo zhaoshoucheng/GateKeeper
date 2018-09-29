@@ -143,6 +143,11 @@ class Cron extends CI_Controller
 
         foreach ($city_ids as $city_id) {
             try {
+                if($this->downgrade_model->isOpen($city_id)){
+                    $message="city_downgrade is open continue";
+                    echo "[INFO] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
+                    continue;
+                }
                 $all = [];
                 foreach ($checkItems as $item) {
                     $url = sprintf("%s/%s", $baseUrl,$item['url']);
