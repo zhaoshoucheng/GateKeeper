@@ -558,13 +558,41 @@ class Waymap_model extends CI_Model
     }
 
     /**
+     * 获取路口相位信息
+     */
+    public function getFlowMovement($cityId, $logicJunctionId, $logicFlowId)
+    {
+        try {
+            $query = [
+                'city_id' => $cityId,
+                'logic_junction_id' => $logicJunctionId,
+                'logic_flow_id' => $logicFlowId,
+                'user_id' => $this->config->item('waymap_userid'),
+                'token' => $this->config->item('waymap_token'),
+            ];
+            $url = $this->config->item('waymap_interface') . '/signal-map/flow/movement';
+
+            $res = httpGET($url, $query);
+
+            $res = json_decode($res, true);
+            if ($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])) {
+                return [];
+            }
+
+            return $res['data']['movement'];
+        } catch (Exception $e) {
+
+            return [];
+        }
+    }
+
+    /**
      * 获取全部路网版本
      */
     public function getAllMapVersion()
     {
         $data['token'] = $this->token;
         $data['user_id'] = $this->userid;
-        $mapVersions = [];
 
         try {
             $mapVersions = httpGET($this->config->item('waymap_interface') . '/signal-map/map/versions', $data);
