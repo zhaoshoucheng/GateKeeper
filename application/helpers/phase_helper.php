@@ -46,18 +46,18 @@ define('NORTH_WEST_TURN_ROUND', 30);
 define('NORTH_EAST_TURN_ROUND', 31);
 define('SOUTH_EAST_TURN_ROUND', 32);
 
-if(function_exists('phase_map')) {
+if(!function_exists('phase_map')) {
     function phase_map($in, $out)
     {
         if($in < 0 || $in > 360 || $out < 0 || $out > 360)
             return false;
         $direction = phase_direction($in);
-        $action = phase_direction($in, $out);
+        $action = phase_action($in, $out);
         return constant($direction . '_' . $action);
     }
 }
 
-if(function_exists('phase_direction')) {
+if(!function_exists('phase_direction')) {
     function phase_direction($link)
     {
         $BASE = 22.5;
@@ -76,7 +76,7 @@ if(function_exists('phase_direction')) {
     }
 }
 
-if(function_exists('phase_action')) {
+if(!function_exists('phase_action')) {
     function phase_action($in, $out)
     {
         //规则
@@ -100,3 +100,45 @@ if(function_exists('phase_action')) {
     }
 }
 
+
+if(!function_exists('phase_name')) {
+    function phase_name($phaseId)
+    {
+        $phaseNames = [
+            "1" => "西左",
+            "2" => "东直",
+            "3" => "北左",
+            "4" => "南直",
+            "5" => "东左",
+            "6" => "西直",
+            "7" => "南左",
+            "8" => "北直",
+            "9" => "东右",
+            "10" => "南右",
+            "11" => "西右",
+            "12" => "北右",
+            "13" => "东掉头",
+            "14" => "南掉头",
+            "15" => "西掉头",
+            "16" => "北掉头",
+            "17" => "东北左",
+            "18" => "东南左",
+            "19" => "西南左",
+            "20" => "西北左",
+            "21" => "东北直",
+            "22" => "东南直",
+            "23" => "西南直",
+            "24" => "西北直",
+            "25" => "东北右",
+            "26" => "东南右",
+            "27" => "西南右",
+            "28" => "西北右",
+            "29" => "东北掉头",
+            "30" => "东南掉头",
+            "31" => "西南掉头",
+            "32" => "西北掉头",
+        ];
+
+        return $phaseNames[$phaseId] ?? 0;
+    }
+}
