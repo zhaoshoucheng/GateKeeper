@@ -855,6 +855,9 @@ class Timingadaptationarea_model extends CI_Model
 
             $cycleLength = $timingInfo['data']['cycle'];
             $offset = $timingInfo['data']['offset'];
+            $todStartTime = $timingInfo['data']['tod_start_time'];
+            $time = date_parse($todStartTime);
+            $todStartSecond = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
             if (empty($cycleLength)) {
                 $result['errmsg'] = '路口该方向相位差为空';
                 return $result;
@@ -894,8 +897,9 @@ class Timingadaptationarea_model extends CI_Model
                     ];
                 }
 
-                $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k], $cycleLength, $offset);
+                $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k], $cycleLength, $offset, $todStartSecond);
             }
+            $ret['dataList'] = array_filter($ret['dataList']);
 
             $trajs = Collection::make($ret['dataList']);
 
@@ -931,11 +935,11 @@ class Timingadaptationarea_model extends CI_Model
      * @param $offset 相位差
      * @return array 调整后的轨迹
      */
-    private function getTrajsInOneCycle(array $trajs, int $cycleLength, int $offset)
+    private function getTrajsInOneCycle(array $trajs, int $cycleLength, int $offset, int $startTime)
     {
-        $trajs = Collection::make($trajs);
+        $trajsCol = Collection::make($trajs);
 
-        $min = $trajs->reduce(function($a, $b){
+        $min = $trajsCol->reduce(function($a, $b){
            if ($a == null) {
                return $b;
            }
@@ -946,17 +950,20 @@ class Timingadaptationarea_model extends CI_Model
         });
 
         $crossTime = $min[0]; // 过路口时间
-        $shiftTime = $crossTime - (($crossTime - $offset) % $cycleLength);
+        $shiftTime = $crossTime -  (($crossTime - $startTime - $offset) % $cycleLength);
         $minTime = $crossTime - $shiftTime - 1.5 * $cycleLength;
         $maxTime = $crossTime - $shiftTime + 1.5 * $cycleLength;
 
-        return $trajs->map(function($item) use($shiftTime, $minTime, $maxTime){
-            $time = $item[0] - $shiftTime;
+        $ret = [];
+        foreach ($trajs as $traj) {
+            $time = $traj[0] - $shiftTime;
             if ($time < $minTime || $time > $maxTime) {
-                return [];
+                continue;
             }
-            return [$time, $item[1]];
-        })->filter()->all();
+
+            $ret[] = [$time, $traj[1]];
+        }
+        return $ret;
     }
 
 
@@ -1226,8 +1233,9 @@ class Timingadaptationarea_model extends CI_Model
         $res = [
             'cycle'  => $timingInfo['extra_time']['cycle'],
             'offset' => $timingInfo['extra_time']['offset'],
+            'tod_start_time' => $timingInfo['extra_time']['tod_start_time'],
+            'tod_end_time' => $timingInfo['extra_time']['tod_end_time'],
         ];
-
         // 信息灯信息
         foreach ($timingInfo['movement_timing'] as $k=>$v) {
             if ($v['flow']['logic_flow_id'] == $data['logic_flow_id']) {
