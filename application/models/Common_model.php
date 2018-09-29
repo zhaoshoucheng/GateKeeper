@@ -99,28 +99,23 @@ class Common_model extends CI_Model
             return strpos($direction, '掉头') === False;
         });
 
-        // nema排序
-        $num1 = [
-            '北' => 4 * 10,
-            '东' => 3 * 10,
-            '南' => 2 * 10,
-            '西' => 1 * 10,
+        $scores = [
+            '南左' => 8 * 5,
+            '北直' => 7 * 5,
+            '西左' => 6 * 5,
+            '东直' => 5 * 5,
+            '北左' => 4 * 5,
+            '南直' => 3 * 5,
+            '东左' => 2 * 5,
+            '西直' => 1 * 5,
         ];
-        $num2 = [
-            '左' => 5 * 1,
-            '直' => 4 * 1,
-            '右' => 3 * 1,
-        ];
+
+
 
         $ret = [];
         foreach ($flowInfos as $flowId => $direction) {
-            $char1 = mb_substr($direction, 0, 1);
-            $char2 = mb_substr($direction, 1, 1);
-            $char3 = mb_substr($direction, 2, 1);
-            $score1 = $num1[$char1] ?? 0;
-            $score2 = $num2[$char2] ?? 0;
-            $score3 = is_numeric($char3) ? intval($char3) : 0;
-            $order = $score1 + $score2 - $score3;
+            $word2 = mb_substr($direction, 0 , 2);
+            $order = $scores[$word2] ?? 0;
             $ret[] = [
                 'flow_id' => $flowId,
                 'flow_name' => $direction,
