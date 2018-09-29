@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5f300350922471528d2ea7ac92aaddd6",
+    "content-hash": "73e8a86a2ebfc2d9e6e6fe6bbc7ba491",
     "packages": [
         {
             "name": "apache/thrift",
@@ -13,6 +13,12 @@
                 "type": "git",
                 "url": "https://github.com/apache/thrift.git",
                 "reference": "591e20f9636c37527a70dc03598218c3468a0eff"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "http://artifactory.intra.xiaojukeji.com:80/artifactory/api/composer/composer-github/vcs-dists/zip/apache/thrift/591e20f9636c37527a70dc03598218c3468a0eff",
+                "reference": "591e20f9636c37527a70dc03598218c3468a0eff",
+                "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0"
@@ -28,7 +34,6 @@
                     "Thrift": "lib/php/lib/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache-2.0"
             ],
@@ -49,7 +54,7 @@
             "source": {
                 "type": "git",
                 "url": "git@git.xiaojukeji.com:cloud/collection.git",
-                "reference": "d9c6ccc19cd82d1b09638c9eceb31add1f517bb9"
+                "reference": "b0273041061d4776575fdb22ff15780d461c1ec8"
             },
             "require": {
                 "php": ">=7.0"
@@ -60,7 +65,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Licxisky\\Collection\\": "src/"
+                    "Didi\\Cloud\\Collection\\": "src/"
                 },
                 "classmap": [
                     "./"
@@ -71,12 +76,12 @@
             ],
             "authors": [
                 {
-                    "name": "licxisky",
-                    "email": "licxisky@gmail.com"
+                    "name": "lichaoxi_i",
+                    "email": "lichaoxi_i@didichuxing.com"
                 }
             ],
-            "description": "PHP array collection",
-            "time": "2018-09-29T14:49:23+00:00"
+            "description": "PHP Array Collection",
+            "time": "2018-09-29T15:13:59+00:00"
         },
         {
             "name": "cloud/itsmap",
@@ -152,7 +157,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/inflector/zipball/5527a48b7313d15261292c149e55e26eae771b0a",
+                "url": "http://artifactory.intra.xiaojukeji.com:80/artifactory/api/composer/composer-github/vcs-dists/zip/doctrine/inflector/5527a48b7313d15261292c149e55e26eae771b0a",
                 "reference": "5527a48b7313d15261292c149e55e26eae771b0a",
                 "shasum": ""
             },
@@ -173,7 +178,6 @@
                     "Doctrine\\Common\\Inflector\\": "lib/Doctrine/Common/Inflector"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -421,7 +425,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/fd8c787753b3a2ad11bc60c063cff1358a32a3b4",
+                "url": "http://artifactory.intra.xiaojukeji.com:80/artifactory/api/composer/composer-github/vcs-dists/zip/Seldaek/monolog/fd8c787753b3a2ad11bc60c063cff1358a32a3b4",
                 "reference": "fd8c787753b3a2ad11bc60c063cff1358a32a3b4",
                 "shasum": ""
             },
@@ -431,6 +435,32 @@
             },
             "provide": {
                 "psr/log-implementation": "1.0.0"
+            },
+            "require-dev": {
+                "aws/aws-sdk-php": "^2.4.9 || ^3.0",
+                "doctrine/couchdb": "~1.0@dev",
+                "graylog2/gelf-php": "~1.0",
+                "jakub-onderka/php-parallel-lint": "0.9",
+                "php-amqplib/php-amqplib": "~2.4",
+                "php-console/php-console": "^3.1.3",
+                "phpunit/phpunit": "~4.5",
+                "phpunit/phpunit-mock-objects": "2.3.0",
+                "ruflin/elastica": ">=0.90 <3.0",
+                "sentry/sentry": "^0.13",
+                "swiftmailer/swiftmailer": "^5.3|^6.0"
+            },
+            "suggest": {
+                "aws/aws-sdk-php": "Allow sending log messages to AWS services like DynamoDB",
+                "doctrine/couchdb": "Allow sending log messages to a CouchDB server",
+                "ext-amqp": "Allow sending log messages to an AMQP server (1.0+ required)",
+                "ext-mongo": "Allow sending log messages to a MongoDB server",
+                "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
+                "mongodb/mongodb": "Allow sending log messages to a MongoDB server via PHP Driver",
+                "php-amqplib/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib",
+                "php-console/php-console": "Allow sending log messages to Google Chrome",
+                "rollbar/rollbar": "Allow sending log messages to Rollbar",
+                "ruflin/elastica": "Allow sending log messages to an Elastic Search server",
+                "sentry/sentry": "Allow sending log messages to a Sentry server"
             },
             "type": "library",
             "extra": {
@@ -526,7 +556,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/container/zipball/b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
+                "url": "http://artifactory.intra.xiaojukeji.com:80/artifactory/api/composer/composer-github/vcs-dists/zip/php-fig/container/b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
                 "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
                 "shasum": ""
             },
@@ -544,7 +574,6 @@
                     "Psr\\Container\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -575,7 +604,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
+                "url": "http://artifactory.intra.xiaojukeji.com:80/artifactory/api/composer/composer-github/vcs-dists/zip/php-fig/log/4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
                 "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
                 "shasum": ""
             },
@@ -621,7 +650,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/simple-cache/zipball/408d5eafb83c57f6365a3ca330ff23aa4a5fa39b",
+                "url": "http://artifactory.intra.xiaojukeji.com:80/artifactory/api/composer/composer-github/vcs-dists/zip/php-fig/simple-cache/408d5eafb83c57f6365a3ca330ff23aa4a5fa39b",
                 "reference": "408d5eafb83c57f6365a3ca330ff23aa4a5fa39b",
                 "shasum": ""
             },
@@ -639,7 +668,6 @@
                     "Psr\\SimpleCache\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],

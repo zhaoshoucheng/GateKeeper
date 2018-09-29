@@ -26,6 +26,10 @@
 		{
 			"type": "git",
 			"url": "git@git.xiaojukeji.com:cloud/collection.git"
+		},
+		{
+			"type": "git",
+			"url": "git@git.xiaojukeji.com:cloud/itsmap.git"
 		}
 	],
 	"suggest": {
