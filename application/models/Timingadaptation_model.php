@@ -102,7 +102,6 @@ class Timingadaptation_model extends CI_Model
             ->limit(1)
             ->get()->first_row('array');
 
-
         // 没有数据
         if(!$res) {
             throw new Exception('该路口无配时');
@@ -149,28 +148,22 @@ class Timingadaptation_model extends CI_Model
         ];
 
         // 上次下发时间
-        if(!is_null($res['down_time']) && isset($current_info['update_time'])) {
-            $downTime = strtotime($res['down_time']);
-            $lastUploadTime = $downTime > $current_info['update_time'] ? $downTime : $current_info['update_time'];
-        } elseif (!is_null($res['down_time'])) {
-            $lastUploadTime = strtotime($res['down_time']);
-        } elseif (isset($current_info['update_time'])) {
-            $lastUploadTime = $current_info['update_time'];
-        } else {
-            $lastUploadTime = 'N/A';
-            $baseTime = time() + 5 * 60;
-        }
+        $lastUploadTime = strtotime($res['down_time']) > 0
+            ? $res['down_time']
+            : 'N/A';
 
-        if(!isset($baseTime)) {
-            $baseTime = 5 * 60 + (($lastUploadTime + 5 * 60) > time() ? $lastUploadTime : time());
-        }
-
+        // 预计下次下发时间
+        $nextUploadTime = $lastUploadTime == 'N/A'
+            ? time()
+            : ((strtotime($res['down_time']) > (time() - 5 * 60)
+                ? strtotime($res['down_time'])
+                : time()) + 5 * 60);
 
         return [
             'get_current_plan_time' => date('Y-m-d H:i:s'),
-            'last_upload_time' => date('Y-m-d H:i:s', $lastUploadTime),
+            'last_upload_time' => $lastUploadTime,
             'adapte_time' => $res['timing_update_time'] ?? 'N/A',
-            'next_upload_time' => date('Y-m-d H:i:s', $baseTime),
+            'next_upload_time' => date('Y-m-d H:i:s', $nextUploadTime),
             'status' => $status,
             'tmp' => $tmp,
             'message' => $messages[$status],
