@@ -148,15 +148,28 @@ class Timingadaptation_model extends CI_Model
             '3' => '正在切换基本方案',
         ];
 
-        $baseTime = $current_info['update_time'] + 5 * 60 > time()
-            ? $current_info['update_time']
-            : time()
-            + 5 * 60;
+        // 上次下发时间
+        if(!is_null($res['down_time']) && isset($current_info['update_time'])) {
+            $downTime = strtotime($res['down_time']);
+            $lastUploadTime = $downTime > $current_info['update_time'] ? $downTime : $current_info['update_time'];
+        } elseif (!is_null($res['down_time'])) {
+            $lastUploadTime = strtotime($res['down_time']);
+        } elseif (isset($current_info['update_time'])) {
+            $lastUploadTime = $current_info['update_time'];
+        } else {
+            $lastUploadTime = 'N/A';
+            $baseTime = time() + 5 * 60;
+        }
+
+        if(!isset($baseTime)) {
+            $baseTime = 5 * 60 + (($lastUploadTime + 5 * 60) > time() ? $lastUploadTime : time());
+        }
+
 
         return [
             'get_current_plan_time' => date('Y-m-d H:i:s'),
-            'last_upload_time' => date('Y-m-d H:i:s', $current_info['update_time']),
-            'adapte_time' => $res['timing_update_time'],
+            'last_upload_time' => date('Y-m-d H:i:s', $lastUploadTime),
+            'adapte_time' => $res['timing_update_time'] ?? 'N/A',
             'next_upload_time' => date('Y-m-d H:i:s', $baseTime),
             'status' => $status,
             'tmp' => $tmp,
