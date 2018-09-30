@@ -293,6 +293,11 @@ class Area extends MY_Controller
         $this->response($data);
     }
 
+    /**
+     * Excel 文件下载
+     * @throws PHPExcel_Exception
+     * @throws PHPExcel_Writer_Exception
+     */
     public function download()
     {
 
@@ -314,7 +319,7 @@ class Area extends MY_Controller
 
         $data = json_decode($data, true);
 
-        $fileName = "{$data['info']['junction_name']}_{$data['info']['quota_name']}_" . date('Ymd');
+        $fileName = "{$data['info']['area_name']}_" . date('Ymd');
 
         $objPHPExcel = new PHPExcel();
         $objSheet = $objPHPExcel->getActiveSheet();
@@ -322,14 +327,11 @@ class Area extends MY_Controller
 
         $detailParams = [
             ['指标名', $data['info']['quota_name']],
-            ['方向', $data['info']['direction']],
+            ['方向', $data['info']['direction'] ?? ''],
             ['基准时间', implode(' ~ ', $data['info']['base_time'])],
+            ['评估时间', implode(' ~ ', $data['info']['evaluate_time'])],
+            ['指标单位', $data['info']['quota_unit']],
         ];
-        foreach ($data['info']['evaluate_time'] as $key => $item) {
-            $detailParams[] = ['评估时间'.($key+1), implode(' ~ ', $item)];
-        }
-
-        $detailParams[] = ['指标单位', $data['info']['quota_unit']];
 
         $objSheet->mergeCells('A1:F1');
         $objSheet->setCellValue('A1', $fileName);
@@ -362,21 +364,19 @@ class Area extends MY_Controller
 
         if(!empty($data['evaluate'])) {
 
-            foreach ($data['evaluate'] as $datum) {
-                $table = $this->getExcelArray($datum);
+            $table = $this->getExcelArray($data['evaluate']);
 
-                $objSheet->fromArray($table, NULL, 'A' . $line);
+            $objSheet->fromArray($table, NULL, 'A' . $line);
 
-                $styles = $this->getExcelStyle();
-                $rows_cnt = count($table);
-                $cols_cnt = count($table[0]) - 1;
-                $rows_index = $rows_cnt + $line - 1;
-                $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $rows_index)->applyFromArray($styles['content']);
-                $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($styles['header']);
-                $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $line)->applyFromArray($styles['header']);
+            $styles = $this->getExcelStyle();
+            $rows_cnt = count($table);
+            $cols_cnt = count($table[0]) - 1;
+            $rows_index = $rows_cnt + $line - 1;
+            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $rows_index)->applyFromArray($styles['content']);
+            $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($styles['header']);
+            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $line)->applyFromArray($styles['header']);
 
-                $line += ($rows_cnt + 2);
-            }
+            $line += ($rows_cnt + 2);
         }
 
         $objWriter = new PHPExcel_Writer_Excel5($objPHPExcel);
@@ -392,5 +392,117 @@ class Area extends MY_Controller
         ob_end_clean();
         $objWriter->save('php://output');
         exit();
+    }
+
+    /**
+     * 获取 Excel 单元格格式
+     * @return array
+     */
+    private function getExcelStyle() {
+        $title_style = array(
+            'font' => array(
+                'bold' => true,
+                'size '=> 16,
+                'color'=>array(
+                    'argb' => '00000000',
+                ),
+            ),
+            'fill' => array(
+                'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                'color' => array(
+                    'argb' => '00FFFF00',
+                ),
+            ),
+        );
+
+        $headers_style = array(
+            'font' => array(
+                'bold' => true,
+                'size '=> 12,
+                'color'=>array(
+                    'argb' => '00000000',
+                ),
+            ),
+            'fill' => array(
+                'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                'color' => array(
+                    'argb' => '00DCDCDC',
+                ),
+            ),
+            'alignment' => array(
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            ),
+        );
+
+        $content_style = array(
+            'borders' => array (
+                'allborders' => array (
+                    'style' => PHPExcel_Style_Border::BORDER_THIN,  //设置border样式
+                    //'style' => PHPExcel_Style_Border::BORDER_THICK, //另一种样式
+                    'color' => array ('argb' => '00000000'),     //设置border颜色
+                ),
+            ),
+            'alignment' => array(
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            ),
+        );
+
+        return array(
+            'title'  => $title_style,
+            'header' => $headers_style,
+            'content'=> $content_style,
+        );
+
+    }
+
+    /**
+     * 获取 Excel 单元格填充元素
+     *
+     * @param $data
+     * @return array
+     */
+    private function getExcelArray($data)
+    {
+        $timeArray = ["00:00", "00:30","01:00","01:30", "02:00", "02:30", "03:00", "03:30",
+            "04:00", "04:30", "05:00", "05:30", "06:00", "06:30", "07:00", "07:30",
+            "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+            "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+            "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30",
+            "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30"];
+
+        $table = [];
+
+        $table[] = $timeArray;
+        array_unshift($table[0], "日期-时间");
+
+        $data = array_map(function ($value) {
+            return array_column($value, 1, 0);
+        }, $data);
+
+        foreach ($data as $key => $value) {
+            $column = [];
+            $column[] = $key;
+            foreach ($timeArray as $item) {
+                $column[] = $value[$item] ?? '-';
+            }
+            $table[] = $column;
+        }
+        //echo json_encode($table);die();
+        return $table;
+    }
+
+    /**
+     * int 转 char (Excel 中)
+     *
+     * @param $index
+     * @param int $start
+     * @return string
+     */
+    private function intToChr($index, $start = 65) {
+        $str = '';
+        if (floor($index / 26) > 0) {
+            $str .= $this->intToChr(floor($index / 26) - 1);
+        }
+        return $str . chr($index % 26 + $start);
     }
 }

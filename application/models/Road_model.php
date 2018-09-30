@@ -266,7 +266,14 @@ class Road_model extends CI_Model
             'stop_time_cycle' => 'round(sum(stop_time_cycle), 2) as stop_time_cycle',
             'stop_delay' => 'round(sum(stop_delay), 2) as stop_delay',
             'speed' => 'round(avg(speed), 2) as speed',
-            'time' => 's',
+            'time' => '',
+        ];
+
+        $nameMaps = [
+            'stop_time_cycle' => '干线停车次数',
+            'stop_delay' => '干线停车延误',
+            'speed' => '干线平均速度',
+            'time' => '干线通过时间',
         ];
 
         // 如果指标不在映射数组中，返回空数组
@@ -275,7 +282,7 @@ class Road_model extends CI_Model
         }
 
         // 获取干线路口数据
-        $junctionList = $this->db->select('logic_junction_ids')
+        $junctionList = $this->db->select('road_name, logic_junction_ids')
             ->from('road')
             ->where('city_id', $params['city_id'])
             ->where('road_id', $params['road_id'])
@@ -286,6 +293,8 @@ class Road_model extends CI_Model
         if(!$junctionList) {
             return [];
         }
+
+        $roadName = $junctionList->road_name;
 
         $junctionIds = explode(',', $junctionList->logic_junction_ids);
 
@@ -375,9 +384,32 @@ class Road_model extends CI_Model
         };
 
         // 数据处理
-        return Collection::make($result)
+        $result = Collection::make($result)
             ->groupBy([$baseOrEvaluateCallback, 'date'], $groupByItemFormatCallback)
             ->get();
+
+        $result['info'] = [
+            'road_name' => $roadName,
+            'quota_name' => $nameMaps[$params['quota_key']],
+            'quota_unit' => '',
+            'direction' => $params['direction'] == 1 ? '正向' : '反向',
+            'base_time' => [$params['base_start_date'], $params['base_end_date']],
+            'evaluate_time' => [$params['evaluate_start_date'], $params['evaluate_end_date']],
+        ];
+
+        $jsonResult = json_encode($result);
+
+        $downloadId = md5($jsonResult);
+
+        $result['info']['download_id'] = $downloadId;
+
+        $redisKey = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
+
+        $this->redis_model->setData($redisKey, $jsonResult);
+
+        $this->redis_model->setExpire($redisKey, 30 * 60);
+
+        return $result;
     }
 
     /**
