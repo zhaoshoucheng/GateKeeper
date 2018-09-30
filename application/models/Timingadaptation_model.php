@@ -1,5 +1,7 @@
 <?php
 
+use Didi\Cloud\Collection\Collection;
+
 class Timingadaptation_model extends CI_Model
 {
     function __construct()
@@ -187,12 +189,16 @@ class Timingadaptation_model extends CI_Model
      */
     private function formatCurrentTimingInfo($current)
     {
-        foreach ($current['tod'] ?? [] as &$tod)
+        foreach ($current['tod'] ?? [] as $k => $tod)
         {
-            foreach ($tod['stage'] ?? [] as &$stage)
+            foreach ($tod['stage'] ?? [] as $key => $stage)
             {
-                $stage['suggest_green_max'] = $stage['green_max'];
-                $stage['suggest_green_min'] = $stage['green_min'];
+                $current['tod'][$k]['stage'][$key]['suggest_green_max'] = $stage['green_max'];
+                $current['tod'][$k]['stage'][$key]['suggest_green_min'] = $stage['green_min'];
+
+                $current['tod'][$k]['stage'][$key]['movements'] = array_filter($stage['movements'], function ($item) {
+                    return $item['flow']['logic_flow_id'] != "";
+                });
             }
         }
         return $current;
@@ -254,7 +260,7 @@ class Timingadaptation_model extends CI_Model
             // 数据处理
             foreach ($tod['movement_timing'] as $mk => &$movement) {
 
-                $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '';
+                $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '/';
 
                 // 获取并过滤出 基准配时中的绿灯
                 $currentTiming = &$current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];

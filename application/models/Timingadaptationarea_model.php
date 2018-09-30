@@ -5,6 +5,8 @@
  * # date:    2018-07-25
  ********************************************/
 
+use Didi\Cloud\Collection\Collection;
+
 class Timingadaptationarea_model extends CI_Model
 {
     private $signal_mis_interface = '';
@@ -324,9 +326,6 @@ class Timingadaptationarea_model extends CI_Model
 
         // 获取实时报警路口信息
         $alarmJunctions = $this->getRealTimeAlarmJunctions($cityId);
-        if (empty($alarmJunctions)) {
-            return [];
-        }
 
         // 路口ID串
         $junctionIds = implode(',', array_unique(array_column($alarmJunctions, 'logic_junction_id')));
@@ -896,6 +895,7 @@ class Timingadaptationarea_model extends CI_Model
 
                 $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k], $cycleLength, $offset);
             }
+            $ret['dataList'] = array_filter($ret['dataList']);
 
             $trajs = Collection::make($ret['dataList']);
 
@@ -933,9 +933,9 @@ class Timingadaptationarea_model extends CI_Model
      */
     private function getTrajsInOneCycle(array $trajs, int $cycleLength, int $offset)
     {
-        $trajs = Collection::make($trajs);
+        $trajsCol = Collection::make($trajs);
 
-        $min = $trajs->reduce(function($a, $b){
+        $min = $trajsCol->reduce(function($a, $b){
            if ($a == null) {
                return $b;
            }
@@ -946,17 +946,20 @@ class Timingadaptationarea_model extends CI_Model
         });
 
         $crossTime = $min[0]; // 过路口时间
-        $shiftTime = $crossTime - (($crossTime - $offset) % $cycleLength);
-        $minTime = $crossTime - $shiftTime - 1.5 * $cycleLength;
+        $shiftTime = $crossTime -  (($crossTime - $offset) % $cycleLength);
+        $minTime = $crossTime - $shiftTime - 2 * $cycleLength;
         $maxTime = $crossTime - $shiftTime + 1.5 * $cycleLength;
 
-        return $trajs->map(function($item) use($shiftTime, $minTime, $maxTime){
-            $time = $item[0] - $shiftTime;
+        $ret = [];
+        foreach ($trajs as $traj) {
+            $time = $traj[0] - $shiftTime;
             if ($time < $minTime || $time > $maxTime) {
-                return [];
+                continue;
             }
-            return [$time, $item[1]];
-        })->filter()->all();
+
+            $ret[] = [$time, $traj[1]];
+        }
+        return $ret;
     }
 
 
@@ -1117,6 +1120,14 @@ class Timingadaptationarea_model extends CI_Model
                 return $result;
             }
 
+            // 获取某个方向的flow长度
+            $flowMovement = $this->waymap_model->getFlowMovement($data['city_id'], $data['logic_junction_id'], $data['logic_flow_id']);
+            if (empty($flowMovement) || empty($flowMovement['in_link_length'])) {
+                $result['errmsg'] = 'flow长度获取错误';
+                return $result;
+            }
+            $inLinkLength = $flowMovement['in_link_length'];
+
             $ret['dataList'] = [];
 
             // 用于存储所有时间
@@ -1130,7 +1141,7 @@ class Timingadaptationarea_model extends CI_Model
                     $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
                     $ret['dataList'][$vv['timestamp']] = [
                         $second,             // 时间秒数 X轴
-                        $vv['stopDistance'], // 值      Y轴
+                        round($vv['stopDistance'] / $inLinkLength * 100, 2), // 值      Y轴
                     ];
 
                     // 记录所有时间 用于获取最大最小值
@@ -1192,7 +1203,6 @@ class Timingadaptationarea_model extends CI_Model
     /**
      * 获取某一相位的自适应配置信息
      * @param $data['logic_junction_id'] string Y 路口ID
-     * @param $data['logic_flow_id']     string Y 相位ID
      * @return array
      */
     private function getFlowTimingInfo($data)
@@ -1226,8 +1236,9 @@ class Timingadaptationarea_model extends CI_Model
         $res = [
             'cycle'  => $timingInfo['extra_time']['cycle'],
             'offset' => $timingInfo['extra_time']['offset'],
+            'tod_start_time' => $timingInfo['extra_time']['tod_start_time'],
+            'tod_end_time' => $timingInfo['extra_time']['tod_end_time'],
         ];
-
         // 信息灯信息
         foreach ($timingInfo['movement_timing'] as $k=>$v) {
             if ($v['flow']['logic_flow_id'] == $data['logic_flow_id']) {
