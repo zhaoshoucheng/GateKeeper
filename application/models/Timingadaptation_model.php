@@ -102,7 +102,6 @@ class Timingadaptation_model extends CI_Model
             ->limit(1)
             ->get()->first_row('array');
 
-
         // 没有数据
         if(!$res) {
             throw new Exception('该路口无配时');
@@ -148,16 +147,23 @@ class Timingadaptation_model extends CI_Model
             '3' => '正在切换基本方案',
         ];
 
-        $baseTime = $current_info['update_time'] + 5 * 60 > time()
-            ? $current_info['update_time']
-            : time()
-            + 5 * 60;
+        // 上次下发时间
+        $lastUploadTime = strtotime($res['down_time']) > 0
+            ? $res['down_time']
+            : 'N/A';
+
+        // 预计下次下发时间
+        $nextUploadTime = $lastUploadTime == 'N/A'
+            ? time()
+            : ((strtotime($res['down_time']) > (time() - 5 * 60)
+                ? strtotime($res['down_time'])
+                : time()) + 5 * 60);
 
         return [
             'get_current_plan_time' => date('Y-m-d H:i:s'),
-            'last_upload_time' => date('Y-m-d H:i:s', $current_info['update_time']),
-            'adapte_time' => $res['timing_update_time'],
-            'next_upload_time' => date('Y-m-d H:i:s', $baseTime),
+            'last_upload_time' => $lastUploadTime,
+            'adapte_time' => $res['timing_update_time'] ?? 'N/A',
+            'next_upload_time' => date('Y-m-d H:i:s', $nextUploadTime),
             'status' => $status,
             'tmp' => $tmp,
             'message' => $messages[$status],
