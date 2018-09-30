@@ -196,9 +196,9 @@ class Timingadaptation_model extends CI_Model
                 $current['tod'][$k]['stage'][$key]['suggest_green_max'] = $stage['green_max'];
                 $current['tod'][$k]['stage'][$key]['suggest_green_min'] = $stage['green_min'];
 
-                $current['tod'][$k]['stage'][$key]['movements'] = array_filter($stage['movements'], function ($item) {
+                $current['tod'][$k]['stage'][$key]['movements'] = array_values(array_filter($stage['movements'], function ($item) {
                     return $item['flow']['logic_flow_id'] != "";
-                });
+                }));
             }
         }
         return $current;
