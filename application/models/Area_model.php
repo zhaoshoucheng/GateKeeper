@@ -269,8 +269,13 @@ class Area_model extends CI_Model
     {
         // 指标算法映射
         $methods = [
-            'speed' => 'avg(speed) as speed',
-            'stop_delay' => 'avg(stop_delay) as stop_delay'
+            'speed' => 'round(avg(speed), 2) as speed',
+            'stop_delay' => 'round(avg(stop_delay), 2) as stop_delay'
+        ];
+
+        $nameMaps = [
+            'speed' => '区域平均速度',
+            'stop_delay' => '区域平均延误'
         ];
 
         // 指标不存在与映射数组中
@@ -347,10 +352,10 @@ class Area_model extends CI_Model
 
         $result['info'] = [
             'area_name' => $areaInfo['area_name'],
-            'quota_name' => $params['quota_key'],
+            'quota_name' => $nameMaps[$params['quota_key']],
             'quota_unit' => '',
-            'base_time' => $params['base_start_date'] . ' ~ ' . $params['base_end_date'],
-            'evaluate_time' => $params['evaluate_start_date'] . ' ~ ' . $params['evaluate_end_date'],
+            'base_time' => [$params['base_start_date'], $params['base_end_date']],
+            'evaluate_time' => [$params['evaluate_start_date'], $params['evaluate_end_date']],
         ];
 
         $jsonResult = json_encode($result);

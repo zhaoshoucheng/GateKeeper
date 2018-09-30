@@ -42,7 +42,7 @@ class Timingadaptation_model extends CI_Model
         $data = $this->getCurrentInfo($params['logic_junction_id']);
 
         if($data == null) {
-            throw new Exception('无法获取路口的基准配时信息');
+            return [];
         }
 
         return $this->formatCurrentTimingInfo($data);
