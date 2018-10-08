@@ -11,6 +11,9 @@ class Waymap_model extends CI_Model
     private $email_to = 'ningxiangbing@didichuxing.com';
     protected $userid = '';
 
+    // 全局的最后一个版本
+    public static $lastMapVersion = [];
+
     public function __construct()
     {
         parent::__construct();
@@ -317,6 +320,7 @@ class Waymap_model extends CI_Model
 
             $map_version = httpPOST($url, $wdata);
             $retArr = json_decode($map_version, true);
+
             if (isset($retArr['errorCode'])
                 && $retArr['errorCode'] == 0
                 && !empty($retArr['data'])) {
@@ -517,6 +521,7 @@ class Waymap_model extends CI_Model
                 'logic_junction_ids' => $junctionIds,
                 'user_id' => $this->config->item('waymap_userid'),
                 'token' => $this->config->item('waymap_token'),
+                'version' => $this->getLastMapVersion(),
             ];
             $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
 
@@ -584,6 +589,21 @@ class Waymap_model extends CI_Model
 
             return [];
         }
+    }
+
+
+    /*
+     * 获取最新的路网版本
+     */
+    public function getLastMapVersion()
+    {
+        if (!empty(self::$lastMapVersion)) {
+            return self::$lastMapVersion;
+        }
+
+        $mapVersions = $this->getAllMapVersion();
+        self::$lastMapVersion = max($mapVersions);
+        return self::$lastMapVersion;
     }
 
     /**
