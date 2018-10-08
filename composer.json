@@ -16,7 +16,8 @@
 		"apache/thrift": "0.9.2",
 		"monolog/monolog": "^1.23",
 		"cloud/collection": "dev-master",
-		"cloud/php_tracelog": "dev-master"
+		"cloud/php_tracelog": "dev-master",
+		"overtrue/pinyin": "~4.0"
 	},
 	"repositories": [
 		{

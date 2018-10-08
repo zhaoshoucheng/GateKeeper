@@ -15,6 +15,8 @@ class Common_model extends CI_Model
         parent::__construct();
 
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
+        $this->db = $this->load->database('default', true);
     }
 
     /**
@@ -130,5 +132,26 @@ class Common_model extends CI_Model
             return ($a['order'] > $b['order']) ? -1 : 1;
         });
         return $ret;
+    }
+
+    /**
+     * 获取最新的 hour
+     * @param $cityId
+     * @param null $date
+     * @return false|string
+     */
+    public function getLastestHour($cityId, $date = null)
+    {
+        if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
+            return $hour;
+        }
+
+        // 查询优化
+        $sql = "SELECT `hour` FROM `real_time_{$cityId}`  WHERE 1 ORDER BY updated_at DESC,hour DESC LIMIT 1";
+        $result = $this->db->query($sql)->first_row();
+        if(!$result)
+            return date('H:i:s');
+
+        return $result->hour;
     }
 }

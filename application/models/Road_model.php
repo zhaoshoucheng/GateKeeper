@@ -273,7 +273,7 @@ class Road_model extends CI_Model
             'stop_time_cycle' => '干线停车次数',
             'stop_delay' => '干线停车延误',
             'speed' => '干线平均速度',
-            'time' => '干线通过时间',
+            'time' => '干线通行时间',
         ];
 
         // 如果指标不在映射数组中，返回空数组

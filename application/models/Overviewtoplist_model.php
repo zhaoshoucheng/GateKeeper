@@ -21,6 +21,7 @@ class Overviewtoplist_model extends CI_Model
         $this->load->config('realtime_conf');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
+        $this->load->model('common_model');
     }
 
     public function stopDelayTopList($data)
@@ -30,7 +31,7 @@ class Overviewtoplist_model extends CI_Model
             return [];
         }
 
-        $hour = $this->getLastestHour($data['city_id'], $data['date']);
+        $hour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
 
         $result = $this->db->select('logic_junction_id, hour, sum(stop_delay * traj_count) / sum(traj_count) as stop_delay')
             ->from($table)
@@ -69,7 +70,7 @@ class Overviewtoplist_model extends CI_Model
             return [];
         }
 
-        $hour = $this->getLastestHour($data['city_id'], $data['date']);
+        $hour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
 
         $result = $this->db->select('logic_junction_id, hour, stop_time_cycle, logic_flow_id')
             ->from($table)
@@ -120,7 +121,7 @@ class Overviewtoplist_model extends CI_Model
             return [];
         }
 
-        $hour = $this->getLastestHour($data['city_id'], $data['date']);
+        $hour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
 
         $result = $this->db->select('logic_junction_id, hour, ' . $select . ' as ' . $column)
             ->from($table)
@@ -152,33 +153,7 @@ class Overviewtoplist_model extends CI_Model
         return $result;
     }
 
-    private function getLastestHour($cityId, $date = null)
-    {
-        if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
-            return $hour;
-        }
-
-        if (!$this->isTableExisted($this->tb . $cityId)) {
-            return date('H:i:s');
-        }
-
-        $date = $date ?? date('Y-m-d');
-
-        $result = $this->db->select('hour')
-            ->from($this->tb . $cityId)
-            ->where('updated_at >=', $date . ' 00:00:00')
-            ->where('updated_at <=', $date . ' 23:59:59')
-            ->order_by('hour', 'desc')
-            ->limit(1)
-            ->get()->first_row();
-
-        if(!$result)
-            return date('H:i:s');
-
-        return $result->hour;
-    }
-
-    /**
+    /*
      * 校验数据表是否存在
      */
     private function isTableExisted($table)
