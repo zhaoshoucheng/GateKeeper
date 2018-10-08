@@ -134,6 +134,12 @@ class Common_model extends CI_Model
         return $ret;
     }
 
+    /**
+     * 获取最新的 hour
+     * @param $cityId
+     * @param null $date
+     * @return false|string
+     */
     public function getLastestHour($cityId, $date = null)
     {
         if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
