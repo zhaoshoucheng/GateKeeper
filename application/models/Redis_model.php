@@ -80,11 +80,14 @@ class Redis_model extends CI_Model
         if (!$this->redis) {
             return false;
         }
+        $setResult = false;
         try {
-            $this->redis->setex($key, $time, $value);
-        } catch (RedisException $e) {
-            print_r($e->getMessage());exit;
-            return false;
+            $setResult = $this->redis->setex($key, $time, $value);
+        } catch (\Exception $e) {
+            com_log_warning('redis_model_setex_exception', 0, $e->getMessage(), compact("key", "time", "value"));
+        }
+        if (!$setResult) {
+            com_log_warning('redis_model_setex_false', 0, "", compact("key", "time", "value"));
         }
         return true;
     }
