@@ -6,6 +6,7 @@
  ********************************************/
 
 use Didi\Cloud\Collection\Collection;
+use Overtrue\Pinyin\Pinyin;
 
 class Timingadaptationarea_model extends CI_Model
 {
@@ -385,6 +386,19 @@ class Timingadaptationarea_model extends CI_Model
                 ];
             }
         }
+
+        // 按照拼音排序
+        $pinyin = new Pinyin('Overtrue\Pinyin\MemoryFileDictLoader');
+        foreach ($data as $key => $junction) {
+            $name = $junction['junction_name'];
+            $firstName = mb_substr($name, 0, 1);
+            $pinyins = $pinyin->convert($firstName, PINYIN_ASCII_TONE);
+            $data[$key]['pinyin'] = $pinyins[0];
+        }
+
+        usort($data, function($a, $b){
+            return $a['pinyin'] < $b['pinyin'] ? -1 : 1;
+        });
 
         return $data;
     }
