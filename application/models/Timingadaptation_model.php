@@ -10,6 +10,7 @@ class Timingadaptation_model extends CI_Model
         $this->db = $this->load->database('default', true);
         $this->load->helper('http_helper');
         $this->load->model('redis_model');
+        $this->load->model('common_model');
         $this->load->config('adaption_conf');
     }
 
@@ -329,7 +330,7 @@ class Timingadaptation_model extends CI_Model
             return [];
         }
 
-        $hour = $this->getLastestHour($cityId);
+        $hour = $this->common_model->getLastestHour($cityId);
 
         $flows = $this->db->select('logic_flow_id, twice_stop_rate')
             ->from('real_time_' . $cityId)
@@ -340,26 +341,5 @@ class Timingadaptation_model extends CI_Model
             ->get()->result_array();
 
         return array_column($flows, 'twice_stop_rate', 'logic_flow_id');
-    }
-
-    /**
-     * 获取最新批次的 hour
-     * @param $cityId
-     * @param null $date
-     * @return false|string
-     */
-    public function getLastestHour($cityId, $date = null)
-    {
-        if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
-            return $hour;
-        }
-
-        // 查询优化
-        $sql = "SELECT `hour` FROM `real_time_{$cityId}`  WHERE 1 ORDER BY updated_at DESC,hour DESC LIMIT 1";
-        $result = $this->db->query($sql)->first_row();
-        if(!$result)
-            return date('H:i:s');
-
-        return $result->hour;
     }
 }

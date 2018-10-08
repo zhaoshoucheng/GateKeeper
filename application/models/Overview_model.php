@@ -21,6 +21,7 @@ class Overview_model extends CI_Model
         $this->config->load('realtime_conf');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
+        $this->load->model('common_model');
     }
 
     /**
@@ -30,7 +31,7 @@ class Overview_model extends CI_Model
      */
     public function junctionsList($data)
     {
-        $hour = $this->getLastestHour($data['city_id'], $data['date']);
+        $hour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
 
         $result = $this->getJunctionList($data['city_id'], $data['date'], $hour);
 
@@ -108,7 +109,7 @@ class Overview_model extends CI_Model
     {
         $cityId = $data['city_id'];
         $date = $data['date'];
-        $hour = $this->getLastestHour($data['city_id'], $data['date']);
+        $hour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
 
         $junctionSurveyKey = "its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
 
@@ -226,7 +227,7 @@ class Overview_model extends CI_Model
         }
 
         // 获取最近时间
-        $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
+        $lastHour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
 
         /*
          * 获取实时路口停车延误记录
