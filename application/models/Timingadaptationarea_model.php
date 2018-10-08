@@ -116,9 +116,8 @@ class Timingadaptationarea_model extends CI_Model
         if (!empty($redisData)) {
             $redisData = json_decode($redisData, true);
         }
-
         // 获取数组更新最新时间 用于获取每个区域平均延误、平均速度
-        $lastHour = $this->getLastestHour($cityId);
+        $lastHour = $this->getLastestHour2($cityId);
         $esTime = date('Y-m-d H:i:s', strtotime($lastHour));
 
         foreach ($data as $k=>$v) {
@@ -151,7 +150,7 @@ class Timingadaptationarea_model extends CI_Model
                 ];
 
                 // 获取区域平均速度
-                $esData['quota_key'] = 'speed';
+                $esData['quota_key'] = 'avgSpeed';
                 $esSpeed = $this->getEsAreaQuotaValue($esData);
                 if ($esSpeed['errno'] != 0) {
                     $speed = 0;
@@ -235,10 +234,11 @@ class Timingadaptationarea_model extends CI_Model
 
         $esUrl = $this->config->item('es_interface') . '/estimate/diagnosis/queryQuota';
         $esData = [
-            'source'        => 'trajectory',
+            'source'        => 'signal_control',
             'cityId'        => $data['city_id'],
             'junctionId'    => $data['junctionIds'],
             'dayTime'       => $data['time'],
+            'requestId'  => get_traceid(),
             'andOperations' => [
                 'junctionId' => 'in',
                 'cityId'     => 'eq',
@@ -252,7 +252,6 @@ class Timingadaptationarea_model extends CI_Model
                 "orderField" => "weight_avg",
             ],
         ];
-
         try {
             $quotaInfo = httpPOST($esUrl, $esData, 0, 'json');
             if (!$quotaInfo) {
@@ -1401,6 +1400,35 @@ class Timingadaptationarea_model extends CI_Model
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->order_by('hour', 'desc')
+            ->limit(1)
+            ->get()->first_row();
+
+        if(!$result) {
+            return date('H:i:s');
+        }
+
+        return $result->hour;
+    }
+
+    /**
+     * 获取指定日期最新的数据时间, 这个根据updated_at进行降序排列就行
+     * @param $table
+     * @param null $date
+     * @return false|string
+     */
+    private function getLastestHour2($cityId, $date = null)
+    {
+        if (!$this->isTableExisted('real_time_' . $cityId)) {
+            return date('H:i:s');
+        }
+
+        $date = $date ?? date('Y-m-d');
+
+        $result = $this->db->select('hour')
+            ->from('real_time_' . $cityId)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->order_by('updated_at', 'desc')
             ->limit(1)
             ->get()->first_row();
 
