@@ -762,8 +762,9 @@ class Timingadaptationarea_model extends CI_Model
         $startTime = strtotime('00:00:00') * 1000;
 
         $esData = [
-            "source"        => "trajectory",
+            "source"        => "signal_control",
             "cityId"        => $data['city_id'],
+            'requestId'     => get_traceid(),
             "junctionId"    => $esJunctionIds,
             "timestamp"     => "[{$startTime}, {$endTime}]",
             "source"        => 'signal_control',
@@ -807,7 +808,7 @@ class Timingadaptationarea_model extends CI_Model
                     $value = $item['quotaMap']['weight_avg'] * 3.6;
                 }
                 $ret[$k] =  [
-                    date('H:i:s', strtotime($item['quotaMap']['dayTime'])), // 时间 X轴
+                    date('H:i:s', $item['quotaMap']['dayTime'] / 1000), // 时间 X轴
                     round($value, 2),                                       // 值   Y轴
                 ];
             }
