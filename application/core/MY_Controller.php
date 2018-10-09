@@ -200,7 +200,7 @@ class MY_Controller extends CI_Controller {
         echo "<br/>";
         echo $client_sign;
         echo "<br/>";
-        
+
         if ($server_sign != $client_sign) {
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "签名的sign不正确";
