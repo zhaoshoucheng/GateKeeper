@@ -1,13 +1,13 @@
 <?php
 /***************************************************************
-# 新版人工配时 管理类
+# 自使用配时,参数 管理类
 # user:niuyufu
 # date:2018-09-21
  ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class SignalControl extends MY_Controller{
+class Xmmtrace extends MY_Controller{
     public function __construct()
     {
         parent::__construct();
@@ -18,7 +18,6 @@ class SignalControl extends MY_Controller{
 
     public function proxy()
     {
-
         $requestUri = $_SERVER['REQUEST_URI'];
         $realUri = explode("?",$requestUri);
         $realUri = explode("/",$realUri[0]);
@@ -26,14 +25,10 @@ class SignalControl extends MY_Controller{
         $reqMethod = $_SERVER['REQUEST_METHOD'];
         if($reqMethod == 'GET'){
             $params = $this->input->get();
-            if(isset($params['read_only']) && $params['read_only']==1){
-                $ret = httpGET($this->config->item('signal_control_interface')."/timingrelease/".$funcName,$params);
-            }else{
-                $ret = httpGET($this->config->item('signal_control_interface')."/signalcontrol/".$funcName,$params);
-            }
+            $ret = httpGET($this->config->item('xmmtrace_interface')."/".$funcName,$params);
         }elseif ($reqMethod == 'POST'){
             $params = file_get_contents("php://input");
-            $ret = httpPOST($this->config->item('signal_control_interface')."/signalcontrol/".$funcName,$params,0,'raw');
+            $ret = httpPOST($this->config->item('xmmtrace_interface')."/".$funcName,$params,0,'raw');
         }
         if($ret){
             $ret = json_decode($ret,true);
