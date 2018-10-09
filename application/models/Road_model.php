@@ -26,6 +26,7 @@ class Road_model extends CI_Model
 
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
+        $this->load->config('evaluate_conf');
     }
 
     /**
@@ -276,6 +277,9 @@ class Road_model extends CI_Model
             'time' => '干线通行时间',
         ];
 
+        // 获取指标单位
+        $units = array_column($this->config->item('road'), 'unit', 'key');
+
         // 如果指标不在映射数组中，返回空数组
         if(!isset($methods[$params['quota_key']])) {
             return [];
@@ -390,8 +394,8 @@ class Road_model extends CI_Model
 
         $result['info'] = [
             'road_name' => $roadName,
-            'quota_name' => $nameMaps[$params['quota_key']],
-            'quota_unit' => '',
+            'quota_name' => $nameMaps[$params['quota_key']] ?? '',
+            'quota_unit' => $units[$params['quota_key']] ?? '',
             'direction' => $params['direction'] == 1 ? '正向' : '反向',
             'base_time' => [$params['base_start_date'], $params['base_end_date']],
             'evaluate_time' => [$params['evaluate_start_date'], $params['evaluate_end_date']],
