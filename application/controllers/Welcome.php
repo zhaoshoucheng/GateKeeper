@@ -38,7 +38,10 @@ class Welcome extends CI_Controller {
 	    $queryStr="x0=114.48136&y0=38.03515&x1=114.48492&y1=38.03534&st=1539046794&et=1539048594&userid=signal&samples=-1&biztypes=all&index=all&driverlist=all&status=5&app_id=xmmtrace&sign=1111";
         $queryMap = [];
         parse_str($queryStr, $queryMap);
-        print_r($queryMap);exit;
+        ksort($queryMap);
+        $sortStr = http_build_query($queryMap);
+        $sign = substr(md5($sortStr . "&" . "3a01e6c56bcce94ee5de073df3d512d4"), 7, 16);
+        print_r($sign);exit;
 
 
         $this->load->model('redis_model');
