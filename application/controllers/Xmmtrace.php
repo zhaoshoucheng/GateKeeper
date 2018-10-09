@@ -32,7 +32,7 @@ class Xmmtrace extends MY_Controller{
         }
         if($ret){
             header("Content-Type:application/json;charset=UTF-8");
-            echo json_encode($ret);
+            echo $ret;
             exit;
         }
         $this->errno = ERR_HTTP_FAILED;
