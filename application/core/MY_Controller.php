@@ -34,7 +34,7 @@ class MY_Controller extends CI_Controller {
             $this->routerUri = $this->uri->ruri_string();
             com_log_notice('_com_sign', ['ip' => $_SERVER["REMOTE_ADDR"], 'ip' => $this->input->get_request_header('X-Real-Ip')]);
             // 此处采用appid+appkey的验证
-            if (isset($_REQUEST['app_id']) && isset($_REQUEST['sign'])) {
+            if (isset($_REQUEST['app_id'])) {
                 com_log_notice('_com_sign', ['uri' => $this->routerUri, 'request' => $_REQUEST]);
                 if (!$this->_checkAuthorizedApp()) {
                     $this->_output();
@@ -168,7 +168,7 @@ class MY_Controller extends CI_Controller {
 
         ksort($params);
         $query_str = http_build_query($params);
-        $client_sign = $_REQUEST['sign'];
+        $client_sign = isset($_REQUEST['sign']) ? $_REQUEST['sign'] : "";
         $app_id = $_REQUEST['app_id'];
         $this->load->config('appkey', true);
         $app_config = $this->config->item('authirized_apps', 'appkey');
@@ -177,6 +177,9 @@ class MY_Controller extends CI_Controller {
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "该appid:{$app_id}没有授权";
             return false;
+        }
+        if (isset($app_config[$app_id]['white_ips']) && in_array($_SERVER['REMOTE_ADDR'],$app_config[$app_id]['white_ips'])) {
+            return true;
         }
         $app_key = $app_config[$app_id]['secret'];
         $open_api = isset($app_config[$app_id]['open_api']) ? $app_config[$app_id]['open_api'] : array();

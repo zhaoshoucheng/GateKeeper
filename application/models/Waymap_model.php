@@ -434,6 +434,7 @@ class Waymap_model extends CI_Model
      *
      * @param $qArr array 请求参数
      * @return array
+     * @throws Exception
      */
     public function getConnectionAdjJunctions($qArr)
     {
