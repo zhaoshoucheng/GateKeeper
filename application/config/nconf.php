@@ -56,6 +56,11 @@ if($development == 2){
     $signal_control_port = '30062';
     $signal_control_ext = '/signal-timing';
 
+    // xmmtrace
+    $xmmtrace_server = '100.69.238.158';
+    $xmmtrace_port = '8001';
+    $xmmtrace_ext = '/api/transmit/Traffic';
+
 }else{
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
@@ -91,6 +96,11 @@ if($development == 2){
     $signal_control_server = '100.90.164.31';
     $signal_control_port = '8031';
     $signal_control_ext = '/signal-timing';
+
+    // xmmtrace
+    $signal_control_server = '100.69.238.158';
+    $signal_control_port = '8001';
+    $signal_control_ext = '/api/transmit/Traffic';
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -115,6 +125,9 @@ $config['es_interface'] = 'http://' . $es_server . $es_port . $es_ext;
 
 // 新版配时地址
 $config['signal_control_interface'] = 'http://' . $signal_control_server.":" . $signal_control_port . $signal_control_ext;
+
+// 新版轨迹地址
+$config['xmmtrace_interface'] = 'http://' . $xmmtrace_server.":" . $xmmtrace_port . $xmmtrace_ext;
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;
