@@ -171,7 +171,6 @@ class MY_Controller extends CI_Controller {
         }else{
             $params = $this->input->post();
         }
-        print_r($params);exit;
         com_log_notice('_com_sign', ['params' => $params]);
         unset($params['sign']);
         if (!isset($params['ts'])) {
@@ -191,10 +190,17 @@ class MY_Controller extends CI_Controller {
         if (isset($app_config[$app_id]['white_ips']) && in_array($_SERVER['REMOTE_ADDR'],$app_config[$app_id]['white_ips'])) {
             return true;
         }
+
         $app_key = $app_config[$app_id]['secret'];
         $open_api = isset($app_config[$app_id]['open_api']) ? $app_config[$app_id]['open_api'] : array();
         $server_sign = substr(md5($query_str . "&" . $app_key), 7, 16);
-
+        echo $query_str . "&" . $app_key;
+        echo "<br/>";
+        echo $server_sign;
+        echo "<br/>";
+        echo $client_sign;
+        echo "<br/>";
+        
         if ($server_sign != $client_sign) {
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "签名的sign不正确";
