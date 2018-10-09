@@ -216,6 +216,7 @@ class Area_model extends CI_Model
             ->from('area')
             ->where('city_id', $params['city_id'])
             ->where('delete_at', '1970-01-01 00:00:00')
+            ->order_by('create_at desc')
             ->get()->result_array();
 
         $areaIds = array_column($areas, 'id');
@@ -237,7 +238,7 @@ class Area_model extends CI_Model
         $areaIdJunctionList = Collection::make($areaJunctions)
             ->groupBy('area_id', function ($v) {
                 return array_column($v, 'junction_id');
-            })->get();
+            })->krsort()->get();
 
         $results = [];
 
@@ -260,7 +261,7 @@ class Area_model extends CI_Model
             $result['center_lat'] = $len == 0 ? 0 : $cnt_lat / $len;
             $result['center_lng'] = $len == 0 ? 0 : $cnt_lng / $len;
 
-            $results[$areaId] = $result;
+            $results[] = $result;
         }
 
         return $results;

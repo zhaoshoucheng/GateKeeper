@@ -221,6 +221,7 @@ class Road_model extends CI_Model
             ->from($this->tb)
             ->where('city_id', $params['city_id'])
             ->where('is_delete', 0)
+            ->order_by('created_at desc')
             ->get()->result_array();
 
         // 如果数据为空或者获取数据失败，则返回空数组
