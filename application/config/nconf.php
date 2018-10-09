@@ -52,8 +52,8 @@ if($development == 2){
     $es_ext = '';
 
     // new timing
-    $signal_control_server = '100.90.164.31';
-    $signal_control_port = '8031';
+    $signal_control_server = '10.85.128.81';
+    $signal_control_port = '30062';
     $signal_control_ext = '/signal-timing';
 
 }else{
