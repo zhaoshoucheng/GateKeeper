@@ -51,6 +51,32 @@ if (!function_exists('getSignature')) {
     }
 }
 
+if (!function_exists('getSign')) {
+    /**
+     * @param map $params API调用的请求参数集合的关联数组，不包含sign参数
+     * @param string $secret 申请到的app_id对应秘钥
+     * @return string
+     */
+    function getSign($params, $secret)
+    {
+        $str = '';  //待签名字符串
+
+        //先将参数以其参数名的字典序升序进行排序
+        ksort($params);
+
+        //遍历排序后的参数数组中的每一个key/value对
+        foreach ($params as $k => $v) {
+            //为key/value对生成一个key=value格式的字符串，并拼接到待签名字符串后面
+            $str .= "$k=" . urldecode($v);
+        }
+
+        //将签名密钥拼接到签名字符串最后面
+        $str = $str . "&" . $secret;
+        //通过md5算法为签名字符串生成一个md5签名, 从第7位开始取16位
+        return substr(md5($str), 7, 16);
+    }
+}
+
 if (!function_exists('des_encrypt')) {
     /** des加密 **/
     function des_encrypt($str, $key)
