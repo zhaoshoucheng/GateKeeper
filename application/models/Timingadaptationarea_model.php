@@ -27,6 +27,7 @@ class Timingadaptationarea_model extends CI_Model
         $this->load->config('realtime_conf.php');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
+        $this->load->model('common_model');
     }
 
     /**
@@ -118,7 +119,8 @@ class Timingadaptationarea_model extends CI_Model
             $redisData = json_decode($redisData, true);
         }
         // 获取数组更新最新时间 用于获取每个区域平均延误、平均速度
-        $lastHour = $this->getLastestHour2($cityId);
+        $lastHour = $this->common_model->getLastestHour($cityId);
+
         $esTime = date('Y-m-d H:i:s', strtotime($lastHour));
 
         foreach ($data as $k=>$v) {
@@ -393,7 +395,11 @@ class Timingadaptationarea_model extends CI_Model
             $name = $junction['junction_name'];
             $firstName = mb_substr($name, 0, 1);
             $pinyins = $pinyin->convert($firstName, PINYIN_ASCII_TONE);
-            $data[$key]['pinyin'] = $pinyins[0];
+            if(!empty($pinyins)){
+                $data[$key]['pinyin'] = $pinyins[0];
+            }else{
+                $data[$key]['pinyin'] = '';
+            }
         }
 
         usort($data, function($a, $b){
@@ -1329,7 +1335,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             // 获取最近时间
-            $lastHour = $this->getLastestHour($cityId);
+            $lastHour = $this->common_model->getLastestHour($cityId);
 
             $lastTime = date('Y-m-d') . ' ' . $lastHour;
             $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 300);
@@ -1390,68 +1396,6 @@ class Timingadaptationarea_model extends CI_Model
 
         $result = $this->db->query($sql, [$cityId, $areaId])->result_array();
         return $result;
-    }
-
-    /**
-     * 获取指定日期最新的数据时间
-     * @param $table
-     * @param null $date
-     * @return false|string
-     */
-    private function getLastestHour($cityId, $date = null)
-    {
-        $hour = $this->redis_model->getData("its_realtime_lasthour_$cityId");
-        if(!empty($hour)) {
-            return $hour;
-        }
-        if (!$this->isTableExisted('real_time_' . $cityId)) {
-            return date('H:i:s');
-        }
-
-        $date = $date ?? date('Y-m-d');
-
-        $result = $this->db->select('hour')
-            ->from('real_time_' . $cityId)
-            ->where('updated_at >=', $date . ' 00:00:00')
-            ->where('updated_at <=', $date . ' 23:59:59')
-            ->order_by('hour', 'desc')
-            ->limit(1)
-            ->get()->first_row();
-
-        if(!$result) {
-            return date('H:i:s');
-        }
-
-        return $result->hour;
-    }
-
-    /**
-     * 获取指定日期最新的数据时间, 这个根据updated_at进行降序排列就行
-     * @param $table
-     * @param null $date
-     * @return false|string
-     */
-    private function getLastestHour2($cityId, $date = null)
-    {
-        if (!$this->isTableExisted('real_time_' . $cityId)) {
-            return date('H:i:s');
-        }
-
-        $date = $date ?? date('Y-m-d');
-
-        $result = $this->db->select('hour')
-            ->from('real_time_' . $cityId)
-            ->where('updated_at >=', $date . ' 00:00:00')
-            ->where('updated_at <=', $date . ' 23:59:59')
-            ->order_by('updated_at', 'desc')
-            ->limit(1)
-            ->get()->first_row();
-
-        if(!$result) {
-            return date('H:i:s');
-        }
-
-        return $result->hour;
     }
 
     /**

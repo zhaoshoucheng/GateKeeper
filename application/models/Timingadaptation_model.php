@@ -10,6 +10,7 @@ class Timingadaptation_model extends CI_Model
         $this->db = $this->load->database('default', true);
         $this->load->helper('http_helper');
         $this->load->model('redis_model');
+        $this->load->model('common_model');
         $this->load->config('adaption_conf');
     }
 
@@ -160,10 +161,10 @@ class Timingadaptation_model extends CI_Model
                 : time()) + 5 * 60);
 
         return [
-            'get_current_plan_time' => date('Y-m-d H:i:s'),
-            'last_upload_time' => $lastUploadTime,
-            'adapte_time' => $res['timing_update_time'] ?? 'N/A',
-            'next_upload_time' => date('Y-m-d H:i:s', $nextUploadTime),
+            'get_current_plan_time' => date('H:i:s'),
+            'last_upload_time' => $lastUploadTime == 'N/A' ? 'N/A' : date('H:i:s', strtotime($lastUploadTime)),
+            'adapte_time' => isset($res['timing_update_time']) ? date('H:i:s', strtotime($res['timing_update_time'])) : 'N/A',
+            'next_upload_time' => date('H:i:s', $nextUploadTime),
             'status' => $status,
             'tmp' => $tmp,
             'message' => $messages[$status],
@@ -229,16 +230,16 @@ class Timingadaptation_model extends CI_Model
         // 自适应和基准数据合并之后的格式化处理
         $formatTimingCallback = function ($timing) {
             return [
-                'start_time' => $timing['start_time'][1] ?? '',
-                'suggest_start_time' => $timing['start_time'][0] ?? '',
-                'duration' => $timing['duration'][1] ?? '',
-                'suggest_duration' => $timing['duration'][0] ?? '',
-                'max' => $timing['max'][1] ?? '',
-                'suggest_max' => $timing['max'][0] ?? '',
-                'min' => $timing['min'][1] ?? '',
-                'suggest_min' => $timing['min'][0] ?? '',
-                'start_time_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
-                'duration_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
+                'start_time'            => $timing['start_time'][1] ?? '',
+                'suggest_start_time'    => $timing['start_time'][0] ?? '',
+                'duration'              => $timing['duration'][1] ?? '',
+                'suggest_duration'      => $timing['duration'][0] ?? '',
+                'max'                   => $timing['max'][1] ?? '',
+                'suggest_max'           => $timing['max'][0] ?? '',
+                'min'                   => $timing['min'][1] ?? '',
+                'suggest_min'           => $timing['min'][0] ?? '',
+                'start_time_change'     => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
+                'duration_change'       => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
             ];
         };
 
@@ -256,6 +257,9 @@ class Timingadaptation_model extends CI_Model
         }
 
         foreach ($adapt['tod'] as $tk => &$tod) {
+
+            $tod['extra_time']['tod_end_time'] = date('H:i', strtotime($tod['extra_time']['tod_end_time']));
+            $tod['extra_time']['tod_start_time'] = date('H:i', strtotime($tod['extra_time']['tod_start_time']));
 
             // 获取 该方向 flow Ids
             $flowIds = call_user_func($getFlowIdsCallback, $tod['movement_timing']);
@@ -329,7 +333,7 @@ class Timingadaptation_model extends CI_Model
             return [];
         }
 
-        $hour = $this->getLastestHour($cityId);
+        $hour = $this->common_model->getLastestHour($cityId);
 
         $flows = $this->db->select('logic_flow_id, twice_stop_rate')
             ->from('real_time_' . $cityId)
@@ -340,26 +344,5 @@ class Timingadaptation_model extends CI_Model
             ->get()->result_array();
 
         return array_column($flows, 'twice_stop_rate', 'logic_flow_id');
-    }
-
-    /**
-     * 获取最新批次的 hour
-     * @param $cityId
-     * @param null $date
-     * @return false|string
-     */
-    public function getLastestHour($cityId, $date = null)
-    {
-        if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
-            return $hour;
-        }
-
-        // 查询优化
-        $sql = "SELECT `hour` FROM `real_time_{$cityId}`  WHERE 1 ORDER BY updated_at DESC,hour DESC LIMIT 1";
-        $result = $this->db->query($sql)->first_row();
-        if(!$result)
-            return date('H:i:s');
-
-        return $result->hour;
     }
 }

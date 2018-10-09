@@ -35,6 +35,11 @@ class Welcome extends CI_Controller {
 	}
 
 	public function test(){
+        $this->load->model('redis_model');
+        $this->redis_model->setEx("11222", "hello", 24*3600);
+        $value = $this->redis_model->getData("11222");
+        var_dump($value);
+        exit;
         $hour = $this->overview_model->getLastestHour(12,"2018-09-12");
         var_dump($hour);exit;
         com_log_warning('_asynctask_index_error', 0, '1123123', []);

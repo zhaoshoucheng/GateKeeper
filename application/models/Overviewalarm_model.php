@@ -20,6 +20,7 @@ class Overviewalarm_model extends CI_Model
         $this->load->config('realtime_conf.php');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
+        $this->load->model('common_model');
     }
 
     /**
@@ -195,7 +196,7 @@ class Overviewalarm_model extends CI_Model
         $result = [];
 
         // 获取最近时间
-        $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
+        $lastHour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
 
         // 先去redis查数据，如果没有则查表
         $alarmRedisKey = 'its_realtime_alarm_'.$data['city_id'];
@@ -246,7 +247,7 @@ class Overviewalarm_model extends CI_Model
         $junctionIds = implode(',', array_unique(array_column($data, 'logic_junction_id')));
 
         // 获取路口信息
-        $junctionsInfo = $this->waymap_model->getJunctionInfo($junctionIds);
+        $junctionsInfo  = $this->waymap_model->getJunctionInfo($junctionIds);
         $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
 
         // 获取路口相位信息
@@ -255,12 +256,12 @@ class Overviewalarm_model extends CI_Model
         // 报警类别
         $alarmCate = $this->config->item('alarm_category');
 
-        foreach ($data as $k=>$val) {
+        foreach ($data as $k => $val) {
             // 持续时间
             $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
             if ($durationTime == 0) {
                 // 当前时间
-                $nowTime = time();
+                $nowTime          = time();
                 $tempDurationTime = ($nowTime - strtotime($val['start_time'])) / 60;
                 // 默认持续时间为2分钟 有的只出现一次，表里记录last_time与start_time相等
                 if ($tempDurationTime < 2) {
@@ -273,14 +274,14 @@ class Overviewalarm_model extends CI_Model
             if (!empty($junctionIdName[$val['logic_junction_id']])
                 && !empty($flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']])) {
                 $result['dataList'][$k] = [
-                    'start_time'        => date('H:i', strtotime($val['start_time'])),
-                    'duration_time'     => $durationTime,
+                    'start_time' => date('H:i', strtotime($val['start_time'])),
+                    'duration_time' => $durationTime,
                     'logic_junction_id' => $val['logic_junction_id'],
-                    'junction_name'     => $junctionIdName[$val['logic_junction_id']] ?? '',
-                    'logic_flow_id'     => $val['logic_flow_id'],
-                    'flow_name'         => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
-                    'alarm_comment'     => $alarmCate[$val['type']]['name'] ?? '',
-                    'alarm_key'         => $val['type'],
+                    'junction_name' => $junctionIdName[$val['logic_junction_id']] ?? '',
+                    'logic_flow_id' => $val['logic_flow_id'],
+                    'flow_name' => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
+                    'alarm_comment' => $alarmCate[$val['type']]['name'] ?? '',
+                    'alarm_key' => $val['type'],
                 ];
             }
         }
@@ -291,39 +292,6 @@ class Overviewalarm_model extends CI_Model
         $result['dataList'] = array_values($result['dataList']);
 
         return $result;
-    }
-
-    /**
-     * 获取指定日期最新的数据时间
-     * @param $table
-     * @param null $date
-     * @return false|string
-     */
-    private function getLastestHour($cityId, $date = null)
-    {
-        $hour = $this->redis_model->getData("its_realtime_lasthour_$cityId");
-        if(!empty($hour)) {
-            return $hour;
-        }
-        if (!$this->isTableExisted('real_time_' . $cityId)) {
-            return date('H:i:s');
-        }
-
-        $date = $date ?? date('Y-m-d');
-
-        $result = $this->db->select('hour')
-            ->from('real_time_' . $cityId)
-            ->where('updated_at >=', $date . ' 00:00:00')
-            ->where('updated_at <=', $date . ' 23:59:59')
-            ->order_by('hour', 'desc')
-            ->limit(1)
-            ->get()->first_row();
-
-        if(!$result) {
-            return date('H:i:s');
-        }
-
-        return $result->hour;
     }
 
     /**
