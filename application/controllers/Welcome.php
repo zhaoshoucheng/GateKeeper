@@ -40,7 +40,7 @@ class Welcome extends CI_Controller {
         parse_str($queryStr, $queryMap);
 
         $sign = getSign($queryMap, "3a01e6c56bcce94ee5de073df3d512d4");
-        $url="http://100.90.164.31:8082/Xmmtrace/xmmtrace".$queryStr."&sign=".$sign;
+        $url="http://100.90.164.31:8082/Xmmtrace/xmmtrace?".$queryStr."&sign=".$sign;
         echo $url;exit;
 
 
