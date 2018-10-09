@@ -20,6 +20,7 @@ class Evaluate_model extends CI_Model
         $this->load->config('realtime_conf');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
+        $this->load->model('common_model');
     }
 
     /**
@@ -120,7 +121,7 @@ class Evaluate_model extends CI_Model
         }
 
         // 获取最近时间
-        $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
+        $lastHour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
 
         $where = "hour = '{$lastHour}'";
 
