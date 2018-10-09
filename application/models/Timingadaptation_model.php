@@ -258,6 +258,9 @@ class Timingadaptation_model extends CI_Model
 
         foreach ($adapt['tod'] as $tk => &$tod) {
 
+            $tod['extra_time']['tod_end_time'] = date('H:i', strtotime($tod['extra_time']['tod_end_time']));
+            $tod['extra_time']['tod_start_time'] = date('H:i', strtotime($tod['extra_time']['tod_start_time']));
+
             // 获取 该方向 flow Ids
             $flowIds = call_user_func($getFlowIdsCallback, $tod['movement_timing']);
 
