@@ -65,8 +65,6 @@ $config['authirized_apps'] = array(
             'Xmmtrace/xmmtrace',
         ),
         'white_ips' => array(
-            "172.25.32.53",
-            "100.70.160.62"
         )
     ),
 );
