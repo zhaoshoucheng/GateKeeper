@@ -216,7 +216,7 @@ class Area_model extends CI_Model
             ->from('area')
             ->where('city_id', $params['city_id'])
             ->where('delete_at', '1970-01-01 00:00:00')
-            ->order_by('created_at desc')
+            ->order_by('create_at desc')
             ->get()->result_array();
 
         $areaIds = array_column($areas, 'id');
