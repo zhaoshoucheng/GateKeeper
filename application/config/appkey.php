@@ -45,4 +45,16 @@ $config['authirized_apps'] = array(
         'white_ips' => array(
         )
     ),
+    '1004' => array(
+        'name'  => 'token',
+        'secret'=> '3a01e6c56bcce94ee5de073df3d512d2',
+        'open_api'   => array(
+            'AdaptMovement/queryconf',
+            'AdaptMovement/updateconf',
+            'AdaptMovement/deleteconf',
+        ),
+        'white_ips' => array(
+            "172.25.32.53"
+        )
+    ),
 );
