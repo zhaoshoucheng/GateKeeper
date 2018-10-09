@@ -161,10 +161,10 @@ class Timingadaptation_model extends CI_Model
                 : time()) + 5 * 60);
 
         return [
-            'get_current_plan_time' => date('Y-m-d H:i:s'),
-            'last_upload_time' => $lastUploadTime,
-            'adapte_time' => $res['timing_update_time'] ?? 'N/A',
-            'next_upload_time' => date('Y-m-d H:i:s', $nextUploadTime),
+            'get_current_plan_time' => date('H:i:s'),
+            'last_upload_time' => $lastUploadTime == 'N/A' ? 'N/A' : date('H:i:s', strtotime($lastUploadTime)),
+            'adapte_time' => isset($res['timing_update_time']) ? date('H:i:s', strtotime($res['timing_update_time'])) : 'N/A',
+            'next_upload_time' => date('H:i:s', $nextUploadTime),
             'status' => $status,
             'tmp' => $tmp,
             'message' => $messages[$status],
@@ -230,16 +230,16 @@ class Timingadaptation_model extends CI_Model
         // 自适应和基准数据合并之后的格式化处理
         $formatTimingCallback = function ($timing) {
             return [
-                'start_time' => $timing['start_time'][1] ?? '',
-                'suggest_start_time' => $timing['start_time'][0] ?? '',
-                'duration' => $timing['duration'][1] ?? '',
-                'suggest_duration' => $timing['duration'][0] ?? '',
-                'max' => $timing['max'][1] ?? '',
-                'suggest_max' => $timing['max'][0] ?? '',
-                'min' => $timing['min'][1] ?? '',
-                'suggest_min' => $timing['min'][0] ?? '',
-                'start_time_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
-                'duration_change' => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
+                'start_time'            => $timing['start_time'][1] ?? '',
+                'suggest_start_time'    => $timing['start_time'][0] ?? '',
+                'duration'              => $timing['duration'][1] ?? '',
+                'suggest_duration'      => $timing['duration'][0] ?? '',
+                'max'                   => $timing['max'][1] ?? '',
+                'suggest_max'           => $timing['max'][0] ?? '',
+                'min'                   => $timing['min'][1] ?? '',
+                'suggest_min'           => $timing['min'][0] ?? '',
+                'start_time_change'     => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
+                'duration_change'       => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
             ];
         };
 
