@@ -163,7 +163,7 @@ class MY_Controller extends CI_Controller {
             $this->errmsg = "该appid:{$app_id}没有授权";
             return false;
         }
-        $method = isset($app_config[$app_id]['method']) ? $_REQUEST['method'] : "";
+        $method = isset($app_config[$app_id]['method']) ? $app_config[$app_id]['method'] : "";
 
         // 如果是any获取所有参数包含get
         if($method=="any"){
@@ -186,7 +186,7 @@ class MY_Controller extends CI_Controller {
 
         ksort($params);
         $query_str = http_build_query($params);
-        
+
         if (isset($app_config[$app_id]['white_ips']) && in_array($_SERVER['REMOTE_ADDR'],$app_config[$app_id]['white_ips'])) {
             return true;
         }
