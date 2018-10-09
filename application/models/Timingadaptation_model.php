@@ -116,7 +116,7 @@ class Timingadaptation_model extends CI_Model
         $current_info = json_decode($res['current_info'], true);
 
         // 获取基准配时数据
-        $current_result = $this->getCurrentUpdateResult();
+        $current_result = $this->getCurrentUpdateResult($params['logic_junction_id']);
 
         list($status, $tmp) = [null, null];
 
@@ -174,8 +174,10 @@ class Timingadaptation_model extends CI_Model
 
     /**
      * 获取配时下发结果
+     * @param $logic_junction_id
+     * @return array|null
      */
-    private function getCurrentUpdateResult()
+    private function getCurrentUpdateResult($logic_junction_id)
     {
         $address = $this->config->item('url') . '/TimingAdaptation/getUploadStatus';
         $res = httpGET($address, compact('logic_junction_id'));
