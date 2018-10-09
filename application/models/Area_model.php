@@ -28,6 +28,7 @@ class Area_model extends CI_Model
         $this->load->model('redis_model');
         $this->load->config('nconf');
         $this->load->config('realtime_conf');
+        $this->load->config('evaluate_conf');
     }
 
     public function getList($city_id){
@@ -278,6 +279,9 @@ class Area_model extends CI_Model
             'stop_delay' => '区域平均延误'
         ];
 
+        // 获取指标单位
+        $units = array_column($this->config->item('area'), 'unit', 'key');
+
         // 指标不存在与映射数组中
         if(!isset($methods[$params['quota_key']])) {
             return [];
@@ -352,8 +356,8 @@ class Area_model extends CI_Model
 
         $result['info'] = [
             'area_name' => $areaInfo['area_name'],
-            'quota_name' => $nameMaps[$params['quota_key']],
-            'quota_unit' => '',
+            'quota_name' => $nameMaps[$params['quota_key']] ?? '',
+            'quota_unit' => $units[$params['quota_key']] ?? '',
             'base_time' => [$params['base_start_date'], $params['base_end_date']],
             'evaluate_time' => [$params['evaluate_start_date'], $params['evaluate_end_date']],
         ];
