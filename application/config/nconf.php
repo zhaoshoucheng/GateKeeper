@@ -98,9 +98,9 @@ if($development == 2){
     $signal_control_ext = '/signal-timing';
 
     // xmmtrace
-    $signal_control_server = '100.69.238.158';
-    $signal_control_port = '8001';
-    $signal_control_ext = '/api/transmit/Traffic';
+    $xmmtrace_server = '100.69.238.158';
+    $xmmtrace_port = '8001';
+    $xmmtrace_ext = '/api/transmit/Traffic';
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
