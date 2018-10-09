@@ -171,6 +171,7 @@ class MY_Controller extends CI_Controller {
         }else{
             $params = $this->input->post();
         }
+        print_r($params);exit;
         com_log_notice('_com_sign', ['params' => $params]);
         unset($params['sign']);
         if (!isset($params['ts'])) {
