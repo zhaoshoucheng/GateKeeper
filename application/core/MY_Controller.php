@@ -173,6 +173,8 @@ class MY_Controller extends CI_Controller {
         }
         com_log_notice('_com_sign', ['params' => $params]);
         unset($params['sign']);
+        print_r($app_config);exit;
+        print_r($params);exit;
         if (!isset($params['ts'])) {
             $params['ts'] = time();
         }
