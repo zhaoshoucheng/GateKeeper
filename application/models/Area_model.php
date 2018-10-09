@@ -227,7 +227,6 @@ class Area_model extends CI_Model
             ->from('area_junction_relation')
             ->where_in('area_id', $areaIds)
             ->where('delete_at', '1970-01-01 00:00:00')
-            ->order_by('id desc')
             ->get()->result_array();
 
         $junctionIds = array_column($areaJunctions, 'junction_id');
@@ -264,6 +263,8 @@ class Area_model extends CI_Model
 
             $results[$areaId] = $result;
         }
+
+        krsort($results);
 
         return $results;
     }
