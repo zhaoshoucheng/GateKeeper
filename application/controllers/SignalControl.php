@@ -16,7 +16,6 @@ class SignalControl extends MY_Controller{
 
     }
 
-
     public function proxy()
     {
 
