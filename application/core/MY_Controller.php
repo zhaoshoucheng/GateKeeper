@@ -176,7 +176,7 @@ class MY_Controller extends CI_Controller {
         if (!isset($params['ts'])) {
             $params['ts'] = time();
         }
-
+        print_r($params);exit;
         // 带时间戳的sign的时效时间为1s
         if (abs(time() - $params['ts']) > 3) {
             $this->errno = ERR_AUTH_KEY;
