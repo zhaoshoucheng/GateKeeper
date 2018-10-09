@@ -167,7 +167,7 @@ class MY_Controller extends CI_Controller {
 
         // 如果是any获取所有参数包含get
         if($method=="any"){
-            $params = $_REQUEST;
+            $params = array_merge($this->input->post(), $this->input->get());
         }else{
             $params = $this->input->post();
         }
