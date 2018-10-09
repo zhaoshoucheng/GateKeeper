@@ -395,7 +395,11 @@ class Timingadaptationarea_model extends CI_Model
             $name = $junction['junction_name'];
             $firstName = mb_substr($name, 0, 1);
             $pinyins = $pinyin->convert($firstName, PINYIN_ASCII_TONE);
-            $data[$key]['pinyin'] = $pinyins[0];
+            if(!empty($pinyins)){
+                $data[$key]['pinyin'] = $pinyins[0];
+            }else{
+                $data[$key]['pinyin'] = '';
+            }
         }
 
         usort($data, function($a, $b){
