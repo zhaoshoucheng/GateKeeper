@@ -31,13 +31,9 @@ class Xmmtrace extends MY_Controller{
             $ret = httpPOST($this->config->item('xmmtrace_interface')."/".$funcName,$params,0,'raw');
         }
         if($ret){
-            $ret = json_decode($ret,true);
-            if($ret['errorCode']!=0){
-                $this->errno = ERR_HTTP_FAILED;
-                $this->errmsg = $ret['errorMsg'];
-                return;
-            }
-            return $this->response($ret['data']);
+            header("Content-Type:application/json;charset=UTF-8");
+            echo json_encode($ret);
+            exit;
         }
         $this->errno = ERR_HTTP_FAILED;
         $this->errmsg = "服务异常";
