@@ -63,7 +63,7 @@ $config['authirized_apps'] = array(
         'method'  => 'any',
         'secret'=> '3a01e6c56bcce94ee5de073df3d512d4',
         'open_api'   => array(
-            'Xmmtrace/xmmtrace',
+            'Xmmtrace/proxy/xmmtrace',
         ),
         'white_ips' => array(
         )
