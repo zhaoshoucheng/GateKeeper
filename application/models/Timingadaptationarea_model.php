@@ -813,8 +813,9 @@ class Timingadaptationarea_model extends CI_Model
                     // 速度m/s转换为km/h
                     $value = $item['quotaMap']['weight_avg'] * 3.6;
                 }
+                $dayTime = date('H:i:s', strtotime($item['quotaMap']['dayTime']));
                 $ret[$k] =  [
-                    date('H:i:s', $item['quotaMap']['dayTime'] / 1000), // 时间 X轴
+                    $dayTime, // 时间 X轴
                     round($value, 2),                                       // 值   Y轴
                 ];
             }
