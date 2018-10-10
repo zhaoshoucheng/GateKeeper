@@ -77,6 +77,29 @@ class TimingAdaptation extends MY_Controller
         }
     }
 
+    public function getCurrentStatus()
+    {
+        $params = $this->input->post();
+
+        $validator = Validator::make($params, [
+            'logic_junction_id' => 'required',
+        ]);
+
+        if($validator->fail()) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validator->firstError();
+            return;
+        }
+
+        try {
+            $data = $this->timingadaptation_model->getCurrentStatus($params);
+            $this->response($data);
+        } catch (Exception $e) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $e->getMessage();
+        }
+    }
+
     /**
      * 获取自适应配时状态
      */
