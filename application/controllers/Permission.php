@@ -14,7 +14,7 @@ class Permission extends MY_Controller
     {
         $menu = $this->config->item('menu');
 
-        $data = $menu[$menu['check']($this->username)] ?? [];
+        $data = $menu['menuList'][$menu['check']($this->username)] ?? [];
 
         $this->response($data);
     }
