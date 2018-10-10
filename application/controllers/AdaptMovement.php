@@ -7,7 +7,7 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class AdaptMovement extends Inroute_Controller{
+class AdaptMovement extends MY_Controller{
     public function __construct()
     {
         parent::__construct();
@@ -16,10 +16,8 @@ class AdaptMovement extends Inroute_Controller{
 
     }
 
-
     public function proxy()
     {
-
         $requestUri = $_SERVER['REQUEST_URI'];
         $realUri = explode("?",$requestUri);
         $realUri = explode("/",$realUri[0]);
