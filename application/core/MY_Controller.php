@@ -23,7 +23,7 @@ class MY_Controller extends CI_Controller {
         parent::__construct();
         date_default_timezone_set('Asia/Shanghai');
         $host = $_SERVER['HTTP_HOST'];
-        
+
         $this->load->config('white');
         $escapeSso = $this->config->item('white_escape_sso');
 
@@ -148,26 +148,15 @@ class MY_Controller extends CI_Controller {
         }
     }
 
+    /**
+     * 签名方式修改,支持post+get混合参数
+     * @return bool
+     */
     private function _checkAuthorizedApp() {
         if($this->is_check_login == 0){
             return true;
         }
-        // 获取所有的参数
-        $params = $this->input->post();
-        com_log_notice('_com_sign', ['params' => $params]);
-        unset($params['sign']);
-        if (!isset($params['ts'])) {
-            $params['ts'] = time();
-        }
-        // 带时间戳的sign的时效时间为1s
-        if (abs(time() - $params['ts']) > 3) {
-            $this->errno = ERR_AUTH_KEY;
-            $this->errmsg = "该签名已经过时";
-            return false;
-        }
 
-        ksort($params);
-        $query_str = http_build_query($params);
         $client_sign = isset($_REQUEST['sign']) ? $_REQUEST['sign'] : "";
         $app_id = $_REQUEST['app_id'];
         $this->load->config('appkey', true);
@@ -178,9 +167,32 @@ class MY_Controller extends CI_Controller {
             $this->errmsg = "该appid:{$app_id}没有授权";
             return false;
         }
+        $method = isset($app_config[$app_id]['method']) ? $app_config[$app_id]['method'] : "";
+
+        // 如果是any获取所有参数包含get
+        if($method=="any"){
+            $params = array_merge($this->input->post(), $this->input->get());
+        }else{
+            $params = $this->input->post();
+        }
+        com_log_notice('_com_sign', ['params' => $params]);
+        unset($params['sign']);
+        if (!isset($params['ts'])) {
+            $params['ts'] = time();
+        }
+        // 带时间戳的sign的时效时间为1s
+        if (abs(time() - $params['ts']) > 10) {
+            $this->errno = ERR_AUTH_KEY;
+            $this->errmsg = "该签名已经过时";
+            return false;
+        }
+        ksort($params);
+        $query_str = http_build_query($params);
+
         if (isset($app_config[$app_id]['white_ips']) && in_array($_SERVER['REMOTE_ADDR'],$app_config[$app_id]['white_ips'])) {
             return true;
         }
+
         $app_key = $app_config[$app_id]['secret'];
         $open_api = isset($app_config[$app_id]['open_api']) ? $app_config[$app_id]['open_api'] : array();
         $server_sign = substr(md5($query_str . "&" . $app_key), 7, 16);
