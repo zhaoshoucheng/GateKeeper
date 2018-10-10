@@ -763,7 +763,7 @@ class Timingadaptationarea_model extends CI_Model
         $esJunctionIds = implode(',', array_filter(array_column($junctions['data'], 'logic_junction_id')));
 
         // 当前时间 毫秒级时间戳
-        $endTime = (int)(microtime(true) * 1000);
+        $endTime = (int)(time() * 1000);
         // 开始时间 当天开始时间 毫秒级时间戳
         $startTime = strtotime('00:00:00') * 1000;
 
@@ -813,14 +813,50 @@ class Timingadaptationarea_model extends CI_Model
                     // 速度m/s转换为km/h
                     $value = $item['quotaMap']['weight_avg'] * 3.6;
                 }
+                $dayTime = date('H:i:s', strtotime($item['quotaMap']['dayTime']));
                 $ret[$k] =  [
-                    date('H:i:s', $item['quotaMap']['dayTime'] / 1000), // 时间 X轴
+                    $dayTime, // 时间 X轴
                     round($value, 2),                                       // 值   Y轴
                 ];
             }
 
+            $tmpRet = [];
+            $lastDayTime = "";
+            for($i = 0; $i < count($ret); ) {
+                if (empty($lastDayTime)) {
+                    $lastDayTime = $ret[$i][0];
+                    $tmpRet[] = $ret[$i];
+                    $i++;
+                    continue;
+                }
+
+                $nowTime = strtotime($ret[$i][0]);
+                $lastTime = strtotime($lastDayTime);
+                // 如果两个距离不是顺序的
+                if ($lastTime > $nowTime) {
+                    $i++;
+                    continue;
+                }
+
+                // 如果两个距离小于15分钟
+                if ($nowTime - $lastTime < 15*60) {
+                    $tmpRet[] = $ret[$i];
+                    $lastDayTime = $ret[$i][0];
+                    $i++;
+                    continue;
+                }
+
+                // 两个距离大于15分钟
+                $lastDayTime = $tmpDayTime = date("H:i:s", $lastTime + 15 * 60);
+                $tmpRet[] = [
+                    $tmpDayTime,
+                    null
+                ];
+                continue;
+            }
+
             $result['errno'] = 0;
-            $result['data'] = !empty($ret) ? $ret : [];
+            $result['data'] = !empty($tmpRet) ? $tmpRet : [];
             return $result;
         } catch (Exception $e) {
             com_log_warning('_es_queryQuota_failed', 0, $e->getMessage(), compact("esUrl","esData","quotaInfo"));
