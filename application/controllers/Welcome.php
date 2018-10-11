@@ -35,7 +35,7 @@ class Welcome extends CI_Controller {
 	}
 
 	public function test(){
-        $queryStr="app_id=1004&ts=".time();
+        /*$queryStr="app_id=1004&ts=".time();
         $queryMap = [];
         parse_str($queryStr, $queryMap);
         $sign = getSign($queryMap, "3a01e6c56bcce94ee5de073df3d512d2");
@@ -43,8 +43,7 @@ class Welcome extends CI_Controller {
         $url="http://100.90.164.31:8082/AdaptMovement/updateconf?".$queryStr."&sign=".$sign;
         echo $sign;
         echo "<br/>";
-        echo $url;exit;
-
+        echo $url;exit;*/
 
         $queryStr="logic_junction_ids=22222&app_id=1004&ts=".time();
         $queryMap = [];
