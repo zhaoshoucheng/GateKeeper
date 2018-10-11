@@ -36,7 +36,7 @@ function make_output() {
 ##      1.生成部署包output
 ##########################################
 # 1.生成部署包output
-#compose
+compose
 make_output
 ret=$?
 if [ $ret -eq 0 ];then
