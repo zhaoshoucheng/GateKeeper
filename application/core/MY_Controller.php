@@ -195,11 +195,7 @@ class MY_Controller extends CI_Controller {
 
         $app_key = $app_config[$app_id]['secret'];
         $open_api = isset($app_config[$app_id]['open_api']) ? $app_config[$app_id]['open_api'] : array();
-        echo $query_str . "&" . $app_key;
-        echo "<br/>";
         $server_sign = substr(md5($query_str . "&" . $app_key), 7, 16);
-        echo $server_sign;
-        echo "<br/>";
         if ($server_sign != $client_sign) {
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "签名的sign不正确";
