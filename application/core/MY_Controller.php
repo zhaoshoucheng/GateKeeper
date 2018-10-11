@@ -168,6 +168,7 @@ class MY_Controller extends CI_Controller {
             return false;
         }
         $method = isset($app_config[$app_id]['method']) ? $app_config[$app_id]['method'] : "";
+        $timeout = isset($app_config[$app_id]['timeout']) ? $app_config[$app_id]['timeout'] : 10;
 
         // 如果是any获取所有参数包含get
         if($method=="any"){
@@ -181,7 +182,7 @@ class MY_Controller extends CI_Controller {
             $params['ts'] = time();
         }
         // 带时间戳的sign的时效时间为1s
-        if (abs(time() - $params['ts']) > 10) {
+        if (abs(time() - $params['ts']) > $timeout) {
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "该签名已经过时";
             return false;
