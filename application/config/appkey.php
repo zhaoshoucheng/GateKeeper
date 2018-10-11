@@ -47,11 +47,13 @@ $config['authirized_apps'] = array(
     ),
     '1004' => array(
         'name'  => 'token',
+        'method'  => 'any',
+        'timeout'  => 100,
         'secret'=> '3a01e6c56bcce94ee5de073df3d512d2',
         'open_api'   => array(
-            'AdaptMovement/queryconf',
-            'AdaptMovement/updateconf',
-            'AdaptMovement/deleteconf',
+            'AdaptMovement/proxy/queryconf',
+            'AdaptMovement/proxy/updateconf',
+            'AdaptMovement/proxy/deleteconf',
         ),
         'white_ips' => array(
             "172.25.32.53",
