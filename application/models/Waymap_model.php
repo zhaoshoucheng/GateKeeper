@@ -11,6 +11,9 @@ class Waymap_model extends CI_Model
     private $email_to = 'ningxiangbing@didichuxing.com';
     protected $userid = '';
 
+    // 全局的最后一个版本
+    public static $lastMapVersion = [];
+
     public function __construct()
     {
         parent::__construct();
@@ -91,8 +94,9 @@ class Waymap_model extends CI_Model
 
         // 获取最新版本
         $mapVersions = $this->getAllMapVersion();
-        $newMapVersion = max($mapVersions);
-        $data['version'] = $newMapVersion;
+        if (!empty($mapVersions)) {
+            $data['version'] = max($mapVersions);
+        }
 
         try {
             $ids_array = explode(',', $ids);
@@ -313,8 +317,10 @@ class Waymap_model extends CI_Model
         $result_version = '';
         try {
             $url = $this->config->item('waymap_interface') . '/signal-map/map/getDateVersion';
+
             $map_version = httpPOST($url, $wdata);
             $retArr = json_decode($map_version, true);
+
             if (isset($retArr['errorCode'])
                 && $retArr['errorCode'] == 0
                 && !empty($retArr['data'])) {
@@ -428,6 +434,7 @@ class Waymap_model extends CI_Model
      *
      * @param $qArr array 请求参数
      * @return array
+     * @throws Exception
      */
     public function getConnectionAdjJunctions($qArr)
     {
@@ -510,11 +517,12 @@ class Waymap_model extends CI_Model
         }
 
         try {
-
+            $this->load->helper('phase');
             $getQuery = [
                 'logic_junction_ids' => $junctionIds,
                 'user_id' => $this->config->item('waymap_userid'),
                 'token' => $this->config->item('waymap_token'),
+                'version' => $this->getLastMapVersion(),
             ];
             $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
 
@@ -526,6 +534,8 @@ class Waymap_model extends CI_Model
             }
 
             $res = array_map(function ($v) {
+                // 纠正这里的phase_id和phase_name
+                $v = $this->adjustPhase($v);
                 return array_column($v, 'phase_name', 'logic_flow_id');
             }, $res['data']);
 
@@ -536,6 +546,67 @@ class Waymap_model extends CI_Model
         }
     }
 
+
+    /**
+     * 修改路口的flow，校准phase_id和phase_name
+     * @param $flows flow数据
+     * @return array
+     */
+    private function adjustPhase($flows)
+    {
+        foreach ($flows as $key => $flow) {
+            $phaseId = phase_map($flow['in_degree'], $flow['out_degree']);
+            $phaseName = phase_name($phaseId);
+            $flows[$key]['phase_id'] = $phaseId;
+            $flows[$key]['phase_name'] = $phaseName;
+        }
+        return $flows;
+    }
+
+    /**
+     * 获取路口相位信息
+     */
+    public function getFlowMovement($cityId, $logicJunctionId, $logicFlowId)
+    {
+        try {
+            $query = [
+                'city_id' => $cityId,
+                'logic_junction_id' => $logicJunctionId,
+                'logic_flow_id' => $logicFlowId,
+                'user_id' => $this->config->item('waymap_userid'),
+                'token' => $this->config->item('waymap_token'),
+            ];
+            $url = $this->config->item('waymap_interface') . '/signal-map/flow/movement';
+
+            $res = httpGET($url, $query);
+
+            $res = json_decode($res, true);
+            if ($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])) {
+                return [];
+            }
+
+            return $res['data']['movement'];
+        } catch (Exception $e) {
+
+            return [];
+        }
+    }
+
+
+    /*
+     * 获取最新的路网版本
+     */
+    public function getLastMapVersion()
+    {
+        if (!empty(self::$lastMapVersion)) {
+            return self::$lastMapVersion;
+        }
+
+        $mapVersions = $this->getAllMapVersion();
+        self::$lastMapVersion = max($mapVersions);
+        return self::$lastMapVersion;
+    }
+
     /**
      * 获取全部路网版本
      */
@@ -543,7 +614,6 @@ class Waymap_model extends CI_Model
     {
         $data['token'] = $this->token;
         $data['user_id'] = $this->userid;
-        $mapVersions = [];
 
         try {
             $mapVersions = httpGET($this->config->item('waymap_interface') . '/signal-map/map/versions', $data);

@@ -48,6 +48,14 @@ class Downgrade_model extends CI_Model
     public function getUrlCache($route, $method, $params)
     {
         $this->config->load('cron', TRUE);
+
+        //未开通城市排除
+        $downgradeCityId = isset($params['city_id']) ? intval($params['city_id']) : 0;
+        $cityIds = $this->config->item('city_ids', 'cron');
+        if(!in_array($downgradeCityId,$cityIds)){
+            return "";
+        }
+
         $basedir = $this->config->item('basedir', 'cron');
         $cacheFile = $this->getCacheFileName($route, $method, $params);
         try {

@@ -5,6 +5,8 @@
 # date:    2018-08-21
 ********************************************/
 
+use Didi\Cloud\Collection\Collection;
+
 class Road_model extends CI_Model
 {
     private $tb = 'road';
@@ -23,6 +25,8 @@ class Road_model extends CI_Model
         }
 
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
+        $this->load->config('evaluate_conf');
     }
 
     /**
@@ -85,6 +89,13 @@ class Road_model extends CI_Model
             return ['errno' => -1, 'errmsg' => '新增干线入库失败！'];
         }
 
+        $tmp = $this->formatRoadDetailData($insertData['city_id'], $insertData['logic_junction_ids']);
+
+        if(is_object($tmp))
+            $tmp = [];
+
+        $this->redis_model->setData('Road_' . $insertData['road_id'], json_encode($tmp));
+
         return ['errno' => 0, 'errmsg' => ''];
     }
 
@@ -124,6 +135,13 @@ class Road_model extends CI_Model
             return ['errno' => -1, 'errmsg' => '干线更新失败！'];
         }
 
+        $tmp = $this->formatRoadDetailData(intval($data['city_id']), $updateData['logic_junction_ids']);
+
+        if(is_object($tmp))
+            $tmp = [];
+
+        $this->redis_model->setData('Road_' . trim($data['road_id']), json_encode($tmp));
+
         return ['errno' => 0, 'errmsg' => ''];
     }
 
@@ -152,6 +170,8 @@ class Road_model extends CI_Model
             return ['errno' => -1, 'errmsg' => '干线更新失败！'];
         }
 
+        $this->redis_model->deleteData('Road_' . trim($data['road_id']));
+
         return ['errno' => 0, 'errmsg' => ''];
     }
 
@@ -159,7 +179,7 @@ class Road_model extends CI_Model
      * 查询干线详情
      * @param $data['city_id'] interger Y 城市ID
      * @param $data['road_id'] string   Y 干线ID
-     * @return json
+     * @return array
      */
     public function getRoadDetail($data)
     {
@@ -188,17 +208,98 @@ class Road_model extends CI_Model
         return $result;
     }
 
+    /**
+     * 获取指定城市全部干线的详情
+     *
+     * @param $params
+     * @return array
+     */
+    public function getAllRoadDetail($params)
+    {
+        // 获取数据
+        $result = $this->db->select('road_id, logic_junction_ids, road_name, road_direction')
+            ->from($this->tb)
+            ->where('city_id', $params['city_id'])
+            ->where('is_delete', 0)
+            ->order_by('created_at desc')
+            ->get()->result_array();
+
+        // 如果数据为空或者获取数据失败，则返回空数组
+        if(!$result) {
+            return [];
+        }
+        
+        $results = [];
+
+        foreach ($result as $item) {
+
+            //从 Redis 获取数据失败
+            if(!($tmp = $this->redis_model->getData('Road_' . $item['road_id']))) {
+
+                // 从数据库中获取数据
+                $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
+
+                // 数据控获取数据为空
+                if(is_object($tmp))
+                    $tmp = [];
+
+                // 将数据刷新到 Redis
+                $this->redis_model->setData('Road_' . $item['road_id'], json_encode($tmp));
+            } else {
+                $tmp = json_decode($tmp, true);
+            }
+
+            $tmp['road'] = $item;
+            $results[] = $tmp;
+        }
+
+        return $results;
+    }
+
+    /**
+     * 干线评估
+     * @param $params
+     * @return array|mixed
+     */
     public function comparison($params)
     {
-        $junctionList = $this->db->select('logic_junction_ids')
+        // 指标算法映射
+        $methods = [
+            'stop_time_cycle' => 'round(sum(stop_time_cycle), 2) as stop_time_cycle',
+            'stop_delay' => 'round(sum(stop_delay), 2) as stop_delay',
+            'speed' => 'round(avg(speed), 2) as speed',
+            'time' => '',
+        ];
+
+        $nameMaps = [
+            'stop_time_cycle' => '干线停车次数',
+            'stop_delay' => '干线停车延误',
+            'speed' => '干线平均速度',
+            'time' => '干线通行时间',
+        ];
+
+        // 获取指标单位
+        $units = array_column($this->config->item('road'), 'unit', 'key');
+
+        // 如果指标不在映射数组中，返回空数组
+        if(!isset($methods[$params['quota_key']])) {
+            return [];
+        }
+
+        // 获取干线路口数据
+        $junctionList = $this->db->select('road_name, logic_junction_ids')
             ->from('road')
             ->where('city_id', $params['city_id'])
             ->where('road_id', $params['road_id'])
             ->where('is_delete', 0)
             ->get()->first_row();
 
-        if(!$junctionList) return [];
+        // 获取干线数据失败
+        if(!$junctionList) {
+            return [];
+        }
 
+        $roadName = $junctionList->road_name;
 
         $junctionIds = explode(',', $junctionList->logic_junction_ids);
 
@@ -209,49 +310,111 @@ class Road_model extends CI_Model
         // 调用路网接口获取干线路口信息
         $res = $this->waymap_model->getConnectPath($params['city_id'], $newMapVersion, $junctionIds);
 
-        $dataKey = $params['direction'] == 1 ? 'forward_path_flows' : 'backward_path_flows';
+        // 根据参数决定获取数据指定方向的 flow 集合
+        $dataKey = $params['direction'] == 1
+            ? 'forward_path_flows'
+            : 'backward_path_flows';
 
-        if(!isset($res[$dataKey])) return [];
+        // 路网数据没有该方向
+        if(!isset($res[$dataKey])) {
+            return [];
+        }
 
-        $logic_flow_ids = array_map(function ($v) {
+        // 生成指定时间范围内的 基准日期集合数组
+        $baseDates = dateRange($params['base_start_date'], $params['base_end_date']);
+
+        // 生成指定时间范围内的 评估日期集合数组
+        $evaluateDates = dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
+
+        // 生成 00:00 - 23:30 间的 粒度为 30 分钟的时间集合数组
+        $hours = hourRange('00:00', '23:30');
+
+        $logicFlowIds = array_map(function ($v) {
             return $v['logic_flow']['logic_flow_id'] ?? '';
         }, $res[$dataKey]);
 
-        $baseDates = $this->dateRange($params['base_start_date'], $params['base_end_date']);
-        $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
-        $hours = $this->hourRange('00:00', '23:30');
+        if($params['quota_key'] == 'time') {
 
-        //echo 'select ' . 'date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'] . ' from ' . 'flow_duration_v6_' . $params['city_id'] . ' where logic_flow_id in ( \'' . implode('\',\'', $junctionIds). '\' ) and date in ( \'' .           implode('\',\'', array_merge($baseDates, $evaluateDates))  . '\' ) group by date, hour';die();
+            $timeCaseWhen = 'round(sum(CASE WHEN speed = 0 THEN 0 ';
 
-        $result = $this->db->select('date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'])
+            // 获取每个 flow 的长度
+            foreach ($res[$dataKey] as $item)
+            {
+                if(isset($item['logic_flow']['logic_flow_id']) && $item['logic_flow']['logic_flow_id'] != '') {
+
+                    $timeCaseWhen .= 'WHEN logic_flow_id = \'' . $item['logic_flow']['logic_flow_id']
+                        . '\' THEN ' . $item['length'] . ' / speed ';
+                }
+            }
+
+            $timeCaseWhen .= 'ELSE 0 END), 2) time';
+
+            $methods['time'] = $timeCaseWhen;
+        }
+
+        // 获取数据源集合
+        $result = $this->db->select('date, hour, ' . $methods[$params['quota_key']])
             ->from('flow_duration_v6_' . $params['city_id'])
             ->where_in('date', array_merge($baseDates, $evaluateDates))
             ->where_in('hour', $hours)
             ->where_in('logic_junction_id', $junctionIds)
-            ->where_in('logic_flow_id', $logic_flow_ids)
+            ->where_in('logic_flow_id', $logicFlowIds)
             ->group_by(['date', 'hour'])->get()->result_array();
 
-        return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
-            return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
-        }, 'date'], function ($v) use ($params) {
-            return array_map(function ($v) use ($params) {
-                return [$v['hour'], $v[$params['quota_key']]];
-            }, $v);
-        })->get();
-    }
+        // 获取数据源失败 或者 数据源为空
+        if(!$result || empty($result)) {
+            return [];
+        }
 
-    private function dateRange($start, $end)
-    {
-        return array_map(function ($v) {
-            return date('Y-m-d', $v);
-        }, range(strtotime($start), strtotime($end), 60 * 60 * 24));
-    }
+        // 将数据按照 日期（基准 和 评估）进行分组的键名函数
+        $baseOrEvaluateCallback = function ($item) use ($baseDates) {
+            return in_array($item['date'], $baseDates)
+                ? 'base'
+                : 'evaluate';
+        };
 
-    private function hourRange($start, $end)
-    {
-        return array_map(function ($v) {
-            return date('H:i', $v);
-        }, range(strtotime($start), strtotime($end), 30 * 60));
+        // 数据分组后，将每组数据进行处理的函数
+        $groupByItemFormatCallback = function ($item) use ($params, $hours) {
+            $hourToNull = array_combine($hours, array_fill(0, 48, null));
+            $item = array_column($item, $params['quota_key'], 'hour');
+            $hourToValue = array_merge($hourToNull, $item);
+
+            $result = [];
+
+            foreach ($hourToValue as $hour => $value) {
+                $result[] = [$hour, $value];
+            }
+
+            return $result;
+        };
+
+        // 数据处理
+        $result = Collection::make($result)
+            ->groupBy([$baseOrEvaluateCallback, 'date'], $groupByItemFormatCallback)
+            ->get();
+
+        $result['info'] = [
+            'road_name' => $roadName,
+            'quota_name' => $nameMaps[$params['quota_key']] ?? '',
+            'quota_unit' => $units[$params['quota_key']] ?? '',
+            'direction' => $params['direction'] == 1 ? '正向' : '反向',
+            'base_time' => [$params['base_start_date'], $params['base_end_date']],
+            'evaluate_time' => [$params['evaluate_start_date'], $params['evaluate_end_date']],
+        ];
+
+        $jsonResult = json_encode($result);
+
+        $downloadId = md5($jsonResult);
+
+        $result['info']['download_id'] = $downloadId;
+
+        $redisKey = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
+
+        $this->redis_model->setData($redisKey, $jsonResult);
+
+        $this->redis_model->setExpire($redisKey, 30 * 60);
+
+        return $result;
     }
 
     /**
@@ -333,15 +496,16 @@ class Road_model extends CI_Model
      */
     private function isRoadNameExisted($name, $roadId = '')
     {
-        $where = 'road_name = "' . $name . '"';
+        $sqlArr = [$name];
+
+        $sql = 'select road_id from ' . $this->tb;
+        $sql .= ' where road_name = ?';
         if (!empty($roadId)) {
-            $where .= ' and road_id != "' . $roadId . '"';
+            $sql .= ' and road_id != ?';
+            array_push($sqlArr, $roadId);
         }
 
-        $this->db->select('road_id');
-        $this->db->from($this->tb);
-        $this->db->where($where);
-        $res = $this->db->get()->result_array();
+        $res = $this->db->query($sql, $sqlArr)->result_array();
 
         if (empty($res)) {
             return false;

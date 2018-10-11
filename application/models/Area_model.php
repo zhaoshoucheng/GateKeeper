@@ -5,6 +5,9 @@
  * # author:  niuyufu@didichuxing.com
  * # date:    2018-08-23
  ********************************************/
+
+use Didi\Cloud\Collection\Collection;
+
 class Area_model extends CI_Model
 {
     private $tb = 'area';
@@ -22,7 +25,10 @@ class Area_model extends CI_Model
             return [];
         }
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
         $this->load->config('nconf');
+        $this->load->config('realtime_conf');
+        $this->load->config('evaluate_conf');
     }
 
     public function getList($city_id){
@@ -204,39 +210,187 @@ class Area_model extends CI_Model
         return $formatResult($result);
     }
 
+    public function getAllAreaJunctionList($params)
+    {
+        $areas = $this->db->select('area_name, id')
+            ->from('area')
+            ->where('city_id', $params['city_id'])
+            ->where('delete_at', '1970-01-01 00:00:00')
+            ->order_by('create_at desc')
+            ->get()->result_array();
+
+        $areaIds = array_column($areas, 'id');
+
+        $areaIdNames = array_column($areas, 'area_name', 'id');
+
+        $areaJunctions = $this->db->select('area_id, junction_id')
+            ->from('area_junction_relation')
+            ->where_in('area_id', $areaIds)
+            ->where('delete_at', '1970-01-01 00:00:00')
+            ->get()->result_array();
+
+        $junctionIds = array_column($areaJunctions, 'junction_id');
+
+        $junctionList = $this->waymap_model->getJunctionInfo(implode(",",$junctionIds));
+
+        $junctionIdList = array_column($junctionList, null, 'logic_junction_id');
+
+        $areaIdJunctionList = Collection::make($areaJunctions)
+            ->groupBy('area_id', function ($v) {
+                return array_column($v, 'junction_id');
+            })->krsort()->get();
+
+        $results = [];
+
+        foreach ($areaIdJunctionList as $areaId => $junctionIds) {
+            $result = [
+                'area_id' => $areaId,
+                'area_name' => $areaIdNames[$areaId] ?? '',
+            ];
+
+            $cnt_lng = 0;
+            $cnt_lat = 0;
+            foreach ($junctionIds as $id) {
+                $result['junction_list'][] = $junctionIdList[$id] ?? '';
+                $cnt_lat += $junctionIdList[$id]['lat'] ?? 0;
+                $cnt_lng += $junctionIdList[$id]['lng'] ?? 0;
+            }
+
+            $len = count($result['junction_list']);
+
+            $result['center_lat'] = $len == 0 ? 0 : $cnt_lat / $len;
+            $result['center_lng'] = $len == 0 ? 0 : $cnt_lng / $len;
+
+            $results[] = $result;
+        }
+
+        return $results;
+    }
+
     public function comparison($params)
     {
+        // 指标算法映射
+        $methods = [
+            'speed' => 'round(avg(speed), 2) as speed',
+            'stop_delay' => 'round(avg(stop_delay), 2) as stop_delay'
+        ];
+
+        $nameMaps = [
+            'speed' => '区域平均速度',
+            'stop_delay' => '区域平均延误'
+        ];
+
+        // 获取指标单位
+        $units = array_column($this->config->item('area'), 'unit', 'key');
+
+        // 指标不存在与映射数组中
+        if(!isset($methods[$params['quota_key']])) {
+            return [];
+        }
+
+        if(!($areaInfo = $this->getAreaInfo($params['area_id']))) {
+            throw new Exception('该区域已被删除');
+        }
+
+        // 获取该区域全部路口ID
         $junctionList = $this->db->select('junction_id')
             ->from('area_junction_relation')
             ->where('area_id', $params['area_id'])
             ->where('delete_at', '1970-01-01 00:00:00')
             ->get()->result_array();
 
+        // 数据获取失败 或者 数据为空
+        if(!$junctionList || empty($junctionList)) {
+            return [];
+        }
+
         $junctionList = array_column($junctionList, 'junction_id');
 
-        $baseDates = $this->dateRange($params['base_start_date'], $params['base_end_date']);
-        $evaluateDates = $this->dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
+        // 基准时间范围
+        $baseDates = dateRange($params['base_start_date'], $params['base_end_date']);
 
-        $result = $this->db->select('date, hour, sum(traj_count * '. $params['quota_key'] . ') / sum(traj_count) as '. $params['quota_key'])
+        // 评估时间范围
+        $evaluateDates = dateRange($params['evaluate_start_date'], $params['evaluate_end_date']);
+
+        // 生成 00:00 - 23:30 间的 粒度为 30 分钟的时间集合数组
+        $hours = hourRange('00:00', '23:30');
+
+        // 获取数据
+        $result = $this->db->select('date, hour, ' . $methods[$params['quota_key']])
             ->from('junction_hour_report')
             ->where_in('date', array_merge($baseDates, $evaluateDates))
             ->where_in('logic_junction_id', $junctionList)
+            ->where_in('hour', $hours)
+            ->where('city_id', $params['city_id'])
             ->group_by(['date', 'hour'])->get()->result_array();
 
-        return Collection::make($result)->groupBy([function ($v) use ($baseDates) {
-            return in_array($v['date'], $baseDates) ? 'base' : 'evaluate';
-        }, 'date'], function ($v) use ($params) {
-            return array_map(function ($v) use ($params) {
-                return [$v['hour'], $v[$params['quota_key']]];
-            }, $v);
-        })->get();
+        if(!$result || empty($result))
+            return [];
+
+
+        // 将数据按照 日期（基准 和 评估）进行分组的键名函数
+        $baseOrEvaluateCallback = function ($item) use ($baseDates) {
+            return in_array($item['date'], $baseDates)
+                ? 'base'
+                : 'evaluate';
+        };
+
+        // 数据分组后，将每组数据进行处理的函数
+        $groupByItemFormatCallback = function ($item) use ($params, $hours) {
+            $hourToNull = array_combine($hours, array_fill(0, 48, null));
+            $item = array_column($item, $params['quota_key'], 'hour');
+            $hourToValue = array_merge($hourToNull, $item);
+
+            $result = [];
+
+            foreach ($hourToValue as $hour => $value) {
+                $result[] = [$hour, $value];
+            }
+
+            return $result;
+        };
+
+        // 数据处理
+        $result = Collection::make($result)
+            ->groupBy([$baseOrEvaluateCallback, 'date'], $groupByItemFormatCallback)
+            ->get();
+
+        $result['info'] = [
+            'area_name' => $areaInfo['area_name'],
+            'quota_name' => $nameMaps[$params['quota_key']] ?? '',
+            'quota_unit' => $units[$params['quota_key']] ?? '',
+            'base_time' => [$params['base_start_date'], $params['base_end_date']],
+            'evaluate_time' => [$params['evaluate_start_date'], $params['evaluate_end_date']],
+        ];
+
+        $jsonResult = json_encode($result);
+
+        $downloadId = md5($jsonResult);
+
+        $result['info']['download_id'] = $downloadId;
+
+        $redisKey = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
+
+        $this->redis_model->setData($redisKey, $jsonResult);
+
+        $this->redis_model->setExpire($redisKey, 30 * 60);
+
+        return $result;
     }
 
-    private function dateRange($start, $end)
+    private function getAreaInfo($areaId)
     {
-        return array_map(function ($v) {
-            return date('Y-m-d', $v);
-        }, range(strtotime($start), strtotime($end), 60 * 60 * 24));
+        $result = $this->db->select('*')
+            ->from('area')
+            ->where('id', $areaId)
+            ->where('delete_at', '1970-01-01')
+            ->get()->first_row('array');
+
+        if(!$result || empty($result)) {
+            return false;
+        }
+
+        return $result;
     }
 
     //自动替换model数据

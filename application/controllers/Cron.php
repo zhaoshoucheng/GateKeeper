@@ -143,6 +143,11 @@ class Cron extends CI_Controller
 
         foreach ($city_ids as $city_id) {
             try {
+                if($this->downgrade_model->isOpen($city_id)){
+                    $message="city_downgrade is open continue";
+                    echo "[INFO] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
+                    continue;
+                }
                 $all = [];
                 foreach ($checkItems as $item) {
                     $url = sprintf("%s/%s", $baseUrl,$item['url']);
@@ -218,7 +223,8 @@ class Cron extends CI_Controller
                 $message = $e->getMessage();
                 echo "[ERROR] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
                 $data = array('msgtype' => 'text', 'text' => array('content' => "兜底数据写入报警: ".$message));
-                //httpPOST($webhook, $data, 0, 'json');
+                httpPOST($webhook, $data, 0, 'json');
+                com_log_warning('downgradeWrite_error', 0, $e->getMessage());
                 continue;
             }
         }

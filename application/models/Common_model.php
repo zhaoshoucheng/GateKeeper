@@ -15,6 +15,8 @@ class Common_model extends CI_Model
         parent::__construct();
 
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
+        $this->db = $this->load->database('default', true);
     }
 
     /**
@@ -77,12 +79,79 @@ class Common_model extends CI_Model
         }
 
         $flowsInfo = $this->waymap_model->getFlowsInfo($data['logic_junction_id']);
+
         if (!empty($flowsInfo)) {
-            $result['data'] = $flowsInfo[$data['logic_junction_id']];
+            $result['data'] = $this->sortByNema($flowsInfo[$data['logic_junction_id']]);
         }
 
         $result['errno'] = 0;
 
         return $result;
+    }
+
+
+    /**
+     * @param $flowInfos array['logic_flow_id' => 'direction']
+     * @return array [['flow_id', 'flow_name', 'order']]
+     */
+    public function sortByNema($flowInfos)
+    {
+        // 过滤有"掉头"字样的
+        $flowInfos = array_filter($flowInfos, function($direction) {
+            return strpos($direction, '掉头') === False;
+        });
+
+        $scores = [
+            '南左' => 8 * 5,
+            '北直' => 7 * 5,
+            '西左' => 6 * 5,
+            '东直' => 5 * 5,
+            '北左' => 4 * 5,
+            '南直' => 3 * 5,
+            '东左' => 2 * 5,
+            '西直' => 1 * 5,
+        ];
+
+
+
+        $ret = [];
+        foreach ($flowInfos as $flowId => $direction) {
+            $word2 = mb_substr($direction, 0 , 2);
+            $order = $scores[$word2] ?? 0;
+            $ret[] = [
+                'flow_id' => $flowId,
+                'flow_name' => $direction,
+                'order' => $order,
+            ];
+        }
+
+        usort($ret, function($a, $b) {
+            if ($a['order'] == $b['order']) {
+                return 0;
+            }
+            return ($a['order'] > $b['order']) ? -1 : 1;
+        });
+        return $ret;
+    }
+
+    /**
+     * 获取最新的 hour
+     * @param $cityId
+     * @param null $date
+     * @return false|string
+     */
+    public function getLastestHour($cityId, $date = null)
+    {
+        if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
+            return $hour;
+        }
+
+        // 查询优化
+        $sql = "SELECT `hour` FROM `real_time_{$cityId}`  WHERE 1 ORDER BY updated_at DESC,hour DESC LIMIT 1";
+        $result = $this->db->query($sql)->first_row();
+        if(!$result)
+            return date('H:i:s');
+
+        return $result->hour;
     }
 }

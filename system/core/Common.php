@@ -616,19 +616,8 @@ if ( ! function_exists('_error_handler'))
 		$_error->log_exception($severity, $message, $filepath, $line);
 
 		// Should we display the error?
-		if (str_ireplace(array('off', 'none', 'no', 'false', 'null'), '', ini_get('display_errors')))
-		{
-			$_error->show_php_error($severity, $message, $filepath, $line);
-            exit;
-		}
-
-		// If the error is fatal, the execution of the script should be stopped because
-		// errors can't be recovered from. Halting the script conforms with PHP's
-		// default error handling. See http://www.php.net/manual/en/errorfunc.constants.php
-		if ($is_error)
-		{
-			exit(1); // EXIT_ERROR
-		}
+        $_error->show_php_error($severity, $message, $filepath, $line);
+        exit(1); // EXIT_ERROR
 	}
 }
 
@@ -653,12 +642,9 @@ if ( ! function_exists('_exception_handler'))
 
 		is_cli() OR set_status_header(500);
 		// Should we display the error?
-		if (str_ireplace(array('off', 'none', 'no', 'false', 'null'), '', ini_get('display_errors')))
-		{
-			$_error->show_exception($exception);
-		}
 
-		exit(1); // EXIT_ERROR
+        $_error->show_exception($exception);
+        exit(1); // EXIT_ERROR
 	}
 }
 

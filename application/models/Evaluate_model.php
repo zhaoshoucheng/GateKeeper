@@ -20,6 +20,7 @@ class Evaluate_model extends CI_Model
         $this->load->config('realtime_conf');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
+        $this->load->model('common_model');
     }
 
     /**
@@ -120,7 +121,7 @@ class Evaluate_model extends CI_Model
         }
 
         // 获取最近时间
-        $lastHour = $this->getLastestHour($data['city_id'], $data['date']);
+        $lastHour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
 
         $where = "hour = '{$lastHour}'";
 
@@ -580,38 +581,6 @@ class Evaluate_model extends CI_Model
         $this->redis_model->setExpire($redisKeyPrefix . $redisKey, 1800);
 
         return $result;
-    }
-
-    /**
-     * 获取指定日期最新的数据时间
-     * @param $table
-     * @param null $date
-     * @return false|string
-     */
-    private function getLastestHour($cityId, $date = null)
-    {
-        if (($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
-            return $hour;
-        }
-
-        if (!$this->isTableExisted('real_time_' . $cityId)) {
-            return date('H:i:s');
-        }
-
-        $date = $date ?? date('Y-m-d');
-
-        $result = $this->db->select('hour')
-            ->from('real_time_' . $cityId)
-            ->where('updated_at >=', $date . ' 00:00:00')
-            ->where('updated_at <=', $date . ' 23:59:59')
-            ->order_by('hour', 'desc')
-            ->limit(1)
-            ->get()->first_row();
-
-        if(!$result)
-            return date('H:i:s');
-
-        return $result->hour;
     }
 
     /**

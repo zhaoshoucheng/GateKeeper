@@ -5,6 +5,9 @@
  * # date:    2018-07-25
  ********************************************/
 
+use Didi\Cloud\Collection\Collection;
+use Overtrue\Pinyin\Pinyin;
+
 class Timingadaptationarea_model extends CI_Model
 {
     private $signal_mis_interface = '';
@@ -24,6 +27,7 @@ class Timingadaptationarea_model extends CI_Model
         $this->load->config('realtime_conf.php');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
+        $this->load->model('common_model');
     }
 
     /**
@@ -114,9 +118,9 @@ class Timingadaptationarea_model extends CI_Model
         if (!empty($redisData)) {
             $redisData = json_decode($redisData, true);
         }
-
         // 获取数组更新最新时间 用于获取每个区域平均延误、平均速度
-        $lastHour = $this->getLastestHour($cityId);
+        $lastHour = $this->common_model->getLastestHour($cityId);
+
         $esTime = date('Y-m-d H:i:s', strtotime($lastHour));
 
         foreach ($data as $k=>$v) {
@@ -149,7 +153,7 @@ class Timingadaptationarea_model extends CI_Model
                 ];
 
                 // 获取区域平均速度
-                $esData['quota_key'] = 'speed';
+                $esData['quota_key'] = 'avgSpeed';
                 $esSpeed = $this->getEsAreaQuotaValue($esData);
                 if ($esSpeed['errno'] != 0) {
                     $speed = 0;
@@ -233,10 +237,11 @@ class Timingadaptationarea_model extends CI_Model
 
         $esUrl = $this->config->item('es_interface') . '/estimate/diagnosis/queryQuota';
         $esData = [
-            'source'        => 'trajectory',
+            'source'        => 'signal_control',
             'cityId'        => $data['city_id'],
             'junctionId'    => $data['junctionIds'],
             'dayTime'       => $data['time'],
+            'requestId'  => get_traceid(),
             'andOperations' => [
                 'junctionId' => 'in',
                 'cityId'     => 'eq',
@@ -250,20 +255,24 @@ class Timingadaptationarea_model extends CI_Model
                 "orderField" => "weight_avg",
             ],
         ];
-
         try {
             $quotaInfo = httpPOST($esUrl, $esData, 0, 'json');
             if (!$quotaInfo) {
                 $result['errmsg'] = '调用es接口 queryQuota 失败！';
+                com_log_warning('_es_queryQuota_failed', 0, $result['errmsg'], compact("esUrl","esData","quotaInfo"));
+                $result['data'] = $quotaValue;
                 return $result;
             }
             $quotaInfo = json_decode($quotaInfo, true);
+            $quotaValue = 0;
             if ($quotaInfo['code'] != '000000') {
                 $result['errmsg'] = $quotaInfo['message'];
+                com_log_warning('_es_queryQuota_failed', 0, $result['errmsg'], compact("esUrl","esData","quotaInfo"));
+                $result['data'] = $quotaValue;
                 return $result;
             }
 
-            $quotaValue = 0;
+
             if (!empty($quotaInfo['result']['quotaResults'])) {
                 list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
                 $quotaValue = $quotaValueInfo['quotaMap']['weight_avg'];
@@ -308,8 +317,6 @@ class Timingadaptationarea_model extends CI_Model
      * $data = [
      *     [
      *         'logic_junction_id'=>xxxx, // 路口ID
-     *         'lat'              =>xxxx, // 纬度
-     *         'lon'              =>xxxx, // 经度
      *         'status'           =>xxxx, // 路口类型：0:无配时；1:有配时；2:自适应；9:配时异常
      *         'source'           =>xxxx, // 数据来源
      *         'junction_name'    =>xxxx, // 路口名称
@@ -326,12 +333,23 @@ class Timingadaptationarea_model extends CI_Model
 
         // 获取实时报警路口信息
         $alarmJunctions = $this->getRealTimeAlarmJunctions($cityId);
-        if (empty($alarmJunctions)) {
-            return [];
-        }
 
         // 路口ID串
         $junctionIds = implode(',', array_unique(array_column($alarmJunctions, 'logic_junction_id')));
+
+        // 获取路口信息
+        $allJunctionIds = implode(',', array_unique(array_column($data, 'logic_junction_id')));
+        $junctionInfo = $this->waymap_model->getJunctionInfo($allJunctionIds);
+
+        // 组织路口ID=>路口经纬度的数据  ['路口ID' =>['lng'=>xx, 'lat'=>xx], ...]
+        $junctionIdByLatAndLog = [];
+        foreach ($junctionInfo as $v) {
+            $junctionIdByLatAndLog[$v['logic_junction_id']] = [
+                'lng' => $v['lng'],
+                'lat' => $v['lat'],
+            ];
+        }
+
         // 获取路口相位信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
         // 报警类别
@@ -359,6 +377,10 @@ class Timingadaptationarea_model extends CI_Model
         array_filter($alarmData);
 
         foreach ($data as $k=>$v) {
+            // 路口经纬度
+            $data[$k]['lng'] = $junctionIdByLatAndLog[$v['logic_junction_id']]['lng'] ?? 0;
+            $data[$k]['lat'] = $junctionIdByLatAndLog[$v['logic_junction_id']]['lat'] ?? 0;
+
             // 组织路口报警信息
             $data[$k]['alarm'] = [
                     'is' => 0,
@@ -371,6 +393,23 @@ class Timingadaptationarea_model extends CI_Model
                 ];
             }
         }
+
+        // 按照拼音排序
+        $pinyin = new Pinyin('Overtrue\Pinyin\MemoryFileDictLoader');
+        foreach ($data as $key => $junction) {
+            $name = $junction['junction_name'];
+            $firstName = mb_substr($name, 0, 1);
+            $pinyins = $pinyin->convert($firstName, PINYIN_ASCII_TONE);
+            if(!empty($pinyins)){
+                $data[$key]['pinyin'] = $pinyins[0];
+            }else{
+                $data[$key]['pinyin'] = '';
+            }
+        }
+
+        usort($data, function($a, $b){
+            return $a['pinyin'] < $b['pinyin'] ? -1 : 1;
+        });
 
         return $data;
     }
@@ -707,7 +746,7 @@ class Timingadaptationarea_model extends CI_Model
      * 获取区域指标折线图
      * @param $data['city_id']   interger Y 城市ID
      * @param $data['area_id']   interger Y 区域ID
-     * @param $data['quota_key'] string   Y 指标KEY speed / stopDelay
+     * @param $data['quota_key'] string   Y 指标KEY avgSpeed / stopDelay
      * @return array
      */
     public function getAreaQuotaInfo($data)
@@ -721,20 +760,25 @@ class Timingadaptationarea_model extends CI_Model
 
         // 获取路口ID串
         $junctions = $this->getAreaJunctions($data);
-        if (!empty($junctions['data'])) {
-            $esJunctionIds = implode(',', array_filter(array_column($junctions['data'], 'logic_junction_id')));
+        if (empty($junctions['data'])) {
+            $result['errmsg'] = '此区域没有路口！';
+            return $result;
         }
 
+        $esJunctionIds = implode(',', array_filter(array_column($junctions['data'], 'logic_junction_id')));
+
         // 当前时间 毫秒级时间戳
-        $endTime = (int)(microtime(true) * 1000);
+        $endTime = (int)(time() * 1000);
         // 开始时间 当天开始时间 毫秒级时间戳
         $startTime = strtotime('00:00:00') * 1000;
 
         $esData = [
-            "source" => "trajectory",
-            "cityId" =>  $data['city_id'],
-            "junctionId" => $esJunctionIds,
-            "timestamp"  => "[{$startTime}, {$endTime}]",
+            "source"        => "signal_control",
+            "cityId"        => $data['city_id'],
+            'requestId'     => get_traceid(),
+            "junctionId"    => $esJunctionIds,
+            "timestamp"     => "[{$startTime}, {$endTime}]",
+            "source"        => 'signal_control',
             "andOperations" => [
                 "junctionId" => "in",
                 "cityId"     => "eq",
@@ -769,20 +813,509 @@ class Timingadaptationarea_model extends CI_Model
 
             $ret = [];
             foreach ($quotaValueInfo as $k=>$item) {
+                $value = $item['quotaMap']['weight_avg'];
+                if ($data['quota_key'] == 'avgSpeed') {
+                    // 速度m/s转换为km/h
+                    $value = $item['quotaMap']['weight_avg'] * 3.6;
+                }
+                $dayTime = date('H:i:s', strtotime($item['quotaMap']['dayTime']));
                 $ret[$k] =  [
-                    date('H:i:s', strtotime($item['quotaMap']['dayTime'])), // 时间 X轴
-                    round($item['quotaMap']['weight_avg'], 2),              // 值   Y轴
+                    $dayTime, // 时间 X轴
+                    round($value, 2),                                       // 值   Y轴
                 ];
             }
 
+            $tmpRet = [];
+            $lastDayTime = "";
+            for($i = 0; $i < count($ret); ) {
+                if (empty($lastDayTime)) {
+                    $lastDayTime = $ret[$i][0];
+                    $tmpRet[] = $ret[$i];
+                    $i++;
+                    continue;
+                }
+
+                $nowTime = strtotime($ret[$i][0]);
+                $lastTime = strtotime($lastDayTime);
+                // 如果两个距离不是顺序的
+                if ($lastTime > $nowTime) {
+                    $i++;
+                    continue;
+                }
+
+                // 如果两个距离小于15分钟
+                if ($nowTime - $lastTime < 15*60) {
+                    $tmpRet[] = $ret[$i];
+                    $lastDayTime = $ret[$i][0];
+                    $i++;
+                    continue;
+                }
+
+                // 两个距离大于15分钟
+                $lastDayTime = $tmpDayTime = date("H:i:s", $lastTime + 15 * 60);
+                $tmpRet[] = [
+                    $tmpDayTime,
+                    null
+                ];
+                continue;
+            }
+
             $result['errno'] = 0;
-            $result['data'] = !empty($ret) ? $ret : (object)[];
+            $result['data'] = !empty($tmpRet) ? $tmpRet : [];
             return $result;
         } catch (Exception $e) {
             com_log_warning('_es_queryQuota_failed', 0, $e->getMessage(), compact("esUrl","esData","quotaInfo"));
             $result['errmsg'] = '调用es的获取区域指标折线图接口出错！';
             return $result;
         }
+    }
+
+    /**
+     * 获取时空图
+     * @param $data['city_id']           interger Y 城市ID
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['logic_flow_id']     string   Y 相位ID
+     * @return array
+     */
+    public function getSpaceTimeMtraj($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        $endTime = time();
+        $startTime = $endTime - 30 * 60;
+
+        $esData = [
+            "cityId"     => $data['city_id'],
+            "endTime"    => $endTime,
+            "movementId" => $data['logic_flow_id'],
+            "source"     => "signal_control",
+            "startTime"  => $startTime,
+        ];
+
+        $esUrl = $this->config->item('es_interface') . '/estimate/space/query';
+
+        try {
+
+            // 获取相位配时信息
+            $timingInfo = $this->getFlowTimingInfo($data);
+            if ($timingInfo['errno'] != 0) {
+                $result['errmsg'] = $timingInfo['errmsg'];
+                return $result;
+            }
+
+            if (empty($timingInfo['data'])) {
+                $result['errmsg'] = '路口该方向无配时信息';
+                return $result;
+            }
+
+            $cycleLength = $timingInfo['data']['cycle'];
+            $offset = $timingInfo['data']['offset'];
+            if (empty($cycleLength)) {
+                $result['errmsg'] = '路口该方向相位差为空';
+                return $result;
+            }
+
+            $detail = httpPOST($esUrl, $esData, 0, 'json');
+            if (!$detail) {
+                $result['errmsg'] = '调用es接口 获取时空图 失败！';
+                return $result;
+            }
+            $detail = json_decode($detail, true);
+            if ($detail['code'] != '000000') {
+                $result['errmsg'] = $detail['message'];
+                return $result;
+            }
+
+            if (empty($detail['result'])) {
+                $result['errmsg'] = '该方向无轨迹';
+                return $result;
+            }
+
+            $ret['dataList'] = [];
+
+            foreach ($detail['result'] as $k=>$v) {
+                // 按时间正序排序
+                $timestampArr = array_column($v, 'timestamp');
+                sort($timestampArr);
+                array_multisort($timestampArr, SORT_DESC, $v);
+
+                foreach ($v as $kk=>$vv) {
+                    // 将时间转为秒数
+                    $time = date_parse(date("H:i:s", $vv['timestamp']));
+                    $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
+                    $ret['dataList'][$k][$kk] = [
+                        $second,                      // 时间秒数 X轴
+                        $vv['distanceToStopBar'] * -1 // 值      Y轴
+                    ];
+                }
+
+                $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k], $cycleLength, $offset);
+            }
+            $ret['dataList'] = array_filter($ret['dataList']);
+
+            $trajs = Collection::make($ret['dataList']);
+
+            // X轴 Y轴 信息集合
+            $ret['info'] = [
+                "x" => [
+                    "max" => $trajs->collapse()->column(0)->max(),
+                    "min" => $trajs->collapse()->column(0)->min(),
+                ],
+                "y" => [
+                    "max" => $trajs->collapse()->column(1)->max(),
+                    "min" => $trajs->collapse()->column(1)->min(),
+                ],
+            ];
+
+            $ret['signal_info'] = $timingInfo['data'];
+
+            $result['errno'] = 0;
+            $result['data'] = $ret;
+
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_es_space_query_failed', 0, $e->getMessage(), compact("esUrl","esData","detail"));
+            $result['errmsg'] = '调用es的获取时空图接口出错！';
+            return $result;
+        }
+    }
+
+    /**
+     * 获取把时空图轨迹压缩在一个周期内
+     * @param $trajs 轨迹数据,二维数组
+     * @param $cycleLength 周期时长
+     * @param $offset 相位差
+     * @return array 调整后的轨迹
+     */
+    private function getTrajsInOneCycle(array $trajs, int $cycleLength, int $offset)
+    {
+        $trajsCol = Collection::make($trajs);
+
+        $min = $trajsCol->reduce(function($a, $b){
+           if ($a == null) {
+               return $b;
+           }
+           if (abs($a[1]) < abs($b[1])) {
+               return $a;
+           }
+           return $b;
+        });
+
+        $crossTime = $min[0]; // 过路口时间
+        $shiftTime = $crossTime -  (($crossTime - $offset) % $cycleLength);
+        $minTime = $crossTime - $shiftTime - 2 * $cycleLength;
+        $maxTime = $crossTime - $shiftTime + 1.5 * $cycleLength;
+
+        $ret = [];
+        foreach ($trajs as $traj) {
+            $time = $traj[0] - $shiftTime;
+            if ($time < $minTime || $time > $maxTime) {
+                continue;
+            }
+
+            $ret[] = [$time, $traj[1]];
+        }
+        return $ret;
+    }
+
+
+    /**
+     * 获取散点图
+     * @param $data['city_id']           interger Y 城市ID
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['logic_flow_id']     string   Y 相位ID
+     * @return array
+     */
+    public function getScatterMtraj($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        $endTime = time();
+        $startTime = $endTime - 30 * 60;
+
+        $esData = [
+            "cityId"     => $data['city_id'],
+            "endTime"    => $endTime,
+            "movementId" => $data['logic_flow_id'],
+            "source"     => "signal_control",
+            "startTime"  => $startTime,
+        ];
+
+        $esUrl = $this->config->item('es_interface') . '/estimate/scatter/query';
+
+        try {
+            $detail = httpPOST($esUrl, $esData, 0, 'json');
+            if (!$detail) {
+                $result['errmsg'] = '调用es接口 获取散点图 失败！';
+                return $result;
+            }
+            $detail = json_decode($detail, true);
+            if ($detail['code'] != '000000') {
+                $result['errmsg'] = $detail['message'];
+                return $result;
+            }
+
+            if(empty($detail['result'])) {
+                $result['errmsg'] = '该方向没有轨迹数据';
+                return $result;
+            }
+
+            $ret['dataList'] = [];
+            // 用于存储所有时间
+            $timestamp = [];
+            // 用于存储所有值
+            $value = [];
+
+            foreach ($detail['result'] as $k=>$v) {
+                // 将时间转为秒数
+                $time = date_parse(date("H:i:s", $v['timestamp']));
+                $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
+                $ret['dataList'][$k] = [
+                    $second,                 // 时间秒数 X轴
+                    $v['stopDelayBefore'],  // 值      Y轴
+                ];
+
+                // 记录所有时间 用于获取最大最小值
+                $timestamp[$k] = $second;
+                // 记录所有值 用于获取最大最小值
+                $value[$k] = $v['stopDelayBefore'];
+            }
+
+            // X轴 Y轴 信息集合
+            $ret['info'] = [
+                "x" => [
+                    "max" => 0,
+                    "min" => 0,
+                ],
+                "y" => [
+                    "max" => 0,
+                    "min" => 0,
+                ],
+            ];
+            if (!empty($timestamp)) {
+                $ret['info']['x'] = [
+                    'max' => max($timestamp),
+                    'min' => min($timestamp),
+                ];
+            }
+            if (!empty($value)) {
+                $ret['info']['y'] = [
+                    'max' => max($value),
+                    'min' => min($value),
+                ];
+            }
+
+            // 获取相位配时信息
+            $timingInfo = $this->getFlowTimingInfo($data);
+            if ($timingInfo['errno'] != 0) {
+                $result['errmsg'] = $timingInfo['errmsg'];
+                return $result;
+            }
+
+            $ret['signal_info'] = $timingInfo['data'];
+
+            $result['errno'] = 0;
+            $result['data'] = $ret;
+
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_es_scatter_query_failed', 0, $e->getMessage(), compact("esUrl","esData","detail"));
+            $result['errmsg'] = '调用es的获取散点图接口出错！';
+            return $result;
+        }
+    }
+
+    /**
+     * 获取排队长度图
+     * @param $data['city_id']           interger Y 城市ID
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['logic_flow_id']     string   Y 相位ID
+     * @return array
+     */
+    public function getQueueLengthMtraj($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        if (empty($data)) {
+            $result['errmsg'] = 'data 不能为空！';
+            return $result;
+        }
+
+        $endTime = time();
+        $startTime = $endTime - 30 * 60;
+
+        $esData = [
+            "cityId"     => $data['city_id'],
+            "endTime"    => $endTime,
+            "movementId" => $data['logic_flow_id'],
+            "source"     => "signal_control",
+            "startTime"  => $startTime,
+        ];
+
+        $esUrl = $this->config->item('es_interface') . '/estimate/queue/query';
+
+        try {
+            $detail = httpPOST($esUrl, $esData, 0, 'json');
+            if (!$detail) {
+                $result['errmsg'] = '调用es接口 排队长度图 失败！';
+                return $result;
+            }
+            $detail = json_decode($detail, true);
+            if ($detail['code'] != '000000') {
+                $result['errmsg'] = $detail['message'];
+                return $result;
+            }
+
+            if (empty($detail['result'])) {
+                $result['errmsg'] = '该方向没有轨迹数据';
+                return $result;
+            }
+
+            // 获取某个方向的flow长度
+            $flowMovement = $this->waymap_model->getFlowMovement($data['city_id'], $data['logic_junction_id'], $data['logic_flow_id']);
+            if (empty($flowMovement) || empty($flowMovement['in_link_length'])) {
+                $result['errmsg'] = 'flow长度获取错误';
+                return $result;
+            }
+            $inLinkLength = $flowMovement['in_link_length'];
+
+            $ret['dataList'] = [];
+
+            // 用于存储所有时间
+            $timestamp = [];
+            // 用于存储所有值
+            $value = [];
+            foreach ($detail['result'] as $k=>$v) {
+                foreach ($v as $kk=>$vv) {
+                    // 将时间转为秒数
+                    $time = date_parse(date("H:i:s", $vv['timestamp']));
+                    $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
+                    $ret['dataList'][$vv['timestamp']] = [
+                        $second,             // 时间秒数 X轴
+                        round($vv['stopDistance'] / $inLinkLength * 100, 2), // 值      Y轴
+                    ];
+
+                    // 记录所有时间 用于获取最大最小值
+                    $timestamp[$vv['timestamp']] = $second;
+                    // 记录所有值 用于获取最大最小值
+                    $value[$vv['timestamp']] = $vv['stopDistance'];
+                }
+            }
+
+            // X轴 Y轴 信息集合
+            $ret['info'] = [
+                "x" => [
+                    "max" => 0,
+                    "min" => 0,
+                ],
+                "y" => [
+                    "max" => 0,
+                    "min" => 0,
+                ],
+            ];
+            if (!empty($timestamp)) {
+                $ret['info']['x'] = [
+                    'max' => max($timestamp),
+                    'min' => min($timestamp),
+                ];
+            }
+            if (!empty($value)) {
+                $ret['info']['y'] = [
+                    'max' => max($value),
+                    'min' => min($value),
+                ];
+            }
+
+            if (!empty($ret['dataList'])) {
+                ksort($ret['dataList']);
+                $ret['dataList'] = array_values($ret['dataList']);
+            }
+
+            // 获取相位配时信息
+            $timingInfo = $this->getFlowTimingInfo($data);
+            if ($timingInfo['errno'] != 0) {
+                $result['errmsg'] = $timingInfo['errmsg'];
+                return $result;
+            }
+
+            $ret['signal_info'] = $timingInfo['data'];
+
+            $result['errno'] = 0;
+            $result['data'] = $ret;
+
+            return $result;
+        } catch (Exception $e) {
+            com_log_warning('_es_queue_query_failed', 0, $e->getMessage(), compact("esUrl","esData","detail"));
+            $result['errmsg'] = '调用es的获取排队长度图接口出错！';
+            return $result;
+        }
+    }
+
+    /**
+     * 获取某一相位的自适应配置信息
+     * @param $data['logic_junction_id'] string Y 路口ID
+     * @return array
+     */
+    private function getFlowTimingInfo($data)
+    {
+        $result = ['errno'=>-1, 'errmsg'=>'', 'data'=>''];
+
+        $table = 'adapt_timing_mirror';
+        if (!$this->isTableExisted($table)) {
+            $result['errmsg'] = '数据adapt_timing_mirror表不存在！';
+            return $result;
+        }
+
+        $sql = 'select timing_info from ' . $table;
+        $sql .= ' where logic_junction_id = ?';
+
+        $resData = $this->db->query($sql, [$data['logic_junction_id']])->row_array();
+        if (empty($resData['timing_info'])) {
+            $result['errno'] = 0;
+            return $result;
+        }
+
+        $Info = json_decode($resData['timing_info'], true);
+
+        list($timingInfo) = $Info['data']['tod'];
+        if (empty($timingInfo)) {
+            $result['errno'] = 0;
+            return $result;
+        }
+
+        // 周期 相位差
+        $res = [
+            'cycle'  => $timingInfo['extra_time']['cycle'],
+            'offset' => $timingInfo['extra_time']['offset'],
+            'tod_start_time' => $timingInfo['extra_time']['tod_start_time'],
+            'tod_end_time' => $timingInfo['extra_time']['tod_end_time'],
+        ];
+        // 信息灯信息
+        foreach ($timingInfo['movement_timing'] as $k=>$v) {
+            if ($v['flow']['logic_flow_id'] == $data['logic_flow_id']) {
+                $res['yellow'] = $v['yellow'];
+                foreach ($v['timing'] as $kk=>$vv) {
+                    $res['green'][$kk] = [
+                        'start_time' => $vv['start_time'],
+                        'duration'   => $vv['duration'],
+                    ];
+                }
+            }
+        }
+
+        $result['errno'] = 0;
+        $result['data'] = $res;
+        return $result;
     }
 
     /**
@@ -843,7 +1376,7 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             // 获取最近时间
-            $lastHour = $this->getLastestHour($cityId);
+            $lastHour = $this->common_model->getLastestHour($cityId);
 
             $lastTime = date('Y-m-d') . ' ' . $lastHour;
             $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 300);
@@ -855,8 +1388,8 @@ class Timingadaptationarea_model extends CI_Model
             $sql .= ' and last_time >= ? and last_time <= ?';
             $sql .= ' order by type asc, (last_time - start_time) desc';
             $result = $this->db->query($sql, [
-                $data['city_id'],
-                $data['date'],
+                $cityId,
+                date('Y-m-d'),
                 $lastTime,
                 $cycleTime
             ])->result_array();
@@ -904,39 +1437,6 @@ class Timingadaptationarea_model extends CI_Model
 
         $result = $this->db->query($sql, [$cityId, $areaId])->result_array();
         return $result;
-    }
-
-    /**
-     * 获取指定日期最新的数据时间
-     * @param $table
-     * @param null $date
-     * @return false|string
-     */
-    private function getLastestHour($cityId, $date = null)
-    {
-        $hour = $this->redis_model->getData("its_realtime_lasthour_$cityId");
-        if(!empty($hour)) {
-            return $hour;
-        }
-        if (!$this->isTableExisted('real_time_' . $cityId)) {
-            return date('H:i:s');
-        }
-
-        $date = $date ?? date('Y-m-d');
-
-        $result = $this->db->select('hour')
-            ->from('real_time_' . $cityId)
-            ->where('updated_at >=', $date . ' 00:00:00')
-            ->where('updated_at <=', $date . ' 23:59:59')
-            ->order_by('hour', 'desc')
-            ->limit(1)
-            ->get()->first_row();
-
-        if(!$result) {
-            return date('H:i:s');
-        }
-
-        return $result->hour;
     }
 
     /**

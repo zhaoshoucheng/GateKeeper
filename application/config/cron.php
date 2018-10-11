@@ -3,13 +3,23 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 $config['city_ids'] = [1, 3, 12, 18, 23, 38, 85, 134];
-$config['base_url'] = 'http://100.90.163.52:8000/signalpro/api';
+
+$online_host = array(
+    'ipd-cloud-web00.gz01',
+    'ipd-cloud-web01.gz01',
+);
+if (in_array(gethostname(), $online_host)) {
+    $config['base_url'] = 'http://127.0.0.1:8000/signalpro/api';
+}else{
+    $config['base_url'] = 'http://100.90.165.32:8088/signalpro/api';
+}
+
 // $config['base_url'] = 'http://100.90.164.31:8100/itstool/';
 $config['open_file'] = 'open.json';
 $config['checkItems'] = [
     [
         'method' => 'POST',
-        'url' => 'Overviewalarm/realTimeAlarmList',
+        'url' => 'Overviewalarm/realTimeAlarmList', //实时报警列表
         'params' => [
             'city_id' => 0,
         ],
@@ -28,7 +38,7 @@ $config['checkItems'] = [
     ],
     [
         'method' => 'POST',
-        'url' => 'Overviewtoplist/stopTimeCycleTopList',
+        'url' => 'Overviewtoplist/stopTimeCycleTopList',    //停车次数top列表
         'params' => [
             'city_id' => 0,
             'pagesize' => 20,
@@ -46,7 +56,7 @@ $config['checkItems'] = [
     ],
     [
         'method' => 'POST',
-        'url' => 'Overviewtoplist/stopDelayTopList',
+        'url' => 'Overviewtoplist/stopDelayTopList',    //停车时间top列表
         'params' => [
             'city_id' => 0,
             'pagesize' => 20,
