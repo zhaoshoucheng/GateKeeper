@@ -48,7 +48,7 @@ $config['authirized_apps'] = array(
     '1004' => array(
         'name'  => 'token',
         'method'  => 'any',
-        'timeout'  => 10,
+        'timeout'  => 100,
         'secret'=> '3a01e6c56bcce94ee5de073df3d512d2',
         'open_api'   => array(
             'AdaptMovement/proxy/queryconf',
