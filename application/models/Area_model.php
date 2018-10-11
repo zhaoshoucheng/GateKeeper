@@ -435,4 +435,46 @@ class Area_model extends CI_Model
         }
         return 0;
     }
+
+    //================ 抽层 ==============//
+
+    public function getAreasByCityId($cityId, $select = '*')
+    {
+        return $this->db->select('*')
+            ->from($this->tb)
+            ->where('city_id', $cityId)
+            ->where('delete_at', "1970-01-01 00:00:00")
+            ->order_by('id', 'DESC')
+            ->get()->result_array();
+    }
+
+    public function getAreaByAreaId($areaId, $select = '*')
+    {
+        return $this->db->select($select)
+            ->from($this->tb)
+            ->where('id', $areaId)
+            ->where('delete_at', '1970-01-01')
+            ->get()->first_row('array');
+    }
+
+    public function getJunctionsByAreaId($areaId, $select = '*')
+    {
+        return $this->db->select($select)
+            ->from('area_junction_relation')
+            ->where('area_id', $areaId)
+            ->where('delete_at', '1970-01-01 00:00:00')
+            ->get()->result_array();
+    }
+
+    public function getJunctionByCityId($dates, $junctionIds, $hours, $cityId, $select)
+    {
+        return $this->db->select($select)
+            ->from('junction_hour_report')
+            ->where_in('date', $dates)
+            ->where_in('logic_junction_id', $junctionIds)
+            ->where_in('hour', $hours)
+            ->where('city_id', $cityId)
+            ->group_by(['date', 'hour'])
+            ->get()->result_array();
+    }
 }

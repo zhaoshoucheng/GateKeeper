@@ -7,14 +7,20 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\AreaService;
+
 class Area extends MY_Controller
 {
+    protected $areaService;
+
     public function __construct()
     {
         parent::__construct();
         $this->load->model('area_model');
         $this->load->config('evaluate_conf');
         $this->load->config('realtime_conf');
+
+        $this->areaService = new AreaService();
     }
 
     /**
@@ -127,7 +133,8 @@ class Area extends MY_Controller
         }
 
         try{
-            $data = $this->area_model->getList(intval($params['city_id']));
+            $data = $this->areaService->getList($params);
+            //$data = $this->area_model->getList(intval($params['city_id']));
         }catch (\Exception $e){
             com_log_warning('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_error', 0, $e->getMessage(), compact("params","data"));
             $this->errno = ERR_HTTP_FAILED;
