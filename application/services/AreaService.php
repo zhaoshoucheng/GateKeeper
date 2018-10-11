@@ -16,8 +16,6 @@ class AreaService extends BaseService
 
     public function __construct()
     {
-        parent::__construct();
-
         $this->area_model = new \Area_model();
 
         $this->load->model([

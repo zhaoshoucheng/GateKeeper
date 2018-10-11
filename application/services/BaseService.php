@@ -9,7 +9,10 @@
 namespace Services;
 
 
-class BaseService extends \CI_Model
+class BaseService
 {
-
+    public function __get($key)
+    {
+        return get_instance()->$key;
+    }
 }
