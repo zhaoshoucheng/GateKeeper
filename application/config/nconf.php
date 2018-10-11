@@ -47,8 +47,8 @@ if($development == 2){
     $signal_mis_ext = '/signal-mis';
 
     // es
-    $es_server = '10.89.236.25';
-    $es_port = '8087';
+    $es_server = '100.69.238.158';
+    $es_port = '8001';
     $es_ext = '';
 
     // new timing

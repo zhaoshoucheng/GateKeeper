@@ -259,11 +259,15 @@ class Timingadaptationarea_model extends CI_Model
             $quotaInfo = httpPOST($esUrl, $esData, 0, 'json');
             if (!$quotaInfo) {
                 $result['errmsg'] = '调用es接口 queryQuota 失败！';
+                com_log_warning('_es_queryQuota_failed', 0, $result['errmsg'], compact("esUrl","esData","quotaInfo"));
+
                 return $result;
             }
             $quotaInfo = json_decode($quotaInfo, true);
             if ($quotaInfo['code'] != '000000') {
                 $result['errmsg'] = $quotaInfo['message'];
+                com_log_warning('_es_queryQuota_failed', 0, $result['errmsg'], compact("esUrl","esData","quotaInfo"));
+
                 return $result;
             }
 
