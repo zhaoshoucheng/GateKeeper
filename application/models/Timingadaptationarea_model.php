@@ -1208,7 +1208,7 @@ class Timingadaptationarea_model extends CI_Model
                     // 记录所有时间 用于获取最大最小值
                     $timestamp[$vv['timestamp']] = $second;
                     // 记录所有值 用于获取最大最小值
-                    $value[$vv['timestamp']] = $vv['stopDistance'];
+                    $value[$vv['timestamp']] = round($vv['stopDistance'] / $inLinkLength * 100, 2);
                 }
             }
 
