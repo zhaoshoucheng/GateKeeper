@@ -16,10 +16,10 @@ $config['menu'] = [
         ];
 
         if(in_array($user, $users)) {
-            return 2;
+            return 1;
         }
 
-        return 1;
+        return 2;
     },
 
     'menuList' => [
@@ -32,7 +32,7 @@ $config['menu'] = [
             ],
             [
                 'name' => '诊断',
-                'url' => '/signalpro/#/diagnose/',
+                'url' => '/signalpro/#/',
                 'remark ' => 'signal',
                 'son' => [
                     [
@@ -41,51 +41,33 @@ $config['menu'] = [
                     ],
                     [
                         'name' => '详情',
-                        'url' => 'index',
+                        'url' => 'diagnose',
                     ],
                 ],
             ],
             [
                 'name' => '评估',
-                'url' => '/signalpro/#/assessment/',
+                'url' => '#/assessment/',
                 'remark ' => 'signal',
-                'son' => [
-                    [
-                        'name' => '路口评估',
-                        'url' => 'junction',
-                    ],
-                    [
-                        'name' => '干线评估',
-                        'url' => 'road',
-                    ],
-                    [
-                        'name' => '区域评估',
-                        'url' => 'area',
-                    ],
-                ],
             ],
             [
                 'name' => '优化',
-                'url' => '/signalpro/#/optimize/',
+                'url' => '/signalpro/#/',
                 'remark ' => 'signal',
                 'son' => [
                     [
                         'name' => '单点时段优化',
-                        'url' => 'signal',
+                        'url' => 'signal-optimize',
                     ],
                     [
                         'name' => '单点绿信比优化',
-                        'url' => 'green',
+                        'url' => 'green-optimize',
                     ],
                     [
                         'name' => '干线协调优化',
-                        'url' => 'coordinate',
+                        'url' => 'coordinate-optimize',
                     ],
                 ],
-            ],
-            [
-                'name' => '自适应',
-                'url' => '#/adaptive',
             ],
             [
                 'name' => '报告',
@@ -94,9 +76,9 @@ $config['menu'] = [
             ],
             [
                     'name' => '管理',
-                    'url' => '#/manage/configuration',
+                    'url' => '#/configuration',
                     'remark ' => 'signal',
-                ],
+            ],
         ],
         // 北京区域受限菜单
         2 => [
@@ -107,7 +89,7 @@ $config['menu'] = [
             ],
             [
                 'name' => '诊断',
-                'url' => '/signalpro/#/diagnose/',
+                'url' => '/signalpro/#/',
                 'remark ' => 'signal',
                 'son' => [
                     [
@@ -116,26 +98,26 @@ $config['menu'] = [
                     ],
                     [
                         'name' => '详情',
-                        'url' => 'index',
+                        'url' => 'diagnose',
                     ],
                 ],
             ],
             [
                 'name' => '优化',
-                'url' => '/signalpro/#/optimize/',
+                'url' => '/signalpro/#/',
                 'remark ' => 'signal',
                 'son' => [
                     [
                         'name' => '单点时段优化',
-                        'url' => 'signal',
+                        'url' => 'signal-optimize',
                     ],
                     [
                         'name' => '单点绿信比优化',
-                        'url' => 'green',
+                        'url' => 'green-optimize',
                     ],
                     [
                         'name' => '干线协调优化',
-                        'url' => 'coordinate',
+                        'url' => 'coordinate-optimize',
                     ],
                 ],
             ],
