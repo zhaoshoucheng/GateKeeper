@@ -16,10 +16,10 @@ $config['menu'] = [
         ];
 
         if(in_array($user, $users)) {
-            return 1;
+            return 2;
         }
 
-        return 2;
+        return 1;
     },
 
     'menuList' => [
