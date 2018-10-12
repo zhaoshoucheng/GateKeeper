@@ -122,7 +122,7 @@ class TimingAdaptation extends MY_Controller
             $data = $this->timingadaptation_model->getAdapteStatus($params);
             $this->response($data);
         } catch (Exception $e) {
-            $this->errno = ERR_PARAMETERS;
+            $this->errno = $e->getCode();
             $this->errmsg = $e->getMessage();
         }
     }

@@ -171,12 +171,12 @@ class Timingadaptation_model extends CI_Model
 
         // 没有数据
         if(!$res) {
-            throw new Exception('该路口无配时');
+            throw new Exception('该路口无配时', 0);
         }
 
         // 配时错误
         if($res['error_code']) {
-            throw new Exception('该路口配时错误');
+            throw new Exception('该路口配时错误', ERR_PARAMETERS);
         }
 
         $current_info = json_decode($res['current_info'], true);
