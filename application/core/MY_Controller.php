@@ -10,10 +10,11 @@ class MY_Controller extends CI_Controller {
 
     public $errno = 0;
     public $errmsg = '';
-    public $output_data=array();
-    public $templates = array();
+    public $output_data = [];
+    public $templates = [];
     public $routerUri = '';
     public $username = 'unknown';
+
     protected $debug = false;
     protected $is_check_login = 0;
     protected $timingType = 1; // 0，全部；1，人工；2，配时反推；3，信号机上报
@@ -21,7 +22,9 @@ class MY_Controller extends CI_Controller {
 
     public function __construct(){
         parent::__construct();
+
         date_default_timezone_set('Asia/Shanghai');
+
         $host = $_SERVER['HTTP_HOST'];
 
         $this->load->config('white');
@@ -32,7 +35,8 @@ class MY_Controller extends CI_Controller {
 
             $this->load->model('user/user', 'user');
             $this->routerUri = $this->uri->ruri_string();
-            com_log_notice('_com_sign', ['ip' => $_SERVER["REMOTE_ADDR"], 'ip' => $this->input->get_request_header('X-Real-Ip')]);
+            com_log_notice('_com_sign', ['ip' => $_SERVER["REMOTE_ADDR"], 'ip2' => $this->input->get_request_header('X-Real-Ip')]);
+
             // 此处采用appid+appkey的验证
             if (isset($_REQUEST['app_id'])) {
                 com_log_notice('_com_sign', ['uri' => $this->routerUri, 'request' => $_REQUEST]);
@@ -57,12 +61,12 @@ class MY_Controller extends CI_Controller {
                         || (isset($_SERVER["HTTP_ACCEPT"]) && strstr($_SERVER["HTTP_ACCEPT"], 'application/json')) ) {
                         $this->_output();
                         exit();
-                    }else{
+                    } else {
                         // 页面请求
                         $redirect = $this->user->getLoginUrl() . '&jumpto='.urlencode($currentUrl);
                         header("location: " . $redirect);
                         exit();
-                    };
+                    }
                 }
                 // 目前还未按照接口设置权限，所以暂时注释掉
                 /*
@@ -105,7 +109,7 @@ class MY_Controller extends CI_Controller {
 
     // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时
     protected function setTimingType(){
-        try{
+        try {
             $this->load->model('junction_model');
             $back_timing_roll = $this->config->item('back_timing_roll');
             $taskId = $this->input->get_post('task_id', true);
@@ -113,7 +117,7 @@ class MY_Controller extends CI_Controller {
             if (in_array($taskUser, $back_timing_roll, true)) {
                 $this->timingType = 2;
             }
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             com_log_warning('my_controller_set_timingtype_error', 0, $e->getMessage(), compact("taskId"));
         }
     }
@@ -126,13 +130,13 @@ class MY_Controller extends CI_Controller {
     }
 
     public function _output(){
-        if($this->errno >0 && empty($this->errmsg)){
+        if($this->errno >0 && empty($this->errmsg)) {
             $errmsgMap = $this->config->item('errmsg');
             $this->errmsg = $errmsgMap[$this->errno];
         }
-        if(!empty($this->templates)){
 
-            foreach ($this->templates as $t){
+        if(!empty($this->templates)) {
+            foreach ($this->templates as $t) {
                 echo $this->load->view($t, array(), true);
             }
         } else {
@@ -273,5 +277,25 @@ class MY_Controller extends CI_Controller {
             }
         }
         return ($ip ? $ip : $_SERVER['REMOTE_ADDR']);
+    }
+
+    /**
+     * @param null $key
+     * @param bool $xss
+     * @return mixed
+     */
+    protected function post($key = null, $xss = true)
+    {
+        return $this->input->post($key, $xss);
+    }
+
+    /**
+     * @param null $key
+     * @param bool $xss
+     * @return mixed
+     */
+    protected function get($key = null, $xss = true)
+    {
+        return $this->input->get($key, $xss);
     }
 }

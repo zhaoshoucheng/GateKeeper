@@ -5,15 +5,21 @@
 # date:    2018-04-03
 ********************************************/
 
-class Redis_model extends CI_Model
+namespace Models;
+
+class Redis_model extends \CI_Model
 {
     private $redis = false;
 
+    /**
+     * Redis_model constructor.
+     * @throws \Exception
+     */
     public function __construct()
     {
         parent::__construct();
 
-        $this->redis = new Redis();
+        $this->redis = new \Redis();
         // 需要设置redis的配置
         $redis_conf = $this->config->item('redis');
         if (isset($redis_conf['host'])) {
@@ -30,7 +36,7 @@ class Redis_model extends CI_Model
     /**
     * 获取数据
     * @param $key  string key
-    * @return array
+    * @return array|string|bool
     */
     public function getData($key)
     {
@@ -43,7 +49,7 @@ class Redis_model extends CI_Model
             if (!$res) {
                 return false;
             }
-        } catch  (RedisException $e) {
+        } catch  (\RedisException $e) {
             $res = false;
         }
         return $res;
@@ -52,7 +58,7 @@ class Redis_model extends CI_Model
     /**
     * 存储数据
     * @param $key    string key
-    * @param $value  json   value
+    * @param $value  array|string value
     * @return bool
     */
     public function setData($key, $value)
@@ -62,7 +68,7 @@ class Redis_model extends CI_Model
         }
         try {
             $res = $this->redis->set($key, $value);
-        } catch (RedisException $e) {
+        } catch (\RedisException $e) {
             $res = false;
         }
         return $res;
@@ -71,8 +77,8 @@ class Redis_model extends CI_Model
     /**
      * 设置时效
      * @param $key   string   key
-     * @param $value  json   value
-     * @param $time  interger 秒
+     * @param $value array|string   value
+     * @param $time  int 秒
      * @return bool
      */
     public function setEx($key, $value, $time)
@@ -95,7 +101,7 @@ class Redis_model extends CI_Model
     /**
     * 设置时效
     * @param $key   string   key
-    * @param $time  interger 秒
+    * @param $time  int 秒
     * @return bool
     */
     public function setExpire($key, $time)

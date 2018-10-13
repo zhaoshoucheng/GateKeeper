@@ -35,3 +35,59 @@ $config['road'] = [
         'unit' => '米／秒'
     ],
 ];
+
+$config['area_map'] = [
+    'speed' => '区域平均速度',
+    'stop_delay' => '区域平均延误'
+];
+
+$config['area_download_url_prefix'] = '/api/area/download?download_id=';
+
+$config['excel_style'] = [
+    'header' => [
+        'font' => [
+            'bold' => true,
+            'size '=> 16,
+            'color'=>[
+                'argb' => '00000000',
+            ],
+        ],
+        'fill' => [
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => [
+                'argb' => '00FFFF00',
+            ],
+        ],
+    ],
+    'title' => [
+        'font' => [
+            'bold' => true,
+            'size '=> 12,
+            'color'=>[
+                'argb' => '00000000',
+            ],
+        ],
+        'fill' => [
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => [
+                'argb' => '00DCDCDC',
+            ],
+        ],
+        'alignment' => [
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+        ],
+    ],
+    'content' => [
+        'borders' => [
+            'allborders' => [
+                'style' => PHPExcel_Style_Border::BORDER_THIN,
+                'color' => [
+                    'argb' => '00000000'
+                ],
+            ],
+        ],
+        'alignment' => [
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+        ],
+    ]
+];

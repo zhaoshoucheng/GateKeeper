@@ -58,6 +58,11 @@ class CI_Controller {
 	 */
 	private static $instance;
 
+    /**
+     * @var \CI_Loader
+     */
+    private $load;
+
 	/**
 	 * Class constructor
 	 *

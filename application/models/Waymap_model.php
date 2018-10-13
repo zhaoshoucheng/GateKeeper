@@ -5,7 +5,9 @@
 # date:    2018-04-08
  ********************************************/
 
-class Waymap_model extends CI_Model
+namespace Models;
+
+class Waymap_model extends \CI_Model
 {
     protected $token;
     private $email_to = 'ningxiangbing@didichuxing.com';

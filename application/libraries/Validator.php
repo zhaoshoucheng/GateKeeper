@@ -17,12 +17,18 @@ class Validator
         'equal' => '',
         'between' => '',
         'date' => '',
+        'arr' => ''
     ];
 
     private $data = [];
 
     private $messages = [];
 
+    /**
+     * @param $data
+     * @param $rules
+     * @return $this
+     */
     public function create($data, $rules)
 	{
 		$this->data = $data;
@@ -41,6 +47,11 @@ class Validator
 		return $this;
 	}
 
+    /**
+     * @param $data
+     * @param $rules
+     * @return Validator
+     */
 	public static function make($data, $rules)
     {
         return (new static)->create($data, $rules);
@@ -141,5 +152,13 @@ class Validator
             return;
         if(date($format, strtotime($this->data[$key])) !== $this->data[$key])
             $this->messages[] = "$key 的格式错误";
+    }
+
+    private function arr($key)
+    {
+        if(!isset($this->data[$key]))
+            return;
+        if(!is_array($this->data[$key]))
+            $this->messages[] = "$key 不是数组";
     }
 }

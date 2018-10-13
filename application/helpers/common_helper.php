@@ -169,7 +169,7 @@ if(!function_exists('hourRange')) {
      * @param string $format
      * @return array
      */
-    function hourRange($start = '00:00', $end = '23:00', $skip = 30, $format = 'H:i')
+    function hourRange($start = '00:00', $end = '23:30', $skip = 30, $format = 'H:i')
     {
         return array_map(function ($item) use ($format) {
             return date($format, $item);

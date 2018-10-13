@@ -136,7 +136,7 @@ if ( ! function_exists('load_class'))
 	 * @param	string	the class name being requested
 	 * @param	string	the directory where the class should be found
 	 * @param	mixed	an optional argument to pass to the class constructor
-	 * @return	object
+	 * @return	object|CI_Loader
 	 */
 	function &load_class($class, $directory = 'libraries', $param = NULL)
 	{

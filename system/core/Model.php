@@ -67,6 +67,7 @@ class CI_Model {
 	 * syntax as controllers.
 	 *
 	 * @param	string	$key
+     * @return object|CI_DB_query_builder
 	 */
 	public function __get($key)
 	{
