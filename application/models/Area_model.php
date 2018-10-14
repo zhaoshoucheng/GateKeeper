@@ -16,12 +16,7 @@ class Area_model extends \CI_Model
     /**
      * @var \CI_DB_query_builder
      */
-    private $db;
-
-    /**
-     * @var \CI_Loader
-     */
-    private $load;
+    protected $db;
 
     /**
      * Area_model constructor.

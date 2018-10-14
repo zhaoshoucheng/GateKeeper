@@ -61,7 +61,7 @@ class CI_Controller {
     /**
      * @var \CI_Loader
      */
-    private $load;
+    public $load;
 
 	/**
 	 * Class constructor

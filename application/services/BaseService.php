@@ -9,10 +9,13 @@
 namespace Services;
 
 
-class BaseService
+class BaseService extends \CI_Model
 {
-    public function __get($key)
+    /**
+     * BaseService constructor.
+     */
+    public function __construct()
     {
-        return get_instance()->$key;
+        parent::__construct();
     }
 }

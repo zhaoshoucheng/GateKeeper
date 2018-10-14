@@ -1,9 +1,8 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: didi
- * Date: 2018/10/11
- * Time: 下午3:38
+ * 信控平台 - 区域相关接口
+ *
+ * User: lichaoxi_i@didichuxing.com
  */
 
 namespace Services;
@@ -16,17 +15,18 @@ use Models\Area_model;
 class AreaService extends BaseService
 {
     /**
-     * @var \CI_Loader
+     * @var Area_model
      */
-    private $load;
+    protected $area_model;
 
     /**
-     * @var \CI_Config
+     * @var Redis_model
      */
-    private $config;
-
-    protected $area_model;
     protected $redis_model;
+
+    /**
+     * @var Waymap_model
+     */
     protected $waymap_model;
 
     /**
@@ -35,6 +35,8 @@ class AreaService extends BaseService
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->area_model = new Area_model();
         $this->redis_model = new Redis_model();
         $this->waymap_model = new Waymap_model();

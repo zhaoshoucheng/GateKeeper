@@ -1,21 +1,25 @@
 <?php
 /********************************************
-# desc:    路网数据模型
-# author:  ningxiangbing@didichuxing.com
-# date:    2018-04-08
+ * # desc:    路网数据模型
+ * # author:  ningxiangbing@didichuxing.com
+ * # date:    2018-04-08
  ********************************************/
 
 namespace Models;
 
 class Waymap_model extends \CI_Model
 {
-    protected $token;
-    private $email_to = 'ningxiangbing@didichuxing.com';
-    protected $userid = '';
-
     // 全局的最后一个版本
-    public static $lastMapVersion = [];
+    public static $lastMapVersion = null;
 
+    protected $token;
+
+    protected $userid;
+
+    /**
+     * Waymap_model constructor.
+     * @throws \Exception
+     */
     public function __construct()
     {
         parent::__construct();
@@ -23,543 +27,432 @@ class Waymap_model extends \CI_Model
         $this->load->config('nconf');
         $this->load->config('realtime_conf');
         $this->load->helper('http');
-        $this->token = $this->config->item('waymap_token');
+
+        $this->token  = $this->config->item('waymap_token');
         $this->userid = $this->config->item('waymap_userid');
+
+        $this->getLastMapVersion();
+    }
+
+    /**
+     * 获取最新的路网版本
+     *
+     * @return mixed|null
+     * @throws \Exception
+     */
+    public function getLastMapVersion()
+    {
+        if (self::$lastMapVersion == null) {
+            return self::$lastMapVersion;
+        }
+
+        $mapVersions = $this->getAllMapVersion();
+
+        self::$lastMapVersion = max($mapVersions);
+
+        return self::$lastMapVersion;
+    }
+
+    /**
+     * 获取全部路网版本
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getAllMapVersion()
+    {
+        $data = [];
+
+        $url = $this->config->item('waymap_interface') . '/signal-map/map/versions';
+
+        return $this->get($url, $data);
+    }
+
+    /**
+     * 路网数据接口统一调用 Get
+     *
+     * @param $url
+     * @param $data
+     * @param int $timeout
+     * @param array $header
+     * @return array
+     * @throws \Exception
+     */
+    public function get($url, $data, $timeout = 20000, $header = [])
+    {
+        $data['token']   = $this->token;
+        $data['user_id'] = $this->userid;
+
+        $res = httpGET($url, $data, $timeout, $header);
+
+        if (!$res) {
+            throw new \Exception('路网数据获取失败', ERR_REQUEST_WAYMAP_API);
+        }
+
+        $res = json_decode($res, true);
+
+        if (!$res) {
+            throw new \Exception('路网数据格式错误', ERR_REQUEST_WAYMAP_API);
+        }
+
+        if ($res['errorCode'] != 0) {
+            throw new \Exception($res['errorMsg'], $res['errorCode']);
+        }
+
+        return $res['data'] ?? [];
     }
 
     /**
      * 根据关键词获取路口信息
+     *
      * @param $city_id
      * @param $keyword
+     * @return array
+     * @throws \Exception
      */
     public function getSuggestJunction($city_id, $keyword)
     {
-        $data['token'] = $this->token;
-        $data['user_id'] = $this->userid;
-        $data['city_id'] = $city_id;
-        $data['keyword'] = $keyword;
+        $data = compact('city_id', 'keyword');
 
-        try {
-            $junctions = httpGET($this->config->item('waymap_interface') . '/signal-map/mapJunction/suggest', $data);
-            if (!$junctions) {
-                return [];
-            }
+        $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/suggest';
 
-            $junctions = json_decode($junctions, true);
-            if ($junctions['errorCode'] != 0 || empty($junctions['data'])) {
-                return [];
-            }
-
-            return $junctions['data'];
-        } catch (Exception $e) {
-            return [];
-        }
+        return $this->get($url, $data);
     }
 
     /**
      * 获取行政区信息
+     *
      * @param $city_id
+     * @return array
+     * @throws \Exception
      */
     public function getDistrictInfo($city_id)
     {
-        $data['token'] = $this->token;
-        $data['user_id'] = $this->userid;
-        $data['city_id'] = $city_id;
+        $data = compact('city_id');
 
-        try {
-            $ret = httpGET($this->config->item('waymap_interface') . '/signal-map/city/districts', $data);
-            if (!$ret) {
-                return [];
-            }
+        $url = $this->config->item('waymap_interface') . '/signal-map/city/districts';
 
-            $ret = json_decode($ret, true);
-            if ($ret['errorCode'] != 0 || empty($ret['data'])) {
-                return [];
-            }
-
-            return $ret['data'];
-        } catch (Exception $e) {
-            return [];
-        }
+        return $this->get($url, $data);
     }
 
     /**
      * 根据路口ID串获取路口名称
-     * @param logic_junction_ids     逻辑路口ID串     string
-     * @param returnFormat           数据返回格式      array [key => 'id', value => ['name',...]]
+     *
+     * @param $logic_ids
      * @return array
+     * @throws \Exception
      */
-    public function getJunctionInfo($ids, $returnFormat = null)
+    public function getJunctionInfo($logic_ids)
     {
-        $data['token'] = $this->token;
-        $data['user_id'] = $this->userid;
+        $version = self::$lastMapVersion;
 
-        // 获取最新版本
-        $mapVersions = $this->getAllMapVersion();
-        if (!empty($mapVersions)) {
-            $data['version'] = max($mapVersions);
-        }
+        $data = compact('logic_ids', 'version');
 
-        try {
-            $ids_array = explode(',', $ids);
+        $url = $this->config->item('waymap_interface') . '/signal-map/map/many';
 
-            $res = [];
-
-            foreach (array_chunk($ids_array, 100) as $ids) {
-                $data['logic_ids'] = implode(',', $ids);
-                $result = httpGET($this->config->item('waymap_interface') . '/signal-map/map/many', $data);
-
-                if (!$result) {
-                    // 日志
-                    return [];
-                }
-                $result = json_decode($result, true);
-                if ($result['errorCode'] != 0 || !isset($result['data']) || empty($result['data'])) {
-                    return [];
-                }
-
-                $res = array_merge($res, $result['data']);
-            }
-
-            if(is_null($returnFormat)) {
-                return $res;
-            } else {
-
-                //检查 $returnFormat 格式
-                if(!is_array($returnFormat) || !array_key_exists('key', $returnFormat)
-                    || !array_key_exists('value', $returnFormat) || !is_string($returnFormat['key']))
-                    return $res;
-
-                $result = [];
-
-                if(is_string($returnFormat['value'])) {
-                    $result = array_column($res, $returnFormat['value'], $returnFormat['key']);
-                } else {
-                    foreach ($res as $datum) {
-                        $temp = [];
-                        foreach ($returnFormat['value'] as $item) {
-                            $temp[$item] = $datum[$item];
-                        }
-                        $result[$datum[$returnFormat['key']]] = $temp;
-                    }
-                }
-
-                return $result;
-            }
-
-        } catch (Exception $e) {
-            return [];
-        }
+        return $this->get($url, $data);
     }
 
     /**
      * 获取路口各相位lng、lat
-     * @param $data['version']           路网版本
-     * @param $data['logic_junction_id'] 逻辑路口ID
-     * @param $data['logic_flow_ids']    相位id集合
+     *
+     * @param $version
+     * @param $logic_junction_id
+     * @param $logic_flow_ids
      * @return array
+     * @throws \Exception
      */
-    public function getJunctionFlowLngLat($data)
+    public function getJunctionFlowLngLat($version, $logic_junction_id, $logic_flow_ids)
     {
-        if (empty($data)) {
-            return [];
-        }
+        $data = compact('version', 'logic_junction_id', 'logic_flow_ids');
 
-        $data['token'] = $this->token;
-        $data['user_id'] = $this->userid;
+        $url = $this->config->item('waymap_interface') . '/signal-map/MapFlow/simplifyFlows';
 
-        $map_data = [];
-
-        try {
-            $map_data = httpGET($this->config->item('waymap_interface') . '/signal-map/MapFlow/simplifyFlows', $data);
-            if (!$map_data) {
-                // 日志
-                return [];
-            }
-            $map_data = json_decode($map_data, true);
-            if ($map_data['errorCode'] != 0 || empty($map_data['data'])) {
-                return [];
-            }
-        } catch (Exception $e) {
-            // 日志
-            return [];
-        }
-
-        return $map_data;
+        return $this->get($url, $data);
     }
 
     /**
      * 获取路口中心点坐标
-     * @param $data['logic_id']  逻辑路口ID
+     *
+     * @param $logic_id
      * @return array
+     * @throws \Exception
      */
-    public function getJunctionCenterCoords($data)
+    public function getJunctionCenterCoords($logic_id)
     {
-        if (empty($data)) {
-            return [];
+        $data = compact('logic_id');
+
+        $url = $this->config->item('waymap_interface') . '/signal-map/map/detail';
+
+        $result = $this->get($url, $data);
+
+        return [
+            'lng' => $result['data']['lng'],
+            'lat' => $result['data']['lat'],
+        ];
+    }
+
+    /**
+     * 获取全城路口
+     *
+     * @param $city_id
+     * @param int $version
+     * @return array|bool|mixed|string
+     * @throws \Exception
+     */
+    public function getAllCityJunctions($city_id, $version = 0)
+    {
+        /*-------------------------------------------------
+        | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
+        --------------------------------------------------*/
+        $redis_model = new Redis_model();
+
+        $redis_key = "all_city_junctions_{$city_id}_{$version}";
+
+        $result = $redis_model->getData($redis_key);
+
+        if (!$result) {
+
+            $offset = 0;
+            $count  = 10000;
+
+            $data = compact('offset', 'count', 'version');
+
+            $url = $this->config->item('waymap_interface') . '/signal-map/map/getList';
+
+            $res = $this->get($url, $data);
+
+            $redis_model->deleteData($redis_key);
+
+            $redis_model->setData($redis_key, json_encode($res['data']));
+
+            $redis_model->setExpire($redis_key, 3600 * 24);
+
+            $result = $res['data'];
         }
-
-        $data['token'] = $this->token;
-        $data['user_id'] = $this->userid;
-
-        try {
-            $junction_info = httpGET($this->config->item('waymap_interface') . '/signal-map/map/detail', $data);
-            if (!$junction_info) {
-                return [];
-            }
-
-            $junction_info = json_decode($junction_info, true);
-            if ($junction_info['errorCode'] != 0 || empty($junction_info['data'])) {
-                return [];
-            }
-        } catch (Exception $e) {
-            return [];
-        }
-
-        $result['lng'] = isset($junction_info['data']['lng']) ? $junction_info['data']['lng'] : '';
-        $result['lat'] = isset($junction_info['data']['lat']) ? $junction_info['data']['lat'] : '';
 
         return $result;
     }
 
     /**
-     * 获取全城路口
-     * @param city_id        Y 城市ID
-     * @param $version       N 地图版本
-     * @return array
-     */
-    public function getAllCityJunctions($city_id, $version=0, $returnFormat = null)
-    {
-        if ((int)$city_id < 1) {
-            return false;
-        }
-
-        /*---------------------------------------------------
-        | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
-        -----------------------------------------------------*/
-        $this->load->model('redis_model');
-        $redis_key = "all_city_junctions_{$city_id}_{$version}";
-        // 获取redis中数据
-        $city_junctions = $this->redis_model->getData($redis_key);
-        if (!$city_junctions) {
-            $data = [
-                'city_id' => $city_id,
-                'token'   => $this->token,
-                'user_id' => $this->userid,
-                'offset'  => 0,
-                'count'   => 10000
-            ];
-            if(!empty($version)){
-                $data["version"] = $version;
-            }
-            try {
-                $res = httpGET($this->config->item('waymap_interface') . '/signal-map/map/getList', $data);
-                if (!$res) {
-                    return false;
-                }
-                $res = json_decode($res, true);
-                if (isset($res['errorCode'])
-                    && $res['errorCode'] == 0
-                    && isset($res['data'])
-                    && count($res['data']) >= 1) {
-                    $this->redis_model->deleteData($redis_key);
-                    $this->redis_model->setData($redis_key, json_encode($res['data']));
-                    $this->redis_model->setExpire($redis_key, 3600 * 24);
-                    $city_junctions = $res['data'];
-                }
-            } catch (Exception $e) {
-                return false;
-            }
-        } else {
-            $city_junctions = json_decode($city_junctions, true);
-        }
-
-        if(!is_null($returnFormat)) {
-
-            //检查 $returnFormat 格式
-            if(!is_array($returnFormat) || !array_key_exists('key', $returnFormat)
-                || !array_key_exists('value', $returnFormat) || !is_string($returnFormat['key']))
-                return $city_junctions;
-
-            $result = [];
-
-            if(is_string($returnFormat['value'])) {
-                $result = array_column($city_junctions, $returnFormat['value'], $returnFormat['key']);
-            } else {
-                foreach ($city_junctions as $datum) {
-                    $temp = [];
-                    foreach ($returnFormat['value'] as $item) {
-                        $temp[$item] = $datum[$item];
-                    }
-                    $result[$datum[$returnFormat['key']]] = $temp;
-                }
-            }
-
-            return $result;
-        }
-        return $city_junctions;
-    }
-
-    /**
      * 获取最新地图版本号
-     * @param $dates array 日期 ['20180102', '20180103']
+     *
+     * @param $date
      * @return array
+     * @throws \Exception
      */
-    public function getMapVersion($dates)
+    public function getMapVersion($date)
     {
-        if (!is_array($dates) || empty($dates)) {
-            return [];
-        }
+        $data = compact('date');
 
-        $wdata = [
-            'date'  => implode(",",$dates),
-            'token' => $this->token,
-            'user_id' => $this->userid,
-        ];
-        $result_version = '';
-        try {
-            $url = $this->config->item('waymap_interface') . '/signal-map/map/getDateVersion';
+        $url = $this->config->item('waymap_interface') . '/signal-map/map/getDateVersion';
 
-            $map_version = httpPOST($url, $wdata);
-            $retArr = json_decode($map_version, true);
-
-            if (isset($retArr['errorCode'])
-                && $retArr['errorCode'] == 0
-                && !empty($retArr['data'])) {
-                foreach ($retArr['data'] as $k=>$v) {
-                    if(!empty($v)){
-                        $result_version = $v;
-                    }
-                }
-                return $result_version;
-            }else{
-                $errorMsg = !empty($retArr['errorMsg']) ? $retArr['errorMsg'] : "GetMapVersion error.";
-                com_log_warning('_itstool_waymap_getMapVersion_errorcode', 0, $errorMsg, compact("url","wdata","map_version"));
-                throw new \Exception("waymap:".$errorMsg);
-            }
-        } catch (Exception $e) {
-            com_log_warning('_itstool_waymap_getMapVersion_error', 0, $e->getMessage(), compact("url","wdata","map_version"));
-            throw new \Exception($e->getMessage());
-        }
+        return $this->get($url, $data);
     }
 
     /**
      * 获取多个links的geo数据
      *
-     * @param $linksArr     array           linkId数组
-     * @param $cityId       Integer         城市id
-     * @param $mapVersion   Integer         地图版本
-     * @param $token        String          token
+     * @param $link_ids
+     * @param $version
      * @return array
+     * @throws \Exception
      */
-    public function getLinksGeoInfos($linksArr, $cityId, $mapVersion, $token="fabf12896e792723a1180e96c0f37093"){
-        if (!is_array($linksArr) || empty($linksArr) || empty(implode(',', $linksArr))) {
-            return [];
-        }
-        $qArr = [
-            'link_ids' => implode(",", $linksArr),
-            'version'  => $mapVersion,
-            'token'    => $this->config->item('waymap_token'),
-            'user_id'  => $this->config->item('waymap_userid'),
-        ];
-        try {
-            $url = $this->config->item('waymap_interface') . '/signal-map/mapFlow/linkInfo';
-            $res = httpGET($url, $qArr);
-            $retArr = json_decode($res, true);
-            if (isset($retArr['errorCode']) && $retArr['errorCode'] == 0 && !empty($retArr['data'])) {
-                $linksInfo = !empty($retArr['data']['links_info']) ? $retArr['data']['links_info'] : [];
-                $features = [];
-                foreach ($linksInfo as $linkId=>$linkInfo){
-                    $geomArr = !empty($linkInfo['geom']) ? explode(';',$linkInfo['geom']) : [];
-                    $coords = [];
-                    foreach ($geomArr as $geo){
-                        $geoInfo = explode(',',$geo);
-                        $coords[] = [(float)$geoInfo[0],(float)$geoInfo[1],];
-                    }
+    public function getLinksGeoInfos($link_ids, $version)
+    {
+        $data = compact('link_ids', 'version');
 
-                    $linkInfo['s_node']['lng'] = $linkInfo['s_node']['lng'] ?? 0;
-                    $linkInfo['s_node']['lat'] = $linkInfo['s_node']['lat'] ?? 0;
-                    $linkInfo['s_node']['node_id'] = $linkInfo['s_node']['node_id'] ?? 0;
-                    $linkInfo['e_node']['lng'] = $linkInfo['e_node']['lng'] ?? 0;
-                    $linkInfo['e_node']['lat'] = $linkInfo['e_node']['lat'] ?? 0;
-                    $linkInfo['e_node']['node_id'] = $linkInfo['e_node']['node_id'] ?? 0;
-                    $sPoint = [
-                        'geometry'=>[
-                            'coordinates'=>[$linkInfo['s_node']['lng']/100000,$linkInfo['s_node']['lat']/100000,],
-                            'type'=>'Point',
-                        ],
-                        'properties'=>[
-                            'id'=>(int)$linkInfo['s_node']['node_id'],
-                        ],
-                        'type'=>'Feature',
-                    ];
-                    $ePoint = [
-                        'geometry'=>[
-                            'coordinates'=>[$linkInfo['e_node']['lng']/100000,$linkInfo['e_node']['lat']/100000,],
-                            'type'=>'Point',
-                        ],
-                        'properties'=>[
-                            'id'=>(int)$linkInfo['e_node']['node_id'],
-                        ],
-                        'type'=>'Feature',
-                    ];
-                    $lineString = [
-                        'geometry'=>[
-                            'coordinates'=>$coords,
-                            'type'=>'LineString',
-                        ],
-                        'properties'=>[
-                            'id'=>$linkId,
-                            'snodeid'=>(int)$linkInfo['s_node']['node_id'],
-                            'enodeid'=>(int)$linkInfo['e_node']['node_id'],
-                        ],
-                        'type'=>'Feature',
-                    ];
-                    $features[] = $sPoint;
-                    $features[] = $ePoint;
-                    $features[] = $lineString;
-                }
-                return ['features'=>$features, 'type'=>'FeatureCollection'];
-            }else{
-                $errorMsg = !empty($retArr['errorMsg']) ? $retArr['errorMsg'] : "The getLinksGeoInfos error format.";
-                throw new \Exception($errorMsg);
+        $url = $this->config->item('waymap_interface') . '/signal-map/mapFlow/linkInfo';
+
+        $res = $this->get($url, $data);
+
+        $linksInfo = !empty($res['data']['links_info']) ? $res['data']['links_info'] : [];
+
+        $features = [];
+
+        foreach ($linksInfo as $linkId => $linkInfo) {
+
+            $geomArr = !empty($linkInfo['geom']) ? explode(';', $linkInfo['geom']) : [];
+
+            $coords = [];
+
+            foreach ($geomArr as $geo) {
+
+                $geoInfo = explode(',', $geo);
+
+                $coords[] = [(float)$geoInfo[0], (float)$geoInfo[1]];
             }
-        } catch (Exception $e) {
-            com_log_warning('_itstool_waymap_getLinksGeoInfos_error', 0, $e->getMessage(), compact("url","qArr","res"));
-            throw new \Exception($e->getMessage());
+
+            $linkInfo['s_node']['lng']     = $linkInfo['s_node']['lng'] ?? 0;
+            $linkInfo['s_node']['lat']     = $linkInfo['s_node']['lat'] ?? 0;
+            $linkInfo['s_node']['node_id'] = $linkInfo['s_node']['node_id'] ?? 0;
+            $linkInfo['e_node']['lng']     = $linkInfo['e_node']['lng'] ?? 0;
+            $linkInfo['e_node']['lat']     = $linkInfo['e_node']['lat'] ?? 0;
+            $linkInfo['e_node']['node_id'] = $linkInfo['e_node']['node_id'] ?? 0;
+
+            $sPoint = [
+                'geometry' => [
+                    'coordinates' => [$linkInfo['s_node']['lng'] / 100000, $linkInfo['s_node']['lat'] / 100000,],
+                    'type' => 'Point',
+                ],
+                'properties' => [
+                    'id' => (int)$linkInfo['s_node']['node_id'],
+                ],
+                'type' => 'Feature',
+            ];
+
+            $ePoint = [
+                'geometry' => [
+                    'coordinates' => [$linkInfo['e_node']['lng'] / 100000, $linkInfo['e_node']['lat'] / 100000,],
+                    'type' => 'Point',
+                ],
+                'properties' => [
+                    'id' => (int)$linkInfo['e_node']['node_id'],
+                ],
+                'type' => 'Feature',
+            ];
+
+            $lineString = [
+                'geometry' => [
+                    'coordinates' => $coords,
+                    'type' => 'LineString',
+                ],
+                'properties' => [
+                    'id' => $linkId,
+                    'snodeid' => (int)$linkInfo['s_node']['node_id'],
+                    'enodeid' => (int)$linkInfo['e_node']['node_id'],
+                ],
+                'type' => 'Feature',
+            ];
+            $features[] = $sPoint;
+            $features[] = $ePoint;
+            $features[] = $lineString;
         }
+        return [
+            'features' => $features,
+            'type' => 'FeatureCollection',
+        ];
     }
 
     /**
      * 获取某一个路口与相邻路口的links
      * http://wiki.intra.xiaojukeji.com/pages/viewpage.action?pageId=146798263
      *
-     * @param $qArr array 请求参数
+     * @param $city_id
+     * @param $selected_junctionid
+     * @param $selected_path
      * @return array
-     * @throws Exception
+     * @throws \Exception
      */
-    public function getConnectionAdjJunctions($qArr)
+    public function getConnectionAdjJunctions($city_id, $selected_junctionid, $selected_path)
     {
-        if (!is_array($qArr) || empty($qArr)) {
-            throw new \Exception("The qjson empty.");
-        }
+        $map_version = self::$lastMapVersion;
 
-        try {
-            $getQuery = [
-                'token'    => $this->config->item('waymap_token'),
-                'user_id'  => $this->config->item('waymap_userid'),
-            ];
-            $url = $this->config->item('waymap_interface') . '/signal-map/connect/adj_junctions';
-            $url = $url."?".http_build_query($getQuery);
+        $data = compact('city_id', 'selected_junctionid', 'selected_path', 'map_version');
 
-            $res = httpPOST($url, $qArr, 5000, 'json');
-            $retArr = json_decode($res, true);
-            if (isset($retArr['errorCode'])
-                && $retArr['errorCode'] == 0
-                && !empty($retArr['data'])) {
-                return $retArr['data'];
-            }else{
-                if(isset($retArr['errorCode'])){
-                    $errorMsg = !empty($retArr['errorMsg']) ? $retArr['errorMsg'] : "The adj_junctions error format.";
-                }else{
-                    $errorMsg = " unknown error.";
-                }
-                com_log_warning('_itstool_waymap_getConnectionAdjJunctions_errorcode', 0, $errorMsg, compact("url","qArr","res"));
-                throw new \Exception("waymap:".$errorMsg);
-                return [];
-            }
-        } catch (Exception $e) {
-            com_log_warning('_itstool_waymap_getConnectionAdjJunctions_error', 0, $e->getMessage(), compact("url","qArr","res"));
-            throw new \Exception($e->getMessage());
-        }
+        $url = $this->config->item('waymap_interface') . '/signal-map/connect/adj_junctions';
+
+        return $this->post($url, $data);
     }
 
-    public function getConnectPath($cityId,$mapVersion, array $selectedJunctionids)
+    /**
+     * 路网数据接口统一调用 Post
+     *
+     * @param $url
+     * @param $data
+     * @param int $timeout
+     * @param string $contentType
+     * @param array $header
+     * @return array
+     * @throws \Exception
+     */
+    public function post($url, $data, $timeout = 5000, $contentType = 'json', $header = [])
     {
-        if(empty($selectedJunctionids)){
-            return [];
+        $query['token']   = $this->token;
+        $query['user_id'] = $this->userid;
+
+        $url = $url . '?' . http_build_query($query);
+
+        $data = array_merge($data, $query);
+
+        $res = httpPOST($url, $data, $timeout, $contentType, $header);
+
+        if (!$res) {
+            throw new \Exception('路网数据获取失败', ERR_REQUEST_WAYMAP_API);
         }
 
-        try {
-            $getQuery = [
-                'token'    => $this->config->item('waymap_token'),
-                'user_id'  => $this->config->item('waymap_userid'),
-            ];
-            $url = $this->config->item('waymap_interface') . '/signal-map/connect/path';
-            $url = $url."?".http_build_query($getQuery);
-            $res = httpPOST($url, array(
-                'city_id'=>$cityId,
-                'map_version'=>$mapVersion,
-                'selected_junctionids'=>$selectedJunctionids,
-                'token' => $this->token,
-                'user_id'=>$this->userid,
-            ), 0, 'json');
-            $retArr = json_decode($res, true);
+        $res = json_decode($res, true);
 
-            if (isset($retArr['errorCode'])
-                && $retArr['errorCode'] == 0
-                && !empty($retArr['data'])) {
-                return $retArr['data'];
-            }
-        } catch (Exception $e) {
-
-            com_log_warning('_itstool_waymap_getConnectionAdjJunctions_error', 0, $e->getMessage(), compact("qArr","res"));
-            return [];
+        if (!$res) {
+            throw new \Exception('路网数据格式错误', ERR_REQUEST_WAYMAP_API);
         }
 
+        if ($res['errorCode'] != 0) {
+            throw new \Exception($res['errorMsg'], $res['errorCode']);
+        }
+
+        return $res['data'] ?? [];
+    }
+
+    /**
+     * 获取指定路口结合的干线路径
+     *
+     * @param $city_id
+     * @param $map_version
+     * @param array $selected_junctionids
+     * @return array
+     * @throws \Exception
+     */
+    public function getConnectPath($city_id, $map_version, array $selected_junctionids)
+    {
+        $data = compact('city_id', 'map_version', 'selected_junctionids');
+
+        $url = $this->config->item('waymap_interface') . '/signal-map/connect/path';
+
+        return $this->post($url, $data);
     }
 
     /**
      * 获取路口相位信息
+     *
+     * @param $logic_junction_ids
+     * @return array
+     * @throws \Exception
      */
-    public function getFlowsInfo($junctionIds)
+    public function getFlowsInfo($logic_junction_ids)
     {
-        if(empty($junctionIds)) {
-            return [];
-        }
+        $this->load->helper('phase');
 
-        try {
-            $this->load->helper('phase');
-            $getQuery = [
-                'logic_junction_ids' => $junctionIds,
-                'user_id' => $this->config->item('waymap_userid'),
-                'token' => $this->config->item('waymap_token'),
-                'version' => $this->getLastMapVersion(),
-            ];
-            $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
+        $version = self::$lastMapVersion;
 
-            $res = httpPOST($url, $getQuery);
+        $data = compact('logic_junction_ids', 'version');
 
-            $res = json_decode($res, true);
-            if ($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])) {
-                return [];
-            }
+        $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
 
-            $res = array_map(function ($v) {
-                // 纠正这里的phase_id和phase_name
-                $v = $this->adjustPhase($v);
-                return array_column($v, 'phase_name', 'logic_flow_id');
-            }, $res['data']);
 
-            return $res;
-        } catch (Exception $e) {
+        $res = $this->post($url, $data);
 
-            return [];
-        }
+        $res = array_map(function ($v) {
+            // 纠正这里的 phase_id 和 phase_name
+            $v = $this->adjustPhase($v);
+            return array_column($v, 'phase_name', 'logic_flow_id');
+        }, $res);
+
+        return $res;
     }
 
-
     /**
-     * 修改路口的flow，校准phase_id和phase_name
-     * @param $flows flow数据
+     * 修改路口的flow，校准 phase_id 和 phase_name
+     *
+     * @param $flows
      * @return array
      */
     private function adjustPhase($flows)
     {
         foreach ($flows as $key => $flow) {
-            $phaseId = phase_map($flow['in_degree'], $flow['out_degree']);
-            $phaseName = phase_name($phaseId);
-            $flows[$key]['phase_id'] = $phaseId;
+            $phaseId                   = phase_map($flow['in_degree'], $flow['out_degree']);
+            $phaseName                 = phase_name($phaseId);
+            $flows[$key]['phase_id']   = $phaseId;
             $flows[$key]['phase_name'] = $phaseName;
         }
         return $flows;
@@ -567,113 +460,41 @@ class Waymap_model extends \CI_Model
 
     /**
      * 获取路口相位信息
+     *
+     * @param $city_id
+     * @param $logic_junction_id
+     * @param $logic_flow_id
+     * @return array|mixed
+     * @throws \Exception
      */
-    public function getFlowMovement($cityId, $logicJunctionId, $logicFlowId)
+    public function getFlowMovement($city_id, $logic_junction_id, $logic_flow_id)
     {
-        try {
-            $query = [
-                'city_id' => $cityId,
-                'logic_junction_id' => $logicJunctionId,
-                'logic_flow_id' => $logicFlowId,
-                'user_id' => $this->config->item('waymap_userid'),
-                'token' => $this->config->item('waymap_token'),
-            ];
-            $url = $this->config->item('waymap_interface') . '/signal-map/flow/movement';
+        $data = compact('city_id', 'logic_junction_id', 'logic_flow_id');
 
-            $res = httpGET($url, $query);
+        $url   = $this->config->item('waymap_interface') . '/signal-map/flow/movement';
 
-            $res = json_decode($res, true);
-            if ($res['errorCode'] != 0 || !isset($res['data']) || empty($res['data'])) {
-                return [];
-            }
+        $res = $this->get($url, $data);
 
-            return $res['data']['movement'];
-        } catch (Exception $e) {
-
-            return [];
-        }
-    }
-
-
-    /*
-     * 获取最新的路网版本
-     */
-    public function getLastMapVersion()
-    {
-        if (!empty(self::$lastMapVersion)) {
-            return self::$lastMapVersion;
-        }
-
-        $mapVersions = $this->getAllMapVersion();
-        self::$lastMapVersion = max($mapVersions);
-        return self::$lastMapVersion;
-    }
-
-    /**
-     * 获取全部路网版本
-     */
-    public function getAllMapVersion()
-    {
-        $data['token'] = $this->token;
-        $data['user_id'] = $this->userid;
-
-        try {
-            $mapVersions = httpGET($this->config->item('waymap_interface') . '/signal-map/map/versions', $data);
-            if (!$mapVersions) {
-                return [];
-            }
-
-            $mapVersions = json_decode($mapVersions, true);
-            if ($mapVersions['errorCode'] != 0 || empty($mapVersions['data'])) {
-                return [];
-            }
-
-            return $mapVersions['data'];
-        } catch (Exception $e) {
-            return [];
-        }
+        return $res['movement'] ?? [];
     }
 
     /**
      * 获取路口详情 经纬度、所属城市、行政区、某某交汇口等
-     * @param $data['logic_junction_id'] string   Y 路口ID
-     * @param $data['city_id']           interger Y 城市ID
-     * @param $data['map_version']       string   N 地图版本
+     *
+     * @param $logic_junction_id
+     * @param $city_id
+     * @param null $map_version
      * @return array
+     * @throws \Exception
      */
-    public function gitJunctionDetail($data)
+    public function gitJunctionDetail($logic_junction_id, $city_id, $map_version = null)
     {
-        if (empty($data)) {
-            return ['errno' => -1, 'errmsg'=>'参数请求错误！'];
-        }
+        $map_version = $map_version ?? self::$lastMapVersion;
 
-        $wdata['token'] = $this->token;
-        $wdata['user_id'] = $this->userid;
-        $wdata['city_id'] = $data['city_id'];
-        $wdata['logic_junction_ids'] = $data['logic_junction_id'];
+        $data = compact('city_id', 'logic_junction_id', 'map_version');
 
-        if (empty($data['map_version'])) {
-            $allVersion = $this->getAllMapVersion();
-            $wdata['map_version'] = max($allVersion);
-        } else {
-            $wdata['map_version'] = $data['map_version'];
-        }
+        $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/detail';
 
-        try {
-            $detail = httpGET($this->config->item('waymap_interface') . '/signal-map/mapJunction/detail', $wdata);
-            if (!$detail) {
-                return ['errno'=>-1, 'errmsg'=>'路网返回路口信息为空！'];
-            }
-
-            $detail = json_decode($detail, true);
-            if ($detail['errorCode'] != 0 || empty($detail['data'])) {
-                return ['errno'=>-1, 'errmsg'=>$detail['errorMsg']];
-            }
-
-            return ['errno'=>0, 'data'=>$detail['data']];
-        } catch (Exception $e) {
-            com_log_warning('_itstool_waymap_gitJunctionDetail_error', 0, $e->getMessage(), compact("wdata","detail"));
-            return ['errno'=>-1, 'errmsg'=>'路网服务异常！'];
-        }
+        return $this->get($url, $data);
     }
 }
