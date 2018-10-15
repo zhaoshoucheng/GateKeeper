@@ -267,7 +267,7 @@ class Road_model extends CI_Model
         $methods = [
             'stop_time_cycle' => 'round(sum(stop_time_cycle), 2) as stop_time_cycle',
             'stop_delay' => 'round(sum(stop_delay), 2) as stop_delay',
-            'speed' => 'round(avg(speed), 2) as speed',
+            'speed' => 'round(avg(speed) * 3.6, 2) as speed',
             'time' => '',
         ];
 
