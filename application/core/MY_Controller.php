@@ -224,7 +224,7 @@ class MY_Controller extends CI_Controller {
         }
         $this->username = $this->user->username;
 
-        $GLOBALS['G_username'] = $this->username;
+        define('USERNAME', $this->username);
         return true;
     }
 
