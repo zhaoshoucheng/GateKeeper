@@ -26,9 +26,9 @@ class Area_model extends CI_Model
 
         $this->db = $this->load->database('default', true);
 
-        $is_existed = $this->db->table_exists($this->tb);
+        $isExisted = $this->db->table_exists($this->tb);
 
-        if (!$is_existed) {
+        if (!$isExisted) {
             throw new \Exception('数据表不存在');
         }
     }

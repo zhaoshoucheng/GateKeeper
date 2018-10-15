@@ -1,27 +1,31 @@
 <?php
 /********************************************
-# desc:    干线据模型
-# author:  ningxiangbing@didichuxing.com
-# date:    2018-08-21
-********************************************/
+ * # desc:    干线据模型
+ * # author:  ningxiangbing@didichuxing.com
+ * # date:    2018-08-21
+ ********************************************/
 
 use Didi\Cloud\Collection\Collection;
 
 class Road_model extends CI_Model
 {
     private $tb = 'road';
-    private $db = '';
+
+    /**
+     * @var CI_DB_query_builder
+     */
+    private $db;
 
     public function __construct()
     {
         parent::__construct();
-        if (empty($this->db)) {
-            $this->db = $this->load->database('default', true);
-        }
 
-        // 判断数据表是否存在
-        if (!$this->isTableExisted($this->tb)) {
-            return [];
+        $this->db = $this->load->database('default', true);
+
+        $isExisted = $this->db->table_exists($this->tb);
+
+        if (!$isExisted) {
+            throw new \Exception('数据表不存在');
         }
 
         $this->load->model('waymap_model');
@@ -56,10 +60,10 @@ class Road_model extends CI_Model
 
     /**
      * 新增干线
-     * @param $data['city_id']        interger Y 城市ID
-     * @param $data['road_name']      string   Y 干线名称
-     * @param $data['junction_ids']   array    Y 干线路口ID
-     * @param $data['road_direction'] interger Y 干线方向 1：东西 2：南北
+     * @param $data ['city_id']        interger Y 城市ID
+     * @param $data ['road_name']      string   Y 干线名称
+     * @param $data ['junction_ids']   array    Y 干线路口ID
+     * @param $data ['road_direction'] interger Y 干线方向 1：东西 2：南北
      * @return array
      */
     public function addRoad($data)
@@ -74,14 +78,14 @@ class Road_model extends CI_Model
         }
 
         $insertData = [
-            'city_id'            => intval($data['city_id']),
-            'road_id'            => md5(implode(',', $data['junction_ids']) . $data['road_name']),
-            'road_name'          => strip_tags(trim($data['road_name'])),
+            'city_id' => intval($data['city_id']),
+            'road_id' => md5(implode(',', $data['junction_ids']) . $data['road_name']),
+            'road_name' => strip_tags(trim($data['road_name'])),
             'logic_junction_ids' => implode(',', $data['junction_ids']),
-            'road_direction'     => intval($data['road_direction']),
-            'user_id'            => 0,
-            'created_at'         => date('Y-m-d H:i:s'),
-            'updated_at'         => date('Y-m-d H:i:s'),
+            'road_direction' => intval($data['road_direction']),
+            'user_id' => 0,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
         ];
 
         $res = $this->db->insert($this->tb, $insertData);
@@ -91,7 +95,7 @@ class Road_model extends CI_Model
 
         $tmp = $this->formatRoadDetailData($insertData['city_id'], $insertData['logic_junction_ids']);
 
-        if(is_object($tmp))
+        if (is_object($tmp))
             $tmp = [];
 
         $this->redis_model->setData('Road_' . $insertData['road_id'], json_encode($tmp));
@@ -100,12 +104,108 @@ class Road_model extends CI_Model
     }
 
     /**
+     * 校验干线名称是否存在
+     */
+    private function isRoadNameExisted($name, $roadId = '')
+    {
+        $sqlArr = [$name];
+
+        $sql = 'select road_id from ' . $this->tb;
+        $sql .= ' where road_name = ?';
+        if (!empty($roadId)) {
+            $sql .= ' and road_id != ?';
+            array_push($sqlArr, $roadId);
+        }
+
+        $res = $this->db->query($sql, $sqlArr)->result_array();
+
+        if (empty($res)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * 格式化干线详情数据
+     * @param $city_id interger 城市ID
+     * @param $ids     string   路口ID串
+     * @return array
+     */
+    private function formatRoadDetailData($cityId, $ids)
+    {
+        $result = [];
+
+        $junctionIds = array_filter(explode(',', preg_replace("/(\n)|(\s)|(\t)|(\')|(')|(，)/", ',', $ids)));
+
+        // 最新路网版本
+        $allMapVersions = $this->waymap_model->getAllMapVersion();
+        $newMapVersion  = max($allMapVersions);
+
+        // 调用路网接口获取干线路口信息
+        $res = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIds);
+        if (empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
+            return (object)[];
+        }
+
+        foreach ($res['forward_path_flows'] as $k => $v) {
+            $result['road_info'][$k] = [
+                'start_junc_id' => $v['start_junc_id'],
+                'end_junc_id' => $v['end_junc_id'],
+                'links' => $v['path_links'],
+            ];
+            // 正向geojson
+            $geojson                                = $this->waymap_model->getLinksGeoInfos(explode(',', $v['path_links']), $newMapVersion);
+            $result['road_info'][$k]['forward_geo'] = $geojson;
+
+            foreach ($res['backward_path_flows'] as $kk => $vv) {
+                if ($v['start_junc_id'] == $vv['end_junc_id']
+                    && $v['end_junc_id'] == $vv['start_junc_id']) {
+                    $result['road_info'][$k]['reverse_links'] = $vv['path_links'];
+                    // 反向geojson
+                    $geojson                                = $this->waymap_model->getLinksGeoInfos(explode(',', $vv['path_links']), $newMapVersion);
+                    $result['road_info'][$k]['reverse_geo'] = $geojson;
+                }
+            }
+        }
+
+        $countData = [
+            'lng' => 0,
+            'lat' => 0,
+        ];
+        foreach ($junctionIds as $v) {
+            $result['junctions_info'][$v] = [
+                'logic_junction_id' => $v,
+                'junction_name' => $res['junctions_info'][$v]['name'] ?? '未知路口',
+                'lng' => $res['junctions_info'][$v]['lng'] ?? 0,
+                'lat' => $res['junctions_info'][$v]['lat'] ?? 0,
+                'node_ids' => $res['junctions_info'][$v]['node_ids'] ?? [],
+            ];
+            $countData['lng']             += $res['junctions_info'][$v]['lng'] ?? 0;
+            $countData['lat']             += $res['junctions_info'][$v]['lat'] ?? 0;
+        }
+
+        if (empty($result)) {
+            return (object)[];
+        }
+
+        $result['center']         = [
+            'lng' => count($result['junctions_info']) >= 1 ? $countData['lng'] / count($result['junctions_info']) : 0,
+            'lat' => count($result['junctions_info']) >= 1 ? $countData['lat'] / count($result['junctions_info']) : 0,
+        ];
+        $result['junctions_info'] = array_values($result['junctions_info']);
+        $result['map_version']    = $newMapVersion;
+
+        return $result;
+    }
+
+    /**
      * 编辑干线
-     * @param $data['city_id']        interger Y 城市ID
-     * @param $data['road_id']        string   Y 干线ID
-     * @param $data['road_name']      string   Y 干线名称
-     * @param $data['junction_ids']   array    Y 干线路口ID
-     * @param $data['road_direction'] interger Y 干线方向 1：东西 2：南北
+     * @param $data ['city_id']        interger Y 城市ID
+     * @param $data ['road_id']        string   Y 干线ID
+     * @param $data ['road_name']      string   Y 干线名称
+     * @param $data ['junction_ids']   array    Y 干线路口ID
+     * @param $data ['road_direction'] interger Y 干线方向 1：东西 2：南北
      * @return array
      */
     public function editRoad($data)
@@ -125,10 +225,10 @@ class Road_model extends CI_Model
         $this->db->where($where);
 
         $updateData = [
-            'road_name'          => strip_tags(trim($data['road_name'])),
+            'road_name' => strip_tags(trim($data['road_name'])),
             'logic_junction_ids' => implode(',', $data['junction_ids']),
-            'road_direction'     => intval($data['road_direction']),
-            'updated_at'         => date('Y-m-d H:i:s'),
+            'road_direction' => intval($data['road_direction']),
+            'updated_at' => date('Y-m-d H:i:s'),
         ];
         $this->db->update($this->tb, $updateData);
         if ($this->db->affected_rows() < 1) {
@@ -137,7 +237,7 @@ class Road_model extends CI_Model
 
         $tmp = $this->formatRoadDetailData(intval($data['city_id']), $updateData['logic_junction_ids']);
 
-        if(is_object($tmp))
+        if (is_object($tmp))
             $tmp = [];
 
         $this->redis_model->setData('Road_' . trim($data['road_id']), json_encode($tmp));
@@ -147,8 +247,8 @@ class Road_model extends CI_Model
 
     /**
      * 删除干线
-     * @param $data['city_id'] interger Y 城市ID
-     * @param $data['road_id'] string   Y 干线ID
+     * @param $data ['city_id'] interger Y 城市ID
+     * @param $data ['road_id'] string   Y 干线ID
      * @return array
      */
     public function delete($data)
@@ -161,7 +261,7 @@ class Road_model extends CI_Model
         $where .= ' and city_id = ' . intval($data['city_id']);
         $this->db->where($where);
         $updateData = [
-            'is_delete'  => 1,
+            'is_delete' => 1,
             'deleted_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ];
@@ -177,8 +277,8 @@ class Road_model extends CI_Model
 
     /**
      * 查询干线详情
-     * @param $data['city_id'] interger Y 城市ID
-     * @param $data['road_id'] string   Y 干线ID
+     * @param $data ['city_id'] interger Y 城市ID
+     * @param $data ['road_id'] string   Y 干线ID
      * @return array
      */
     public function getRoadDetail($data)
@@ -225,22 +325,22 @@ class Road_model extends CI_Model
             ->get()->result_array();
 
         // 如果数据为空或者获取数据失败，则返回空数组
-        if(!$result) {
+        if (!$result) {
             return [];
         }
-        
+
         $results = [];
 
         foreach ($result as $item) {
 
             //从 Redis 获取数据失败
-            if(!($tmp = $this->redis_model->getData('Road_' . $item['road_id']))) {
+            if (!($tmp = $this->redis_model->getData('Road_' . $item['road_id']))) {
 
                 // 从数据库中获取数据
                 $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
 
                 // 数据控获取数据为空
-                if(is_object($tmp))
+                if (is_object($tmp))
                     $tmp = [];
 
                 // 将数据刷新到 Redis
@@ -250,7 +350,7 @@ class Road_model extends CI_Model
             }
 
             $tmp['road'] = $item;
-            $results[] = $tmp;
+            $results[]   = $tmp;
         }
 
         return $results;
@@ -282,7 +382,7 @@ class Road_model extends CI_Model
         $units = array_column($this->config->item('road'), 'unit', 'key');
 
         // 如果指标不在映射数组中，返回空数组
-        if(!isset($methods[$params['quota_key']])) {
+        if (!isset($methods[$params['quota_key']])) {
             return [];
         }
 
@@ -295,7 +395,7 @@ class Road_model extends CI_Model
             ->get()->first_row();
 
         // 获取干线数据失败
-        if(!$junctionList) {
+        if (!$junctionList) {
             return [];
         }
 
@@ -305,7 +405,7 @@ class Road_model extends CI_Model
 
         // 最新路网版本
         $allMapVersions = $this->waymap_model->getAllMapVersion();
-        $newMapVersion = max($allMapVersions);
+        $newMapVersion  = max($allMapVersions);
 
         // 调用路网接口获取干线路口信息
         $res = $this->waymap_model->getConnectPath($params['city_id'], $newMapVersion, $junctionIds);
@@ -316,7 +416,7 @@ class Road_model extends CI_Model
             : 'backward_path_flows';
 
         // 路网数据没有该方向
-        if(!isset($res[$dataKey])) {
+        if (!isset($res[$dataKey])) {
             return [];
         }
 
@@ -333,14 +433,13 @@ class Road_model extends CI_Model
             return $v['logic_flow']['logic_flow_id'] ?? '';
         }, $res[$dataKey]);
 
-        if($params['quota_key'] == 'time') {
+        if ($params['quota_key'] == 'time') {
 
             $timeCaseWhen = 'round(sum(CASE WHEN speed = 0 THEN 0 ';
 
             // 获取每个 flow 的长度
-            foreach ($res[$dataKey] as $item)
-            {
-                if(isset($item['logic_flow']['logic_flow_id']) && $item['logic_flow']['logic_flow_id'] != '') {
+            foreach ($res[$dataKey] as $item) {
+                if (isset($item['logic_flow']['logic_flow_id']) && $item['logic_flow']['logic_flow_id'] != '') {
 
                     $timeCaseWhen .= 'WHEN logic_flow_id = \'' . $item['logic_flow']['logic_flow_id']
                         . '\' THEN ' . $item['length'] . ' / speed ';
@@ -362,7 +461,7 @@ class Road_model extends CI_Model
             ->group_by(['date', 'hour'])->get()->result_array();
 
         // 获取数据源失败 或者 数据源为空
-        if(!$result || empty($result)) {
+        if (!$result || empty($result)) {
             return [];
         }
 
@@ -375,8 +474,8 @@ class Road_model extends CI_Model
 
         // 数据分组后，将每组数据进行处理的函数
         $groupByItemFormatCallback = function ($item) use ($params, $hours) {
-            $hourToNull = array_combine($hours, array_fill(0, 48, null));
-            $item = array_column($item, $params['quota_key'], 'hour');
+            $hourToNull  = array_combine($hours, array_fill(0, 48, null));
+            $item        = array_column($item, $params['quota_key'], 'hour');
             $hourToValue = array_merge($hourToNull, $item);
 
             $result = [];
@@ -418,108 +517,46 @@ class Road_model extends CI_Model
     }
 
     /**
-     * 格式化干线详情数据
-     * @param $city_id interger 城市ID
-     * @param $ids     string   路口ID串
-     * @return array
-     */
-    private function formatRoadDetailData($cityId, $ids)
-    {
-        $result = [];
-
-        $junctionIds = array_filter(explode(',', preg_replace("/(\n)|(\s)|(\t)|(\')|(')|(，)/" ,',' ,$ids)));
-
-        // 最新路网版本
-        $allMapVersions = $this->waymap_model->getAllMapVersion();
-        $newMapVersion = max($allMapVersions);
-
-        // 调用路网接口获取干线路口信息
-        $res = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIds);
-        if (empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
-            return (object)[];
-        }
-
-        foreach ($res['forward_path_flows'] as $k=>$v) {
-            $result['road_info'][$k] = [
-                'start_junc_id' => $v['start_junc_id'],
-                'end_junc_id' => $v['end_junc_id'],
-                'links' => $v['path_links'],
-            ];
-            // 正向geojson
-            $geojson = $this->waymap_model->getLinksGeoInfos(explode(',', $v['path_links']), $newMapVersion);
-            $result['road_info'][$k]['forward_geo'] = $geojson;
-
-            foreach ($res['backward_path_flows'] as $kk=>$vv) {
-                if ($v['start_junc_id'] == $vv['end_junc_id']
-                    && $v['end_junc_id'] == $vv['start_junc_id'])
-                {
-                    $result['road_info'][$k]['reverse_links'] = $vv['path_links'];
-                    // 反向geojson
-                    $geojson = $this->waymap_model->getLinksGeoInfos(explode(',', $vv['path_links']), $newMapVersion);
-                    $result['road_info'][$k]['reverse_geo'] = $geojson;
-                }
-            }
-        }
-
-        $countData = [
-            'lng' => 0,
-            'lat' => 0,
-        ];
-        foreach ($junctionIds as $v) {
-            $result['junctions_info'][$v] = [
-                'logic_junction_id' => $v,
-                'junction_name'     => $res['junctions_info'][$v]['name'] ?? '未知路口',
-                'lng'               => $res['junctions_info'][$v]['lng'] ?? 0,
-                'lat'               => $res['junctions_info'][$v]['lat'] ?? 0,
-                'node_ids'          => $res['junctions_info'][$v]['node_ids'] ?? [],
-            ];
-            $countData['lng'] += $res['junctions_info'][$v]['lng'] ?? 0;
-            $countData['lat'] += $res['junctions_info'][$v]['lat'] ?? 0;
-        }
-
-        if (empty($result)) {
-            return (object)[];
-        }
-
-        $result['center'] = [
-            'lng' => count($result['junctions_info']) >= 1 ? $countData['lng'] / count($result['junctions_info']) : 0,
-            'lat' => count($result['junctions_info']) >= 1 ? $countData['lat'] / count($result['junctions_info']) : 0,
-        ];
-        $result['junctions_info'] = array_values($result['junctions_info']);
-        $result['map_version'] = $newMapVersion;
-
-        return $result;
-    }
-
-    /**
-     * 校验干线名称是否存在
-     */
-    private function isRoadNameExisted($name, $roadId = '')
-    {
-        $sqlArr = [$name];
-
-        $sql = 'select road_id from ' . $this->tb;
-        $sql .= ' where road_name = ?';
-        if (!empty($roadId)) {
-            $sql .= ' and road_id != ?';
-            array_push($sqlArr, $roadId);
-        }
-
-        $res = $this->db->query($sql, $sqlArr)->result_array();
-
-        if (empty($res)) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    /**
      * 校验数据表是否存在
      */
     private function isTableExisted($table)
     {
         $isExisted = $this->db->table_exists($table);
         return $isExisted;
+    }
+
+    //------------------------------------//
+
+    /**
+     * 根据 城市ID 获取干线列表
+     *
+     * @param $cityId
+     * @param string $select
+     * @return array
+     */
+    public function getRoadsByCityId($cityId, $select = '*')
+    {
+        return $this->db->select($select)
+            ->from($this->tb)
+            ->where('city_id', $cityId)
+            ->where('is_delete', 0)
+            ->order_by('created_at desc')
+            ->get()->result_array();
+    }
+
+    /**
+     * 插入新的干线数据
+     *
+     * @param $data
+     * @return mixed
+     */
+    public function insertRoad($data)
+    {
+        $data['created_at'] = $data['created_at'] ?? date('Y-m-d H:i:s');
+        $data['updated_at'] = $data['updated_at'] ?? date('Y-m-d H:i:s');
+
+        $this->db->insert($this->tb, $data);
+
+        return $this->db->insert_id();
     }
 }
