@@ -45,6 +45,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @category	Libraries
  * @author		EllisLab Dev Team
  * @link		https://codeigniter.com/user_guide/libraries/config.html
+ *
+ * @property CI_Config $config
+ * @property CI_Loader $load
  */
 class CI_Model {
 
@@ -67,6 +70,7 @@ class CI_Model {
 	 * syntax as controllers.
 	 *
 	 * @param	string	$key
+     * @return object|CI_DB_query_builder
 	 */
 	public function __get($key)
 	{

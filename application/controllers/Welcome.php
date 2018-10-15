@@ -2,6 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Didi\Cloud\ItsMap\City as CityService;
+use Services\AreaService;
 
 class Welcome extends CI_Controller {
 
@@ -30,6 +31,8 @@ class Welcome extends CI_Controller {
 	 */
 	public function index()
 	{
+        var_dump((new AreaService())->index());
+        die();
 	    print_r($_SERVER);
 		$this->load->view('welcome_message');
 	}

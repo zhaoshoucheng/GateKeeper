@@ -106,6 +106,25 @@ switch (ENVIRONMENT)
 		exit(1); // EXIT_ERROR
 }
 
+if(!function_exists('_exception_handler')) {
+    function _exception_handler($exception) {
+        $_error =& load_class('Exceptions', 'core');
+        $_error->log_exception('error', 'Exception: '.$exception->getMessage(), $exception->getFile(), $exception->getLine());
+
+        $output = array(
+            'errno' => $exception->getCode(),
+            'errmsg' => $exception->getMessage(),
+            'data' => [],
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+            'trace' => $exception->getTrace()
+        );
+        header("Content-Type:application/json;charset=UTF-8");
+        echo json_encode($output);
+        exit(1); // EXIT_ERROR
+    }
+}
+
 /*
  *---------------------------------------------------------------
  * SYSTEM DIRECTORY NAME
