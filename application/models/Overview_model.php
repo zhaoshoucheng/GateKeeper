@@ -5,6 +5,8 @@
  * # date:    2018-07-25
  ********************************************/
 
+use Didi\Cloud\Collection\Collection;
+
 class Overview_model extends CI_Model
 {
     private $tb = 'real_time_';
@@ -19,6 +21,7 @@ class Overview_model extends CI_Model
         }
 
         $this->config->load('realtime_conf');
+        $this->config->load('permission/nanchang_overview_conf');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
         $this->load->model('common_model');
@@ -183,31 +186,21 @@ class Overview_model extends CI_Model
         $junctionListKey = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
 
         if(($junctionList = $this->redis_model->getData($junctionListKey))) {
-            return json_decode($junctionList, true);
+
+            $junctionList = json_decode($junctionList, true);
+
+            $nanchang = $this->config->item('nanchang');
+
+            if(array_key_exists($_SESSION['username'], $nanchang)) {
+                return Collection::make($junctionList)
+                    ->whereIn('jid', $nanchang[$_SESSION['username']])
+                    ->values()->get();
+            } else {
+                return $junctionList;
+            }
         }
+
         return [];
-//        if (!$this->isTableExisted($this->tb . $cityId)) {
-//            return [];
-//        }
-//
-//        $data = $this->db->select('*')
-//            ->from($this->tb . $cityId)
-//            ->where('hour', $hour)
-//            ->where('traj_count >=', 10)
-//            ->where('updated_at >=', $date . ' 00:00:00')
-//            ->where('updated_at <=', $date . ' 23:59:59')
-//            ->get()->result_array();
-//
-//        $lngs = array_filter(array_column($data, 'lng'));
-//        $lats = array_filter(array_column($data, 'lat'));
-//
-//        $center['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
-//        $center['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
-//
-//        return [
-//            'dataList' => $data,
-//            'center' => $center
-//        ];
     }
 
     /**

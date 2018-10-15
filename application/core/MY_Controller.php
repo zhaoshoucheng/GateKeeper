@@ -221,6 +221,8 @@ class MY_Controller extends CI_Controller {
             return false;
         }
         $this->username = $this->user->username;
+
+        $_SESSION['username'] = $this->username;
         return true;
     }
 
