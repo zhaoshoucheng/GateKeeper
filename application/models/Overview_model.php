@@ -49,19 +49,34 @@ class Overview_model extends CI_Model
     {
 
         $table = 'real_time_' . $data['city_id'];
+
         if (!$this->isTableExisted($table)) {
             return [];
         }
 
-        $result = $this->redis_model->getData('its_realtime_avg_stop_delay_' . $data['city_id'] . '_' . $data['date']);
-        $result = json_decode($result, true);
-        if(!$result) {
+        $nanchang = $this->config->item('nanchang');
+
+        $username = get_instance()->username;
+
+        if(array_key_exists($username, $nanchang)) {
             $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
                 ->from($table)
                 ->where('updated_at >=', $data['date'] . ' 00:00:00')
                 ->where('updated_at <=', $data['date'] . ' 23:59:59')
+                ->where_in('logic_junction_id', $nanchang[$username])
                 ->group_by('hour')
                 ->get()->result_array();
+        } else {
+            $result = $this->redis_model->getData('its_realtime_avg_stop_delay_' . $data['city_id'] . '_' . $data['date']);
+            $result = json_decode($result, true);
+            if (!$result) {
+                $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
+                    ->from($table)
+                    ->where('updated_at >=', $data['date'] . ' 00:00:00')
+                    ->where('updated_at <=', $data['date'] . ' 23:59:59')
+                    ->group_by('hour')
+                    ->get()->result_array();
+            }
         }
 
 
