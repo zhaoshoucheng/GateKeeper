@@ -209,23 +209,24 @@ class AreaService extends BaseService
 
         // 获取城市全部区域信息
         $areaList = $this->area_model->getAreasByCityId($cityId, 'id, area_name');
+        $areaCollection = Collection::make($areaList);
 
         // 获取区域ID
-        $areaIdList = $areaList->column('id')->get();
+        $areaIdList = $areaCollection->column('id')->get();
 
         // 获取 ID 和 名称的映射
-        $areaIdToNameList = $areaList->column('area_name', 'id')->get();
+        $areaIdToNameList = $areaCollection->column('area_name', 'id')->get();
 
         // 获取全部区域路口映射
         $areaJunctionList = $this->area_model->getAreaJunctionsByAreaIds($areaIdList);
+        $areaJunctionCollection = Collection::make($areaJunctionList);
 
         // 从路网获取路口信息
-        $junctionIds = $areaJunctionList->implode('junction_id', ',');
+        $junctionIds = $areaJunctionCollection->implode('junction_id', ',');
         $junctionList = $this->waymap_model->getJunctionInfo($junctionIds);
         $junctionIdList = array_column($junctionList, null, 'logic_junction_id');
 
-
-        $areaIdJunctionList = $areaJunctionList
+        $areaIdJunctionList = $areaJunctionCollection
             ->groupBy('area_id', function ($item) {
                 return array_column($item, 'junction_id');
             })->krsort();
@@ -303,12 +304,14 @@ class AreaService extends BaseService
         }
 
         // 获取该区域全部路口ID
-        $junctionCollection = $this->area_model->getJunctionsByAreaId($areaId, 'junction_id');
+        $junctionList = $this->area_model->getJunctionsByAreaId($areaId, 'junction_id');
 
         // 数据获取失败 或者 数据为空
-        if(!$junctionCollection || $junctionCollection->empty()) {
+        if(!$junctionList || empty($junctionList)) {
             throw new \Exception('路口数据获取失败', ERR_PARAMETERS);
         }
+
+        $junctionCollection = Collection::make($junctionList);
 
         $junctionIds = $junctionCollection->column('junction_id')->get();
 
@@ -323,11 +326,13 @@ class AreaService extends BaseService
         $select = 'date, hour, ' . $methods[$quotaKey];
         $dates = array_merge($baseDates, $evaluateDates);
 
-        $resultCollection = $this->area_model->getJunctionByCityId($dates, $junctionIds, $hours, $cityId, $select);
+        $resultList = $this->area_model->getJunctionByCityId($dates, $junctionIds, $hours, $cityId, $select);
 
-        if(!$resultCollection || $resultCollection->empty()) {
-            return [];
+        if(!$resultList || empty($resultList)) {
+            throw new \Exception('路口数据获取失败', ERR_PARAMETERS);
         }
+
+        $resultCollection = Collection::make($resultList);
 
         // 将数据按照 日期（基准 和 评估）进行分组的键名函数
         $baseOrEvaluateCallback = function ($item) use ($baseDates) {

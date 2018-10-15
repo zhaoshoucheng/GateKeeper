@@ -289,12 +289,7 @@ class Evaluate_model extends CI_Model
             return [];
         }
 
-        $waymap_data = [
-            'version'           => $newMapVersion,
-            'logic_junction_id' => $data['junction_id'],
-            'logic_flow_ids'    => array_keys($allFlows[$data['junction_id']]),
-        ];
-        $ret = $this->waymap_model->getJunctionFlowLngLat($waymap_data);
+        $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $data['junction_id'], array_keys($allFlows[$data['junction_id']]));
         if (empty($ret['data'])) {
             return [];
         }
@@ -309,7 +304,7 @@ class Evaluate_model extends CI_Model
         // 获取路口中心坐标
         $result['center'] = '';
         $centerData['logic_id'] = $data['junction_id'];
-        $center = $this->waymap_model->getJunctionCenterCoords($centerData);
+        $center = $this->waymap_model->getJunctionCenterCoords($data['junction_id']);
 
         $result['center'] = $center;
         $result['map_version'] = $newMapVersion;

@@ -446,7 +446,7 @@ class Road_model extends CI_Model
                 'links' => $v['path_links'],
             ];
             // 正向geojson
-            $geojson = $this->waymap_model->getLinksGeoInfos(explode(',', $v['path_links']), $cityId, $newMapVersion);
+            $geojson = $this->waymap_model->getLinksGeoInfos(explode(',', $v['path_links']), $newMapVersion);
             $result['road_info'][$k]['forward_geo'] = $geojson;
 
             foreach ($res['backward_path_flows'] as $kk=>$vv) {
@@ -455,7 +455,7 @@ class Road_model extends CI_Model
                 {
                     $result['road_info'][$k]['reverse_links'] = $vv['path_links'];
                     // 反向geojson
-                    $geojson = $this->waymap_model->getLinksGeoInfos(explode(',', $vv['path_links']), $cityId, $newMapVersion);
+                    $geojson = $this->waymap_model->getLinksGeoInfos(explode(',', $vv['path_links']), $newMapVersion);
                     $result['road_info'][$k]['reverse_geo'] = $geojson;
                 }
             }

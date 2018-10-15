@@ -28,7 +28,7 @@ class Common_model extends CI_Model
      */
     public function getJunctionAdAndCross($data)
     {
-        $result = $this->waymap_model->gitJunctionDetail($data);
+        $result = $this->waymap_model->gitJunctionDetail($data['logic_junction_id'], $data['city_id'], $data['map_version']);
         if ($result['errno'] != 0) {
             return ['errno'=>ERR_REQUEST_WAYMAP_API, 'errmsg'=>$result['errmsg']];
         }

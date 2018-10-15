@@ -472,7 +472,8 @@ class PeriodReport extends MY_Controller
         $needNameJunctions = array_column(array_slice($finalData['junction_list'],0,$topNum),'logic_junction_id');
         $needNameJunctions[] = $maxMoMJunction['logic_junction_id'];
 
-        $junctionInfos = $this->waymap_model->getJunctionInfo(implode(",",$needNameJunctions),['key'=>'logic_junction_id','value'=>['name']]);
+        $junctionInfos = $this->waymap_model->getJunctionInfo(implode(",",$needNameJunctions));
+        $junctionInfos = array_column($junctionInfos, 'name', 'logic_junction_id');
 
 
         $summary = "其中".$junctionInfos[$finalData['junction_list'][0]['logic_junction_id']]['name'];

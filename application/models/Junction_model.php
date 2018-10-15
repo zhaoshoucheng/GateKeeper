@@ -1172,18 +1172,13 @@ class Junction_model extends CI_Model
         | 获取路网路口各相位经纬度及路口中心经纬度 |
         -------------------------------------*/
         // 获取地图版本
-        $map_version = $this->waymap_model->getMapVersion($data['dates']);
+        $map_version = $this->waymap_model->getMapVersion(implode(',', $data['dates']));
         if (empty($map_version)) {
             return [];
         }
 
         // 获取路网路口各相位坐标
-        $waymap_data = [
-            'version'           => trim($map_version),
-            'logic_junction_id' => $junction_id,
-            'logic_flow_ids'    => array_keys($timing['list']),
-        ];
-        $ret = $this->waymap_model->getJunctionFlowLngLat($waymap_data);
+        $ret = $this->waymap_model->getJunctionFlowLngLat(trim($map_version), $junction_id, array_keys($timing['list']));
         if (empty($ret['data'])) {
             return [];
         }
@@ -1198,7 +1193,7 @@ class Junction_model extends CI_Model
         // 获取路口中心坐标
         $result['center'] = '';
         $center_data['logic_id'] = $junction_id;
-        $center = $this->waymap_model->getJunctionCenterCoords($center_data);
+        $center = $this->waymap_model->getJunctionCenterCoords($junction_id);
 
         $result['center'] = $center;
         $result['map_version'] = $map_version;

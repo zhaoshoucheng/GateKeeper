@@ -38,18 +38,16 @@ class Area_model extends CI_Model
      *
      * @param $cityId
      * @param string $select
-     * @return Collection|null
+     * @return array
      */
     public function getAreasByCityId($cityId, $select = '*')
     {
-        $result = $this->db->select($select)
+        return $this->db->select($select)
             ->from($this->tb)
             ->where('city_id', $cityId)
             ->where('delete_at', "1970-01-01 00:00:00")
             ->order_by('id', 'DESC')
             ->get()->result_array();
-
-        return $result ? Collection::make($result) : null;
     }
 
     /**
@@ -91,21 +89,15 @@ class Area_model extends CI_Model
      *
      * @param $areaId
      * @param string $select
-     * @return Collection|null
+     * @return array
      */
     public function getJunctionsByAreaId($areaId, $select = '*')
     {
-        $result = $this->db->select($select)
+        return $this->db->select($select)
             ->from('area_junction_relation')
             ->where('area_id', $areaId)
             ->where('delete_at', '1970-01-01 00:00:00')
             ->get()->result_array();
-
-        if(!$result) {
-            return null;
-        }
-
-        return Collection::make($result);
     }
 
     /**
@@ -120,7 +112,7 @@ class Area_model extends CI_Model
      */
     public function getJunctionByCityId($dates, $junctionIds, $hours, $cityId, $select)
     {
-        $result = $this->db->select($select)
+        return $this->db->select($select)
             ->from('junction_hour_report')
             ->where_in('date', $dates)
             ->where_in('logic_junction_id', $junctionIds)
@@ -128,11 +120,6 @@ class Area_model extends CI_Model
             ->where('city_id', $cityId)
             ->group_by('date, hour')
             ->get()->result_array();
-
-        if(!$result) {
-            return null;
-        }
-        return Collection::make($result);
     }
 
     /**
@@ -239,10 +226,6 @@ class Area_model extends CI_Model
      */
     public function deleteAreaJunctions($areaId, $junctionIds)
     {
-        if(empty($junctionIds)) {
-            return null;
-        }
-
         return $this->db->where('area_id', $areaId)
             ->where_in('junction_id', $junctionIds)
             ->where('delete_at', '1970-01-01 00:00:00')
@@ -255,20 +238,14 @@ class Area_model extends CI_Model
      *
      * @param $areaIds
      * @param string $select
-     * @return Collection|null
+     * @return array
      */
     public function getAreaJunctionsByAreaIds($areaIds, $select = '*')
     {
-        if(empty($areaIds)) {
-            return null;
-        }
-
-        $result = $this->db->select($select)
+        return $this->db->select($select)
             ->from('area_junction_relation')
             ->where_in('area_id', $areaIds)
             ->where('delete_at', '1970-01-01 00:00:00')
             ->get()->result_array();
-
-        return $result ? Collection::make($result) : null;
     }
 }

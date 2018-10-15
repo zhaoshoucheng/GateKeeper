@@ -54,7 +54,7 @@ class Arterialjunction_model extends CI_Model
         }
 
         // 获取地图版本
-        $version = $this->waymap_model->getMapVersion(explode(",",$task['dates']));
+        $version = $this->waymap_model->getMapVersion($task['dates']);
         if (empty($version)) {
             throw new \Exception("The map_version not found.");
         }
@@ -111,13 +111,13 @@ class Arterialjunction_model extends CI_Model
                 throw new \Exception("The task not found.");
             }
             // 获取地图版本
-            $data['q']['map_version'] = $this->waymap_model->getMapVersion(explode(",",$task['dates']));
+            $data['q']['map_version'] = $this->waymap_model->getMapVersion($task['dates']);
             if (empty($data['q']['map_version'])) {
                 throw new \Exception("The map_version not found.");
             }
         }
 
-        $adjJunctions = $this->waymap_model->getConnectionAdjJunctions($data['q']);
+        $adjJunctions = $this->waymap_model->getConnectionAdjJunctions($data['q']['city_id'], $data['q']['selected_junctionid'], $data['q']['selected_path']);
 
         //获取一个方向的links
         $getDirectionLinks = function ($direction, $qData) {
@@ -141,7 +141,7 @@ class Arterialjunction_model extends CI_Model
 
         //合并多个link的geo信息
         $mergeLinkGeoInfosByLinks = function ($linkArr, $cityId, $mapVersion) {
-            $orginLinksGeoInfos = $this->waymap_model->getLinksGeoInfos($linkArr, $cityId, $mapVersion);
+            $orginLinksGeoInfos = $this->waymap_model->getLinksGeoInfos($linkArr, $mapVersion);
             if(empty($orginLinksGeoInfos)){
                 return (Object)[];
             }

@@ -139,7 +139,8 @@ class Junctionreport_model extends CI_Model
     {
         $junctionId = $data['logic_junction_id'];
 
-        $junctionInfo = $this->waymap_model->getJunctionInfo($junctionId, [ 'key'=>'logic_junction_id', 'value' => ['name', 'lat', 'lng'] ]);
+        $junctionInfo = $this->waymap_model->getJunctionInfo($junctionId);
+        $junctionInfo = array_column($junctionInfo, null, 'logic_junction_id');
 
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionId);
 
