@@ -32,6 +32,6 @@ $config['road'] = [
     [
         'key' => 'speed',
         'name' => '干线平均速度',
-        'unit' => '米／秒'
+        'unit' => '千米／小时'
     ],
 ];
