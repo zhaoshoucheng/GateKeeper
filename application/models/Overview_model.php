@@ -192,12 +192,12 @@ class Overview_model extends CI_Model
             $nanchang = $this->config->item('nanchang');
 
             if(array_key_exists($_SESSION['username'], $nanchang)) {
-                return Collection::make($junctionList)
+                $junctionList['data'] = Collection::make($junctionList['data'])
                     ->whereIn('jid', $nanchang[$_SESSION['username']])
                     ->values()->get();
-            } else {
-                return $junctionList;
             }
+
+            return $junctionList;
         }
 
         return [];
