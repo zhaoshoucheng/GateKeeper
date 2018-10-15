@@ -32,7 +32,7 @@ $config['menu'] = [
             ],
             [
                 'name' => '诊断',
-                'url' => '/signalpro/#/',
+                'url' => '/signalpro/#/diagnose/',
                 'remark ' => 'signal',
                 'son' => [
                     [
@@ -41,33 +41,51 @@ $config['menu'] = [
                     ],
                     [
                         'name' => '详情',
-                        'url' => 'diagnose',
+                        'url' => 'index',
                     ],
                 ],
             ],
             [
                 'name' => '评估',
-                'url' => '#/assessment/',
+                'url' => '/signalpro/#/assessment/',
                 'remark ' => 'signal',
+                'son' => [
+                    [
+                        'name' => '路口评估',
+                        'url' => 'junction',
+                    ],
+                    [
+                        'name' => '干线评估',
+                        'url' => 'road',
+                    ],
+                    [
+                        'name' => '区域评估',
+                        'url' => 'area',
+                    ],
+                ],
             ],
             [
                 'name' => '优化',
-                'url' => '/signalpro/#/',
+                'url' => '/signalpro/#/optimize/',
                 'remark ' => 'signal',
                 'son' => [
                     [
                         'name' => '单点时段优化',
-                        'url' => 'signal-optimize',
+                        'url' => 'signal',
                     ],
                     [
                         'name' => '单点绿信比优化',
-                        'url' => 'green-optimize',
+                        'url' => 'green',
                     ],
                     [
                         'name' => '干线协调优化',
-                        'url' => 'coordinate-optimize',
+                        'url' => 'coordinate',
                     ],
                 ],
+            ],
+            [
+                'name' => '自适应',
+                'url' => '#/adaptive',
             ],
             [
                 'name' => '报告',
@@ -75,9 +93,9 @@ $config['menu'] = [
                 'remark ' => 'signal',
             ],
             [
-                    'name' => '管理',
-                    'url' => '#/configuration',
-                    'remark ' => 'signal',
+                'name' => '管理',
+                'url' => '#/manage/configuration',
+                'remark ' => 'signal',
             ],
         ],
         // 北京区域受限菜单
@@ -89,7 +107,7 @@ $config['menu'] = [
             ],
             [
                 'name' => '诊断',
-                'url' => '/signalpro/#/',
+                'url' => '/signalpro/#/diagnose/',
                 'remark ' => 'signal',
                 'son' => [
                     [
@@ -98,26 +116,26 @@ $config['menu'] = [
                     ],
                     [
                         'name' => '详情',
-                        'url' => 'diagnose',
+                        'url' => 'index',
                     ],
                 ],
             ],
             [
                 'name' => '优化',
-                'url' => '/signalpro/#/',
+                'url' => '/signalpro/#/optimize/',
                 'remark ' => 'signal',
                 'son' => [
                     [
                         'name' => '单点时段优化',
-                        'url' => 'signal-optimize',
+                        'url' => 'signal',
                     ],
                     [
                         'name' => '单点绿信比优化',
-                        'url' => 'green-optimize',
+                        'url' => 'green',
                     ],
                     [
                         'name' => '干线协调优化',
-                        'url' => 'coordinate-optimize',
+                        'url' => 'coordinate',
                     ],
                 ],
             ],
