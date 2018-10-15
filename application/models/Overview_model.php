@@ -194,9 +194,12 @@ class Overview_model extends CI_Model
             $username = get_instance()->username;
 
             if(array_key_exists($username, $nanchang)) {
-                $junctionList['data'] = Collection::make($junctionList['data'])
+                $junctionList['dataList'] = Collection::make($junctionList['dataList'])
                     ->whereIn('jid', $nanchang[$username])
-                    ->values()->get();
+                    ->values();
+
+                $junctionList['center']['lng'] = $junctionList['dataList']->avg('lng');
+                $junctionList['center']['lat'] = $junctionList['dataList']->avg('lat');
             }
 
             return $junctionList;
