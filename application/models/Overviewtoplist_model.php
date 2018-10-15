@@ -46,7 +46,8 @@ class Overviewtoplist_model extends CI_Model
 
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
-        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids, ['key' => 'logic_junction_id', 'value' => 'name']);
+        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
+        $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
 
         $realTimeQuota = $this->config->item('real_time_quota');
 
@@ -84,7 +85,8 @@ class Overviewtoplist_model extends CI_Model
 
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
-        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids, ['key' => 'logic_junction_id', 'value' => 'name']);
+        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
+        $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
 
         $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
 
@@ -136,7 +138,8 @@ class Overviewtoplist_model extends CI_Model
 
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
-        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids, ['key' => 'logic_junction_id', 'value' => 'name']);
+        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
+        $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
 
         $realTimeQuota = $this->config->item('real_time_quota');
 

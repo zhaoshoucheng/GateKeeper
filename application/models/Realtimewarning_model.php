@@ -285,7 +285,8 @@ class Realtimewarning_model extends CI_Model
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
         //获取路口信息的自定义返回格式
-        $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0, ['key' => 'logic_junction_id', 'value' => ['name', 'lng', 'lat']]);
+        $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0);
+        $junctionsInfo = array_column($junctionsInfo, null, 'logic_junction_id');
 
         //获取需要报警的全部路口ID
         $ids = implode(',', array_column($realTimeAlarmsInfo, 'logic_junction_id'));

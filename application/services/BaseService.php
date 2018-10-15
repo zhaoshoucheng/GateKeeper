@@ -1,9 +1,8 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: didi
- * Date: 2018/10/11
- * Time: 下午3:31
+ * 服务模块 - 基类
+ *
+ * User: lichaoxi_i@didiglobal.com
  */
 
 namespace Services;
