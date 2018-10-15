@@ -79,7 +79,6 @@ class Overview_model extends CI_Model
             }
         }
 
-
         $realTimeQuota = $this->config->item('real_time_quota');
 
         $result       = array_map(function ($v) use ($realTimeQuota) {
@@ -131,9 +130,9 @@ class Overview_model extends CI_Model
 
         $junctionSurveyKey = "its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
 
-        if(($result = $this->redis_model->getData($junctionSurveyKey))) {
-           return json_decode($result, true);
-        }
+//        if(($result = $this->redis_model->getData($junctionSurveyKey))) {
+//           return json_decode($result, true);
+//        }
 
         $data = $this->junctionsList($data);
 
