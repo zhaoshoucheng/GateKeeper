@@ -5,9 +5,7 @@
  * # date:    2018-04-08
  ********************************************/
 
-namespace Models;
-
-class Waymap_model extends \CI_Model
+class Waymap_model extends CI_Model
 {
     // 全局的最后一个版本
     public static $lastMapVersion = null;

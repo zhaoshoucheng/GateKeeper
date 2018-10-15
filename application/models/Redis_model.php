@@ -5,9 +5,7 @@
 # date:    2018-04-03
 ********************************************/
 
-namespace Models;
-
-class Redis_model extends \CI_Model
+class Redis_model extends CI_Model
 {
     /**
      * @var bool|\Redis
@@ -22,8 +20,6 @@ class Redis_model extends \CI_Model
     public function __construct()
     {
         parent::__construct();
-
-        $this->config = new \CI_Config();
 
         $this->redis = new \Redis();
         // 需要设置redis的配置

@@ -8,14 +8,21 @@
 
 namespace Services;
 
-
-class BaseService extends \CI_Model
+/**
+ * Class BaseService
+ * @package Services
+ *
+ * @property \CI_Config $config
+ * @property \CI_Loader $load
+ */
+class BaseService
 {
-    /**
-     * BaseService constructor.
-     */
     public function __construct()
     {
-        parent::__construct();
+    }
+
+    public function __get($key)
+    {
+        return get_instance()->$key;
     }
 }

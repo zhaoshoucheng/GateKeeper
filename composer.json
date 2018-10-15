@@ -28,8 +28,7 @@
 	},
 	"autoload": {
 		"psr-4" : {
-			"Services\\" : "application/services/",
-			"Models\\" : "application/models/"
+			"Services\\" : "application/services/"
 		},
 		"files": [
 			"application/libraries/SSOSdk.php"

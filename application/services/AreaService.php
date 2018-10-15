@@ -8,27 +8,17 @@
 namespace Services;
 
 use Didi\Cloud\Collection\Collection;
-use Models\Waymap_model;
-use Models\Redis_model;
-use Models\Area_model;
 
+/**
+ * Class AreaService
+ * @package Services
+ *
+ * @property \Area_model $area_model
+ * @property \Redis_model $redis_model
+ * @property \Waymap_model $waymap_model
+ */
 class AreaService extends BaseService
 {
-    /**
-     * @var Area_model
-     */
-    protected $area_model;
-
-    /**
-     * @var Redis_model
-     */
-    protected $redis_model;
-
-    /**
-     * @var Waymap_model
-     */
-    protected $waymap_model;
-
     /**
      * AreaService constructor.
      * @throws \Exception
@@ -37,9 +27,9 @@ class AreaService extends BaseService
     {
         parent::__construct();
 
-        $this->area_model = new Area_model();
-        $this->redis_model = new Redis_model();
-        $this->waymap_model = new Waymap_model();
+        $this->load->model('waymap_model');
+        $this->load->model('area_model');
+        $this->load->model('redis_model');
 
         $this->load->config('nconf');
         $this->load->config('realtime_conf');
@@ -211,6 +201,7 @@ class AreaService extends BaseService
      *
      * @param $params
      * @return array
+     * @throws \Exception
      */
     public function getCityAreaDetail($params)
     {

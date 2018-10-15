@@ -45,18 +45,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @category	Libraries
  * @author		EllisLab Dev Team
  * @link		https://codeigniter.com/user_guide/libraries/config.html
+ *
+ * @property CI_Config $config
+ * @property CI_Loader $load
  */
 class CI_Model {
-
-    /**
-     * @var \CI_Loader
-     */
-    protected $load;
-
-    /**
-     * @var \CI_Config
-     */
-    protected $config;
 
 	/**
 	 * Class constructor
@@ -65,9 +58,6 @@ class CI_Model {
 	 */
 	public function __construct()
 	{
-	    $this->load = new CI_Loader();
-	    $this->config = new CI_Config();
-
 		log_message('info', 'Model Class Initialized');
 	}
 

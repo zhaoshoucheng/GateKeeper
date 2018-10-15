@@ -5,11 +5,9 @@
  * # author:  niuyufu@didichuxing.com
  * # date:    2018-08-23
  ********************************************/
-namespace Models;
-
 use Didi\Cloud\Collection\Collection;
 
-class Area_model extends \CI_Model
+class Area_model extends CI_Model
 {
     private $tb = 'area';
 
