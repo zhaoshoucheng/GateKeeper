@@ -6,6 +6,7 @@
 **********************************************/
 
 include_once "Inroute_Controller.php";
+
 class MY_Controller extends CI_Controller {
 
     public $errno = 0;
@@ -20,6 +21,7 @@ class MY_Controller extends CI_Controller {
 
 
     public function __construct(){
+
         parent::__construct();
         date_default_timezone_set('Asia/Shanghai');
         $host = $_SERVER['HTTP_HOST'];
@@ -222,7 +224,7 @@ class MY_Controller extends CI_Controller {
         }
         $this->username = $this->user->username;
 
-        $_SESSION['username'] = $this->username;
+        $GLOBALS['G_username'] = $this->username;
         return true;
     }
 

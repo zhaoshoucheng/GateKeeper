@@ -191,9 +191,9 @@ class Overview_model extends CI_Model
 
             $nanchang = $this->config->item('nanchang');
 
-            if(array_key_exists($_SESSION['username'], $nanchang)) {
+            if(array_key_exists($GLOBALS['G_username'], $nanchang)) {
                 $junctionList['data'] = Collection::make($junctionList['data'])
-                    ->whereIn('jid', $nanchang[$_SESSION['username']])
+                    ->whereIn('jid', $nanchang[$GLOBALS['G_username']])
                     ->values()->get();
             }
 
