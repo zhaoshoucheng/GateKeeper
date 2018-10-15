@@ -224,7 +224,6 @@ class MY_Controller extends CI_Controller {
         }
         $this->username = $this->user->username;
 
-        define('USERNAME', $this->username);
         return true;
     }
 
