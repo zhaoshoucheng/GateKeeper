@@ -341,7 +341,7 @@ class Timingadaptation_model extends CI_Model
                 $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '/';
 
                 // 获取并过滤出 基准配时中的绿灯
-                $currentTiming = &$current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];
+                $currentTiming = $current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];
                 $greenCurrents = Collection::make($currentTiming)->where('state', 1)->get();
 
                 // 自适应和基准配时数据递归合并

@@ -234,7 +234,7 @@ class Road_model extends CI_Model
         foreach ($result as $item) {
 
             //从 Redis 获取数据失败
-            if(!($tmp = $this->redis_model->getData('Road_' . $item['road_id']))) {
+            if(isset($params['flag']) || !($tmp = $this->redis_model->getData('Road_' . $item['road_id']))) {
 
                 // 从数据库中获取数据
                 $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
@@ -332,6 +332,12 @@ class Road_model extends CI_Model
         $logicFlowIds = array_map(function ($v) {
             return $v['logic_flow']['logic_flow_id'] ?? '';
         }, $res[$dataKey]);
+
+        if(in_array($params['quota_key'], ['time', 'stop_delay', 'stop_time_cycle'])) {
+            if(count($junctionIds) - 1 > count($logicFlowIds)) {
+                throw new Exception('路网数据错误');
+            }
+        }
 
         if($params['quota_key'] == 'time') {
 
