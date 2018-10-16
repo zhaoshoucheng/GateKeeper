@@ -7,10 +7,19 @@
 
 use Didi\Cloud\Collection\Collection;
 
+/**
+ * Class Road_model
+ *
+ * @property Redis_model $redis_model
+ */
 class Road_model extends CI_Model
 {
     private $tb = 'road';
-    private $db = '';
+
+    /**
+     * @var CI_DB_query_builder
+     */
+    private $db;
 
     public function __construct()
     {
