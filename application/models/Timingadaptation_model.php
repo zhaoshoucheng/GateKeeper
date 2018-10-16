@@ -363,13 +363,18 @@ class Timingadaptation_model extends CI_Model
                 $movement['logic_flow_id'] = ($movement['flow']['logic_flow_id'] ?? '') . ($movement['flow']['comment'] ?? '');
             }
 
+            unset($movement);
+
             // 移除 flow id 为空的元素
             $tod['movement_timing'] = call_user_func($removeEmptyFlowIdItemCallback, $tod['movement_timing']);
 
             $tod['movement_timing'] = Collection::make($tod['movement_timing'])
                 ->groupBy('logic_flow_id', $mergeSameFlowIdTimingCallback)
                 ->values()->get();
+
+            unset($tod['stage']);
         }
+
         return $adapt;
     }
 
