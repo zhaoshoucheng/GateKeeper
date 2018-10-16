@@ -261,6 +261,15 @@ class Overview_model extends CI_Model
             return [];
         }
 
+        $nanchang = $this->config->item('nanchang');
+        $username = get_instance()->username;
+
+        if(array_key_exists($username, $nanchang)) {
+            $res = Collection::make($res)
+                ->whereIn('logic_junction_id', $nanchang[$username])
+                ->values()->get();
+        }
+
         $result = $this->formatCongestionInfoData($res);
 
         return $result;
