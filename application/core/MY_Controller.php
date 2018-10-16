@@ -198,6 +198,7 @@ class MY_Controller extends CI_Controller {
         $open_api = isset($app_config[$app_id]['open_api']) ? $app_config[$app_id]['open_api'] : array();
         $server_sign = substr(md5($query_str . "&" . $app_key), 7, 16);
         if ($server_sign != $client_sign) {
+            com_log_notice('_com_sign_error', ['md5str' => $query_str . "&" . $app_key, 'server_sign' => $server_sign, 'client_sign' => $client_sign, 'app_id' => $app_id, 'app_config' => $app_config]);
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "签名的sign不正确";
             return false;
