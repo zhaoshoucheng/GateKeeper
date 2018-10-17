@@ -28,21 +28,7 @@ class Overview_model extends CI_Model
     }
 
     /**
-     * @param $data['city_id'] Y 城市ID
-     * @param $data['date'] N 日期
-     * @return array
-     */
-    public function junctionsList($data)
-    {
-        $hour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
-
-        $result = $this->getJunctionList($data['city_id'], $data['date'], $hour);
-
-        return $result;
-    }
-
-    /**
-     * @param $data['city_id'] Y 城市ID
+     * @param $data ['city_id'] Y 城市ID
      * @return array
      */
     public function operationCondition($data)
@@ -54,37 +40,23 @@ class Overview_model extends CI_Model
             return [];
         }
 
-        $nanchang = $this->config->item('nanchang');
-
-        $username = get_instance()->username;
-
-        if(array_key_exists($username, $nanchang)) {
+        $result = $this->redis_model->getData('its_realtime_avg_stop_delay_' . $data['city_id'] . '_' . $data['date']);
+        $result = json_decode($result, true);
+        if (!$result) {
             $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
                 ->from($table)
                 ->where('updated_at >=', $data['date'] . ' 00:00:00')
                 ->where('updated_at <=', $data['date'] . ' 23:59:59')
-                ->where_in('logic_junction_id', $nanchang[$username])
                 ->group_by('hour')
                 ->get()->result_array();
-        } else {
-            $result = $this->redis_model->getData('its_realtime_avg_stop_delay_' . $data['city_id'] . '_' . $data['date']);
-            $result = json_decode($result, true);
-            if (!$result) {
-                $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
-                    ->from($table)
-                    ->where('updated_at >=', $data['date'] . ' 00:00:00')
-                    ->where('updated_at <=', $data['date'] . ' 23:59:59')
-                    ->group_by('hour')
-                    ->get()->result_array();
-            }
         }
 
         $realTimeQuota = $this->config->item('real_time_quota');
 
-        $result       = array_map(function ($v) use ($realTimeQuota) {
+        $result = array_map(function ($v) use ($realTimeQuota) {
             return [
                 $realTimeQuota['stop_delay']['round']($v['avg_stop_delay']),
-                substr($v['hour'],0, 5)
+                substr($v['hour'], 0, 5),
             ];
         }, $result);
 
@@ -92,14 +64,14 @@ class Overview_model extends CI_Model
         $allStopDelay = array_column($result, 0);
         $info         = [
             'value' => count($allStopDelay) == 0 ? 0 : $realTimeQuota['stop_delay']['round'](array_sum($allStopDelay) / count($allStopDelay)),
-            'unit' => $realTimeQuota['stop_delay']['unit']
+            'unit' => $realTimeQuota['stop_delay']['unit'],
         ];
 
         $ext = [];
 
         array_reduce($result, function ($carry, $item) use (&$ext) {
             $now = strtotime($item[1] ?? '00:00');
-            if($now - $carry >= 30 * 60) {
+            if ($now - $carry >= 30 * 60) {
                 $ext = array_merge($ext, range($carry + 5 * 60, $now - 5 * 60, 5 * 60));
             }
             return $now;
@@ -113,8 +85,17 @@ class Overview_model extends CI_Model
 
         return [
             'dataList' => $result,
-            'info' => $info
+            'info' => $info,
         ];
+    }
+
+    /**
+     * 校验数据表是否存在
+     */
+    private function isTableExisted($table)
+    {
+        $isExisted = $this->db->table_exists($table);
+        return $isExisted;
     }
 
     /**
@@ -125,8 +106,8 @@ class Overview_model extends CI_Model
     public function junctionSurvey($data)
     {
         $cityId = $data['city_id'];
-        $date = $data['date'];
-        $hour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
+        $date   = $data['date'];
+        $hour   = $this->common_model->getLastestHour($data['city_id'], $data['date']);
 
         $junctionSurveyKey = "its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
 
@@ -145,13 +126,62 @@ class Overview_model extends CI_Model
         $result['congestion_total'] = 0;
 
         foreach ($data as $datum) {
-            $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+            $result['alarm_total']      += $datum['alarm']['is'] ?? 0;
             $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
         }
 
         return $result;
 
 
+    }
+
+    /**
+     * @param $data ['city_id'] Y 城市ID
+     * @param $data ['date'] N 日期
+     * @return array
+     */
+    public function junctionsList($data)
+    {
+        $hour = $this->common_model->getLastestHour($data['city_id'], $data['date']);
+
+        $result = $this->getJunctionList($data['city_id'], $data['date'], $hour);
+
+        return $result;
+    }
+
+    /**
+     * 从缓存中取全部路口信息数据
+     *
+     * @param $cityId
+     * @param $date
+     * @param $hour
+     * @return array
+     */
+    private function getJunctionList($cityId, $date, $hour)
+    {
+        $junctionListKey = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
+
+        if (($junctionList = $this->redis_model->getData($junctionListKey))) {
+
+            $junctionList = json_decode($junctionList, true);
+
+            $nanchang = $this->config->item('nanchang');
+
+            $username = get_instance()->username;
+
+            if (array_key_exists($username, $nanchang)) {
+                $junctionList['dataList'] = Collection::make($junctionList['dataList'])
+                    ->whereIn('jid', $nanchang[$username])
+                    ->values();
+
+                $junctionList['center']['lng'] = $junctionList['dataList']->avg('lng');
+                $junctionList['center']['lat'] = $junctionList['dataList']->avg('lat');
+            }
+
+            return $junctionList;
+        }
+
+        return [];
     }
 
     /**
@@ -162,7 +192,7 @@ class Overview_model extends CI_Model
      */
     public function getLastestHour($cityId, $date = null)
     {
-        if(($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
+        if (($hour = $this->redis_model->getData("its_realtime_lasthour_$cityId"))) {
             return $hour;
         }
 
@@ -179,61 +209,26 @@ class Overview_model extends CI_Model
             ->limit(1)
             ->get()->first_row();*/
         // 查询优化
-        $sql = "SELECT `hour` FROM `real_time_{$cityId}`  WHERE 1 ORDER BY updated_at DESC,hour DESC LIMIT 1";
+        $sql    = "SELECT `hour` FROM `real_time_{$cityId}`  WHERE 1 ORDER BY updated_at DESC,hour DESC LIMIT 1";
         $result = $this->db->query($sql)->first_row();
-        if(!$result)
+        if (!$result)
             return date('H:i:s');
 
         return $result->hour;
     }
 
     /**
-     * 从缓存中取全部路口信息数据
-     *
-     * @param $cityId
-     * @param $date
-     * @param $hour
-     * @return array
-     */
-    private function getJunctionList($cityId, $date, $hour)
-    {
-        $junctionListKey = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
-
-        if(($junctionList = $this->redis_model->getData($junctionListKey))) {
-
-            $junctionList = json_decode($junctionList, true);
-
-            $nanchang = $this->config->item('nanchang');
-
-            $username = get_instance()->username;
-
-            if(array_key_exists($username, $nanchang)) {
-                $junctionList['dataList'] = Collection::make($junctionList['dataList'])
-                    ->whereIn('jid', $nanchang[$username])
-                    ->values();
-
-                $junctionList['center']['lng'] = $junctionList['dataList']->avg('lng');
-                $junctionList['center']['lat'] = $junctionList['dataList']->avg('lat');
-            }
-
-            return $junctionList;
-        }
-
-        return [];
-    }
-
-    /**
      * 获取拥堵概览
      *
-     * @param $data['city_id']    interger Y 城市ID
-     * @param $data['date']       string   Y 日期 Y-m-d
-     * @param $data['time_point'] string   Y 时间 H:i:s
+     * @param $data ['city_id']    interger Y 城市ID
+     * @param $data ['date']       string   Y 日期 Y-m-d
+     * @param $data ['time_point'] string   Y 时间 H:i:s
      * @return array
      */
     public function getCongestionInfo($data)
     {
         $result = [];
-        $table = $this->tb . $data['city_id'];
+        $table  = $this->tb . $data['city_id'];
         if (!$this->isTableExisted($table)) {
             return [];
         }
@@ -264,7 +259,7 @@ class Overview_model extends CI_Model
         $nanchang = $this->config->item('nanchang');
         $username = get_instance()->username;
 
-        if(array_key_exists($username, $nanchang)) {
+        if (array_key_exists($username, $nanchang)) {
             $res = Collection::make($res)
                 ->whereIn('logic_junction_id', $nanchang[$username])
                 ->values()->get();
@@ -299,23 +294,23 @@ class Overview_model extends CI_Model
         // 路口状态计算规则
         $junctinStatusFormula = $this->config->item('junction_status_formula');
 
-        foreach ($data as $k=>$v) {
+        foreach ($data as $k => $v) {
             $congestionNum[$junctinStatusFormula($v['stop_delay'])][$k] = 1;
         }
 
         $result['count'] = [];
         $result['ratio'] = [];
-        foreach ($junctionStatusConf as $k=>$v) {
+        foreach ($junctionStatusConf as $k => $v) {
             $result['count'][$k] = [
                 'cate' => $v['name'],
-                'num'  => isset($congestionNum[$k]) ? count($congestionNum[$k]) : 0,
+                'num' => isset($congestionNum[$k]) ? count($congestionNum[$k]) : 0,
             ];
 
             $result['ratio'][$k] = [
-                'cate'  => $v['name'],
+                'cate' => $v['name'],
                 'ratio' => isset($congestionNum[$k])
-                            ? round((count($congestionNum[$k]) / $junctionTotal) * 100) . '%'
-                            : '0%',
+                    ? round((count($congestionNum[$k]) / $junctionTotal) * 100) . '%'
+                    : '0%',
             ];
         }
 
@@ -323,14 +318,5 @@ class Overview_model extends CI_Model
         $result['ratio'] = array_values($result['ratio']);
 
         return $result;
-    }
-
-    /**
-     * 校验数据表是否存在
-     */
-    private function isTableExisted($table)
-    {
-        $isExisted = $this->db->table_exists($table);
-        return $isExisted;
     }
 }
