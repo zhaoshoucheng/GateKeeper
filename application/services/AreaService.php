@@ -81,7 +81,6 @@ class AreaService extends BaseService
         $areaId = $this->area_model->insertArea($data);
 
         // 创建区域路口关联
-
         $failCount = $this->area_model->insertAreaJunctions($areaId, $junctionIds);
 
         if($failCount === 0) {

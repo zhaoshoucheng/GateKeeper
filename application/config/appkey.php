@@ -63,6 +63,7 @@ $config['authirized_apps'] = array(
     'xmmtrace' => array(
         'name'  => 'token',
         'method'  => 'any',
+        'timeout'  => 100,
         'secret'=> '3a01e6c56bcce94ee5de073df3d512d4',
         'open_api'   => array(
             'Xmmtrace/proxy/xmmtrace',
