@@ -326,7 +326,7 @@ class Waymap_model extends CI_Model
                 && !empty($retArr['data'])) {
                 foreach ($retArr['data'] as $k=>$v) {
                     if(!empty($v)){
-                        $result_version = $v;
+                        return  $v;
                     }
                 }
                 return $result_version;
