@@ -825,6 +825,14 @@ class Timingadaptationarea_model extends CI_Model
                 ];
             }
 
+            /*
+            unset($ret[0]);
+            unset($ret[1]);
+            unset($ret[2]);
+            unset($ret[3]);
+            $ret = array_values($ret);
+            */
+
             $tmpRet = [];
             $lastDayTime = "00:00:00";
             for($i = 0; $i < count($ret); ) {
@@ -842,6 +850,13 @@ class Timingadaptationarea_model extends CI_Model
                     $lastDayTime = $ret[$i][0];
                     $i++;
                     continue;
+                }
+
+                if ($lastDayTime == "00:00:00") {
+                    $tmpRet[] = [
+                        $lastDayTime,
+                        null
+                    ];
                 }
 
                 // 两个距离大于15分钟
