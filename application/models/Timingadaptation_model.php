@@ -320,6 +320,15 @@ class Timingadaptation_model extends CI_Model
             );
         };
 
+        $mergeSameFlowIdTimingCallback = function ($data) {
+            $result = array_shift($data);
+            unset($result['logic_flow_id']);
+            return array_reduce($data, function ($carry, $item) {
+                $carry['timing'] = array_merge($carry['timing'], $item['timing']);
+                return $carry;
+            }, $result);
+        };
+
         if(empty($adapt) || empty($current)) {
             return [];
         }
@@ -349,11 +358,23 @@ class Timingadaptation_model extends CI_Model
 
                 // 数据处理
                 $movement['timing'] = array_map($formatTimingCallback, $greens);
+
+                //提取 flow id
+                $movement['logic_flow_id'] = ($movement['flow']['logic_flow_id'] ?? '') . ($movement['flow']['comment'] ?? '');
             }
+
+            unset($movement);
 
             // 移除 flow id 为空的元素
             $tod['movement_timing'] = call_user_func($removeEmptyFlowIdItemCallback, $tod['movement_timing']);
+
+            $tod['movement_timing'] = Collection::make($tod['movement_timing'])
+                ->groupBy('logic_flow_id', $mergeSameFlowIdTimingCallback)
+                ->values()->get();
+
+            unset($tod['stage']);
         }
+
         return $adapt;
     }
 

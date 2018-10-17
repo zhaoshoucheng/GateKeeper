@@ -5,6 +5,8 @@
  * # date:    2018-07-25
  ********************************************/
 
+use Didi\Cloud\Collection\Collection;
+
 class Overview_model extends CI_Model
 {
     private $tb = 'real_time_';
@@ -19,6 +21,7 @@ class Overview_model extends CI_Model
         }
 
         $this->config->load('realtime_conf');
+        $this->config->load('permission/nanchang_overview_conf');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
         $this->load->model('common_model');
@@ -46,21 +49,35 @@ class Overview_model extends CI_Model
     {
 
         $table = 'real_time_' . $data['city_id'];
+
         if (!$this->isTableExisted($table)) {
             return [];
         }
 
-        $result = $this->redis_model->getData('its_realtime_avg_stop_delay_' . $data['city_id'] . '_' . $data['date']);
-        $result = json_decode($result, true);
-        if(!$result) {
+        $nanchang = $this->config->item('nanchang');
+
+        $username = get_instance()->username;
+
+        if(array_key_exists($username, $nanchang)) {
             $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
                 ->from($table)
                 ->where('updated_at >=', $data['date'] . ' 00:00:00')
                 ->where('updated_at <=', $data['date'] . ' 23:59:59')
+                ->where_in('logic_junction_id', $nanchang[$username])
                 ->group_by('hour')
                 ->get()->result_array();
+        } else {
+            $result = $this->redis_model->getData('its_realtime_avg_stop_delay_' . $data['city_id'] . '_' . $data['date']);
+            $result = json_decode($result, true);
+            if (!$result) {
+                $result = $this->db->select('hour, avg(stop_delay) as avg_stop_delay')
+                    ->from($table)
+                    ->where('updated_at >=', $data['date'] . ' 00:00:00')
+                    ->where('updated_at <=', $data['date'] . ' 23:59:59')
+                    ->group_by('hour')
+                    ->get()->result_array();
+            }
         }
-
 
         $realTimeQuota = $this->config->item('real_time_quota');
 
@@ -113,9 +130,9 @@ class Overview_model extends CI_Model
 
         $junctionSurveyKey = "its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
 
-        if(($result = $this->redis_model->getData($junctionSurveyKey))) {
-           return json_decode($result, true);
-        }
+//        if(($result = $this->redis_model->getData($junctionSurveyKey))) {
+//           return json_decode($result, true);
+//        }
 
         $data = $this->junctionsList($data);
 
@@ -183,31 +200,26 @@ class Overview_model extends CI_Model
         $junctionListKey = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
 
         if(($junctionList = $this->redis_model->getData($junctionListKey))) {
-            return json_decode($junctionList, true);
+
+            $junctionList = json_decode($junctionList, true);
+
+            $nanchang = $this->config->item('nanchang');
+
+            $username = get_instance()->username;
+
+            if(array_key_exists($username, $nanchang)) {
+                $junctionList['dataList'] = Collection::make($junctionList['dataList'])
+                    ->whereIn('jid', $nanchang[$username])
+                    ->values();
+
+                $junctionList['center']['lng'] = $junctionList['dataList']->avg('lng');
+                $junctionList['center']['lat'] = $junctionList['dataList']->avg('lat');
+            }
+
+            return $junctionList;
         }
+
         return [];
-//        if (!$this->isTableExisted($this->tb . $cityId)) {
-//            return [];
-//        }
-//
-//        $data = $this->db->select('*')
-//            ->from($this->tb . $cityId)
-//            ->where('hour', $hour)
-//            ->where('traj_count >=', 10)
-//            ->where('updated_at >=', $date . ' 00:00:00')
-//            ->where('updated_at <=', $date . ' 23:59:59')
-//            ->get()->result_array();
-//
-//        $lngs = array_filter(array_column($data, 'lng'));
-//        $lats = array_filter(array_column($data, 'lat'));
-//
-//        $center['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
-//        $center['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
-//
-//        return [
-//            'dataList' => $data,
-//            'center' => $center
-//        ];
     }
 
     /**
@@ -247,6 +259,15 @@ class Overview_model extends CI_Model
 
         if (empty($res)) {
             return [];
+        }
+
+        $nanchang = $this->config->item('nanchang');
+        $username = get_instance()->username;
+
+        if(array_key_exists($username, $nanchang)) {
+            $res = Collection::make($res)
+                ->whereIn('logic_junction_id', $nanchang[$username])
+                ->values()->get();
         }
 
         $result = $this->formatCongestionInfoData($res);
