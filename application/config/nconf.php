@@ -42,9 +42,9 @@ if($development == 2){
     ];
 
     // signal-mis
-    $signal_mis_server = '100.90.164.31';
-    $signal_mis_port = '8006';
-    $signal_mis_ext = '/signal-mis';
+    $signal_mis_server = '100.69.238.11';
+    $signal_mis_port = '8000';
+    $signal_mis_ext = '/its/signal-mis';
 
     // es
     $es_server = '100.69.238.158';

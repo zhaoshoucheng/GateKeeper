@@ -260,18 +260,19 @@ class Timingadaptationarea_model extends CI_Model
             if (!$quotaInfo) {
                 $result['errmsg'] = '调用es接口 queryQuota 失败！';
                 com_log_warning('_es_queryQuota_failed', 0, $result['errmsg'], compact("esUrl","esData","quotaInfo"));
-
+                $result['data'] = $quotaValue;
                 return $result;
             }
             $quotaInfo = json_decode($quotaInfo, true);
+            $quotaValue = 0;
             if ($quotaInfo['code'] != '000000') {
                 $result['errmsg'] = $quotaInfo['message'];
                 com_log_warning('_es_queryQuota_failed', 0, $result['errmsg'], compact("esUrl","esData","quotaInfo"));
-
+                $result['data'] = $quotaValue;
                 return $result;
             }
 
-            $quotaValue = 0;
+
             if (!empty($quotaInfo['result']['quotaResults'])) {
                 list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
                 $quotaValue = $quotaValueInfo['quotaMap']['weight_avg'];
@@ -1206,8 +1207,6 @@ class Timingadaptationarea_model extends CI_Model
 
                     // 记录所有时间 用于获取最大最小值
                     $timestamp[$vv['timestamp']] = $second;
-                    // 记录所有值 用于获取最大最小值
-                    $value[$vv['timestamp']] = $vv['stopDistance'];
                 }
             }
 
@@ -1218,7 +1217,7 @@ class Timingadaptationarea_model extends CI_Model
                     "min" => 0,
                 ],
                 "y" => [
-                    "max" => 0,
+                    "max" => 100,
                     "min" => 0,
                 ],
             ];
@@ -1226,12 +1225,6 @@ class Timingadaptationarea_model extends CI_Model
                 $ret['info']['x'] = [
                     'max' => max($timestamp),
                     'min' => min($timestamp),
-                ];
-            }
-            if (!empty($value)) {
-                $ret['info']['y'] = [
-                    'max' => max($value),
-                    'min' => min($value),
                 ];
             }
 

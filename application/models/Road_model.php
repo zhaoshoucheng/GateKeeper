@@ -7,10 +7,19 @@
 
 use Didi\Cloud\Collection\Collection;
 
+/**
+ * Class Road_model
+ *
+ * @property Redis_model $redis_model
+ */
 class Road_model extends CI_Model
 {
     private $tb = 'road';
-    private $db = '';
+
+    /**
+     * @var CI_DB_query_builder
+     */
+    private $db;
 
     public function __construct()
     {
@@ -234,7 +243,7 @@ class Road_model extends CI_Model
         foreach ($result as $item) {
 
             //从 Redis 获取数据失败
-            if(!($tmp = $this->redis_model->getData('Road_' . $item['road_id']))) {
+            if(isset($params['flag']) || !($tmp = $this->redis_model->getData('Road_' . $item['road_id']))) {
 
                 // 从数据库中获取数据
                 $tmp = $this->formatRoadDetailData($params['city_id'], $item['logic_junction_ids']);
@@ -267,7 +276,7 @@ class Road_model extends CI_Model
         $methods = [
             'stop_time_cycle' => 'round(sum(stop_time_cycle), 2) as stop_time_cycle',
             'stop_delay' => 'round(sum(stop_delay), 2) as stop_delay',
-            'speed' => 'round(avg(speed), 2) as speed',
+            'speed' => 'round(avg(speed) * 3.6, 2) as speed',
             'time' => '',
         ];
 
@@ -332,6 +341,12 @@ class Road_model extends CI_Model
         $logicFlowIds = array_map(function ($v) {
             return $v['logic_flow']['logic_flow_id'] ?? '';
         }, $res[$dataKey]);
+
+        if(in_array($params['quota_key'], ['time', 'stop_delay', 'stop_time_cycle'])) {
+            if(count($junctionIds) - 1 > count($logicFlowIds)) {
+                throw new Exception('路网数据错误');
+            }
+        }
 
         if($params['quota_key'] == 'time') {
 

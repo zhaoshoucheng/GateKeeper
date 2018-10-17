@@ -88,6 +88,72 @@ class Timingadaptation_model extends CI_Model
     }
 
     /**
+     * 获取指定路口的最近一次基准配时的下发状态
+     *
+     * @param $params
+     * @return array
+     * @throws Exception
+     */
+    public function getCurrentStatus($params)
+    {
+        // 获取数据源
+        $res = $this->db->select('*')
+            ->from('adapt_timing_mirror')
+            ->where('logic_junction_id', $params['logic_junction_id'])
+            ->limit(1)
+            ->get()->first_row('array');
+
+        // 没有数据
+        if(!$res) {
+            throw new Exception('该路口无配时');
+        }
+
+        // 配时错误
+        if($res['error_code']) {
+            throw new Exception('该路口配时错误');
+        }
+
+        $current_info = json_decode($res['current_info'], true);
+
+        if(!$current_info || empty($current_info)) {
+            throw new Exception('该路口尚未下发过基准配时方案');
+        }
+
+        // 获取基准配时数据
+        $current_result = $this->getCurrentUpdateResult($params['logic_junction_id']);
+
+        $result = [];
+
+        if($current_result['timestamp'] <= $current_info['update_time']) {
+            if(time() - $current_info['update_time'] >= 10 * 60) {
+                $result = [
+                    'status' => 1,
+                    'msg' => '基准配时下发中',
+                ];
+            } else {
+                $result = [
+                    'status' => 4,
+                    'msg' => '基准配时下发超时',
+                ];
+            }
+        } else {
+            if($current_result['status'] == 1) {
+                $result = [
+                    'status' => 2,
+                    'msg' => '基准配时下发成功',
+                ];
+            } else {
+                $result = [
+                    'status' => 3,
+                    'msg' => '基准配时下发失败',
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * 获取自适应配时状态
      *
      * @param $params
@@ -105,12 +171,12 @@ class Timingadaptation_model extends CI_Model
 
         // 没有数据
         if(!$res) {
-            throw new Exception('该路口无配时');
+            throw new Exception('该路口无配时', 0);
         }
 
         // 配时错误
         if($res['error_code']) {
-            throw new Exception('改路口配时错误');
+            throw new Exception('该路口配时错误', ERR_PARAMETERS);
         }
 
         $current_info = json_decode($res['current_info'], true);
@@ -254,6 +320,15 @@ class Timingadaptation_model extends CI_Model
             );
         };
 
+        $mergeSameFlowIdTimingCallback = function ($data) {
+            $result = array_shift($data);
+            unset($result['logic_flow_id']);
+            return array_reduce($data, function ($carry, $item) {
+                $carry['timing'] = array_merge($carry['timing'], $item['timing']);
+                return $carry;
+            }, $result);
+        };
+
         if(empty($adapt) || empty($current)) {
             return [];
         }
@@ -275,7 +350,7 @@ class Timingadaptation_model extends CI_Model
                 $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '/';
 
                 // 获取并过滤出 基准配时中的绿灯
-                $currentTiming = &$current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];
+                $currentTiming = $current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];
                 $greenCurrents = Collection::make($currentTiming)->where('state', 1)->get();
 
                 // 自适应和基准配时数据递归合并
@@ -283,11 +358,23 @@ class Timingadaptation_model extends CI_Model
 
                 // 数据处理
                 $movement['timing'] = array_map($formatTimingCallback, $greens);
+
+                //提取 flow id
+                $movement['logic_flow_id'] = ($movement['flow']['logic_flow_id'] ?? '') . ($movement['flow']['comment'] ?? '');
             }
+
+            unset($movement);
 
             // 移除 flow id 为空的元素
             $tod['movement_timing'] = call_user_func($removeEmptyFlowIdItemCallback, $tod['movement_timing']);
+
+            $tod['movement_timing'] = Collection::make($tod['movement_timing'])
+                ->groupBy('logic_flow_id', $mergeSameFlowIdTimingCallback)
+                ->values()->get();
+
+            unset($tod['stage']);
         }
+
         return $adapt;
     }
 

@@ -60,6 +60,7 @@ $online_host = array(
 	// 'ipd-cloud-internal-web01.gz01',
 	// 'ipd-cloud-server00.gz01',
 	// 'ipd-cloud-server01.gz01',
+    'ipd-cloud-preweb00.gz01',
 	'ipd-cloud-web00.gz01',
 	'ipd-cloud-web01.gz01',
 

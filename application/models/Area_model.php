@@ -271,7 +271,7 @@ class Area_model extends CI_Model
     {
         // 指标算法映射
         $methods = [
-            'speed' => 'round(avg(speed), 2) as speed',
+            'speed' => 'round(avg(speed) * 3.6, 2) as speed',
             'stop_delay' => 'round(avg(stop_delay), 2) as stop_delay'
         ];
 
@@ -383,7 +383,7 @@ class Area_model extends CI_Model
         $result = $this->db->select('*')
             ->from('area')
             ->where('id', $areaId)
-            ->where('delete_at', '1970-01-01')
+            ->where('delete_at', '1970-01-01 00:00:00')
             ->get()->first_row('array');
 
         if(!$result || empty($result)) {
