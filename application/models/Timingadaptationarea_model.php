@@ -826,15 +826,8 @@ class Timingadaptationarea_model extends CI_Model
             }
 
             $tmpRet = [];
-            $lastDayTime = "";
+            $lastDayTime = "00:00:00";
             for($i = 0; $i < count($ret); ) {
-                if (empty($lastDayTime)) {
-                    $lastDayTime = $ret[$i][0];
-                    $tmpRet[] = $ret[$i];
-                    $i++;
-                    continue;
-                }
-
                 $nowTime = strtotime($ret[$i][0]);
                 $lastTime = strtotime($lastDayTime);
                 // 如果两个距离不是顺序的
