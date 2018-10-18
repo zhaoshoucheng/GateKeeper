@@ -138,6 +138,7 @@ class RoadService extends BaseService
     public function getAllRoadDetail($params)
     {
         $cityId = $params['city_id'];
+        $flag = $params['flag'] ?? false;
 
         $select = 'road_id, logic_junction_ids, road_name, road_direction';
 
@@ -148,7 +149,7 @@ class RoadService extends BaseService
         foreach ($roadList as $item) {
             $roadId = $item['road_id'];
             //从 Redis 获取数据失败
-            if (!($res = $this->redis_model->getData('Road_' . $roadId))) {
+            if ($flag || !($res = $this->redis_model->getData('Road_' . $roadId))) {
                 $data = [
                     'city_id' => $cityId,
                     'road_id' => $roadId,
@@ -216,7 +217,7 @@ class RoadService extends BaseService
 
         foreach ($forwardPathFlowsCollection as $key => $item) {
 
-            $forwardGeo = $this->waymap_model->getLinksGeoInfos(explode(', ', $item['path_links']), $maxWaymapVersion);
+            $forwardGeo = $this->waymap_model->getLinksGeoInfos($item['path_links'], $maxWaymapVersion);
 
             $roadInfo[$key] = [
                 'start_junc_id' => $item['start_junc_id'],
@@ -227,7 +228,7 @@ class RoadService extends BaseService
         }
 
         foreach ($backwardPathFlowsCollection as $key => $item) {
-            $reverseGeo = $this->waymap_model->getLinksGeoInfos(explode(', ', $item['path_links']), $maxWaymapVersion);
+            $reverseGeo = $this->waymap_model->getLinksGeoInfos($item['path_links'], $maxWaymapVersion);
 
             if (isset($roadInfo[$key])) {
                 $roadInfo[$key]['reverse_geo'] = $reverseGeo;

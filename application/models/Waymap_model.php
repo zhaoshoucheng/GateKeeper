@@ -385,7 +385,11 @@ class Waymap_model extends CI_Model
             throw new \Exception('路网数据格式错误', ERR_REQUEST_WAYMAP_API);
         }
 
-        if ($res['errorCode'] != 0) {
+        if(isset($res['errno']) && $res['errno'] != 0) {
+            throw new \Exception($res['errmsg'], $res['errno']);
+        }
+
+        if (isset($res['errorCode']) && $res['errorCode'] != 0) {
             throw new \Exception($res['errorMsg'], $res['errorCode']);
         }
 

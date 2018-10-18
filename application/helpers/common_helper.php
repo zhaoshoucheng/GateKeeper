@@ -207,6 +207,12 @@ if(!function_exists('arrayMergeRecursive')) {
 }
 
 if(!function_exists('snakeCompact')) {
+    /**
+     * 类似于 compact ，将传入变量名的变量转换为数组，数组的键由驼峰式转换为下划线
+     *
+     * @param mixed ...$var
+     * @return array
+     */
     function snakeCompact(...$var)
     {
         if(empty($var)) {
