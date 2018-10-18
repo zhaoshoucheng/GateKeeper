@@ -50,6 +50,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @link		https://codeigniter.com/user_guide/general/controllers.html
  *
  * @property CI_Loader $load
+ * @property CI_Config $config
  */
 class CI_Controller {
 

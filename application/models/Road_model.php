@@ -545,6 +545,22 @@ class Road_model extends CI_Model
     }
 
     /**
+     * 获取指定干线
+     *
+     * @param $roadId
+     * @param string $select
+     * @return array
+     */
+    public function getRoadByRoadId($roadId, $select = '*')
+    {
+        return $this->db->select($select)
+            ->from($this->tb)
+            ->where('road_id', $roadId)
+            ->where('is_delete', 0)
+            ->get()->row_array();
+    }
+
+    /**
      * 插入新的干线数据
      *
      * @param $data
@@ -558,5 +574,48 @@ class Road_model extends CI_Model
         $this->db->insert($this->tb, $data);
 
         return $this->db->insert_id();
+    }
+
+    /**
+     * 更新干线数据
+     *
+     * @param $roadId
+     * @param $data
+     * @return bool
+     */
+    public function updateRoad($roadId, $data)
+    {
+        $data['updated_at'] = $data['updated_at'] ?? date('Y-m-d H:i:s');
+
+        return $this->db->where('road_id', $roadId)
+            ->where('is_delete', 0)
+            ->update($this->tb, $data);
+    }
+
+    /**
+     * 删除干线
+     *
+     * @param $roadId
+     * @return bool
+     */
+    public function deleteRoad($roadId)
+    {
+        return $this->db->where('roa_id', $roadId)
+            ->where('is_delete', 0)
+            ->set('is_delete', 1)
+            ->set('deleted_at', date('Y-m-d H:i:s'))
+            ->update($this->tb);
+    }
+
+    public function getJunctionByCityId($dates, $hours, $junctionIds, $flowIds, $cityId, $select = '*')
+    {
+        return $this->db->select($select)
+            ->from('flow_duration_v6_' . $cityId)
+            ->where_in('date', $dates)
+            ->where_in('hour', $hours)
+            ->where_in('logic_junction_id', $junctionIds)
+            ->where_in('logic_flow_id', $flowIds)
+            ->group_by('date, hour')
+            ->get()->result_array();
     }
 }

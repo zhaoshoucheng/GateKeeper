@@ -41,6 +41,13 @@ $config['area_map'] = [
     'stop_delay' => '区域平均延误'
 ];
 
+$config['road_map'] = [
+    'stop_time_cycle' => '干线停车次数',
+    'stop_delay' => '干线停车延误',
+    'speed' => '干线平均速度',
+    'time' => '干线通行时间',
+];
+
 $config['area_download_url_prefix'] = '/api/area/download?download_id=';
 
 $config['excel_style'] = [

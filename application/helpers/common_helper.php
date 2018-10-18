@@ -205,3 +205,70 @@ if(!function_exists('arrayMergeRecursive')) {
         return $target;
     }
 }
+
+if(!function_exists('snakeCompact')) {
+    function snakeCompact(...$var)
+    {
+        if(empty($var)) {
+            return [];
+        }
+
+        $res = [];
+        foreach ($var as $item) {
+            $name =  preg_replace_callback('/([A-Z]{1})/',function($matches){
+                return '_'.strtolower($matches[0]);
+            }, $item);
+            $res[$name] = $GLOBALS[$item];
+        }
+        return $res;
+    }
+}
+
+if(!function_exists('snakeExtract')) {
+    function snakeExtract(array $arr)
+    {
+        foreach ($arr as $key => $value) {
+            $name = preg_replace_callback('/([-_]+([a-z]{1}))/i',function($matches){
+                return strtoupper($matches[2]);
+            }, $key);
+            $GLOBALS[$name] = $value;
+        }
+    }
+}
+
+if(!function_exists('getExcelArray')) {
+    function getExcelArray($data)
+    {
+        $timeArray = hourRange();
+
+        $table = [];
+
+        $table[] = $timeArray;
+        array_unshift($table[0], "日期-时间");
+
+        $data = array_map(function ($value) {
+            return array_column($value, 1, 0);
+        }, $data);
+
+        foreach ($data as $key => $value) {
+            $column = [];
+            $column[] = $key;
+            foreach ($timeArray as $item) {
+                $column[] = $value[$item] ?? '-';
+            }
+            $table[] = $column;
+        }
+
+        return $table;
+    }
+}
+
+if(!function_exists('intToChr')) {
+    function intToChr($index, $start = 65) {
+        $str = '';
+        if (floor($index / 26) > 0) {
+            $str .= $this->intToChr(floor($index / 26) - 1);
+        }
+        return $str . chr($index % 26 + $start);
+    }
+}

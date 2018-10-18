@@ -210,6 +210,12 @@ class Area_model extends CI_Model
             ->get()->result_array();
     }
 
+    /**
+     * 删除区域
+     *
+     * @param $areaId
+     * @return bool
+     */
     public function deleteArea($areaId)
     {
         return $this->db->where('id', $areaId)

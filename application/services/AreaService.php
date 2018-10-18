@@ -411,7 +411,9 @@ class AreaService extends BaseService
      */
     public function download($params)
     {
-        $key = $this->config->item('quota_evaluate_key_prefix') . $params['download_id'];
+        $downloadId = $params['download_id'];
+
+        $key = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
 
         $excelStyle = $this->config->item('excel_style');
 
@@ -449,7 +451,7 @@ class AreaService extends BaseService
 
         if(!empty($data['base'])) {
 
-            $table = $this->getExcelArray($data['base']);
+            $table = getExcelArray($data['base']);
 
             $objSheet->fromArray($table, NULL, 'A' . $line);
 
@@ -457,25 +459,25 @@ class AreaService extends BaseService
             $cols_cnt = count($table[0]) - 1;
             $rows_index = $rows_cnt + $line - 1;
 
-            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
+            $objSheet->getStyle("A{$line}:".intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
             $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($excelStyle['header']);
-            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $line)->applyFromArray($excelStyle['header']);
+            $objSheet->getStyle("A{$line}:".intToChr($cols_cnt) . $line)->applyFromArray($excelStyle['header']);
 
             $line += ($rows_cnt + 2);
         }
 
         if(!empty($data['evaluate'])) {
 
-            $table = $this->getExcelArray($data['evaluate']);
+            $table = getExcelArray($data['evaluate']);
 
             $objSheet->fromArray($table, NULL, 'A' . $line);
 
             $rows_cnt = count($table);
             $cols_cnt = count($table[0]) - 1;
             $rows_index = $rows_cnt + $line - 1;
-            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
+            $objSheet->getStyle("A{$line}:".intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
             $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($excelStyle['header']);
-            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $line)->applyFromArray($excelStyle['header']);
+            $objSheet->getStyle("A{$line}:".intToChr($cols_cnt) . $line)->applyFromArray($excelStyle['header']);
         }
 
         $objWriter = new \PHPExcel_Writer_Excel5($objPHPExcel);
@@ -491,51 +493,5 @@ class AreaService extends BaseService
         ob_end_clean();
         $objWriter->save('php://output');
         exit();
-    }
-
-    /**
-     * 获取 Excel 单元格填充元素
-     *
-     * @param $data
-     * @return array
-     */
-    private function getExcelArray($data)
-    {
-        $timeArray = hourRange();
-
-        $table = [];
-
-        $table[] = $timeArray;
-        array_unshift($table[0], "日期-时间");
-
-        $data = array_map(function ($value) {
-            return array_column($value, 1, 0);
-        }, $data);
-
-        foreach ($data as $key => $value) {
-            $column = [];
-            $column[] = $key;
-            foreach ($timeArray as $item) {
-                $column[] = $value[$item] ?? '-';
-            }
-            $table[] = $column;
-        }
-
-        return $table;
-    }
-
-    /**
-     * int 转 char (Excel 中)
-     *
-     * @param $index
-     * @param int $start
-     * @return string
-     */
-    private function intToChr($index, $start = 65) {
-        $str = '';
-        if (floor($index / 26) > 0) {
-            $str .= $this->intToChr(floor($index / 26) - 1);
-        }
-        return $str . chr($index % 26 + $start);
     }
 }
