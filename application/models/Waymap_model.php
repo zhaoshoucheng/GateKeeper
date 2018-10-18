@@ -40,7 +40,7 @@ class Waymap_model extends CI_Model
      */
     public function getLastMapVersion()
     {
-        if (self::$lastMapVersion == null) {
+        if (self::$lastMapVersion != null) {
             return self::$lastMapVersion;
         }
 

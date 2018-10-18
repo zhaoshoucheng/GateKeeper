@@ -16,7 +16,7 @@ use Didi\Cloud\Collection\Collection;
  * @property \Waymap_model $waymap_model
  * @property \Redis_model $redis_model
  * @property \Road_model $road_model
-*/
+ */
 class RoadService extends BaseService
 {
     /**
@@ -57,9 +57,9 @@ class RoadService extends BaseService
      */
     public function addRoad($params)
     {
-        $cityId = $params['city_id'];
-        $junctionIds = $params['junction_ids'];
-        $roadName = $params['road_name'];
+        $cityId        = $params['city_id'];
+        $junctionIds   = $params['junction_ids'];
+        $roadName      = $params['road_name'];
         $roadDirection = $params['road_direction'];
 
         $data = [
@@ -68,12 +68,12 @@ class RoadService extends BaseService
             'road_name' => strip_tags(trim($roadName)),
             'logic_junction_ids' => implode(',', $junctionIds),
             'road_direction' => intval($roadDirection),
-            'user_id' => 0
+            'user_id' => 0,
         ];
 
         $res = $this->road_model->insertRoad($data);
 
-        if(!$res) {
+        if (!$res) {
             throw new \Exception('新增干线失败', ERR_PARAMETERS);
         }
 
@@ -89,9 +89,9 @@ class RoadService extends BaseService
      */
     public function updateRoad($params)
     {
-        $roadId = $params['road_id'];
-        $junctionIds = $params['junction_ids'];
-        $roadName = $params['road_name'];
+        $roadId        = $params['road_id'];
+        $junctionIds   = $params['junction_ids'];
+        $roadName      = $params['road_name'];
         $roadDirection = $params['road_direction'];
 
         $data = [
@@ -102,7 +102,7 @@ class RoadService extends BaseService
 
         $res = $this->road_model->updateRoad($roadId, $data);
 
-        if(!$res) {
+        if (!$res) {
             throw new \Exception('更新干线失败', ERR_PARAMETERS);
         }
 
@@ -122,11 +122,53 @@ class RoadService extends BaseService
 
         $res = $this->road_model->deleteRoad($roadId);
 
-        if(!$res) {
+        if (!$res) {
             throw new \Exception('删除干线失败', ERR_PARAMETERS);
         }
 
         return $res;
+    }
+
+    /**
+     * 获取全城全部路口详情
+     *
+     * @param $params
+     * @return array
+     */
+    public function getAllRoadDetail($params)
+    {
+        $cityId = $params['city_id'];
+
+        $select = 'road_id, logic_junction_ids, road_name, road_direction';
+
+        $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
+
+        $results = [];
+
+        foreach ($roadList as $item) {
+            $roadId = $item['road_id'];
+            //从 Redis 获取数据失败
+            if (!($res = $this->redis_model->getData('Road_' . $roadId))) {
+                $data = [
+                    'city_id' => $cityId,
+                    'road_id' => $roadId,
+                ];
+                try {
+                    $res = $this->getRoadDetail($data);
+                } catch (\Exception $e) {
+                    $res = [];
+                }
+                // 将数据刷新到 Redis
+                $this->redis_model->setData('Road_' . $roadId, json_encode($res));
+            } else {
+                $res = json_decode($res, true);
+            }
+
+            $res['road'] = $item;
+            $results[]   = $res;
+        }
+
+        return $results;
     }
 
     /**
@@ -153,8 +195,8 @@ class RoadService extends BaseService
             throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
         }
 
-        $junctionList = $res['junctions_info'];
-        $forwardPathFlows = $res['forward_path_flows'];
+        $junctionList      = $res['junctions_info'];
+        $forwardPathFlows  = $res['forward_path_flows'];
         $backwardPathFlows = $res['backward_path_flows'];
 
         $getStartEndJunctionIdKeyCallback = function ($item) {
@@ -163,11 +205,11 @@ class RoadService extends BaseService
         $getEndStartJunctionIdKeyCallback = function ($item) {
             return $item['end_junc_id'] . '-' . $item['start_junc_id'];
         };
-        $getFirstItemCallback = function ($item) {
+        $getFirstItemCallback             = function ($item) {
             return is_array($item) ? current($item) : $item;
         };
 
-        $forwardPathFlowsCollection = Collection::make($forwardPathFlows)->groupBy($getStartEndJunctionIdKeyCallback, $getFirstItemCallback);
+        $forwardPathFlowsCollection  = Collection::make($forwardPathFlows)->groupBy($getStartEndJunctionIdKeyCallback, $getFirstItemCallback);
         $backwardPathFlowsCollection = Collection::make($backwardPathFlows)->groupBy($getEndStartJunctionIdKeyCallback, $getFirstItemCallback);
 
         $roadInfo = [];
@@ -187,7 +229,7 @@ class RoadService extends BaseService
         foreach ($backwardPathFlowsCollection as $key => $item) {
             $reverseGeo = $this->waymap_model->getLinksGeoInfos(explode(', ', $item['path_links']), $maxWaymapVersion);
 
-            if(isset($roadInfo[$key])) {
+            if (isset($roadInfo[$key])) {
                 $roadInfo[$key]['reverse_geo'] = $reverseGeo;
             }
         }
@@ -217,47 +259,8 @@ class RoadService extends BaseService
             'road_info' => $roadInfo,
             'junctionsInfo' => $junctionsInfo,
             'center' => $center,
-            'map_version' => $maxWaymapVersion
+            'map_version' => $maxWaymapVersion,
         ];
-    }
-
-    /**
-     * 获取全城全部路口详情
-     *
-     * @param $params
-     */
-    public function getAllRoadDetail($params)
-    {
-        $cityId = $params['city_id'];
-
-        $select = 'road_id, logic_junction_ids, road_name, road_direction';
-
-        $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
-
-        $results = [];
-
-        foreach ($roadList as $item) {
-            $roadId = $item['road_id'];
-            //从 Redis 获取数据失败
-            if (!($res = $this->redis_model->getData('Road_' . $roadId))) {
-                $data = [
-                    'city_id' => $cityId,
-                    'road_id' => $roadId
-                ];
-                try {
-                    $res = $this->getRoadDetail($data);
-                } catch (\Exception $e) {
-                    $res = [];
-                }
-                // 将数据刷新到 Redis
-                $this->redis_model->setData('Road_' . $roadId, json_encode($res));
-            } else {
-                $res = json_decode($res, true);
-            }
-
-            $res['road'] = $item;
-            $results[]   = $res;
-        }
     }
 
     /**
@@ -269,14 +272,14 @@ class RoadService extends BaseService
      */
     public function comparison($params)
     {
-        $roadId = $params['road_id'];
-        $cityId = $params['city_id'];
-        $direction = $params['direction'];
-        $quotaKey = $params['quota_key'];
-        $baseStartDate = $params['base_start_date'];
-        $baseEndDate = $params['base_start_date'];
+        $roadId            = $params['road_id'];
+        $cityId            = $params['city_id'];
+        $direction         = $params['direction'];
+        $quotaKey          = $params['quota_key'];
+        $baseStartDate     = $params['base_start_date'];
+        $baseEndDate       = $params['base_start_date'];
         $evaluateStartDate = $params['evaluate_start_date'];
-        $evaluateEndDate = $params['evaluate_end_date'];
+        $evaluateEndDate   = $params['evaluate_end_date'];
 
         // 指标算法映射
         $methods = [
@@ -297,7 +300,7 @@ class RoadService extends BaseService
         }
 
         // 获取干线路口数据
-        $select = 'road_name, logic_junction_ids';
+        $select   = 'road_name, logic_junction_ids';
         $roadInfo = $this->road_model->getRoadByRoadId($roadId, $select);
 
         // 获取干线数据失败
@@ -324,7 +327,7 @@ class RoadService extends BaseService
         }
 
         // 生成指定时间范围内的 基准日期集合数组，评估日期集合数组
-        $baseDates = dateRange($baseStartDate, $baseEndDate);
+        $baseDates     = dateRange($baseStartDate, $baseEndDate);
         $evaluateDates = dateRange($evaluateStartDate, $evaluateEndDate);
 
         // 生成 00:00 - 23:30 间的 粒度为 30 分钟的时间集合数组
@@ -354,7 +357,7 @@ class RoadService extends BaseService
         }
 
         $select = 'date, hour, ' . $methods[$quotaKey];
-        $dates = array_merge($baseDates, $evaluateDates);
+        $dates  = array_merge($baseDates, $evaluateDates);
 
         // 获取数据源集合
         $result = $this->road_model->getJunctionByCityId($dates, $hours, $junctionIdList, $flowIdList, $cityId, $select);
@@ -418,7 +421,7 @@ class RoadService extends BaseService
         $downloadId = $params['download_id'];
 
         return [
-            'download_url' => '/api/road/download?download_id='. $downloadId
+            'download_url' => '/api/road/download?download_id=' . $downloadId,
         ];
     }
 
