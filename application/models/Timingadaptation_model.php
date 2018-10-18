@@ -306,8 +306,8 @@ class Timingadaptation_model extends CI_Model
                 'suggest_max'           => $timing['max'][0] ?? '',
                 'min'                   => $timing['min'][1] ?? '',
                 'suggest_min'           => $timing['min'][0] ?? '',
-                'start_time_change'     => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
-                'duration_change'       => ($timing['duration'][0] ?? '') - ($timing['duration'][1] ?? ''),
+                'start_time_change'     => (int)($timing['duration'][0] ?? 0) - (int)($timing['duration'][1] ?? 0),
+                'duration_change'       => (int)($timing['duration'][0] ?? 0) - (int)($timing['duration'][1] ?? 0),
             ];
         };
 
