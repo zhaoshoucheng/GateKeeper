@@ -49,6 +49,7 @@ $config['road_map'] = [
 ];
 
 $config['area_download_url_prefix'] = '/api/area/download?download_id=';
+$config['road_download_url_prefix'] = '/api/road/download?download_id=';
 
 $config['excel_style'] = [
     'header' => [

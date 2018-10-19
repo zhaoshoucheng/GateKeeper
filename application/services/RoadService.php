@@ -14,8 +14,8 @@ use Didi\Cloud\Collection\Collection;
  * @package Services
  *
  * @property \Waymap_model $waymap_model
- * @property \Redis_model $redis_model
- * @property \Road_model $road_model
+ * @property \Redis_model  $redis_model
+ * @property \Road_model   $road_model
  */
 class RoadService extends BaseService
 {
@@ -37,6 +37,7 @@ class RoadService extends BaseService
      * 获取城市干线列表
      *
      * @param $params
+     *
      * @return array
      */
     public function getRoadList($params)
@@ -52,6 +53,7 @@ class RoadService extends BaseService
      * 新增干线
      *
      * @param $params
+     *
      * @return mixed
      * @throws \Exception
      */
@@ -84,6 +86,7 @@ class RoadService extends BaseService
      * 更新干线
      *
      * @param $params
+     *
      * @return bool
      * @throws \Exception
      */
@@ -113,6 +116,7 @@ class RoadService extends BaseService
      * 删除干线
      *
      * @param $params
+     *
      * @return bool
      * @throws \Exception
      */
@@ -133,12 +137,13 @@ class RoadService extends BaseService
      * 获取全城全部路口详情
      *
      * @param $params
+     *
      * @return array
      */
     public function getAllRoadDetail($params)
     {
         $cityId = $params['city_id'];
-        $flag = $params['flag'] ?? false;
+        $flag   = $params['flag'] ?? false;
 
         $select = 'road_id, logic_junction_ids, road_name, road_direction';
 
@@ -176,6 +181,7 @@ class RoadService extends BaseService
      * 获取干线详情
      *
      * @param $params
+     *
      * @return array
      * @throws \Exception
      */
@@ -268,6 +274,7 @@ class RoadService extends BaseService
      * 干线评估
      *
      * @param $params
+     *
      * @return array|mixed
      * @throws \Exception
      */
@@ -417,17 +424,32 @@ class RoadService extends BaseService
         return $result;
     }
 
+    /**
+     * 获取评估数据下载链接
+     *
+     * @param $params
+     *
+     * @return array
+     * @throws \Exception
+     */
     public function downloadEvaluateData($params)
     {
         $downloadId = $params['download_id'];
 
+        $key = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
+
+        if (!$this->redis_model->getData($key)) {
+            throw new \Exception('请先评估再下载', ERR_PARAMETERS);
+        }
+
         return [
-            'download_url' => '/api/road/download?download_id=' . $downloadId,
+            'download_url' => $this->config->item('road_download_url_prefix') . $params['download_id'],
         ];
     }
 
     /**
      * @param $params
+     *
      * @throws \Exception
      * @throws \PHPExcel_Exception
      * @throws \PHPExcel_Writer_Exception

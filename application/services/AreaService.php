@@ -389,7 +389,9 @@ class AreaService extends BaseService
      */
     public function downloadEvaluataData($params)
     {
-        $key = $this->config->item('quota_evaluate_key_prefix') . $params['download_id'];
+        $downloadId = $params['download_id'];
+
+        $key = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
 
         if(!$this->redis_model->getData($key)) {
             throw new \Exception('请先评估再下载', ERR_PARAMETERS);
