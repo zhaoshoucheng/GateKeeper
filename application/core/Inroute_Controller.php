@@ -11,6 +11,10 @@ class Inroute_Controller extends CI_Controller {
         parent::__construct();
     }
 
+    /**
+     * @param $params
+     * @throws Exception
+     */
     protected function authToken($params){
         $this->load->config('nconf');
         $inroute = $this->config->item('inroute');
@@ -21,7 +25,6 @@ class Inroute_Controller extends CI_Controller {
 
         //优先验证签名==>其次验证白名单
         if(!empty($params['current_time']) && !empty($params['sig'])){
-            $salt_token = $salt_token;
             if(!checkSign($params,$salt_token)){
                 throw new \Exception('no_permission_checkSign');
             }
