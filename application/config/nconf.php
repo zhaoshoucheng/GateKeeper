@@ -42,9 +42,9 @@ if ($development == 2) {
     ];
 
     // signal-mis
-    $signal_mis_server = '100.90.164.31';
-    $signal_mis_port   = '8006';
-    $signal_mis_ext    = '/signal-mis';
+    $signal_mis_server = '100.69.238.11';
+    $signal_mis_port   = '8000';
+    $signal_mis_ext    = '/its/signal-mis';
 
     // es
     $es_server = '100.69.238.158';
@@ -177,6 +177,7 @@ $config['confidence'] = [
 
 // 路口指标
 $config['junction_quota_key'] = [
+
     'imbalance_index' => [
         'name' => '失衡指数',                                  // 名称
         'status_formula' => function ($val) {                  // 状态判断规则

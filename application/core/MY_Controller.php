@@ -6,6 +6,7 @@
 **********************************************/
 
 include_once "Inroute_Controller.php";
+
 class MY_Controller extends CI_Controller {
 
     public $errno = 0;
@@ -21,6 +22,7 @@ class MY_Controller extends CI_Controller {
 
 
     public function __construct(){
+
         parent::__construct();
 
         date_default_timezone_set('Asia/Shanghai');
@@ -157,6 +159,11 @@ class MY_Controller extends CI_Controller {
      * @return bool
      */
     private function _checkAuthorizedApp() {
+        $paramTmp = array_merge($this->input->post(), $this->input->get());
+        com_log_notice('_checkauthorizedapp_param', [
+            'params' => $paramTmp,
+            'url'=>$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING']
+        ]);
         if($this->is_check_login == 0){
             return true;
         }
@@ -165,8 +172,13 @@ class MY_Controller extends CI_Controller {
         $app_id = $_REQUEST['app_id'];
         $this->load->config('appkey', true);
         $app_config = $this->config->item('authirized_apps', 'appkey');
-        com_log_notice('_com_sign', ['client_sign' => $client_sign, 'app_id' => $app_id, 'app_config' => $app_config]);
+        com_log_notice('_com_sign_config', ['client_sign' => $client_sign, 'app_id' => $app_id, 'app_config' => $app_config]);
         if (!isset($app_config[$app_id]) || !isset($app_config[$app_id]['secret'])) {
+            com_log_notice('_checkauthorizedapp_err', [
+                'error' => "error_appid",
+                'params' => $paramTmp,
+                'url'=>$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING']
+            ]);
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "该appid:{$app_id}没有授权";
             return false;
@@ -180,13 +192,21 @@ class MY_Controller extends CI_Controller {
         }else{
             $params = $this->input->post();
         }
-        com_log_notice('_com_sign', ['params' => $params]);
+        com_log_notice('_com_sign', ['params' => $params, 'url'=>'/'.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING']]);
         unset($params['sign']);
         if (!isset($params['ts'])) {
             $params['ts'] = time();
         }
         // 带时间戳的sign的时效时间为1s
         if (abs(time() - $params['ts']) > $timeout) {
+            com_log_notice('_checkauthorizedapp_err', [
+                'error' => "error_tstimeout",
+                'time' => time(),
+                'ts' => $params['ts'],
+                'timeout' => $timeout,
+                'params' => $paramTmp,
+                'url'=>$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING']
+            ]);
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "该签名已经过时";
             return false;
@@ -202,10 +222,26 @@ class MY_Controller extends CI_Controller {
         $open_api = isset($app_config[$app_id]['open_api']) ? $app_config[$app_id]['open_api'] : array();
         $server_sign = substr(md5($query_str . "&" . $app_key), 7, 16);
         if ($server_sign != $client_sign) {
+            com_log_notice('_checkauthorizedapp_err', [
+                'error' => "error_tstimeout",
+                'params' => $paramTmp,
+                'url'=>$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'],
+                'md5str' => $query_str . "&" . $app_key, 'server_sign' => $server_sign,
+                'server_sign' => $server_sign,
+                'client_sign' => $client_sign,
+                'app_id' => $app_id
+            ]);
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "签名的sign不正确";
             return false;
         } else if (!in_array($this->routerUri, $open_api)){
+            com_log_notice('_checkauthorizedapp_err', [
+                'error' => "error_apiurl_notopen",
+                'params' => $paramTmp,
+                'url'=>$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'],
+                'md5str' => $query_str . "&" . $app_key, 'server_sign' => $server_sign,
+                'app_id' => $app_id
+            ]);
             $this->errno = ERR_AUTH_KEY;
             $this->errmsg = "该接口{$this->routerUri}没有开放授权";
             return false;
@@ -225,6 +261,7 @@ class MY_Controller extends CI_Controller {
             return false;
         }
         $this->username = $this->user->username;
+
         return true;
     }
 

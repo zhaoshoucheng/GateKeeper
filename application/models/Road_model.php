@@ -5,6 +5,11 @@
  * # date:    2018-08-21
  ********************************************/
 
+/**
+ * Class Road_model
+ *
+ * @property Redis_model $redis_model
+ */
 class Road_model extends CI_Model
 {
     private $tb = 'road';

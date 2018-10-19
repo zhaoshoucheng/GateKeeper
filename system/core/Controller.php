@@ -49,9 +49,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author		EllisLab Dev Team
  * @link		https://codeigniter.com/user_guide/general/controllers.html
  *
+<<<<<<< HEAD
  * @property CI_Loader $load
  * @property CI_Config $config
  * @property CI_Input $input
+=======
+ * @property string $username
+>>>>>>> feature/licxi4.0
  */
 class CI_Controller {
 

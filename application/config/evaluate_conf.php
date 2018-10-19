@@ -4,7 +4,11 @@ $config['area'] = [
     [
         'key' => 'speed',
         'name' => '区域平均速度',
+<<<<<<< HEAD
         'unit' => '米／秒',
+=======
+        'unit' => '千米／小时'
+>>>>>>> feature/licxi4.0
     ],
     [
         'key' => 'stop_delay',

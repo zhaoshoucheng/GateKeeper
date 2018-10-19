@@ -825,16 +825,17 @@ class Timingadaptationarea_model extends CI_Model
                 ];
             }
 
-            $tmpRet = [];
-            $lastDayTime = "";
-            for($i = 0; $i < count($ret); ) {
-                if (empty($lastDayTime)) {
-                    $lastDayTime = $ret[$i][0];
-                    $tmpRet[] = $ret[$i];
-                    $i++;
-                    continue;
-                }
+            /*
+            unset($ret[0]);
+            unset($ret[1]);
+            unset($ret[2]);
+            unset($ret[3]);
+            $ret = array_values($ret);
+            */
 
+            $tmpRet = [];
+            $lastDayTime = "00:00:00";
+            for($i = 0; $i < count($ret); ) {
                 $nowTime = strtotime($ret[$i][0]);
                 $lastTime = strtotime($lastDayTime);
                 // 如果两个距离不是顺序的
@@ -849,6 +850,13 @@ class Timingadaptationarea_model extends CI_Model
                     $lastDayTime = $ret[$i][0];
                     $i++;
                     continue;
+                }
+
+                if ($lastDayTime == "00:00:00") {
+                    $tmpRet[] = [
+                        $lastDayTime,
+                        null
+                    ];
                 }
 
                 // 两个距离大于15分钟
@@ -1207,8 +1215,6 @@ class Timingadaptationarea_model extends CI_Model
 
                     // 记录所有时间 用于获取最大最小值
                     $timestamp[$vv['timestamp']] = $second;
-                    // 记录所有值 用于获取最大最小值
-                    $value[$vv['timestamp']] = round($vv['stopDistance'] / $inLinkLength * 100, 2);
                 }
             }
 
@@ -1219,7 +1225,7 @@ class Timingadaptationarea_model extends CI_Model
                     "min" => 0,
                 ],
                 "y" => [
-                    "max" => 0,
+                    "max" => 100,
                     "min" => 0,
                 ],
             ];
@@ -1227,12 +1233,6 @@ class Timingadaptationarea_model extends CI_Model
                 $ret['info']['x'] = [
                     'max' => max($timestamp),
                     'min' => min($timestamp),
-                ];
-            }
-            if (!empty($value)) {
-                $ret['info']['y'] = [
-                    'max' => max($value),
-                    'min' => min($value),
                 ];
             }
 
