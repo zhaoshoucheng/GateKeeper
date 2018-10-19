@@ -11,7 +11,7 @@ class Timingadaptation_model extends CI_Model
         $this->load->helper('http_helper');
         $this->load->model('redis_model');
         $this->load->model('common_model');
-        $this->load->config('adaption_conf');
+        $this->load->config('nconf');
     }
 
     /**
@@ -56,7 +56,7 @@ class Timingadaptation_model extends CI_Model
      */
     private function getCurrentInfo($logic_junction_id)
     {
-        $address = $this->config->item('url') . '/TimingAdaptation/getCurrentTimingInfo';
+        $address = $this->config->item('signal_mis_interface') . '/TimingAdaptation/getCurrentTimingInfo';
         $res     = httpGET($address, compact('logic_junction_id'));
 
         $res = json_decode($res, true);
@@ -250,7 +250,7 @@ class Timingadaptation_model extends CI_Model
     public function updateCurrentTiming($params)
     {
         // 通过路网接口获取数据
-        $res = httpPOST($this->config->item('url') . '/TimingAdaptation/uploadSignalTiming', $params);
+        $res = httpPOST($this->config->item('signal_mis_interface') . '/TimingAdaptation/uploadSignalTiming', $params);
 
         if (!$res) {
             throw new Exception('配时下发失败！');
@@ -354,7 +354,7 @@ class Timingadaptation_model extends CI_Model
      */
     private function getCurrentUpdateResult($logic_junction_id)
     {
-        $address = $this->config->item('url') . '/TimingAdaptation/getUploadStatus';
+        $address = $this->config->item('signal_mis_interface') . '/TimingAdaptation/getUploadStatus';
         $res     = httpGET($address, compact('logic_junction_id'));
 
         $res = json_decode($res, true);
