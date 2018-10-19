@@ -223,7 +223,7 @@ class Road extends MY_Controller
 
         $validate = Validate::make($params, [
             'city_id' => 'min:1',
-            'area_id' => 'min:1',
+            'road_id' => 'min:1',
             'quota_key' => 'min:1',
             'base_start_date' => 'date:Y-m-d',
             'base_end_date' => 'date:Y-m-d',
