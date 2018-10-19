@@ -17,6 +17,7 @@ class Warning extends MY_Controller
     {
         $params = $this->input->post();
         $params = array_merge($params, $this->input->get());
+        $warningUrl = 'http://monitor.odin.xiaojukeji.com';
 
         $validate = Validate::make($params, [
             'send_type' => 'min:1',
@@ -31,13 +32,22 @@ class Warning extends MY_Controller
             return;
         }
         try {
-            $data = [
-                'app' => "std",
-                'subject' => $params["subject"],
-                'tos' => explode(",",$params["tos"]),
-                'content' => ["msg" => $params["content"]],
-            ];
-            $ret = httpPOST($this->config->item('warning_interface') . '/api/v2/notify/mail?sys=Itstool', $data, 0, "json");
+            if($params["send_type"]==1){
+                $data = [
+                    'app' => "std",
+                    'subject' => $params["subject"],
+                    'tos' => explode(",",$params["tos"]),
+                    'content' => ["msg" => $params["content"]],
+                ];
+                $ret = httpPOST($warningUrl . '/api/v2/notify/mail?sys=Itstool', $data, 0, "json");
+            }else{
+                $data = [
+                    'app' => "std",
+                    'tos' => explode(",",$params["tos"]),
+                    'content' => ["msg" => $params["content"]],
+                ];
+                $ret = httpPOST($warningUrl . '/api/v2/notify/sms?sys=Itstool', $data, 0, "json");
+            }
             $ret = json_decode($ret, true);
             if (isset($ret['code']) && $ret['code'] != 0) {
                 $message = isset($ret["msg"]) ? $ret["msg"] : "";

@@ -55,7 +55,7 @@ class Welcome extends CI_Controller {
 //        echo "<br/>";
 //        echo $url;exit;
 
-        $queryStr="send_type=1&tos=niuyufu@didichuxing.com&subject=1122&content=1&log_id=1&app_id=warning&ts=".time();
+        $queryStr="send_type=2&tos=18953101270&subject=1122&content=1&log_id=1&app_id=warning&ts=".time();
         $queryMap = [];
         parse_str($queryStr, $queryMap);
         $sign = getSign($queryMap, "3a01e6c56bcce94ee5de073df3d512d5");
