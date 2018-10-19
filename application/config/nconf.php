@@ -101,6 +101,7 @@ if($development == 2){
     $xmmtrace_server = '100.69.238.158';
     $xmmtrace_port = '8001';
     $xmmtrace_ext = '/api/transmit/Traffic';
+
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -128,6 +129,9 @@ $config['signal_control_interface'] = 'http://' . $signal_control_server.":" . $
 
 // 新版轨迹地址
 $config['xmmtrace_interface'] = 'http://' . $xmmtrace_server.":" . $xmmtrace_port . $xmmtrace_ext;
+
+// 新版轨迹地址
+$config['warning_interface'] = 'http://monitor.odin.xiaojukeji.com';
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;
