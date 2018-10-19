@@ -106,10 +106,13 @@ if (!function_exists('_exception_handler')) {
     /**
      * 异常处理
      *
-     * @param $exception
+     * @param Exception $exception
      */
     function _exception_handler($exception)
     {
+        /**
+         * @var CI_Exceptions
+         */
         $_error =& load_class('Exceptions', 'core');
         $_error->log_exception('error', 'Exception: ' . $exception->getMessage(), $exception->getFile(), $exception->getLine());
 
