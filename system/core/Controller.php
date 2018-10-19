@@ -51,6 +51,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * @property CI_Loader $load
  * @property CI_Config $config
+ * @property CI_Input $input
  */
 class CI_Controller {
 

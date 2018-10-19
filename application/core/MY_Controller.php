@@ -279,24 +279,4 @@ class MY_Controller extends CI_Controller {
         }
         return ($ip ? $ip : $_SERVER['REMOTE_ADDR']);
     }
-
-    /**
-     * @param null $key
-     * @param bool $xss
-     * @return mixed
-     */
-    protected function post($key = null, $xss = true)
-    {
-        return $this->input->post($key, $xss);
-    }
-
-    /**
-     * @param null $key
-     * @param bool $xss
-     * @return mixed
-     */
-    protected function get($key = null, $xss = true)
-    {
-        return $this->input->get($key, $xss);
-    }
 }

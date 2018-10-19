@@ -53,7 +53,7 @@ if (!function_exists('getSignature')) {
 
 if (!function_exists('getSign')) {
     /**
-     * @param map $params API调用的请求参数集合的关联数组，不包含sign参数
+     * @param array $params API调用的请求参数集合的关联数组，不包含sign参数
      * @param string $secret 申请到的app_id对应秘钥
      * @return string
      */
@@ -80,7 +80,13 @@ if (!function_exists('getSign')) {
 }
 
 if (!function_exists('des_encrypt')) {
-    /** des加密 **/
+    /**
+     * des加密
+     *
+     * @param $str
+     * @param $key
+     * @return mixed|string
+     */
     function des_encrypt($str, $key)
     {
         $block = @mcrypt_get_block_size('des', 'ecb');
@@ -91,7 +97,13 @@ if (!function_exists('des_encrypt')) {
 }
 
 if (!function_exists('des_decrypt')) {
-    /** des解密 **/
+    /**
+     * des解密
+     *
+     * @param $str
+     * @param $key
+     * @return bool|string
+     */
     function des_decrypt($str, $key)
     {
         $str = safe_b64decode($str);
@@ -104,7 +116,12 @@ if (!function_exists('des_decrypt')) {
 
 
 if (!function_exists('safe_b64encode')) {
-    //处理特殊字符
+    /**
+     * 处理特殊字符
+     *
+     * @param $string
+     * @return mixed|string
+     */
     function safe_b64encode($string)
     {
         $data = base64_encode($string);
@@ -114,7 +131,12 @@ if (!function_exists('safe_b64encode')) {
 }
 
 if (!function_exists('safe_b64decode')) {
-    //解析特殊字符
+    /**
+     * 解析特殊字符
+     *
+     * @param $string
+     * @return bool|string
+     */
     function safe_b64decode($string)
     {
         $data = str_replace(array('-', '_'), array('+', '/'), $string);
@@ -129,6 +151,7 @@ if (!function_exists('safe_b64decode')) {
 if (!function_exists('isInt')) {
     /**
      * 验证字符串是否为数字
+     *
      * @param $number string
      * @return bool
      */

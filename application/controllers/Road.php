@@ -1,9 +1,9 @@
 <?php
 /***************************************************************
-# 干线类
-# user:ningxiangbing@didichuxing.com
-# date:2018-08-21
-***************************************************************/
+ * # 干线类
+ * # user:ningxiangbing@didichuxing.com
+ * # date:2018-08-21
+ ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
@@ -33,14 +33,14 @@ class Road extends MY_Controller
      */
     public function queryRoadList()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        $validator = Validator::make($params, [
-            'city_id' => 'required'
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new \Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         $data = $this->roadService->getRoadList($params);
@@ -55,17 +55,16 @@ class Road extends MY_Controller
      */
     public function addRoad()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        // 校验参数
-        $validator = Validator::make($params, [
-            'city_id'        => 'required',
-            'road_name'      => 'required',
-            'road_direction' => 'required',
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+            'road_name' => 'nullunable',
+            'road_direction' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new \Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         if (empty($params['junction_ids']) || !is_array($params['junction_ids'])) {
@@ -78,18 +77,13 @@ class Road extends MY_Controller
 
         $roadDirectionConf = $this->config->item('road_direction');
 
-        if (!array_key_exists(intval($params['road_direction']), $roadDirectionConf)) {
+        if (!array_key_exists($params['road_direction'], $roadDirectionConf)) {
             throw new \Exception('请选择正确的干线方向', ERR_PARAMETERS);
         }
 
-        $data = [
-            'city_id'        => intval($params['city_id']),
-            'road_name'      => strip_tags(trim($params['road_name'])),
-            'junction_ids'   => $params['junction_ids'],
-            'road_direction' => intval($params['road_direction']),
-        ];
+        $params['city_id'] = intval($params['city_id']);
 
-        $this->roadService->addRoad($data);
+        $this->roadService->addRoad($params);
     }
 
     /**
@@ -99,18 +93,17 @@ class Road extends MY_Controller
      */
     public function editRoad()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        // 校验参数
-        $validator = Validator::make($params, [
-                'city_id'        => 'required',
-                'road_name'      => 'required',
-                'road_id'        => 'required',
-                'road_direction' => 'required',
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+            'road_name' => 'nullunable',
+            'road_id' => 'nullunable',
+            'road_direction' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new \Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         if (empty($params['junction_ids']) || !is_array($params['junction_ids'])) {
@@ -123,21 +116,15 @@ class Road extends MY_Controller
 
         $roadDirectionConf = $this->config->item('road_direction');
 
-        if (!array_key_exists(intval($params['road_direction']), $roadDirectionConf)) {
+        if (!array_key_exists($params['road_direction'], $roadDirectionConf)) {
             throw new \Exception('请选择正确的干线方向', ERR_PARAMETERS);
         }
 
-        $data = [
-            'city_id'        => intval($params['city_id']),
-            'road_id'        => strip_tags(trim($params['road_id'])),
-            'road_name'      => strip_tags(trim($params['road_name'])),
-            'junction_ids'   => $params['junction_ids'],
-            'road_direction' => intval($params['road_direction']),
-        ];
+        $params['city_id'] = intval($params['city_id']);
 
-        $res = $this->roadService->updateRoad($data);
+        $res = $this->roadService->updateRoad($params);
 
-        if(!$res) {
+        if (!$res) {
             throw new Exception('干线更新失败', ERR_PARAMETERS);
         }
     }
@@ -149,26 +136,19 @@ class Road extends MY_Controller
      */
     public function delete()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        // 校验参数
-        $validator = Validator::make($params, [
-            'city_id' => 'required',
-            'road_id' => 'required',
+        $validate = Validate::make($params, [
+            'road_id' => 'nullunable',
         ]);
 
-        if($validator->fail()) {
-            throw new \Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
-        $data = [
-            'city_id' => intval($params['city_id']),
-            'road_id' => strip_tags(trim($params['road_id'])),
-        ];
+        $res = $this->roadService->deleteRoad($params);
 
-        $res = $this->roadService->deleteRoad($data);
-
-        if(!$res) {
+        if (!$res) {
             throw new Exception('干线删除失败', ERR_PARAMETERS);
         }
     }
@@ -180,7 +160,7 @@ class Road extends MY_Controller
      */
     public function getRoadDetail()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
         // 校验参数
         $validator = Validator::make($params, [
@@ -188,7 +168,7 @@ class Road extends MY_Controller
             'road_id' => 'required',
         ]);
 
-        if($validator->fail()) {
+        if ($validator->fail()) {
             throw new \Exception($validator->firstError(), ERR_PARAMETERS);
         }
 
@@ -209,14 +189,14 @@ class Road extends MY_Controller
      */
     public function getAllRoadDetail()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        $validator = Validator::make($params, [
-            'city_id' => 'required',
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new \Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         $data = $this->roadService->getAllRoadDetail($params);
@@ -239,21 +219,24 @@ class Road extends MY_Controller
      */
     public function comparison()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        $validator = Validator::make($params, [
-            'city_id' => 'required;numeric',
-            'road_id' => 'required',
-            'quota_key' => 'required',
-            'direction' => 'required;in:1,2',
-            'base_start_date' =>'required;date:Y-m-d',
-            'base_end_date' =>'required;date:Y-m-d',
-            'evaluate_start_date' =>'required;date:Y-m-d',
-            'evaluate_end_date' =>'required;date:Y-m-d',
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+            'area_id' => 'min:1',
+            'quota_key' => 'min:1',
+            'base_start_date' => 'date:Y-m-d',
+            'base_end_date' => 'date:Y-m-d',
+            'evaluate_start_date' => 'date:Y-m-d',
+            'evaluate_end_date' => 'date:Y-m-d',
         ]);
 
-        if($validator->fail()) {
-            throw new \Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
+        }
+
+        if(!in_array($params['direction'], [1,2])) {
+            throw new \Exception('参数 direction 必须为 1 或 2', ERR_PARAMETERS);
         }
 
         $data = $this->roadService->comparison($params);
@@ -268,15 +251,14 @@ class Road extends MY_Controller
      */
     public function downloadEvaluateData()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        //数据校验
-        $validator = Validator::make($params, [
-            'download_id' => 'required',
+        $validate = Validate::make($params, [
+            'download_id' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         $data = $this->roadService->downloadEvaluateData($params);
@@ -291,17 +273,15 @@ class Road extends MY_Controller
      */
     public function download()
     {
-        $params = $this->get();
+        $params = $this->input->get();
 
-        //数据校验
-        $validator = Validator::make($params, [
-            'download_id' => 'required',
+        $validate = Validate::make($params, [
+            'download_id' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
-
         $this->roadService->download($params);
     }
 }

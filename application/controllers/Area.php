@@ -1,8 +1,8 @@
 <?php
 /***************************************************************
-# 区域管理
-# user:niuyufu@didichuxing.com
-# date:2018-08-23
+ * # 区域管理
+ * # user:niuyufu@didichuxing.com
+ * # date:2018-08-23
  ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
@@ -31,17 +31,20 @@ class Area extends MY_Controller
      */
     public function addAreaWithJunction()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        $validator = Validator::make($params, [
-            'area_name' => 'required',
-            'city_id' => 'required',
-            'junction_ids' => 'required;arr',
+        $validate = Validate::make($params, [
+            'area_name' => 'min:1',
+            'city_id' => 'min:1',
+            'junction_ids' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new \Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
+
+        // 数据格式化
+        $params['city_id'] = intval($params['city_id']);
 
         $data = $this->areaService->addArea($params);
 
@@ -55,17 +58,20 @@ class Area extends MY_Controller
      */
     public function updateAreaWithJunction()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        $validator = Validator::make($params, [
-            'area_name' => 'required',
-            'city_id' => 'required',
-            'junction_ids' => 'required;arr',
+        $validate = Validate::make($params, [
+            'area_name' => 'min:1',
+            'city_id' => 'min:1',
+            'junction_ids' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new \Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
+
+        // 数据格式化
+        $params['city_id'] = intval($params['city_id']);
 
         $data = $this->areaService->updateArea($params);
 
@@ -79,14 +85,17 @@ class Area extends MY_Controller
      */
     public function delete()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        $validator = Validator::make($params, [
-            'area_id' => 'required',
+        $validate = Validate::make($params, [
+            'area_id' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new \Exception($validator->firstError(), ERR_PARAMETERS);
+        // 数据格式化
+        $params['area_id'] = intval($params['area_id']);
+
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         $data = $this->areaService->deleteArea($params);
@@ -101,15 +110,18 @@ class Area extends MY_Controller
      */
     public function getList()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        $validator = Validator::make($params, [
-            'city_id' => 'required',
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new \Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
+
+        // 数据格式化
+        $params['city_id'] = intval($params['city_id']);
 
         $data = $this->areaService->getList($params);
 
@@ -123,16 +135,18 @@ class Area extends MY_Controller
      */
     public function getAreaJunctionList()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        $validator = Validator::make($params, [
-            'area_id' => 'required',
-            'city_id' => 'required'
+        $validate = Validate::make($params, [
+            'area_id' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new \Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
+
+        // 数据格式化
+        $params['area_id'] = intval($params['area_id']);
 
         $data = $this->areaService->getAreaDetail($params);
 
@@ -146,15 +160,18 @@ class Area extends MY_Controller
      */
     public function getAllAreaJunctionList()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        $validator = Validator::make($params, [
-            'city_id' => 'required',
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
+
+        // 数据格式化
+        $params['city_id'] = intval($params['city_id']);
 
         $data = $this->areaService->getCityAreaDetail($params);
 
@@ -178,22 +195,24 @@ class Area extends MY_Controller
      */
     public function comparison()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        //数据校验
-        $validator = Validator::make($params, [
-            'city_id' => 'required;numeric',
-            'area_id' => 'required;numeric',
-            'quota_key' => 'required',
-            'base_start_date' =>'required;date:Y-m-d',
-            'base_end_date' =>'required;date:Y-m-d',
-            'evaluate_start_date' =>'required;date:Y-m-d',
-            'evaluate_end_date' =>'required;date:Y-m-d',
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+            'area_id' => 'min:1',
+            'quota_key' => 'min:1',
+            'base_start_date' => 'date:Y-m-d',
+            'base_end_date' => 'date:Y-m-d',
+            'evaluate_start_date' => 'date:Y-m-d',
+            'evaluate_end_date' => 'date:Y-m-d',
         ]);
 
-        if($validator->fail()) {
-            throw new Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
+
+        $params['city_id'] = intval($params['city_id']);
+        $params['area_id'] = intval($params['area_id']);
 
         $data = $this->areaService->comparison($params);
 
@@ -207,15 +226,14 @@ class Area extends MY_Controller
      */
     public function downloadEvaluateData()
     {
-        $params = $this->post();
+        $params = $this->input->post(null, true);
 
-        //数据校验
-        $validator = Validator::make($params, [
-            'download_id' => 'required',
+        $validate = Validate::make($params, [
+            'download_id' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         $data = $this->areaService->downloadEvaluataData($params);
@@ -225,21 +243,21 @@ class Area extends MY_Controller
 
     /**
      * Excel 文件下载
+     *
      * @throws Exception
      * @throws PHPExcel_Exception
      * @throws PHPExcel_Writer_Exception
      */
     public function download()
     {
-        $params = $this->get();
+        $params = $this->input->get();
 
-        //数据校验
-        $validator = Validator::make($params, [
-            'download_id' => 'required',
+        $validate = Validate::make($params, [
+            'download_id' => 'min:1',
         ]);
 
-        if($validator->fail()) {
-            throw new Exception($validator->firstError(), ERR_PARAMETERS);
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         $this->areaService->download($params);
