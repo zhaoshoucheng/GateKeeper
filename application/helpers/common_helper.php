@@ -67,7 +67,7 @@ if (!function_exists('getSign')) {
         //遍历排序后的参数数组中的每一个key/value对
         foreach ($params as $k => $v) {
             //为key/value对生成一个key=value格式的字符串，并拼接到待签名字符串后面
-            $str .= "$k=" . urldecode($v)."&";
+            $str .= "$k=" . urlencode($v)."&";
         }
 
         //将签名密钥拼接到签名字符串最后面
