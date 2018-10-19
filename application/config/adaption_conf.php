@@ -1,3 +1,3 @@
 <?php
 
-$config['url'] = 'http://100.90.164.31:8006/signal-mis';
+$config['url'] = 'http://100.69.238.11:8000/its/signal-mis';

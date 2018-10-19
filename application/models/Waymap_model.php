@@ -18,6 +18,7 @@ class Waymap_model extends CI_Model
 
     /**
      * Waymap_model constructor.
+     *
      * @throws \Exception
      */
     public function __construct()
@@ -37,46 +38,12 @@ class Waymap_model extends CI_Model
     }
 
     /**
-     * 获取最新的路网版本
-     *
-     * @return mixed|null
-     * @throws \Exception
-     */
-    public function getLastMapVersion()
-    {
-        if (self::$lastMapVersion == null) {
-            return self::$lastMapVersion;
-        }
-
-        $mapVersions = $this->getAllMapVersion();
-
-        self::$lastMapVersion = max($mapVersions);
-
-        return self::$lastMapVersion;
-    }
-
-    /**
-     * 获取全部路网版本
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public function getAllMapVersion()
-    {
-        $data = [];
-
-        $url = $this->waymap_interface . '/signal-map/map/versions';
-
-        return $this->get($url, $data);
-    }
-
-    /**
      * 路网数据接口统一调用 Get
      *
-     * @param $url
-     * @param $data
-     * @param int $timeout
-     * @param array $header
+     * @param string $url 请求的地址
+     * @param array $data 请求的参数
+     * @param int $timeout 超时时间
+     * @param array $header 自定义请求头部信息
      * @return array
      * @throws \Exception
      */
@@ -105,10 +72,87 @@ class Waymap_model extends CI_Model
     }
 
     /**
+     * 路网数据接口统一调用 Post
+     *
+     * @param string $url 请求的地址
+     * @param array $data 请求的参数
+     * @param int $timeout 超时时间
+     * @param string $contentType 参数类型
+     * @param array $header 自定义请求头部
+     * @return array
+     * @throws \Exception
+     */
+    public function post($url, $data, $timeout = 5000, $contentType = 'json', $header = [])
+    {
+        $query['token']   = $this->token;
+        $query['user_id'] = $this->userid;
+
+        $url = $url . '?' . http_build_query($query);
+
+        $data = array_merge($data, $query);
+
+        $res = httpPOST($url, $data, $timeout, $contentType, $header);
+
+        if (!$res) {
+            throw new \Exception('路网数据获取失败', ERR_REQUEST_WAYMAP_API);
+        }
+
+        $res = json_decode($res, true);
+
+        if (!$res) {
+            throw new \Exception('路网数据格式错误', ERR_REQUEST_WAYMAP_API);
+        }
+
+        if(isset($res['errno']) && $res['errno'] != 0) {
+            throw new \Exception($res['errmsg'], $res['errno']);
+        }
+
+        if (isset($res['errorCode']) && $res['errorCode'] != 0) {
+            throw new \Exception($res['errorMsg'], $res['errorCode']);
+        }
+
+        return $res['data'] ?? [];
+    }
+
+    /**
+     * 获取最新的路网版本
+     *
+     * @return int
+     * @throws \Exception
+     */
+    public function getLastMapVersion()
+    {
+        if (self::$lastMapVersion != null) {
+            return self::$lastMapVersion;
+        }
+
+        $mapVersions = $this->getAllMapVersion();
+
+        self::$lastMapVersion = max($mapVersions);
+
+        return self::$lastMapVersion;
+    }
+
+    /**
+     * 获取全部路网版本
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getAllMapVersion()
+    {
+        $data = [];
+
+        $url = $this->config->item('waymap_interface') . '/signal-map/map/versions';
+
+        return $this->get($url, $data);
+    }
+
+    /**
      * 根据关键词获取路口信息
      *
-     * @param $city_id
-     * @param $keyword
+     * @param int $city_id 城市ID
+     * @param string $keyword 关键词
      * @return array
      * @throws \Exception
      */
@@ -124,7 +168,7 @@ class Waymap_model extends CI_Model
     /**
      * 获取行政区信息
      *
-     * @param $city_id
+     * @param int $city_id 城市ID
      * @return array
      * @throws \Exception
      */
@@ -158,9 +202,9 @@ class Waymap_model extends CI_Model
     /**
      * 获取路口各相位lng、lat
      *
-     * @param $version
-     * @param $logic_junction_id
-     * @param $logic_flow_ids
+     * @param int $version 版本号
+     * @param string $logic_junction_id 路口ID
+     * @param array $logic_flow_ids 相位ID
      * @return array
      * @throws \Exception
      */
@@ -176,7 +220,7 @@ class Waymap_model extends CI_Model
     /**
      * 获取路口中心点坐标
      *
-     * @param $logic_id
+     * @param string $logic_id 路口ID
      * @return array
      * @throws \Exception
      */
@@ -197,8 +241,8 @@ class Waymap_model extends CI_Model
     /**
      * 获取全城路口
      *
-     * @param $city_id
-     * @param int $version
+     * @param int $city_id 城市ID
+     * @param int $version 版本号
      * @return array|bool|mixed|string
      * @throws \Exception
      */
@@ -209,7 +253,7 @@ class Waymap_model extends CI_Model
         --------------------------------------------------*/
         $redis_model = new Redis_model();
 
-        $redis_key = "all_city_junctions_{$city_id}_{$version}";
+        $redis_key = 'all_city_junctions_' . $city_id .'_' . $version. '}';
 
         $result = $redis_model->getData($redis_key);
 
@@ -239,7 +283,7 @@ class Waymap_model extends CI_Model
     /**
      * 获取最新地图版本号
      *
-     * @param $date
+     * @param string $date 日期
      * @return array
      * @throws \Exception
      */
@@ -255,8 +299,8 @@ class Waymap_model extends CI_Model
     /**
      * 获取多个links的geo数据
      *
-     * @param $link_ids
-     * @param $version
+     * @param string $link_ids
+     * @param int $version
      * @return array
      * @throws \Exception
      */
@@ -340,7 +384,7 @@ class Waymap_model extends CI_Model
      * 获取某一个路口与相邻路口的links
      * http://wiki.intra.xiaojukeji.com/pages/viewpage.action?pageId=146798263
      *
-     * @param $city_id
+     * @param int $city_id
      * @param $selected_junctionid
      * @param $selected_path
      * @return array
@@ -358,49 +402,10 @@ class Waymap_model extends CI_Model
     }
 
     /**
-     * 路网数据接口统一调用 Post
-     *
-     * @param $url
-     * @param $data
-     * @param int $timeout
-     * @param string $contentType
-     * @param array $header
-     * @return array
-     * @throws \Exception
-     */
-    public function post($url, $data, $timeout = 5000, $contentType = 'json', $header = [])
-    {
-        $query['token']   = $this->token;
-        $query['user_id'] = $this->userid;
-
-        $url = $url . '?' . http_build_query($query);
-
-        $data = array_merge($data, $query);
-
-        $res = httpPOST($url, $data, $timeout, $contentType, $header);
-
-        if (!$res) {
-            throw new \Exception('路网数据获取失败', ERR_REQUEST_WAYMAP_API);
-        }
-
-        $res = json_decode($res, true);
-
-        if (!$res) {
-            throw new \Exception('路网数据格式错误', ERR_REQUEST_WAYMAP_API);
-        }
-
-        if ($res['errorCode'] != 0) {
-            throw new \Exception($res['errorMsg'], $res['errorCode']);
-        }
-
-        return $res['data'] ?? [];
-    }
-
-    /**
      * 获取指定路口结合的干线路径
      *
-     * @param $city_id
-     * @param $map_version
+     * @param int $city_id
+     * @param int $map_version
      * @param array $selected_junctionids
      * @return array
      * @throws \Exception

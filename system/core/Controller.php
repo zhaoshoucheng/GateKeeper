@@ -49,8 +49,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author		EllisLab Dev Team
  * @link		https://codeigniter.com/user_guide/general/controllers.html
  *
- * @property CI_Loader $load
  * @property string $username
+ *
+ * @property CI_Loader $load
+ * @property CI_Config $config
+ * @property CI_Input $input
  */
 class CI_Controller {
 

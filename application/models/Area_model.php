@@ -26,9 +26,9 @@ class Area_model extends CI_Model
 
         $this->db = $this->load->database('default', true);
 
-        $is_existed = $this->db->table_exists($this->tb);
+        $isExisted = $this->db->table_exists($this->tb);
 
-        if (!$is_existed) {
+        if (!$isExisted) {
             throw new \Exception('数据表不存在');
         }
     }
@@ -210,6 +210,12 @@ class Area_model extends CI_Model
             ->get()->result_array();
     }
 
+    /**
+     * 删除区域
+     *
+     * @param $areaId
+     * @return bool
+     */
     public function deleteArea($areaId)
     {
         return $this->db->where('id', $areaId)
