@@ -8,19 +8,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |-----------------------------------------------------
 */
 // 线上机器
-$online_host = array(
+$online_host = [
     'ipd-cloud-web00.gz01',
     'ipd-cloud-web01.gz01',
     'ipd-cloud-preweb00.gz01',
-);
+];
 
-$hostname = gethostname();
+$hostname    = gethostname();
 $development = 1; //开发环境
 if (in_array($hostname, $online_host)) {
     $development = 2;
 }
 
-if($development == 2){
+if ($development == 2) {
     // 路网接口服务器地址
     $waymap_server = '100.69.238.11';
     // 路网接口服务器端口
@@ -43,25 +43,25 @@ if($development == 2){
 
     // signal-mis
     $signal_mis_server = '100.90.164.31';
-    $signal_mis_port = '8006';
-    $signal_mis_ext = '/signal-mis';
+    $signal_mis_port   = '8006';
+    $signal_mis_ext    = '/signal-mis';
 
     // es
     $es_server = '100.69.238.158';
-    $es_port = '8001';
-    $es_ext = '';
+    $es_port   = '8001';
+    $es_ext    = '';
 
     // new timing
     $signal_control_server = '10.85.128.81';
-    $signal_control_port = '30062';
-    $signal_control_ext = '/signal-timing';
+    $signal_control_port   = '30062';
+    $signal_control_ext    = '/signal-timing';
 
     // xmmtrace
     $xmmtrace_server = '100.69.238.158';
-    $xmmtrace_port = '8001';
-    $xmmtrace_ext = '/api/transmit/Traffic';
+    $xmmtrace_port   = '8001';
+    $xmmtrace_ext    = '/api/transmit/Traffic';
 
-}else{
+} else {
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
     // 路网接口服务器端口
@@ -84,34 +84,34 @@ if($development == 2){
 
     // signal-mis
     $signal_mis_server = '100.90.164.31';
-    $signal_mis_port = '8006';
-    $signal_mis_ext = '/signal-mis';
+    $signal_mis_port   = '8006';
+    $signal_mis_ext    = '/signal-mis';
 
     // es
     $es_server = '10.89.236.25';
-    $es_port = '8087';
-    $es_ext = '';
+    $es_port   = '8087';
+    $es_ext    = '';
 
-        // new timing
+    // new timing
     $signal_control_server = '100.90.164.31';
-    $signal_control_port = '8031';
-    $signal_control_ext = '/signal-timing';
+    $signal_control_port   = '8031';
+    $signal_control_ext    = '/signal-timing';
 
     // xmmtrace
     $xmmtrace_server = '100.69.238.158';
-    $xmmtrace_port = '8001';
-    $xmmtrace_ext = '/api/transmit/Traffic';
+    $xmmtrace_port   = '8001';
+    $xmmtrace_ext    = '/api/transmit/Traffic';
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
 $temp_timing_port = !empty($timing_port) ? ":" . $timing_port : "";
-$signal_mis_port = !empty($signal_mis_port) ? ":" . $signal_mis_port : "";
-$es_port = !empty($es_port) ? ":" . $es_port : "";
+$signal_mis_port  = !empty($signal_mis_port) ? ":" . $signal_mis_port : "";
+$es_port          = !empty($es_port) ? ":" . $es_port : "";
 
 // 路网接口地址
 $config['waymap_interface'] = 'http://' . $waymap_server . $temp_waymap_port . $waymap_ext;
 // 路网接口token
-$config['waymap_token'] = '4c3e3b6a3588161128d0604daab528db';
+$config['waymap_token']  = '4c3e3b6a3588161128d0604daab528db';
 $config['waymap_userid'] = 'signalPro';
 
 // 配时接口地址
@@ -124,362 +124,426 @@ $config['signal_mis_interface'] = 'http://' . $signal_mis_server . $signal_mis_p
 $config['es_interface'] = 'http://' . $es_server . $es_port . $es_ext;
 
 // 新版配时地址
-$config['signal_control_interface'] = 'http://' . $signal_control_server.":" . $signal_control_port . $signal_control_ext;
+$config['signal_control_interface'] = 'http://' . $signal_control_server . ":" . $signal_control_port . $signal_control_ext;
 
 // 新版轨迹地址
-$config['xmmtrace_interface'] = 'http://' . $xmmtrace_server.":" . $xmmtrace_port . $xmmtrace_ext;
+$config['xmmtrace_interface'] = 'http://' . $xmmtrace_server . ":" . $xmmtrace_port . $xmmtrace_ext;
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;
 
 // 评估置信度
 $config['confidence'] = [
-    0=>[
+    0 => [
         // 备注
-        'name'      => '全部',
+        'name' => '全部',
         // 用于组织sql语句的where条件
-        'sql_where' => function($val) { return $val . ' > 0';},
+        'sql_where' => function ($val) {
+            return $val . ' > 0';
+        },
         // 用于判断
-        'formula'   => function($val) { return $val > 0;},
+        'formula' => function ($val) {
+            return $val > 0;
+        },
     ],
-    1=>[
-        'name'      => '高',
-        'sql_where' => function($val) use($confidence_threshold) { return $val . ' > ' . $confidence_threshold;},
-        'formula'   => function($val) use($confidence_threshold) { return $val > $confidence_threshold;},
+    1 => [
+        'name' => '高',
+        'sql_where' => function ($val) use ($confidence_threshold) {
+            return $val . ' > ' . $confidence_threshold;
+        },
+        'formula' => function ($val) use ($confidence_threshold) {
+            return $val > $confidence_threshold;
+        },
     ],
-    2=>[
-        'name'      => '低',
-        'sql_where' => function($val) use($confidence_threshold) { return $val . ' < ' . $confidence_threshold;},
-        'formula'   => function($val) use($confidence_threshold) { return $val < $confidence_threshold;},
+    2 => [
+        'name' => '低',
+        'sql_where' => function ($val) use ($confidence_threshold) {
+            return $val . ' < ' . $confidence_threshold;
+        },
+        'formula' => function ($val) use ($confidence_threshold) {
+            return $val < $confidence_threshold;
+        },
     ],
-    3=>[
-        'name'      => '中',
-        'sql_where' => function($val) { return $val . ' > 0';},
-        'formula'   => function($val) { return $val > 0;},
-    ]
+    3 => [
+        'name' => '中',
+        'sql_where' => function ($val) {
+            return $val . ' > 0';
+        },
+        'formula' => function ($val) {
+            return $val > 0;
+        },
+    ],
 ];
 
 // 路口指标
 $config['junction_quota_key'] = [
     'imbalance_index' => [
         'name' => '失衡指数',                                  // 名称
-        'status_formula' => function($val) {                  // 状态判断规则
+        'status_formula' => function ($val) {                  // 状态判断规则
             if ($val > 0.6) {
                 return 1; // 高
-            } else if ($val > 0.3 && $val <= 0.6) {
+            } elseif ($val > 0.3 && $val <= 0.6) {
                 return 2; // 中
             } else {
                 return 3; // 低
             }
         },
-        'round' => function($val) { return round($val, 2);}, // 格式化数据
-        'unit'  => ''                                        // 单位
+        'round' => function ($val) {
+            return round($val, 2);
+        }, // 格式化数据
+        'unit' => ''                                        // 单位
     ],
     'spillover_index' => [
-        'name'       => '溢流指数',
-        'status_formula' => function($val) {
+        'name' => '溢流指数',
+        'status_formula' => function ($val) {
             if ($val > 0.08) {
                 return 1;
-            } else if ($val > 0.04 && $val <= 0.08) {
+            } elseif ($val > 0.04 && $val <= 0.08) {
                 return 2;
             } else {
                 return 3;
             }
         },
-        'round'      => function($val) { return round($val, 2);},
-        'unit'       => ''
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '',
     ],
     'incoordination_index' => [
-        'name'       => '失调指数',
-        'status_formula' => function($val) {
+        'name' => '失调指数',
+        'status_formula' => function ($val) {
             if ($val > 0.7) {
                 return 1;
-            } else if ($val > 0.4 && $val <= 0.7) {
+            } elseif ($val > 0.4 && $val <= 0.7) {
                 return 2;
             } else {
                 return 3;
             }
         },
-        'round'      => function($val) { return round($val, 2);},
-        'unit'       => ''
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '',
     ],
     'saturation_index' => [
-        'name'       => '饱和指数',
-        'status_formula' => function($val) {
+        'name' => '饱和指数',
+        'status_formula' => function ($val) {
             if ($val > 0.9) {
                 return 1;
-            } else if ($val > 0.3 && $val <= 0.9) {
+            } elseif ($val > 0.3 && $val <= 0.9) {
                 return 2;
             } else {
                 return 3;
             }
         },
-        'round'      => function($val) { return round($val, 2);},
-        'unit'       => ''
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '',
     ],
     'stop_cycle_time' => [
-        'name'       => '停车次数',
-        'status_formula' => function($val) {
+        'name' => '停车次数',
+        'status_formula' => function ($val) {
             if ($val > 2) {
                 return 1;
-            } else if ($val > 1 && $val <= 2) {
+            } elseif ($val > 1 && $val <= 2) {
                 return 2;
             } else {
                 return 3;
             }
         },
-        'round'      => function($val) { return round($val, 2);},
-        'unit'       => ''
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '',
     ],
     'stop_delay' => [
-        'name'       => '平均延误',
-        'status_formula' => function($val) {
+        'name' => '平均延误',
+        'status_formula' => function ($val) {
             if ($val > 40) {
                 return 1;
-            } else if ($val > 20 && $val <= 40) {
+            } elseif ($val > 20 && $val <= 40) {
                 return 2;
             } else {
                 return 3;
             }
         },
-        'round'      => function($val) { return round($val, 2);},
-        'unit'       => '秒'
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '秒',
     ],
     'avg_speed' => [
-        'name'       => '平均速度',
-        'status_formula' => function($val) {
+        'name' => '平均速度',
+        'status_formula' => function ($val) {
             if ($val > 40) {
                 return 1;
-            } else if ($val > 20 && $val <= 40) {
+            } elseif ($val > 20 && $val <= 40) {
                 return 2;
             } else {
                 return 3;
             }
         },
-        'round'      => function($val) { return round($val, 2);},
-        'unit'       => '千米/时'
-    ]
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '千米/时',
+    ],
 ];
 
 // flow指标
 $config['flow_quota_key'] = [
     'route_length' => [
-        'name'      => '路段长度', // 中文名称
-        'round'     => function($val) { return round($val);},  // 格式化数据
-        'unit'      => '米'       // 单位
+        'name' => '路段长度', // 中文名称
+        'round' => function ($val) {
+            return round($val);
+        },  // 格式化数据
+        'unit' => '米'       // 单位
     ],
     'queue_position' => [
-        'name'      =>'排队长度',
-        'round'     => function($val) { return round($val);},
-        'unit'      => '米'
+        'name' => '排队长度',
+        'round' => function ($val) {
+            return round($val);
+        },
+        'unit' => '米',
     ],
     'saturation_degree' => [
-        'name'      =>'饱和度',
-        'round'     => function($val) { return round($val, 2);},
-        'unit'      => ''
+        'name' => '饱和度',
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '',
     ],
     'stop_delay' => [
-        'name'      => '停车延误',
-        'round'     => function($val) { return round($val, 2);},
-        'unit'      => '秒'
+        'name' => '停车延误',
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '秒',
     ],
     'stop_time_cycle' => [
-        'name'      =>'停车次数',
-        'round'     => function($val) { return round($val, 2);},
-        'unit'      => ''
+        'name' => '停车次数',
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '',
     ],
     'spillover_rate' => [
-        'name'      => '溢流比率',
-        'round'     => function($val) { return round($val, 5);},
-        'unit'      => ''
+        'name' => '溢流比率',
+        'round' => function ($val) {
+            return round($val, 5);
+        },
+        'unit' => '',
     ],
     'stop_rate' => [
-        'name'      => '停车比率',
-        'round'     => function($val) { return round($val, 2);},
-        'unit'      => ''
+        'name' => '停车比率',
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '',
     ],
     'flow_num' => [
-        'name'      => '流量',
-        'round'     => function($val) { return round($val);},
-        'unit'      => '每小时/车道'
+        'name' => '流量',
+        'round' => function ($val) {
+            return round($val);
+        },
+        'unit' => '每小时/车道',
     ],
     'free_flow_speed' => [
-        'name'      => '自由流',
-        'round'     => function($val) { return round($val, 2);},
-        'unit'      => '千米/时'
+        'name' => '自由流',
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '千米/时',
     ],
 ];
 
 // 诊断问题
 $config['diagnose_key'] = [
-    'spillover_index'   => [
-        'name'                      => '溢流',
-        'junction_diagnose_formula' => function($val) { return $val > 0.008;},
-        'sql_where' => function() { return '`spillover_index` > 0.008';},
-        'nature_formula'  => function($val) {
+    'spillover_index' => [
+        'name' => '溢流',
+        'junction_diagnose_formula' => function ($val) {
+            return $val > 0.008;
+        },
+        'sql_where' => function () {
+            return '`spillover_index` > 0.008';
+        },
+        'nature_formula' => function ($val) {
             if ($val > 0.6) {
                 return 1;
-            } else if ($val > 0.3 && $val <= 0.6) {
+            } elseif ($val > 0.3 && $val <= 0.6) {
                 return 2;
-            } else if ($val > 0 && $val <= 0.3){
+            } elseif ($val > 0 && $val <= 0.3) {
                 return 3;
             } else {
                 return 0;
             }
         },
-        'flow_quota'=>[
-            'spillover_rate'=>[
-                'name'=>'溢流比率',
-                'unit'=>''
+        'flow_quota' => [
+            'spillover_rate' => [
+                'name' => '溢流比率',
+                'unit' => '',
             ],
-            'queue_position'=>[
-                'name'=>'排队长度',
-                'unit'=>'米'
+            'queue_position' => [
+                'name' => '排队长度',
+                'unit' => '米',
             ],
-            'stop_delay'=>[
-                'name'=>'停车延误',
-                'unit'=>'秒'
+            'stop_delay' => [
+                'name' => '停车延误',
+                'unit' => '秒',
             ],
-            'stop_time_cycle'=>[
-                'name'=>'停车次数',
-                'unit'=>''
+            'stop_time_cycle' => [
+                'name' => '停车次数',
+                'unit' => '',
             ],
-            'route_length'  => [
-                'name'=>'路段长度',
-                'unit'=>'米'
+            'route_length' => [
+                'name' => '路段长度',
+                'unit' => '米',
             ],
         ],
         // flow级的诊断问题 规则：溢流比率 > 0.008
         'flow_diagnose' => [
             'quota' => 'spillover_rate',
-            'formula' => function($val) { // $val = ['spillover_rate'=>xxx]
+            'formula' => function ($val) { // $val = ['spillover_rate'=>xxx]
                 return $val > 0.008;
             },
-        ]
+        ],
     ],
-    'imbalance_index'=>[
-        'name'                      => '失衡',
-        'junction_diagnose_formula' => function($val) { return $val > 0;},
-        'sql_where' => function() { return '`imbalance_index` > 0';},
-        'nature_formula'  => function($val) {
+    'imbalance_index' => [
+        'name' => '失衡',
+        'junction_diagnose_formula' => function ($val) {
+            return $val > 0;
+        },
+        'sql_where' => function () {
+            return '`imbalance_index` > 0';
+        },
+        'nature_formula' => function ($val) {
             if ($val > 0.08) {
                 return 1;
-            } else if ($val > 0.04 && $val <= 0.08) {
+            } elseif ($val > 0.04 && $val <= 0.08) {
                 return 2;
-            } else if ($val > 0.005 && $val <= 0.04) {
+            } elseif ($val > 0.005 && $val <= 0.04) {
                 return 3;
             } else {
                 return 0;
             }
         },
-        'flow_quota'=>[
-            'saturation_degree'=>[
-                'name'=>'饱和度',
-                'unit'=>''
+        'flow_quota' => [
+            'saturation_degree' => [
+                'name' => '饱和度',
+                'unit' => '',
             ],
-            'queue_position'=>[
-                'name'=>'排队长度',
-                'unit'=>'米'
+            'queue_position' => [
+                'name' => '排队长度',
+                'unit' => '米',
             ],
-            'stop_delay'=>[
-                'name'=>'停车延误',
-                'unit'=>'秒'
+            'stop_delay' => [
+                'name' => '停车延误',
+                'unit' => '秒',
             ],
-            'stop_time_cycle'=>[
-                'name'=>'停车次数',
-                'unit'=>'秒'
+            'stop_time_cycle' => [
+                'name' => '停车次数',
+                'unit' => '秒',
             ],
-            'route_length'  => [
-                'name'=>'路段长度',
-                'unit'=>'米'
-            ]
+            'route_length' => [
+                'name' => '路段长度',
+                'unit' => '米',
+            ],
         ],
         // flow级的诊断问题 规则：饱和度 >= 0 或 饱和度 < 2
         'flow_diagnose' => [
             'quota' => 'saturation_degree',
-            'formula' => function($val) { // $val = ['spillover_rate'=>xxx]
+            'formula' => function ($val) { // $val = ['spillover_rate'=>xxx]
                 return ($val > 0 || $val < 2);
             },
         ],
     ],
-    'saturation_index'  => [
-        'name'                      => '空放',
-        'junction_diagnose_formula' => function($val) { return $val < 0.3;},
-        'sql_where' => function() { return '`saturation_index` < 0.3';},
-        'nature_formula'  => function($val) {
+    'saturation_index' => [
+        'name' => '空放',
+        'junction_diagnose_formula' => function ($val) {
+            return $val < 0.3;
+        },
+        'sql_where' => function () {
+            return '`saturation_index` < 0.3';
+        },
+        'nature_formula' => function ($val) {
             if ($val < 0.1) {
                 return 1;
-            } else if ($val >= 0.1 && $val < 0.2) {
+            } elseif ($val >= 0.1 && $val < 0.2) {
                 return 2;
-            } else if ($val >= 0.2 && $val < 0.3) {
+            } elseif ($val >= 0.2 && $val < 0.3) {
                 return 3;
             } else {
                 return 0;
             }
         },
-        'flow_quota'=>[
-            'saturation_degree'=>[
-                'name'=>'饱和度',
-                'unit'=>''
+        'flow_quota' => [
+            'saturation_degree' => [
+                'name' => '饱和度',
+                'unit' => '',
             ],
-            'stop_delay'=>[
-                'name'=>'停车延误',
-                'unit'=>'秒'
+            'stop_delay' => [
+                'name' => '停车延误',
+                'unit' => '秒',
             ],
-            'stop_time_cycle'=>[
-                'name'=>'停车次数',
-                'unit'=>''
-            ]
+            'stop_time_cycle' => [
+                'name' => '停车次数',
+                'unit' => '',
+            ],
         ],
         // flow级的诊断问题 规则：饱和度 < 0.3
         'flow_diagnose' => [
             'quota' => 'saturation_degree',
-            'formula' => function($val) { // $val = ['spillover_rate'=>xxx]
+            'formula' => function ($val) { // $val = ['spillover_rate'=>xxx]
                 return $val < 0.3;
             },
         ],
     ],
-    'over_saturation'   => [
-        'name'                      => '过饱和',
-        'junction_diagnose_formula' => function($val) { return $val > 1;},
-        'sql_where' => function() { return '`saturation_index` > 1';},
-        'nature_formula'  => function($val) {
+    'over_saturation' => [
+        'name' => '过饱和',
+        'junction_diagnose_formula' => function ($val) {
+            return $val > 1;
+        },
+        'sql_where' => function () {
+            return '`saturation_index` > 1';
+        },
+        'nature_formula' => function ($val) {
             if ($val > 1.5) {
                 return 1;
-            } else if ($val > 1.2 && $val <= 1.5) {
+            } elseif ($val > 1.2 && $val <= 1.5) {
                 return 2;
-            } else if ($val > 1 && $val <= 1.2) {
+            } elseif ($val > 1 && $val <= 1.2) {
                 return 3;
             } else {
                 return 0;
             }
         },
-        'flow_quota'=>[
-            'saturation_degree'=>[
-                'name'=>'饱和度',
-                'unit'=>''
+        'flow_quota' => [
+            'saturation_degree' => [
+                'name' => '饱和度',
+                'unit' => '',
             ],
-            'stop_delay'=>[
-                'name'=>'停车延误',
-                'unit'=>'秒'
+            'stop_delay' => [
+                'name' => '停车延误',
+                'unit' => '秒',
             ],
-            'stop_time_cycle'=>[
-                'name'=>'停车次数',
-                'unit'=>''
+            'stop_time_cycle' => [
+                'name' => '停车次数',
+                'unit' => '',
             ],
-            'queue_position'=>[
-                'name'=>'排队长度',
-                'unit'=>'米'
-            ]
+            'queue_position' => [
+                'name' => '排队长度',
+                'unit' => '米',
+            ],
         ],
         // flow级的诊断问题 饱和度 > 0.9
         'flow_diagnose' => [
             'quota' => 'saturation_degree',
-            'formula' => function($val) { // $val = ['spillover_rate'=>xxx]
+            'formula' => function ($val) { // $val = ['spillover_rate'=>xxx]
                 return $val > 0.9;
             },
         ],
-    ]
+    ],
 ];
 
 
@@ -488,19 +552,19 @@ $config['diagnose_confidence_threshold'] = 0.5;
 
 // 排序
 $config['sort_conf'] = [
-    1   => 'asc',
-    2   => 'desc'
+    1 => 'asc',
+    2 => 'desc',
 ];
 
 // result_comment配置
 $config['result_comment'] = [
-    'signal_mes_error' => '配时信息与实际车流不符'
+    'signal_mes_error' => '配时信息与实际车流不符',
 ];
 
 // 绿信比优化建议
 $config['split_opt_suggest'] = [
     'over_saturation_flow' => '相位:movement过饱和，建议增加绿灯时长',
-    'green_loss_flow'      => '相位:movement存在空放，可缩短绿灯时长',
+    'green_loss_flow' => '相位:movement存在空放，可缩短绿灯时长',
 ];
 
 // 反推配时名单
@@ -517,52 +581,52 @@ $config['action_log_map'] = [
 
 // 定义实时报警规则
 $config['realtimewarning_rule'] = [
-    'default' =>[
-        'isOverFlow'=>[
-            'spillover_rate'=>0.2,
-            'stop_delay'=>40,
+    'default' => [
+        'isOverFlow' => [
+            'spillover_rate' => 0.2,
+            'stop_delay' => 40,
         ],
-        'isSAT'=>[
-            'twice_stop_rate'=>0.2,
-            'queue_length'=>180,
-            'stop_delay'=>50,
+        'isSAT' => [
+            'twice_stop_rate' => 0.2,
+            'queue_length' => 180,
+            'stop_delay' => 50,
         ],
-        'where'=>' and traj_count >= 10',
+        'where' => ' and traj_count >= 10',
     ],
-    '12' =>[
-        'isOverFlow'=>[
-            'spillover_rate'=>0.2,
-            'stop_delay'=>40,
+    '12' => [
+        'isOverFlow' => [
+            'spillover_rate' => 0.2,
+            'stop_delay' => 40,
         ],
-        'isSAT'=>[
-            'twice_stop_rate'=>0.2,
-            'queue_length'=>180,
-            'stop_delay'=>50,
+        'isSAT' => [
+            'twice_stop_rate' => 0.2,
+            'queue_length' => 180,
+            'stop_delay' => 50,
         ],
-        'where'=>' and traj_count >= 10',
+        'where' => ' and traj_count >= 10',
     ],
 ];
 
 //配置gift
 $config['gift'] = [
-    'upload'=>[
-        'itstool_public' =>'http://100.69.238.36:8000/resource/itstool_public',
-        'itstool_private' =>'http://100.69.238.36:8000/resource/itstool_private',
+    'upload' => [
+        'itstool_public' => 'http://100.69.238.36:8000/resource/itstool_public',
+        'itstool_private' => 'http://100.69.238.36:8000/resource/itstool_private',
     ],
-    'get'=>[
-        'itstool_public' =>'http://100.69.238.37:8000/resource/itstool_public',
-        'itstool_private' =>'http://100.69.238.37:8000/resource/itstool_private',
+    'get' => [
+        'itstool_public' => 'http://100.69.238.37:8000/resource/itstool_public',
+        'itstool_private' => 'http://100.69.238.37:8000/resource/itstool_private',
     ],
-    'batch'=>[
-        'itstool_public' =>'http://100.69.238.37:8000/batch/resource/itstool_public',
-        'itstool_private' =>'http://100.69.238.37:8000/batch/resource/itstool_private',
+    'batch' => [
+        'itstool_public' => 'http://100.69.238.37:8000/batch/resource/itstool_public',
+        'itstool_private' => 'http://100.69.238.37:8000/batch/resource/itstool_private',
     ],
 ];
 
 //配置
 $config['inroute'] = [
-    'default'=>[
-        'allow_host_ip' =>[
+    'default' => [
+        'allow_host_ip' => [
             "10.89.236.25",     //三台jixiang机器
             "10.89.234.61",
             "10.89.235.12",
@@ -572,7 +636,7 @@ $config['inroute'] = [
             "172.25.32.135",    //测试
             "100.90.165.32",    //preweb00
         ],
-        'salt_token' =>'99f8698a68a2fa78',
+        'salt_token' => '99f8698a68a2fa78',
     ],
 ];
 
