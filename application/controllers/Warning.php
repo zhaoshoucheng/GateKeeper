@@ -34,12 +34,12 @@ class Warning extends MY_Controller
             $data = [
                 'app' => "std",
                 'subject' => $params["subject"],
-                'tos' => $params["tos"],
+                'tos' => explode(",",$params["tos"]),
                 'content' => ["msg" => $params["content"]],
             ];
-            $ret = httpPOST($this->config->item('warning_interface') . '/api/v2/notify/mail', $data, 0, "json");
+            $ret = httpPOST($this->config->item('warning_interface') . '/api/v2/notify/mail?sys=Itstool', $data, 0, "json");
             $ret = json_decode($ret, true);
-            if (isset($ret['code']) && $ret['code'] == -1) {
+            if (isset($ret['code']) && $ret['code'] != 0) {
                 $message = isset($ret["msg"]) ? $ret["msg"] : "";
                 com_log_warning('warning_interface_error', 0, $message, compact("data","ret"));
                 $this->errno = -1;
@@ -51,6 +51,6 @@ class Warning extends MY_Controller
             $this->errorCode = $e->getCode();
             $this->errorMessage = $e->getMessage();
         }
-        return $this->response($data);
+        return $this->response("");
     }
 }
