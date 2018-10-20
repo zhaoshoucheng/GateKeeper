@@ -644,3 +644,13 @@ $config['inroute'] = [
 
 // 屏控服务开关
 $config['security_frequency_switch'] = true;
+
+$config['user_feedback_types'] = [
+    1 => '报警信息',
+    2 => '指标计算',
+    3 => '诊断问题',
+    4 => '评估内容',
+    5 => '优化结果',
+    6 => '页面交互',
+    7 => '其他',
+];
