@@ -12,10 +12,6 @@ use Didi\Cloud\Collection\Collection;
 /**
  * Class RoadService
  * @package Services
- *
- * @property \Waymap_model $waymap_model
- * @property \Redis_model  $redis_model
- * @property \Road_model   $road_model
  */
 class RoadService extends BaseService
 {

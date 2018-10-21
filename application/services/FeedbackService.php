@@ -11,8 +11,6 @@ namespace Services;
 /**
  * Class FeedbackService
  * @package Services
- *
- * @property \Feedback_model $feedback_model
  */
 class FeedbackService extends BaseService
 {

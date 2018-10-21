@@ -11,9 +11,6 @@ namespace Services;
 /**
  * Class HelperService
  * @package Services
- *
- * @property \Redis_model $redis_model
- * @property \Realtime_model $realtime_model
  */
 class HelperService extends BaseService
 {
@@ -28,15 +25,13 @@ class HelperService extends BaseService
     /**
      * 获取最新的hour
      *
-     * @param $params
+     * @param $cityId
      *
      * @return array|bool|string
      * @throws \Exception
      */
-    public function getLastestHour($params)
+    public function getLastestHour($cityId)
     {
-        $cityId = $params['city_id'];
-
         $hour = $this->redis_model->getData('its_realtime_lasthour_' . $cityId);
 
         if($hour) {

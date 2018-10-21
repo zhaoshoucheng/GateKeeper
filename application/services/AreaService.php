@@ -12,10 +12,6 @@ use Didi\Cloud\Collection\Collection;
 /**
  * Class AreaService
  * @package Services
- *
- * @property \Area_model $area_model
- * @property \Redis_model $redis_model
- * @property \Waymap_model $waymap_model
  */
 class AreaService extends BaseService
 {
