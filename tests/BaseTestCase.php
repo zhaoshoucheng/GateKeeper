@@ -48,6 +48,5 @@ class BaseTestCase extends TestCase
         $this->assertArrayHasKey('data', $data);
 
         $this->assertEquals($data['errno'], 0, 'Error Code: ' . $data['errno'] . "\n" . 'Error Message: ' . $data['errmsg']);
-        $this->assertNotEmpty($data['data'], 'Data is Empty');
     }
 }
