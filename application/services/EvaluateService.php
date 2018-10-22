@@ -21,6 +21,8 @@ class EvaluateService extends BaseService
 
         $this->load->model('redis_model');
         $this->load->model('waymap_model');
+        $this->load->model('realtime_model');
+        $this->load->model('flowDurationV6_model');
 
         $this->load->config('evaluate_conf');
 
@@ -101,7 +103,7 @@ class EvaluateService extends BaseService
 
         $dataList = [];
 
-        foreach ($result[$junctionId] ?? [] as $key => $value) {
+        foreach ($result as $key => $value) {
             $dataList[] = [
                 'logic_flow_id' => $key,
                 'flow_name' => $value,
@@ -240,11 +242,7 @@ class EvaluateService extends BaseService
 
         $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionId, array_keys($allFlows[$logicJunctionId]));
 
-        if (empty($ret['data'])) {
-            return [];
-        }
-
-        foreach ($ret['data'] as $k => $v) {
+        foreach ($ret as $k => $v) {
             if (!empty($allFlows[$logicJunctionId][$v['logic_flow_id']])) {
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
                 $result['dataList'][$k]['flow_label']    = $allFlows[$logicJunctionId][$v['logic_flow_id']];
@@ -275,12 +273,9 @@ class EvaluateService extends BaseService
      *                $params['quota_key']       string   Y 指标KEY
      *                $params['flow_id']         string   Y 相位ID
      *                $params['base_time']       array    Y 基准时间 [1532880000, 1532966400, 1533052800] 日期时间戳
-     *                $params['evaluate_time']   array    Y 评估时间 有可能会有多个评估时间段
-     *                $params['evaluate_time'] = [[1532880000, 1532880000]]
+     *                $params['evaluate_time']   array    Y 评估时间 有可能会有多个评估时间段 [[1532880000, 1532880000]]
      *                $params['base_time_start_end']       array Y 基准时间 开始、结束时间 用于返回数据
      *                $params['evaluate_time_start_end']   array Y 评估时间 开始、结束时间 用于返回数据
-     *
-     * @param $params
      *
      * @return array
      * @throws \Exception
@@ -299,17 +294,19 @@ class EvaluateService extends BaseService
             ->collapse()
             ->merge($baseTime)
             ->unique()
-            ->get();
+            ->map(function ($item) {
+                return date('Y-m-d', $item);
+            })->get();
 
         if ($logicFlowId == 9999) {
             $select  = 'logic_junction_id, date, hour, avg(' . $quotaKey . ') as ' . $quotaKey;
             $groupBy = 'logic_junction_id, hour, date';
 
-            $data = $this->realtime_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, '', $dates, $groupBy, $select);
+            $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, '', $dates, $groupBy, $select);
         } else {
             $select = 'logic_junction_id, logic_flow_id, date, hour, ' . $quotaKey;
 
-            $data = $this->realtime_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, '', $select);
+            $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, '', $select);
         }
 
         if (!$data) {

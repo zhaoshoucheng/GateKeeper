@@ -123,9 +123,9 @@ if (!function_exists('_exception_handler')) {
         ];
 
         if (ENVIRONMENT == 'development') {
-            $output['trace'] = $exception->getTrace();
             $output['file']  = $exception->getFile();
             $output['line']  = $exception->getLine();
+            $output['trace'] = $exception->getTrace();
         }
         header("Content-Type:application/json;charset=UTF-8");
         echo json_encode($output);

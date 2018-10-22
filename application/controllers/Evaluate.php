@@ -128,7 +128,7 @@ class Evaluate extends MY_Controller
 
         $result = $this->evaluateService->getJunctionQuotaSortList($data);
 
-        return $this->response($result);
+        $this->response($result);
     }
 
     /**
@@ -213,6 +213,7 @@ class Evaluate extends MY_Controller
     public function quotaEvaluateCompare()
     {
         $params = $this->input->post(null, true);
+
         // 校验参数
         $validate = Validate::make($params, [
             'city_id' => 'min:1',

@@ -86,25 +86,4 @@ class Realtime_model extends CI_Model
             ->where('updated_at >', $upTime)
             ->get()->result_array();
     }
-
-    public function getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, $groupBy, $select = '*')
-    {
-        $this->db->select($select)
-            ->from($this->tb . $cityId)
-            ->where('logic_junction_id', $logicJunctionId);
-
-        if(!$logicFlowId) {
-            $this->db->where('logic_flow_id', $logicFlowId);
-        }
-
-        if(!$dates) {
-            $this->db->where_in('date', $dates);
-        }
-
-        if(!$groupBy) {
-            $this->db->group_by($groupBy);
-        }
-
-        return $this->db->get()->result_array();
-    }
 }
