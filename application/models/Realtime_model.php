@@ -8,7 +8,7 @@
 
 class Realtime_model extends CI_Model
 {
-    private $tb = 'read_time_';
+    private $tb = 'real_time_';
 
     /**
      * @var \CI_DB_query_builder
@@ -57,11 +57,54 @@ class Realtime_model extends CI_Model
     public function getFlowsInFlowIds($cityId, $hour, $logicJunctionId, $logicFlowId, $select = '*')
     {
         return $this->db->select($select)
-            ->from('real_time_' . $cityId)
+            ->from($this->tb . $cityId)
             ->where('hour', $hour)
             ->where('logic_junction_id', $logicJunctionId)
             ->where('updated_at > ', date('Y-m-d', strtotime('-10  minutes')))
             ->where_in('logic_flow_id', $logicFlowId)
             ->get()->result_array();
+    }
+
+    public function getQuotasByHour($cityId, $hour, $quotaKey, $select = '*')
+    {
+        return $this->db->select($select)
+            ->from($this->tb . $cityId)
+            ->where('traj_count >= 10')
+            ->where('hour', $hour)
+            ->group_by('logic_junction_id')
+            ->order_by($quotaKey, 'DESC')
+            ->limit(100)
+            ->get()->result_array();
+    }
+
+    public function getQuotaByFlowId($cityId, $logicJunctionId, $logicFlowId, $upTime, $select = '*')
+    {
+        return $this->db->select($select)
+            ->from($this->tb . $cityId)
+            ->where('logic_junction_id', $logicJunctionId)
+            ->where('logic_flow_id', $logicFlowId)
+            ->where('updated_at >', $upTime)
+            ->get()->result_array();
+    }
+
+    public function getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, $groupBy, $select = '*')
+    {
+        $this->db->select($select)
+            ->from($this->tb . $cityId)
+            ->where('logic_junction_id', $logicJunctionId);
+
+        if(!$logicFlowId) {
+            $this->db->where('logic_flow_id', $logicFlowId);
+        }
+
+        if(!$dates) {
+            $this->db->where_in('date', $dates);
+        }
+
+        if(!$groupBy) {
+            $this->db->group_by($groupBy);
+        }
+
+        return $this->db->get()->result_array();
     }
 }

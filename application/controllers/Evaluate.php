@@ -1,136 +1,120 @@
 <?php
 /***************************************************************
-# 评估类
-# user:ningxiangbing@didichuxing.com
-# date:2018-07-25
-***************************************************************/
+ * # 评估类
+ * # user:ningxiangbing@didichuxing.com
+ * # date:2018-07-25
+ ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\EvaluateService;
+
 class Evaluate extends MY_Controller
 {
+    protected $evaluateService;
+
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('evaluate_model');
-        $this->load->model('redis_model');
-        $this->load->config('realtime_conf');
+
+        $this->evaluateService = new EvaluateService();
     }
 
     /**
      * 获取全城路口列表
-     * @param city_id    interger Y 城市ID
-     * @return json
+     *
+     * @throws Exception
      */
     public function getCityJunctionList()
     {
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数city_id传递错误！';
-            return;
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+        ]);
+
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
-        $data['city_id'] = $params['city_id'];
+        $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data['date'] = $params['date'] ?? date('Y-m-d');
-
-        $data = $this->evaluate_model->getCityJunctionList($data);
+        $data = $this->evaluateService->getCityJunctionList($params);
 
         $this->response($data);
     }
 
     /**
      * 获取指标列表
-     * @param city_id    interger Y 城市ID
-     * @return json
+     *
+     * @throws Exception
      */
     public function getQuotaList()
     {
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数city_id传递错误！';
-            return;
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+        ]);
+
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
-        $data['city_id'] = $params['city_id'];
-
-        $data['date'] = $params['date'] ?? date('Y-m-d');
-
-        $data = $this->evaluate_model->getQuotaList($data);
+        $data = $this->evaluateService->getQuotaList();
 
         $this->response($data);
     }
 
     /**
      * 获取相位（方向）列表
-     * @param city_id     interger Y 城市ID
-     * @param junction_id string   Y 路口ID
-     * @return json
+     *
+     * @throws Exception
      */
     public function getDirectionList()
     {
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数city_id传递错误！';
-            return;
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+            'junction_id' => 'min:1',
+        ]);
+
+        if (!$validate['status']) {
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
-        $data['city_id'] = $params['city_id'];
-
-        if(!isset($params['junction_id']) || empty(trim($params['junction_id']))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数junction_id不能为空！';
-            return;
-        }
-
-        $data['junction_id'] = $params['junction_id'];
-
-        $data['date'] = $params['date'] ?? date('Y-m-d');
-
-        $data = $this->evaluate_model->getDirectionList($data);
+        $data = $this->evaluateService->getDirectionList($params);
 
         $this->response($data);
     }
 
     /**
      * 获取路口指标排序列表
-     * @param city_id     interger Y 城市ID
-     * @param quota_key   string   Y 指标KEY
-     * @param date        string   N 日期 格式：Y-m-d 默认当前日期
-     * @param time_point  string   N 时间 格式：H:i:s 默认当前时间
-     * @return json
+     *
+     * @throws Exception
      */
     public function getJunctionQuotaSortList()
     {
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
         // 校验参数
         $validate = Validate::make($params, [
-                'city_id'   => 'min:1',
-                'quota_key' => 'nullunable',
-            ]
-        );
+            'city_id' => 'min:1',
+            'quota_key' => 'nullunable',
+        ]);
+
         if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         if (!array_key_exists($params['quota_key'], $this->config->item('real_time_quota'))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '指标 ' . html_escape($params['quota_key']) . ' 不存在！';
-            return;
+            throw new \Exception('指标 ' . html_escape($params['quota_key']) . ' 不存在！', ERR_PARAMETERS);
         }
 
         $data = [
-            'city_id'    => intval($params['city_id']),
-            'quota_key'  => strip_tags(trim($params['quota_key'])),
-            'date'       => date('Y-m-d'),
+            'city_id' => intval($params['city_id']),
+            'quota_key' => strip_tags(trim($params['quota_key'])),
+            'date' => date('Y-m-d'),
             'time_point' => date('H:i:s'),
         ];
 
@@ -142,51 +126,42 @@ class Evaluate extends MY_Controller
             $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
         }
 
-        $result = $this->evaluate_model->getJunctionQuotaSortList($data);
+        $result = $this->evaluateService->getJunctionQuotaSortList($data);
 
         return $this->response($result);
     }
 
     /**
      * 获取指标趋势图
-     * @param city_id     interger Y 城市ID
-     * @param junction_id string   Y 路口ID
-     * @param quota_key   string   Y 指标KEY
-     * @param flow_id     string   Y 相位ID
-     * @param date        string   N 日期 格式：Y-m-d 默认当前日期
-     * @param time_point  string   N 时间 格式：H:i:s 默认当前时间
-     * @return json
+     *
+     * @throws Exception
      */
     public function getQuotaTrend()
     {
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
         // 校验参数
         $validate = Validate::make($params, [
-                'city_id'     => 'min:1',
-                'junction_id' => 'nullunable',
-                'quota_key'   => 'nullunable',
-                'flow_id'     => 'nullunable',
-            ]
-        );
+            'city_id' => 'min:1',
+            'junction_id' => 'nullunable',
+            'quota_key' => 'nullunable',
+            'flow_id' => 'nullunable',
+        ]);
+
         if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         if (!array_key_exists($params['quota_key'], $this->config->item('real_time_quota'))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '指标 ' . html_escape($params['quota_key']) . ' 不存在！';
-            return;
+            throw new \Exception('指标 ' . html_escape($params['quota_key']) . ' 不存在！', ERR_PARAMETERS);
         }
 
         $data = [
-            'city_id'     => intval($params['city_id']),
+            'city_id' => intval($params['city_id']),
             'junction_id' => strip_tags(trim($params['junction_id'])),
-            'quota_key'   => strip_tags(trim($params['quota_key'])),
-            'flow_id'     => strip_tags(trim($params['flow_id'])),
-            'date'        => date('Y-m-d'),
-            'time_point'  => date('H:i:s'),
+            'quota_key' => strip_tags(trim($params['quota_key'])),
+            'flow_id' => strip_tags(trim($params['flow_id'])),
+            'date' => date('Y-m-d'),
+            'time_point' => date('H:i:s'),
         ];
 
         if (!empty($params['date'])) {
@@ -197,91 +172,68 @@ class Evaluate extends MY_Controller
             $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
         }
 
-        $result = $this->evaluate_model->getQuotaTrend($data);
+        $result = $this->evaluateService->getQuotaTrend($data);
 
-        return $this->response($result);
+        $this->response($result);
     }
 
     /**
      * 获取路口地图数据
-     * @param city_id     interger Y 城市ID
-     * @param junction_id string   Y 路口ID
-     * @return json
+     *
+     * @throws Exception
      */
     public function getJunctionMapData()
     {
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
         // 校验参数
         $validate = Validate::make($params, [
-                'city_id'     => 'min:1',
-                'junction_id' => 'nullunable',
-            ]
-        );
+            'city_id' => 'min:1',
+            'junction_id' => 'nullunable',
+        ]);
+
         if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         $data = [
-            'city_id'     => intval($params['city_id']),
+            'city_id' => intval($params['city_id']),
             'junction_id' => strip_tags(trim($params['junction_id'])),
         ];
 
-        $result = $this->evaluate_model->getJunctionMapData($data);
+        $result = $this->evaluateService->getJunctionMapData($data);
 
-        return $this->response($result);
+        $this->response($result);
     }
 
     /**
      * 指标评估对比
-     * @param city_id         interger Y 城市ID
-     * @param junction_id     string   Y 路口ID
-     * @param quota_key       string   Y 指标KEY
-     * @param flow_id         string   Y 相位ID
-     * @param base_start_time string   N 基准开始时间 格式：yyyy-mm-dd hh:ii:ss
-     * 例：2018-08-06 00:00:00 默认：上一周工作日开始时间（上周一 yyyy-mm-dd 00:00:00）
-     * @param base_end_time   string   N 基准结束时间 格式：yyyy-mm-dd hh:ii:ss
-     * 例：2018-08-07 23:59:59 默认：上一周工作日结束时间（上周五 yyyy-mm-dd 23:59:59）
-     * @param evaluate_time   array    N 评估时间 有可能会有多个评估时间段，固使用json格式的字符串
-     * evaluate_time 格式：
-     * [
-     *     [
-     *         "start_time"=> "2018-08-01 00:00:00", // 开始时间 格式：yyyy-mm-dd hh:ii:ss 例：2018-08-06 00:00:00
-     *         "end_time"=> "2018-08-07 23:59:59"    // 结束时间 格式：yyyy-mm-dd hh:ii:ss 例：2018-08-07 23:59:59
-     *     ],
-     *     ......
-     * ]
-     * @return json
+     *
+     * @throws Exception
      */
     public function quotaEvaluateCompare()
     {
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
         // 校验参数
         $validate = Validate::make($params, [
-                'city_id'     => 'min:1',
-                'junction_id' => 'nullunable',
-                'quota_key'   => 'nullunable',
-                'flow_id'     => 'nullunable',
-            ]
-        );
+            'city_id' => 'min:1',
+            'junction_id' => 'nullunable',
+            'quota_key' => 'nullunable',
+            'flow_id' => 'nullunable',
+        ]);
+
         if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
+            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
         }
 
         if (!array_key_exists($params['quota_key'], $this->config->item('real_time_quota'))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '指标 ' . html_escape($params['quota_key']) . ' 不存在！';
-            return;
+            throw new \Exception('指标 ' . html_escape($params['quota_key']) . ' 不存在！', ERR_PARAMETERS);
         }
 
         $data = [
-            'city_id'     => intval($params['city_id']),
+            'city_id' => intval($params['city_id']),
             'junction_id' => strip_tags(trim($params['junction_id'])),
-            'quota_key'   => strip_tags(trim($params['quota_key'])),
-            'flow_id'     => strip_tags(trim($params['flow_id'])),
+            'quota_key' => strip_tags(trim($params['quota_key'])),
+            'flow_id' => strip_tags(trim($params['flow_id'])),
         ];
 
         /**
@@ -305,7 +257,7 @@ class Evaluate extends MY_Controller
         // 用于返回
         $data['base_time_start_end'] = [
             'start' => date('Y-m-d H:i:s', $baseStartTime),
-            'end'   => date('Y-m-d H:i:s', $baseEndTime),
+            'end' => date('Y-m-d H:i:s', $baseEndTime),
         ];
 
         // 计算基准时间段具体每天日期
@@ -321,7 +273,7 @@ class Evaluate extends MY_Controller
             $week = date('w');
             if ($week == 0) { // 周日
                 $endTime = strtotime(date('Y-m-d') . '-2 days') + 24 * 3600 - 1;
-            } else if ($week == 1) { // 周一
+            } elseif ($week == 1) { // 周一
                 $endTime = time();
             } else {
                 $endTime = strtotime(date('Y-m-d') . '-1 days') + 24 * 3600 - 1;
@@ -329,13 +281,13 @@ class Evaluate extends MY_Controller
 
             $params['evaluate_time'][] = [
                 'start_time' => $startTime,
-                'end_time'   => $endTime,
+                'end_time' => $endTime,
             ];
         } else {
-            foreach ($params['evaluate_time'] as $k=>$v) {
+            foreach ($params['evaluate_time'] as $k => $v) {
                 $params['evaluate_time'][$k] = [
                     'start_time' => isset($v['start_time']) ? strtotime($v['start_time']) : 0,
-                    'end_time' => isset($v['end_time'])  ? strtotime($v['end_time']) : 0,
+                    'end_time' => isset($v['end_time']) ? strtotime($v['end_time']) : 0,
                 ];
             }
         }
@@ -344,243 +296,53 @@ class Evaluate extends MY_Controller
         $data['evaluate_time_start_end'] = [];
 
         // 处理评估时间，计算各评估时间具体日期
-        foreach ($params['evaluate_time'] as $k=>$v) {
+        foreach ($params['evaluate_time'] as $k => $v) {
             for ($i = $v['start_time']; $i <= $v['end_time']; $i += 24 * 3600) {
                 $data['evaluate_time'][$k][$i] = $i;
             }
             $data['evaluate_time_start_end'][$k] = [
                 'start' => date('Y-m-d H:i:s', $v['start_time']),
-                'end'   => date('Y-m-d H:i:s', $v['end_time']),
+                'end' => date('Y-m-d H:i:s', $v['end_time']),
             ];
         }
 
-        $result = $this->evaluate_model->quotaEvaluateCompare($data);
+        $result = $this->evaluateService->quotaEvaluateCompare($data);
 
-        return $this->response($result);
+        $this->response($result);
     }
 
     /**
-     * 下载评估对比数据
-     * @param
-     * @return json
+     * 获取评估对比数据下载地址
+     *
+     * @throws Exception
      */
     public function downloadEvaluateData()
     {
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
 
-        if(!isset($params['download_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = "download_id 的值不能为空";
-            return;
+        if (!isset($params['download_id'])) {
+            throw new Exception('download_id 的值不能为空', ERR_PARAMETERS);
         }
 
-        $key = $this->config->item('quota_evaluate_key_prefix') . $params['download_id'];
-
-        if(!$this->redis_model->getData($key)) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = "请先评估再下载";
-            return;
-        }
-
-        $data = [
-            'download_url' => '/api/evaluate/download?download_id='. $params['download_id']
-        ];
+        $data = $this->evaluateService->downloadEvaluateData($params);
 
         $this->response($data);
     }
 
+    /**
+     * 评估数据下载地址
+     *
+     * @throws Exception
+     * @throws PHPExcel_Exception
+     */
     public function download()
     {
         $params = $this->input->get();
 
-        if(!isset($params['download_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = "download_id 的值不能为空";
-            return;
+        if (!isset($params['download_id'])) {
+            throw new Exception('download_id 的值不能为空', ERR_PARAMETERS);
         }
 
-        $key = $this->config->item('quota_evaluate_key_prefix') . $params['download_id'];
-
-        if(!($data = $this->redis_model->getData($key))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = "请先评估再下载";
-            return;
-        }
-
-        $data = json_decode($data, true);
-
-        $fileName = "{$data['info']['junction_name']}_{$data['info']['quota_name']}_" . date('Ymd');
-
-        $objPHPExcel = new PHPExcel();
-        $objSheet = $objPHPExcel->getActiveSheet();
-        $objSheet->setTitle('数据');
-
-        $detailParams = [
-            ['指标名', $data['info']['quota_name']],
-            ['方向', $data['info']['direction']],
-            ['基准时间', implode(' ~ ', $data['info']['base_time'])],
-        ];
-        foreach ($data['info']['evaluate_time'] as $key => $item) {
-            $detailParams[] = ['评估时间'.($key+1), implode(' ~ ', $item)];
-        }
-
-        $detailParams[] = ['指标单位', $data['info']['quota_unit']];
-
-        $objSheet->mergeCells('A1:F1');
-        $objSheet->setCellValue('A1', $fileName);
-        $objSheet->fromArray($detailParams, NULL, 'A4');
-
-        $styles = $this->getExcelStyle();
-        $objSheet->getStyle('A1')->applyFromArray($styles['title']);
-        $rows_idx = count($detailParams) + 3;
-        $objSheet->getStyle("A4:A{$rows_idx}")->getFont()->setSize(12)->setBold(true);
-
-        $line = 6 + count($detailParams);
-
-        if(!empty($data['base'])) {
-
-            $table = $this->getExcelArray($data['base']);
-
-            $objSheet->fromArray($table, NULL, 'A' . $line);
-
-            $styles = $this->getExcelStyle();
-            $rows_cnt = count($table);
-            $cols_cnt = count($table[0]) - 1;
-            $rows_index = $rows_cnt + $line - 1;
-
-            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $rows_index)->applyFromArray($styles['content']);
-            $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($styles['header']);
-            $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $line)->applyFromArray($styles['header']);
-
-            $line += ($rows_cnt + 2);
-        }
-
-        if(!empty($data['evaluate'])) {
-
-            foreach ($data['evaluate'] as $datum) {
-                $table = $this->getExcelArray($datum);
-
-                $objSheet->fromArray($table, NULL, 'A' . $line);
-
-                $styles = $this->getExcelStyle();
-                $rows_cnt = count($table);
-                $cols_cnt = count($table[0]) - 1;
-                $rows_index = $rows_cnt + $line - 1;
-                $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $rows_index)->applyFromArray($styles['content']);
-                $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($styles['header']);
-                $objSheet->getStyle("A{$line}:".$this->intToChr($cols_cnt) . $line)->applyFromArray($styles['header']);
-
-                $line += ($rows_cnt + 2);
-            }
-        }
-
-        $objWriter = new PHPExcel_Writer_Excel5($objPHPExcel);
-
-        header('Content-Type: application/x-xls;');
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename='.$fileName . '.xls');
-        header('Cache-Control: max-age=0');
-        header('Cache-Control: max-age=1');
-        header('Expires: 0'); // Date in the past
-        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-        header('Pragma: public'); // HTTP/1.0
-        ob_end_clean();
-        $objWriter->save('php://output');
-        exit();
-    }
-
-    private function getExcelStyle() {
-        $title_style = array(
-            'font' => array(
-                'bold' => true,
-                'size '=> 16,
-                'color'=>array(
-                    'argb' => '00000000',
-                ),
-            ),
-            'fill' => array(
-                'type' => PHPExcel_Style_Fill::FILL_SOLID,
-                'color' => array(
-                    'argb' => '00FFFF00',
-                ),
-            ),
-        );
-
-        $headers_style = array(
-            'font' => array(
-                'bold' => true,
-                'size '=> 12,
-                'color'=>array(
-                    'argb' => '00000000',
-                ),
-            ),
-            'fill' => array(
-                'type' => PHPExcel_Style_Fill::FILL_SOLID,
-                'color' => array(
-                    'argb' => '00DCDCDC',
-                ),
-            ),
-            'alignment' => array(
-                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
-            ),
-        );
-
-        $content_style = array(
-            'borders' => array (
-                'allborders' => array (
-                    'style' => PHPExcel_Style_Border::BORDER_THIN,  //设置border样式
-                    //'style' => PHPExcel_Style_Border::BORDER_THICK, //另一种样式
-                    'color' => array ('argb' => '00000000'),     //设置border颜色
-                ),
-            ),
-            'alignment' => array(
-                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
-            ),
-        );
-
-        return array(
-            'title'  => $title_style,
-            'header' => $headers_style,
-            'content'=> $content_style,
-        );
-
-    }
-
-    private function getExcelArray($data)
-    {
-        $timeArray = ["00:00", "00:30","01:00","01:30", "02:00", "02:30", "03:00", "03:30",
-            "04:00", "04:30", "05:00", "05:30", "06:00", "06:30", "07:00", "07:30",
-            "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-            "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
-            "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30",
-            "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30"];
-
-        $table = [];
-
-        $table[] = $timeArray;
-        array_unshift($table[0], "日期-时间");
-
-        $data = array_map(function ($value) {
-            return array_column($value, 0, 1);
-        }, $data);
-
-        foreach ($data as $key => $value) {
-            $column = [];
-            $column[] = $key;
-            foreach ($timeArray as $item) {
-                $column[] = $value[$item] ?? '-';
-            }
-            $table[] = $column;
-        }
-        //echo json_encode($table);die();
-        return $table;
-    }
-
-    private function intToChr($index, $start = 65) {
-        $str = '';
-        if (floor($index / 26) > 0) {
-            $str .= $this->intToChr(floor($index / 26) - 1);
-        }
-        return $str . chr($index % 26 + $start);
+        $this->evaluateService->download($params);
     }
 }

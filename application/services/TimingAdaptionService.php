@@ -60,12 +60,15 @@ class TimingAdaptionService extends BaseService
             ];
         };
 
-        // 移除 flow id 为空的元素
-        $removeEmptyFlowId = function ($movement_timing) {
-            return array_values(array_filter($movement_timing, function ($item) {
-                    return $item['flow']['logic_flow_id'] != '';
-                })
-            );
+        /**
+         * @param Collection $movementTimingCollection
+         *
+         * @return array
+         */
+        $removeEmptyFlowId = function ($movementTimingCollection) {
+            return $movementTimingCollection->filter(function ($item) {
+                return $item['flow']['logic_flow_id'] != '';
+            })->values();
         };
 
         $mergeSameFlowIdTiming = function ($data) {
@@ -283,6 +286,10 @@ class TimingAdaptionService extends BaseService
         $data = [
             'update_time' => time(),
             'changed' => $offset == null ? 0 : ($offset == $params['offset']),
+        ];
+
+        $data = [
+            'current_info' => json_encode($data),
         ];
 
         $result = $this->adapt_model->updateAdapt($logicJunctionId, $data);

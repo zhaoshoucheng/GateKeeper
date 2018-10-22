@@ -258,7 +258,7 @@ class Waymap_model extends CI_Model
             $offset = 0;
             $count  = 10000;
 
-            $data = compact('offset', 'count', 'version');
+            $data = compact('offset', 'count', 'version', 'city_id');
 
             $url = $this->config->item('waymap_interface') . '/signal-map/map/getList';
 
@@ -266,11 +266,11 @@ class Waymap_model extends CI_Model
 
             $redis_model->deleteData($redis_key);
 
-            $redis_model->setData($redis_key, json_encode($res['data']));
+            $redis_model->setData($redis_key, json_encode($res));
 
             $redis_model->setExpire($redis_key, 3600 * 24);
 
-            $result = $res['data'];
+            $result = $res;
         }
 
         return $result;
