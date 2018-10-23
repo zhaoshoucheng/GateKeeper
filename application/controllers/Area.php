@@ -35,12 +35,9 @@ class Area extends MY_Controller
 
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
-            'area_name' => 'required|min_length[1]',
-            'junction_ids' => 'required|is_array',
+            'area_name' => 'required|trim|min_length[1]',
+            'junction_ids[]' => 'required',
         ]);
-
-        // 数据格式化
-        $params['city_id'] = intval($params['city_id']);
 
         $data = $this->areaService->addArea($params);
 
@@ -58,12 +55,9 @@ class Area extends MY_Controller
 
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
-            'area_name' => 'required|min_length[1]',
-            'junction_ids' => 'required|is_array',
+            'area_name' => 'required|trim|min_length[1]',
+            'junction_ids[]' => 'required',
         ]);
-
-        // 数据格式化
-        $params['city_id'] = intval($params['city_id']);
 
         $data = $this->areaService->updateArea($params);
 
@@ -83,9 +77,6 @@ class Area extends MY_Controller
             'area_id' => 'required|is_natural_no_zero',
         ]);
 
-        // 数据格式化
-        $params['area_id'] = intval($params['area_id']);
-
         $data = $this->areaService->deleteArea($params);
 
         $this->response($data);
@@ -103,9 +94,6 @@ class Area extends MY_Controller
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
         ]);
-
-        // 数据格式化
-        $params['city_id'] = intval($params['city_id']);
 
         $data = $this->areaService->getList($params);
 
@@ -125,9 +113,6 @@ class Area extends MY_Controller
             'area_id' => 'required|is_natural_no_zero',
         ]);
 
-        // 数据格式化
-        $params['area_id'] = intval($params['area_id']);
-
         $data = $this->areaService->getAreaDetail($params);
 
         $this->response($data);
@@ -145,9 +130,6 @@ class Area extends MY_Controller
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
         ]);
-
-        // 数据格式化
-        $params['city_id'] = intval($params['city_id']);
 
         $data = $this->areaService->getCityAreaDetail($params);
 

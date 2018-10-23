@@ -30,15 +30,11 @@ class Feedback extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        $validate = Validate::make($params, [
-            'city_id' => 'min:1',
-            'type' => 'min:0',
-            'question' => 'min:1',
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'type' => 'required|in_list[1,2,3,4,5,6,7]',
+            'question' => 'required|trim|min_length[1]'
         ]);
-
-        if(!$validate['status']) {
-            throw new Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         $data = $this->feedbackService->insertFeedback($params);
 
