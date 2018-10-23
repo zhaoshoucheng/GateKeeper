@@ -33,15 +33,11 @@ class Area extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        $validate = Validate::make($params, [
-            'area_name' => 'min:1',
-            'city_id' => 'min:1',
-            'junction_ids' => 'min:1',
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_name' => 'required|min_length[1]',
+            'junction_ids' => 'required|is_array',
         ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         // 数据格式化
         $params['city_id'] = intval($params['city_id']);
@@ -60,15 +56,11 @@ class Area extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        $validate = Validate::make($params, [
-            'area_name' => 'min:1',
-            'city_id' => 'min:1',
-            'junction_ids' => 'min:1',
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_name' => 'required|min_length[1]',
+            'junction_ids' => 'required|is_array',
         ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         // 数据格式化
         $params['city_id'] = intval($params['city_id']);
@@ -87,16 +79,12 @@ class Area extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        $validate = Validate::make($params, [
-            'area_id' => 'min:1',
+        $this->validate([
+            'area_id' => 'required|is_natural_no_zero',
         ]);
 
         // 数据格式化
         $params['area_id'] = intval($params['area_id']);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         $data = $this->areaService->deleteArea($params);
 
@@ -112,13 +100,9 @@ class Area extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        $validate = Validate::make($params, [
-            'city_id' => 'min:1',
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
         ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         // 数据格式化
         $params['city_id'] = intval($params['city_id']);
@@ -137,13 +121,9 @@ class Area extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        $validate = Validate::make($params, [
-            'area_id' => 'min:1',
+        $this->validate([
+            'area_id' => 'required|is_natural_no_zero',
         ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         // 数据格式化
         $params['area_id'] = intval($params['area_id']);
@@ -162,13 +142,9 @@ class Area extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        $validate = Validate::make($params, [
-            'city_id' => 'min:1',
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
         ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         // 数据格式化
         $params['city_id'] = intval($params['city_id']);
@@ -197,22 +173,15 @@ class Area extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        $validate = Validate::make($params, [
-            'city_id' => 'min:1',
-            'area_id' => 'min:1',
-            'quota_key' => 'min:1',
-            'base_start_date' => 'date:Y-m-d',
-            'base_end_date' => 'date:Y-m-d',
-            'evaluate_start_date' => 'date:Y-m-d',
-            'evaluate_end_date' => 'date:Y-m-d',
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|is_natural_no_zero',
+            'quota_key' => 'required|min_length[1]',
+            'base_start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'base_end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'evaluate_start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'evaluate_end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
         ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
-
-        $params['city_id'] = intval($params['city_id']);
-        $params['area_id'] = intval($params['area_id']);
 
         $data = $this->areaService->comparison($params);
 
@@ -228,13 +197,9 @@ class Area extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        $validate = Validate::make($params, [
-            'download_id' => 'min:1',
+        $this->validate([
+            'download_id' => 'required|min_length[1]'
         ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         $data = $this->areaService->downloadEvaluataData($params);
 
@@ -252,13 +217,9 @@ class Area extends MY_Controller
     {
         $params = $this->input->get();
 
-        $validate = Validate::make($params, [
-            'download_id' => 'min:1',
+        $this->validate([
+            'download_id' => 'required|min_length[1]'
         ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         $this->areaService->download($params);
     }

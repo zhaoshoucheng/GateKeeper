@@ -56,13 +56,13 @@ class Realtime_model extends CI_Model
      */
     public function getFlowsInFlowIds($cityId, $hour, $logicJunctionId, $logicFlowId, $select = '*')
     {
-        return $this->db->select($select)
+        echo  $this->db->select($select)
             ->from($this->tb . $cityId)
             ->where('hour', $hour)
             ->where('logic_junction_id', $logicJunctionId)
             ->where('updated_at > ', date('Y-m-d', strtotime('-10  minutes')))
             ->where_in('logic_flow_id', $logicFlowId)
-            ->get()->result_array();
+            ->get_compiled_select();die();
     }
 
     public function getQuotasByHour($cityId, $hour, $quotaKey, $select = '*')
