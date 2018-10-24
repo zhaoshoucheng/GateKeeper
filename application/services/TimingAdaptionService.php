@@ -335,8 +335,8 @@ class TimingAdaptionService extends BaseService
         // 获取基准配时数据
         $currentResult = $this->getCurrentUpdateResult($logicJunctionId);
 
-        if ($currentResult['timestamp'] <= $currentResult['update_time']) {
-            if (time() - $currentResult['update_time'] >= 10 * 60) {
+        if ($currentResult['timestamp'] <= $currentInfo['update_time']) {
+            if (time() - $currentInfo['update_time'] >= 10 * 60) {
                 return ['status' => 1, 'msg' => '基准配时下发中'];
             } else {
                 return ['status' => 4, 'msg' => '基准配时下发超时'];
