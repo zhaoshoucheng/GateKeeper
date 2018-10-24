@@ -187,7 +187,7 @@ if (!function_exists('dateRange')) {
      */
     function dateRange($start, $end, $skip = 1, $format = 'Y-m-d')
     {
-        if ($start <= $end) {
+        if ($start > $end) {
             throw new Exception('起始时间必须小于等于结束时间');
         }
 

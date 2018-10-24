@@ -69,6 +69,10 @@ class RoadService extends BaseService
             'user_id' => 0,
         ];
 
+        if (!$this->road_model->roadNameIsUnique($roadName, $cityId)) {
+            throw new \Exception('干线名称 ' . $roadName . ' 已经存在', ERR_DATABASE);
+        }
+
         $res = $this->road_model->insertRoad($data);
 
         if (!$res) {
@@ -88,6 +92,7 @@ class RoadService extends BaseService
      */
     public function updateRoad($params)
     {
+        $cityId        = $params['city_id'];
         $roadId        = $params['road_id'];
         $junctionIds   = $params['junction_ids'];
         $roadName      = $params['road_name'];
@@ -98,6 +103,10 @@ class RoadService extends BaseService
             'logic_junction_ids' => implode(',', $junctionIds),
             'road_direction' => intval($roadDirection),
         ];
+
+        if (!$this->road_model->roadNameIsUnique($roadName, $cityId, $roadId)) {
+            throw new \Exception('干线名称 ' . $roadName . ' 已经存在', ERR_DATABASE);
+        }
 
         $res = $this->road_model->updateRoad($roadId, $data);
 

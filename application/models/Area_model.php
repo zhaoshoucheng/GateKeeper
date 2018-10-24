@@ -254,4 +254,19 @@ class Area_model extends CI_Model
             ->where('delete_at', '1970-01-01 00:00:00')
             ->get()->result_array();
     }
+
+    public function areaNameIsUnique($areaName, $cityId, $areaId = null)
+    {
+        $this->db->limit(1)
+            ->from($this->tb)
+            ->where('area_name', $areaName)
+            ->where('city_id', $cityId)
+            ->where('delete_at != ', '1970-01-01 00:00:00');
+
+        if(!is_null($areaId)) {
+            $this->db->where('area_id != ', $areaId);
+        }
+
+        return $this->db->get()->num_rows() === 0;
+    }
 }

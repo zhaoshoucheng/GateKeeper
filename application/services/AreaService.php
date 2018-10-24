@@ -65,13 +65,17 @@ class AreaService extends BaseService
     public function addArea($params)
     {
         $cityId = $params['city_id'];
-        $areaNmae = $params['area_name'];
+        $areaName = $params['area_name'];
         $junctionIds = $params['junction_ids'];
 
         $data = [
-            'area_name' => $areaNmae,
+            'area_name' => $areaName,
             'city_id' => $cityId
         ];
+
+        if(!$this->area_model->areaNameIsUnique($areaName, $cityId)) {
+            throw new \Exception('区域名称 ' . $areaName . ' 已经存在', ERR_DATABASE);
+        }
 
         // 创建区域
         $areaId = $this->area_model->insertArea($data);
@@ -96,6 +100,7 @@ class AreaService extends BaseService
      */
     public function updateArea($params)
     {
+        $cityId = $params['city_id'];
         $areaId = $params['area_id'];
         $areaName = $params['area_name'];
         $junctionIds = $params['junction_ids'];
@@ -112,6 +117,10 @@ class AreaService extends BaseService
         $data = [
             'area_name' => $areaName
         ];
+
+        if(!$this->area_model->areaNameIsUnique($areaName, $cityId, $areaId)) {
+            throw new \Exception('区域名称 ' . $areaName . ' 已经存在', ERR_DATABASE);
+        }
 
         // 更新区域信息
         $res = $this->area_model->updateArea($areaId, $data);
