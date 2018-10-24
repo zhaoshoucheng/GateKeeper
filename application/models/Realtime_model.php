@@ -86,4 +86,14 @@ class Realtime_model extends CI_Model
             ->where('updated_at >', $upTime)
             ->get()->result_array();
     }
+
+    public function getAvgQuotaByCityId($cityId, $date, $select = '*')
+    {
+        return $this->db->select($select)
+            ->from($this->tb . $cityId)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->group_by('hour')
+            ->get()->result_array();
+    }
 }

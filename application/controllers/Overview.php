@@ -1,95 +1,89 @@
 <?php
 /***************************************************************
-# 概览类
-#    概览页---路口概况
-#    概览页---路口列表
-#    概览页---运行概况
-#    概览页---拥堵概览
-#    概览页---获取token
-# user:ningxiangbing@didichuxing.com
-# date:2018-07-25
-***************************************************************/
+ * # 概览类
+ * #    概览页---路口概况
+ * #    概览页---路口列表
+ * #    概览页---运行概况
+ * #    概览页---拥堵概览
+ * #    概览页---获取token
+ * # user:ningxiangbing@didichuxing.com
+ * # date:2018-07-25
+ ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\OverviewService;
+
 class Overview extends MY_Controller
 {
+    protected $overviewService;
+
     public function __construct()
     {
         parent::__construct();
-        //不要在此处设置load->model,因为会加载资源
+
+        $this->overviewService = new OverviewService();
     }
 
     /**
-    * 获取路口列表
-    * @param city_id    interger Y 城市ID
-    * @param date       string   Y 日期 yyyy-mm-dd
-    * @param time_point stirng   Y 时间点 H:i:s
-    * @return json
-    */
+     * 获取路口列表
+     *
+     * @throws Exception
+     */
     public function junctionsList()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数city_id传递错误！';
-            return;
-        }
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ]);
 
-        $data['city_id'] = $params['city_id'];
+        $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data['date'] = $params['date'] ?? date('Y-m-d');
-
-        $data = $this->overview_model->junctionsList($data);
+        $data = $this->overviewService->junctionsList($params);
 
         $this->response($data);
     }
 
     /**
-    * 运行情况
-    * @param
-    * @return json
-    */
+     * 运行情况
+     *
+     * @throws Exception
+     */
     public function operationCondition()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
+        $params = $this->input->post(null, true);
 
-        $params = $this->input->post(NULL, TRUE);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ]);
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数city_id传递错误！';
-            return;
-        }
+        $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data['city_id'] = $params['city_id'];
-
-        $data['date'] = $params['date'] ?? date('Y-m-d');
-
-        $data = $this->overview_model->operationCondition($data);
+        $data = $this->overviewService->operationCondition($params);
 
         $this->response($data);
 
     }
 
     /**
-    * 路口概况
-    * @param
-    * @return json
-    */
+     * 路口概况
+     *
+     * @param
+     *
+     * @return json
+     */
     public function junctionSurvey()
     {
         $this->load->model('overview_model');
         $this->load->model('redis_model');
 
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
+        if (!isset($params['city_id']) || !is_numeric($params['city_id'])) {
+            $this->errno  = ERR_PARAMETERS;
             $this->errmsg = '参数city_id传递错误！';
             return;
         }
@@ -105,31 +99,33 @@ class Overview extends MY_Controller
     }
 
     /**
-    * 拥堵概览
-    * @param city_id    interger Y 城市ID
-    * @param date       string   N 日期 yyyy-mm-dd
-    * @param time_point stirng   N 时间点 H:i:s
-    * @return json
-    */
+     * 拥堵概览
+     *
+     * @param city_id    interger Y 城市ID
+     * @param date       string   N 日期 yyyy-mm-dd
+     * @param time_point stirng   N 时间点 H:i:s
+     *
+     * @return json
+     */
     public function getCongestionInfo()
     {
         $this->load->model('overview_model');
         $this->load->model('redis_model');
 
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
         // 校验参数
         $validate = Validate::make($params, [
-                'city_id'    => 'min:1',
+                'city_id' => 'min:1',
             ]
         );
         if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
+            $this->errno  = ERR_PARAMETERS;
             $this->errmsg = $validate['errmsg'];
             return;
         }
         $data = [
-            'city_id'    => intval($params['city_id']),
-            'date'       => date('Y-m-d'),
+            'city_id' => intval($params['city_id']),
+            'date' => date('Y-m-d'),
             'time_point' => date('H:i:s'),
         ];
 
@@ -147,10 +143,12 @@ class Overview extends MY_Controller
     }
 
     /**
-    * 获取token
-    * @param
-    * @return json
-    */
+     * 获取token
+     *
+     * @param
+     *
+     * @return json
+     */
     public function getToken()
     {
         $this->load->model('overview_model');
@@ -174,10 +172,10 @@ class Overview extends MY_Controller
         $this->load->model('overview_model');
         $this->load->model('redis_model');
 
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
 
-        if(!isset($params['tokenval'])) {
-            $this->errno = ERR_PARAMETERS;
+        if (!isset($params['tokenval'])) {
+            $this->errno  = ERR_PARAMETERS;
             $this->errmsg = '参数tokenval不能为空！';
             return;
         }
@@ -186,7 +184,7 @@ class Overview extends MY_Controller
 
         $data = [];
 
-        if(!$this->redis_model->getData($tokenval)) {
+        if (!$this->redis_model->getData($tokenval)) {
             $data['verify'] = false;
         } else {
             $data['verify'] = true;
@@ -203,7 +201,7 @@ class Overview extends MY_Controller
     public function getNowDate()
     {
         $weekArray = [
-            '日', '一', '二', '三', '四', '五' ,'六'
+            '日', '一', '二', '三', '四', '五', '六',
         ];
 
         $time = time();
@@ -211,7 +209,7 @@ class Overview extends MY_Controller
         $data = [
             'date' => date('Y-m-d', $time),
             'time' => date('H:i:s', $time),
-            'week' => '星期' . $weekArray[date('w', $time)]
+            'week' => '星期' . $weekArray[date('w', $time)],
         ];
 
         $this->response($data);
