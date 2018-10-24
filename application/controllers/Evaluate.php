@@ -29,13 +29,10 @@ class Evaluate extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        $validate = Validate::make($params, [
-            'city_id' => 'min:1',
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]'
         ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
 
@@ -51,16 +48,6 @@ class Evaluate extends MY_Controller
      */
     public function getQuotaList()
     {
-        $params = $this->input->post(null, true);
-
-        $validate = Validate::make($params, [
-            'city_id' => 'min:1',
-        ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
-
         $data = $this->evaluateService->getQuotaList();
 
         $this->response($data);
@@ -75,14 +62,10 @@ class Evaluate extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        $validate = Validate::make($params, [
-            'city_id' => 'min:1',
-            'junction_id' => 'min:1',
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'junction_id' => 'required|min_length[1]',
         ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         $data = $this->evaluateService->getDirectionList($params);
 
@@ -97,38 +80,20 @@ class Evaluate extends MY_Controller
     public function getJunctionQuotaSortList()
     {
         $params = $this->input->post(null, true);
-        // 校验参数
-        $validate = Validate::make($params, [
-            'city_id' => 'min:1',
-            'quota_key' => 'nullunable',
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'quota_key' => 'required|in_list[' . implode(',', array_keys($this->config->item('real_time_quota'))) . ']',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'time_point' => 'exact_length[8]|regex_match[/\d{2}:\d{2}:\d{2}/]'
         ]);
 
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
+        $params['date'] = $params['date'] ?? date('Y-m-d');
+        $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        if (!array_key_exists($params['quota_key'], $this->config->item('real_time_quota'))) {
-            throw new \Exception('指标 ' . html_escape($params['quota_key']) . ' 不存在！', ERR_PARAMETERS);
-        }
+        $data = $this->evaluateService->getJunctionQuotaSortList($params);
 
-        $data = [
-            'city_id' => intval($params['city_id']),
-            'quota_key' => strip_tags(trim($params['quota_key'])),
-            'date' => date('Y-m-d'),
-            'time_point' => date('H:i:s'),
-        ];
-
-        if (!empty($params['date'])) {
-            $data['date'] = date('Y-m-d', strtotime(strip_tags(trim($params['date']))));
-        }
-
-        if (!empty($params['time_point'])) {
-            $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
-        }
-
-        $result = $this->evaluateService->getJunctionQuotaSortList($data);
-
-        $this->response($result);
+        $this->response($data);
     }
 
     /**
@@ -139,42 +104,22 @@ class Evaluate extends MY_Controller
     public function getQuotaTrend()
     {
         $params = $this->input->post(null, true);
-        // 校验参数
-        $validate = Validate::make($params, [
-            'city_id' => 'min:1',
-            'junction_id' => 'nullunable',
-            'quota_key' => 'nullunable',
-            'flow_id' => 'nullunable',
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'quota_key' => 'required|in_list[' . implode(',', array_keys($this->config->item('real_time_quota'))) . ']',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'time_point' => 'exact_length[8]|regex_match[/\d{2}:\d{2}:\d{2}/]',
+            'junction_id' => 'required|min_length[1]',
+            'flow_id' => 'required|min_length[1]'
         ]);
 
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
+        $params['date'] = $params['date'] ?? date('Y-m-d');
+        $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        if (!array_key_exists($params['quota_key'], $this->config->item('real_time_quota'))) {
-            throw new \Exception('指标 ' . html_escape($params['quota_key']) . ' 不存在！', ERR_PARAMETERS);
-        }
+        $data = $this->evaluateService->getQuotaTrend($params);
 
-        $data = [
-            'city_id' => intval($params['city_id']),
-            'junction_id' => strip_tags(trim($params['junction_id'])),
-            'quota_key' => strip_tags(trim($params['quota_key'])),
-            'flow_id' => strip_tags(trim($params['flow_id'])),
-            'date' => date('Y-m-d'),
-            'time_point' => date('H:i:s'),
-        ];
-
-        if (!empty($params['date'])) {
-            $data['date'] = date('Y-m-d', strtotime(strip_tags(trim($params['date']))));
-        }
-
-        if (!empty($params['time_point'])) {
-            $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
-        }
-
-        $result = $this->evaluateService->getQuotaTrend($data);
-
-        $this->response($result);
+        $this->response($data);
     }
 
     /**
@@ -185,24 +130,15 @@ class Evaluate extends MY_Controller
     public function getJunctionMapData()
     {
         $params = $this->input->post(null, true);
-        // 校验参数
-        $validate = Validate::make($params, [
-            'city_id' => 'min:1',
-            'junction_id' => 'nullunable',
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'junction_id' => 'required|min_length[1]',
         ]);
 
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
+        $data = $this->evaluateService->getJunctionMapData($params);
 
-        $data = [
-            'city_id' => intval($params['city_id']),
-            'junction_id' => strip_tags(trim($params['junction_id'])),
-        ];
-
-        $result = $this->evaluateService->getJunctionMapData($data);
-
-        $this->response($result);
+        $this->response($data);
     }
 
     /**
@@ -212,48 +148,24 @@ class Evaluate extends MY_Controller
      */
     public function quotaEvaluateCompare()
     {
-        $params = $this->input->post(null, true);
+        $data = $this->input->post(null, true);
 
-        // 校验参数
-        $validate = Validate::make($params, [
-            'city_id' => 'min:1',
-            'junction_id' => 'nullunable',
-            'quota_key' => 'nullunable',
-            'flow_id' => 'nullunable',
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'quota_key' => 'required|in_list[' . implode(',', array_keys($this->config->item('real_time_quota'))) . ']',
+            'junction_id' => 'required|min_length[1]',
+            'flow_id' => 'required|min_length[1]',
+            'base_start_time' => 'is_natural',
+            'base_end_time' => 'is_natural',
         ]);
-
-        if (!$validate['status']) {
-            throw new \Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
-
-        if (!array_key_exists($params['quota_key'], $this->config->item('real_time_quota'))) {
-            throw new \Exception('指标 ' . html_escape($params['quota_key']) . ' 不存在！', ERR_PARAMETERS);
-        }
-
-        $data = [
-            'city_id' => intval($params['city_id']),
-            'junction_id' => strip_tags(trim($params['junction_id'])),
-            'quota_key' => strip_tags(trim($params['quota_key'])),
-            'flow_id' => strip_tags(trim($params['flow_id'])),
-        ];
 
         /**
          * 如果基准时间没有传，则默认：上周工作日
          * 如果评估时间没有传，则默认：本周工作日
          */
-        if (empty($params['base_start_time'])) {
-            // 上周一作为开始时间 Y-m-d H:i:s
-            $baseStartTime = strtotime('monday last week');
-        } else {
-            $baseStartTime = strtotime($params['base_start_time']);
-        }
 
-        if (empty($params['base_end_time'])) {
-            // 上周五作为结束时间 本周减去2天减1秒
-            $baseEndTime = strtotime('monday this week') - 2 * 24 * 3600 - 1;
-        } else {
-            $baseEndTime = strtotime($params['base_end_time']);
-        }
+        $baseStartTime = $params['base_start_time'] ?? strtotime('monday last week');
+        $baseEndTime = $params['base_end_time'] ?? (strtotime('monday this week') - 2 * 24 * 3600 - 1);
 
         // 用于返回
         $data['base_time_start_end'] = [
@@ -321,9 +233,9 @@ class Evaluate extends MY_Controller
     {
         $params = $this->input->post(null, true);
 
-        if (!isset($params['download_id'])) {
-            throw new Exception('download_id 的值不能为空', ERR_PARAMETERS);
-        }
+        $this->validate([
+            'download_id' => 'required|min_length[1]'
+        ]);
 
         $data = $this->evaluateService->downloadEvaluateData($params);
 
@@ -340,9 +252,9 @@ class Evaluate extends MY_Controller
     {
         $params = $this->input->get();
 
-        if (!isset($params['download_id'])) {
-            throw new Exception('download_id 的值不能为空', ERR_PARAMETERS);
-        }
+        $this->validate([
+            'download_id' => 'required|min_length[1]'
+        ]);
 
         $this->evaluateService->download($params);
     }

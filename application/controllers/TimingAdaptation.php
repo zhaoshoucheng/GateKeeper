@@ -22,14 +22,10 @@ class TimingAdaptation extends MY_Controller
     {
         $params = $this->input->post();
 
-        $validate = Validate::make($params, [
-            'logic_junction_id' => 'min:1',
-            'city_id' => 'min:1'
+        $this->validate([
+            'logic_junction_id' => 'required|min_length[1]',
+            'city_id' => 'required|is_natural_no_zero'
         ]);
-
-        if(!$validate['status']) {
-            throw new Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         $data = $this->timingAdaptService->getAdaptTimingInfo($params);
 
@@ -45,13 +41,9 @@ class TimingAdaptation extends MY_Controller
     {
         $params = $this->input->post();
 
-        $validate = Validate::make($params, [
-            'logic_junction_id' => 'min:1',
+        $this->validate([
+            'logic_junction_id' => 'required|min_length[1]',
         ]);
-
-        if(!$validate['status']) {
-            throw new Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         $data = $this->timingAdaptService->getCurrentTimingInfo($params);
 
@@ -67,13 +59,9 @@ class TimingAdaptation extends MY_Controller
     {
         $params = $this->input->post();
 
-        $validate = Validate::make($params, [
-            'logic_junction_id' => 'min:1',
+        $this->validate([
+            'logic_junction_id' => 'required|min_length[1]',
         ]);
-
-        if(!$validate['status']) {
-            throw new Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         $data = $this->timingAdaptService->updateCurrentTiming($params);
 
@@ -89,13 +77,9 @@ class TimingAdaptation extends MY_Controller
     {
         $params = $this->input->post();
 
-        $validate = Validate::make($params, [
-            'logic_junction_id' => 'min:1',
+        $this->validate([
+            'logic_junction_id' => 'required|min_length[1]',
         ]);
-
-        if(!$validate['status']) {
-            throw new Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         $data = $this->timingAdaptService->getCurrentStatus($params);
 
@@ -111,14 +95,10 @@ class TimingAdaptation extends MY_Controller
     {
         $params = $this->input->post();
 
-        $validate = Validate::make($params, [
-            'logic_junction_id' => 'nullunable',
-            'is_open' => 'nullunable'
+        $this->validate([
+            'logic_junction_id' => 'required|min_length[1]',
+            'is_open' => 'required|in_list[0,1]'
         ]);
-
-        if(!$validate['status']) {
-            throw new Exception($validate['errmsg'], ERR_PARAMETERS);
-        }
 
         $data = $this->timingAdaptService->getAdapteStatus($params);
 
