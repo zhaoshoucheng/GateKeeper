@@ -22,8 +22,8 @@ class Common_model extends CI_Model
     /**
      * 获取路口所属行政区域及交叉节点信息
      * @param $data['city_id']           interger Y 城市ID
-     * @param $data['logic_junction_id'] string   Y 路口ID
-     * @param $data['map_version']       string   Y 地图版本
+     *        $data['logic_junction_id'] string   Y 路口ID
+     *        $data['map_version']       string   Y 地图版本
      * @return array
      */
     public function getJunctionAdAndCross($data)

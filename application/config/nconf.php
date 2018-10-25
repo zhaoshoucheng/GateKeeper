@@ -43,8 +43,8 @@ if ($development == 2) {
 
     // signal-mis
     $signal_mis_server = '100.69.238.11';
-    $signal_mis_port = '8000';
-    $signal_mis_ext = '/its/signal-mis';
+    $signal_mis_port   = '8000';
+    $signal_mis_ext    = '/its/signal-mis';
 
     // es
     $es_server = '100.69.238.158';
@@ -177,6 +177,7 @@ $config['confidence'] = [
 
 // 路口指标
 $config['junction_quota_key'] = [
+
     'imbalance_index' => [
         'name' => '失衡指数',                                  // 名称
         'status_formula' => function ($val) {                  // 状态判断规则
@@ -643,3 +644,13 @@ $config['inroute'] = [
 
 // 屏控服务开关
 $config['security_frequency_switch'] = true;
+
+$config['user_feedback_types'] = [
+    1 => '报警信息',
+    2 => '指标计算',
+    3 => '诊断问题',
+    4 => '评估内容',
+    5 => '优化结果',
+    6 => '页面交互',
+    7 => '其他',
+];

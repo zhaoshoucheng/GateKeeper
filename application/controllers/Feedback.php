@@ -5,60 +5,49 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\FeedbackService;
+
 class Feedback extends MY_Controller
 {
-    protected $types = [
-        1 => '报警信息',
-        2 => '指标计算',
-        3 => '诊断问题',
-        4 => '评估内容',
-        5 => '优化结果',
-        6 => '页面交互',
-        7 => '其他',
-    ];
+    /**
+     * @var FeedbackService
+     */
+    protected $feedbackService;
 
     public function __construct()
     {
         parent::__construct();
-        //考虑降级问题model尽量放到action中初始化
+
+        $this->feedbackService = new FeedbackService();
     }
 
+    /**
+     * 创建用户反馈
+     *
+     * @throws Exception
+     */
     public function addFeedback()
     {
-        $this->load->model('feedback_model');
-        $params = $this->input->post();
+        $params = $this->input->post(null, true);
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of city_id is wrong.';
-            return;
-        }
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'type' => 'required|in_list[1,2,3,4,5,6,7]',
+            'question' => 'required|trim|min_length[1]'
+        ]);
 
-        if(!isset($params['type']) || !array_key_exists($params['type'], $this->types)) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of type is wrong.';
-            return;
-        }
+        $data = $this->feedbackService->insertFeedback($params);
 
-        if(!isset($params['question']) || empty(trim($params['question']))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'You must have question.';
-            return;
-        }
-
-        $params['user_id'] = $this->username;
-
-        $data = $this->feedback_model->addFeedback($params);
-
-        return $this->response($data);
+        $this->response($data);
     }
 
+    /**
+     * 获取用户反馈类型
+     */
     public function getTypes()
     {
-        $types = [ 1 => 0 ];
+        $result = $this->feedbackService->getTypes();
 
-        foreach ($this->types as $key => $type) { $types[$key.''] = $type; }
-
-        $this->response($types);
+        $this->response($result);
     }
 }

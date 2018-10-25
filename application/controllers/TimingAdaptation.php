@@ -1,129 +1,107 @@
 <?php
 
+use \Services\TimingAdaptionService;
+
 class TimingAdaptation extends MY_Controller
 {
+    protected $timingAdaptService;
+
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('timingadaptation_model');
+
+        $this->timingAdaptService = new TimingAdaptionService();
     }
 
     /**
      * 自适应配时详情
+     *
+     * @throws Exception
      */
     public function getAdaptTimingInfo()
     {
         $params = $this->input->post();
 
-        $validator = Validator::make($params, [
-            'logic_junction_id' => 'required',
-            'city_id' => 'required'
+        $this->validate([
+            'logic_junction_id' => 'required|min_length[1]',
+            'city_id' => 'required|is_natural_no_zero'
         ]);
 
-        if($validator->fail()) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validator->firstError();
-            return;
-        }
+        $data = $this->timingAdaptService->getAdaptTimingInfo($params);
 
-        try {
-            $data = $this->timingadaptation_model->getAdaptTimingInfo($params);
-            $this->response($data);
-        } catch (Exception $e) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $e->getMessage();
-        }
+        $this->response($data);
     }
 
     /**
      * 基准配时详情
+     *
+     * @throws Exception
      */
     public function getCurrentTimingInfo()
     {
         $params = $this->input->post();
 
-        $validator = Validator::make($params, [
-            'logic_junction_id' => 'required',
+        $this->validate([
+            'logic_junction_id' => 'required|min_length[1]',
         ]);
 
-        if($validator->fail()) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validator->firstError();
-            return;
-        }
+        $data = $this->timingAdaptService->getCurrentTimingInfo($params);
 
-        try {
-            $data = $this->timingadaptation_model->getCurrentTimingInfo($params);
-            $this->response($data);
-        } catch (Exception $e) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $e->getMessage();
-        }
+        $this->response($data);
     }
 
     /**
      * 基准配时下发
+     *
+     * @throws Exception
      */
     public function updateCurrentTiming()
     {
         $params = $this->input->post();
 
-        try {
-            $data = $this->timingadaptation_model->updateCurrentTiming($params);
-            $this->response($data);
-        } catch (Exception $e) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $e->getMessage();
-        }
+        $this->validate([
+            'logic_junction_id' => 'required|min_length[1]',
+        ]);
+
+        $data = $this->timingAdaptService->updateCurrentTiming($params);
+
+        $this->response($data);
     }
 
+    /**
+     * 获取基准配时状态
+     *
+     * @throws Exception
+     */
     public function getCurrentStatus()
     {
         $params = $this->input->post();
 
-        $validator = Validator::make($params, [
-            'logic_junction_id' => 'required',
+        $this->validate([
+            'logic_junction_id' => 'required|min_length[1]',
         ]);
 
-        if($validator->fail()) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validator->firstError();
-            return;
-        }
+        $data = $this->timingAdaptService->getCurrentStatus($params);
 
-        try {
-            $data = $this->timingadaptation_model->getCurrentStatus($params);
-            $this->response($data);
-        } catch (Exception $e) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $e->getMessage();
-        }
+        $this->response($data);
     }
 
     /**
      * 获取自适应配时状态
+     *
+     * @throws Exception
      */
     public function getAdapteStatus()
     {
         $params = $this->input->post();
 
-        $validator = Validator::make($params, [
-            'logic_junction_id' => 'required',
-            'is_open' => 'required'
+        $this->validate([
+            'logic_junction_id' => 'required|min_length[1]',
+            'is_open' => 'required|in_list[0,1]'
         ]);
 
-        if($validator->fail()) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validator->firstError();
-            return;
-        }
+        $data = $this->timingAdaptService->getAdapteStatus($params);
 
-        try {
-            $data = $this->timingadaptation_model->getAdapteStatus($params);
-            $this->response($data);
-        } catch (Exception $e) {
-            $this->errno = $e->getCode();
-            $this->errmsg = $e->getMessage();
-        }
+        $this->response($data);
     }
 }

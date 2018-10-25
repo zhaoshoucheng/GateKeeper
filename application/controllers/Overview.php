@@ -1,198 +1,142 @@
 <?php
 /***************************************************************
-# 概览类
-#    概览页---路口概况
-#    概览页---路口列表
-#    概览页---运行概况
-#    概览页---拥堵概览
-#    概览页---获取token
-# user:ningxiangbing@didichuxing.com
-# date:2018-07-25
-***************************************************************/
+ * # 概览类
+ * #    概览页---路口概况
+ * #    概览页---路口列表
+ * #    概览页---运行概况
+ * #    概览页---拥堵概览
+ * #    概览页---获取token
+ * # user:ningxiangbing@didichuxing.com
+ * # date:2018-07-25
+ ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\OverviewService;
+
 class Overview extends MY_Controller
 {
+    protected $overviewService;
+
     public function __construct()
     {
         parent::__construct();
-        //不要在此处设置load->model,因为会加载资源
+
+        $this->overviewService = new OverviewService();
     }
 
     /**
-    * 获取路口列表
-    * @param city_id    interger Y 城市ID
-    * @param date       string   Y 日期 yyyy-mm-dd
-    * @param time_point stirng   Y 时间点 H:i:s
-    * @return json
-    */
+     * 获取路口列表
+     *
+     * @throws Exception
+     */
     public function junctionsList()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
-        $params = $this->input->post(NULL, TRUE);
+        $params = $this->input->post(null, true);
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数city_id传递错误！';
-            return;
-        }
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ]);
 
-        $data['city_id'] = $params['city_id'];
+        $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data['date'] = $params['date'] ?? date('Y-m-d');
-
-        $data = $this->overview_model->junctionsList($data);
+        $data = $this->overviewService->junctionsList($params);
 
         $this->response($data);
     }
 
     /**
-    * 运行情况
-    * @param
-    * @return json
-    */
+     * 运行情况
+     *
+     * @throws Exception
+     */
     public function operationCondition()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
+        $params = $this->input->post(null, true);
 
-        $params = $this->input->post(NULL, TRUE);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ]);
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数city_id传递错误！';
-            return;
-        }
+        $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data['city_id'] = $params['city_id'];
-
-        $data['date'] = $params['date'] ?? date('Y-m-d');
-
-        $data = $this->overview_model->operationCondition($data);
+        $data = $this->overviewService->operationCondition($params);
 
         $this->response($data);
 
     }
 
     /**
-    * 路口概况
-    * @param
-    * @return json
-    */
+     * 路口概况
+     *
+     * @throws Exception
+     */
     public function junctionSurvey()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
+        $params = $this->input->post(null, true);
 
-        $params = $this->input->post(NULL, TRUE);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ]);
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数city_id传递错误！';
-            return;
-        }
+        $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data['city_id'] = $params['city_id'];
-
-        $data['date'] = $params['date'] ?? date('Y-m-d');
-
-        $data = $this->overview_model->junctionSurvey($data);
+        $data = $this->overviewService->junctionSurvey($params);
 
         $this->response($data);
 
     }
 
     /**
-    * 拥堵概览
-    * @param city_id    interger Y 城市ID
-    * @param date       string   N 日期 yyyy-mm-dd
-    * @param time_point stirng   N 时间点 H:i:s
-    * @return json
-    */
+     * 拥堵概览
+     *
+     * @throws Exception
+     */
     public function getCongestionInfo()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
+        $params = $this->input->post(null, true);
 
-        $params = $this->input->post(NULL, TRUE);
-        // 校验参数
-        $validate = Validate::make($params, [
-                'city_id'    => 'min:1',
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
-        $data = [
-            'city_id'    => intval($params['city_id']),
-            'date'       => date('Y-m-d'),
-            'time_point' => date('H:i:s'),
-        ];
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'time_point' => 'exact_length[8]|regex_match[/\d{2}:\d{2}:\d{2}/]',
+        ]);
 
-        if (!empty($params['date'])) {
-            $data['date'] = date('Y-m-d', strtotime(strip_tags(trim($params['date']))));
-        }
+        $params['date']       = $params['date'] ?? date('Y-m-d');
+        $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        if (!empty($params['time_point'])) {
-            $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
-        }
+        $result = $this->overviewService->getCongestionInfo($params);
 
-        $result = $this->overview_model->getCongestionInfo($data);
-
-        return $this->response($result);
+        $this->response($result);
     }
 
     /**
-    * 获取token
-    * @param
-    * @return json
-    */
+     * 获取token
+     */
     public function getToken()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
-
-        $token = md5(time() . rand(1, 10000) * rand(1, 10000));
-
-        $this->redis_model->setData('Token_' . $token, $token);
-        $this->redis_model->setExpire('Token_' . $token, 60 * 30);
-
-        $data = [$token];
+        $data = $this->overviewService->getToken();
 
         $this->response($data);
     }
 
     /**
      * 验证token
+     *
+     * @throws Exception
      */
     public function verifyToken()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
+        $params = $this->input->post(null, true);
 
-        $params = $this->input->post(NULL, TRUE);
+        $this->validate([
+            'tokenval' => 'required|trim|min_length[1]',
+        ]);
 
-        if(!isset($params['tokenval'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数tokenval不能为空！';
-            return;
-        }
-
-        $tokenval = 'Token_' . $params['tokenval'];
-
-        $data = [];
-
-        if(!$this->redis_model->getData($tokenval)) {
-            $data['verify'] = false;
-        } else {
-            $data['verify'] = true;
-        }
-
-        $this->redis_model->deleteData($tokenval);
+        $data = $this->overviewService->verifyToken($params);
 
         $this->response($data);
     }
@@ -202,17 +146,7 @@ class Overview extends MY_Controller
      */
     public function getNowDate()
     {
-        $weekArray = [
-            '日', '一', '二', '三', '四', '五' ,'六'
-        ];
-
-        $time = time();
-
-        $data = [
-            'date' => date('Y-m-d', $time),
-            'time' => date('H:i:s', $time),
-            'week' => '星期' . $weekArray[date('w', $time)]
-        ];
+        $data = $this->overviewService->getNowDate();
 
         $this->response($data);
     }

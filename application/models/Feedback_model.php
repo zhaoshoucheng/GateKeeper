@@ -8,26 +8,31 @@
 
 class Feedback_model extends CI_Model
 {
-
     protected $tb = 'user_feedback';
+
+    /**
+     * @var CI_DB_query_builder
+     */
+    protected $db;
 
     public function __construct()
     {
         parent::__construct();
-        if (empty($this->db)) {
-            $this->db = $this->load->database('default', true);
-        }
+
+        $this->db = $this->load->database('default', true);
     }
 
-    public function addFeedback($data)
+    /**
+     * @param $data
+     *
+     * @return bool
+     */
+    public function insertFeedback($data)
     {
-        $data['created_at'] = date('Y-m-d H:i:s');
-        $data['updated_at'] = date('Y-m-d H:i:s');
-        $data['description'] = $data['desc'] ?? '';
-        if(isset($data['desc'])) unset($data['desc']);
-        $this->db->insert($this->tb, $data);
+        $data['created_at'] = $data['created_at'] ?? date('Y-m-d H:i:s');
+        $data['updated_at'] = $data['updated_at'] ?? date('Y-m-d H:i:s');
 
-        return 'success';
+        return $this->db->insert($this->tb, $data);
     }
 
 }

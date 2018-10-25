@@ -17,7 +17,8 @@
 		"monolog/monolog": "^1.23",
 		"cloud/collection": "1.0.1",
 		"cloud/php_tracelog": "1.0.1",
-		"overtrue/pinyin": "~4.0"
+		"overtrue/pinyin": "~4.0",
+		"guzzlehttp/guzzle": "^6.3"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"
@@ -28,7 +29,8 @@
 	},
 	"autoload": {
 		"psr-4" : {
-			"Services\\" : "application/services/"
+			"Services\\" : "application/services/",
+			"Test\\" : "tests/"
 		},
 		"files": [
 			"application/libraries/SSOSdk.php"

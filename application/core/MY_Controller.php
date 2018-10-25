@@ -316,4 +316,23 @@ class MY_Controller extends CI_Controller {
         }
         return ($ip ? $ip : $_SERVER['REMOTE_ADDR']);
     }
+
+    /**
+     *
+     *
+     * @param $rules ['city_id' => 'required|is_natural_no_zero', ... ]
+     *
+     * @throws Exception
+     */
+    protected function validate($rules)
+    {
+        foreach ($rules as $field => $rule) {
+            $this->form_validation->set_rules($field, $field, $rule);
+        }
+
+        if($this->form_validation->run() == false) {
+            $errmsg  = current($this->form_validation->error_array());
+            throw new Exception($errmsg, ERR_PARAMETERS);
+        }
+    }
 }

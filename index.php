@@ -26,13 +26,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *
- * @package    CodeIgniter
- * @author    EllisLab Dev Team
+ * @package      CodeIgniter
+ * @author       EllisLab Dev Team
  * @copyright    Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
  * @copyright    Copyright (c) 2014 - 2017, British Columbia Institute of Technology (http://bcit.ca/)
- * @license    http://opensource.org/licenses/MIT	MIT License
- * @link    https://codeigniter.com
- * @since    Version 1.0.0
+ * @license      http://opensource.org/licenses/MIT	MIT License
+ * @link         https://codeigniter.com
+ * @since        Version 1.0.0
  * @filesource
  */
 
@@ -123,16 +123,52 @@ if (!function_exists('_exception_handler')) {
         ];
 
         if (ENVIRONMENT == 'development') {
-            $output['trace'] = $exception->getTrace();
             $output['file']  = $exception->getFile();
             $output['line']  = $exception->getLine();
+            $output['trace'] = $exception->getTrace();
         }
         header("Content-Type:application/json;charset=UTF-8");
         echo json_encode($output);
         exit(1); // EXIT_ERROR
     }
 }
+if (!function_exists('_error_handler')) {
+    /**
+     * Error Handler
+     *
+     * @param    int    $severity
+     * @param    string $message
+     * @param    string $filepath
+     * @param    int    $line
+     *
+     * @return    void
+     */
+    function _error_handler($severity, $message, $filepath, $line)
+    {
+        $is_error = (((E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR) & $severity) === $severity);
+        // When an error occurred, set the status header to '500 Internal Server Error'
+        // to indicate to the client something went wrong.
+        // This can't be done within the $_error->show_php_error method because
+        // it is only called when the display_errors flag is set (which isn't usually
+        // the case in a production environment) or when errors are ignored because
+        // they are above the error_reporting threshold.
+        if ($is_error) {
+            set_status_header(500);
+        }
 
+        // Should we ignore the error? We'll get the current error_reporting
+        // level and add its bits with the severity bits to find out.
+        if (($severity & error_reporting()) !== $severity) {
+            return;
+        }
+        $_error =& load_class('Exceptions', 'core');
+        $_error->log_exception($severity, $message, $filepath, $line);
+
+        // Should we display the error?
+        $_error->show_php_error($severity, $message, $filepath, $line);
+        exit(1); // EXIT_ERROR
+    }
+}
 /*
  *---------------------------------------------------------------
  * SYSTEM DIRECTORY NAME
