@@ -183,12 +183,14 @@ class AreaService extends BaseService
             return round($item, 6);
         };
 
-        $centerLat = $areaJunctionCollection->avg('lat', $round);
-        $centerLng = $areaJunctionCollection->avg('lng', $round);
-
         $junctionIds = $areaJunctionCollection->implode('junction_id', ',');
 
         $junctionInfoList = $this->waymap_model->getJunctionInfo($junctionIds);
+
+        $junctionInfoCollection = Collection::make($junctionInfoList);
+
+        $centerLat = $junctionInfoCollection->avg('lat', $round);
+        $centerLng = $junctionInfoCollection->avg('lng', $round);
 
         return [
             'list' => [
