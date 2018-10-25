@@ -77,7 +77,7 @@ class OverviewService extends BaseService
 
         $junctionList = $this->redis_model->getData($redisKey);
 
-        return $junctionList ? $junctionList : [];
+        return $junctionList ? json_decode($junctionList, true) : [];
     }
 
     /**
