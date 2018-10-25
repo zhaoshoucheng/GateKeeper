@@ -13,6 +13,7 @@ namespace Services;
  *
  * @property \CI_Config            $config
  * @property \CI_Loader            $load
+ * @property \CI_Benchmark         $benchmark
  * @property \Redis_model          $redis_model
  * @property \Waymap_model         $waymap_model
  * @property \Area_model           $area_model
@@ -26,6 +27,7 @@ class BaseService
 {
     public function __construct()
     {
+        $this->benchmark->mark('service_start');
     }
 
     public function __get($key)

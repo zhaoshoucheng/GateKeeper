@@ -21,13 +21,13 @@ class OverviewService extends BaseService
     {
         parent::__construct();
 
+        $this->helperService = new HelperService();
+
         $this->load->model('redis_model');
+        $this->load->model('waymap_model');
         $this->load->model('realtime_model');
 
-        $this->config->load('permission/nanchang_overview_conf');
         $this->config->load('realtime_conf');
-
-        $this->helperService = new HelperService();
     }
 
     /**
@@ -77,27 +77,7 @@ class OverviewService extends BaseService
 
         $junctionList = $this->redis_model->getData($redisKey);
 
-        if ($junctionList) {
-
-            $junctionList = json_decode($junctionList, true);
-
-            $nanchang = $this->config->item('nanchang');
-
-            $username = get_instance()->username;
-
-            if (array_key_exists($username, $nanchang)) {
-                $junctionList['dataList'] = Collection::make($junctionList['dataList'])
-                    ->whereIn('jid', $nanchang[$username])
-                    ->values();
-
-                $junctionList['center']['lng'] = $junctionList['dataList']->avg('lng');
-                $junctionList['center']['lat'] = $junctionList['dataList']->avg('lat');
-            }
-
-            return $junctionList;
-        }
-
-        return [];
+        return $junctionList ? $junctionList : [];
     }
 
     /**
@@ -179,15 +159,6 @@ class OverviewService extends BaseService
 
         if (!$res) {
             return [];
-        }
-
-        $nanchang = $this->config->item('nanchang');
-        $username = get_instance()->username;
-
-        if (array_key_exists($username, $nanchang)) {
-            $res = Collection::make($res)
-                ->whereIn('logic_junction_id', $nanchang[$username])
-                ->values()->get();
         }
 
         $result = [];
@@ -287,5 +258,87 @@ class OverviewService extends BaseService
             'time' => date('H:i:s', $time),
             'week' => '星期' . $weekArray[date('w', $time)],
         ];
+    }
+
+    /**
+     * 获取停车延误TOP20
+     *
+     * @param $params
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function stopDelayTopList($params)
+    {
+        $cityId = $params['city_id'];
+        $date = $params['date'];
+        $pagesize = $params['pagesize'];
+
+        $hour = $this->helperService->getLastestHour($cityId);
+
+        $select = 'logic_junction_id, hour, sum(stop_delay * traj_count) / sum(traj_count) as stop_delay';
+
+        $result = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $select);
+
+        $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
+
+        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
+        $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
+
+        $realTimeQuota = $this->config->item('real_time_quota');
+
+        $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota) {
+            return [
+                'time' => $item['hour'],
+                'logic_junction_id' => $item['logic_junction_id'],
+                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
+                'stop_delay' => $realTimeQuota['stop_delay']['round']($item['stop_delay']),
+                'quota_unit' => $realTimeQuota['stop_delay']['unit']
+            ];
+        }, $result);
+
+        return $result;
+    }
+
+    /**
+     * @param $params
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function stopTimeCycleTopList($params)
+    {
+        $cityId = $params['city_id'];
+        $date = $params['date'];
+        $pagesize = $params['pagesize'];
+
+        $hour = $this->helperService->getLastestHour($cityId);
+
+        $select = 'logic_junction_id, hour, stop_time_cycle, logic_flow_id';
+
+        $result = $this->realtime_model->getTopCycleTime($cityId, $date, $hour, $pagesize, $select);
+
+        $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
+
+        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
+        $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
+
+        $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+
+        $realTimeQuota = $this->config->item('real_time_quota');
+
+        $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota, $flowsInfo) {
+            return [
+                'time' => $item['hour'],
+                'logic_junction_id' => $item['logic_junction_id'],
+                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
+                'logic_flow_id' => $item['logic_flow_id'],
+                'flow_name' => $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] ?? '未知方向',
+                'stop_time_cycle' => $realTimeQuota['stop_time_cycle']['round']($item['stop_time_cycle']),
+                'quota_unit' => $realTimeQuota['stop_time_cycle']['unit']
+            ];
+        }, $result);
+
+        return $result;
     }
 }

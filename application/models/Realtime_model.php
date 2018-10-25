@@ -112,4 +112,31 @@ class Realtime_model extends CI_Model
 
         return $this->db->query($sql)->result_array();
     }
+
+    public function getTopStopDelay($cityId, $date, $hour, $pagesize, $select = '*')
+    {
+        return $this->db->select($select)
+            ->from($this->tb . $cityId)
+            ->where('hour', $hour)
+            ->where('traj_count >=', 10)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->group_by('logic_junction_id')
+            ->order_by('stop_delay', 'desc')
+            ->limit($pagesize)
+            ->get()->result_array();
+    }
+
+    public function getTopCycleTime($cityId, $date, $hour, $pagesize, $select = '*')
+    {
+        return $this->db->select($select)
+            ->from($this->tb . $cityId)
+            ->where('hour', $hour)
+            ->where('traj_count >=', 10)
+            ->where('updated_at >=', $date . ' 00:00:00')
+            ->where('updated_at <=', $date . ' 23:59:59')
+            ->order_by('stop_time_cycle', 'desc')
+            ->limit($pagesize)
+            ->get()->result_array();
+    }
 }
