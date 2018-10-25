@@ -71,28 +71,20 @@ class Overview extends MY_Controller
     /**
      * 路口概况
      *
-     * @param
-     *
-     * @return json
+     * @throws Exception
      */
     public function junctionSurvey()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
-
         $params = $this->input->post(null, true);
 
-        if (!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno  = ERR_PARAMETERS;
-            $this->errmsg = '参数city_id传递错误！';
-            return;
-        }
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ]);
 
-        $data['city_id'] = $params['city_id'];
+        $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data['date'] = $params['date'] ?? date('Y-m-d');
-
-        $data = $this->overview_model->junctionSurvey($data);
+        $data = $this->overviewService->junctionSurvey($params);
 
         $this->response($data);
 
@@ -101,96 +93,50 @@ class Overview extends MY_Controller
     /**
      * 拥堵概览
      *
-     * @param city_id    interger Y 城市ID
-     * @param date       string   N 日期 yyyy-mm-dd
-     * @param time_point stirng   N 时间点 H:i:s
-     *
-     * @return json
+     * @throws Exception
      */
     public function getCongestionInfo()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
-
         $params = $this->input->post(null, true);
-        // 校验参数
-        $validate = Validate::make($params, [
-                'city_id' => 'min:1',
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno  = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
-        $data = [
-            'city_id' => intval($params['city_id']),
-            'date' => date('Y-m-d'),
-            'time_point' => date('H:i:s'),
-        ];
 
-        if (!empty($params['date'])) {
-            $data['date'] = date('Y-m-d', strtotime(strip_tags(trim($params['date']))));
-        }
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'time_point' => 'exact_length[8]|regex_match[/\d{2}:\d{2}:\d{2}/]',
+        ]);
 
-        if (!empty($params['time_point'])) {
-            $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
-        }
+        $params['date']       = $params['date'] ?? date('Y-m-d');
+        $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        $result = $this->overview_model->getCongestionInfo($data);
+        $result = $this->overviewService->getCongestionInfo($params);
 
-        return $this->response($result);
+        $this->response($result);
     }
 
     /**
      * 获取token
-     *
-     * @param
-     *
-     * @return json
      */
     public function getToken()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
-
-        $token = md5(time() . rand(1, 10000) * rand(1, 10000));
-
-        $this->redis_model->setData('Token_' . $token, $token);
-        $this->redis_model->setExpire('Token_' . $token, 60 * 30);
-
-        $data = [$token];
+        $data = $this->overviewService->getToken();
 
         $this->response($data);
     }
 
     /**
      * 验证token
+     *
+     * @throws Exception
      */
     public function verifyToken()
     {
-        $this->load->model('overview_model');
-        $this->load->model('redis_model');
-
         $params = $this->input->post(null, true);
 
-        if (!isset($params['tokenval'])) {
-            $this->errno  = ERR_PARAMETERS;
-            $this->errmsg = '参数tokenval不能为空！';
-            return;
-        }
+        $this->validate([
+            'tokenval' => 'required|trim|min_length[1]',
+        ]);
 
-        $tokenval = 'Token_' . $params['tokenval'];
-
-        $data = [];
-
-        if (!$this->redis_model->getData($tokenval)) {
-            $data['verify'] = false;
-        } else {
-            $data['verify'] = true;
-        }
-
-        $this->redis_model->deleteData($tokenval);
+        $data = $this->overviewService->verifyToken($params);
 
         $this->response($data);
     }
@@ -200,17 +146,7 @@ class Overview extends MY_Controller
      */
     public function getNowDate()
     {
-        $weekArray = [
-            '日', '一', '二', '三', '四', '五', '六',
-        ];
-
-        $time = time();
-
-        $data = [
-            'date' => date('Y-m-d', $time),
-            'time' => date('H:i:s', $time),
-            'week' => '星期' . $weekArray[date('w', $time)],
-        ];
+        $data = $this->overviewService->getNowDate();
 
         $this->response($data);
     }

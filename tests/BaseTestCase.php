@@ -19,7 +19,7 @@ class BaseTestCase extends TestCase
         ]);
     }
 
-    protected function move(string $uri, array $params = [], callable $callable = null)
+    protected function move(string $uri, array $params = [], $errno = 0, callable $callable = null)
     {
         $res = $this->request($uri, $params);
 
@@ -27,17 +27,17 @@ class BaseTestCase extends TestCase
             call_user_func($callable, $res);
         }
 
-        $this->assert($res);
+        return $this->assert($res, $errno);
     }
 
-    protected function request(string $uri, array $params)
+    protected function request(string $uri, array $params = [])
     {
         return $this->client->post($uri, [
             'form_params' => $params,
         ]);
     }
 
-    protected function assert(ResponseInterface $res)
+    protected function assert(ResponseInterface $res, $errno = 0)
     {
         $this->assertEquals(200, $res->getStatusCode());
 
@@ -47,6 +47,8 @@ class BaseTestCase extends TestCase
         $this->assertArrayHasKey('errmsg', $data);
         $this->assertArrayHasKey('data', $data);
 
-        $this->assertEquals($data['errno'], 0, 'Error Code: ' . $data['errno'] . "\n" . 'Error Message: ' . $data['errmsg']);
+        $this->assertEquals($data['errno'], $errno, 'Error Code: ' . $data['errno'] . "\n" . 'Error Message: ' . $data['errmsg']);
+
+        return $data['data'];
     }
 }

@@ -85,6 +85,7 @@ class Road extends MY_Controller
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
             'road_name' => 'required|trim|min_length[1]',
+            'road_id' => 'required|trim|min_length[1]',
             'road_direction' => 'required|is_natural|in_list[1,2]',
             'junction_ids[]' => 'required',
         ]);

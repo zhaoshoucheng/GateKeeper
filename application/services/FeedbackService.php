@@ -40,6 +40,12 @@ class FeedbackService extends BaseService
         return $result;
     }
 
+    /**
+     * @param $params
+     *
+     * @return bool
+     * @throws \Exception
+     */
     public function insertFeedback($params)
     {
         $params['description'] = $params['desc'] ?? '';

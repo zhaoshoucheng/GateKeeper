@@ -16,7 +16,7 @@ class FeedbackTest extends BaseTestCase
         $params = [
             'city_id' => '12',
             'question' => '路口信息为空',
-            'type' => '0',
+            'type' => '1',
             'desc' => '点击路口无法查看路口信息'
         ];
 

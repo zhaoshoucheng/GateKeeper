@@ -56,7 +56,7 @@ class RoadTest extends BaseTestCase
 
     public function testComparison()
     {
-        $options = [
+        $params = [
             'city_id' => '12',
             'road_id' => 'd00f039b347afff3efb16d872f5a902d',
             'quota_key' => 'time',
@@ -69,6 +69,6 @@ class RoadTest extends BaseTestCase
 
         $uri = '/road/comparison';
 
-        $this->move($uri, $options);
+        $this->move($uri, $params);
     }
 }
