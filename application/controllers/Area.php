@@ -55,7 +55,7 @@ class Area extends MY_Controller
 
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
-            'area_name' => 'required|trim|min_length[1]|is_unique[area.area_name]',
+            'area_name' => 'required|trim|min_length[1]',
             'junction_ids[]' => 'required',
         ]);
 
