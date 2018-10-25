@@ -25,6 +25,7 @@ class OverviewService extends BaseService
         $this->load->model('realtime_model');
 
         $this->config->load('permission/nanchang_overview_conf');
+        $this->config->load('realtime_conf');
 
         $this->helperService = new HelperService();
     }
