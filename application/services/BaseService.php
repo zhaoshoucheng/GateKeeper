@@ -22,6 +22,7 @@ namespace Services;
  * @property \Feedback_model       $feedback_model
  * @property \Adapt_model          $adapt_model
  * @property \FlowDurationV6_model $flowDurationV6_model
+ * @property \RealtimeAlarm_model  $realtimeAlarm_model
  */
 class BaseService
 {
