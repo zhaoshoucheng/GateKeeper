@@ -76,8 +76,8 @@ if (!function_exists('getSign')) {
 
         //将签名密钥拼接到签名字符串最后面
         $str = $str . $secret;
-        echo $str;
-        echo "<br/>";
+        //echo $str;
+        //echo "<br/>";
         //通过md5算法为签名字符串生成一个md5签名, 从第7位开始取16位
         return substr(md5($str), 7, 16);
     }

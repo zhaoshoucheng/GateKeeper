@@ -190,7 +190,7 @@ class MY_Controller extends CI_Controller
         $server_sign = substr(md5($query_str . "&" . $app_key), 7, 16);
         if ($server_sign != $client_sign) {
             com_log_notice('_checkauthorizedapp_err', [
-                'error' => "error_tstimeout",
+                'error' => "error_sign",
                 'params' => $paramTmp,
                 'url' => $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'],
                 'md5str' => $query_str . "&" . $app_key,
