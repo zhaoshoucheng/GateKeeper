@@ -207,9 +207,14 @@ if (!function_exists('hourRange')) {
      * @param string $format
      *
      * @return array
+     * @throws Exception
      */
     function hourRange($start = '00:00', $end = '23:30', $skip = 30, $format = 'H:i')
     {
+        if($start > $end) {
+            throw new Exception('起始时间必须小于等于结束时间');
+        }
+
         return array_map(function ($item) use ($format) {
             return date($format, $item);
         }, range(strtotime($start), strtotime($end), $skip * 60));

@@ -12,6 +12,10 @@ include_once "Inroute_Controller.php";
  *
  * @property CI_Benchmark $benchmark
  * @property User $user
+ * @property CI_URI $uri
+ * @property CI_Router $router
+ * @property Downgrade_model $Downgrade_model
+ * @property Junction_model $junction_model
  */
 class MY_Controller extends CI_Controller
 {
@@ -21,6 +25,10 @@ class MY_Controller extends CI_Controller
     public $templates = [];
     public $routerUri = '';
     public $username = 'unknown';
+
+    /**
+     * @var CI_Output
+     */
     public $output;
 
     protected $debug = false;
@@ -46,17 +54,22 @@ class MY_Controller extends CI_Controller
 
             $this->load->model('user/user', 'user');
             $this->routerUri = $this->uri->ruri_string();
+
             com_log_notice('_com_sign', ['ip' => $_SERVER["REMOTE_ADDR"], 'ip2' => $this->input->get_request_header('X-Real-Ip')]);
 
-            // 此处采用appid+appkey的验证
+            // 此处采用appid + appkey的验证
             if (isset($_REQUEST['app_id'])) {
+
                 com_log_notice('_com_sign', ['uri' => $this->routerUri, 'request' => $_REQUEST]);
+
                 if (!$this->_checkAuthorizedApp()) {
                     $this->_output();
                     exit();
                 }
+
             } elseif (isset($_REQUEST['token'])
                 and in_array($_REQUEST['token'], ["aedadf3e3795b933db2883bd02f31e1d", "d4971d281aee77720a00a5795bb38f85"])) {
+
                 if (in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus', 'overview/verifytoken', 'task/areaflowprocess', 'task/mapversioncb'])
                     and in_array($host, ['100.69.238.11:8000'])) {
                     return;
@@ -131,15 +144,18 @@ class MY_Controller extends CI_Controller
             'params' => $paramTmp,
             'url' => $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'],
         ]);
+
         if ($this->is_check_login == 0) {
             return true;
         }
 
         $client_sign = isset($_REQUEST['sign']) ? $_REQUEST['sign'] : "";
         $app_id      = $_REQUEST['app_id'];
+
         $this->load->config('appkey', true);
         $app_config = $this->config->item('authirized_apps', 'appkey');
         com_log_notice('_com_sign_config', ['client_sign' => $client_sign, 'app_id' => $app_id, 'app_config' => $app_config]);
+
         if (!isset($app_config[$app_id]) || !isset($app_config[$app_id]['secret'])) {
             com_log_notice('_checkauthorizedapp_err', [
                 'error' => "error_appid",
@@ -150,6 +166,7 @@ class MY_Controller extends CI_Controller
             $this->errmsg = "该appid:{$app_id}没有授权";
             return false;
         }
+
         $method  = isset($app_config[$app_id]['method']) ? $app_config[$app_id]['method'] : "";
         $timeout = isset($app_config[$app_id]['timeout']) ? $app_config[$app_id]['timeout'] : 10;
 
@@ -161,9 +178,11 @@ class MY_Controller extends CI_Controller
         }
         com_log_notice('_com_sign', ['params' => $params, 'url' => '/' . $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']]);
         unset($params['sign']);
+
         if (!isset($params['ts'])) {
             $params['ts'] = time();
         }
+
         // 带时间戳的sign的时效时间为1s
         if (abs(time() - $params['ts']) > $timeout) {
             com_log_notice('_checkauthorizedapp_err', [
@@ -252,12 +271,15 @@ class MY_Controller extends CI_Controller
         if ($this->is_check_login == 0) {
             return true;
         }
+
         $ret = $this->user->isUserLogin();
+
         if (!$ret) {
             $this->errno       = ERR_AUTH_LOGIN;
             $this->output_data = $this->user->getLoginUrl();
             return false;
         }
+
         $this->username = $this->user->username;
 
         return true;
@@ -275,6 +297,7 @@ class MY_Controller extends CI_Controller
             $this->errno = ERR_AUTH_AREA;
             return false;
         }
+
         foreach ($ret as $val) {
             //if($area == $val['taxi_id']){ // sso
             if ($area == $val['taxiId']) {
@@ -343,9 +366,11 @@ class MY_Controller extends CI_Controller
     private function getIp()
     {
         $ip = false;
+
         if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
             $ip = $_SERVER["HTTP_CLIENT_IP"];
         }
+
         if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ips = explode(", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
             if ($ip) {
@@ -359,6 +384,7 @@ class MY_Controller extends CI_Controller
                 }
             }
         }
+
         return ($ip ? $ip : $_SERVER['REMOTE_ADDR']);
     }
 }

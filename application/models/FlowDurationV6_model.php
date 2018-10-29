@@ -42,4 +42,17 @@ class FlowDurationV6_model extends CI_Model
 
         return $this->db->get()->result_array();
     }
+
+    public function getQuotaByJunction($cityId, $logicJunctionId, $dates, $hours, $select = '*')
+    {
+        return $this->db->select($select)
+            ->from($this->tb . $cityId)
+            ->where('logic_junction_id', $logicJunctionId)
+            ->where_in('date', $dates)
+            ->where_in('hour', $hours)
+            ->where('traj_count >=', 10)
+            ->group_by('logic_flow_id, hour')
+            ->order_by('logic_flow_id, hour')
+            ->get()->result_array();
+    }
 }
