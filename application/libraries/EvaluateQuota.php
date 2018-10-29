@@ -17,6 +17,11 @@ if (!defined('EVALUATE_QUOTA_INFO')){
     define('EVALUATE_QUOTA_INFO',EVALUATE_QUOTA_ROOT. 'evaluateQuota/QuotaInfo'.DIRECTORY_SEPARATOR);
 }
 
+/**
+ * Class EvaluateQuota
+ *
+ * @method array getJunctionDurationDelay($data, $start, $end)
+ */
 class EvaluateQuota
 {
     private $_evaluateQuotaFactory;
