@@ -99,18 +99,14 @@ class Realtime_model extends CI_Model
 
     public function getAvgQuotaByJunction($cityId, $hour, $date, $select = '*')
     {
-        $sql = $this->db->select($select)
+        return $this->db->select($select)
             ->from($this->tb . $cityId)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->where('hour', $hour)
             ->where('traj_count >=', 10)
             ->group_by('hour, logic_junction_id')
-            ->get_compiled_select();
-
-        $sql = '/*{"router":"m"}*/' . $sql;
-
-        return $this->db->query($sql)->result_array();
+            ->get()->result_array();
     }
 
     public function getTopStopDelay($cityId, $date, $hour, $pagesize, $select = '*')

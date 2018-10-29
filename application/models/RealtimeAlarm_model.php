@@ -22,6 +22,16 @@ class RealtimeAlarm_model extends CI_Model
         $this->db = $this->load->database('default', true);
     }
 
+    /**
+     * 获取指定类型信息数目
+     *
+     * @param        $cityId
+     * @param        $date
+     * @param        $type
+     * @param string $select
+     *
+     * @return array
+     */
     public function countJunctionByType($cityId, $date, $type, $select = '*')
     {
         return $this->db->select($select)
@@ -32,6 +42,15 @@ class RealtimeAlarm_model extends CI_Model
             ->get()->row_array();
     }
 
+    /**
+     * 获取指定日期路口
+     *
+     * @param        $cityId
+     * @param        $dates
+     * @param string $select
+     *
+     * @return array
+     */
     public function getJunctionByDate($cityId, $dates, $select = '*')
     {
         return $this->db->select($select)
@@ -42,15 +61,29 @@ class RealtimeAlarm_model extends CI_Model
             ->get()->result_array();
     }
 
-    public function getRealtimeAlarmList($cityId, $date, $lastTime, $cycleTime)
+    /**
+     * 获取实时报警信息详情
+     *
+     * @param $cityId
+     * @param $date
+     * @param $lastTime
+     * @param $cycleTime
+     *
+     * @return array
+     */
+    public function getRealtimeAlarmList($cityId, $date, $lastTime, $cycleTime = null)
     {
-        return $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time')
+        $this->db->select('type, logic_junction_id, logic_flow_id, start_time, last_time')
             ->from($this->tb)
             ->where('city_id', $cityId)
             ->where('date', $date)
-            ->where('last_time >=', $lastTime)
-            ->where('last_time <=', $cycleTime)
-            ->order_by('type asc, (last_time - start_time) desc')
+            ->where('last_time >=', $lastTime);
+
+        if(!is_null($cycleTime)) {
+            $this->db->where('last_time <=', $cycleTime);
+        }
+
+        return $this->db->order_by('type asc, (last_time - start_time) desc')
             ->get()->result_array();
     }
 }

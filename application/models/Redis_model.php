@@ -1,9 +1,9 @@
 <?php
 /********************************************
-# desc:    redis缓存
-# author:  ningxiangbing@didichuxing.com
-# date:    2018-04-03
-********************************************/
+ * # desc:    redis缓存
+ * # author:  ningxiangbing@didichuxing.com
+ * # date:    2018-04-03
+ ********************************************/
 
 class Redis_model extends CI_Model
 {
@@ -26,22 +26,23 @@ class Redis_model extends CI_Model
         $redis_conf = $this->config->item('redis');
 
         if (isset($redis_conf['host'])) {
-            $host = $redis_conf['host'];
-            $port = $redis_conf['port'];
-            $timeout = $redis_conf['timeout'];  //增加超时时间
+            $host       = $redis_conf['host'];
+            $port       = $redis_conf['port'];
+            $timeout    = $redis_conf['timeout'];  //增加超时时间
             $connResult = $this->redis->connect($host, $port, $timeout);
-            if(!$connResult){
+            if (!$connResult) {
                 throw new \Exception("redis connection error:" . json_encode($redis_conf));
             }
         }
     }
 
     /**
-    * 获取数据
+     * 获取数据
      *
-    * @param $key  string key
-    * @return array|string|bool
-    */
+     * @param $key  string key
+     *
+     * @return array|string|bool
+     */
     public function getData($key)
     {
         if (!$this->redis) {
@@ -53,19 +54,20 @@ class Redis_model extends CI_Model
             if (!$res) {
                 return false;
             }
-        } catch  (\RedisException $e) {
+        } catch (\RedisException $e) {
             $res = false;
         }
         return $res;
     }
 
     /**
-    * 存储数据
+     * 存储数据
      *
-    * @param $key    string key
-    * @param $value  array|string value
-    * @return bool
-    */
+     * @param $key    string key
+     * @param $value  array|string value
+     *
+     * @return bool
+     */
     public function setData($key, $value)
     {
         if (!$this->redis) {
@@ -85,6 +87,7 @@ class Redis_model extends CI_Model
      * @param $key   string   key
      * @param $value array|string   value
      * @param $time  int 秒
+     *
      * @return bool
      */
     public function setEx($key, $value, $time)
@@ -105,12 +108,13 @@ class Redis_model extends CI_Model
     }
 
     /**
-    * 设置时效
+     * 设置时效
      *
-    * @param $key   string   key
-    * @param $time  int 秒
-    * @return bool
-    */
+     * @param $key   string   key
+     * @param $time  int 秒
+     *
+     * @return bool
+     */
     public function setExpire($key, $time)
     {
         if (!$this->redis) {
@@ -125,11 +129,12 @@ class Redis_model extends CI_Model
     }
 
     /**
-    * 删除数据
+     * 删除数据
      *
-    * @param $key  string key
-    * @return bool
-    */
+     * @param $key  string key
+     *
+     * @return bool
+     */
     public function deleteData($key)
     {
         if (!$this->redis) {
@@ -148,6 +153,7 @@ class Redis_model extends CI_Model
      *
      * @param $key
      * @param $val
+     *
      * @return bool
      */
     public function sadd($key, $val)
@@ -167,6 +173,7 @@ class Redis_model extends CI_Model
      * 集合 取成员
      *
      * @param $key
+     *
      * @return array
      */
     public function smembers($key)
@@ -177,7 +184,7 @@ class Redis_model extends CI_Model
 
         try {
             $res = $this->redis->smembers($key);
-        } catch  (\RedisException $e) {
+        } catch (\RedisException $e) {
             $res = [];
         }
         return $res;
@@ -188,6 +195,7 @@ class Redis_model extends CI_Model
      *
      * @param $key
      * @param $member
+     *
      * @return bool
      */
     public function sremData($key, $member)
@@ -198,7 +206,7 @@ class Redis_model extends CI_Model
 
         try {
             $this->redis->srem($key, $member);
-        } catch  (\RedisException $e) {
+        } catch (\RedisException $e) {
             return false;
         }
         return true;
@@ -208,6 +216,7 @@ class Redis_model extends CI_Model
      * 删除集合
      *
      * @param $key
+     *
      * @return bool
      */
     public function delList($key)
@@ -218,7 +227,7 @@ class Redis_model extends CI_Model
 
         try {
             $this->redis->del($key);
-        } catch  (\RedisException $e) {
+        } catch (\RedisException $e) {
             return false;
         }
         return true;
