@@ -22,10 +22,10 @@ class Report_model extends CI_Model
 
         $this->db = $this->load->database('default', true);
 
-        $is_existed = $this->db->table_exists($this->tb);
+        $isExisted = $this->db->table_exists($this->tb);
 
-        if (!$is_existed) {
-            throw new Exception('数据表 ' . $this->tb . ' 不存在', ERR_DATABASE);
+        if (!$isExisted) {
+            throw new \Exception('数据表不存在');
         }
     }
 
