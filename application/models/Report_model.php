@@ -72,7 +72,7 @@ class Report_model extends CI_Model
      */
     public function getCountJoinUploadFile($cityId, $type, $pageNum, $pageSize, $namespace)
     {
-        return $this->db->select('count(*) as num')
+        $res = $this->db->select('count(*) as num')
             ->from('report')
             ->join('upload_files', 'upload_files.item_id = report.id')
             ->where('report.delete_at', "1970-01-01 00:00:00")
@@ -81,7 +81,9 @@ class Report_model extends CI_Model
             ->where('report.city_id', $cityId)
             ->where('report.type', $type)
             ->limit($pageSize, ($pageNum - 1) * $pageSize)
-            ->get()->row_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->row_array() : $res;
     }
 
     /**
@@ -95,7 +97,7 @@ class Report_model extends CI_Model
      */
     public function getSelectJoinUploadFile($cityId, $type, $pageNum, $pageSize, $namespace)
     {
-        return $this->db->select('report.id, report.title, report.create_at, file_key, namespace')
+        $res = $this->db->select('report.id, report.title, report.create_at, file_key, namespace')
             ->from('report')
             ->join('upload_files', 'upload_files.item_id = report.id')
             ->where('report.delete_at', "1970-01-01 00:00:00")
@@ -105,6 +107,8 @@ class Report_model extends CI_Model
             ->where('report.type', $type)
             ->order_by('report.id', 'DESC')
             ->limit($pageSize, ($pageNum - 1) * $pageSize)
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 }

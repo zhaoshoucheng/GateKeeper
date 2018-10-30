@@ -48,13 +48,15 @@ class TimeAlarmRemarks_model extends CI_Model
             return [];
         }
 
-        return $this->db->select('logic_flow_id, type')
+        $res = $this->db->select('logic_flow_id, type')
             ->from($this->tb)
             ->where('city_id', $cityId)
             ->where('area_id', $areaId)
             ->where_in('logic_junction_id', $junctionIds)
             ->where_in('logic_flow_id', $flowIds)
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**

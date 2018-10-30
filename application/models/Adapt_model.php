@@ -42,10 +42,12 @@ class Adapt_model extends CI_Model
      */
     public function getAdaptByJunctionId($logicJunctionId, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from($this->tb)
             ->where('logic_junction_id', $logicJunctionId)
-            ->get()->row_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->row_array() : $res;
     }
 
     /**

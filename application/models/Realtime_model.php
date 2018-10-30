@@ -36,12 +36,15 @@ class Realtime_model extends CI_Model
     public function getLastestHour($cityId)
     {
         $this->isExisted($cityId);
-        return $this->db->select('hour')
+
+        $res = $this->db->select('hour')
             ->from($this->tb . $cityId)
             ->order_by('updated_at', 'DESC')
             ->order_by('hour', 'DESC')
             ->limit(1)
-            ->get()->row_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->row_array() : $res;
     }
 
     /**
@@ -75,13 +78,16 @@ class Realtime_model extends CI_Model
     public function getFlowsInFlowIds($cityId, $hour, $logicJunctionId, $logicFlowId, $select = '*')
     {
         $this->isExisted($cityId);
-        return $this->db->select($select)
+
+        $res = $this->db->select($select)
             ->from($this->tb . $cityId)
             ->where('hour', $hour)
             ->where('logic_junction_id', $logicJunctionId)
             ->where('updated_at > ', date('Y-m-d', strtotime('-10  minutes')))
             ->where_in('logic_flow_id', $logicFlowId)
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -96,14 +102,17 @@ class Realtime_model extends CI_Model
     public function getQuotasByHour($cityId, $hour, $quotaKey, $select = '*')
     {
         $this->isExisted($cityId);
-        return $this->db->select($select)
+
+        $res = $this->db->select($select)
             ->from($this->tb . $cityId)
             ->where('traj_count >= 10')
             ->where('hour', $hour)
             ->group_by('logic_junction_id')
             ->order_by($quotaKey, 'DESC')
             ->limit(100)
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -119,12 +128,15 @@ class Realtime_model extends CI_Model
     public function getQuotaByFlowId($cityId, $logicJunctionId, $logicFlowId, $upTime, $select = '*')
     {
         $this->isExisted($cityId);
-        return $this->db->select($select)
+
+        $res = $this->db->select($select)
             ->from($this->tb . $cityId)
             ->where('logic_junction_id', $logicJunctionId)
             ->where('logic_flow_id', $logicFlowId)
             ->where('updated_at >', $upTime)
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -138,12 +150,15 @@ class Realtime_model extends CI_Model
     public function getAvgQuotaByCityId($cityId, $date, $select = '*')
     {
         $this->isExisted($cityId);
-        return $this->db->select($select)
+
+        $res = $this->db->select($select)
             ->from($this->tb . $cityId)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->group_by('hour')
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -158,14 +173,17 @@ class Realtime_model extends CI_Model
     public function getAvgQuotaByJunction($cityId, $hour, $date, $select = '*')
     {
         $this->isExisted($cityId);
-        return $this->db->select($select)
+
+        $res = $this->db->select($select)
             ->from($this->tb . $cityId)
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->where('hour', $hour)
             ->where('traj_count >=', 10)
             ->group_by('hour, logic_junction_id')
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -181,7 +199,8 @@ class Realtime_model extends CI_Model
     public function getTopStopDelay($cityId, $date, $hour, $pagesize, $select = '*')
     {
         $this->isExisted($cityId);
-        return $this->db->select($select)
+
+        $res = $this->db->select($select)
             ->from($this->tb . $cityId)
             ->where('hour', $hour)
             ->where('traj_count >=', 10)
@@ -190,7 +209,9 @@ class Realtime_model extends CI_Model
             ->group_by('logic_junction_id')
             ->order_by('stop_delay', 'desc')
             ->limit($pagesize)
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -206,7 +227,8 @@ class Realtime_model extends CI_Model
     public function getTopCycleTime($cityId, $date, $hour, $pagesize, $select = '*')
     {
         $this->isExisted($cityId);
-        return $this->db->select($select)
+
+        $res = $this->db->select($select)
             ->from($this->tb . $cityId)
             ->where('hour', $hour)
             ->where('traj_count >=', 10)
@@ -214,6 +236,8 @@ class Realtime_model extends CI_Model
             ->where('updated_at <=', $date . ' 23:59:59')
             ->order_by('stop_time_cycle', 'desc')
             ->limit($pagesize)
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 }

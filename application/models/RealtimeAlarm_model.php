@@ -44,12 +44,14 @@ class RealtimeAlarm_model extends CI_Model
      */
     public function countJunctionByType($cityId, $date, $type, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from($this->tb)
             ->where('date', $date)
             ->where('city_id', $cityId)
             ->where('type', $type)
-            ->get()->row_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->row_array() : $res;
     }
 
     /**
@@ -63,12 +65,14 @@ class RealtimeAlarm_model extends CI_Model
      */
     public function getJunctionByDate($cityId, $dates, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from($this->tb)
             ->where('city_id', $cityId)
             ->where_in('date', $dates)
             ->group_by('logic_junction_id, date')
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -93,7 +97,9 @@ class RealtimeAlarm_model extends CI_Model
             $this->db->where('last_time <=', $cycleTime);
         }
 
-        return $this->db->order_by('type asc, (last_time - start_time) desc')
-            ->get()->result_array();
+        $res = $this->db->order_by('type asc, (last_time - start_time) desc')
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 }
