@@ -21,7 +21,6 @@ class Overview_model extends CI_Model
         }
 
         $this->config->load('realtime_conf');
-        $this->config->load('permission/nanchang_overview_conf');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
         $this->load->model('common_model');
@@ -111,9 +110,9 @@ class Overview_model extends CI_Model
 
         $junctionSurveyKey = "its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
 
-//        if(($result = $this->redis_model->getData($junctionSurveyKey))) {
-//           return json_decode($result, true);
-//        }
+        if(($result = $this->redis_model->getData($junctionSurveyKey))) {
+           return json_decode($result, true);
+        }
 
         $data = $this->junctionsList($data);
 
@@ -164,19 +163,6 @@ class Overview_model extends CI_Model
         if (($junctionList = $this->redis_model->getData($junctionListKey))) {
 
             $junctionList = json_decode($junctionList, true);
-
-            $nanchang = $this->config->item('nanchang');
-
-            $username = get_instance()->username;
-
-            if (array_key_exists($username, $nanchang)) {
-                $junctionList['dataList'] = Collection::make($junctionList['dataList'])
-                    ->whereIn('jid', $nanchang[$username])
-                    ->values();
-
-                $junctionList['center']['lng'] = $junctionList['dataList']->avg('lng');
-                $junctionList['center']['lat'] = $junctionList['dataList']->avg('lat');
-            }
 
             return $junctionList;
         }
@@ -254,15 +240,6 @@ class Overview_model extends CI_Model
 
         if (empty($res)) {
             return [];
-        }
-
-        $nanchang = $this->config->item('nanchang');
-        $username = get_instance()->username;
-
-        if (array_key_exists($username, $nanchang)) {
-            $res = Collection::make($res)
-                ->whereIn('logic_junction_id', $nanchang[$username])
-                ->values()->get();
         }
 
         $result = $this->formatCongestionInfoData($res);
