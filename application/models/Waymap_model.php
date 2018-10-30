@@ -362,7 +362,7 @@ class Waymap_model extends CI_Model
 
         $url = $this->config->item('waymap_interface') . '/signal-map/connect/adj_junctions';
 
-        return $this->post($url, $data);
+        return $this->post($url, $data, 5000, 'json');
     }
 
     /**
@@ -377,7 +377,7 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function post($url, $data, $timeout = 5000, $contentType = 'json', $header = [])
+    public function post($url, $data, $timeout = 0, $contentType = 'x-www-form-urlencoded', $header = [])
     {
         $query['token']   = $this->token;
         $query['user_id'] = $this->userid;
@@ -389,13 +389,13 @@ class Waymap_model extends CI_Model
         $res = httpPOST($url, $data, $timeout, $contentType, $header);
 
         if (!$res) {
-            throw new \Exception('路网数据获取失败', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception('接口请求失败', ERR_REQUEST_WAYMAP_API);
         }
 
         $res = json_decode($res, true);
 
         if (!$res) {
-            throw new \Exception('路网数据格式错误', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception('接口请求失败', ERR_REQUEST_WAYMAP_API);
         }
 
         if (isset($res['errno']) && $res['errno'] != 0) {
@@ -425,7 +425,7 @@ class Waymap_model extends CI_Model
 
         $url = $this->config->item('waymap_interface') . '/signal-map/connect/path';
 
-        return $this->post($url, $data);
+        return $this->post($url, $data, 0, 'json');
     }
 
     /**

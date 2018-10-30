@@ -32,6 +32,14 @@ class Adapt_model extends CI_Model
         }
     }
 
+    /**
+     * 获取指定路口的自适应配时信息
+     *
+     * @param        $logicJunctionId
+     * @param string $select
+     *
+     * @return array
+     */
     public function getAdaptByJunctionId($logicJunctionId, $select = '*')
     {
         return $this->db->select($select)
