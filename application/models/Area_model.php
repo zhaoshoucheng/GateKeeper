@@ -221,6 +221,10 @@ class Area_model extends CI_Model
 
         $areaIds = array_column($areas, 'id');
 
+        if(empty($areaIds)) {
+            return [];
+        }
+
         $areaIdNames = array_column($areas, 'area_name', 'id');
 
         $areaJunctions = $this->db->select('area_id, junction_id')
