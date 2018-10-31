@@ -37,51 +37,6 @@ class Redis_model extends CI_Model
     }
 
     /**
-     * 获取数据
-     *
-     * @param $key  string key
-     *
-     * @return array|string|bool
-     */
-    public function getData($key)
-    {
-        if (!$this->redis) {
-            return false;
-        }
-
-        try {
-            $res = $this->redis->get($key);
-            if (!$res) {
-                return false;
-            }
-        } catch (\RedisException $e) {
-            $res = false;
-        }
-        return $res;
-    }
-
-    /**
-     * 存储数据
-     *
-     * @param $key    string key
-     * @param $value  array|string value
-     *
-     * @return bool
-     */
-    public function setData($key, $value)
-    {
-        if (!$this->redis) {
-            return false;
-        }
-        try {
-            $res = $this->redis->set($key, $value);
-        } catch (\RedisException $e) {
-            $res = false;
-        }
-        return $res;
-    }
-
-    /**
      * 设置时效
      *
      * @param $key   string   key
@@ -103,27 +58,6 @@ class Redis_model extends CI_Model
         }
         if (!$setResult) {
             com_log_warning('redis_model_setex_false', 0, "", compact("key", "time", "value"));
-        }
-        return true;
-    }
-
-    /**
-     * 设置时效
-     *
-     * @param $key   string   key
-     * @param $time  int 秒
-     *
-     * @return bool
-     */
-    public function setExpire($key, $time)
-    {
-        if (!$this->redis) {
-            return false;
-        }
-        try {
-            $this->redis->expire($key, $time);
-        } catch (\RedisException $e) {
-            return false;
         }
         return true;
     }
@@ -231,5 +165,207 @@ class Redis_model extends CI_Model
             return false;
         }
         return true;
+    }
+
+    /**
+     * 获取指定城市的最新 hour
+     *
+     * @param $cityId
+     *
+     * @return array|bool|string
+     */
+    public function getHour($cityId)
+    {
+        $key = 'its_realtime_lasthour_' . $cityId;
+
+        return $this->getData($key);
+    }
+
+    /**
+     * 获取数据
+     *
+     * @param $key  string key
+     *
+     * @return array|string|bool
+     */
+    public function getData($key)
+    {
+        if (!$this->redis) {
+            return false;
+        }
+
+        try {
+            $res = $this->redis->get($key);
+            if (!$res) {
+                return false;
+            }
+        } catch (\RedisException $e) {
+            $res = false;
+        }
+        return $res;
+    }
+
+    /**
+     * 缓存评估数据用于下载
+     *
+     * @param string $downloadId
+     * @param array  $data
+     *
+     * @return bool
+     */
+    public function setComparisonDownloadData(string $downloadId, array $data)
+    {
+        $this->load->config('realtime_conf');
+
+        $key = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
+
+        // 设置Redis缓存
+        $d = $this->setData($key, json_encode($data));
+
+        $e = $this->setExpire($key, 30 * 60);
+
+        return $d && $e;
+    }
+
+    /**
+     * 存储数据
+     *
+     * @param $key    string key
+     * @param $value  array|string value
+     *
+     * @return bool
+     */
+    public function setData($key, $value)
+    {
+        if (!$this->redis) {
+            return false;
+        }
+        try {
+            $res = $this->redis->set($key, $value);
+        } catch (\RedisException $e) {
+            $res = false;
+        }
+        return $res;
+    }
+
+    /**
+     * 设置时效
+     *
+     * @param $key   string   key
+     * @param $time  int 秒
+     *
+     * @return bool
+     */
+    public function setExpire($key, $time)
+    {
+        if (!$this->redis) {
+            return false;
+        }
+        try {
+            $this->redis->expire($key, $time);
+        } catch (\RedisException $e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param string $downloadId
+     *
+     * @return bool|mixed
+     */
+    public function getComparisonDownloadData(string $downloadId)
+    {
+        $this->load->config('realtime_conf');
+
+        $key = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
+
+        if (!($data = $this->getData($key))) {
+            return false;
+        }
+
+        return json_decode($data, true);
+    }
+
+    /**
+     * @param $cityId
+     * @param $date
+     * @param $hour
+     *
+     * @return bool|mixed
+     */
+    public function getRealtimePretreatJunctionList($cityId, $date, $hour)
+    {
+        $key = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
+
+        if(!($data = $this->getData($key))) {
+            return false;
+        }
+
+        return json_decode($data, true);
+    }
+
+    /**
+     * @param $cityId
+     * @param $date
+     *
+     * @return bool|mixed
+     */
+    public function getRealtimeAvgStopDelay($cityId, $date)
+    {
+        $key = 'its_realtime_avg_stop_delay_' . $cityId . '_' . $date;
+
+        if(!($data = $this->getData($key))) {
+            return false;
+        }
+
+        return json_decode($data, true);
+    }
+
+    /**
+     * @param $token
+     *
+     * @return bool
+     */
+    public function setToken($token)
+    {
+        $d = $this->setData('Token_' . $token, $token);
+        $e = $this->setExpire('Token_' . $token, 60 * 30);
+
+        return $d && $e;
+    }
+
+    /**
+     * @param $token
+     *
+     * @return bool
+     */
+    public function verifyToken($token)
+    {
+        $key = 'Token_' . $token;
+
+        if(!($data = $this->getData($key))) {
+            return false;
+        }
+
+        $this->deleteData($key);
+
+        return true;
+    }
+
+    /**
+     * @param $cityId
+     *
+     * @return bool|mixed
+     */
+    public function getRealtimeAlarmList($cityId)
+    {
+        $key = 'its_realtime_alarm_' . $cityId;
+
+        if(!($data = $this->getData($key))) {
+            return false;
+        }
+
+        return json_decode($data, true);
     }
 }

@@ -74,11 +74,9 @@ class OverviewService extends BaseService
 
         $hour = $this->helperService->getLastestHour($cityId);
 
-        $redisKey = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
+        $data = $this->redis_model->getRealtimePretreatJunctionList($cityId, $date, $hour);
 
-        $junctionList = $this->redis_model->getData($redisKey);
-
-        return $junctionList ? json_decode($junctionList, true) : [];
+        return $data ? $data : [];
     }
 
     /**
@@ -87,19 +85,16 @@ class OverviewService extends BaseService
      * @param $params
      *
      * @return array
+     * @throws \Exception
      */
     public function operationCondition($params)
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
 
-        $redisKey = 'its_realtime_avg_stop_delay_' . $cityId . '_' . $date;
+        $res = $this->redis_model->getRealtimeAvgStopDelay($cityId, $date);
 
-        $res = $this->redis_model->getData($redisKey);
-
-        $result = $res
-            ? json_decode($res, true)
-            : $this->realtime_model->getAvgQuotaByCityId($cityId, $date, 'hour, avg(stop_delay) as avg_stop_delay');
+        $result = $res ? $res : $this->realtime_model->getAvgQuotaByCityId($cityId, $date, 'hour, avg(stop_delay) as avg_stop_delay');
 
         $realTimeQuota = $this->config->item('real_time_quota');
 
@@ -227,18 +222,13 @@ class OverviewService extends BaseService
      */
     public function verifyToken($params)
     {
-        $tokenval = 'Token_' . $params['tokenval'];
+        $token = 'Token_' . $params['tokenval'];
 
-        $data = [];
+        $res = $this->redis_model->verifyToken($token);
 
-        if (!$this->redis_model->getData($tokenval)) {
-            $data['verify'] = false;
-        } else {
-            $this->redis_model->deleteData($tokenval);
-            $data['verify'] = true;
-        }
-
-        return $data;
+        return [
+            'verify' => $res
+        ];
     }
 
     /**
@@ -468,12 +458,7 @@ class OverviewService extends BaseService
 
         $hour = $this->helperService->getLastestHour($cityId);
 
-        // 先去redis查数据，如果没有则查表
-        $alarmRedisKey = 'its_realtime_alarm_' . $cityId;
-
-        $res = $this->redis_model->getData($alarmRedisKey);
-
-        $res = json_decode($res, true);
+        $res = $this->redis_model->getRealtimeAlarmList($cityId);
 
         if (!$res || empty($res)) {
 

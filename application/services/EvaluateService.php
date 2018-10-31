@@ -173,6 +173,7 @@ class EvaluateService extends BaseService
      * @param $params
      *
      * @return array
+     * @throws \Exception
      */
     public function getQuotaTrend($params)
     {
@@ -468,16 +469,13 @@ class EvaluateService extends BaseService
             'direction' => $flowsInfo[$logicJunctionId][$logicFlowId] ?? '',
         ];
 
-        // 将结果存储在redis中，以备下载使用
-        $redisKeyPrefix = $this->config->item('quota_evaluate_key_prefix');
-        $redisKey       = md5(json_encode($result));
+        $downloadId = md5(json_encode($result));
 
         // 将ID返回前端以供下载使用
-        $result['info']['download_id'] = $redisKey;
+        $result['info']['download_id'] = $downloadId;
 
-        $this->redis_model->setData($redisKeyPrefix . $redisKey, json_encode($result));
-        // 30分钟后过期
-        $this->redis_model->setExpire($redisKeyPrefix . $redisKey, 1800);
+        // 缓存数据
+        $this->redis_model->setComparisonDownloadData($downloadId, $result);
 
         return $result;
     }
@@ -514,13 +512,13 @@ class EvaluateService extends BaseService
     public function download($params)
     {
 
-        $key = $this->config->item('quota_evaluate_key_prefix') . $params['download_id'];
+        $downloadId = $params['download_id'];
 
-        if (!($data = $this->redis_model->getData($key))) {
+        $data = $this->redis_model->getComparisonDownloadData($downloadId);
+
+        if (!$data) {
             throw new \Exception('请先评估再下载', ERR_DEFAULT);
         }
-
-        $data = json_decode($data, true);
 
         $fileName = "{$data['info']['junction_name']}_{$data['info']['quota_name']}_" . date('Ymd');
 

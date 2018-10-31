@@ -420,11 +420,7 @@ class RoadService extends BaseService
 
         $result['info']['download_id'] = $downloadId;
 
-        $redisKey = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
-
-        $this->redis_model->setData($redisKey, $jsonResult);
-
-        $this->redis_model->setExpire($redisKey, 30 * 60);
+        $this->redis_model->setComparisonDownloadData($downloadId, $result);
 
         return $result;
     }
@@ -463,17 +459,13 @@ class RoadService extends BaseService
     {
         $downloadId = $params['download_id'];
 
-        $key = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
+        $data = $this->redis_model->getComparisonDownloadData($downloadId);
 
-        $excelStyle = $this->config->item('excel_style');
-
-        $res = $this->redis_model->getData($key);
-
-        if (!$res) {
+        if (!$data) {
             throw new \Exception('请先评估再下载', ERR_PARAMETERS);
         }
 
-        $data = json_decode($res, true);
+        $excelStyle = $this->config->item('excel_style');
 
         $fileName = "{$data['info']['road_name']}_" . date('Ymd');
 
