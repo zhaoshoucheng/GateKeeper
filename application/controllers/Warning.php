@@ -21,7 +21,7 @@ class Warning extends MY_Controller
                 'timestamp' => time(),
                 'value' => 1,
                 'tags' => [
-                    "host" => "ipd-cloud-web00.gz01",
+                    "host" => gethostname(),
                 ],
                 'step' => 10,
             ]
