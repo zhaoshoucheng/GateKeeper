@@ -7,12 +7,18 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\JunctionService;
+
 class Junction extends MY_Controller
 {
-    private $eamil_to = 'ningxiangbing@didichuxing.com';
+    protected $junctionService;
+
     public function __construct()
     {
         parent::__construct();
+
+        $this->junctionService = new JunctionService();
+
         $this->load->model('junction_model');
         $this->load->model('timing_model');
         $this->load->config('nconf');
@@ -21,66 +27,57 @@ class Junction extends MY_Controller
 
     /**
     * 评估-获取全城路口指标信息
-    * @param task_id     interger  Y 任务ID
-    * @param city_id     interger  Y 城市ID
-    * @param type        interger  Y 指标计算类型 1：统合 0：时间点
-    * @param time_point  string    N 评估时间点 指标计算类型为1时非空
-    * @param confidence  interger  Y 置信度 0:全部 1:高 2:低
-    * @param quota_key   string    Y 指标key
+    * @param $params['task_id']     interger  Y 任务ID
+    * @param $params['city_id']     interger  Y 城市ID
+    * @param $params['type']        interger  Y 指标计算类型 1：统合 0：时间点
+    * @param $params['time_point']  string    N 评估时间点 指标计算类型为1时非空
+    * @param $params['confidence']  interger  Y 置信度 0:全部 1:高 2:低
+    * @param $params['quota_key']   string    Y 指标key
+    * @throws Exception
     * @return json
     */
     public function getAllCityJunctionInfo()
     {
         $params = $this->input->post(NULL, TRUE);
+
         // 校验参数
-        $validate = Validate::make($params, [
-                'task_id'    => 'min:1',
-                'type'       => 'min:0',
-                'city_id'    => 'min:1',
-                'quota_key'  => 'nullunable',
-                'confidence' => 'min:0'
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
+        $this->validate([
+            'task_id' => 'required|is_natural_no_zero',
+            'type' => 'required|is_natural',
+            'quota_key' => 'required|min_length[4]',
+            'confidence' => 'required|is_natural',
+            'city_id' => 'required|is_natural_no_zero',
+        ]);
 
         $data['task_id'] = (int)$params['task_id'];
         $data['type'] = (int)$params['type'];
         $data['city_id'] = $params['city_id'];
+        $data['time_point'] = '';
 
         // type == 0时 time_point为必传项
-        if ($data['type'] == 0 && empty(trim($params['time_point']))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'time_point不能为空！';
-            return;
-        }
         if ($data['type'] == 0) {
+            if (empty(trim($params['time_point']))) {
+                throw new \Exception('参数time_point传递错误！', ERR_PARAMETERS);
+            }
             $data['time_point'] = trim($params['time_point']);
         }
 
         // 判断置信度是否存在
         if (!array_key_exists($params['confidence'], $this->config->item('confidence'))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数confidence传递错误！';
-            return;
+            throw new \Exception('参数confidence传递错误！', ERR_PARAMETERS);
         }
         $data['confidence'] = $params['confidence'];
 
         // 判断指标KEY是否正确
         $data['quota_key'] = strtolower(trim($params['quota_key']));
         if (!array_key_exists($data['quota_key'], $this->config->item('junction_quota_key'))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数quota_key传递错误！';
-            return;
+            throw new \Exception('参数quota_key传递错误！', ERR_PARAMETERS);
         }
 
         // 获取全城路口指标信息
-        $data = $this->junction_model->getAllCityJunctionInfo($data);
+        $data = $this->junctionService->getAllCityJunctionInfo($data);
 
-        return $this->response($data);
+        $this->response($data);
     }
 
     /**

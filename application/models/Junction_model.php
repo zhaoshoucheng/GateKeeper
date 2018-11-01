@@ -20,8 +20,7 @@ class Junction_model extends CI_Model
 
         $is_existed = $this->db->table_exists($this->tb);
         if (!$is_existed) {
-            // 添加日志
-            return [];
+            throw new \Exception('数据表不存在！');
         }
 
         $this->load->config('nconf');
@@ -31,72 +30,38 @@ class Junction_model extends CI_Model
 
     /**
     * 获取全城路口信息
-    * @param data['task_id']    interger 任务ID
-    * @param data['type']       interger 计算指数类型 1：统合 0：时间点
-    * @param data['city_id']    interger 城市ID
-    * @param data['time_point'] string   评估时间点 指标计算类型为1时非空
-    * @param data['confidence'] interger 置信度
-    * @param data['quota_key']  string   指标key
+    * @param $params['task_id']    int      任务ID
+    * @param $params['type']       int      计算指数类型 1：统合 0：时间点
+    * @param $params['time_point'] string   评估时间点 指标计算类型为1时非空
+    * @param $params['quota_key']  string   指标KEY
+    * @param $params['confidence'] int      置信度
+    * @param $select               string   查询字段 默认全部
     * @return array
     */
-    public function getAllCityJunctionInfo($data)
+    public function getAllCityJunctionInfo($params, $select = '*')
     {
-        $quotaKey = $data['quota_key'];
 
-        // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
-        $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
-        if (count($allCityJunctions) < 1 || !$allCityJunctions) {
-            return [];
+        $where = 'task_id = ' . $params['task_id'];
+        if ($params['type'] == 0) {
+            $where .= " and type = {$params['type']} and time_point = '{$params['time_point']}'";
         }
 
-        $selectstr = empty($this->selectColumns($quotaKey)) ? '' : ',' . $this->selectColumns($quotaKey);
-        if (empty($selectstr)) {
-            return [];
-        }
-
-        $select = '';
-        if ($data['type'] == 1) { // 综合
-            $select = "id, junction_id, max({$quotaKey}) as {$quotaKey}";
-        } else {
-            $select = 'id, junction_id' . $selectstr;
-        }
-
-        $where = 'task_id = ' . $data['task_id'];
-        if ($data['type'] == 0) {
-            $where .= " and type = {$data['type']} and time_point = '{$data['time_point']}'";
-        }
-
-        $confidenceConf = $this->config->item('confidence');
-        if (isset($data['confidence'])
-            && (int)$data['confidence'] >= 1
-            && array_key_exists($data['confidence'], $confidenceConf))
-        {
-            $where .= ' and ' . $confidenceConf[$data['confidence']]['sql_where']($quotaKey . '_confidence');
+        // 是否选择置信度
+        if ((int)$params['confidence'] >= 1) { // 选择了置信度条件
+            $confidenceConf = $this->config->item('confidence');
+            $where .= ' and ' . $confidenceConf[$params['confidence']]['sql_where']($params['quotaKey'] . '_confidence');
         }
 
         $this->db->select($select);
         $this->db->from($this->tb);
         $this->db->where($where);
-        if ($data['type'] == 1) {
+
+        // 判断是否是综合查询
+        if ($params['type'] == 1) {
             $this->db->group_by('junction_id');
         }
 
-        $res = $this->db->get()->result_array();
-
-        $quotaKeyConf = $this->config->item('junction_quota_key');
-        $tempQuotaData = [];
-        foreach ($res as &$v) {
-            // 指标状态 1：高 2：中 3：低
-            $v['quota_status'] = $quotaKeyConf[$quotaKey]['status_formula']($v[$quotaKey]);
-
-            $v[$quotaKey] = $quotaKeyConf[$quotaKey]['round']($v[$quotaKey]);
-            $tempQuotaData[$v['junction_id']]['list'][$quotaKey] = $v[$quotaKey];
-            $tempQuotaData[$v['junction_id']]['list']['quota_status'] = $v['quota_status'];
-        }
-
-        $resultData = $this->mergeAllJunctions($allCityJunctions, $tempQuotaData, 'quota_detail');
-
-        return $resultData;
+        return $this->db->get()->result_array();
     }
 
     /**
