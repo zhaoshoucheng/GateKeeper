@@ -13,6 +13,37 @@ class Warning extends MY_Controller
         $this->load->helper('http');
     }
 
+    public function heartbeat()
+    {
+        $data = [
+            [
+                'name' => "LOG.signal_heartbeat",
+                'timestamp' => time(),
+                'value' => 1,
+                'tags' => [
+                    "host" => "ipd-cloud-web00.gz01",
+                ],
+                'step' => 10,
+            ]
+        ];
+        try {
+            $ret = httpPOST('http://collect.odin.xiaojukeji.com/api/v1/collector/push?ns=collect.hna.web.its-tool.ipd-cloud.didi.com', $data, 0, "json");
+            $ret = json_decode($ret, true);
+            if (isset($ret['code']) && $ret['code'] != 0) {
+                $message = isset($ret["msg"]) ? $ret["msg"] : "";
+                com_log_warning('warning_heartbeat_error', 0, $message, compact("data", "ret"));
+                $this->errno = -1;
+                $this->errmsg = 'warning_heartbeat_error';
+                return;
+            }
+            $this->output_data = $ret['data'];
+        } catch (Exception $e) {
+            $this->errorCode = $e->getCode();
+            $this->errorMessage = $e->getMessage();
+        }
+        return $this->response("");
+    }
+
     public function notify()
     {
         $params = $this->input->post();
