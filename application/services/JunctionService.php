@@ -10,6 +10,11 @@ namespace Services;
 
 use Didi\Cloud\Collection\Collection;
 
+/**
+ * Class JunctionService
+ * @package Services
+ * @property \FlowDurationV6_model $flowDurationV6_model
+ */
 class JunctionService extends BaseService
 {
     public function __construct()
@@ -79,9 +84,8 @@ class JunctionService extends BaseService
         };
 
         $resultCollection = Collection::make($result);
-        $dataByFlow       = $resultCollection->groupBy(['logic_flow_id', 'hour'], $firstQuotaKey);
-        $dataByHour       = $resultCollection->groupBy(['hour', 'logic_flow_id'], $firstQuotaKey);
-
+        $dataByFlow = $resultCollection->groupBy(['logic_flow_id', 'hour'], $firstQuotaKey);
+        $dataByHour = $resultCollection->groupBy(['hour', 'logic_flow_id'], $firstQuotaKey);
         //求出每个方向的全天均值中最大的方向 ID //如果有多个最大值，则取平均求最大
         $maxValueReduce = function (Collection $carry, $item) {
             $incrementItem = function (Collection $ca, $it) {
@@ -93,6 +97,9 @@ class JunctionService extends BaseService
             return $carry->set($item, $dataByHour->avg($item));
         };
 
+        /**
+         * @var Collection $maxFlowIds
+         */
         $maxFlowIds = $dataByHour->reduce($maxValueReduce, Collection::make([]))
             ->keysOfMaxValue()
             ->reduce($setValueReduce, Collection::make([]))

@@ -11,6 +11,12 @@ namespace Services;
 
 use Didi\Cloud\Collection\Collection;
 
+/**
+ * Class EvaluateService
+ * @package Services
+ * @property \Realtime_model       $realtime_model
+ * @property \FlowDurationV6_model $flowDurationV6_model
+ */
 class EvaluateService extends BaseService
 {
     protected $helperService;

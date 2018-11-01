@@ -15,6 +15,8 @@ use Overtrue\Pinyin\Pinyin;
  * Class TimingAdaptionAreaService
  * @package Services
  * @property \TimeAlarmRemarks_model $timeAlarmRemarks_model
+ * @property \Adapt_model            $adapt_model
+ * @property \RealtimeAlarm_model    $realtimeAlarm_model
  */
 class TimingAdaptionAreaService extends BaseService
 {
@@ -519,7 +521,7 @@ class TimingAdaptionAreaService extends BaseService
         // 路口ID
         $junctionId = array_column($areaAlarmJunctions, 'logic_junction_id');
         // flowID
-        $flowId = array_column($areaAlarmJunctions, 'logic_flow_id');
+        $flowId       = array_column($areaAlarmJunctions, 'logic_flow_id');
         $alarmRemarks = $this->timeAlarmRemarks_model->getAlarmRemarks($cityId, $areaId, $junctionId, $flowId);
         // 人工校验信息 [flowid => type]
         $alarmRemarksFlowKeyTypeValue = [];

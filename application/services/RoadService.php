@@ -12,6 +12,7 @@ use Didi\Cloud\Collection\Collection;
 /**
  * Class RoadService
  * @package Services
+ * @property \Road_model           $road_model
  */
 class RoadService extends BaseService
 {

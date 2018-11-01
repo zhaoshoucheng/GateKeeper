@@ -11,6 +11,7 @@ namespace Services;
 /**
  * Class HelperService
  * @package Services
+ * @property \Realtime_model $real_time
  */
 class HelperService extends BaseService
 {

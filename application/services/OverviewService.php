@@ -10,6 +10,12 @@ namespace Services;
 
 use Didi\Cloud\Collection\Collection;
 
+/**
+ * Class OverviewService
+ * @package Services
+ * @property \RealtimeAlarm_model $realtimeAlarm_model
+ * @property \Realtime_model      $realtime_model
+ */
 class OverviewService extends BaseService
 {
     protected $helperService;
@@ -227,7 +233,7 @@ class OverviewService extends BaseService
         $res = $this->redis_model->verifyToken($token);
 
         return [
-            'verify' => $res
+            'verify' => $res,
         ];
     }
 

@@ -10,6 +10,12 @@ namespace Services;
 
 use Didi\Cloud\Collection\Collection;
 
+/**
+ * Class TimingAdaptionService
+ * @package Services
+ * @property \Adapt_model $adapt_model
+ * @property \Realtime_model $realtime_model
+ */
 class TimingAdaptionService extends BaseService
 {
     protected $helperService;
@@ -20,6 +26,7 @@ class TimingAdaptionService extends BaseService
 
         $this->load->model('redis_model');
         $this->load->model('adapt_model');
+        $this->load->model('realtime_model');
 
         $this->load->config('nconf');
 
