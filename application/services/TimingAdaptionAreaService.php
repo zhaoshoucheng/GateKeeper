@@ -425,7 +425,7 @@ class TimingAdaptionAreaService extends BaseService
 
         $cityId     = $params['city_id'];
         $areaId     = $params['area_id'];
-        $alarmType  = $params['alram_type'];
+        $alarmType  = $params['alarm_type'];
         $ignoreType = $params['ignore_type'];
 
         // 获取实时报警路口信息（全城）
@@ -876,7 +876,7 @@ class TimingAdaptionAreaService extends BaseService
             ],
         ];
 
-        $ret['signal_info'] = $timingInfo['data'];
+        $ret['signal_info'] = $timingInfo;
 
         return $ret;
     }

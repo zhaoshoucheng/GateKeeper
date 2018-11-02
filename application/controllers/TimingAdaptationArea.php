@@ -11,7 +11,6 @@ use Services\TimingAdaptionAreaService;
 
 /**
  * Class TimingAdaptationArea
- * @property Timingadaptationarea_model $timingadaptationarea_model
  */
 class TimingAdaptationArea extends MY_Controller
 {
@@ -20,7 +19,6 @@ class TimingAdaptationArea extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('timingadaptationarea_model');
 
         $this->timingAdaptionAreaService = new TimingAdaptionAreaService();
     }
@@ -209,7 +207,7 @@ class TimingAdaptationArea extends MY_Controller
             'logic_flow_id' => 'required|trim|min_length[1]',
         ]);
 
-        $result = $this->timingadaptationarea_model->getSpaceTimeMtraj($params);
+        $result = $this->timingAdaptionAreaService->getSpaceTimeMtraj($params);
 
         $this->response($result);
     }
@@ -229,7 +227,7 @@ class TimingAdaptationArea extends MY_Controller
             'logic_flow_id' => 'required|trim|min_length[1]',
         ]);
 
-        $result = $this->timingadaptationarea_model->getScatterMtraj($params);
+        $result = $this->timingAdaptionAreaService->getScatterMtraj($params);
 
         $this->response($result);
     }
@@ -249,7 +247,7 @@ class TimingAdaptationArea extends MY_Controller
             'logic_flow_id' => 'required|trim|min_length[1]',
         ]);
 
-        $result = $this->timingadaptationarea_model->getQueueLengthMtraj($params);
+        $result = $this->timingAdaptionAreaService->getQueueLengthMtraj($params);
 
         $this->response($result);
     }
