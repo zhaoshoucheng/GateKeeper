@@ -23,7 +23,7 @@ class ReportService extends BaseService
         parent::__construct();
 
         $this->load->model('report_model');
-        $this->load->model('uploadfile_model');
+        $this->load->model('uploadfFile_model');
         $this->load->model('gift_model');
         $this->load->model('waymap_model');
     }

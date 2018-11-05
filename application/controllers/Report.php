@@ -12,9 +12,6 @@ class Report extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('report_model');
-        $this->load->model('gift_model');
-        $this->load->model('waymap_model');
 
         $this->reportService = new ReportService();
     }
