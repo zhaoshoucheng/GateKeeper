@@ -97,76 +97,78 @@ class Period_model extends CI_Model
             $this->db->where_in('hour', $hourList);
         }
 
-        $ret = $this->db->get('city_hour_report')->result_array();
-        return $ret;
+        $res = $this->db->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
-    public function getJunctionWeekData($cityId, $logicJunctionId = null, $dateList, $orderBy)
+    public function getJunctionWeekData($cityId, $logicJunctionId, $dateList, $orderBy)
     {
-        $where = [
-            'city_id' => $cityId,
-        ];
-        if (!empty($logicJunctionId)) {
-            $where['logic_junction_id'] = $logicJunctionId;
-        }
-        $ret = $this->db->where(
-            $where
-        )->where_in(
-            'date', $dateList
-        )->order_by($orderBy)->limit(1000)->get('junction_week_report')->result_array();
+        $this->db->select('*')
+            ->from('junction_week_report')
+            ->where('city_id', $cityId)
+            ->where_in('date', $dateList)
+            ->order_by($orderBy)
+            ->limit(1000);
 
-        return $ret;
+        if (!empty($logicJunctionId)) {
+            $this->db->where('logic_junction_id', $logicJunctionId);
+        }
+
+        $res = $this->db->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     public function getJunctionDayData($cityId, $logicJunctionId, $dateList, $orderBy)
     {
-        $where = [
-            'city_id' => $cityId,
-        ];
-        if (!empty($logicJunctionId)) {
-            $where['logic_junction_id'] = $logicJunctionId;
-        }
-        $ret = $this->db->where(
-            $where
-        )->where_in(
-            'date', $dateList
-        )->order_by($orderBy)->limit(1000)->get('junction_week_report')->result_array();
+        $this->db->select('*')
+            ->from('junction_week_report')
+            ->where('city_id', $cityId)
+            ->where_in('date', $dateList)
+            ->order_by($orderBy)
+            ->limit(1000);
 
-        return $ret;
+        if (!empty($logicJunctionId)) {
+            $this->db->where('logic_junction_id', $logicJunctionId);
+        }
+
+        $res = $this->db->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     public function getJunctionHourData($cityId, $dateList, $hour, $orderBy)
     {
-        $where = [
-            'city_id' => $cityId,
-        ];
+        $res = $this->db->where('city_id', $cityId)
+            ->where_in('date', $dateList)
+            ->where_in('hour', $hour)
+            ->order_by($orderBy)
+            ->limit(1000)
+            ->get('junction_hour_report');
 
-        $ret = $this->db->where(
-            $where
-        )->where_in(
-            'date', $dateList
-        )->where_in(
-            'hour', $hour
-        )->order_by($orderBy)->limit(1000)->get('junction_hour_report')->result_array();
-
-        return $ret;
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
-    public function getJunctionMonthData($cityId, $logicJunctionId = null, $year, $month, $orderBy)
+    public function getJunctionMonthData($cityId, $logicJunctionId, $year, $month, $orderBy)
     {
         $where = [
             'city_id' => $cityId,
             'year' => $year,
             'month' => $month,
         ];
+
         if (!empty($logicJunctionId)) {
             $where['logic_junction_id'] = $logicJunctionId;
         }
-        $ret = $this->db->where(
-            $where
-        )->order_by($orderBy)->limit(1000)->get('junction_month_report')->result_array();
 
-        return $ret;
+        $res = $this->db->where($where)
+            ->order_by($orderBy)
+            ->limit(1000)
+            ->get('junction_month_report');
+
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
 
