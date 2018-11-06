@@ -13,62 +13,41 @@ if (!defined('EVALUATE_QUOTA_ROOT')) {
     require(EVALUATE_QUOTA_ROOT . 'evaluateQuota/Autoloader.php');
 }
 
-if (!defined('EVALUATE_QUOTA_INFO')){
-    define('EVALUATE_QUOTA_INFO',EVALUATE_QUOTA_ROOT. 'evaluateQuota/QuotaInfo'.DIRECTORY_SEPARATOR);
+if (!defined('EVALUATE_QUOTA_INFO')) {
+    define('EVALUATE_QUOTA_INFO', EVALUATE_QUOTA_ROOT . 'evaluateQuota/QuotaInfo' . DIRECTORY_SEPARATOR);
 }
 
 /**
  * Class EvaluateQuota
  *
  * @method array getJunctionDurationDelay($data, $start, $end)
+ * @method array getCityStopDelayAve($hourDate)
+ * @method array getJunctionStopDelayAve($date)
+ * @method array getJunctionStopDelayAveTable($date)
+ * @method array getJunctionQueueLengthAve($date)
+ * @method array getJunctionQueueLengthAveTable($date)
+ * @method array getCitySplloverFreq($date)
+ * @method array getCitySpeedAve($date)
  */
 class EvaluateQuota
 {
     private $_evaluateQuotaFactory;
 
-    private function _initQuotaFactory(EvaluateQuotaFactory $factory)
-    {
-        $this->_evaluateQuotaFactory = $factory;
-    }
-
-    private function _getAreaQuotaFactory()
-    {
-        $this->_initQuotaFactory(new AreaQuota());
-        return $this->_evaluateQuotaFactory;
-    }
-    private function _getJunctionQuotaFactory()
-    {
-        $this->_initQuotaFactory(new JunctionQuota());
-        return $this->_evaluateQuotaFactory;
-    }
-    private function _getCityQuotaFactory()
-    {
-        $this->_initQuotaFactory(new CityQuota());
-        return $this->_evaluateQuotaFactory;
-    }
-    private function _camelize($uncamelized_words,$separator='_')
-    {
-        $uncamelized_words = $separator. str_replace($separator, " ", strtolower($uncamelized_words));
-        return ltrim(str_replace(" ", "", ucwords($uncamelized_words)), $separator );
-    }
-
-    private function _uncamelize($camelCaps,$separator='_')
-    {
-        return strtolower(preg_replace('/([a-z])([A-Z])/', "$1" . $separator . "$2", $camelCaps));
-    }
-
-
     /**
      * 调用方式:驼峰命名 get +指标类型(City,Junction)+指标名称(durationDelay)
+     *
      * @param $name
      * @param $arguments
+     *
+     * @return mixed
+     * @throws Exception
      */
     public function __call($name, $arguments)
     {
-        $name = $this->_uncamelize($name);
-        $feature = explode('_',$name);
+        $name    = $this->_uncamelize($name);
+        $feature = explode('_', $name);
         $factory = null;
-        switch ($feature[1]){
+        switch ($feature[1]) {
             case 'junction':
                 $factory = $this->_getJunctionQuotaFactory();
                 break;
@@ -80,24 +59,59 @@ class EvaluateQuota
                 break;
             default:
                 throw new Exception('undefined quota type');
-
         }
-        if(empty($arguments[0])){
+
+        if (empty($arguments[0])) {
             throw new Exception('quota factory can not load data which is null');
         }
 
         $factory->load_data($arguments[0]);
         $funcName = 'get';
-        for($i = 2 ;$i<count($feature);$i++){
-            $funcName.="_".$feature[$i];
+        for ($i = 2; $i < count($feature); $i++) {
+            $funcName .= "_" . $feature[$i];
         }
         $funcName = self::_camelize($funcName);
         unset($arguments[0]);
         $args = $arguments;
-        if(method_exists($factory,$funcName)){
+        if (method_exists($factory, $funcName)) {
             return call_user_func_array([$factory, $funcName], $args);
         }
 
+        return null;
+    }
+
+    private function _uncamelize($camelCaps, $separator = '_')
+    {
+        return strtolower(preg_replace('/([a-z])([A-Z])/', "$1" . $separator . "$2", $camelCaps));
+    }
+
+    private function _getJunctionQuotaFactory()
+    {
+        $this->_initQuotaFactory(new JunctionQuota());
+        return $this->_evaluateQuotaFactory;
+    }
+
+    private function _initQuotaFactory(EvaluateQuotaFactory $factory)
+    {
+        $this->_evaluateQuotaFactory = $factory;
+    }
+
+    private function _getAreaQuotaFactory()
+    {
+        $this->_initQuotaFactory(new AreaQuota());
+        return $this->_evaluateQuotaFactory;
+    }
+
+    private function _getCityQuotaFactory()
+    {
+        $this->_initQuotaFactory(new CityQuota());
+        return $this->_evaluateQuotaFactory;
+    }
+
+    private function _camelize($uncamelized_words, $separator = '_')
+    {
+        $uncamelized_words = $separator . str_replace($separator, " ", strtolower($uncamelized_words));
+        return ltrim(str_replace(" ", "", ucwords($uncamelized_words)), $separator);
     }
 }
 

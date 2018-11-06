@@ -8,157 +8,158 @@
 
 class Period_model extends CI_Model
 {
+    /**
+     * @var CI_DB_query_builder
+     */
+    protected $db;
+
     public function __construct()
     {
         parent::__construct();
 
-        if (empty($this->db)) {
-            $this->db = $this->load->database('default', true);
-        }
+        $this->db = $this->load->database('default', true);
 
     }
 
-    public function getDistrictMonthData($cityId,$districtList,$year,$month)
+    public function getDistrictMonthData($cityId, $districtList, $year, $month)
     {
         $ret = $this->db->where(
-            array(
-                'city_id'=>$cityId,
-                'year'=>$year,
-                'month'=>intval($month)
-            )
-        )->where_in('district_id',$districtList)->get('district_month_report')->result_array();
+            [
+                'city_id' => $cityId,
+                'year' => $year,
+                'month' => intval($month),
+            ]
+        )->where_in('district_id', $districtList)->get('district_month_report')->result_array();
 
         return $ret;
     }
 
-    public function getDistrictWeekData($cityId,$districtList,$dateList)
+    public function getDistrictWeekData($cityId, $districtList, $dateList)
     {
         $ret = $this->db->where(
-            array(
-                'city_id'=>$cityId,
-            )
-        )->where_in('district_id',$districtList)->where_in('date',$dateList)->get('district_week_report')->result_array();
+            [
+                'city_id' => $cityId,
+            ]
+        )->where_in('district_id', $districtList)->where_in('date', $dateList)->get('district_week_report')->result_array();
         return $ret;
     }
 
-    public function getDistrictHourData($cityId,$districtList,$dateList,$hourList = array())
+    public function getDistrictHourData($cityId, $districtList, $dateList, $hourList = [])
     {
         $this->db->where(
-            array(
-                'city_id'=>$cityId,
-            )
+            [
+                'city_id' => $cityId,
+            ]
         )->where_in(
-            'date',$dateList
+            'date', $dateList
         )->where_in(
-            'district_id',$districtList
+            'district_id', $districtList
         );
-        if(!empty($hourList)){
-            $this->db->where_in('hour',$hourList);
+        if (!empty($hourList)) {
+            $this->db->where_in('hour', $hourList);
         }
 
         $ret = $this->db->get('district_hour_report')->result_array();
         return $ret;
     }
 
-    public function getCityMonthData($cityId,$year,$month)
+    public function getCityMonthData($cityId, $year, $month)
     {
-        $ret = $this->db->where(
-            array(
-                'city_id'=>$cityId,
-                'year'=>$year,
-                'month'=>$month
-            )
-        )->get('city_month_report')->result_array();
-        return $ret;
+        $res = $this->db->select('*')
+            ->from('city_month_report')
+            ->where('city_id', $cityId)
+            ->where('year', $year)
+            ->where('month', $month)
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
-    public function getCityWeekData($cityId,$date)
+    public function getCityWeekData($cityId, $date)
     {
-        $ret = $this->db->where(
-            array(
-                'city_id'=>$cityId,
-                'date'=>$date,
-            )
-        )->get('city_week_report')->result_array();
-        return $ret;
+        $res = $this->db->select('*')
+            ->from('city_week_report')
+            ->where('city_id', $cityId)
+            ->where('date', $date)
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
-    public function getCityHourData($cityId,$dateList,$hourList = array())
+    public function getCityHourData($cityId, $dateList, $hourList = [])
     {
-        $this->db->where(
-            array(
-                'city_id'=>$cityId,
-            )
-        )->where_in(
-            'date',$dateList
-        );
-        if(!empty($hourList)){
-            $this->db->where_in('hour',$hourList);
+        $this->db->select('*')
+            ->from('city_hour_report')
+            ->where('city_id', $cityId)
+            ->where_in('date', $dateList);
+
+        if (!empty($hourList)) {
+            $this->db->where_in('hour', $hourList);
         }
 
         $ret = $this->db->get('city_hour_report')->result_array();
         return $ret;
     }
 
-    public function getJunctionWeekData($cityId,$logicJunctionId=null,$dateList,$orderBy)
+    public function getJunctionWeekData($cityId, $logicJunctionId = null, $dateList, $orderBy)
     {
-        $where = array(
-            'city_id'=>$cityId,
-        );
-        if(!empty($logicJunctionId)){
+        $where = [
+            'city_id' => $cityId,
+        ];
+        if (!empty($logicJunctionId)) {
             $where['logic_junction_id'] = $logicJunctionId;
         }
         $ret = $this->db->where(
             $where
         )->where_in(
-            'date',$dateList
+            'date', $dateList
         )->order_by($orderBy)->limit(1000)->get('junction_week_report')->result_array();
 
         return $ret;
     }
 
-    public function getJunctionDayData($cityId,$logicJunctionId,$dateList,$orderBy)
+    public function getJunctionDayData($cityId, $logicJunctionId, $dateList, $orderBy)
     {
-        $where = array(
-            'city_id'=>$cityId,
-        );
-        if(!empty($logicJunctionId)){
+        $where = [
+            'city_id' => $cityId,
+        ];
+        if (!empty($logicJunctionId)) {
             $where['logic_junction_id'] = $logicJunctionId;
         }
         $ret = $this->db->where(
             $where
         )->where_in(
-            'date',$dateList
+            'date', $dateList
         )->order_by($orderBy)->limit(1000)->get('junction_week_report')->result_array();
 
         return $ret;
     }
 
-    public function getJunctionHourData($cityId,$dateList,$hour,$orderBy)
+    public function getJunctionHourData($cityId, $dateList, $hour, $orderBy)
     {
-        $where = array(
-            'city_id'=>$cityId,
-        );
+        $where = [
+            'city_id' => $cityId,
+        ];
 
         $ret = $this->db->where(
             $where
         )->where_in(
-            'date',$dateList
+            'date', $dateList
         )->where_in(
-            'hour',$hour
+            'hour', $hour
         )->order_by($orderBy)->limit(1000)->get('junction_hour_report')->result_array();
 
         return $ret;
     }
 
-    public function getJunctionMonthData($cityId,$logicJunctionId=null,$year,$month,$orderBy)
+    public function getJunctionMonthData($cityId, $logicJunctionId = null, $year, $month, $orderBy)
     {
-        $where = array(
-            'city_id'=>$cityId,
-            'year'=>$year,
-            'month'=>$month
-        );
-        if(!empty($logicJunctionId)){
+        $where = [
+            'city_id' => $cityId,
+            'year' => $year,
+            'month' => $month,
+        ];
+        if (!empty($logicJunctionId)) {
             $where['logic_junction_id'] = $logicJunctionId;
         }
         $ret = $this->db->where(
