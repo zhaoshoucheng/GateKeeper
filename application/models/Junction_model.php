@@ -9,7 +9,6 @@ class Junction_model extends CI_Model
 {
     private $tb = 'junction_index';
     private $db = '';
-    private $email_to = 'ningxiangbing@didichuxing.com';
 
     public function __construct()
     {
@@ -66,12 +65,12 @@ class Junction_model extends CI_Model
 
     /**
      * 获取全城路口诊断问题列表
-     * @param data['task_id']      interger 任务ID
-     * @param data['city_id']      interger 城市ID
-     * @param data['time_point']   string   时间点
-     * @param data['type']         interger 计算类型
-     * @param data['confidence']   interger 置信度
-     * @param data['diagnose_key'] array    诊断问题KEY
+     * @param $data['task_id']      interger 任务ID
+     * @param $data['city_id']      interger 城市ID
+     * @param $data['time_point']   string   时间点
+     * @param $data['type']         interger 计算类型
+     * @param $data['confidence']   interger 置信度
+     * @param $data['diagnose_key'] array    诊断问题KEY
      * @return array
      */
     public function getJunctionsDiagnoseList($data)
@@ -179,12 +178,12 @@ class Junction_model extends CI_Model
 
     /**
      * 查询综合类型全城路口诊断问题列表
-     * @param data['task_id']      interger 任务ID
-     * @param data['city_id']      interger 城市ID
-     * @param data['time_point']   string   时间点
-     * @param data['type']         interger 计算类型
-     * @param data['confidence']   interger 置信度
-     * @param data['diagnose_key'] array    诊断问题KEY
+     * @param $data['task_id']      interger 任务ID
+     * @param $data['city_id']      interger 城市ID
+     * @param $data['time_point']   string   时间点
+     * @param $data['type']         interger 计算类型
+     * @param $data['confidence']   interger 置信度
+     * @param $data['diagnose_key'] array    诊断问题KEY
      * @return array
      */
     private function getJunctionsDiagnoseBySynthesize($data)
@@ -253,10 +252,10 @@ class Junction_model extends CI_Model
 
     /**
      * 根据时间点查询全城路口诊断问题列表
-     * @param data['task_id']      interger 任务ID
-     * @param data['time_point']   string   时间点
-     * @param data['confidence']   interger 置信度
-     * @param data['diagnose_key'] array    诊断问题KEY
+     * @param $data['task_id']      interger 任务ID
+     * @param $data['time_point']   string   时间点
+     * @param $data['confidence']   interger 置信度
+     * @param $data['diagnose_key'] array    诊断问题KEY
      * @return array
      */
     private function getJunctionsDiagnoseByTimePoint($data)
@@ -389,11 +388,11 @@ class Junction_model extends CI_Model
 
     /**
      * 诊断-诊断问题排序列表
-     * @param data['task_id']      interger 任务ID
-     * @param data['time_point']   string   时间点
-     * @param data['diagnose_key'] array    诊断问题KEY
-     * @param data['confidence']   interger 置信度
-     * @param data['orderby']      interger 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
+     * @param $data['task_id']      interger 任务ID
+     * @param $data['time_point']   string   时间点
+     * @param $data['diagnose_key'] array    诊断问题KEY
+     * @param $data['confidence']   interger 置信度
+     * @param $data['orderby']      interger 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
      * @return array
      */
     public function getDiagnoseRankList($data)
@@ -485,84 +484,41 @@ class Junction_model extends CI_Model
 
     /**
      * 获取诊断列表页简易路口详情
-     * @param $data['task_id']         interger 任务ID
-     * @param $data['junction_id']     string   逻辑路口ID
-     * @param $data['dates']           array    评估/诊断日期
-     * @param $data['time_point']      string   时间点
-     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-     * @param $data['diagnose_key']    array    诊断问题KEY
-     * @param $data['timingType']      interger 配时来源 1：人工 2：反推
-     * @param $select                  string   select colum
+     * @param $taskId     int     任务ID
+     * @param $junctionId string  逻辑路口ID
+     * @param $timePoint  string  时间点
+     * @param $select     string  select colum
      * @return array
      */
-    public function getDiagnosePageSimpleJunctionDetail($data, $select)
+    public function getDiagnosePageSimpleJunctionDetail($taskId, $junctionId, $timePoint, $select = '*')
     {
         // 组织where条件
-        $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
+        $where = 'task_id = ' . $taskId . ' and junction_id = "' . $junctionId . '"';
         $where  .= ' and type = 0';
-        $where  .= ' and time_point = "' . trim($data['time_point']) . '"';
+        $where  .= ' and time_point = "' . $timePoint . '"';
 
-        $res = $this->db->select($select)
+        return $this->db->select($select)
                         ->from($this->tb)
                         ->where($where)
-                        ->get();
-
-        if (!$res) {
-            return [];
-        }
-
-        return $res->row_array();
+                        ->get()->row_array();
     }
 
     /**
      * 获取路口问题趋势图
-     * @param $data['task_id']         interger 任务ID
-     * @param $data['junction_id']     string   逻辑路口ID
-     * @param $data['time_point']      string   时间点
-     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-     * @param $data['diagnose_key']    array    诊断问题KEY
+     * @param $taskId      int    任务ID
+     * @param $junctionId  string 逻辑路口ID
+     * @param $select      string select colum
      * @return array
      */
-    public function getJunctionQuestionTrend($data)
+    public function getJunctionQuestionTrend($taskId, $junctionId, $select = '*')
     {
-        if (!empty($data['diagnose_key'])) {
-            /*
-             * 因为过饱和问题与空放问题共用一个指标，现空放问题的KEY与指标KEY相同
-             * 所以可以把过饱和问题的KEY忽略
-             */
-            $tempDiagnoseKey = [];
-            foreach ($data['diagnose_key'] as $k=>$v) {
-                $tempDiagnoseKey[$k] = $v;
-                if ($v == 'over_saturation') {
-                    $tempDiagnoseKey[$k] = 'saturation_index';
-                }
-            }
-            array_unique($tempDiagnoseKey);
-
-            $selectStr = $this->selectColumns($tempDiagnoseKey);
-            $select = "id, junction_id, {$selectStr}, stop_delay, time_point";
-        } else {
-            $select = "id, junction_id, stop_delay, time_point";
-        }
-
         // 组织where条件
-        $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
+        $where = 'task_id = ' . $taskId . ' and junction_id = "' . $junctionId . '" and type = 0';
 
-        $where  .= ' and type = 0';
-
-        $res = $this->db->select($select)
+        return $this->db->select($select)
                         ->from($this->tb)
                         ->where($where)
-                        ->get();
-
-        if (!$res || empty($res)) {
-            return [];
-        }
-
-        $result = $res->result_array();
-        $result = $this->formatJunctionQuestionTrendData($result, $data, $data['diagnose_key']);
-
-        return $result;
+                        ->get()->result_array();
     }
 
     /**
@@ -646,126 +602,6 @@ class Junction_model extends CI_Model
         }
 
         return $res->row_array();
-    }
-
-    /**
-     * 格式化路口问题趋势数据
-     *     PS:当路口无问题属于正常状态时，返回路口级指标平均延误的趋势图
-     * @param $data                         array  Y 路口数据
-     * @param $whereData['time_point']      string Y 时间点 用于标注问题持续时间段用
-     * @param $whereData['task_time_point'] string Y 任务时间段
-     * @param $diagnose                     array  N 需要查询的问题 当路口正常状态时，可为空
-     * @return array
-     */
-    private function formatJunctionQuestionTrendData($data, $whereData, $diagnose)
-    {
-        // 正常路口返回路口级指标平均延误的趋势图
-        $normalQuota = 'stop_delay';
-
-        // 任务开始、结束时间
-        $taskTimeRange = array_filter(explode('-', $whereData['task_time_range']));
-        $taskStartTime = strtotime($taskTimeRange[0]);
-        $taskEndTime = strtotime($taskTimeRange[1]);
-
-        // 使任务时间连续 时间间隔15分钟
-        for ($i = $taskStartTime; $i < $taskEndTime; $i += 15 * 60) {
-            $tempData[$i]['imbalance_index'] = 0;
-            $tempData[$i]['spillover_index'] = 0;
-            $tempData[$i]['saturation_index'] = 0;
-            $tempData[$i]['stop_delay'] = 0;
-            $tempData[$i]['time_point'] = date('H:i', $i);
-        }
-        foreach ($data as $k=>$v) {
-            $tempData[strtotime($v['time_point'])] = $v;
-        }
-        ksort($tempData);
-
-        // 诊断问题配置
-        $diagnoseConf = $this->config->item('diagnose_key');
-        // 路口级指标配置
-        $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
-
-        $newData = [];
-
-        if (!empty($diagnose)) { // 有问题的路口
-            foreach ($diagnoseConf as $k=>$v) {
-                if (!in_array($k, $diagnose, true)) {
-                    continue;
-                }
-
-                /*
-                 * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
-                 * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
-                 */
-                $diagnoseKey = $k;
-                if ($k == 'over_saturation') {
-                    $diagnoseKey = 'saturation_index';
-                }
-
-                $newData[$k]['info']['name'] = $v['name'];
-                $newData[$k]['info']['quota_name'] = $junctionQuotaKeyConf[$diagnoseKey]['name'];
-                // 此问题持续开始时间
-                $continuouStart = strtotime($whereData['time_point']);
-                // 此问题持续结束时间
-                $continuouEnd = strtotime($whereData['time_point']);
-                // 时间刻度15分钟
-                $scale = 15 * 60;
-                $isBeforQuestion = true;
-                $isAfterQuestion = true;
-
-                while ($isBeforQuestion) {
-                    $beforTime = $continuouStart - $scale;
-                    if (empty($tempData[$beforTime])) {
-                        $isBeforQuestion = false;
-                    } else {
-                        if ($v['junction_diagnose_formula']($tempData[$beforTime][$diagnoseKey])) {
-                            $continuouStart = $beforTime;
-                        } else {
-                            $isBeforQuestion = false;
-                        }
-                    }
-                }
-
-                while ($isAfterQuestion) {
-                    $afterTime = $continuouEnd + $scale;
-                    if (empty($tempData[$afterTime])) {
-                        $isAfterQuestion = false;
-                    } else {
-                        if ($v['junction_diagnose_formula']($tempData[$afterTime][$diagnoseKey])) {
-                            $continuouEnd = $afterTime;
-                        } else {
-                            $isAfterQuestion = false;
-                        }
-                    }
-                }
-
-                $newData[$k]['info']['continuous_start'] = date('H:i',$continuouStart);
-                $newData[$k]['info']['continuous_end'] = date('H:i', $continuouEnd);
-
-                foreach ($tempData as $kk=>$vv) {
-                    $newData[$k]['list'][$kk]['value'] = $junctionQuotaKeyConf[$diagnoseKey]['round']($vv[$diagnoseKey]);
-                    $newData[$k]['list'][$kk]['time'] = $vv['time_point'];
-                }
-                if (!empty($newData[$k]['list'])) {
-                    $newData[$k]['list'] = array_values($newData[$k]['list']);
-                }
-            }
-        } else { // 正常路口，返回路口级指标 平均延误 的趋势图
-            $newData[$normalQuota]['info']['name'] = $junctionQuotaKeyConf[$normalQuota]['name'];
-            $newData[$normalQuota]['info']['quota_name'] = $junctionQuotaKeyConf[$normalQuota]['name'];
-            $newData[$normalQuota]['info']['continuous_start'] = '00:00';
-            $newData[$normalQuota]['info']['continuous_end'] = '00:00';
-            foreach ($tempData as $k=>$v) {
-                $newData[$normalQuota]['list'][$k]['value']
-                = $junctionQuotaKeyConf[$normalQuota]['round']($v[$normalQuota]);
-                $newData[$normalQuota]['list'][$k]['time'] = $v['time_point'];
-            }
-            if (!empty($newData[$normalQuota]['list'])) {
-                $newData[$normalQuota]['list'] = array_values($newData[$normalQuota]['list']);
-            }
-        }
-
-        return $newData;
     }
 
     /**
