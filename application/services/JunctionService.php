@@ -106,18 +106,169 @@ class JunctionService extends BaseService
     }
 
     /**
-    * 获取诊断详情页数据
-    * @param $data['task_id']         interger 任务ID
-    * @param $data['junction_id']     string   逻辑路口ID
-    * @param $data['dates']           array    评估/诊断日期
-    * @param $data['search_type']     interger 查询类型 1：按方案查询 0：按时间点查询
-    * @param $data['time_point']      string   时间点 当search_type = 0 时 必传
-    * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
-    * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
-    * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
-    * @return array
+     * 获取诊断列表页简易路口详情
+     * @param $params['task_id']         interger 任务ID
+     * @param $params['junction_id']     string   逻辑路口ID
+     * @param $params['dates']           array    评估/诊断日期
+     * @param $params['time_point']      string   时间点
+     * @param $params['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+     * @param $params['diagnose_key']    array    诊断问题KEY
+     * @param $params['timingType']      interger 配时来源 1：人工 2：反推
+     * @return array
+     */
+    public function getDiagnosePageSimpleJunctionDetail($params)
+    {
+        /*
+         * 因为过饱和问题与空放问题共用一个指标，现空放问题的KEY与指标KEY相同
+         * 所以可以把过饱和问题的KEY忽略
+         */
+        $tempDiagnoseKey = [];
+        foreach ($params['diagnose_key'] as $k=>$v) {
+            $tempDiagnoseKey[$k] = $v;
+            if ($v == 'over_saturation') {
+                $tempDiagnoseKey[$k] = 'saturation_index';
+            }
+        }
+        array_unique($tempDiagnoseKey);
+        $selectStr = $this->selectColumns($tempDiagnoseKey);
+        $select = "id, junction_id, {$selectStr}, start_time, end_time, movements, time_point";
+
+        $data = $this->junction_model->getDiagnosePageSimpleJunctionDetail($params, $select);
+        if (!$data) {
+            return [];
+        }
+
+        $dates = $params['dates'];
+        $timingType = $params['timingType'];
+
+        // 将json转为数组
+        $data['movements'] = json_decode($data['movements'], true);
+        if (empty($data['movements'])) {
+            return [];
+        }
+
+        $resultData = [];
+        // 扩展指标字段
+        $resultData['extend_flow_quota']['confidence'] = '置信度';
+
+        // 获取flow_id=>name数组
+        $timingData = [
+            'junction_id' => trim($data['junction_id']),
+            'dates'       => $dates,
+            'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60),
+            'timingType'  => $timingType
+        ];
+        $flowIdName = $this->timing_model->getFlowIdToName($timingData);
+
+        // 置信度配置
+        $confidenceConf = $this->config->item('confidence');
+
+        // flow 所有指标配置
+        $flowQuotaKeyConf = $this->config->item('flow_quota_key');
+        // 指标集合
+        foreach ($flowQuotaKeyConf as $k => $v) {
+            $resultData['flow_quota'][$k]['name'] = $flowQuotaKeyConf[$k]['name'];
+            $resultData['flow_quota'][$k]['unit'] = $flowQuotaKeyConf[$k]['unit'];
+        }
+
+        $tempArr = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'confidence'=>'', 'comment'=>'']);
+        foreach ($data['movements'] as $k=>$v) {
+            $v['comment'] = $flowIdName[$v['movement_id']] ?? '';
+            $v['confidence'] = $confidenceConf[$v['confidence']]['name'];
+            foreach ($flowQuotaKeyConf as $kk=>$vv) {
+                if (isset($v[$kk])) {
+                    $v[$kk] = $vv['round']($v[$kk]);
+                }
+            }
+            $resultData['notmal_movements'][$k] = array_intersect_key($v, $tempArr);
+        }
+
+        // 诊断问题配置
+        $diagnoseConf = $this->config->item('diagnose_key');
+
+        /*********************************************
+            循环诊断问题配置
+            判断此路口有哪个问题
+            匹配movement中文名称
+            匹配置信度中文名称
+            匹配此路口有问题的movement并放入此问题集合中
+        *********************************************/
+        foreach ($diagnoseConf as $k=>$v) {
+            /*
+             * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
+             * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
+             */
+            $diagnoseKey = $k;
+            if ($k == 'over_saturation') {
+                $diagnoseKey = 'saturation_index';
+            }
+            if (!isset($data[$diagnoseKey])) {
+                continue;
+            }
+            if ($v['junction_diagnose_formula']($data[$diagnoseKey])) {
+                // 问题名称
+                $resultData['diagnose_detail'][$k]['name'] = $v['name'];
+
+                // 组织有此问题的movement集合
+                $resultData['diagnose_detail'][$k]['movements'] = [];
+
+                foreach ($data['movements'] as $kk=>$vv) {
+                    // 问题对应的指标
+                    $diagnoseQuota = $v['flow_diagnose']['quota'];
+                    if ($v['flow_diagnose']['formula']($vv[$diagnoseQuota])) {
+                        // movement_id
+                        $resultData['diagnose_detail'][$k]['movements'][$kk]['movement_id']
+                        = $vv['movement_id'];
+                        // movement中文名称-相位名称
+                        $resultData['diagnose_detail'][$k]['movements'][$kk]['comment']
+                        = $flowIdName[$vv['movement_id']];
+                        // 此问题对应指标值
+                        $resultData['diagnose_detail'][$k]['movements'][$kk][$diagnoseQuota]
+                        = $flowQuotaKeyConf[$diagnoseQuota]['round']($vv[$diagnoseQuota]);
+                        // 置信度
+                        $resultData['diagnose_detail'][$k]['movements'][$kk]['confidence']
+                        = $confidenceConf[$vv['confidence']]['name'];
+                    }
+                }
+
+                if (!empty($resultData['diagnose_detail'][$k]['movements'])) {
+                    $resultData['diagnose_detail'][$k]['movements']
+                    = array_values($resultData['diagnose_detail'][$k]['movements']);
+                }
+            }
+        }
+
+        return $resultData;
+    }
+
+    /**
+    * 格式化诊断列表页简易路口详情数据
+    * @param $data        路口详情数据
+    * @param $dates       评估/诊断日期
+    * @param $timingType  配时数据来源 1：人工 2：反推
     */
+    private function formatDiagnosePageSimpleJunctionDetailData($data, $dates, $timingType)
+    {
+        if (empty($data) || empty($dates)) {
+            return [];
+        }
+
+        
+    }
+
+    /**
+     * 获取诊断详情页数据
+     * @param $data['task_id']         interger 任务ID
+     * @param $data['junction_id']     string   逻辑路口ID
+     * @param $data['dates']           array    评估/诊断日期
+     * @param $data['search_type']     interger 查询类型 1：按方案查询 0：按时间点查询
+     * @param $data['time_point']      string   时间点 当search_type = 0 时 必传
+     * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
+     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
+     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+     * @param $data['timingType']      interger 配时来源 1：人工 2：反推
+     * @return array
+     */
     private function getDiagnoseJunctionDetail($data)
     {
         // 诊断问题配置
@@ -147,18 +298,18 @@ class JunctionService extends BaseService
     }
 
     /**
-    * 获取指标详情页数据
-    * @param $data['task_id']         interger 任务ID
-    * @param $data['junction_id']     string   逻辑路口ID
-    * @param $data['dates']           array    评估/诊断日期
-    * @param $data['search_type']     interger 查询类型 1：按方案查询 0：按时间点查询
-    * @param $data['time_point']      string   时间点 当search_type = 0 时 必传
-    * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
-    * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
-    * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
-    * @return array
-    */
+     * 获取指标详情页数据
+     * @param $data['task_id']         interger 任务ID
+     * @param $data['junction_id']     string   逻辑路口ID
+     * @param $data['dates']           array    评估/诊断日期
+     * @param $data['search_type']     interger 查询类型 1：按方案查询 0：按时间点查询
+     * @param $data['time_point']      string   时间点 当search_type = 0 时 必传
+     * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
+     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
+     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+     * @param $data['timingType']      interger 配时来源 1：人工 2：反推
+     * @return array
+     */
     private function getQuotaJunctionDetail($data)
     {
         // 组织select colum
@@ -183,13 +334,13 @@ class JunctionService extends BaseService
     }
 
     /**
-    * 格式化路口详情数据
-    * @param $data        路口详情数据
-    * @param $dates       评估/诊断日期
-    * @param $resultType  数据返回类型 1：指标详情页 2：诊断详情页
-    * @param $timingType  配时数据来源 1：人工 2：反推
-    * @return array
-    */
+     * 格式化路口详情数据
+     * @param $data        路口详情数据
+     * @param $dates       评估/诊断日期
+     * @param $resultType  数据返回类型 1：指标详情页 2：诊断详情页
+     * @param $timingType  配时数据来源 1：人工 2：反推
+     * @return array
+     */
     private function formatJunctionDetailData($data, $dates, $resultType, $timingType)
     {
         if (empty($data) || empty($dates) || (int)$resultType < 1) {
@@ -437,6 +588,29 @@ class JunctionService extends BaseService
         $resultData['center']['lat'] = $centerLat;
 
         return $resultData;
+    }
+
+    /**
+     * 组织select 字段
+     */
+    private function selectColumns($key)
+    {
+        $select = '';
+        if (is_string($key)) { // 评估，单选
+            if (array_key_exists($key, $this->config->item('junction_quota_key'))) {
+                $select = $key;
+            }
+        }
+        if (is_array($key)) { // 诊断问题， 多选
+            $diagnoseKeyConf = $this->config->item('diagnose_key');
+            foreach ($key as $v) {
+                if (array_key_exists($v, $diagnoseKeyConf)) {
+                    $select .= empty($select) ? $v : ',' . $v;
+                }
+            }
+        }
+
+        return $select;
     }
 
 }

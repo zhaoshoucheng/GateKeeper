@@ -26,16 +26,16 @@ class Junction extends MY_Controller
     }
 
     /**
-    * 评估-获取全城路口指标信息
-    * @param $params['task_id']     interger  Y 任务ID
-    * @param $params['city_id']     interger  Y 城市ID
-    * @param $params['type']        interger  Y 指标计算类型 1：统合 0：时间点
-    * @param $params['time_point']  string    N 评估时间点 指标计算类型为1时非空
-    * @param $params['confidence']  interger  Y 置信度 0:全部 1:高 2:低
-    * @param $params['quota_key']   string    Y 指标key
-    * @throws Exception
-    * @return json
-    */
+     * 评估-获取全城路口指标信息
+     * @param $params['task_id']     interger  Y 任务ID
+     * @param $params['city_id']     interger  Y 城市ID
+     * @param $params['type']        interger  Y 指标计算类型 1：统合 0：时间点
+     * @param $params['time_point']  string    N 评估时间点 指标计算类型为1时非空
+     * @param $params['confidence']  interger  Y 置信度 0:全部 1:高 2:低
+     * @param $params['quota_key']   string    Y 指标key
+     * @throws Exception
+     * @return json
+     */
     public function getAllCityJunctionInfo()
     {
         $params = $this->input->post(NULL, TRUE);
@@ -71,17 +71,17 @@ class Junction extends MY_Controller
     }
 
     /**
-    * 获取路口指标详情
-    * @param task_id         interger Y 任务ID
-    * @param dates           array    Y 评估/诊断日期 [20180102,20180103,....]
-    * @param junction_id     string   Y 逻辑路口ID
-    * @param search_type     interger Y 查询类型 1：按方案查询 0：按时间点查询
-    * @param time_point      string   N 时间点 当search_type = 0 时 必传
-    * @param time_range      string   N 方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
-    * @param type            interger Y 详情类型 1：指标详情页 2：诊断详情页
-    * @param task_time_range string   Y 评估/诊断任务开始结束时间 格式："06:00-09:00"
-    * @return json
-    */
+     * 获取路口指标详情
+     * @param $params['task_id']         interger Y 任务ID
+     * @param $params['dates']           array    Y 评估/诊断日期 [20180102,20180103,....]
+     * @param $params['junction_id']     string   Y 逻辑路口ID
+     * @param $params['search_type']     interger Y 查询类型 1：按方案查询 0：按时间点查询
+     * @param $params['time_point']      string   N 时间点 当search_type = 0 时 必传
+     * @param $params['time_range']      string   N 方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
+     * @param $params['type']            interger Y 详情类型 1：指标详情页 2：诊断详情页
+     * @param $params['task_time_range'] string   Y 评估/诊断任务开始结束时间 格式："06:00-09:00"
+     * @return json
+     */
     public function getJunctionQuotaDetail()
     {
         $params = $this->input->post(NULL, TRUE);
@@ -132,59 +132,39 @@ class Junction extends MY_Controller
     }
 
     /**
-    * 获取诊断列表页简易路口详情
-    * @param task_id         interger Y 任务ID
-    * @param dates           array    Y 评估/诊断日期 [20180102,20180103,....]
-    * @param junction_id     string   Y 逻辑路口ID
-    * @param time_point      string   Y 时间点
-    * @param task_time_range string   Y 评估/诊断任务开始结束时间 格式："06:00-09:00"
-    * @param diagnose_key    array    Y 诊断问题KEY
-    * @return json
-    */
+     * 获取诊断列表页简易路口详情
+     * @param $params['task_id']         interger Y 任务ID
+     * @param $params['dates']           array    Y 评估/诊断日期 [20180102,20180103,....]
+     * @param $params['junction_id']     string   Y 逻辑路口ID
+     * @param $params['time_point']      string   Y 时间点
+     * @param $params['task_time_range'] string   Y 评估/诊断任务开始结束时间 格式："06:00-09:00"
+     * @param $params['diagnose_key']    array    Y 诊断问题KEY
+     * @return json
+     */
     public function getDiagnosePageSimpleJunctionDetail()
     {
         $params = $this->input->post(NULL, TRUE);
 
         // 校验参数
-        $validate = Validate::make($params, [
-                'task_id'         => 'min:1',
-                'junction_id'     => 'nullunable',
-                'task_time_range' => 'nullunable',
-                'time_point'      => 'nullunable'
-            ]
-        );
+        $this->validate([
+            'task_id'         => 'required|is_natural_no_zero',
+            'time_point'      => 'required|exact_length[5]|regex_match[/\d{2}:\d{2}/]',
+            'junction_id'     => 'required|min_length[4]',
+            'task_time_range' => 'required|exact_length[11]|regex_match[/\d{2}:\d{2}-\d{2}:\d{2}/]',
+        ]);
 
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
-
-        $task_time_range = array_filter(explode('-', $params['task_time_range']));
-        if (empty($task_time_range[0]) || empty($task_time_range[1])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'task_time_range传递错误！';
-            return;
-        }
-
-        if (!is_array($params['dates']) || empty($params['dates'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数dates必须为数组且不可为空！';
-            return;
+        if (empty($params['dates']) || !is_array($params['dates'])) {
+            throw new \Exception('参数dates不为空且为数组格式！', ERR_PARAMETERS);
         }
 
         if (empty($params['diagnose_key']) || !is_array($params['diagnose_key'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数diagnose_key必须为数组且不可为空！';
-            return;
+            throw new \Exception('参数diagnose_key必须为数组且不可为空！', ERR_PARAMETERS);
         }
 
         $diagnoseConf = $this->config->item('diagnose_key');
         foreach ($params['diagnose_key'] as $v) {
             if (!array_key_exists($v, $diagnoseConf)) {
-                $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'diagnose_key传递错误！';
-                return;
+                throw new \Exception('参数diagnose_key传递错误！', ERR_PARAMETERS);
             }
         }
 
@@ -199,7 +179,7 @@ class Junction extends MY_Controller
         ];
 
         // 获取诊断列表页简易路口详情
-        $res = $this->junction_model->getDiagnosePageSimpleJunctionDetail($data);
+        $res = $this->junctionService->getDiagnosePageSimpleJunctionDetail($data);
 
         return $this->response($res);
     }
