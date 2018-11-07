@@ -28,7 +28,7 @@ $config['menu'] = [
             0 =>
                 [
                     'name' => '概览',
-                    'url' => '/overview',
+                    'url' => '/signalpro/overview',
                     'remark ' => 'signal',
                 ],
             1 =>
@@ -101,18 +101,18 @@ $config['menu'] = [
             4 =>
                 [
                     'name' => '自适应',
-                    'url' => '/adaptive',
+                    'url' => '/signalpro/adaptive',
                 ],
             5 =>
                 [
                     'name' => '报告',
-                    'url' => '/report',
+                    'url' => '/signalpro/report',
                     'remark ' => 'signal',
                 ],
             6 =>
                 [
                     'name' => '管理',
-                    'url' => '/manage/configuration',
+                    'url' => '/signalpro/manage/configuration',
                     'remark ' => 'signal',
                 ],
         ],
@@ -121,7 +121,7 @@ $config['menu'] = [
             [
                 [
                     'name' => '概览',
-                    'url' => '/overview',
+                    'url' => '/signalpro/overview',
                     'remark ' => 'signal',
                 ],
                 [
