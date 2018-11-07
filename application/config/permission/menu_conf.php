@@ -28,13 +28,13 @@ $config['menu'] = [
             0 =>
                 [
                     'name' => '概览',
-                    'url' => '/signalpro/overview',
+                    'url' => '/overview',
                     'remark ' => 'signal',
                 ],
             1 =>
                 [
                     'name' => '诊断',
-                    'url' => '/signalpro/diagnose/',
+                    'url' => '/diagnose/',
                     'remark ' => 'signal',
                     'son' =>
                         [
@@ -53,7 +53,7 @@ $config['menu'] = [
             2 =>
                 [
                     'name' => '评估',
-                    'url' => '/signalpro/assessment/',
+                    'url' => '/assessment/',
                     'remark ' => 'signal',
                     'son' =>
                         [
@@ -77,7 +77,7 @@ $config['menu'] = [
             3 =>
                 [
                     'name' => '优化',
-                    'url' => '/signalpro/optimize/',
+                    'url' => '/optimize/',
                     'remark ' => 'signal',
                     'son' =>
                         [
@@ -101,18 +101,18 @@ $config['menu'] = [
             4 =>
                 [
                     'name' => '自适应',
-                    'url' => '/signalpro/adaptive',
+                    'url' => '/adaptive',
                 ],
             5 =>
                 [
                     'name' => '报告',
-                    'url' => '/signalpro/report',
+                    'url' => '/report',
                     'remark ' => 'signal',
                 ],
             6 =>
                 [
                     'name' => '管理',
-                    'url' => '/signalpro/manage/configuration',
+                    'url' => '/manage/configuration',
                     'remark ' => 'signal',
                 ],
         ],
@@ -121,12 +121,12 @@ $config['menu'] = [
             [
                 [
                     'name' => '概览',
-                    'url' => '/signalpro/overview',
+                    'url' => '/overview',
                     'remark ' => 'signal',
                 ],
                 [
                     'name' => '诊断',
-                    'url' => '/signalpro/diagnose/',
+                    'url' => '/diagnose/',
                     'remark ' => 'signal',
                     'son' =>
                         [
@@ -144,7 +144,7 @@ $config['menu'] = [
                 ],
                 [
                     'name' => '优化',
-                    'url' => '/signalpro/optimize/',
+                    'url' => '/optimize/',
                     'remark ' => 'signal',
                     'son' =>
                         [
