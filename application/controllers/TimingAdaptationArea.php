@@ -59,7 +59,9 @@ class TimingAdaptationArea extends MY_Controller
 
         $params['type'] = $params['type'] ?? -1;
 
-        return $this->timingAdaptionAreaService->getAreaJunctionList($params);
+        $data = $this->timingAdaptionAreaService->getAreaJunctionList($params);
+
+        $this->response($data);
     }
 
     /**
@@ -149,7 +151,7 @@ class TimingAdaptationArea extends MY_Controller
 
         $result = $this->timingAdaptionAreaService->junctionSwitch($params);
 
-        return $this->response($result);
+        $this->response($result);
     }
 
     /**
