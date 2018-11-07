@@ -44,14 +44,16 @@ class Junction extends MY_Controller
         $this->validate([
             'task_id'    => 'required|is_natural_no_zero',
             'type'       => 'required|is_natural',
-            'quota_key'  => 'required|trim|min_length[4]',
-            'confidence' => 'required|is_natural',
+            'quota_key'  => 'required|trim|in_list[' . implode(',', array_keys($this->config->item('junction_quota_key'))) . ']',
+            'confidence' => 'required|in_list[' . implode(',', array_keys($this->config->item('confidence'))) . ']',
             'city_id'    => 'required|is_natural_no_zero',
         ]);
 
         $data['task_id'] = (int)$params['task_id'];
         $data['type'] = (int)$params['type'];
         $data['city_id'] = $params['city_id'];
+        $data['confidence'] = $params['confidence'];
+        $data['quota_key'] = strtolower(trim($params['quota_key']));
         $data['time_point'] = '';
 
         // type == 0时 time_point为必传项
@@ -60,18 +62,6 @@ class Junction extends MY_Controller
                 throw new \Exception('参数time_point传递错误！', ERR_PARAMETERS);
             }
             $data['time_point'] = trim($params['time_point']);
-        }
-
-        // 判断置信度是否存在
-        if (!array_key_exists($params['confidence'], $this->config->item('confidence'))) {
-            throw new \Exception('参数confidence传递错误！', ERR_PARAMETERS);
-        }
-        $data['confidence'] = $params['confidence'];
-
-        // 判断指标KEY是否正确
-        $data['quota_key'] = strtolower(trim($params['quota_key']));
-        if (!array_key_exists($data['quota_key'], $this->config->item('junction_quota_key'))) {
-            throw new \Exception('参数quota_key传递错误！', ERR_PARAMETERS);
         }
 
         // 获取全城路口指标信息
@@ -101,9 +91,8 @@ class Junction extends MY_Controller
             'task_id'         => 'required|is_natural_no_zero',
             'type'            => 'required|is_natural_no_zero',
             'junction_id'     => 'required|min_length[4]',
-            'task_time_range' => 'required|exact_length[11]|regex_match[/\d{2}:\d{2}-\d{2}:\{2}/]',
+            'task_time_range' => 'required|exact_length[11]|regex_match[/\d{2}:\d{2}-\d{2}:\d{2}/]',
             'search_type'     => 'required|is_natural',
-            'dates'           => 'required',
         ]);
 
         $data['time_range'] = '';
@@ -124,8 +113,8 @@ class Junction extends MY_Controller
             $data['time_point'] = strip_tags(trim($params['time_point']));
         }
 
-        if (!is_array($params['dates'])) {
-            throw new \Exception('参数dates必须为数组格式！', ERR_PARAMETERS);
+        if (empty($params['dates']) || !is_array($params['dates'])) {
+            throw new \Exception('参数dates不为空且为数组格式！', ERR_PARAMETERS);
         }
 
         $data['task_id'] = intval($params['task_id']);
