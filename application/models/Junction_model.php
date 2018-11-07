@@ -627,25 +627,11 @@ class Junction_model extends CI_Model
     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
     * @param $data['timingType']      interger 配时来源 1：人工 2：反推
+    * @param $select                  string   select colum
     * @return array
     */
-    private function getDiagnoseJunctionDetail($data)
+    private function getDiagnoseJunctionDetail($data, $select)
     {
-        $diagnoseKeyConf = $this->config->item('diagnose_key');
-
-        // 组织select 需要的字段
-        $select_str = '';
-        foreach ($diagnoseKeyConf as $k=>$v) {
-            /*
-             * 因为过饱和问题与空放都是根据同一指标计算的，现空放问题的KEY与指标相同
-             * 所以只不需要再拼接过饱和问题的select column
-             */
-            if ($k != 'over_saturation') {
-                $select_str .= empty($select_str) ? $k : ',' . $k;
-            }
-        }
-        $select = "id, junction_id, {$select_str}, start_time, end_time, result_comment, movements";
-
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
 
@@ -665,15 +651,11 @@ class Junction_model extends CI_Model
                         ->from($this->tb)
                         ->where($where)
                         ->get();
-
-        if (!$res || empty($res)) {
+        if (!$res) {
             return [];
         }
 
-        $result = $res->row_array();
-        $result = $this->formatJunctionDetailData($result, $data['dates'], 2, $data['timingType']);
-
-        return $result;
+        return $res->row_array();
     }
 
     /**
@@ -687,12 +669,11 @@ class Junction_model extends CI_Model
     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
     * @param $data['timingType']      interger 配时来源 1：人工 2：反推
+    * @param $select                  string   select colum
     * @return array
     */
-    private function getQuotaJunctionDetail($data)
+    private function getQuotaJunctionDetail($data, $select)
     {
-        $select = 'id, junction_id, start_time, end_time, result_comment, movements';
-
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
 
@@ -703,7 +684,6 @@ class Junction_model extends CI_Model
             $where  .= ' and start_time = "' . trim($time_range[0]) . '"';
             $where  .= ' and end_time = "' . trim($time_range[1]) . '"';;
         } else { // 按时间点查询
-            $select .= ', time_point';
             $where  .= ' and type = 0';
             $where  .= ' and time_point = "' . trim($data['time_point']) . '"';
         }
@@ -712,155 +692,11 @@ class Junction_model extends CI_Model
                         ->from($this->tb)
                         ->where($where)
                         ->get();
-
-        if (!$res || empty($res)) {
+        if (!$res) {
             return [];
         }
 
-        $result = $res->row_array();
-        $result = $this->formatJunctionDetailData($result, $data['dates'], 1, $data['timingType']);
-
-        return $result;
-
-    }
-
-    /**
-    * 格式化路口详情数据
-    * @param $data        路口详情数据
-    * @param $dates       评估/诊断日期
-    * @param $resultType 数据返回类型 1：指标详情页 2：诊断详情页
-    * @param $timingType  配时数据来源 1：人工 2：反推
-    */
-    private function formatJunctionDetailData($data, $dates, $resultType, $timingType)
-    {
-        if (empty($data) || empty($dates) || (int)$resultType < 1) {
-            return [];
-        }
-
-        // 因为详情页地图下方列表所有相位都有 置信度字段，而置信度不属于指标，固将此放到扩展指标集合中
-        $data['extend_flow_quota']['confidence'] = '置信度';
-
-        // movement级指标数据在数据表中以json格式的存储，需要json_decode
-        $data['movements'] = json_decode($data['movements'], true);
-        if (empty($data['movements'])) {
-            return [];
-        }
-
-        // 获取flow_id=>name数组
-        $timing_data = [
-            'junction_id' => trim($data['junction_id']),
-            'dates'       => $dates,
-            'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60),
-            'timingType'  => $timingType
-        ];
-        $flowIdName = $this->timing_model->getFlowIdToName($timing_data);
-
-        // flow级指标配置
-        $flowQuotaKeyConf = $this->config->item('flow_quota_key');
-
-        // 需要返回的全部movements所需字段
-        $movementsAll = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'comment'=>'', 'confidence'=>'']);
-
-        // 置信度配置
-        $confidenceConf = $this->config->item('confidence');
-
-        // 匹配相位名称 并按 南左、北直、西左、东直、北左、南直、东左、西直 进行排序(NEMA排序)
-        $phase = [
-            '南左' => 10,
-            '北直' => 20,
-            '西左' => 30,
-            '东直' => 40,
-            '北左' => 50,
-            '南直' => 60,
-            '东左' => 70,
-            '西直' => 80
-        ];
-
-        $tempMovements = [];
-        foreach ($data['movements'] as $k=>&$v) {
-            // 相位名称
-            $v['comment'] = $flowIdName[$v['movement_id']] ?? '';
-
-            // 加这个判断是旧的任务结果数据中没有此字段
-            if (isset($v['confidence'])) {
-                $v['confidence'] = $confidenceConf[$v['confidence']]['name'] ?? '';
-            } else {
-                $v['confidence'] = '';
-            }
-
-            // 组织flow级指标对应相位集合及格式化指标数据
-            foreach ($flowQuotaKeyConf as $key=>$val) {
-                // 指标名称
-                $data['flow_quota_all'][$key]['name'] = $val['name'];
-                // 指标单位
-                $data['flow_quota_all'][$key]['unit'] = $val['unit'];
-                $data['flow_quota_all'][$key]['movements'][$k]['id'] = $v['movement_id'];
-                if (isset($v[$key])) {
-                    $v[$key] = $val['round']($v[$key]);
-                    $data['flow_quota_all'][$key]['movements'][$k]['value'] = $val['round']($v[$key]);
-                }
-            }
-            if (array_key_exists(trim($v['comment']), $phase)
-                && !array_key_exists($phase[trim($v['comment'])], $tempMovements)
-            ) {
-                $tempMovements[$phase[trim($v['comment'])]] = array_intersect_key($v, $movementsAll);
-            } else {
-                $tempMovements[mt_rand(100, 900) + mt_rand(1, 99)] = array_intersect_key($v, $movementsAll);
-            }
-        }
-        // 因为foreach 使用了引用&$v，所以foreach完成后要销毁$v
-        unset($v);
-
-        if (!empty($tempMovements)) {
-            unset($data['movements']);
-            ksort($tempMovements);
-            $data['movements'] = array_values($tempMovements);
-        }
-
-        if ($resultType == 2) { // 诊断详情页
-            // 组织问题集合
-            $diagnoseKeyConf = $this->config->item('diagnose_key');
-            foreach ($diagnoseKeyConf as $k=>$v) {
-                /*
-                 * 因为过饱和问题与空放问题同用一个指标进行计算
-                 * 所以过饱和问题要单独处理一下
-                 */
-                $diagnose = $k;
-                if ($k == 'over_saturation') {
-                    $diagnose = 'saturation_index';
-                }
-
-                // 判断路口的问题
-                if ($v['junction_diagnose_formula']($data[$diagnose])) {
-                    $data['diagnose_detail'][$k]['name'] = $v['name'];
-                    $data['diagnose_detail'][$k]['key'] = $k;
-
-                    // 计算性质程度
-                    $data['diagnose_detail'][$k]['nature'] = $v['nature_formula']($data[$diagnose]);
-
-                    // 匹配每个问题指标
-                    $tempArr = ['movement_id'=>'logic_flow_id', 'comment'=>'name', 'confidence'=>'置信度'];
-                    $tempMerge = array_merge($v['flow_quota'], $tempArr);
-                    foreach ($data['movements'] as $kk=>$vv) {
-                        $data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, $tempMerge);
-                        foreach ($v['flow_quota'] as $key=>$val) {
-                            if (isset($vv[$key])) {
-                                $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
-                                $data['diagnose_detail'][$k]['flow_quota'][$key]['unit'] = $val['unit'];
-                                $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id']
-                                = $vv['movement_id'];
-                                $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value']
-                                = $flowQuotaKeyConf[$key]['round']($vv[$key]);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        $resultCommentConf = $this->config->item('result_comment');
-        $data['result_comment'] = $resultCommentConf[$data['result_comment']] ?? '';
-        return $data;
+        return $res->row_array();
     }
 
     /**
