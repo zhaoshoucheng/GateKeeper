@@ -65,38 +65,6 @@ class Junction_model extends CI_Model
     }
 
     /**
-    * 获取路口指标详情
-    * @param $data['task_id']         interger 任务ID
-    * @param $data['junction_id']     string   逻辑路口ID
-    * @param $data['dates']           array    评估/诊断日期
-    * @param $data['search_type']     interger 查询类型 1：按方案查询 0：按时间点查询
-    * @param $data['time_point']      string   时间点 当search_type = 0 时 必传
-    * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
-    * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
-    * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-    * @param $data['timingType']      interger 配时来源 1：人工 2：反推
-    * @return array
-    */
-    public function getFlowQuotas($data)
-    {
-        if (!isset($data['type']) || empty($data) || !in_array((int)$data['type'], [1, 2], true)) {
-            return [];
-        }
-
-        if ((int)$data['type'] == 2) { // 诊断详情页
-            $res = $this->getDiagnoseJunctionDetail($data);
-        } else { // 指标详情页
-            $res = $this->getQuotaJunctionDetail($data);
-        }
-
-        if (!$res || empty($res)) {
-            return [];
-        }
-
-        return $res;
-    }
-
-    /**
     * 获取全城路口诊断问题列表
     * @param data['task_id']      interger 任务ID
     * @param data['city_id']      interger 城市ID
@@ -630,7 +598,7 @@ class Junction_model extends CI_Model
     * @param $select                  string   select colum
     * @return array
     */
-    private function getDiagnoseJunctionDetail($data, $select)
+    public function getDiagnoseJunctionDetail($data, $select)
     {
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
@@ -672,7 +640,7 @@ class Junction_model extends CI_Model
     * @param $select                  string   select colum
     * @return array
     */
-    private function getQuotaJunctionDetail($data, $select)
+    public function getQuotaJunctionDetail($data, $select)
     {
         // 组织where条件
         $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
