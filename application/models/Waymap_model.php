@@ -216,11 +216,11 @@ class Waymap_model extends CI_Model
         /*-------------------------------------------------
         | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
         --------------------------------------------------*/
-        $redis_model = new Redis_model();
+        $this->load->model('redis_model');
 
         $redis_key = 'all_city_junctions_' . $city_id . '_' . $version . '}';
 
-        $result = $redis_model->getData($redis_key);
+        $result = $this->redis_model->getData($redis_key);
 
         if (!$result) {
 
@@ -233,11 +233,11 @@ class Waymap_model extends CI_Model
 
             $res = $this->get($url, $data);
 
-            $redis_model->deleteData($redis_key);
+            $this->redis_model->deleteData($redis_key);
 
-            $redis_model->setData($redis_key, json_encode($res));
+            $this->redis_model->setData($redis_key, json_encode($res));
 
-            $redis_model->setExpire($redis_key, 3600 * 24);
+            $this->redis_model->setExpire($redis_key, 3600 * 24);
 
             return $res;
         }
