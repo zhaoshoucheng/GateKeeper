@@ -76,8 +76,8 @@ if (!function_exists('getSign')) {
 
         //将签名密钥拼接到签名字符串最后面
         $str = $str . $secret;
-        echo $str;
-        echo "<br/>";
+        //echo $str;
+        //echo "<br/>";
         //通过md5算法为签名字符串生成一个md5签名, 从第7位开始取16位
         return substr(md5($str), 7, 16);
     }
@@ -207,9 +207,14 @@ if (!function_exists('hourRange')) {
      * @param string $format
      *
      * @return array
+     * @throws Exception
      */
     function hourRange($start = '00:00', $end = '23:30', $skip = 30, $format = 'H:i')
     {
+        if($start > $end) {
+            throw new Exception('起始时间必须小于等于结束时间');
+        }
+
         return array_map(function ($item) use ($format) {
             return date($format, $item);
         }, range(strtotime($start), strtotime($end), $skip * 60));

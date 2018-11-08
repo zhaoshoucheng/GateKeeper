@@ -129,6 +129,9 @@ $config['signal_control_interface'] = 'http://' . $signal_control_server . ":" .
 // 新版轨迹地址
 $config['xmmtrace_interface'] = 'http://' . $xmmtrace_server . ":" . $xmmtrace_port . $xmmtrace_ext;
 
+// 新版轨迹地址
+$config['warning_interface'] = 'http://monitor.odin.xiaojukeji.com';
+
 // 评估置信度阈值
 $confidence_threshold = 0.5;
 
@@ -177,7 +180,6 @@ $config['confidence'] = [
 
 // 路口指标
 $config['junction_quota_key'] = [
-
     'imbalance_index' => [
         'name' => '失衡指数',                                  // 名称
         'status_formula' => function ($val) {                  // 状态判断规则

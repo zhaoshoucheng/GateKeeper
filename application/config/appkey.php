@@ -71,4 +71,15 @@ $config['authirized_apps'] = array(
         'white_ips' => array(
         )
     ),
+    'warning' => array(
+        'name'  => 'token',
+        'method'  => 'any',
+        'timeout'  => 100,
+        'secret'=> '3a01e6c56bcce94ee5de073df3d512d5',
+        'open_api'   => array(
+            'warning/notify',
+        ),
+        'white_ips' => array(
+        )
+    ),
 );

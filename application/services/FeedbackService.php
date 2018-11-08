@@ -11,6 +11,7 @@ namespace Services;
 /**
  * Class FeedbackService
  * @package Services
+ * @property \Feedback_model $feedback_model
  */
 class FeedbackService extends BaseService
 {
@@ -49,7 +50,7 @@ class FeedbackService extends BaseService
     public function insertFeedback($params)
     {
         $params['description'] = $params['desc'] ?? '';
-        $params['user_id'] = get_instance()->username;
+        $params['user_id']     = get_instance()->username;
 
         if (isset($params['desc'])) {
             unset($params['desc']);

@@ -6,142 +6,109 @@
 class Report_model extends CI_Model
 {
     private $tb = 'report';
-    private $db = '';
 
+    /**
+     * @var CI_DB_query_builder
+     */
+    private $db;
+
+    /**
+     * Report_model constructor.
+     * @throws Exception
+     */
     public function __construct()
     {
         parent::__construct();
-        if (empty($this->db)) {
-            $this->db = $this->load->database('default', true);
-        }
 
-        $is_existed = $this->db->table_exists($this->tb);
-        if (!$is_existed) {
-            return [];
+        $this->db = $this->load->database('default', true);
+
+        $isExisted = $this->db->table_exists($this->tb);
+
+        if (!$isExisted) {
+            throw new \Exception('数据表不存在');
         }
-        $this->load->model('waymap_model');
-        $this->load->model('gift_model');
-        $this->load->config('nconf');
     }
 
-    public function test()
+    /**
+     * @param $cityId
+     * @param $title
+     * @param $type
+     *
+     * @return int
+     */
+    public function countReportByTitle($cityId, $title, $type)
     {
-        return array(
-            array(
-                'start_time' => "12:00:00",
-                'end_time' => "13:00:00",
-                'logic_junction_id' => "123456",
-                'stop_delay' => "2.3333",
-            ), array(
-                'start_time' => "13:00:00",
-                'end_time' => "14:00:00",
-                'logic_junction_id' => "1234567",
-                'stop_delay' => "1.2222",
-            )
-        );
+        return $this->db->where('city_id', $cityId)
+            ->where('type', $type)
+            ->where('title', $title)
+            ->where('create_at >=', date("Y-m-d 00:00:00"))
+            ->from($this->tb)
+            ->count_all_results();
     }
 
-    public function generate($cityId, $title, $type)
+    /**
+     * @param $data
+     *
+     * @return mixed
+     */
+    public function insertReport($data)
     {
-        //上传图片
-        $data = $this->gift_model->Upload("file");
+        $data['create_at'] = $data['create_at'] ?? date('Y-m-d H:i:s');
+        $data['update_at'] = $data['update_at'] ?? date('Y-m-d H:i:s');
 
-        $retryNum = 0;
-        while (1){
-            if($retryNum>1000){
-                throw new \Exception("生成的报告太多.");
-            }
-            $this->db->where('city_id', $cityId);
-            $this->db->where('type', $type);
-            $this->db->where('title', $title);
-            $this->db->where('create_at >=', date("Y-m-d 00:00:00"));
-            $this->db->from('report');
-            $num = $this->db->count_all_results();
-            if($num==0){
-                break;
-            }
-            $title = str_replace("(".$retryNum.")", '', $title)."(".($retryNum+1).")";
-            $retryNum++;
-        }
+        $this->db->insert($this->tb, $data);
 
-        //插入
-        $param = [
-            "city_id" => $cityId,
-            "title" => $title,
-            "type" => $type,
-            "update_at" => date("Y-m-d H:i:s"),
-            "create_at" => date("Y-m-d H:i:s"),
-        ];
-        $this->db->insert("report", $param);
-        $itemId = $this->db->insert_id();
-
-        //插入新记录
-        foreach ($data as $namespace => $item) {
-            $param = [
-                "file_key" => $item['resource_key'],
-                "item_id" => $itemId,
-                "namespace" => $namespace,
-                "b_type" => 1,
-                "update_at" => date("Y-m-d H:i:s"),
-                "create_at" => date("Y-m-d H:i:s"),
-            ];
-            $this->db->insert('upload_files', $param);
-        }
-        return $data['itstool_private'];
+        return $this->db->insert_id();
     }
 
-    private function _reportListscope($cityId, $type = 1, $pageNum = 1, $pageSize = 100, $namespace){
-        $this->db->from('report');
-        $this->db->join('upload_files', 'upload_files.item_id = report.id');
-        $this->db->where('report.delete_at', "1970-01-01 00:00:00");
-        $this->db->where('upload_files.delete_at', "1970-01-01 00:00:00");
-        $this->db->where('upload_files.namespace', $namespace);
-        $this->db->where('report.city_id', $cityId);
-        $this->db->where('report.type', $type);
-    }
-
-    public function getReportList($cityId, $type = 1, $pageNum = 1, $pageSize = 100)
+    /**
+     * @param $cityId
+     * @param $type
+     * @param $pageNum
+     * @param $pageSize
+     * @param $namespace
+     *
+     * @return array
+     */
+    public function getCountJoinUploadFile($cityId, $type, $pageNum, $pageSize, $namespace)
     {
-        $namespace = 'itstool_private';
+        $res = $this->db->select('count(*) as num')
+            ->from('report')
+            ->join('upload_files', 'upload_files.item_id = report.id')
+            ->where('report.delete_at', "1970-01-01 00:00:00")
+            ->where('upload_files.delete_at', "1970-01-01 00:00:00")
+            ->where('upload_files.namespace', $namespace)
+            ->where('report.city_id', $cityId)
+            ->where('report.type', $type)
+            ->limit($pageSize, ($pageNum - 1) * $pageSize)
+            ->get();
 
-        $this->_reportListscope($cityId, $type, $pageNum, $pageSize, $namespace);
-        $this->db->select('count(*) as num');
-        $statRow = $this->db->get()->row_array();
+        return $res instanceof CI_DB_result ? $res->row_array() : $res;
+    }
 
-        $this->_reportListscope($cityId, $type, $pageNum, $pageSize, $namespace);
-        $this->db->select('report.id,report.title,report.create_at,file_key,namespace');
-        $this->db->order_by('report.id', 'DESC');
-        $this->db->limit($pageSize, ($pageNum - 1) * $pageSize);
-        $query = $this->db->get();
-        $result = $query->result_array();
+    /**
+     * @param $cityId
+     * @param $type
+     * @param $pageNum
+     * @param $pageSize
+     * @param $namespace
+     *
+     * @return array
+     */
+    public function getSelectJoinUploadFile($cityId, $type, $pageNum, $pageSize, $namespace)
+    {
+        $res = $this->db->select('report.id, report.title, report.create_at, file_key, namespace')
+            ->from('report')
+            ->join('upload_files', 'upload_files.item_id = report.id')
+            ->where('report.delete_at', "1970-01-01 00:00:00")
+            ->where('upload_files.delete_at', "1970-01-01 00:00:00")
+            ->where('upload_files.namespace', $namespace)
+            ->where('report.city_id', $cityId)
+            ->where('report.type', $type)
+            ->order_by('report.id', 'DESC')
+            ->limit($pageSize, ($pageNum - 1) * $pageSize)
+            ->get();
 
-
-        $formatResult = function ($result) use ($statRow,$namespace,$pageNum,$pageSize) {
-            $resourceKeys = array_reduce($result, function ($carry, $item) {
-                if (!empty($item["file_key"])) {
-                    $carry[] = $item["file_key"];
-                }
-                return $carry;
-            }, []);
-
-            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-            $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-            $lastPos = strrpos($currentUrl, '/');
-            $baseUrl = substr($currentUrl, 0, $lastPos);
-            foreach ($result as $key => $item) {
-                $itemInfo = $this->gift_model->getResourceUrlList($resourceKeys, $namespace);
-                if (!empty($itemInfo[$item["file_key"]])) {
-                    $result[$key]['url'] = $itemInfo[$item["file_key"]]['download_url'];
-                    $result[$key]['down_url'] = $baseUrl . "/downReport?key=" . $item["file_key"];
-                }
-            }
-            return [
-                "list"=>$result,
-                "total"=>$statRow['num'],
-                "page_no"=>$pageNum,
-                "page_size"=>$pageSize,
-            ];
-        };
-        return $formatResult($result);
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 }

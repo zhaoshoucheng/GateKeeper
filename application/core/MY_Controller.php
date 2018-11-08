@@ -1,14 +1,24 @@
 <?php
 /**********************************************
-* 基础类
-* user:ningxiangbing@didichuxing.com
-* date:2018-03-01
-**********************************************/
+ * 基础类
+ * user:ningxiangbing@didichuxing.com
+ * date:2018-03-01
+ **********************************************/
 
 include_once "Inroute_Controller.php";
 
-class MY_Controller extends CI_Controller {
-
+/**
+ * Class MY_Controller
+ *
+ * @property CI_Benchmark $benchmark
+ * @property User $user
+ * @property CI_URI $uri
+ * @property CI_Router $router
+ * @property Downgrade_model $Downgrade_model
+ * @property Junction_model $junction_model
+ */
+class MY_Controller extends CI_Controller
+{
     public $errno = 0;
     public $errmsg = '';
     public $output_data = [];
@@ -16,14 +26,21 @@ class MY_Controller extends CI_Controller {
     public $routerUri = '';
     public $username = 'unknown';
 
+    /**
+     * @var CI_Output
+     */
+    public $output;
+
     protected $debug = false;
     protected $is_check_login = 0;
     protected $timingType = 1; // 0，全部；1，人工；2，配时反推；3，信号机上报
 
 
-    public function __construct(){
-
+    public function __construct()
+    {
         parent::__construct();
+
+        $this->benchmark->mark('api_start');
 
         date_default_timezone_set('Asia/Shanghai');
 
@@ -37,17 +54,22 @@ class MY_Controller extends CI_Controller {
 
             $this->load->model('user/user', 'user');
             $this->routerUri = $this->uri->ruri_string();
+
             com_log_notice('_com_sign', ['ip' => $_SERVER["REMOTE_ADDR"], 'ip2' => $this->input->get_request_header('X-Real-Ip')]);
 
-            // 此处采用appid+appkey的验证
+            // 此处采用appid + appkey的验证
             if (isset($_REQUEST['app_id'])) {
+
                 com_log_notice('_com_sign', ['uri' => $this->routerUri, 'request' => $_REQUEST]);
+
                 if (!$this->_checkAuthorizedApp()) {
                     $this->_output();
                     exit();
                 }
+
             } elseif (isset($_REQUEST['token'])
                 and in_array($_REQUEST['token'], ["aedadf3e3795b933db2883bd02f31e1d", "d4971d281aee77720a00a5795bb38f85"])) {
+
                 if (in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus', 'overview/verifytoken', 'task/areaflowprocess', 'task/mapversioncb'])
                     and in_array($host, ['100.69.238.11:8000'])) {
                     return;
@@ -57,15 +79,15 @@ class MY_Controller extends CI_Controller {
                 // token and whitelist ip server01, web00, web01, collector03, shuhao*3
                 // in_array($this->input->get_request_header('X-Real-Ip'), ['100.90.164.31', '100.90.163.51', '100.90.163.52', '10.93.94.36', '100.90.165.26', '10.89.236.26', '10.86.108.35'])
             } else {
-                if(!$this->_checkUser()) {
+                if (!$this->_checkUser()) {
                     $currentUrl = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; //线上是https, 获取当前页面的地址
-                    if( (isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) == "xmlhttprequest")
-                        || (isset($_SERVER["HTTP_ACCEPT"]) && strstr($_SERVER["HTTP_ACCEPT"], 'application/json')) ) {
+                    if ((isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) == "xmlhttprequest")
+                        || (isset($_SERVER["HTTP_ACCEPT"]) && strstr($_SERVER["HTTP_ACCEPT"], 'application/json'))) {
                         $this->_output();
                         exit();
                     } else {
                         // 页面请求
-                        $redirect = $this->user->getLoginUrl() . '&jumpto='.urlencode($currentUrl);
+                        $redirect = $this->user->getLoginUrl() . '&jumpto=' . urlencode($currentUrl);
                         header("location: " . $redirect);
                         exit();
                     }
@@ -77,7 +99,7 @@ class MY_Controller extends CI_Controller {
                      exit();
                  }*/
 
-                if(isset($_REQUEST['city_id']) && !$this->_validateCity($_REQUEST['city_id'])){
+                if (isset($_REQUEST['city_id']) && !$this->_validateCity($_REQUEST['city_id'])) {
                     $this->_output();
                     exit();
                 }
@@ -91,17 +113,17 @@ class MY_Controller extends CI_Controller {
         $this->load->model('Downgrade_model');
         $params = $this->input->get();
         $params = array_merge($params, $this->input->post());
-        $route = $this->router->class."/".$this->router->method;
+        $route  = $this->router->class . "/" . $this->router->method;
 
         //提前准备好content
         global $cacheContent;
-        if($this->Downgrade_model->isCacheUrl($route, $_SERVER['REQUEST_METHOD'],$params)){
+        if ($this->Downgrade_model->isCacheUrl($route, $_SERVER['REQUEST_METHOD'], $params)) {
             $cacheContent = $this->Downgrade_model->getUrlCache($route, $_SERVER['REQUEST_METHOD'], $params);
         }
 
         //输出降级内容
         $downgradeCityId = isset($params['city_id']) ? intval($params['city_id']) : 0;
-        if($this->Downgrade_model->isOpen($downgradeCityId) && !empty($cacheContent)){
+        if ($this->Downgrade_model->isOpen($downgradeCityId) && !empty($cacheContent)) {
             header("Content-Type:application/json;charset=UTF-8");
             echo $cacheContent;
             exit;
@@ -110,93 +132,57 @@ class MY_Controller extends CI_Controller {
     }
 
     // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时
-    protected function setTimingType(){
-        try {
-            $this->load->model('junction_model');
-            $back_timing_roll = $this->config->item('back_timing_roll');
-            $taskId = $this->input->get_post('task_id', true);
-            $taskUser = $this->junction_model->getTaskUser($taskId);
-            if (in_array($taskUser, $back_timing_roll, true)) {
-                $this->timingType = 2;
-            }
-        } catch (\Exception $e) {
-            com_log_warning('my_controller_set_timingtype_error', 0, $e->getMessage(), compact("taskId"));
-        }
-    }
-
-    public function response($data, $errno = 0, $errmsg = '') {
-        $this->output_data = $data;
-        $this->errno = $errno;
-        $this->errmsg = $errmsg;
-        $this->output->set_content_type('application/json');
-    }
-
-    public function _output(){
-        if($this->errno >0 && empty($this->errmsg)) {
-            $errmsgMap = $this->config->item('errmsg');
-            $this->errmsg = $errmsgMap[$this->errno];
-        }
-
-        if(!empty($this->templates)) {
-            foreach ($this->templates as $t) {
-                echo $this->load->view($t, array(), true);
-            }
-        } else {
-            $output = array(
-                'errno' => $this->errno,
-                'errmsg' => $this->errmsg,
-                'data' => $this->output_data,
-                'traceid' => get_traceid(),
-                'username' => $this->username,
-            );
-            header("Content-Type:application/json;charset=UTF-8");
-            echo json_encode($output);
-        }
-    }
 
     /**
      * 签名方式修改,支持post+get混合参数
      * @return bool
      */
-    private function _checkAuthorizedApp() {
+    private function _checkAuthorizedApp()
+    {
         $paramTmp = array_merge($this->input->post(), $this->input->get());
         com_log_notice('_checkauthorizedapp_param', [
             'params' => $paramTmp,
-            'url'=>$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING']
+            'url' => $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'],
         ]);
-        if($this->is_check_login == 0){
+
+        if ($this->is_check_login == 0) {
             return true;
         }
 
         $client_sign = isset($_REQUEST['sign']) ? $_REQUEST['sign'] : "";
-        $app_id = $_REQUEST['app_id'];
+        $app_id      = $_REQUEST['app_id'];
+
         $this->load->config('appkey', true);
         $app_config = $this->config->item('authirized_apps', 'appkey');
         com_log_notice('_com_sign_config', ['client_sign' => $client_sign, 'app_id' => $app_id, 'app_config' => $app_config]);
+
         if (!isset($app_config[$app_id]) || !isset($app_config[$app_id]['secret'])) {
             com_log_notice('_checkauthorizedapp_err', [
                 'error' => "error_appid",
                 'params' => $paramTmp,
-                'url'=>$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING']
+                'url' => $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'],
             ]);
-            $this->errno = ERR_AUTH_KEY;
+            $this->errno  = ERR_AUTH_KEY;
             $this->errmsg = "该appid:{$app_id}没有授权";
             return false;
         }
-        $method = isset($app_config[$app_id]['method']) ? $app_config[$app_id]['method'] : "";
+
+        $method  = isset($app_config[$app_id]['method']) ? $app_config[$app_id]['method'] : "";
         $timeout = isset($app_config[$app_id]['timeout']) ? $app_config[$app_id]['timeout'] : 10;
 
         // 如果是any获取所有参数包含get
-        if($method=="any"){
+        if ($method == "any") {
             $params = array_merge($this->input->post(), $this->input->get());
-        }else{
+        } else {
             $params = $this->input->post();
         }
-        com_log_notice('_com_sign', ['params' => $params, 'url'=>'/'.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING']]);
+        com_log_notice('_com_sign', ['params' => $params, 'url' => '/' . $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING']]);
         unset($params['sign']);
+
         if (!isset($params['ts'])) {
             $params['ts'] = time();
         }
+
         // 带时间戳的sign的时效时间为1s
         if (abs(time() - $params['ts']) > $timeout) {
             com_log_notice('_checkauthorizedapp_err', [
@@ -205,44 +191,44 @@ class MY_Controller extends CI_Controller {
                 'ts' => $params['ts'],
                 'timeout' => $timeout,
                 'params' => $paramTmp,
-                'url'=>$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING']
+                'url' => $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'],
             ]);
-            $this->errno = ERR_AUTH_KEY;
+            $this->errno  = ERR_AUTH_KEY;
             $this->errmsg = "该签名已经过时";
             return false;
         }
         ksort($params);
         $query_str = http_build_query($params);
 
-        if (isset($app_config[$app_id]['white_ips']) && in_array($_SERVER['REMOTE_ADDR'],$app_config[$app_id]['white_ips'])) {
+        if (isset($app_config[$app_id]['white_ips']) && in_array($_SERVER['REMOTE_ADDR'], $app_config[$app_id]['white_ips'])) {
             return true;
         }
 
-        $app_key = $app_config[$app_id]['secret'];
-        $open_api = isset($app_config[$app_id]['open_api']) ? $app_config[$app_id]['open_api'] : array();
+        $app_key     = $app_config[$app_id]['secret'];
+        $open_api    = isset($app_config[$app_id]['open_api']) ? $app_config[$app_id]['open_api'] : [];
         $server_sign = substr(md5($query_str . "&" . $app_key), 7, 16);
         if ($server_sign != $client_sign) {
             com_log_notice('_checkauthorizedapp_err', [
-                'error' => "error_tstimeout",
+                'error' => "error_sign",
                 'params' => $paramTmp,
-                'url'=>$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'],
-                'md5str' => $query_str . "&" . $app_key, 'server_sign' => $server_sign,
+                'url' => $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'],
+                'md5str' => $query_str . "&" . $app_key,
                 'server_sign' => $server_sign,
                 'client_sign' => $client_sign,
-                'app_id' => $app_id
+                'app_id' => $app_id,
             ]);
-            $this->errno = ERR_AUTH_KEY;
+            $this->errno  = ERR_AUTH_KEY;
             $this->errmsg = "签名的sign不正确";
             return false;
-        } else if (!in_array($this->routerUri, $open_api)){
+        } elseif (!in_array($this->routerUri, $open_api)) {
             com_log_notice('_checkauthorizedapp_err', [
                 'error' => "error_apiurl_notopen",
                 'params' => $paramTmp,
-                'url'=>$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'],
+                'url' => $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'],
                 'md5str' => $query_str . "&" . $app_key, 'server_sign' => $server_sign,
-                'app_id' => $app_id
+                'app_id' => $app_id,
             ]);
-            $this->errno = ERR_AUTH_KEY;
+            $this->errno  = ERR_AUTH_KEY;
             $this->errmsg = "该接口{$this->routerUri}没有开放授权";
             return false;
         } else {
@@ -250,47 +236,71 @@ class MY_Controller extends CI_Controller {
         }
     }
 
-    private function _checkUser(){
-        if($this->is_check_login == 0){
+    public function _output()
+    {
+        $this->benchmark->mark('api_end');
+
+        if ($this->errno > 0 && empty($this->errmsg)) {
+            $errmsgMap    = $this->config->item('errmsg');
+            $this->errmsg = $errmsgMap[$this->errno];
+        }
+
+        if (!empty($this->templates)) {
+            foreach ($this->templates as $t) {
+                echo $this->load->view($t, [], true);
+            }
+        } else {
+            $output = [
+                'errno' => $this->errno,
+                'errmsg' => $this->errmsg,
+                'data' => $this->output_data,
+                'traceid' => get_traceid(),
+                'username' => $this->username,
+                'time' => [
+                    'a' => $this->benchmark->elapsed_time('api_start', 'api_end') . '秒',
+                    's' => $this->benchmark->elapsed_time('service_start', 'service_end') . '秒',
+                ],
+            ];
+            header("Content-Type:application/json;charset=UTF-8");
+            echo json_encode($output);
+        }
+    }
+
+    private function _checkUser()
+    {
+        if ($this->is_check_login == 0) {
             return true;
         }
+
         $ret = $this->user->isUserLogin();
-        if(!$ret) {
-            $this->errno = ERR_AUTH_LOGIN;
+
+        if (!$ret) {
+            $this->errno       = ERR_AUTH_LOGIN;
             $this->output_data = $this->user->getLoginUrl();
             return false;
         }
+
         $this->username = $this->user->username;
 
         return true;
     }
 
-    private function _validateURI(){
-        if($this->is_check_login == 0){
-            return true;
-        }
-        $ret = $this->user->isAuthorizedUri($this->routerUri);
-        if (!$ret) {
-            $this->errno = ERR_AUTH_URI;
-            return false;
-        }
-        return true;
-    }
-
-    private function _validateCity($area) {
-        if($this->is_check_login == 0){
+    private function _validateCity($area)
+    {
+        if ($this->is_check_login == 0) {
             return true;
         }
 
         $ret = $this->user->getAuthorizedCityid();
         //$ret = $this->user->getCityAuth();
-        if(empty($ret)){
+        if (empty($ret)) {
             $this->errno = ERR_AUTH_AREA;
             return false;
         }
-        foreach($ret as $val){
+
+        foreach ($ret as $val) {
             //if($area == $val['taxi_id']){ // sso
-            if ($area == $val['taxiId']){
+            if ($area == $val['taxiId']) {
                 return true;
             }
         }
@@ -298,23 +308,27 @@ class MY_Controller extends CI_Controller {
         return false;
     }
 
-    private function getIp()
+    public function response($data, $errno = 0, $errmsg = '')
     {
-        $ip=false;
-        if(!empty($_SERVER["HTTP_CLIENT_IP"])){
-            $ip = $_SERVER["HTTP_CLIENT_IP"];
-        }
-        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ips = explode (", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
-            if ($ip) { array_unshift($ips, $ip); $ip = FALSE; }
-            for ($i = 0; $i < count($ips); $i++) {
-                if (!eregi ("^(10│172.16│192.168).", $ips[$i])) {
-                    $ip = $ips[$i];
-                    break;
-                }
+        $this->output_data = $data;
+        $this->errno       = $errno;
+        $this->errmsg      = $errmsg;
+        $this->output->set_content_type('application/json');
+    }
+
+    protected function setTimingType()
+    {
+        try {
+            $this->load->model('junction_model');
+            $back_timing_roll = $this->config->item('back_timing_roll');
+            $taskId           = $this->input->get_post('task_id', true);
+            $taskUser         = $this->junction_model->getTaskUser($taskId);
+            if (in_array($taskUser, $back_timing_roll, true)) {
+                $this->timingType = 2;
             }
+        } catch (\Exception $e) {
+            com_log_warning('my_controller_set_timingtype_error', 0, $e->getMessage(), compact("taskId"));
         }
-        return ($ip ? $ip : $_SERVER['REMOTE_ADDR']);
     }
 
     /**
@@ -330,9 +344,47 @@ class MY_Controller extends CI_Controller {
             $this->form_validation->set_rules($field, $field, $rule);
         }
 
-        if($this->form_validation->run() == false) {
-            $errmsg  = current($this->form_validation->error_array());
+        if ($this->form_validation->run() == false) {
+            $errmsg = current($this->form_validation->error_array());
             throw new Exception($errmsg, ERR_PARAMETERS);
         }
+    }
+
+    private function _validateURI()
+    {
+        if ($this->is_check_login == 0) {
+            return true;
+        }
+        $ret = $this->user->isAuthorizedUri($this->routerUri);
+        if (!$ret) {
+            $this->errno = ERR_AUTH_URI;
+            return false;
+        }
+        return true;
+    }
+
+    private function getIp()
+    {
+        $ip = false;
+
+        if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
+            $ip = $_SERVER["HTTP_CLIENT_IP"];
+        }
+
+        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ips = explode(", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
+            if ($ip) {
+                array_unshift($ips, $ip);
+                $ip = false;
+            }
+            for ($i = 0; $i < count($ips); $i++) {
+                if (!eregi("^(10│172.16│192.168).", $ips[$i])) {
+                    $ip = $ips[$i];
+                    break;
+                }
+            }
+        }
+
+        return ($ip ? $ip : $_SERVER['REMOTE_ADDR']);
     }
 }
