@@ -14,6 +14,8 @@ class Waymap_model extends CI_Model
 
     protected $userid;
 
+    protected $waymap_interface;
+
     /**
      * Waymap_model constructor.
      *
@@ -31,6 +33,8 @@ class Waymap_model extends CI_Model
         $this->userid = $this->config->item('waymap_userid');
 
         $this->getLastMapVersion();
+
+        $this->waymap_interface = $this->config->item('waymap_interface');
     }
 
     /**
@@ -115,7 +119,7 @@ class Waymap_model extends CI_Model
     {
         $data = compact('city_id', 'keyword');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/suggest';
+        $url = $this->waymap_interface . '/signal-map/mapJunction/suggest';
 
         return $this->get($url, $data);
     }
@@ -132,7 +136,7 @@ class Waymap_model extends CI_Model
     {
         $data = compact('city_id');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/city/districts';
+        $url = $this->waymap_interface . '/signal-map/city/districts';
 
         return $this->get($url, $data);
     }
@@ -151,7 +155,7 @@ class Waymap_model extends CI_Model
 
         $data = compact('logic_ids', 'version');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/map/many';
+        $url = $this->waymap_interface . '/signal-map/map/many';
 
         return $this->get($url, $data);
     }
@@ -170,7 +174,7 @@ class Waymap_model extends CI_Model
     {
         $data = compact('version', 'logic_junction_id', 'logic_flow_ids');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/MapFlow/simplifyFlows';
+        $url = $this->waymap_interface . '/signal-map/MapFlow/simplifyFlows';
 
         return $this->get($url, $data);
     }
@@ -187,7 +191,7 @@ class Waymap_model extends CI_Model
     {
         $data = compact('logic_id');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/map/detail';
+        $url = $this->waymap_interface . '/signal-map/map/detail';
 
         $result = $this->get($url, $data);
 
@@ -225,7 +229,7 @@ class Waymap_model extends CI_Model
 
             $data = compact('offset', 'count', 'version', 'city_id');
 
-            $url = $this->config->item('waymap_interface') . '/signal-map/map/getList';
+            $url = $this->waymap_interface . '/signal-map/map/getList';
 
             $res = $this->get($url, $data);
 
@@ -253,7 +257,7 @@ class Waymap_model extends CI_Model
     {
         $data = compact('date');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/map/getDateVersion';
+        $url = $this->waymap_interface . '/signal-map/map/getDateVersion';
 
         return $this->get($url, $data);
     }
@@ -271,7 +275,7 @@ class Waymap_model extends CI_Model
     {
         $data = compact('link_ids', 'version');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/mapFlow/linkInfo';
+        $url = $this->waymap_interface . '/signal-map/mapFlow/linkInfo';
 
         $res = $this->get($url, $data);
 
@@ -360,7 +364,7 @@ class Waymap_model extends CI_Model
 
         $data = compact('city_id', 'selected_junctionid', 'selected_path', 'map_version');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/connect/adj_junctions';
+        $url = $this->waymap_interface . '/signal-map/connect/adj_junctions';
 
         return $this->post($url, $data, 5000, 'json');
     }
@@ -423,7 +427,7 @@ class Waymap_model extends CI_Model
     {
         $data = compact('city_id', 'map_version', 'selected_junctionids');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/connect/path';
+        $url = $this->waymap_interface . '/signal-map/connect/path';
 
         return $this->post($url, $data, 0, 'json');
     }
@@ -444,7 +448,7 @@ class Waymap_model extends CI_Model
 
         $data = compact('logic_junction_ids', 'version');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/phase';
+        $url = $this->waymap_interface . '/signal-map/mapJunction/phase';
 
         $res = $this->get($url, $data);
 
@@ -489,7 +493,7 @@ class Waymap_model extends CI_Model
     {
         $data = compact('city_id', 'logic_junction_id', 'logic_flow_id');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/flow/movement';
+        $url   = $this->waymap_interface . '/signal-map/flow/movement';
 
         $res = $this->get($url, $data);
 
@@ -512,7 +516,7 @@ class Waymap_model extends CI_Model
 
         $data = compact('city_id', 'logic_junction_id', 'map_version');
 
-        $url = $this->config->item('waymap_interface') . '/signal-map/mapJunction/detail';
+        $url = $this->waymap_interface . '/signal-map/mapJunction/detail';
 
         return $this->get($url, $data);
     }
