@@ -7,17 +7,17 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use Services\JunctionService;
+use Services\JunctionsService;
 
 class Junction extends MY_Controller
 {
-    protected $junctionService;
+    protected $junctionsService;
 
     public function __construct()
     {
         parent::__construct();
 
-        $this->junctionService = new JunctionService();
+        $this->junctionsService = new junctionsService();
 
         $this->load->model('junction_model');
         $this->load->model('timing_model');
@@ -65,7 +65,7 @@ class Junction extends MY_Controller
         }
 
         // 获取全城路口指标信息
-        $data = $this->junctionService->getAllCityJunctionInfo($data);
+        $data = $this->junctionsService->getAllCityJunctionInfo($data);
 
         $this->response($data);
     }
@@ -126,7 +126,7 @@ class Junction extends MY_Controller
         $data['timingType'] = $this->timingType;
 
         // 获取路口指标详情
-        $res = $this->junctionService->getFlowQuotas($data);
+        $res = $this->junctionsService->getFlowQuotas($data);
 
         $this->response($res);
     }
@@ -179,7 +179,7 @@ class Junction extends MY_Controller
         ];
 
         // 获取诊断列表页简易路口详情
-        $res = $this->junctionService->getDiagnosePageSimpleJunctionDetail($data);
+        $res = $this->junctionsService->getDiagnosePageSimpleJunctionDetail($data);
 
         $this->response($res);
     }
@@ -229,7 +229,7 @@ class Junction extends MY_Controller
         ];
 
         // 获取诊断列表页简易路口详情
-        $res = $this->junctionService->getJunctionQuestionTrend($data);
+        $res = $this->junctionsService->getJunctionQuestionTrend($data);
 
         $this->response($res);
     }
@@ -261,7 +261,7 @@ class Junction extends MY_Controller
             'time_range'  => strip_tags(trim($params['task_time_range'])),
             'timingType'  => $this->timingType,
         ];
-        $timing = $this->junctionService->getJunctionsTimingInfo($data);
+        $timing = $this->junctionsService->getJunctionsTimingInfo($data);
 
         return $this->response($timing);
     }

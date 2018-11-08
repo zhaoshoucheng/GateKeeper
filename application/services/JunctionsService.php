@@ -7,7 +7,7 @@
 
 namespace Services;
 
-class JunctionService extends BaseService
+class JunctionsService extends BaseService
 {
     public function __construct()
     {
