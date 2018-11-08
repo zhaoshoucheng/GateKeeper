@@ -22,11 +22,11 @@ class JunctionService extends BaseService
 
     /**
      * 获取全城路口信息
-     * @param $params['task_id']    interger 任务ID
-     * @param $params['type']       interger 计算指数类型 1：统合 0：时间点
-     * @param $params['city_id']    interger 城市ID
+     * @param $params['task_id']    int      任务ID
+     * @param $params['type']       int      计算指数类型 1：统合 0：时间点
+     * @param $params['city_id']    int      城市ID
      * @param $params['time_point'] string   评估时间点 指标计算类型为1时非空
-     * @param $params['confidence'] interger 置信度
+     * @param $params['confidence'] int      置信度
      * @param $params['quota_key']  string   指标key
      * @return mixed
      * @throws \Exception
@@ -79,15 +79,15 @@ class JunctionService extends BaseService
 
     /**
      * 获取路口指标详情
-     * @param $params['task_id']         interger 任务ID
+     * @param $params['task_id']         int      任务ID
      * @param $params['junction_id']     string   逻辑路口ID
      * @param $params['dates']           array    评估/诊断日期
-     * @param $params['search_type']     interger 查询类型 1：按方案查询 0：按时间点查询
+     * @param $params['search_type']     int      查询类型 1：按方案查询 0：按时间点查询
      * @param $params['time_point']      string   时间点 当search_type = 0 时 必传
      * @param $params['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
-     * @param $params['type']            interger 详情类型 1：指标详情页 2：诊断详情页
+     * @param $params['type']            int      详情类型 1：指标详情页 2：诊断详情页
      * @param $params['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-     * @param $params['timingType']      interger 配时来源 1：人工 2：反推
+     * @param $params['timingType']      int      配时来源 1：人工 2：反推
      * @return array
      */
     public function getFlowQuotas($params)
@@ -107,13 +107,13 @@ class JunctionService extends BaseService
 
     /**
      * 获取诊断列表页简易路口详情
-     * @param $params['task_id']         interger 任务ID
+     * @param $params['task_id']         int      任务ID
      * @param $params['junction_id']     string   逻辑路口ID
      * @param $params['dates']           array    评估/诊断日期
      * @param $params['time_point']      string   时间点
      * @param $params['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
      * @param $params['diagnose_key']    array    诊断问题KEY
-     * @param $params['timingType']      interger 配时来源 1：人工 2：反推
+     * @param $params['timingType']      int      配时来源 1：人工 2：反推
      * @return array
      */
     public function getDiagnosePageSimpleJunctionDetail($params)
@@ -248,7 +248,7 @@ class JunctionService extends BaseService
     /**
      * 获取路口问题趋势图
      * 路口无问题属于正常状态时，返回路口级指标平均延误的趋势图
-     * @param $params['task_id']         interger 任务ID
+     * @param $params['task_id']         int      任务ID
      * @param $params['junction_id']     string   逻辑路口ID
      * @param $params['time_point']      string   时间点
      * @param $params['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
@@ -278,7 +278,7 @@ class JunctionService extends BaseService
         }
 
         $data = $this->junction_model->getJunctionQuestionTrend($params['task_id'], $params['junction_id'], $select);
-        if (!$res) {
+        if (!$data) {
             return [];
         }
 
@@ -393,16 +393,108 @@ class JunctionService extends BaseService
     }
 
     /**
+     * 获取路口配时信息
+     * @param $params['junction_id'] string   逻辑路口ID
+     * @param $params['dates']       array    评估/诊断日期
+     * @param $params['time_range']  string   时间段 00:00-00:30
+     * @param $params['timingType']  int      配时数据源 0，全部；1，人工；2，配时反推；3，信号机上报
+     * @return array
+     */
+    public function getJunctionsTimingInfo($params)
+    {
+        // 获取配时数据
+        $data = $this->timing_model->getTimingData($params);
+        if (!$data) {
+            return [];
+        }
+
+        if (empty($data['latest_plan']['time_plan']) || $data['total_plan'] < 1) {
+            return [];
+        }
+
+        $task_time_range = explode('-', $params['time_range']);
+        // 任务开始时间
+        $task_start_time = $task_time_range[0];
+        // 任务结束时间
+        $task_end_time = $task_time_range[1];
+
+        $result = [];
+        // 方案总数
+        $result['total_plan'] = $data['total_plan'];
+
+        foreach ($data['latest_plan']['time_plan'] as $k=>$v) {
+            // 方案列表
+            $tod_start_time = $v['tod_start_time'];
+            if (strtotime($task_start_time) > strtotime($tod_start_time)) {
+                $tod_start_time = date("H:i:s", strtotime($task_start_time));
+            }
+            $tod_end_time = $v['tod_end_time'];
+            if (strtotime($tod_end_time) > strtotime($task_end_time)) {
+                $tod_end_time = date("H:i:s", strtotime($task_end_time));
+            }
+            $result['plan_list'][strtotime($tod_start_time)]['id'] = $v['time_plan_id'];
+            $result['plan_list'][strtotime($tod_start_time)]['start_time'] = $tod_start_time;
+            $result['plan_list'][strtotime($tod_start_time)]['end_time'] = $tod_end_time;
+
+            // 每个方案对应的详情配时详情
+            if (isset($v['plan_detail']['extra_timing']['cycle'])
+                && isset($v['plan_detail']['extra_timing']['offset'])
+            ) {
+                $result['timing_detail'][$v['time_plan_id']]['cycle'] = $v['plan_detail']['extra_timing']['cycle'];
+                $result['timing_detail'][$v['time_plan_id']]['offset'] = $v['plan_detail']['extra_timing']['offset'];
+            }
+
+            if (!empty($v['plan_detail']['movement_timing'])) {
+                foreach ($v['plan_detail']['movement_timing'] as $k1=>$v1) {
+                    foreach ($v1 as $key=>$val) {
+                        // 信号灯状态 1=绿灯
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['state']
+                            = isset($val['state']) ? $val['state'] : 0;
+                        // 绿灯开始时间
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['start_time']
+                            = isset($val['start_time']) ? $val['start_time'] : 0;
+                        // 绿灯持续时间
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['duration']
+                            = isset($val['duration']) ? $val['duration'] : 0;
+                        // 绿灯结束时间
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['end_time']
+                            = $val['start_time'] + $val['duration'];
+                        // 逻辑flow id
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['logic_flow_id']
+                            = isset($val['flow_logic']['logic_flow_id']) ? $val['flow_logic']['logic_flow_id'] : 0;
+                        // flow 描述
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['comment']
+                            = isset($val['flow_logic']['comment']) ? $val['flow_logic']['comment'] : '';
+                    }
+                }
+            }
+
+            if (!empty($result['timing_detail'][$v['time_plan_id']]['timing'])) {
+                $result['timing_detail'][$v['time_plan_id']]['timing']
+                    = array_values($result['timing_detail'][$v['time_plan_id']]['timing']);
+            }
+        }
+
+        // 对方案按时间正序排序
+        if (!empty($result['plan_list'])) {
+            ksort($result['plan_list']);
+            $result['plan_list'] = array_values($result['plan_list']);
+        }
+
+        return $result;
+    }
+
+    /**
      * 获取诊断详情页数据
-     * @param $data['task_id']         interger 任务ID
+     * @param $data['task_id']         int      任务ID
      * @param $data['junction_id']     string   逻辑路口ID
      * @param $data['dates']           array    评估/诊断日期
-     * @param $data['search_type']     interger 查询类型 1：按方案查询 0：按时间点查询
+     * @param $data['search_type']     int      查询类型 1：按方案查询 0：按时间点查询
      * @param $data['time_point']      string   时间点 当search_type = 0 时 必传
      * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
-     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
+     * @param $data['type']            int      详情类型 1：指标详情页 2：诊断详情页
      * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-     * @param $data['timingType']      interger 配时来源 1：人工 2：反推
+     * @param $data['timingType']      int      配时来源 1：人工 2：反推
      * @return array
      */
     private function getDiagnoseJunctionDetail($data)
@@ -435,15 +527,15 @@ class JunctionService extends BaseService
 
     /**
      * 获取指标详情页数据
-     * @param $data['task_id']         interger 任务ID
+     * @param $data['task_id']         int      任务ID
      * @param $data['junction_id']     string   逻辑路口ID
      * @param $data['dates']           array    评估/诊断日期
-     * @param $data['search_type']     interger 查询类型 1：按方案查询 0：按时间点查询
+     * @param $data['search_type']     int      查询类型 1：按方案查询 0：按时间点查询
      * @param $data['time_point']      string   时间点 当search_type = 0 时 必传
      * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
-     * @param $data['type']            interger 详情类型 1：指标详情页 2：诊断详情页
+     * @param $data['type']            int      详情类型 1：指标详情页 2：诊断详情页
      * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-     * @param $data['timingType']      interger 配时来源 1：人工 2：反推
+     * @param $data['timingType']      int      配时来源 1：人工 2：反推
      * @return array
      */
     private function getQuotaJunctionDetail($data)

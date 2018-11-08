@@ -27,11 +27,11 @@ class Junction extends MY_Controller
 
     /**
      * 评估-获取全城路口指标信息
-     * @param $params['task_id']     interger  Y 任务ID
-     * @param $params['city_id']     interger  Y 城市ID
-     * @param $params['type']        interger  Y 指标计算类型 1：统合 0：时间点
+     * @param $params['task_id']     int       Y 任务ID
+     * @param $params['city_id']     int       Y 城市ID
+     * @param $params['type']        int       Y 指标计算类型 1：统合 0：时间点
      * @param $params['time_point']  string    N 评估时间点 指标计算类型为1时非空
-     * @param $params['confidence']  interger  Y 置信度 0:全部 1:高 2:低
+     * @param $params['confidence']  int       Y 置信度 0:全部 1:高 2:低
      * @param $params['quota_key']   string    Y 指标key
      * @throws Exception
      * @return json
@@ -72,13 +72,13 @@ class Junction extends MY_Controller
 
     /**
      * 获取路口指标详情
-     * @param $params['task_id']         interger Y 任务ID
+     * @param $params['task_id']         int      Y 任务ID
      * @param $params['dates']           array    Y 评估/诊断日期 [20180102,20180103,....]
      * @param $params['junction_id']     string   Y 逻辑路口ID
-     * @param $params['search_type']     interger Y 查询类型 1：按方案查询 0：按时间点查询
+     * @param $params['search_type']     int      Y 查询类型 1：按方案查询 0：按时间点查询
      * @param $params['time_point']      string   N 时间点 当search_type = 0 时 必传
      * @param $params['time_range']      string   N 方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
-     * @param $params['type']            interger Y 详情类型 1：指标详情页 2：诊断详情页
+     * @param $params['type']            int      Y 详情类型 1：指标详情页 2：诊断详情页
      * @param $params['task_time_range'] string   Y 评估/诊断任务开始结束时间 格式："06:00-09:00"
      * @return json
      */
@@ -133,7 +133,7 @@ class Junction extends MY_Controller
 
     /**
      * 获取诊断列表页简易路口详情
-     * @param $params['task_id']         interger Y 任务ID
+     * @param $params['task_id']         int      Y 任务ID
      * @param $params['dates']           array    Y 评估/诊断日期 [20180102,20180103,....]
      * @param $params['junction_id']     string   Y 逻辑路口ID
      * @param $params['time_point']      string   Y 时间点 06:00
@@ -186,11 +186,11 @@ class Junction extends MY_Controller
 
     /**
      * 获取路口问题趋势图
-     * @param task_id         interger Y 任务ID
-     * @param junction_id     string   Y 路口ID
-     * @param time_point      string   Y 时间点 06:00
-     * @param task_time_range string   Y 任务时间段 格式："06:00-09:00"
-     * @param diagnose_key    array    N 诊断问题KEY 当路口正常状态时可为空
+     * @param $params['task_id']         int      Y 任务ID
+     * @param $params['junction_id']     string   Y 路口ID
+     * @param $params['time_point']      string   Y 时间点 06:00
+     * @param $params['task_time_range'] string   Y 任务时间段 格式："06:00-09:00"
+     * @param $params['diagnose_key']    array    N 诊断问题KEY 当路口正常状态时可为空
      * @return json
      */
     public function getJunctionQuestionTrend()
@@ -238,45 +238,41 @@ class Junction extends MY_Controller
     * 获取配时方案及配时详情
     * @param dates           array  Y 评估/诊断日期
     * @param junction_id     string Y 路口ID
-    * @param task_time_range string Y 任务时间段
+    * @param task_time_range string Y 任务时间段 07:00-09:30
     * @return json
     */
     public function getJunctionTiming()
     {
         $params = $this->input->post(NULL, TRUE);
+
         // 校验参数
-        $validate = Validate::make($params, [
-                'junction_id'      => 'nullunable',
-                'task_time_range'  => 'nullunable'
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
+        $this->validate([
+            'junction_id'     => 'required|min_length[4]',
+            'task_time_range' => 'required|exact_length[11]|regex_match[/\d{2}:\d{2}-\d{2}:\d{2}/]',
+        ]);
 
         if (!is_array($params['dates']) || empty($params['dates'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数dates必须为数组且不可为空！';
-            return;
+            throw new \Exception('参数dates必须为数组且不可为空！', ERR_PARAMETERS);
         }
-        $data['dates'] = $params['dates'];
-        $data['junction_id'] = strip_tags(trim($params['junction_id']));
-        $data['time_range'] = strip_tags(trim($params['task_time_range']));
-        $data['timingType'] = $this->timingType;
-        $timing = $this->timing_model->getJunctionsTimingInfo($data);
+
+        $data = [
+            'dates'       => $params['dates'],
+            'junction_id' => strip_tags(trim($params['junction_id'])),
+            'time_range'  => strip_tags(trim($params['task_time_range'])),
+            'timingType'  => $this->timingType,
+        ];
+        $timing = $this->junctionService->getJunctionsTimingInfo($data);
 
         return $this->response($timing);
     }
 
     /**
     * 诊断-获取全城路口诊断问题列表
-    * @param task_id        interger  Y 任务ID
-    * @param city_id        interger  Y 城市ID
-    * @param type           interger  Y 指标计算类型 1：统合 0：时间点
+    * @param task_id        int       Y 任务ID
+    * @param city_id        int       Y 城市ID
+    * @param type           int       Y 指标计算类型 1：统合 0：时间点
     * @param time_point     string    N 时间点 指标计算类型为1时非空
-    * @param confidence     interger  Y 置信度 0:全部 1:高 2:低
+    * @param confidence     int       Y 置信度 0:全部 1:高 2:低
     * @param diagnose_key   array     Y 诊断key
     * @return json
     */
@@ -340,8 +336,8 @@ class Junction extends MY_Controller
 
     /**
     * 获取问题趋势
-    * @param task_id    interger Y 任务ID
-    * @param confidence interger Y 置信度
+    * @param task_id    int      Y 任务ID
+    * @param confidence int      Y 置信度
     * @return json
     */
     public function getQuestionTrend()
@@ -364,12 +360,12 @@ class Junction extends MY_Controller
 
     /**
     * 诊断-诊断问题排序列表
-    * @param task_id       interger Y 任务ID
-    * @param city_id       interger Y 城市ID
+    * @param task_id       int      Y 任务ID
+    * @param city_id       int      Y 城市ID
     * @param time_point    string   Y 时间点
     * @param diagnose_key  array    Y 诊断key
-    * @param confidence    interger Y 置信度
-    * @param orderby       interger N 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
+    * @param confidence    int      Y 置信度
+    * @param orderby       int      N 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
     * @return json
     */
     public function getDiagnoseRankList()
@@ -428,7 +424,7 @@ class Junction extends MY_Controller
     * 获取路口地图绘制数据
     * @param junction_id     string   Y 逻辑路口ID
     * @param dates           string   Y 评估/诊断任务日期 ['20180102','20180103']
-    * @param search_type     interger Y 查询类型 1：按方案查询 0：按时间点查询
+    * @param search_type     int      Y 查询类型 1：按方案查询 0：按时间点查询
     * @param time_point      string   N 时间点 格式 00:00 PS:当search_type = 0 时 必传
     * @param time_range      string   N 方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传 时间段
     * @param task_time_range string   Y 评估/诊断任务开始结束时间 格式 00:00-24:00
