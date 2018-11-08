@@ -177,7 +177,6 @@ $config['confidence'] = [
 
 // 路口指标
 $config['junction_quota_key'] = [
-
     'imbalance_index' => [
         'name' => '失衡指数',                                  // 名称
         'status_formula' => function ($val) {                  // 状态判断规则
