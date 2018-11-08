@@ -78,6 +78,7 @@ $config['authirized_apps'] = array(
         'secret'=> '3a01e6c56bcce94ee5de073df3d512d5',
         'open_api'   => array(
             'warning/notify',
+            'warning/heartbeat',
         ),
         'white_ips' => array(
         )
