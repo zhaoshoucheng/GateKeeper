@@ -23,7 +23,6 @@ class Overviewtoplist_model extends CI_Model
         }
 
         $this->load->config('realtime_conf');
-        $this->config->load('permission/nanchang_overview_conf');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
         $this->load->model('common_model');
@@ -44,12 +43,6 @@ class Overviewtoplist_model extends CI_Model
             ->where('traj_count >=', 10)
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59');
-
-        $nanchang = $this->config->item('nanchang');
-        $username = get_instance()->username;
-        if(array_key_exists($username, $nanchang)) {
-            $this->db->where_in('logic_junction_id', $nanchang[$username]);
-        }
 
         $result = $this->db->group_by('logic_junction_id')
             ->order_by('sum(stop_delay * traj_count) / sum(traj_count)', 'desc')
@@ -91,12 +84,6 @@ class Overviewtoplist_model extends CI_Model
             ->where('traj_count >=', 10)
             ->where('updated_at >=', $data['date'] . ' 00:00:00')
             ->where('updated_at <=', $data['date'] . ' 23:59:59');
-
-        $nanchang = $this->config->item('nanchang');
-        $username = get_instance()->username;
-        if(array_key_exists($username, $nanchang)) {
-            $this->db->where_in('logic_junction_id', $nanchang[$username]);
-        }
 
         $result = $this->db->order_by('stop_time_cycle', 'desc')
             ->limit($data['pagesize'])

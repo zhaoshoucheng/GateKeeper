@@ -840,5 +840,4 @@ class JunctionService extends BaseService
 
         return $select;
     }
-
 }

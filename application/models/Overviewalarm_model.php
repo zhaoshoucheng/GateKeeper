@@ -24,7 +24,6 @@ class Overviewalarm_model extends CI_Model
             $this->db = $this->load->database('default', true);
         }
         $this->load->config('realtime_conf.php');
-        $this->config->load('permission/nanchang_overview_conf');
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
         $this->load->model('common_model');
@@ -49,19 +48,11 @@ class Overviewalarm_model extends CI_Model
 
         $result = [];
 
-        $nanchang = $this->config->item('nanchang');
-
-        $username = get_instance()->username;
-
         $where = 'city_id = ' . $data['city_id'] . ' and  date = "' . $data['date'] . '" and type = 1';
 
         // 获取溢流报警个数
         $spilloverCount = $this->db->select('count(DISTINCT logic_junction_id) as num')
             ->from($this->tb)->where($where);
-
-        if(array_key_exists($username, $nanchang)) {
-            $this->db->where_in('logic_junction_id', $nanchang[$username]);
-        }
 
         $spilloverCount = $this->db->get()->row_array();
         $spilloverCountRes = $spilloverCount['num'];
@@ -72,10 +63,6 @@ class Overviewalarm_model extends CI_Model
         $saturationCount = $this->db->select('count(DISTINCT logic_junction_id) as num')
             ->from($this->tb)
             ->where($where);
-
-        if(array_key_exists($username, $nanchang)) {
-            $this->db->where_in('logic_junction_id', $nanchang[$username]);
-        }
 
         $saturationCount = $this->db->get()->row_array();
 
@@ -160,14 +147,6 @@ class Overviewalarm_model extends CI_Model
         $this->db->from($this->tb);
         $this->db->where('city_id = ' . $data['city_id']);
         $this->db->where_in('date', $sevenDates);
-
-        $nanchang = $this->config->item('nanchang');
-
-        $username = get_instance()->username;
-
-        if(array_key_exists($username, $nanchang)) {
-            $this->db->where_in('logic_junction_id', $nanchang[$username]);
-        }
 
         $this->db->group_by('logic_junction_id, date');
         $res = $this->db->get()->result_array();
@@ -259,16 +238,6 @@ class Overviewalarm_model extends CI_Model
             if (empty($res)) {
                 return [];
             }
-        }
-
-        $nanchang = $this->config->item('nanchang');
-
-        $username = get_instance()->username;
-
-        if(array_key_exists($username, $nanchang)) {
-            $res = Collection::make($res)
-                ->whereIn('logic_junction_id', $nanchang[$username])
-                ->values()->get();
         }
 
         $result = $this->formatRealTimeAlarmListData($res);

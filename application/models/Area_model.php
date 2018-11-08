@@ -42,12 +42,14 @@ class Area_model extends CI_Model
      */
     public function getAreasByCityId($cityId, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from($this->tb)
             ->where('city_id', $cityId)
             ->where('delete_at', "1970-01-01 00:00:00")
             ->order_by('id', 'DESC')
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -59,11 +61,13 @@ class Area_model extends CI_Model
      */
     public function getAreaByAreaId($areaId, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from($this->tb)
             ->where('id', $areaId)
             ->where('delete_at', '1970-01-01')
-            ->get()->row_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->row_array() : $res;
     }
 
     /**
@@ -76,12 +80,14 @@ class Area_model extends CI_Model
      */
     public function getAreaByAreaName($cityId, $areaName, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from($this->tb)
             ->where('city_id', $cityId)
             ->where('area_name', $areaName)
             ->where('delete_at', '1970-01-01 00:00:00')
-            ->get()->row_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->row_array() : $res;
     }
 
     /**
@@ -93,11 +99,13 @@ class Area_model extends CI_Model
      */
     public function getJunctionsByAreaId($areaId, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from('area_junction_relation')
             ->where('area_id', $areaId)
             ->where('delete_at', '1970-01-01 00:00:00')
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -112,14 +120,16 @@ class Area_model extends CI_Model
      */
     public function getJunctionByCityId($dates, $junctionIds, $hours, $cityId, $select)
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from('junction_hour_report')
             ->where_in('date', $dates)
             ->where_in('logic_junction_id', $junctionIds)
             ->where_in('hour', $hours)
             ->where('city_id', $cityId)
             ->group_by('date, hour')
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -203,11 +213,13 @@ class Area_model extends CI_Model
      */
     public function getAreaJunctions($areaId, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from('area_junction_relation')
             ->where('area_id', $areaId)
             ->where('delete_at', '1970-01-01 00:00:00')
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -248,11 +260,13 @@ class Area_model extends CI_Model
      */
     public function getAreaJunctionsByAreaIds($areaIds, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from('area_junction_relation')
             ->where_in('area_id', $areaIds)
             ->where('delete_at', '1970-01-01 00:00:00')
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     public function areaNameIsUnique($areaName, $cityId, $areaId = null)
