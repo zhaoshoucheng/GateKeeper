@@ -699,11 +699,11 @@ class TimingAdaptionAreaService extends BaseService
         // 获取路口ID串
         $junctions = $this->getAreaJunctions($data);
 
-        if (empty($junctions['data'])) {
+        if (empty($junctions)) {
             throw new \Exception('此区域没有路口', ERR_DEFAULT);
         }
 
-        $esJunctionIds = implode(',', array_filter(array_column($junctions['data'], 'logic_junction_id')));
+        $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
 
         // 当前时间 毫秒级时间戳
         $endTime = (int)(time() * 1000);
