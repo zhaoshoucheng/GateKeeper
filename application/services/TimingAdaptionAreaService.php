@@ -581,7 +581,9 @@ class TimingAdaptionAreaService extends BaseService
             }
         }
 
-        return array_values($result['data'] ?? []);
+        return [
+            'dataList' => array_values($result['data'] ?? []),
+        ];
     }
 
     /**
