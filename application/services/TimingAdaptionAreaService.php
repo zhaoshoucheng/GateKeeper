@@ -803,7 +803,9 @@ class TimingAdaptionAreaService extends BaseService
             continue;
         }
 
-        return !empty($tmpRet) ? $tmpRet : [];
+        return [
+            'dataList' => !empty($tmpRet) ? $tmpRet : [],
+        ];
     }
 
     /**
