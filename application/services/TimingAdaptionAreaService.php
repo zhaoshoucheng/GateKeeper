@@ -188,7 +188,9 @@ class TimingAdaptionAreaService extends BaseService
         // 更新平均速度、平均延误数据的redis
         $this->redis_model->setEx($areaRedisKey, json_encode($redisData), 24 * 3600);
 
-        return $data;
+        return [
+            'dataList' => $data,
+        ];
     }
 
     /**
