@@ -328,12 +328,16 @@ class Realtimewarning_model extends CI_Model
         //获取路口信息的自定义返回格式
         $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0);
         $junctionsInfo = array_column($junctionsInfo, null, 'logic_junction_id');
-
+        
         //获取需要报警的全部路口ID
         $ids = implode(',', array_column($realTimeAlarmsInfo, 'logic_junction_id'));
 
         //获取需要报警的全部路口的全部方向的信息
-        $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+        try {
+            $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+        }catch(\Exception $e){
+            $flowsInfo = [];
+        }
 
         //数组初步处理，去除无用数据
         $result = array_map(function ($item) use ($flowsInfo, $realTimeAlarmsInfo) {
