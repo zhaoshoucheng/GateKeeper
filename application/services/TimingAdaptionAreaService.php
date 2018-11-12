@@ -318,7 +318,12 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         // 获取路口相位信息
-        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        try {
+            $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        } catch (\Exception $e) {
+            $flowsInfo = [];
+        }
+
         // 报警类别
         $alarmCate = $this->config->item('alarm_category');
 

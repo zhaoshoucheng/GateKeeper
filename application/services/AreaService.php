@@ -296,7 +296,7 @@ class AreaService extends BaseService
 
         // 指标算法映射
         $methods = [
-            'speed' => 'round(avg(speed), 2) as speed',
+            'speed' => 'round(avg(speed) * 3.6, 2) as speed',
             'stop_delay' => 'round(avg(stop_delay), 2) as stop_delay',
         ];
 
