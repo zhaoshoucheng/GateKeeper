@@ -383,7 +383,9 @@ class TimingAdaptionAreaService extends BaseService
             return $a['pinyin'] < $b['pinyin'] ? -1 : 1;
         });
 
-        return $data;
+        return [
+            'dataList' => $data,
+        ];
     }
 
     /**
