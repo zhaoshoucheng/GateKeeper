@@ -779,7 +779,22 @@ class JunctionsService extends BaseService
         }
         $select = "id, junction_id, {$selectQuota}, start_time, end_time, result_comment, movements";
 
-        $res = $this->junction_model->getDiagnoseJunctionDetail($data, $select);
+        // 组织where条件
+        $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
+
+        if ((int)$data['search_type'] == 1) { // 按方案查询
+            // 综合查询
+            $time_range = array_filter(explode('-', $data['time_range']));
+            $where  .= ' and type = 1';
+            $where  .= ' and start_time = "' . trim($time_range[0]) . '"';
+            $where  .= ' and end_time = "' . trim($time_range[1]) . '"';;
+        } else { // 按时间点查询
+            $select .= ', time_point';
+            $where  .= ' and type = 0';
+            $where  .= ' and time_point = "' . trim($data['time_point']) . '"';
+        }
+
+        $res = $this->junction_model->searchDB($select, $where, 'row_array');
         if (!$res) {
             return [];
         }
@@ -814,7 +829,21 @@ class JunctionsService extends BaseService
             $select .= ', time_point';
         }
 
-        $res = $this->junction_model->getQuotaJunctionDetail($data, $select);
+        // 组织where条件
+        $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
+
+        if ((int)$data['search_type'] == 1) { // 按方案查询
+            // 综合查询
+            $time_range = array_filter(explode('-', $data['time_range']));
+            $where  .= ' and type = 1';
+            $where  .= ' and start_time = "' . trim($time_range[0]) . '"';
+            $where  .= ' and end_time = "' . trim($time_range[1]) . '"';;
+        } else { // 按时间点查询
+            $where  .= ' and type = 0';
+            $where  .= ' and time_point = "' . trim($data['time_point']) . '"';
+        }
+
+        $res = $this->junction_model->searchDB($select, $where, 'row_array');
         if (!$res) {
             return [];
         }
