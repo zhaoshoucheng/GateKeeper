@@ -342,13 +342,11 @@ class Redis_model extends CI_Model
      */
     public function verifyToken($token)
     {
-        $key = 'Token_' . $token;
-
-        if(!($data = $this->getData($key))) {
+        if(!($data = $this->getData($token))) {
             return false;
         }
 
-        $this->deleteData($key);
+        $this->deleteData($token);
 
         return true;
     }

@@ -1,7 +1,6 @@
 <?php
 
 
-
 $config['menu'] = [
 
     'check' => function ($user) {
@@ -12,10 +11,10 @@ $config['menu'] = [
             '13261208949',
             '13810530502',
             '18612588551',
-            '13911697834'
+            '13911697834',
         ];
 
-        if(in_array($user, $users)) {
+        if (in_array($user, $users)) {
             return 2;
         }
 
@@ -119,53 +118,51 @@ $config['menu'] = [
         // 北京区域受限菜单
         2 => [
             [
-                [
-                    'name' => '概览',
-                    'url' => '/overview',
-                    'remark ' => 'signal',
-                ],
-                [
-                    'name' => '诊断',
-                    'url' => '/diagnose/',
-                    'remark ' => 'signal',
-                    'son' =>
-                        [
-                            0 =>
-                                [
-                                    'name' => '趋势',
-                                    'url' => 'tendency',
-                                ],
-                            1 =>
-                                [
-                                    'name' => '详情',
-                                    'url' => 'index',
-                                ],
-                        ],
-                ],
-                [
-                    'name' => '优化',
-                    'url' => '/optimize/',
-                    'remark ' => 'signal',
-                    'son' =>
-                        [
-                            0 =>
-                                [
-                                    'name' => '单点时段优化',
-                                    'url' => 'signal',
-                                ],
-                            1 =>
-                                [
-                                    'name' => '单点绿信比优化',
-                                    'url' => 'green',
-                                ],
-                            2 =>
-                                [
-                                    'name' => '干线协调优化',
-                                    'url' => 'coordinate',
-                                ],
-                        ],
-                ]
-            ]
-        ]
+                'name' => '概览',
+                'url' => '/overview',
+                'remark ' => 'signal',
+            ],
+            [
+                'name' => '诊断',
+                'url' => '/diagnose/',
+                'remark ' => 'signal',
+                'son' =>
+                    [
+                        0 =>
+                            [
+                                'name' => '趋势',
+                                'url' => 'tendency',
+                            ],
+                        1 =>
+                            [
+                                'name' => '详情',
+                                'url' => 'index',
+                            ],
+                    ],
+            ],
+            [
+                'name' => '优化',
+                'url' => '/optimize/',
+                'remark ' => 'signal',
+                'son' =>
+                    [
+                        0 =>
+                            [
+                                'name' => '单点时段优化',
+                                'url' => 'signal',
+                            ],
+                        1 =>
+                            [
+                                'name' => '单点绿信比优化',
+                                'url' => 'green',
+                            ],
+                        2 =>
+                            [
+                                'name' => '干线协调优化',
+                                'url' => 'coordinate',
+                            ],
+                    ],
+            ],
+        ],
     ],
 ];

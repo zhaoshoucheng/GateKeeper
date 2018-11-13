@@ -188,7 +188,9 @@ class TimingAdaptionAreaService extends BaseService
         // 更新平均速度、平均延误数据的redis
         $this->redis_model->setEx($areaRedisKey, json_encode($redisData), 24 * 3600);
 
-        return $data;
+        return [
+            'dataList' => $data,
+        ];
     }
 
     /**
@@ -316,7 +318,12 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         // 获取路口相位信息
-        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        try {
+            $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        } catch (\Exception $e) {
+            $flowsInfo = [];
+        }
+
         // 报警类别
         $alarmCate = $this->config->item('alarm_category');
 
@@ -376,7 +383,9 @@ class TimingAdaptionAreaService extends BaseService
             return $a['pinyin'] < $b['pinyin'] ? -1 : 1;
         });
 
-        return $data;
+        return [
+            'dataList' => $data,
+        ];
     }
 
     /**
@@ -574,7 +583,9 @@ class TimingAdaptionAreaService extends BaseService
             }
         }
 
-        return array_values($result['data'] ?? []);
+        return [
+            'dataList' => array_values($result['data'] ?? []),
+        ];
     }
 
     /**
@@ -688,11 +699,11 @@ class TimingAdaptionAreaService extends BaseService
         // 获取路口ID串
         $junctions = $this->getAreaJunctions($data);
 
-        if (empty($junctions['data'])) {
+        if (empty($junctions)) {
             throw new \Exception('此区域没有路口', ERR_DEFAULT);
         }
 
-        $esJunctionIds = implode(',', array_filter(array_column($junctions['data'], 'logic_junction_id')));
+        $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
 
         // 当前时间 毫秒级时间戳
         $endTime = (int)(time() * 1000);
@@ -792,7 +803,9 @@ class TimingAdaptionAreaService extends BaseService
             continue;
         }
 
-        return !empty($tmpRet) ? $tmpRet : [];
+        return [
+            'dataList' => !empty($tmpRet) ? $tmpRet : [],
+        ];
     }
 
     /**

@@ -291,7 +291,7 @@ class RoadService extends BaseService
         $direction         = $params['direction'];
         $quotaKey          = $params['quota_key'];
         $baseStartDate     = $params['base_start_date'];
-        $baseEndDate       = $params['base_start_date'];
+        $baseEndDate       = $params['base_end_date'];
         $evaluateStartDate = $params['evaluate_start_date'];
         $evaluateEndDate   = $params['evaluate_end_date'];
 

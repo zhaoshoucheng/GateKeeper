@@ -68,7 +68,7 @@ class FlowDurationV6_model extends CI_Model
         $isExisted = $this->db->table_exists($this->tb . $cityId);
 
         if (!$isExisted) {
-            throw new \Exception('数据表不存在');
+            throw new \Exception('数据表不存在', ERR_DATABASE);
         }
     }
 

@@ -5,6 +5,10 @@
  * # date:    2018-04-08
  ********************************************/
 
+/**
+ * Class Waymap_model
+ * @property Redis_model $redis_model
+ */
 class Waymap_model extends CI_Model
 {
     // 全局的最后一个版本
@@ -234,9 +238,7 @@ class Waymap_model extends CI_Model
             $res = $this->get($url, $data);
 
             $this->redis_model->deleteData($redis_key);
-
             $this->redis_model->setData($redis_key, json_encode($res));
-
             $this->redis_model->setExpire($redis_key, 3600 * 24);
 
             return $res;
@@ -259,7 +261,7 @@ class Waymap_model extends CI_Model
 
         $url = $this->waymap_interface . '/signal-map/map/getDateVersion';
 
-        return $this->get($url, $data);
+        return $this->post($url, $data);
     }
 
     /**
