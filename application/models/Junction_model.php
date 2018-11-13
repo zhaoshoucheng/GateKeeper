@@ -206,7 +206,7 @@ class Junction_model extends CI_Model
         }
 
         // 获取路网路口各相位坐标
-        $ret = $this->waymap_model->getJunctionFlowLngLat(trim($map_version), $junction_id, array_keys($timing['list']));
+        $ret = $this->waymap_model->getJunctionFlowLngLat(current($map_version), $junction_id, array_keys($timing['list']));
         if (empty($ret['data'])) {
             return [];
         }

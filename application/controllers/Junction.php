@@ -322,8 +322,8 @@ class Junction extends MY_Controller
 
     /**
     * 获取问题趋势
-    * @param task_id    int      Y 任务ID
-    * @param confidence int      Y 置信度
+    * @param $params['task_id']    int Y 任务ID
+    * @param $params['confidence'] int Y 置信度
     * @return json
     */
     public function getQuestionTrend()
@@ -359,6 +359,14 @@ class Junction extends MY_Controller
     public function getDiagnoseRankList()
     {
         $params = $this->input->post(NULL, TRUE);
+
+        // 校验参数
+        $this->validate([
+            'task_id'    => 'required|is_natural_no_zero',
+            'time_point' => 'required|exact_length[5]|regex_match[/\d{2}:\d{2}/]',
+            'confidence' => 'required|in_list[' . implode(',', array_keys($this->config->item('confidence'))) . ']',
+            'city_id'    => 'required|is_natural_no_zero',
+        ]);
         // 校验参数
         $validate = Validate::make($params, [
                 'task_id'    => 'min:1',
