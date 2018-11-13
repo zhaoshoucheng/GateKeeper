@@ -268,68 +268,53 @@ class Junction extends MY_Controller
 
     /**
     * 诊断-获取全城路口诊断问题列表
-    * @param task_id        int       Y 任务ID
-    * @param city_id        int       Y 城市ID
-    * @param type           int       Y 指标计算类型 1：统合 0：时间点
-    * @param time_point     string    N 时间点 指标计算类型为1时非空
-    * @param confidence     int       Y 置信度 0:全部 1:高 2:低
-    * @param diagnose_key   array     Y 诊断key
+    * @param $params['task_id']        int       Y 任务ID
+    * @param $params['city_id']        int       Y 城市ID
+    * @param $params['type']           int       Y 指标计算类型 1：统合 0：时间点
+    * @param $params['time_point']     string    N 时间点 指标计算类型为1时非空
+    * @param $params['confidence']     int       Y 置信度 0:全部 1:高 2:低
+    * @param $params['diagnose_key']   array     Y 诊断key
     * @return json
     */
     public function getAllCityJunctionsDiagnoseList()
     {
         $params = $this->input->post(NULL, TRUE);
+
         // 校验参数
-        $validate = Validate::make($params, [
-                'task_id'    => 'min:1',
-                'city_id'    => 'min:1',
-                'type'       => 'min:0',
-                'confidence' => 'min:0'
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
+        $this->validate([
+            'task_id'    => 'required|is_natural_no_zero',
+            'type'       => 'required|is_natural',
+            'confidence' => 'required|in_list[' . implode(',', array_keys($this->config->item('confidence'))) . ']',
+            'city_id'    => 'required|is_natural_no_zero',
+        ]);
 
-        $data['task_id'] = (int)$params['task_id'];
-        $data['city_id'] = $params['city_id'];
-        $data['type'] = (int)$params['type'];
+        $data = [
+            'task_id'    => (int)$params['task_id'],
+            'city_id'    => $params['city_id'],
+            'confidence' => $params['confidence'],
+            'type'       => (int)$params['type'],
+        ];
 
-        if ($data['type'] == 0 && empty(trim($params['time_point']))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'time_point不能为空！';
-            return;
-        }
         if ($data['type'] == 0) {
+            if (empty(trim($params['time_point']))) {
+                throw new \Exception('参数time_point不能为空！', ERR_PARAMETERS);
+            }
             $data['time_point'] = trim($params['time_point']);
         }
-
-        if (!array_key_exists($params['confidence'], $this->config->item('confidence'))) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数confidence传递错误！';
-            return;
-        }
-        $data['confidence'] = $params['confidence'];
 
         if (!empty($params['diagnose_key'])) {
             $diagnoseKeyConf = $this->config->item('diagnose_key');
             foreach ($params['diagnose_key'] as $v) {
                 if (!array_key_exists($v, $diagnoseKeyConf)) {
-                    $this->errno = ERR_PARAMETERS;
-                    $this->errmsg = '参数diagnose_key传递错误！';
-                    return;
+                    throw new \Exception('参数diagnose_key传递错误！', ERR_PARAMETERS);
                 }
             }
         } else {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数diagnose_key必须为数组且不可为空！';
-            return;
+            throw new Exception("参数diagnose_key必须为数组且不可为空！", ERR_PARAMETERS);
         }
         $data['diagnose_key'] = $params['diagnose_key'];
 
-        $res = $this->junction_model->getJunctionsDiagnoseList($data);
+        $res = $this->junctionsService->getJunctionsDiagnoseList($data);
 
         return $this->response($res);
     }

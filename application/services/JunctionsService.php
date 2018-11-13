@@ -35,15 +35,21 @@ class JunctionsService extends BaseService
     {
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了地图
         $allCityJunctions = $this->waymap_model->getAllCityJunctions($params['city_id']);
-        if (count($allCityJunctions) < 1 || !$allCityJunctions) {
+        if (!$allCityJunctions) {
             throw new \Exception('没有获取到全城路口！', ERR_REQUEST_WAYMAP_API);
         }
 
-        // 指标key 指标KEY与数据表字段相同
-        $quotaKey = $params['quota_key'];
-
         // 查询字段定义
         $select = 'id, junction_id';
+        // where条件
+        $where = 'task_id = ' . $params['task_id'];
+        // group_by
+        $groupBy = '';
+        // limit
+        $limit = '';
+
+        // 指标key 指标KEY与数据表字段相同
+        $quotaKey = $params['quota_key'];
 
         // 按查询方式组织select
         if ($params['type'] == 1) { // 综合查询
@@ -52,8 +58,25 @@ class JunctionsService extends BaseService
             $select .= ',' . $quotaKey;
         }
 
+        // where条件组织
+        if ($params['type'] == 0) { // 按时间点查询
+            $where .= " and type = {$params['type']} and time_point = '{$params['time_point']}'";
+        }
+
+        // 是否选择置信度
+        if ((int)$params['confidence'] >= 1) { // 选择了置信度条件
+            $confidenceConf = $this->config->item('confidence');
+            $where .= ' and ' . $confidenceConf[$params['confidence']]['sql_where']($params['quotaKey'] . '_confidence');
+        }
+
+        // 判断是否是综合查询
+        if ($params['type'] == 1) {
+            $groupBy = 'junction_id';
+        }
+
+
         // 获取数据
-        $data = $this->junction_model->getAllCityJunctionInfo($params, $select);
+        $data = $this->junction_model->searchDB($select, $where, 'result_array', $groupBy, $limit);
         if (empty($data)) {
             return [];
         }
@@ -482,6 +505,247 @@ class JunctionsService extends BaseService
         }
 
         return $result;
+    }
+
+    /**
+     * 获取全城路口诊断问题列表
+     * @param $data['task_id']      int      任务ID
+     * @param $data['city_id']      int      城市ID
+     * @param $data['time_point']   string   时间点
+     * @param $data['type']         int      计算类型
+     * @param $data['confidence']   int      置信度
+     * @param $data['diagnose_key'] array    诊断问题KEY
+     * @return array
+     */
+    public function getJunctionsDiagnoseList($data)
+    {
+        // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
+        $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
+        if (!$allCityJunctions) {
+            throw new \Exception('没有获取到全城路口！', ERR_REQUEST_WAYMAP_API);
+        }
+
+        if ($data['type'] == 1) { // 综合
+            $res = $this->getJunctionsDiagnoseBySynthesize($data);
+        } else { // 时间点
+            $res = $this->getJunctionsDiagnoseByTimePoint($data);
+        }
+
+        if (empty($res)) {
+            return [];
+        }
+
+        // 获取此任务路口总数
+        $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
+        $junctionTotal = 0;
+        $allJunction = $this->db->select('count(DISTINCT junction_id) as count')
+                                    ->from($this->tb)
+                                    ->where($where)
+                                    ->get()
+                                    ->row_array();
+        $junctionTotal = $allJunction['count'];
+
+        $diagnoseKeyConf = $this->config->item('diagnose_key');
+        $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
+        $tempDiagnoseData = [];
+
+        // 定义平均延误
+        $countStopDelay = 0;
+        // 定义平均速度
+        $countAvgSpeed = 0;
+        foreach ($data['diagnose_key'] as $val) {
+            /*
+             * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
+             * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
+             */
+            $diagnose = $val;
+            if ($val == 'over_saturation') {
+                $diagnose = 'saturation_index';
+            }
+
+            // 统计每种问题的路口总数
+            $tempDiagnoseData['count'][$val] = 0;
+
+            // 循环任务结果数据，进行问题判断及统计等
+            foreach ($res as $k=>$v) {
+                // 统计停车(平均)延误总数
+                $countStopDelay += $v['stop_delay'];
+                // 统计平均速度总数
+                $countAvgSpeed += $v['avg_speed'];
+
+                /*
+                 * hover:路口平均延误
+                 */
+                // 格式化指标数据
+                $tempDiagnoseData[$v['junction_id']]['info']['quota']['stop_delay']['value']
+                = $junctionQuotaKeyConf['stop_delay']['round']($v['stop_delay']);
+                // 指标名称
+                $tempDiagnoseData[$v['junction_id']]['info']['quota']['stop_delay']['name']
+                = $junctionQuotaKeyConf['stop_delay']['name'];
+                // 指标单位
+                $tempDiagnoseData[$v['junction_id']]['info']['quota']['stop_delay']['unit']
+                = $junctionQuotaKeyConf['stop_delay']['unit'];
+
+                // 对问题对应的指标数据进行格式化
+                $tempDiagnoseData[$v['junction_id']]['list'][$val]
+                = $junctionQuotaKeyConf[$diagnose]['round']($v[$diagnose]);
+
+                // 路口是否有问题标记
+                $isDiagnose = 0;
+                if ($diagnoseKeyConf[$val]['junction_diagnose_formula']($v[$diagnose])) {
+                    $isDiagnose = 1;
+                    // 统计有此问题的路口数
+                    $tempDiagnoseData['count'][$val] += 1;
+                    // hover:路口存在的问题名称
+                    $tempDiagnoseData[$v['junction_id']]['info']['question'][$val]
+                    = $diagnoseKeyConf[$val]['name'];
+                }
+
+                $tempDiagnoseData[$v['junction_id']]['list'][$val . '_diagnose'] = $isDiagnose;
+            }
+        }
+        // 统计所有问题总数
+        $tempDiagnoseData['diagnose_count'] = 0;
+        if (!empty($tempDiagnoseData['count'])) {
+            foreach ($tempDiagnoseData['count'] as $v) {
+                $tempDiagnoseData['diagnose_count'] += $v;
+            }
+        }
+        $tempDiagnoseData['quotaCount']['stop_delay'] = $countStopDelay;
+        $tempDiagnoseData['quotaCount']['avg_speed'] = $countAvgSpeed;
+        $tempDiagnoseData['junctionTotal'] = $junctionTotal;
+
+        $result_data = $this->mergeAllJunctions($allCityJunctions, $tempDiagnoseData, 'diagnose_detail');
+
+        return $result_data;
+    }
+
+    /**
+     * 查询综合类型全城路口诊断问题列表
+     * @param $data['task_id']      interger 任务ID
+     * @param $data['city_id']      interger 城市ID
+     * @param $data['time_point']   string   时间点
+     * @param $data['type']         interger 计算类型
+     * @param $data['confidence']   interger 置信度
+     * @param $data['diagnose_key'] array    诊断问题KEY
+     * @return array
+     */
+    private function getJunctionsDiagnoseBySynthesize($data)
+    {
+        $sql_data = array_map(function($diagnose_key) use ($data) {
+            /*
+             * 过饱和问题与空放问题都是基于路口级指标：饱和指数（saturation_index）算出来的
+             * 所以把过饱和的KEY转为相应的指标KEY进行SQL组合
+             */
+            if ($diagnose_key == 'over_saturation') { // 当是过饱和问题时
+                $diagnose_key = 'saturation_index';
+            }
+
+            if ($diagnose_key == 'saturation_index') {
+                // 空放问题 因为空放问题是取的最小的
+                $selectstr = "id, junction_id, stop_delay, avg_speed,";
+                $selectstr .= " min({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
+            } else {
+                $selectstr = "id, junction_id, stop_delay, avg_speed,";
+                $selectstr .= " max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
+            }
+
+            $where = 'task_id = ' . $data['task_id'] . ' and type = 1';
+            $temp_data = $this->db->select($selectstr)
+                                ->from($this->tb)
+                                ->where($where)
+                                ->group_by('junction_id')
+                                ->get()->result_array();
+            $new_data = [];
+            if (count($temp_data) >= 1) {
+                foreach ($temp_data as $value) {
+                    $new_data[$value['junction_id']] = $value;
+                }
+            }
+            return $new_data;
+        }, $data['diagnose_key']);
+
+        $count = count($data['diagnose_key']);
+
+        $diagnose_confidence_threshold = $this->config->item('diagnose_confidence_threshold');
+
+        $flag = [];
+        if (count($sql_data) >= 1) {
+            $flag = $sql_data[0];
+            foreach ($flag as $k=>&$v) {
+                $v = array_reduce($sql_data, function($carry, $item) use ($k) {
+                    return array_merge($carry, $item[$k]);
+                }, []);
+                if ((int)$data['confidence'] != 0) {
+                    $total = 0;
+                    foreach ($data['diagnose_key'] as $key) {
+                        $total += $v[$key];
+                    }
+
+                    if ($data['confidence'] == 1) { // 置信度：高 unset低的
+                        if ($total / $count <= $diagnose_confidence_threshold) unset($flag[$k]);
+                    } elseif ($data['confidence'] == 2) { // 置信度：低 unset高的
+                        if($total / $count > $diagnose_confidence_threshold) unset($flag[$k]);
+                    }
+                }
+            }
+        }
+
+        return $flag;
+    }
+
+    /**
+     * 根据时间点查询全城路口诊断问题列表
+     * @param $data['task_id']      interger 任务ID
+     * @param $data['time_point']   string   时间点
+     * @param $data['confidence']   interger 置信度
+     * @param $data['diagnose_key'] array    诊断问题KEY
+     * @return array
+     */
+    private function getJunctionsDiagnoseByTimePoint($data)
+    {
+        $diagnoseKeyConf = $this->config->item('diagnose_key');
+        $selectQuotaKey = [];
+        foreach ($diagnoseKeyConf as $k=>$v) {
+            // 过饱和与空放问题都是根据指标饱和指数计算
+            if ($k != 'over_saturation') {
+                $selectQuotaKey[] = $k;
+            }
+        }
+
+        $selectstr = empty($this->selectColumns($selectQuotaKey)) ? '' : ',' . $this->selectColumns($selectQuotaKey);
+        $sql = 'select id, junction_id, stop_delay, avg_speed' . $selectstr . ' from ' . $this->tb;
+        $sql .= " where task_id = ? and time_point = ? and type = 0";
+
+        // 诊断问题总数
+        $diagnoseKeyCount = count($data['diagnose_key']);
+
+        $confidenceWhere = '';
+        foreach ($data['diagnose_key'] as $v) {
+            $diagnose = $v;
+            if ($v == 'over_saturation') {
+                $diagnose = 'saturation_index';
+            }
+            $confidenceWhere .= empty($confidenceWhere) ? $diagnose . '_confidence' : '+' . $diagnose . '_confidence';
+        }
+        $confidenceThreshold = $this->config->item('diagnose_confidence_threshold');
+
+        $confidenceExpression[1] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '>= ?';
+        $confidenceExpression[2] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '< ?';
+
+        $confidenceConf = $this->config->item('confidence');
+        $res = [];
+        if ($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidenceConf)) {
+            $sql .= ' and ' . $confidenceExpression[$data['confidence']];
+            $res = $this->db->query($sql, [$data['task_id'], $data['time_point'], $confidenceThreshold])->result_array();
+        } else {
+            $res = $this->db->query($sql, [$data['task_id'], $data['time_point']])->result_array();
+        }
+        if (!$res) {
+            return [];
+        }
+
+        return $res;
     }
 
     /**
