@@ -35,7 +35,7 @@ class Junction_model extends CI_Model
      * @param $groupBy     group by
      * @param $limit       limit 例：1,100
      */
-    public function searchDB($select='*', $where='1', $resultType='result_array', $groupBy='', $limit='')
+    public function searchDB($select = '*', $where = '1', $resultType = 'result_array', $groupBy = '', $limit= '')
     {
         $this->db->select($select);
         $this->db->from($this->tb);
@@ -236,24 +236,6 @@ class Junction_model extends CI_Model
         }
 
         return $resultData;
-    }
-
-    /**
-     * 获取路口问题趋势图
-     * @param $taskId      int    任务ID
-     * @param $junctionId  string 逻辑路口ID
-     * @param $select      string select colum
-     * @return array
-     */
-    public function getJunctionQuestionTrend($taskId, $junctionId, $select = '*')
-    {
-        // 组织where条件
-        $where = 'task_id = ' . $taskId . ' and junction_id = "' . $junctionId . '" and type = 0';
-
-        return $this->db->select($select)
-                        ->from($this->tb)
-                        ->where($where)
-                        ->get()->result_array();
     }
 
     /**

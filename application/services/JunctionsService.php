@@ -301,7 +301,10 @@ class JunctionsService extends BaseService
             $select = "id, junction_id, stop_delay, time_point";
         }
 
-        $data = $this->junction_model->getJunctionQuestionTrend($params['task_id'], $params['junction_id'], $select);
+        // 组织where条件
+        $where = 'task_id = ' . $params['task_id'] . ' and junction_id = "' . $params['junction_id'] . '" and type = 0';
+
+        $data = $this->junction_model->searchDB($select, $where);
         if (!$data) {
             return [];
         }
