@@ -329,17 +329,19 @@ class Junction extends MY_Controller
     public function getQuestionTrend()
     {
         $params = $this->input->post(NULL, TRUE);
-        if (!isset($params['task_id']) || $params['task_id'] < 1) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数task_id传递错误！';
-            return;
-        }
-        $data['task_id'] = intval($params['task_id']);
-        $data['confidence'] = $params['confidence'] ?? 0;
 
-        $result = [];
+        // 校验参数
+        $this->validate([
+            'task_id'    => 'required|is_natural_no_zero',
+            'confidence' => 'required|in_list[' . implode(',', array_keys($this->config->item('confidence'))) . ']',
+        ]);
 
-        $result = $this->junction_model->getQuestionTrend($data);
+        $data = [
+            'task_id'    => intval($params['task_id']),
+            'confidence' => $params['confidence'],
+        ];
+
+        $result = $this->junctionsService->getQuestionTrend($data);
 
         return $this->response($result);
     }

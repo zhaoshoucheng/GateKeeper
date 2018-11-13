@@ -543,7 +543,7 @@ class JunctionsService extends BaseService
         $select = 'count(DISTINCT junction_id) as count';
         $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
         $junctionTotal = 0;
-        $allJunction = $this->junction_model->searchDB($select, $where);
+        $allJunction = $this->junction_model->searchDB($select, $where, 'row_array');
         $junctionTotal = $allJunction['count'];
 
         $diagnoseKeyConf = $this->config->item('diagnose_key');
@@ -619,6 +619,83 @@ class JunctionsService extends BaseService
         $result_data = $this->mergeAllJunctions($allCityJunctions, $tempDiagnoseData, 'diagnose_detail');
 
         return $result_data;
+    }
+
+    /**
+     * 获取问题趋势
+     * @param $data['task_id']    interger Y 任务ID
+     * @param $data['confidence'] interger Y 置信度
+     * @return array
+     */
+    public function getQuestionTrend($data)
+    {
+        if (empty($data)) {
+            return [];
+        }
+
+        // 诊断问题配置
+        $diagnoseKeyConf = $this->config->item('diagnose_key');
+
+        $select = 'count(DISTINCT junction_id) as count';
+        $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
+
+        // 获取此任务路口总数
+        $junctionTotal = 0;
+        $allJunction = $this->junction_model->searchDB($select, $where, 'row_array');
+        $junctionTotal = $allJunction['count'];
+
+        // 置信度
+        $confidenceThreshold = $this->config->item('confidence');
+
+        // 循环获取每种问题各时间点路口总数
+        $diagnoseSelect = 'count(id) as num , time_point as hour';
+        $groupBy = 'time_point';
+        foreach ($diagnoseKeyConf as $k=>$v) {
+            /*
+             * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
+             * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
+             */
+            $diagnose = $k;
+            if ($diagnose == 'over_saturation') {
+                $diagnose = 'saturation_index';
+            }
+            $nWhere = $where . ' and ' . $v['sql_where']();
+            if ($data['confidence'] >= 1) {
+                $nWhere .= ' and ' . $confidenceThreshold[$data['confidence']]['sql_where']($diagnose . '_confidence');
+            }
+
+            $res[$k] = $this->junction_model->searchDB($diagnoseSelect, $nWhere, 'result_array', $groupBy);
+        }
+
+        $result = [];
+        // X轴时间0-24点时间点，15分钟为一刻度 设置这个是因为可能会有某个时间是没有问题的，导致时间不连续
+        $timeRange = [];
+        $start = strtotime('00:00');
+        $end = strtotime('24:00');
+        for ($i = $start; $i < $end; $i += 15 * 60) {
+            $timeRange[] = date('H:i', $i);
+        }
+        if (empty($res) || !is_array($res)) {
+            return [];
+        }
+
+        foreach ($res as $k=>$v) {
+            foreach ($timeRange as $hour) {
+                $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
+                $result[$k]['list'][$hour]['hour'] = $hour;
+                $result[$k]['list'][$hour]['num'] = 0;
+                $result[$k]['list'][$hour]['percent'] = 0 . '%';
+                foreach ($v as $kk=>$vv) {
+                    if ($vv['hour'] == $hour) {
+                        $result[$k]['list'][$hour]['hour'] = $vv['hour'];
+                        $result[$k]['list'][$hour]['num'] = $vv['num'];
+                        $result[$k]['list'][$hour]['percent'] = round(($vv['num'] / $junctionTotal) * 100, 2) . '%';
+                    }
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**
