@@ -239,27 +239,6 @@ class Junction_model extends CI_Model
     }
 
     /**
-     * 获取诊断列表页简易路口详情
-     * @param $taskId     int     任务ID
-     * @param $junctionId string  逻辑路口ID
-     * @param $timePoint  string  时间点
-     * @param $select     string  select colum
-     * @return array
-     */
-    public function getDiagnosePageSimpleJunctionDetail($taskId, $junctionId, $timePoint, $select = '*')
-    {
-        // 组织where条件
-        $where = 'task_id = ' . $taskId . ' and junction_id = "' . $junctionId . '"';
-        $where  .= ' and type = 0';
-        $where  .= ' and time_point = "' . $timePoint . '"';
-
-        return $this->db->select($select)
-                        ->from($this->tb)
-                        ->where($where)
-                        ->get()->row_array();
-    }
-
-    /**
      * 获取路口问题趋势图
      * @param $taskId      int    任务ID
      * @param $junctionId  string 逻辑路口ID

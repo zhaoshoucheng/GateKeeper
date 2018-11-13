@@ -156,11 +156,12 @@ class JunctionsService extends BaseService
         $selectStr = $this->selectColumns($tempDiagnoseKey);
         $select = "id, junction_id, {$selectStr}, start_time, end_time, movements, time_point";
 
-        $data = $this->junction_model->getDiagnosePageSimpleJunctionDetail($params['task_id'],
-                                                                            $params['junction_id'],
-                                                                            $params['time_point'],
-                                                                            $select
-                                                                        );
+        // 组织where条件
+        $where = 'task_id = ' . $params['task_id'] . ' and junction_id = "' . $params['junction_id'] . '"';
+        $where  .= ' and type = 0';
+        $where  .= ' and time_point = "' . $params['time_point'] . '"';
+
+        $data = $this->junction_model->searchDB($select, $where, 'row_array');
         if (!$data) {
             return [];
         }
