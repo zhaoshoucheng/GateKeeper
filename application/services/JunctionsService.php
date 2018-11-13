@@ -623,8 +623,8 @@ class JunctionsService extends BaseService
 
     /**
      * 获取问题趋势
-     * @param $data['task_id']    interger Y 任务ID
-     * @param $data['confidence'] interger Y 置信度
+     * @param $data['task_id']    int      Y 任务ID
+     * @param $data['confidence'] int      Y 置信度
      * @return array
      */
     public function getQuestionTrend($data)
@@ -699,12 +699,109 @@ class JunctionsService extends BaseService
     }
 
     /**
-     * 查询综合类型全城路口诊断问题列表
-     * @param $data['task_id']      interger 任务ID
-     * @param $data['city_id']      interger 城市ID
+     * 诊断-诊断问题排序列表
+     * @param $data['task_id']      int      任务ID
      * @param $data['time_point']   string   时间点
-     * @param $data['type']         interger 计算类型
-     * @param $data['confidence']   interger 置信度
+     * @param $data['diagnose_key'] array    诊断问题KEY
+     * @param $data['confidence']   int      置信度
+     * @param $data['orderby']      int      诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
+     * @return array
+     */
+    public function getDiagnoseRankList($data)
+    {
+        if (empty($data['diagnose_key'])) {
+            return [];
+        }
+
+        // PM规定页面左侧列表与右侧地图数据一致，而且只在概览页有此列表，固使用 根据时间点查询全城路口诊断问题列表 接口获取初始数据
+        $res = $this->getJunctionsDiagnoseByTimePoint($data);
+        if (!$res) {
+            return [];
+        }
+
+        // 诊断问题、路口指标配置
+        $diagnoseKeyConf = $this->config->item('diagnose_key');
+        $junctionQuotaKeyConf = $this->config->item('junction_quota_key');
+
+        // 按诊断问题组织数组 且 获取路口ID串
+        $result = [];
+        // 路口ID串 用逗号隔开
+        $logicJunctionIds = '';
+        foreach ($res as $k=>$v) {
+            foreach ($data['diagnose_key'] as $k1=>$v1) {
+                /*
+                 * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
+                 * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
+                 */
+                $diagnose = $v1;
+                if ($v1 == 'over_saturation') {
+                    $diagnose = 'saturation_index';
+                }
+                // 列表只展示有问题的路口 组织新数据 junction_id=>指标值 因为排序方便
+                if ($diagnoseKeyConf[$v1]['junction_diagnose_formula']($v[$diagnose])) {
+                    $result[$v1][$v['junction_id']] = $junctionQuotaKeyConf[$diagnose]['round']($v[$diagnose]);
+                }
+            }
+            // 组织路口ID串，用于获取路口名称
+            $logicJunctionIds .= empty($logicJunctionIds) ? $v['junction_id'] : ',' . $v['junction_id'];
+        }
+
+        if (empty($result)) {
+            return [];
+        }
+
+        // 排序默认 2 按指标值倒序
+        if (!isset($data['orderby']) || !array_key_exists((int)$data['orderby'], $this->config->item('sort_conf'))) {
+            $data['orderby'] = 2;
+        }
+
+        // 排序
+        foreach ($data['diagnose_key'] as $v) {
+            if (!empty($result[$v])) {
+                if ((int)$data['orderby'] == 1) {
+                    asort($result[$v]);
+                } else {
+                    arsort($result[$v]);
+                }
+            }
+        }
+
+        // 获取路口名称
+        $junctionInfo = [];
+        if (!empty($logicJunctionIds)) {
+            $junctionInfo = $this->waymap_model->getJunctionInfo($logicJunctionIds);
+        }
+
+        // 组织 junction_id=>name 数组 用于匹配路口名称
+        $junctionIdName = [];
+        if (count($junctionInfo) >= 1) {
+            $junctionIdName = array_column($junctionInfo, 'name', 'logic_junction_id');
+        }
+
+        // 组织最终返回数据结构 ['quota_key'=>['junction_id'=>'xx','junction_label'=>'xxx', 'value'=>0], ......]
+        $resultData = [];
+        foreach ($result as $k=>$v) {
+            foreach ($v as $k1=>$v1) {
+                $resultData[$k][$k1]['junction_id'] = $k1;
+                $resultData[$k][$k1]['junction_label'] = $junctionIdName[$k1] ?? '';
+                $resultData[$k][$k1]['value'] = $v1;
+            }
+
+            if (!empty($resultData[$k])) {
+                $resultData[$k] = array_values($resultData[$k]);
+            }
+        }
+
+        return $resultData;
+    }
+
+    /**
+     * 查询综合类型全城路口诊断问题列表
+     * @param $data['task_id']      int      任务ID
+     * @param $data['city_id']      int      城市ID
+     * @param $data['time_point']   string   时间点
+     * @param $data['type']         int      计算类型
+     * @param $data['confidence']   int      置信度
      * @param $data['diagnose_key'] array    诊断问题KEY
      * @return array
      */
@@ -770,9 +867,9 @@ class JunctionsService extends BaseService
 
     /**
      * 根据时间点查询全城路口诊断问题列表
-     * @param $data['task_id']      interger 任务ID
+     * @param $data['task_id']      int      任务ID
      * @param $data['time_point']   string   时间点
-     * @param $data['confidence']   interger 置信度
+     * @param $data['confidence']   int      置信度
      * @param $data['diagnose_key'] array    诊断问题KEY
      * @return array
      */

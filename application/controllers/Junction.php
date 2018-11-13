@@ -263,7 +263,7 @@ class Junction extends MY_Controller
         ];
         $timing = $this->junctionsService->getJunctionsTimingInfo($data);
 
-        return $this->response($timing);
+        $this->response($timing);
     }
 
     /**
@@ -317,7 +317,7 @@ class Junction extends MY_Controller
 
         $res = $this->junctionsService->getJunctionsDiagnoseList($data);
 
-        return $this->response($res);
+        $this->response($res);
     }
 
     /**
@@ -343,17 +343,17 @@ class Junction extends MY_Controller
 
         $result = $this->junctionsService->getQuestionTrend($data);
 
-        return $this->response($result);
+        $this->response($result);
     }
 
     /**
     * 诊断-诊断问题排序列表
-    * @param task_id       int      Y 任务ID
-    * @param city_id       int      Y 城市ID
-    * @param time_point    string   Y 时间点
-    * @param diagnose_key  array    Y 诊断key
-    * @param confidence    int      Y 置信度
-    * @param orderby       int      N 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
+    * @param $params['task_id']       int      Y 任务ID
+    * @param $params['city_id']       int      Y 城市ID
+    * @param $params['time_point']    string   Y 时间点
+    * @param $params['diagnose_key']  array    Y 诊断key
+    * @param $params['confidence']    int      Y 置信度
+    * @param $params['orderby']       int      N 诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
     * @return json
     */
     public function getDiagnoseRankList()
@@ -367,35 +367,16 @@ class Junction extends MY_Controller
             'confidence' => 'required|in_list[' . implode(',', array_keys($this->config->item('confidence'))) . ']',
             'city_id'    => 'required|is_natural_no_zero',
         ]);
-        // 校验参数
-        $validate = Validate::make($params, [
-                'task_id'    => 'min:1',
-                'time_point' => 'nullunable',
-                'city_id'    => 'min:1',
-                'confidence' => 'min:0'
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
-
-        $res = [];
 
         if (empty($params['diagnose_key']) || !is_array($params['diagnose_key'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数diagnose_key必须为数组且不可为空！';
-            return;
+            throw new \Exception('参数diagnose_key必须为数组且不可为空！', ERR_PARAMETERS);
         }
 
         $diagnoseKeyConf = $this->config->item('diagnose_key');
         $params['diagnose_key'] = array_filter($params['diagnose_key']);
         foreach ($params['diagnose_key'] as $k=>$v) {
             if (!array_key_exists($v, $diagnoseKeyConf)) {
-                $this->errno = ERR_PARAMETERS;
-                $this->errmsg = '参数diagnose_key传递错误！';
-                return;
+                throw new \Exception('参数diagnose_key传递错误！', ERR_PARAMETERS);
             }
         }
 
@@ -412,8 +393,9 @@ class Junction extends MY_Controller
             'orderby'      => intval($params['orderby'])
         ];
 
-        $res = $this->junction_model->getDiagnoseRankList($data);
-        return $this->response($res);
+        $res = $this->junctionsService->getDiagnoseRankList($data);
+
+        $this->response($res);
     }
 
     /**
