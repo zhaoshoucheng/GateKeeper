@@ -539,14 +539,11 @@ class JunctionsService extends BaseService
             return [];
         }
 
-        // 获取此任务路口总数
+        /* 获取此任务路口总数 */
+        $select = 'count(DISTINCT junction_id) as count';
         $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
         $junctionTotal = 0;
-        $allJunction = $this->db->select('count(DISTINCT junction_id) as count')
-                                    ->from($this->tb)
-                                    ->where($where)
-                                    ->get()
-                                    ->row_array();
+        $allJunction = $this->junction_model->searchDB($select, $where);
         $junctionTotal = $allJunction['count'];
 
         $diagnoseKeyConf = $this->config->item('diagnose_key');
@@ -655,13 +652,9 @@ class JunctionsService extends BaseService
             }
 
             $where = 'task_id = ' . $data['task_id'] . ' and type = 1';
-            $temp_data = $this->db->select($selectstr)
-                                ->from($this->tb)
-                                ->where($where)
-                                ->group_by('junction_id')
-                                ->get()->result_array();
+            $temp_data = $this->junction_model->searchDB($selectstr, $where);
             $new_data = [];
-            if (count($temp_data) >= 1) {
+            if ($temp_data && count($temp_data) >= 1) {
                 foreach ($temp_data as $value) {
                     $new_data[$value['junction_id']] = $value;
                 }
@@ -718,8 +711,8 @@ class JunctionsService extends BaseService
         }
 
         $selectstr = empty($this->selectColumns($selectQuotaKey)) ? '' : ',' . $this->selectColumns($selectQuotaKey);
-        $sql = 'select id, junction_id, stop_delay, avg_speed' . $selectstr . ' from ' . $this->tb;
-        $sql .= " where task_id = ? and time_point = ? and type = 0";
+        $select = 'id, junction_id, stop_delay, avg_speed' . $selectstr;
+        $where = "task_id = {$data['task_id']} and time_point = '{$data['time_point']}' and type = 0";
 
         // 诊断问题总数
         $diagnoseKeyCount = count($data['diagnose_key']);
@@ -740,10 +733,10 @@ class JunctionsService extends BaseService
         $confidenceConf = $this->config->item('confidence');
         $res = [];
         if ($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidenceConf)) {
-            $sql .= ' and ' . $confidenceExpression[$data['confidence']];
-            $res = $this->db->query($sql, [$data['task_id'], $data['time_point'], $confidenceThreshold])->result_array();
+            $where .= ' and ' . $confidenceExpression[$data['confidence']];
+            $res = $this->junction_model->searchDB($select, $where);
         } else {
-            $res = $this->db->query($sql, [$data['task_id'], $data['time_point']])->result_array();
+            $res = $this->junction_model->searchDB($select, $where);
         }
         if (!$res) {
             return [];

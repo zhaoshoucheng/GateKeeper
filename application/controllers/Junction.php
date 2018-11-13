@@ -295,6 +295,7 @@ class Junction extends MY_Controller
             'type'       => (int)$params['type'],
         ];
 
+        $data['time_point'] = '';
         if ($data['type'] == 0) {
             if (empty(trim($params['time_point']))) {
                 throw new \Exception('参数time_point不能为空！', ERR_PARAMETERS);
