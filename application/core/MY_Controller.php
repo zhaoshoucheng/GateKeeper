@@ -50,18 +50,19 @@ class MY_Controller extends CI_Controller
         $escapeSso = $this->config->item('white_escape_sso');
 
         $this->load->config('nconf');
+        $this->routerUri = $this->uri->ruri_string();
 
+        // 有一些机器是不需要进行sso验证的，这里就直接跳过
         if (!in_array($host, $escapeSso)) {
             $this->is_check_login = 1;
 
             $this->load->model('user/user', 'user');
-            $this->routerUri = $this->uri->ruri_string();
 
             com_log_notice('_com_sign', ['ip' => $_SERVER["REMOTE_ADDR"], 'ip2' => $this->input->get_request_header('X-Real-Ip')]);
 
-            // 此处采用appid + appkey的验证
-            if (isset($_REQUEST['app_id'])) {
 
+            if (isset($_REQUEST['app_id'])) {
+                // 此处采用appid + appkey的验证, 开放平台
                 com_log_notice('_com_sign', ['uri' => $this->routerUri, 'request' => $_REQUEST]);
 
                 if (!$this->_checkAuthorizedApp()) {
@@ -69,18 +70,16 @@ class MY_Controller extends CI_Controller
                     exit();
                 }
 
-            } elseif (isset($_REQUEST['token'])
-                and in_array($_REQUEST['token'], ["aedadf3e3795b933db2883bd02f31e1d", "d4971d281aee77720a00a5795bb38f85"])) {
-
-                if (in_array(strtolower($this->uri->ruri_string()), ['task/updatetaskrate', 'task/updatetaskstatus', 'overview/verifytoken', 'task/areaflowprocess', 'task/mapversioncb'])
-                    and in_array($host, ['100.69.238.11:8000'])) {
-                    return;
-                } else {
+            } elseif (in_array($host, ['100.69.238.11:8000'])) {
+                // 通过vip进行的请求
+                $token = isset($_REQUEST['token']) ? $_REQUEST['token'] : "";
+                if (!$this->_checkInnerVipAccess($token, $this->routerUri)) {
+                    $this->_output();
                     exit();
                 }
-                // token and whitelist ip server01, web00, web01, collector03, shuhao*3
-                // in_array($this->input->get_request_header('X-Real-Ip'), ['100.90.164.31', '100.90.163.51', '100.90.163.52', '10.93.94.36', '100.90.165.26', '10.89.236.26', '10.86.108.35'])
+
             } else {
+                // 检测用户
                 if (!$this->_checkUser()) {
                     $currentUrl = "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; //线上是https, 获取当前页面的地址
                     if ((isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) == "xmlhttprequest")
@@ -94,13 +93,8 @@ class MY_Controller extends CI_Controller
                         exit();
                     }
                 }
-                // 目前还未按照接口设置权限，所以暂时注释掉
-                /*
-                 if(!$this->_validateURI()){
-                     $this->_output();
-                     exit();
-                 }*/
 
+                // 验证城市
                 if (isset($_REQUEST['city_id']) && !$this->_validateCity($_REQUEST['city_id'])) {
                     $this->_output();
                     exit();
@@ -232,9 +226,35 @@ class MY_Controller extends CI_Controller
             $this->errno  = ERR_AUTH_KEY;
             $this->errmsg = "该接口{$this->routerUri}没有开放授权";
             return false;
-        } else {
-            return true;
         }
+        return true;
+    }
+
+    /*
+     * 判断是否通过内部vip调用指定接口
+     */
+    private function _checkInnerVipAccess($token, $uri)
+    {
+        // token 必须满足条件
+        if (!in_array($token, [
+            "aedadf3e3795b933db2883bd02f31e1d",
+            "d4971d281aee77720a00a5795bb38f85"
+        ])) {
+            return false;
+        }
+
+        // 请求的uri必须在某个条件内
+        if (!in_array(strtolower($uri),
+            [
+                'task/updatetaskrate', 'task/updatetaskstatus',
+                'overview/verifytoken', 'task/areaflowprocess',
+                'task/mapversioncb'
+            ]
+        )) {
+            return false;
+        }
+
+        return true;
     }
 
     public function _output()
