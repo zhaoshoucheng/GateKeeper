@@ -49,6 +49,8 @@ class MY_Controller extends CI_Controller
         $this->load->config('white');
         $escapeSso = $this->config->item('white_escape_sso');
 
+        $this->load->config('nconf');
+
         if (!in_array($host, $escapeSso)) {
             $this->is_check_login = 1;
 
@@ -105,7 +107,6 @@ class MY_Controller extends CI_Controller
                 }
             }
         }
-        $this->load->config('nconf');
 
         //============>降级开始
         //判断是否符合降级规则,是则直接输出
