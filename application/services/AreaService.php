@@ -48,10 +48,6 @@ class AreaService extends BaseService
 
         $areaList = $this->area_model->getAreasByCityId($cityId);
 
-        if (!$areaList) {
-            throw new \Exception('区域列表信息获取失败', ERR_PARAMETERS);
-        }
-
         return [
             'list' => $areaList,
         ];
