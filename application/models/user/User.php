@@ -52,7 +52,7 @@ class User extends CI_Model{
     }
 
 
-    //用户是否有权限
+    //用户是否有权限访问路径
     public function isAuthorizedUri($uri) {
         if(empty($this->username) || $this->username == 'guest'){
             return false;
