@@ -901,8 +901,8 @@ class JunctionsService extends BaseService
         }
         $confidenceThreshold = $this->config->item('diagnose_confidence_threshold');
 
-        $confidenceExpression[1] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '>= ?';
-        $confidenceExpression[2] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '< ?';
+        $confidenceExpression[1] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '>=' . $confidenceThreshold;
+        $confidenceExpression[2] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '<' . $confidenceThreshold;
 
         $confidenceConf = $this->config->item('confidence');
         $res = [];
