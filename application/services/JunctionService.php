@@ -25,6 +25,7 @@ class JunctionService extends BaseService
         $this->load->model('flowDurationV6_model');
 
         $this->load->config('report_conf');
+
     }
 
     /**
