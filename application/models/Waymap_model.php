@@ -5,6 +5,10 @@
  * # date:    2018-04-08
  ********************************************/
 
+/**
+ * Class Waymap_model
+ * @property Redis_model $redis_model
+ */
 class Waymap_model extends CI_Model
 {
     // 全局的最后一个版本
@@ -216,11 +220,11 @@ class Waymap_model extends CI_Model
         /*-------------------------------------------------
         | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
         --------------------------------------------------*/
-        $redis_model = new Redis_model();
+        $this->load->model('redis_model');
 
         $redis_key = 'all_city_junctions_' . $city_id . '_' . $version . '}';
 
-        $result = $redis_model->getData($redis_key);
+        $result = $this->redis_model->getData($redis_key);
 
         if (!$result) {
 
@@ -233,11 +237,9 @@ class Waymap_model extends CI_Model
 
             $res = $this->get($url, $data);
 
-            $redis_model->deleteData($redis_key);
-
-            $redis_model->setData($redis_key, json_encode($res));
-
-            $redis_model->setExpire($redis_key, 3600 * 24);
+            $this->redis_model->deleteData($redis_key);
+            $this->redis_model->setData($redis_key, json_encode($res));
+            $this->redis_model->setExpire($redis_key, 3600 * 24);
 
             return $res;
         }
@@ -259,7 +261,7 @@ class Waymap_model extends CI_Model
 
         $url = $this->waymap_interface . '/signal-map/map/getDateVersion';
 
-        return $this->get($url, $data);
+        return $this->post($url, $data);
     }
 
     /**
@@ -366,7 +368,7 @@ class Waymap_model extends CI_Model
 
         $url = $this->waymap_interface . '/signal-map/connect/adj_junctions';
 
-        return $this->post($url, $data);
+        return $this->post($url, $data, 5000, 'json');
     }
 
     /**
@@ -381,7 +383,7 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function post($url, $data, $timeout = 5000, $contentType = 'json', $header = [])
+    public function post($url, $data, $timeout = 0, $contentType = 'x-www-form-urlencoded', $header = [])
     {
         $query['token']   = $this->token;
         $query['user_id'] = $this->userid;
@@ -393,13 +395,13 @@ class Waymap_model extends CI_Model
         $res = httpPOST($url, $data, $timeout, $contentType, $header);
 
         if (!$res) {
-            throw new \Exception('路网数据获取失败', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception('接口请求失败', ERR_REQUEST_WAYMAP_API);
         }
 
         $res = json_decode($res, true);
 
         if (!$res) {
-            throw new \Exception('路网数据格式错误', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception('接口请求失败', ERR_REQUEST_WAYMAP_API);
         }
 
         if (isset($res['errno']) && $res['errno'] != 0) {
@@ -429,7 +431,7 @@ class Waymap_model extends CI_Model
 
         $url = $this->waymap_interface . '/signal-map/connect/path';
 
-        return $this->post($url, $data);
+        return $this->post($url, $data, 0, 'json');
     }
 
     /**

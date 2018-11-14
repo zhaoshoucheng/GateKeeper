@@ -32,7 +32,7 @@ class Road_model extends CI_Model
         $isExisted = $this->db->table_exists($this->tb);
 
         if (!$isExisted) {
-            throw new \Exception('数据表不存在');
+            throw new \Exception('数据表不存在', ERR_DATABASE);
         }
     }
 
@@ -45,12 +45,14 @@ class Road_model extends CI_Model
      */
     public function getRoadsByCityId($cityId, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from($this->tb)
             ->where('city_id', $cityId)
             ->where('is_delete', 0)
             ->order_by('created_at desc')
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -62,11 +64,14 @@ class Road_model extends CI_Model
      */
     public function getRoadByRoadId($roadId, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from($this->tb)
             ->where('road_id', $roadId)
             ->where('is_delete', 0)
-            ->get()->row_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->row_array() : $res;
+
     }
 
     /**
@@ -128,14 +133,16 @@ class Road_model extends CI_Model
      */
     public function getJunctionByCityId($dates, $hours, $junctionIds, $flowIds, $cityId, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from('flow_duration_v6_' . $cityId)
             ->where_in('date', $dates)
             ->where_in('hour', $hours)
             ->where_in('logic_junction_id', $junctionIds)
             ->where_in('logic_flow_id', $flowIds)
             ->group_by('date, hour')
-            ->get()->result_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     public function roadNameIsUnique($roadName, $cityId, $roadId = null)

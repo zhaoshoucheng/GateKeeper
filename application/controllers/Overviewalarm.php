@@ -1,140 +1,94 @@
 <?php
 /***************************************************************
-# 概览页报警类
-#    7日报警
-#    今日报警
-#    实时报警列表
-# user:ningxiangbing@didichuxing.com
-# date:2018-07-25
-***************************************************************/
+ * # 概览页报警类
+ * #    7日报警
+ * #    今日报警
+ * #    实时报警列表
+ * # user:ningxiangbing@didichuxing.com
+ * # date:2018-07-25
+ ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\OverviewService;
+
 class Overviewalarm extends MY_Controller
 {
+    protected $overviewService;
+
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('overviewalarm_model');
+
+        $this->overviewService = new OverviewService();
     }
 
     /**
      * 获取今日报警概览
-     * @param city_id    interger Y 城市ID
-     * @param date       string   N 日期 yyyy-mm-dd
-     * @param time_point stirng   N 时间点 H:i:s
-     * @return json
+     *
+     * @throws Exception
      */
     public function todayAlarmInfo()
     {
-        $params = $this->input->post(NULL, TRUE);
-        // 校验参数
-        $validate = Validate::make($params, [
-                'city_id'    => 'min:1',
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
+        $params = $this->input->post(null, true);
 
-        $data = [
-            'city_id'    => intval($params['city_id']),
-            'date'       => date('Y-m-d'),
-            'time_point' => date('H:i:s'),
-        ];
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'time_point' => 'exact_length[8]|regex_match[/\d{2}:\d{2}:\d{2}/]',
+        ]);
 
-        if (!empty($params['date'])) {
-            $data['date'] = date('Y-m-d', strtotime(strip_tags(trim($params['date']))));
-        }
+        $params['date']       = $params['date'] ?? date('Y-m-d');
+        $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        if (!empty($params['time_point'])) {
-            $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
-        }
+        $data = $this->overviewService->todayAlarmInfo($params);
 
-        $result = $this->overviewalarm_model->todayAlarmInfo($data);
-
-        return $this->response($result);
+        $this->response($data);
     }
 
     /**
      * 获取七日报警变化
      * 规则：取当前日期前六天的报警路口数+当天到现在时刻的报警路口数
-     * @param city_id    interger Y 城市ID
-     * @param date       string   N 日期 yyyy-mm-dd
-     * @param time_point stirng   N 时间点 H:i:s
-     * @return json
+     *
+     * @throws Exception
      */
     public function sevenDaysAlarmChange()
     {
-        $params = $this->input->post(NULL, TRUE);
-        // 校验参数
-        $validate = Validate::make($params, [
-                'city_id'    => 'min:1',
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
+        $params = $this->input->post(null, true);
 
-        $data = [
-            'city_id'    => intval($params['city_id']),
-            'date'       => date('Y-m-d'),
-            'time_point' => date('H:i:s'),
-        ];
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'time_point' => 'exact_length[8]|regex_match[/\d{2}:\d{2}:\d{2}/]',
+        ]);
 
-        if (!empty($params['date'])) {
-            $data['date'] = date('Y-m-d', strtotime(strip_tags(trim($params['date']))));
-        }
+        $params['date']       = $params['date'] ?? date('Y-m-d');
+        $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        if (!empty($params['time_point'])) {
-            $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
-        }
+        $data = $this->overviewService->sevenDaysAlarmChange($params);
 
-        $result = $this->overviewalarm_model->sevenDaysAlarmChange($data);
-
-        return $this->response($result);
+        $this->response($data);
     }
 
     /**
      * 获取实时报警列表
-     * @param city_id    interger Y 城市ID
-     * @param date       string   N 日期 yyyy-mm-dd
-     * @param time_point stirng   N 时间点 H:i:s
-     * @return json
+     *
+     * @throws Exception
      */
     public function realTimeAlarmList()
     {
-        $params = $this->input->post(NULL, TRUE);
-        // 校验参数
-        $validate = Validate::make($params, [
-                'city_id'    => 'min:1',
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
+        $params = $this->input->post(null, true);
 
-        $data = [
-            'city_id'    => intval($params['city_id']),
-            'date'       => date('Y-m-d'),
-            'time_point' => date('H:i:s'),
-        ];
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'time_point' => 'exact_length[8]|regex_match[/\d{2}:\d{2}:\d{2}/]',
+        ]);
 
-        if (!empty($params['date'])) {
-            $data['date'] = date('Y-m-d', strtotime(strip_tags(trim($params['date']))));
-        }
+        $params['date']       = $params['date'] ?? date('Y-m-d');
+        $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        if (!empty($params['time_point'])) {
-            $data['time_point'] = date('H:i:s', strtotime(strip_tags(trim($params['time_point']))));
-        }
-
-        $result = $this->overviewalarm_model->realTimeAlarmList($data);
+        $result = $this->overviewService->realTimeAlarmList($params);
 
         return $this->response($result);
     }

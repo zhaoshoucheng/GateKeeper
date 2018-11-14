@@ -28,16 +28,26 @@ class Adapt_model extends CI_Model
         $isExisted = $this->db->table_exists($this->tb);
 
         if (!$isExisted) {
-            throw new \Exception('数据表不存在');
+            throw new \Exception('数据表不存在', ERR_DATABASE);
         }
     }
 
+    /**
+     * 获取指定路口的自适应配时信息
+     *
+     * @param        $logicJunctionId
+     * @param string $select
+     *
+     * @return array
+     */
     public function getAdaptByJunctionId($logicJunctionId, $select = '*')
     {
-        return $this->db->select($select)
+        $res = $this->db->select($select)
             ->from($this->tb)
             ->where('logic_junction_id', $logicJunctionId)
-            ->get()->row_array();
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->row_array() : $res;
     }
 
     /**

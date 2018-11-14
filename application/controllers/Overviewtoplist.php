@@ -9,84 +9,62 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\OverviewService;
+
 class Overviewtoplist extends MY_Controller
 {
+    protected $overviewService;
+
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('overviewtoplist_model');
+
+        $this->overviewService = new OverviewService();
     }
 
     /**
-    * 获取延误TOP20
-    * @param
-    * @return json
-    */
+     * 获取延误TOP20
+     *
+     * @throws Exception
+     */
     public function stopDelayTopList()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(null, true);
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of city_id is wrong.';
-            return;
-        }
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'pagesize' => 'is_natural_no_zero'
+        ]);
 
-        $data['city_id'] = $params['city_id'];
+        $params['date'] = $params['date'] ?? date('Y-m-d');
+        $params['pagesize'] = $params['pagesize'] ?? 20;
 
-        $data['date'] = $params['date'] ?? date('Y-m-d');
+        $data = $this->overviewService->stopDelayTopList($params);
 
-        if(!isset($params['pagesize'])) {
-            $data['pagesize'] = 20;
-        } elseif (!is_numeric($params['pagesize'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of pagesize must be integer.';
-            return;
-        } elseif($params['pagesize'] <= 0) {
-            $data['pagesize'] = 20;
-        } else {
-            $data['pagesize'] = $params['pagesize'];
-        }
-
-        $data = $this->overviewtoplist_model->stopDelayTopList($data);
-
-        return $this->response($data);
-
+        $this->response($data);
     }
 
     /**
-    * 获取停车TOP20
-    * @param
-    * @return json
-    */
+     * 获取停车次数TOP20
+     *
+     * @throws Exception
+     */
     public function stopTimeCycleTopList()
     {
         $params = $this->input->post();
 
-        if(!isset($params['city_id']) || !is_numeric($params['city_id'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of city_id is wrong.';
-            return;
-        }
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'pagesize' => 'is_natural_no_zero'
+        ]);
 
-        $data['city_id'] = $params['city_id'];
+        $params['date'] = $params['date'] ?? date('Y-m-d');
+        $params['pagesize'] = $params['pagesize'] ?? 20;
 
-        $data['date'] = $params['date'] ?? date('Y-m-d');
+        $data = $this->overviewService->stopTimeCycleTopList($params);
 
-        if(!isset($params['pagesize'])) {
-            $data['pagesize'] = 20;
-        } elseif (!is_numeric($params['pagesize'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The value of pagesize must be integer.';
-            return;
-        } elseif($params['pagesize'] <= 0) {
-            $data['pagesize'] = 20;
-        } else {
-            $data['pagesize'] = $params['pagesize'];
-        }
-
-        $data = $this->overviewtoplist_model->stopTimeCycleTopList($data);
-
-        return $this->response($data);
+        $this->response($data);
     }
 }

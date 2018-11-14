@@ -12,6 +12,7 @@ use Didi\Cloud\Collection\Collection;
 /**
  * Class AreaService
  * @package Services
+ * @property \Area_model $area_model
  */
 class AreaService extends BaseService
 {
@@ -36,6 +37,7 @@ class AreaService extends BaseService
      * 获取区域列表
      *
      * @param $params
+     *
      * @return mixed
      * @throws \Exception
      */
@@ -46,12 +48,12 @@ class AreaService extends BaseService
 
         $areaList = $this->area_model->getAreasByCityId($cityId);
 
-        if(!$areaList) {
+        if (!$areaList) {
             throw new \Exception('区域列表信息获取失败', ERR_PARAMETERS);
         }
 
         return [
-            'list' => $areaList
+            'list' => $areaList,
         ];
     }
 
@@ -59,21 +61,22 @@ class AreaService extends BaseService
      * 添加区域
      *
      * @param $params
+     *
      * @return mixed
      * @throws \Exception
      */
     public function addArea($params)
     {
-        $cityId = $params['city_id'];
-        $areaName = $params['area_name'];
+        $cityId      = $params['city_id'];
+        $areaName    = $params['area_name'];
         $junctionIds = $params['junction_ids'];
 
         $data = [
             'area_name' => $areaName,
-            'city_id' => $cityId
+            'city_id' => $cityId,
         ];
 
-        if(!$this->area_model->areaNameIsUnique($areaName, $cityId)) {
+        if (!$this->area_model->areaNameIsUnique($areaName, $cityId)) {
             throw new \Exception('区域名称 ' . $areaName . ' 已经存在', ERR_DATABASE);
         }
 
@@ -83,7 +86,7 @@ class AreaService extends BaseService
         // 创建区域路口关联
         $failCount = $this->area_model->insertAreaJunctions($areaId, $junctionIds);
 
-        if($failCount === 0) {
+        if ($failCount === 0) {
             throw new \Exception('插入区域路口失败', ERR_PARAMETERS);
         }
 
@@ -94,37 +97,38 @@ class AreaService extends BaseService
      * 更新区域
      *
      * @param $params
+     *
      * @return mixed
      * @throws \Exception
      */
     public function updateArea($params)
     {
-        $cityId = $params['city_id'];
-        $areaId = $params['area_id'];
-        $areaName = $params['area_name'];
+        $cityId      = $params['city_id'];
+        $areaId      = $params['area_id'];
+        $areaName    = $params['area_name'];
         $junctionIds = $params['junction_ids'];
 
         // 获取区域信息
         $areaInfo = $this->area_model->getAreaByAreaId($areaId, 'id');
 
-        if(!$areaInfo || empty($areaInfo)) {
+        if (!$areaInfo || empty($areaInfo)) {
             throw new \Exception('目标区域不存在', ERR_PARAMETERS);
         }
 
         $areaId = $areaInfo['id'];
 
         $data = [
-            'area_name' => $areaName
+            'area_name' => $areaName,
         ];
 
-        if(!$this->area_model->areaNameIsUnique($areaName, $cityId, $areaId)) {
+        if (!$this->area_model->areaNameIsUnique($areaName, $cityId, $areaId)) {
             throw new \Exception('区域名称 ' . $areaName . ' 已经存在', ERR_DATABASE);
         }
 
         // 更新区域信息
         $res = $this->area_model->updateArea($areaId, $data);
 
-        if(!$res) {
+        if (!$res) {
             throw new \Exception('更新区域失败', ERR_PARAMETERS);
         }
 
@@ -146,6 +150,7 @@ class AreaService extends BaseService
      * 删除区域
      *
      * @param $params
+     *
      * @return mixed
      */
     public function deleteArea($params)
@@ -159,6 +164,7 @@ class AreaService extends BaseService
      * 获取指定区域详情
      *
      * @param $params
+     *
      * @return array
      * @throws \Exception
      */
@@ -169,7 +175,7 @@ class AreaService extends BaseService
 
         $areaInfo = $this->area_model->getAreaByAreaId($areaId);
 
-        if(!$areaInfo) {
+        if (!$areaInfo) {
             throw new \Exception(' 目标区域不存在', ERR_PARAMETERS);
         }
 
@@ -182,12 +188,14 @@ class AreaService extends BaseService
             return round($item, 6);
         };
 
-        $centerLat = $areaJunctionCollection->avg('lat', $round);
-        $centerLng = $areaJunctionCollection->avg('lng', $round);
-
         $junctionIds = $areaJunctionCollection->implode('junction_id', ',');
 
         $junctionInfoList = $this->waymap_model->getJunctionInfo($junctionIds);
+
+        $junctionInfoCollection = Collection::make($junctionInfoList);
+
+        $centerLat = $junctionInfoCollection->avg('lat', $round);
+        $centerLng = $junctionInfoCollection->avg('lng', $round);
 
         return [
             'list' => [
@@ -195,8 +203,8 @@ class AreaService extends BaseService
                 'center_lng' => $centerLng,
                 'area_id' => $areaId,
                 'area_name' => $areaInfo['area_name'] ?? '',
-                'junction_list' => $junctionInfoList
-            ]
+                'junction_list' => $junctionInfoList,
+            ],
         ];
     }
 
@@ -204,6 +212,7 @@ class AreaService extends BaseService
      * 获取城市全部区域详情
      *
      * @param $params
+     *
      * @return array
      * @throws \Exception
      */
@@ -212,7 +221,7 @@ class AreaService extends BaseService
         $cityId = $params['city_id'];
 
         // 获取城市全部区域信息
-        $areaList = $this->area_model->getAreasByCityId($cityId, 'id, area_name');
+        $areaList       = $this->area_model->getAreasByCityId($cityId, 'id, area_name');
         $areaCollection = Collection::make($areaList);
 
         // 获取区域ID
@@ -222,12 +231,12 @@ class AreaService extends BaseService
         $areaIdToNameList = $areaCollection->column('area_name', 'id')->get();
 
         // 获取全部区域路口映射
-        $areaJunctionList = $this->area_model->getAreaJunctionsByAreaIds($areaIdList);
+        $areaJunctionList       = $this->area_model->getAreaJunctionsByAreaIds($areaIdList);
         $areaJunctionCollection = Collection::make($areaJunctionList);
 
         // 从路网获取路口信息
-        $junctionIds = $areaJunctionCollection->implode('junction_id', ',');
-        $junctionList = $this->waymap_model->getJunctionInfo($junctionIds);
+        $junctionIds    = $areaJunctionCollection->implode('junction_id', ',');
+        $junctionList   = $this->waymap_model->getJunctionInfo($junctionIds);
         $junctionIdList = array_column($junctionList, null, 'logic_junction_id');
 
         $areaIdJunctionList = $areaJunctionCollection
@@ -250,7 +259,7 @@ class AreaService extends BaseService
                 'area_name' => $areaIdToNameList[$areaId] ?? '',
                 'center_lat' => $junctionCollection->avg('lat'),
                 'center_lng' => $junctionCollection->avg('lng'),
-                'junction_list' => $junctionCollection
+                'junction_list' => $junctionCollection,
             ];
         }
 
@@ -271,6 +280,7 @@ class AreaService extends BaseService
      * 区域指标评估
      *
      * @param $params
+     *
      * @return array|mixed
      * @throws \Exception
      */
@@ -286,7 +296,7 @@ class AreaService extends BaseService
 
         // 指标算法映射
         $methods = [
-            'speed' => 'round(avg(speed), 2) as speed',
+            'speed' => 'round(avg(speed) * 3.6, 2) as speed',
             'stop_delay' => 'round(avg(stop_delay), 2) as stop_delay',
         ];
 
@@ -297,13 +307,13 @@ class AreaService extends BaseService
         $units = array_column($this->config->item('area'), 'unit', 'key');
 
         // 指标不存在与映射数组中
-        if(!isset($methods[$quotaKey])) {
+        if (!isset($methods[$quotaKey])) {
             throw new \Exception('指标不存在', ERR_PARAMETERS);
         }
 
         $areaInfo = $this->area_model->getAreaByAreaId($areaId);
 
-        if(!$areaInfo) {
+        if (!$areaInfo) {
             throw new \Exception('该区域已被删除', ERR_PARAMETERS);
         }
 
@@ -311,7 +321,7 @@ class AreaService extends BaseService
         $junctionList = $this->area_model->getJunctionsByAreaId($areaId, 'junction_id');
 
         // 数据获取失败 或者 数据为空
-        if(!$junctionList || empty($junctionList)) {
+        if (!$junctionList || empty($junctionList)) {
             throw new \Exception('路口数据获取失败', ERR_PARAMETERS);
         }
 
@@ -320,7 +330,7 @@ class AreaService extends BaseService
         $junctionIds = $junctionCollection->column('junction_id')->get();
 
         // 基准、评估时间范围
-        $baseDates = dateRange($baseStartDate, $baseEndDate);
+        $baseDates     = dateRange($baseStartDate, $baseEndDate);
         $evaluateDates = dateRange($evaluateStartDate, $evaluateEndDate);
 
         // 生成 00:00 - 23:30 间的 粒度为 30 分钟的时间集合数组
@@ -328,11 +338,11 @@ class AreaService extends BaseService
 
         // 获取数据
         $select = 'date, hour, ' . $methods[$quotaKey];
-        $dates = array_merge($baseDates, $evaluateDates);
+        $dates  = array_merge($baseDates, $evaluateDates);
 
         $resultList = $this->area_model->getJunctionByCityId($dates, $junctionIds, $hours, $cityId, $select);
 
-        if(!$resultList || empty($resultList)) {
+        if (!$resultList || empty($resultList)) {
             throw new \Exception('路口数据获取失败', ERR_PARAMETERS);
         }
 
@@ -345,8 +355,8 @@ class AreaService extends BaseService
 
         // 数据分组后，将每组数据进行处理的函数
         $groupByItemFormatCallback = function ($item) use ($params, $hours) {
-            $hourToNull = array_combine($hours, array_fill(0, 48, null));
-            $item = array_column($item, $params['quota_key'], 'hour');
+            $hourToNull  = array_combine($hours, array_fill(0, 48, null));
+            $item        = array_column($item, $params['quota_key'], 'hour');
             $hourToValue = array_merge($hourToNull, $item);
 
             $result = [];
@@ -372,14 +382,10 @@ class AreaService extends BaseService
         ];
 
         // 构建 Redis Key
-        $jsonResult = json_encode($result);
-        $downloadId = md5($jsonResult);
+        $downloadId                    = md5(json_encode($result));
         $result['info']['download_id'] = $downloadId;
-        $redisKey = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
 
-        // 设置Redis缓存
-        $this->redis_model->setData($redisKey, $jsonResult);
-        $this->redis_model->setExpire($redisKey, 30 * 60);
+        $this->redis_model->setComparisonDownloadData($downloadId, $result);
 
         return $result;
     }
@@ -388,6 +394,7 @@ class AreaService extends BaseService
      * 获取区域评估下载地址
      *
      * @param $params
+     *
      * @return array
      * @throws \Exception
      */
@@ -397,12 +404,12 @@ class AreaService extends BaseService
 
         $key = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
 
-        if(!$this->redis_model->getData($key)) {
+        if (!$this->redis_model->getData($key)) {
             throw new \Exception('请先评估再下载', ERR_PARAMETERS);
         }
 
         return [
-            'download_url' => $this->config->item('area_download_url_prefix') . $params['download_id']
+            'download_url' => $this->config->item('area_download_url_prefix') . $params['download_id'],
         ];
 
     }
@@ -411,6 +418,7 @@ class AreaService extends BaseService
      * 评估数据文件下载
      *
      * @param $params
+     *
      * @throws \Exception
      * @throws \PHPExcel_Exception
      * @throws \PHPExcel_Writer_Exception
@@ -419,22 +427,18 @@ class AreaService extends BaseService
     {
         $downloadId = $params['download_id'];
 
-        $key = $this->config->item('quota_evaluate_key_prefix') . $downloadId;
-
         $excelStyle = $this->config->item('excel_style');
 
-        $data = $this->redis_model->getData($key);
+        $data = $this->redis_model->getComparisonDownloadData($downloadId);
 
-        if(!$data) {
+        if (!$data) {
             throw new \Exception('请先评估再下载', ERR_PARAMETERS);
         }
-
-        $data = json_decode($data, true);
 
         $fileName = "{$data['info']['area_name']}_" . date('Ymd');
 
         $objPHPExcel = new \PHPExcel();
-        $objSheet = $objPHPExcel->getActiveSheet();
+        $objSheet    = $objPHPExcel->getActiveSheet();
         $objSheet->setTitle('数据');
 
         $detailParams = [
@@ -447,7 +451,7 @@ class AreaService extends BaseService
 
         $objSheet->mergeCells('A1:F1');
         $objSheet->setCellValue('A1', $fileName);
-        $objSheet->fromArray($detailParams, NULL, 'A4');
+        $objSheet->fromArray($detailParams, null, 'A4');
 
         $objSheet->getStyle('A1')->applyFromArray($excelStyle['title']);
         $rows_idx = count($detailParams) + 3;
@@ -455,42 +459,42 @@ class AreaService extends BaseService
 
         $line = 6 + count($detailParams);
 
-        if(!empty($data['base'])) {
+        if (!empty($data['base'])) {
 
             $table = getExcelArray($data['base']);
 
-            $objSheet->fromArray($table, NULL, 'A' . $line);
+            $objSheet->fromArray($table, null, 'A' . $line);
 
-            $rows_cnt = count($table);
-            $cols_cnt = count($table[0]) - 1;
+            $rows_cnt   = count($table);
+            $cols_cnt   = count($table[0]) - 1;
             $rows_index = $rows_cnt + $line - 1;
 
-            $objSheet->getStyle("A{$line}:".intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
+            $objSheet->getStyle("A{$line}:" . intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
             $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($excelStyle['header']);
-            $objSheet->getStyle("A{$line}:".intToChr($cols_cnt) . $line)->applyFromArray($excelStyle['header']);
+            $objSheet->getStyle("A{$line}:" . intToChr($cols_cnt) . $line)->applyFromArray($excelStyle['header']);
 
             $line += ($rows_cnt + 2);
         }
 
-        if(!empty($data['evaluate'])) {
+        if (!empty($data['evaluate'])) {
 
             $table = getExcelArray($data['evaluate']);
 
-            $objSheet->fromArray($table, NULL, 'A' . $line);
+            $objSheet->fromArray($table, null, 'A' . $line);
 
-            $rows_cnt = count($table);
-            $cols_cnt = count($table[0]) - 1;
+            $rows_cnt   = count($table);
+            $cols_cnt   = count($table[0]) - 1;
             $rows_index = $rows_cnt + $line - 1;
-            $objSheet->getStyle("A{$line}:".intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
+            $objSheet->getStyle("A≈{$line}:" . intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
             $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($excelStyle['header']);
-            $objSheet->getStyle("A{$line}:".intToChr($cols_cnt) . $line)->applyFromArray($excelStyle['header']);
+            $objSheet->getStyle("A{$line}:" . intToChr($cols_cnt) . $line)->applyFromArray($excelStyle['header']);
         }
 
         $objWriter = new \PHPExcel_Writer_Excel5($objPHPExcel);
 
         header('Content-Type: application/x-xls;');
         header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename='.$fileName . '.xls');
+        header('Content-Disposition: attachment;filename=' . $fileName . '.xls');
         header('Cache-Control: max-age=0');
         header('Cache-Control: max-age=1');
         header('Expires: 0'); // Date in the past

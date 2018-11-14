@@ -71,7 +71,7 @@ if (!function_exists('getSign')) {
         //遍历排序后的参数数组中的每一个key/value对
         foreach ($params as $k => $v) {
             //为key/value对生成一个key=value格式的字符串，并拼接到待签名字符串后面
-            $str .= "$k=" . urlencode($v)."&";
+            $str .= "$k=" . urldecode($v) . "&";
         }
 
         //将签名密钥拼接到签名字符串最后面
@@ -207,9 +207,14 @@ if (!function_exists('hourRange')) {
      * @param string $format
      *
      * @return array
+     * @throws Exception
      */
     function hourRange($start = '00:00', $end = '23:30', $skip = 30, $format = 'H:i')
     {
+        if($start > $end) {
+            throw new Exception('起始时间必须小于等于结束时间');
+        }
+
         return array_map(function ($item) use ($format) {
             return date($format, $item);
         }, range(strtotime($start), strtotime($end), $skip * 60));

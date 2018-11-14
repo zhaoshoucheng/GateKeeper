@@ -15,11 +15,21 @@ class Feedback_model extends CI_Model
      */
     protected $db;
 
+    /**
+     * Feedback_model constructor.
+     * @throws Exception
+     */
     public function __construct()
     {
         parent::__construct();
 
         $this->db = $this->load->database('default', true);
+
+        $isExisted = $this->db->table_exists($this->tb);
+
+        if (!$isExisted) {
+            throw new \Exception('数据表不存在', ERR_DATABASE);
+        }
     }
 
     /**

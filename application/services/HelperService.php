@@ -11,6 +11,7 @@ namespace Services;
 /**
  * Class HelperService
  * @package Services
+ * @property \Realtime_model $real_time
  */
 class HelperService extends BaseService
 {
@@ -32,7 +33,7 @@ class HelperService extends BaseService
      */
     public function getLastestHour($cityId)
     {
-        $hour = $this->redis_model->getData('its_realtime_lasthour_' . $cityId);
+        $hour = $this->redis_model->getHour($cityId);
 
         if($hour) {
             return $hour;

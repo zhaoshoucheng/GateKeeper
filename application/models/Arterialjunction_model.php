@@ -5,6 +5,11 @@
  * # author:  niuyufu@didichuxing.com
  * # date:    2018-06-29
  ********************************************/
+
+/**
+ * Class Arterialjunction_model
+ * @property Waymap_model $waymap_model
+ */
 class Arterialjunction_model extends CI_Model
 {
     private $tb = 'junction_index';
@@ -58,6 +63,8 @@ class Arterialjunction_model extends CI_Model
         if (empty($version)) {
             throw new \Exception("The map_version not found.");
         }
+
+        $version = current($version);
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
         $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id'], $version);
         if (count($allCityJunctions) < 1 || !$allCityJunctions || !is_array($allCityJunctions)) {
