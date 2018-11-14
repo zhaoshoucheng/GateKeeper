@@ -411,52 +411,34 @@ class Junction extends MY_Controller
     public function getJunctionMapData()
     {
         $params = $this->input->post(NULL, TRUE);
-        // 校验参数
-        $validate = Validate::make($params, [
-                'junction_id'     => 'nullunable',
-                'search_type'     => 'min:0',
-                'task_time_range' => 'nullunable'
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
 
+        // 校验参数
+        $this->validate([
+            'junction_id'     => 'required|min_length[4]',
+            'task_time_range' => 'required|exact_length[11]|regex_match[/\d{2}:\d{2}-\d{2}:\d{2}/]',
+            'search_type'     => 'required|is_natural',
+        ]);
+
+        $data['time_range'] = '';
+        $data['time_point'] = '';
         if ((int)$params['search_type'] == 1) { // 按方案查询
             if (empty($params['time_range'])) {
-                $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'time_range不能为空！';
-                return;
+                throw new \Exception('参数time_range不能为空！', ERR_PARAMETERS);
             }
             $time_range = array_filter(explode('-', $params['time_range']));
             if (empty($time_range[0]) || empty($time_range[1])) {
-                $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'time_range传递错误！';
-                return;
+                throw new \Exception('参数time_range传递错误！', ERR_PARAMETERS);
             }
             $data['time_range'] = strip_tags(trim($params['time_range']));
         } else {
             if (empty($params['time_point'])) {
-                $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'time_point不能为空！';
-                return;
+                throw new \Exception('参数time_point不能为空！', ERR_PARAMETERS);
             }
             $data['time_point'] = strip_tags(trim($params['time_point']));
         }
 
-        $task_time_range = array_filter(explode('-', $params['task_time_range']));
-        if (empty($task_time_range[0]) || empty($task_time_range[1])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'task_time_range传递错误！';
-            return;
-        }
-
-        if (!is_array($params['dates']) || count($params['dates']) < 1) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数dates必须为数组且不可为空！';
-            return;
+        if (empty($params['dates']) || !is_array($params['dates'])) {
+            throw new \Exception('参数dates必须为数组且不可为空！', ERR_PARAMETERS);
         }
 
         $data['dates'] = $params['dates'];
@@ -465,18 +447,8 @@ class Junction extends MY_Controller
         $data['task_time_range'] = strip_tags(trim($params['task_time_range']));
         $data['timingType'] = $this->timingType;
 
-        $result = $this->junction_model->getJunctionMapData($data);
+        $result = $this->junctionsService->getJunctionMapData($data);
 
-        return $this->response($result);
-    }
-
-    /**
-    * 测试登录
-    */
-    public function testLogin()
-    {
-        echo "welcome!";
-        sendMail($this->eamil_to, '测试', 'ok');
-        exit;
+        $this->response($result);
     }
 }
