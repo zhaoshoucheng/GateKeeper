@@ -122,6 +122,9 @@ class Arterialjunction_model extends CI_Model
             if (empty($data['q']['map_version'])) {
                 throw new \Exception("The map_version not found.");
             }
+            if(is_array($data['q']['map_version'])){
+                $data['q']['map_version'] = current($data['q']['map_version']);
+            }
         }
 
         $adjJunctions = $this->waymap_model->getConnectionAdjJunctions($data['q']['city_id'], $data['q']['selected_junctionid'], $data['q']['selected_path']);
@@ -148,7 +151,11 @@ class Arterialjunction_model extends CI_Model
 
         //合并多个link的geo信息
         $mergeLinkGeoInfosByLinks = function ($linkArr, $cityId, $mapVersion) {
-            $orginLinksGeoInfos = $this->waymap_model->getLinksGeoInfos($linkArr, $mapVersion);
+            try{
+                $orginLinksGeoInfos = $this->waymap_model->getLinksGeoInfos($linkArr, $mapVersion);
+            }catch (\Exception $e){
+
+            }
             if(empty($orginLinksGeoInfos)){
                 return (Object)[];
             }
