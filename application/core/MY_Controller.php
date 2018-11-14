@@ -32,7 +32,6 @@ class MY_Controller extends CI_Controller
     public $output;
 
     protected $debug = false;
-    protected $is_check_login = 0;
     protected $timingType = 1; // 0，全部；1，人工；2，配时反推；3，信号机上报
 
 
@@ -54,7 +53,6 @@ class MY_Controller extends CI_Controller
 
         // 有一些机器是不需要进行sso验证的，这里就直接跳过
         if (!in_array($host, $escapeSso)) {
-            $this->is_check_login = 1;
 
             $this->load->model('user/user', 'user');
 
@@ -139,10 +137,6 @@ class MY_Controller extends CI_Controller
             'params' => $paramTmp,
             'url' => $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'],
         ]);
-
-        if ($this->is_check_login == 0) {
-            return true;
-        }
 
         $client_sign = isset($_REQUEST['sign']) ? $_REQUEST['sign'] : "";
         $app_id      = $_REQUEST['app_id'];
@@ -287,12 +281,11 @@ class MY_Controller extends CI_Controller
         }
     }
 
+    /*
+     * 验证用户是否通过sso
+     */
     private function _checkUser()
     {
-        if ($this->is_check_login == 0) {
-            return true;
-        }
-
         $ret = $this->user->isUserLogin();
 
         if (!$ret) {
@@ -306,21 +299,18 @@ class MY_Controller extends CI_Controller
         return true;
     }
 
+    /*
+     * 验证用户是否有这个城市的权限
+     */
     private function _validateCity($area)
     {
-        if ($this->is_check_login == 0) {
-            return true;
-        }
-
         $ret = $this->user->getAuthorizedCityid();
-        //$ret = $this->user->getCityAuth();
         if (empty($ret)) {
             $this->errno = ERR_AUTH_AREA;
             return false;
         }
 
         foreach ($ret as $val) {
-            //if($area == $val['taxi_id']){ // sso
             if ($area == $val['taxiId']) {
                 return true;
             }
@@ -354,7 +344,6 @@ class MY_Controller extends CI_Controller
 
     /**
      *
-     *
      * @param $rules ['city_id' => 'required|is_natural_no_zero', ... ]
      *
      * @throws Exception
@@ -373,39 +362,11 @@ class MY_Controller extends CI_Controller
 
     private function _validateURI()
     {
-        if ($this->is_check_login == 0) {
-            return true;
-        }
         $ret = $this->user->isAuthorizedUri($this->routerUri);
         if (!$ret) {
             $this->errno = ERR_AUTH_URI;
             return false;
         }
         return true;
-    }
-
-    private function getIp()
-    {
-        $ip = false;
-
-        if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
-            $ip = $_SERVER["HTTP_CLIENT_IP"];
-        }
-
-        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ips = explode(", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
-            if ($ip) {
-                array_unshift($ips, $ip);
-                $ip = false;
-            }
-            for ($i = 0; $i < count($ips); $i++) {
-                if (!eregi("^(10│172.16│192.168).", $ips[$i])) {
-                    $ip = $ips[$i];
-                    break;
-                }
-            }
-        }
-
-        return ($ip ? $ip : $_SERVER['REMOTE_ADDR']);
     }
 }
