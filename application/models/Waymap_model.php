@@ -275,14 +275,14 @@ class Waymap_model extends CI_Model
      */
     public function getLinksGeoInfos($link_ids, $version)
     {
+        $link_ids = is_array($link_ids) ? implode(",", $link_ids) : $link_ids;
         $data = compact('link_ids', 'version');
 
         $url = $this->waymap_interface . '/signal-map/mapFlow/linkInfo';
 
         $res = $this->get($url, $data);
 
-        $linksInfo = !empty($res['data']['links_info']) ? $res['data']['links_info'] : [];
-
+        $linksInfo = !empty($res['links_info']) ? $res['links_info'] : [];
         $features = [];
 
         foreach ($linksInfo as $linkId => $linkInfo) {
