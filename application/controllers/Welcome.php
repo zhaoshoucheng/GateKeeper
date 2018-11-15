@@ -38,6 +38,25 @@ class Welcome extends CI_Controller {
 	}
 
 	public function test(){
+        $hosts = [
+            'http://10.179.117.215:8200',         // IP + Port
+        ];
+        $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
+        $params = [
+            'index' => 'its_alarm_movement_month*',
+            'type' => 'its',
+            'body' => [
+                'query' => [
+                    'match' => [
+                        'count' => '1'
+                    ]
+                ]
+            ]
+        ];
+        $response = $client->search($params);
+        print_r($response);
+        exit;
+
         /*$queryStr="app_id=1004&ts=".time();
         $queryMap = [];
         parse_str($queryStr, $queryMap);
