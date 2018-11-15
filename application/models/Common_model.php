@@ -29,17 +29,13 @@ class Common_model extends CI_Model
     public function getJunctionAdAndCross($data)
     {
         $result = $this->waymap_model->gitJunctionDetail($data['logic_junction_id'], $data['city_id'], $data['map_version']);
-        if ($result['errno'] != 0) {
-            return ['errno'=>ERR_REQUEST_WAYMAP_API, 'errmsg'=>$result['errmsg']];
-        }
-
-        if (empty($result['data']['junctions'])) {
+        if (empty($result['junctions'])) {
             $errmsg = '路网没有返回路口详情！';
             return ['errno'=>ERR_REQUEST_WAYMAP_API, 'errmsg'=>$errmsg];
         }
 
         $res = [];
-        foreach ($result['data']['junctions'] as $k=>$v) {
+        foreach ($result['junctions'] as $k=>$v) {
             $junctionName = $v['name'];
             $districtName = $v['district_name'];
             $road1 = $v['road1'] ?? '未知路口';
@@ -51,7 +47,7 @@ class Common_model extends CI_Model
                 'lat'               => $v['lat'],
             ];
         }
-        $cityName = $result['data']['city_name'];
+        $cityName = $result['city_name'];
 
         $string = $junctionName . '路口位于';
         $string .= $cityName . $districtName . '，';

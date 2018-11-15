@@ -516,7 +516,13 @@ class Waymap_model extends CI_Model
     {
         $map_version = $map_version ?? self::$lastMapVersion;
 
-        $data = compact('city_id', 'logic_junction_id', 'map_version');
+        if(empty($map_version)){
+            $map_version = self::$lastMapVersion;
+        }
+        
+        $logic_junction_ids = $logic_junction_id;
+
+        $data = compact('city_id', 'logic_junction_ids', 'map_version');
 
         $url = $this->waymap_interface . '/signal-map/mapJunction/detail';
 
