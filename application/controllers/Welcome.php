@@ -39,7 +39,7 @@ class Welcome extends CI_Controller {
 
 	public function test(){
         $hosts = [
-            '1819:v19NJfhpxfL0pit@http://100.69.238.11:8000/arius/',         // IP + Port
+            '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',         // IP + Port
         ];
         $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
         $params = [
