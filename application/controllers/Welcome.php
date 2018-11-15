@@ -48,7 +48,7 @@ class Welcome extends CI_Controller {
             'body' => [
                 'query' => [
                     'match' => [
-                        'count' => '1'
+                        'match_all' => []
                     ]
                 ]
             ]
