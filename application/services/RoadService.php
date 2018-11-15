@@ -269,7 +269,7 @@ class RoadService extends BaseService
         $junctionsInfo = array_values($junctionsInfo);
 
         return [
-            'road_info' => $roadInfo,
+            'road_info' => array_values($roadInfo),
             'junctions_info' => $junctionsInfo,
             'center' => $center,
             'map_version' => $maxWaymapVersion,
