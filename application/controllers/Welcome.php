@@ -44,7 +44,7 @@ class Welcome extends CI_Controller {
         $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
         $params = [
             'index' => 'its_alarm_movement_month*',
-            'type' => 'its',
+            'type' => 'type',
             'body' => [
                 'query' => [
                     'match_all' => [
