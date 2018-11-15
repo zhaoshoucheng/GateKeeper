@@ -45,16 +45,9 @@ class Welcome extends CI_Controller
             '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',         // IP + Port
         ];
         $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
-        $json = '{
-        "query" : {
-            "match" : {
-                "id" : "0_2017030116_i_64019260_2017030116_o_603226541_1_1_1542181063000"
-            }
-        }
-        }';
+        $json = '{"query":{"match":{"id":"0_2017030116_i_64019260_2017030116_o_603226541_1_1_1542181063000"}}}';
         $params = [
             'index' => 'its_alarm_movement_month*',
-//            'type' => 'my_type',
             'body' => $json
         ];
         $response = $client->search($params);
