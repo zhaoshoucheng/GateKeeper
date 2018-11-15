@@ -39,7 +39,8 @@ class Welcome extends CI_Controller
         $this->load->view('welcome_message');
     }
 
-    public function test()
+
+    public function estest()
     {
         $hosts = [
             '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',         // IP + Port
@@ -53,7 +54,10 @@ class Welcome extends CI_Controller
         $response = $client->search($params);
         print_r($response);
         exit;
-
+    }
+    
+    public function test()
+    {
         /*$queryStr="app_id=1004&ts=".time();
         $queryMap = [];
         parse_str($queryStr, $queryMap);
