@@ -270,7 +270,7 @@ class RoadService extends BaseService
 
         return [
             'road_info' => $roadInfo,
-            'junctionsInfo' => $junctionsInfo,
+            'junctions_info' => $junctionsInfo,
             'center' => $center,
             'map_version' => $maxWaymapVersion,
         ];
