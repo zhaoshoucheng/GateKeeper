@@ -878,7 +878,7 @@ class JunctionsService extends BaseService
     */
     public function getJunctionMapData($data)
     {
-        $logicJunctionId = $params['junction_id'];
+        $logicJunctionId = $data['junction_id'];
 
         $result = [];
 
