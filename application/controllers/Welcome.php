@@ -4,9 +4,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 use Didi\Cloud\ItsMap\City as CityService;
 use Services\AreaService;
 
-class Welcome extends CI_Controller {
+class Welcome extends CI_Controller
+{
 
-    public function __construct(){
+    public function __construct()
+    {
         parent::__construct();
         $this->load->helper('http');
         $this->load->model('task_model');
@@ -15,42 +17,45 @@ class Welcome extends CI_Controller {
 
 
     /**
-	 * Index Page for this controller.
-	 *
-	 * Maps to the following URL
-	 * 		http://example.com/index.php/welcome
-	 *	- or -
-	 * 		http://example.com/index.php/welcome/index
-	 *	- or -
-	 * Since this controller is set as the default controller in
-	 * config/routes.php, it's displayed at http://example.com/
-	 *
-	 * So any other public methods not prefixed with an underscore will
-	 * map to /index.php/welcome/<method_name>
-	 * @see https://codeigniter.com/user_guide/general/urls.html
-	 */
-	public function index()
-	{
+     * Index Page for this controller.
+     *
+     * Maps to the following URL
+     *        http://example.com/index.php/welcome
+     *    - or -
+     *        http://example.com/index.php/welcome/index
+     *    - or -
+     * Since this controller is set as the default controller in
+     * config/routes.php, it's displayed at http://example.com/
+     *
+     * So any other public methods not prefixed with an underscore will
+     * map to /index.php/welcome/<method_name>
+     * @see https://codeigniter.com/user_guide/general/urls.html
+     */
+    public function index()
+    {
         var_dump((new AreaService())->index());
         die();
-	    print_r($_SERVER);
-		$this->load->view('welcome_message');
-	}
+        print_r($_SERVER);
+        $this->load->view('welcome_message');
+    }
 
-	public function test(){
+    public function test()
+    {
         $hosts = [
             '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',         // IP + Port
         ];
         $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
+        $json = '{
+        "query" : {
+            "match" : {
+                "id" : "0_2017030116_i_64019260_2017030116_o_603226541_1_1_1542181063000"
+            }
+        }
+        }';
         $params = [
             'index' => 'its_alarm_movement_month*',
-            'type' => 'type',
-            'body' => [
-                'query' => [
-                    'match_all' => [
-                    ]
-                ]
-            ]
+//            'type' => 'my_type',
+            'body' => $json
         ];
         $response = $client->search($params);
         print_r($response);
@@ -76,38 +81,42 @@ class Welcome extends CI_Controller {
 //        echo "<br/>";
 //        echo $url;exit;
 
-        $queryStr="send_type=2&tos=18953101270&subject=1122&content=1&log_id=1&app_id=warning&ts=".time();
+        $queryStr = "send_type=2&tos=18953101270&subject=1122&content=1&log_id=1&app_id=warning&ts=" . time();
         $queryMap = [];
         parse_str($queryStr, $queryMap);
         $sign = getSign($queryMap, "3a01e6c56bcce94ee5de073df3d512d5");
 
-        $url="http://100.90.164.31:8082/signalpro/api/warning/notify?".$queryStr."&sign=".$sign;
+        $url = "http://100.90.164.31:8082/signalpro/api/warning/notify?" . $queryStr . "&sign=" . $sign;
         echo $sign;
         echo "<br/>";
-        echo $url;exit;
+        echo $url;
+        exit;
 
-	    $queryStr="x0=114.48136&y0=38.03515&x1=114.48492&y1=38.03534&st=1539046794&et=1539048594&userid=signal&samples=-1&biztypes=all&index=all&driverlist=all&status=5&app_id=xmmtrace&ts=".time();
+        $queryStr = "x0=114.48136&y0=38.03515&x1=114.48492&y1=38.03534&st=1539046794&et=1539048594&userid=signal&samples=-1&biztypes=all&index=all&driverlist=all&status=5&app_id=xmmtrace&ts=" . time();
         $queryMap = [];
         parse_str($queryStr, $queryMap);
         $sign = getSign($queryMap, "3a01e6c56bcce94ee5de073df3d512d4");
 
-        $url="https://sts.didichuxing.com/signalpro/api/Xmmtrace/xmmtrace?".$queryStr."&sign=".$sign;
+        $url = "https://sts.didichuxing.com/signalpro/api/Xmmtrace/xmmtrace?" . $queryStr . "&sign=" . $sign;
         echo $sign;
         echo "<br/>";
-        echo $url;exit;
+        echo $url;
+        exit;
 
 
         $sortStr = http_build_query($queryMap);
         $sign = substr(md5($sortStr . "&" . "3a01e6c56bcce94ee5de073df3d512d4"), 7, 16);
-        print_r($sign);exit;
+        print_r($sign);
+        exit;
 
         $this->load->model('redis_model');
-        $this->redis_model->setEx("11222", "hello", 24*3600);
+        $this->redis_model->setEx("11222", "hello", 24 * 3600);
         $value = $this->redis_model->getData("11222");
         var_dump($value);
         exit;
-        $hour = $this->overview_model->getLastestHour(12,"2018-09-12");
-        var_dump($hour);exit;
+        $hour = $this->overview_model->getLastestHour(12, "2018-09-12");
+        var_dump($hour);
+        exit;
         com_log_warning('_asynctask_index_error', 0, '1123123', []);
 //        echo "123213";
 //        exit;
@@ -124,11 +133,12 @@ class Welcome extends CI_Controller {
 //        throw new \Exception("hello_exception");
 //        $a[11];
         $result = httpGET("http://10.95.100.106:8890/test/hello");
-        var_dump($result);exit;
+        var_dump($result);
+        exit;
         echo "13123";
         $qArr = "1122";
-        $res = ["awae","dadad"];
-        com_log_warning('_itstool_waymap_getConnectionAdjJunctions_error', 0, "adasdsad", compact("qArr","res"));
+        $res = ["awae", "dadad"];
+        com_log_warning('_itstool_waymap_getConnectionAdjJunctions_error', 0, "adasdsad", compact("qArr", "res"));
         exit;
     }
 
@@ -139,7 +149,8 @@ class Welcome extends CI_Controller {
         echo "operateLog";
     }
 
-    public function getAreaJunctionList(){
+    public function getAreaJunctionList()
+    {
         $jstr = '{
 	"errorCode": 0,
 	"errorMsg": "",
@@ -168,10 +179,12 @@ class Welcome extends CI_Controller {
 		}]
 	}
 }';
-        echo $jstr;exit;
+        echo $jstr;
+        exit;
     }
 
-    public function getAreaList(){
+    public function getAreaList()
+    {
         $jstr = '{
 	"errorCode": 0,
 	"errorMsg": "",
@@ -215,11 +228,13 @@ class Welcome extends CI_Controller {
 		}]
 	}
 }';
-        echo $jstr;exit;
+        echo $jstr;
+        exit;
     }
 
 
-    public function getOneAreaList(){
+    public function getOneAreaList()
+    {
         $jstr = '{
 	"errorCode": 0,
 	"errorMsg": "",
@@ -239,10 +254,12 @@ class Welcome extends CI_Controller {
 		}]
 	}
 }';
-        echo $jstr;exit;
+        echo $jstr;
+        exit;
     }
 
-    public function getCurrentAdaptTimingInfo(){
+    public function getCurrentAdaptTimingInfo()
+    {
         $jstr = '{
 	"errorCode": 0,
 	"errorMsg": "",
@@ -322,11 +339,13 @@ class Welcome extends CI_Controller {
 		}]
 	}
 }';
-        echo $jstr;exit;
+        echo $jstr;
+        exit;
     }
 
 
-    public function getAdaptiveJunctionList(){
+    public function getAdaptiveJunctionList()
+    {
         $jstr = '{
 	"errorCode": 0,
 	"errorMsg": "",
@@ -344,17 +363,20 @@ class Welcome extends CI_Controller {
 		"source": 3
 	}]
 }';
-        echo $jstr;exit;
+        echo $jstr;
+        exit;
     }
 
     //获取最新信号机时间
-    public function getSignUploadTime(){
+    public function getSignUploadTime()
+    {
         $jstr = '{
 	"errorCode": 0,
 	"errorMsg": "",
 	"data": "2018-08-02 16:32:03"
 }';
-        echo $jstr;exit;
+        echo $jstr;
+        exit;
     }
 
     public function demo()
@@ -397,47 +419,51 @@ class Welcome extends CI_Controller {
         echo json_encode("ok");
     }
 
-    public function token() {
-    	$remote_ip = $_SERVER["REMOTE_ADDR"];
-    	$uri = $_SERVER["REQUEST_URI"];
-    	$host = $_SERVER["HTTP_HOST"];
-    	var_dump([$remote_ip, $uri, $host]);
-    	$secret = '310173de4b64b866e6f0cf4841178b84';
-    	$get = $this->input->get();
-    	$post = $this->input->post();
-    	$params = array_merge($get, $post);
-    	var_dump($this->gen1($params, $secret));
-    	var_dump($this->gen2($params, $secret));
-    	var_dump($this->gen3($params, $secret));
-    	var_dump($this->router->fetch_directory());
-    	var_dump($this->router->fetch_class());
-    	var_dump($this->router->fetch_method());
-    	var_dump($this->uri->segment_array());
-    	var_dump($this->uri->uri_string());
-    	var_dump($this->uri->ruri_string());
+    public function token()
+    {
+        $remote_ip = $_SERVER["REMOTE_ADDR"];
+        $uri = $_SERVER["REQUEST_URI"];
+        $host = $_SERVER["HTTP_HOST"];
+        var_dump([$remote_ip, $uri, $host]);
+        $secret = '310173de4b64b866e6f0cf4841178b84';
+        $get = $this->input->get();
+        $post = $this->input->post();
+        $params = array_merge($get, $post);
+        var_dump($this->gen1($params, $secret));
+        var_dump($this->gen2($params, $secret));
+        var_dump($this->gen3($params, $secret));
+        var_dump($this->router->fetch_directory());
+        var_dump($this->router->fetch_class());
+        var_dump($this->router->fetch_method());
+        var_dump($this->uri->segment_array());
+        var_dump($this->uri->uri_string());
+        var_dump($this->uri->ruri_string());
 
     }
 
-    private function gen1($params, $secret) {
-    	ksort($params);
-    	$str = '';
-    	foreach ($params as $k => $v) {
-    	    $str .= "$k=" . urldecode($v);
-    	}
-    	$str .= $secret;
-    	return md5($str);
+    private function gen1($params, $secret)
+    {
+        ksort($params);
+        $str = '';
+        foreach ($params as $k => $v) {
+            $str .= "$k=" . urldecode($v);
+        }
+        $str .= $secret;
+        return md5($str);
     }
 
-    private function gen2($params, $secret) {
-    	ksort($params);
-    	$str = http_build_query($params) . '&' . $secret;
-    	return md5($str);
+    private function gen2($params, $secret)
+    {
+        ksort($params);
+        $str = http_build_query($params) . '&' . $secret;
+        return md5($str);
     }
 
-    private function gen3($params, $secret) {
-    	ksort($params);
-    	$query_str = http_build_query($params);
-    	$str = substr(md5($query_str . "&" . $secret), 7, 16);
-    	return $str;
+    private function gen3($params, $secret)
+    {
+        ksort($params);
+        $query_str = http_build_query($params);
+        $str = substr(md5($query_str . "&" . $secret), 7, 16);
+        return $str;
     }
 }
