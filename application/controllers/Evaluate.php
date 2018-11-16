@@ -155,8 +155,8 @@ class Evaluate extends MY_Controller
             'quota_key' => 'required|in_list[' . implode(',', array_keys($this->config->item('real_time_quota'))) . ']',
             'junction_id' => 'required|min_length[1]',
             'flow_id' => 'required|min_length[1]',
-            'base_start_time' => 'is_natural',
-            'base_end_time' => 'is_natural',
+            'base_start_time' => 'required',
+            'base_end_time' => 'required',
         ]);
 
         /**
