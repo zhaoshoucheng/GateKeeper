@@ -104,7 +104,7 @@ class CI_Exceptions {
 		$severity = isset($this->levels[$severity]) ? $this->levels[$severity] : $severity;
         $message = 'Severity: '.$severity.' --> '.$message.' '.$filepath.' '.$line;
         if(function_exists('com_log_warning')){
-            com_log_warning('log_exception', 0, $message);
+            com_log_warning('exception:'.$message, 0, $message);
         }else{
             log_message('error', 'Severity: '.$severity.' --> '.$message.' '.$filepath.' '.$line);
         }
