@@ -7,6 +7,8 @@
 
 namespace Services;
 
+use Didi\Cloud\Collection\Collection;
+
 class AlarmanalysisService extends BaseService
 {
     public function __construct()
@@ -81,25 +83,28 @@ class AlarmanalysisService extends BaseService
             // 0-23整点小时保持连续 原因：数据表中可以会有某个整点没有报警，这样会导致前端画表时出现异常
             // 当前整点
             $nowHour = date('H');
-            for ($i = 0; $i < $nowHour; $i++) {
-                $resultData['dataList'][$i] = array_map(function($item) use ($i, $flowAlarmType) {
-                    if (!empty($item['key']['buckets'])) {
-                        $tempData = array_map(function($typeData) use ($flowAlarmType) {
-                            $tempTypeArr = [
-                                'name'  => $flowAlarmType[$typeData['key']],
-                                'value' => $typeData['num']['value'],
-                                'key'   => $typeData['key'],
-                            ];
-                            return $tempTypeArr;
-                        }, $item['type']['buckets']);
-                        return $tempData;
-                    } else {
-                        return [];
-                    }
-                }, $result['aggregations']['hour']['buckets']);
-            }
+
+            $resultData['dataList'] = array_map(function($item) use ($flowAlarmType) {
+                if (!empty($item['key']['buckets'])) {
+                    $tempData[$item['key']] = array_map(function($typeData) use ($flowAlarmType) {
+                        $tempTypeArr = [
+                            'name'  => $flowAlarmType[$typeData['key']],
+                            'value' => $typeData['num']['value'],
+                            'key'   => $typeData['key'],
+                        ];
+                        return $tempTypeArr;
+                    }, $item['type']['buckets']);
+                    return $tempData;
+                } else {
+                    return [];
+                }
+            }, $result['aggregations']['hour']['buckets']);
         }
 
+        $resultData['dataList'] = Collection::make($resultData['dataList'])->collapse()->get();
+
+
+        print_r($resultData);
         print_r($result);
         return $resultData['dataList'];
     }
