@@ -8,8 +8,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |-----------------------------------------------------
 */
 
+
+// 报警频率配置
 $config['frequency_type'] = [
     0 => '全部',
     1 => '常发',
     2 => '偶发',
+];
+
+// 相位报警类型
+$config['flow_alarm_type'] = [
+    1 => '过饱和',
+    2 => '溢流',
+    3 => '空放',
+    4 => '轻度过饱和',
+];
+
+// 路口报警类型
+$config['junction_alarm_type'] = [
+    1 => '过饱和',
+    2 => '溢流',
+    3 => '失衡',
 ];

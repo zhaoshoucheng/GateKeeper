@@ -36,8 +36,7 @@ class Alarmanalysis_model extends CI_Model
         ];
 
         $response = $client->search($params);
-        echo "<pre>";print_r($response);
-        exit;
+
         return $response;
     }
 }

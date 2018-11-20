@@ -19,7 +19,7 @@ class Alarmanalysis extends MY_Controller
 
         $this->alarmanalysisService = new alarmanalysisService();
 
-        $this->load->config('alarmanalysis');
+        $this->load->config('alarmanalysis_conf');
     }
 
     /**
@@ -38,12 +38,14 @@ class Alarmanalysis extends MY_Controller
         // 校验参数
         $this->validate([
             'frequency_type' => 'required|in_list[' . implode(',', array_keys($this->config->item('frequency_type'))) . ']',
-            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}]',
-            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'city_id'        => 'required|is_natural_no_zero',
         ]);
 
-        $params['logic_junction_id'] = $params['logic_junction_id'] ? strip_tags(trim($params['logic_junction_id'])) : '';
+        $params['logic_junction_id'] = !empty($params['logic_junction_id'])
+                                        ? strip_tags(trim($params['logic_junction_id']))
+                                        : '';
 
         $result = $this->alarmanalysisService->alarmAnalysis($params);
 

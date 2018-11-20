@@ -59,10 +59,25 @@ class AlarmanalysisService extends BaseService
             $json .= ',{"match":{"logic_junction_id":{"query":"'.$params['logic_junction_id'].'","type":"phrase"}}}';
         }
 
-        $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":"hour","aggregations":{"hour":{"terms":{"field":"hour","size":200},"aggregations":{"COUNT(id)":{"value_count":{"field":"id"}}}}}}';
+        // 当选择了报警频率时
+        if ($params['frequency_type'] != 0
+            && array_key_exists($params['frequency_type'], $this->config->item('frequency_type'))) {
+            $json .= ',{"match":{"frequency_type":{"query":'. $params['frequency_type'] .',"type":"phrase"}}}';
+        }
+
+        $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":["hour","type","frequency_type"],"aggregations":{"hour":{"terms":{"field":"hour","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
 
         $result = $this->alarmanalysis_model->search($json);
+        if (!$result) {
+            return [];
+        }
 
+        print_r($result);
+
+        /* 处理数据 */
+        if (!empty($result['aggregations'])) {
+            return;
+        }
 
     }
 
