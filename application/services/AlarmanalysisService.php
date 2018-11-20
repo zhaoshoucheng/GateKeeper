@@ -75,10 +75,31 @@ class AlarmanalysisService extends BaseService
         print_r($result);
 
         /* 处理数据 */
-        if (!empty($result['aggregations'])) {
-            return;
+        $resultData['dataList'] = [];
+        if (!empty($result['aggregations']['hour']['buckets'])) {
+            // 相位报警类型配置
+            $flowAlarmType = $this->config->item('flow_alarm_type');
+
+            // 0-23整点小时保持连续 原因：数据表中可以会有某个整点没有报警，这样会导致前端画表时出现异常
+            for ($i = 0; $i < 24; $i++) {
+                $resultData['dataList'] = array_map(function($item) use ($i) {
+                    if ($i == $item['key']) {
+                        $tempData[$i] = array_map(function($typeData) use ($flowAlarmType) {
+                            $tempTypeArr[$typeData['key']] = [
+                                'name' => $flowAlarmType[$typeData['key']],
+                                'value' => $typeData['num']['value'],
+                            ];
+                            return $tempTypeArr;
+                        }, $item['type']['buckets']);
+                        return $tempData;
+                    } else {
+                        return $tempData[$i] = [];
+                    }
+                }, $result['aggregations']['hour']['buckets']);
+            }
         }
 
+        return $resultData['dataList'];
     }
 
     /**
