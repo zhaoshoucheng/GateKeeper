@@ -75,30 +75,31 @@ class AlarmanalysisService extends BaseService
         }
 
         /* 处理数据 */
-        $resultData['dataList'] = [];
+        $tempRes = [];
         if (!empty($result['aggregations']['hour']['buckets'])) {
             // 相位报警类型配置
             $flowAlarmType = $this->config->item('flow_alarm_type');
 
-            // 0-23整点小时保持连续 原因：数据表中可以会有某个整点没有报警，这样会导致前端画表时出现异常
-            // 当前整点
-            $nowHour = date('H');
-
-            $resultData['dataList'] = array_map(function($item) use ($flowAlarmType) {
+            $tempRes = array_map(function($item) use ($flowAlarmType) {
                 if (!empty($item['key']['buckets'])) {
-                    $tempData[$item['key']] = array_map(function($typeData) use ($flowAlarmType) {
-                        $tempTypeArr = [
+                    return [$item['key']] = array_map(function($typeData) use ($flowAlarmType) {
+                        return [
                             'name'  => $flowAlarmType[$typeData['key']],
                             'value' => $typeData['num']['value'],
                             'key'   => $typeData['key'],
                         ];
-                        return $tempTypeArr;
                     }, $item['type']['buckets']);
-                    return $tempData;
                 } else {
                     return [];
                 }
             }, $result['aggregations']['hour']['buckets']);
+        }
+
+        /* 0-23整点小时保持连续 原因：数据表中可以会有某个整点没有报警，这样会导致前端画表时出现异常 */
+        // 当前整点
+        $nowHour = date('H');
+        for ($i = 0; $i < $nowHour; $i++) {
+            $i++;
         }
 
         $resultData['dataList'] = Collection::make($resultData['dataList'])->collapse()->get();
