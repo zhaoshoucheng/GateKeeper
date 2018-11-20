@@ -81,14 +81,15 @@ class AlarmanalysisService extends BaseService
             $flowAlarmType = $this->config->item('flow_alarm_type');
 
             $tempRes = array_map(function($item) use ($flowAlarmType) {
-                if (!empty($item['key']['buckets'])) {
-                    return [$item['key']] = array_map(function($typeData) use ($flowAlarmType) {
+                if (!empty($item['type']['buckets'])) {
+                    $tempData[$item['key'] . ':00'] = array_map(function($typeData) use ($flowAlarmType) {
                         return [
                             'name'  => $flowAlarmType[$typeData['key']],
                             'value' => $typeData['num']['value'],
                             'key'   => $typeData['key'],
                         ];
                     }, $item['type']['buckets']);
+                    return $tempData;
                 } else {
                     return [];
                 }
@@ -99,15 +100,15 @@ class AlarmanalysisService extends BaseService
         // 当前整点
         $nowHour = date('H');
         for ($i = 0; $i < $nowHour; $i++) {
-            $i++;
+            $continuousHour[$i . ':00'] = [];
         }
 
-        $resultData['dataList'] = Collection::make($resultData['dataList'])->collapse()->get();
+        // 平铺数组
+        $temp = Collection::make($tempRes)->collapse()->get();
+        // 合并数组
+        $resultData['dataList'] = array_merge($continuousHour, $temp);
 
-
-        print_r($resultData);
-        print_r($result);
-        return $resultData['dataList'];
+        return $resultData;
     }
 
     /**
