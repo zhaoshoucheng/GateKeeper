@@ -261,24 +261,37 @@ class AlarmanalysisService extends BaseService
 
             $tempRes = array_map(function($item) use ($junctionAlarmType) {
                 return [
-                    'intHour' => $item['key'],
-                    'hour'    => $item['key'] . ':00',
-                    'value'   => $item['num']['value'],
+                    'hour'  => $item['key'],
+                    'value' => $item['num']['value'],
                 ];
-            }, $result['aggregations']['date']['buckets']);
+            }, $result['aggregations']['hour']['buckets']);
         }
-
-        print_r($tempRes);
 
         /* 0-23整点小时保持连续 原因：数据表中可以会有某个整点没有报警，这样会导致前端画表时出现异常 */
         // 当前整点
         $nowHour = date('H');
         for ($i = 0; $i < $nowHour; $i++) {
-            $continuousHour[$i . ':00'] = [];
+            $continuousHour[$i] = [];
         }
 
-        // 平铺数组
-        $temp = Collection::make($tempRes)->collapse()->get();
+        // 将tempRes数据重新置为 ['hour'=>value] 数组
+        $tempResData = array_column($tempRes, 'hour', 'value');
+
+        // 为了使时间连续，合并
+        $newData = array_merge($continuousHour, $tempResData);
+
+        /* 找出连续三小时报警最的大的TOP2 */
+        for ($i = 0; $i < $nowHour; $i++) {
+            $newData[$i+1] = $newData[$i+1] ?? 0;
+            $newData[$i+2] = $newData[$i+2] ?? 0;
+            $countData[$i . '-' . ($i+1) . ' - ' . ($i+2)] = $newData[$i] + $newData[$i+1] + $newData[$i+2];
+        }
+
+        arsort($countData);
+
+        print_r($countData);
+        print_r($newData);
+
         // 合并数组
         $resultData['dataList'] = array_merge($continuousHour, $temp);
 
