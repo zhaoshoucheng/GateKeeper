@@ -245,7 +245,7 @@ class AlarmanalysisService extends BaseService
             $json .= ',{"match":{"frequency_type":{"query":'. $params['frequency_type'] .',"type":"phrase"}}}';
         }
 
-        $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":"hour","sort":[{"hour":{"order":"asc"}}],"aggregations":{"hour":{"terms":{"field":"hour","size":200},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}';
+        $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":"hour","sort":[{"hour":{"order":"asc"}}],"aggregations":{"hour":{"terms":{"field":"hour","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}';
 
         $result = $this->alarmanalysis_model->search($json);
         if (!$result) {
@@ -305,10 +305,7 @@ class AlarmanalysisService extends BaseService
         $resultData['dataList'] = $tempRes;
         // 组织top信息
         foreach($topData as $hour=>$value) {
-            $resultData['topInfo'][] = [
-                'hour'  => explode('-', $hour),
-                'value' => $value,
-            ];
+            $resultData['topInfo'][] = explode('-', $hour);
         }
 
         return $resultData;
