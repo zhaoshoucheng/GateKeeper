@@ -245,7 +245,7 @@ class AlarmanalysisService extends BaseService
             $json .= ',{"match":{"frequency_type":{"query":'. $params['frequency_type'] .',"type":"phrase"}}}';
         }
 
-        $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":"hour","aggregations":{"hour":{"terms":{"field":"hour","size":200},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}';
+        $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":"hour","sort":[{"hour":{"order":"asc"}}],"aggregations":{"hour":{"terms":{"field":"hour","size":200},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}';
 
         $result = $this->alarmanalysis_model->search($json);
         if (!$result) {
@@ -291,11 +291,20 @@ class AlarmanalysisService extends BaseService
         // 去重
         array_unique($countData);
         // 取top2
-        $top2Data = array_slice($countData, 0, 1);
+        $topData = array_slice($countData, 0, 2);
+        /* 判断两个连续3小时的开始时间差是否满足4小时及以上 */
+        list($top1key, $top2key) = array_keys($topData);
+        // top1、top2开始时间
+        list($top1start) = explode('-', $top1key);
+        list($top2start) = explode('-', $top2key);
+        if (abs($top1start - $top2start) < 4) {
+            // 小于4小时只取最大的一个
+            unset($topData[$top2key]);
+        }
 
         $resultData['dataList'] = $tempRes;
         // 组织top信息
-        foreach($top2Data as $hour=>$value) {
+        foreach($topData as $hour=>$value) {
             $resultData['topInfo'][] = [
                 'hour'  => explode('-', $hour),
                 'value' => $value,
