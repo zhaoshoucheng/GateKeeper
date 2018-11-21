@@ -270,7 +270,7 @@ class AlarmanalysisService extends BaseService
         // 当前整点
         $nowHour = date('H');
         // 将tempRes数据重新置为 ['hour'=>value] 数组
-        $tempResData = array_column($tempRes, 'hour', 'value');
+        $tempResData = array_column($tempRes, 'value', 'hour');
         /* 0-23整点小时保持连续 原因：数据表中可以会有某个整点没有报警，这样会导致前端画表时出现异常 */
         for ($i = 0; $i < $nowHour; $i++) {
             if (!array_key_exists($i, $tempResData)) {
@@ -283,16 +283,24 @@ class AlarmanalysisService extends BaseService
             $value0 = $tempResData[$i] ?? 0;
             $value1 = $tempResData[($i+1)] ?? 0;
             $value2 = $tempResData[($i+2)] ?? 0;
-            $countData[$i . '-' . ($i+1) . ' - ' . ($i+2)] = ($value0 + $value1 + $value2);
+            $countData[$i . '-' . ($i+1) . '-' . ($i+2)] = ($value0 + $value1 + $value2);
         }
 
+        // 排序
         arsort($countData);
+        // 去重
+        array_unique($countData);
+        // 取top2
+        $top2Data = array_slice($countData, 0, 1);
 
-        print_r($countData);
-        print_r($tempResData);
-
-        // 合并数组
-        $resultData['dataList'] = array_merge($continuousHour, $temp);
+        $resultData['dataList'] = $tempRes;
+        // 组织top信息
+        foreach($top2Data as $hour=>$value) {
+            $resultData['topInfo'][] = [
+                'hour'  => explode('-', $hour),
+                'value' => $value,
+            ];
+        }
 
         return $resultData;
 
