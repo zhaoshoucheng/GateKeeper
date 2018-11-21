@@ -148,24 +148,30 @@ class Evaluate extends MY_Controller
      */
     public function quotaEvaluateCompare()
     {
-        $data = $this->input->post(null, true);
+        $params = $this->input->post(null, true);
 
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
             'quota_key' => 'required|in_list[' . implode(',', array_keys($this->config->item('real_time_quota'))) . ']',
             'junction_id' => 'required|min_length[1]',
             'flow_id' => 'required|min_length[1]',
-            'base_start_time' => 'required',
-            'base_end_time' => 'required',
+            'base_start_time' => 'required|regex_match[/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/]',
+            'base_end_time' => 'required|regex_match[/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/]',
         ]);
+
+        $data = [
+            'city_id'     => intval($params['city_id']),
+            'quota_key'   => strip_tags(trim($params['quota_key'])),
+            'junction_id' => strip_tags(trim($params['junction_id'])),
+            'flow_id'     => strip_tags(trim($params['flow_id'])),
+        ];
 
         /**
          * 如果基准时间没有传，则默认：上周工作日
          * 如果评估时间没有传，则默认：本周工作日
          */
-
-        $baseStartTime = $params['base_start_time'] ?? strtotime('monday last week');
-        $baseEndTime = $params['base_end_time'] ?? (strtotime('monday this week') - 2 * 24 * 3600 - 1);
+        $baseStartTime = $params['base_start_time'] ? strtotime($params['base_start_time']) : strtotime('monday last week');
+        $baseEndTime = $params['base_end_time'] ? strtotime($params['base_end_time']) : (strtotime('monday this week') - 2 * 24 * 3600 - 1);
 
         // 用于返回
         $data['base_time_start_end'] = [

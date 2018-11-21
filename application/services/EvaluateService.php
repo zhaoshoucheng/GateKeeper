@@ -312,7 +312,6 @@ class EvaluateService extends BaseService
             $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, '', $dates, $groupBy, $select);
         } else {
             $select = 'logic_junction_id, logic_flow_id, date, hour, ' . $quotaKey;
-
             $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, '', $select);
         }
 

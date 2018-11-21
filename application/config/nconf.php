@@ -61,6 +61,11 @@ if ($development == 2) {
     $xmmtrace_port   = '8001';
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
+    // 报警es
+    $alarm_es_interface = [
+        '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
+    ];
+
 } else {
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
@@ -101,12 +106,18 @@ if ($development == 2) {
     $xmmtrace_server = '100.69.238.158';
     $xmmtrace_port   = '8001';
     $xmmtrace_ext    = '/api/transmit/Traffic';
+
+    // 报警es
+    $alarm_es_interface = [
+        '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
+    ];
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
 $temp_timing_port = !empty($timing_port) ? ":" . $timing_port : "";
 $signal_mis_port  = !empty($signal_mis_port) ? ":" . $signal_mis_port : "";
 $es_port          = !empty($es_port) ? ":" . $es_port : "";
+$alarm_port       = !empty($alarm_port) ? ":" . $alarm_port : "";
 
 // 路网接口地址
 $config['waymap_interface'] = 'http://' . $waymap_server . $temp_waymap_port . $waymap_ext;
@@ -131,6 +142,9 @@ $config['xmmtrace_interface'] = 'http://' . $xmmtrace_server . ":" . $xmmtrace_p
 
 // 新版轨迹地址
 $config['warning_interface'] = 'http://monitor.odin.xiaojukeji.com';
+
+// 报警es接口地址
+$config['alarm_es_interface'] = $alarm_es_interface;
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;
