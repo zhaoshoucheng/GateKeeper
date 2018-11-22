@@ -47,6 +47,10 @@ class Alarmanalysis extends MY_Controller
                                         ? strip_tags(trim($params['logic_junction_id']))
                                         : '';
 
+        if (strtotime($params['end_time']) - strtotime($params['start_time']) < 0) {
+            throw new \Exception('结束日期需大于等于开始日期！', ERR_PARAMETERS);
+        }
+
         $result = $this->alarmanalysisService->alarmAnalysis($params);
 
         $this->response($result);
@@ -76,6 +80,10 @@ class Alarmanalysis extends MY_Controller
         $params['logic_junction_id'] = !empty($params['logic_junction_id'])
                                         ? strip_tags(trim($params['logic_junction_id']))
                                         : '';
+
+        if (strtotime($params['end_time']) - strtotime($params['start_time']) < 0) {
+            throw new \Exception('结束日期需大于等于开始日期！', ERR_PARAMETERS);
+        }
 
         $result = $this->alarmanalysisService->alarmTimeDistribution($params);
 
