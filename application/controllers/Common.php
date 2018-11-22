@@ -8,19 +8,24 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\CommonService;
+
 class Common extends MY_Controller
 {
+    protected $commonService;
+
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('common_model');
+
+        $this->commonService = new commonService();
     }
 
     /**
      * 获取路口所属行政区域及交叉节点信息
-     * @param city_id           interger Y 城市ID
-     * @param logic_junction_id string   Y 路口ID
-     * @param map_version       string   Y 地图版本
+     * @param $params['city_id']           int    Y 城市ID
+     * @param $params['logic_junction_id'] string Y 路口ID
+     * @param $params['map_version']       string Y 地图版本
      * @return json
      */
     public function getJunctionAdAndCross()
@@ -28,16 +33,10 @@ class Common extends MY_Controller
         $params = $this->input->post(null, true);
 
         // 校验参数
-        $validate = Validate::make($params, [
-                'city_id'             => 'min:1',
-                'logic_junction_id'   => 'nullunable',
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
+        $this->validate([
+            'logic_junction_id' => 'required|trim|min_length[8]',
+            'city_id'           => 'required|is_natural_no_zero',
+        ]);
 
         $data['city_id'] = intval($params['city_id']);
         $data['logic_junction_id'] = strip_tags(trim($params['logic_junction_id']));
@@ -46,20 +45,15 @@ class Common extends MY_Controller
             $data['map_version'] = $params['map_version'];
         }
 
-        $result = $this->common_model->getJunctionAdAndCross($data);
-        if ($result['errno'] != 0) {
-            $this->errno = $result['errno'];
-            $this->errmsg = $result['errmsg'];
-            return;
-        }
+        $result = $this->commonService->getJunctionAdAndCross($data);
 
-        return $this->response($result['data']);
+        $this->response($result);
     }
 
     /**
      * 获取路口相位信息
-     * @param city_id           interger Y 城市ID
-     * @param logic_junction_id string   Y 路口ID
+     * @param $params['city_id']           int    Y 城市ID
+     * @param $params['logic_junction_id'] string Y 路口ID
      * @return json
      */
     public function getJunctionMovements()
@@ -67,30 +61,67 @@ class Common extends MY_Controller
         $params = $this->input->post(null, true);
 
         // 校验参数
-        $validate = Validate::make($params, [
-                'city_id'             => 'min:1',
-                'logic_junction_id'   => 'nullunable',
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
+        $this->validate([
+            'logic_junction_id' => 'required|trim|min_length[8]',
+            'city_id'           => 'required|is_natural_no_zero',
+        ]);
 
         $data['city_id'] = intval($params['city_id']);
         $data['logic_junction_id'] = strip_tags(trim($params['logic_junction_id']));
 
-        $result = $this->common_model->getJunctionMovements($data);
+        $result['dataList'] = $this->commonService->getJunctionMovements($data);
 
-        if ($result['errno'] != 0) {
-            $this->errno = $result['errno'];
-            $this->errmsg = $result['errmsg'];
-            return;
+        $this->response($result);
+    }
+
+    /**
+     * 区域数据接口
+     * 权限sso用，获取开城城市列表、行政区域、自定义区域、自定义干线、所有路口
+     * @param $params['city_id']  long N 城市ID areaType非零情况下必填，取自开城城市列表返回接口中的areaId
+     * @param $params['areaType'] int  Y 0：开城城市列表，1：行政区域 ，2：自定义区域，3：干线，4：路口
+     * @return json
+     */
+    public function areaData()
+    {
+        $params = $this->input->post(null, true);
+
+        // 校验参数
+        $this->validate([
+            'areaType' => 'required|is_natural',
+        ]);
+
+        if (in_array($params['areaType'], [1, 2, 3, 4])) {
+            if (intval($params['city_id']) < 1) {
+                throw new \Exception('city_id不能为空！', ERR_PARAMETERS);
+            }
         }
 
-        $res['dataList'] = $result['data'];
+        switch ($params['areaType']) {
+            case 1:
+                // 根据城市ID获取所有行政区域
+                $result = $this->commonService->getAllAdminAreaByCityId($params['city_id']);
+                break;
 
-        return $this->response($res);
+            case 2:
+                // 根据城市ID获取所有自定义区域
+                $result = $this->commonService->getAllCustomAreaByCityId($params['city_id']);
+                break;
+
+            case 3:
+                // 根据城市ID获取所有自定义干线
+                $result = $this->commonService->getAllCustomRoadByCityId($params['city_id']);
+                break;
+
+            case 4:
+                // 根据城市ID获取所有路口
+                $result = $this->commonService->getAllJunctionByCityId($params['city_id']);
+                break;
+            default:
+                // 获取开城城市列表
+                $result = $this->commonService->getOpenCityList();
+                break;
+        }
+
+        $this->response($result);
     }
 }
