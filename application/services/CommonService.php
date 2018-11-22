@@ -149,12 +149,22 @@ class CommonService extends BaseService
         $select = 'id, area_name';
         $where = 'city_id = ' . $cityId;
 
-        $result = $this->common_model->search($table, $select, $where);
-        if (!$result) {
+        $res = $this->common_model->search($table, $select, $where);
+        if (!$res) {
             return (object)[];
         }
 
-        print_r($result);exit;
+        $result = [];
+        foreach ($res as $k=>$v) {
+            $result[$k] = [
+                'areaId'   => $v['id'],
+                'areaName' => $v['area_name'],
+                'level'    => 1,
+                'apid'     => -1,
+            ];
+        }
+
+        return $result;
     }
 
     /**
@@ -165,15 +175,25 @@ class CommonService extends BaseService
     public function getAllCustomRoadByCityId($cityId)
     {
         $table = 'road';
-        $select = 'id, road_id, road_name';
+        $select = 'id, road_name';
         $where = 'city_id = ' . $cityId . ' and is_delete = 0';
 
-        $result = $this->common_model->search($table, $select, $where);
-        if (!$result) {
+        $res = $this->common_model->search($table, $select, $where);
+        if (!$res) {
             return (object)[];
         }
 
-        print_r($result);exit;
+        $result = [];
+        foreach ($res as $k=>$v) {
+            $result[$k] = [
+                'areaId'   => $v['id'],
+                'areaName' => $v['road_name'],
+                'level'    => 1,
+                'apid'     => -1,
+            ];
+        }
+
+        return $result;
     }
 
     /**
