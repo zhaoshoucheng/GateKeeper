@@ -31,6 +31,7 @@ class EvaluateService extends BaseService
         $this->load->model('flowDurationV6_model');
 
         $this->load->config('evaluate_conf');
+        $this->load->config('realtime_conf');
 
         $this->helperService = new HelperService();
     }
