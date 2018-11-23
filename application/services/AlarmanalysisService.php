@@ -208,7 +208,7 @@ class AlarmanalysisService extends BaseService
         }
 
         // 合并数组
-        $resultData['dataList'] = array_merge($continuousTime, $temp);
+        $resultData = array_merge($continuousTime, $temp);
 
         return $resultData;
     }
