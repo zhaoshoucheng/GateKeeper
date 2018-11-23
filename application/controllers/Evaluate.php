@@ -257,10 +257,9 @@ class Evaluate extends MY_Controller
     public function download()
     {
         $params = $this->input->get();
-
-        $this->validate([
-            'download_id' => 'required|min_length[1]'
-        ]);
+        if (empty($params['download_id'])) {
+            throw new \Exception('download_id不能为空！', ERR_PARAMETERS);
+        }
 
         $this->evaluateService->download($params);
     }

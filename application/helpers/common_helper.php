@@ -321,7 +321,7 @@ if (!function_exists('intToChr')) {
     {
         $str = '';
         if (floor($index / 26) > 0) {
-            $str .= $this->intToChr(floor($index / 26) - 1);
+            $str .= intToChr(floor($index / 26) - 1);
         }
         return $str . chr($index % 26 + $start);
     }
