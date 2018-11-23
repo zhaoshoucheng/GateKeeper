@@ -887,7 +887,7 @@ class JunctionsService extends BaseService
 
         // 获取配时数据 地图底图数据源用配时的
         $timing_data = [
-            'junction_id' => $junction_id,
+            'junction_id' => $logicJunctionId,
             'dates'       => $data['dates'],
             'timingType'  => $data['timingType']
         ];
@@ -904,9 +904,9 @@ class JunctionsService extends BaseService
             return [];
         }
 
-        $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionId, $logicJunctionId);
+        $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionId, array_keys($timing['list']));
 
-        foreach ($ret['data'] as $k => $v) {
+        foreach ($ret as $k => $v) {
             if (!empty($timing['list'][$v['logic_flow_id']])) {
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
                 $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
