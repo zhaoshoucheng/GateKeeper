@@ -91,25 +91,12 @@ class Alarmanalysis extends MY_Controller
     }
 
     /**
-     * 当日城市/路口报警信息统计
+     * 7日报警均值
      * @param $params['city_id']           int    Y 城市ID
      * @param $params['logic_junction_id'] string N 逻辑路口ID 当：不为空时，按路口查询;为空时，按城市查询
      * @param $params['alarm_type']        int    Y 报警类型 1: 过饱和 2: 溢流 3:失衡
      */
-    public function dailyAlarmInformationStatistics()
-    {
-        $params = $this->input->post(null, true);
-    }
-
-    /**
-     * N日城市/路口报警信息统计
-     * @param $params['city_id']           int    Y 城市ID
-     * @param $params['logic_junction_id'] string N 逻辑路口ID 当：不为空时，按路口查询;为空时，按城市查询
-     * @param $params['alarm_type']        int    Y 报警类型 1: 过饱和 2: 溢流 3:失衡
-     * @param $params['time_range']        string Y 时间段 yyyy-mm-dd-yyyy-mm-dd
-     * @return json
-     */
-    public function timeAlarmInformationStatistics()
+    public function sevenDayAlarmMeanValue()
     {
         $params = $this->input->post(null, true);
     }

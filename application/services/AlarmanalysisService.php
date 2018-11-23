@@ -58,21 +58,21 @@ class AlarmanalysisService extends BaseService
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
         // where city_id
-        $json .= '{"match":{"city_id":{"query":'.$params['city_id'].',"type":"phrase"}}}';
+        $json .= '{"match":{"city_id":{"query":' . $params['city_id'] . ',"type":"phrase"}}}';
 
         // where date
-        $json .= ',{"match":{"date":{"query":"'.$params['start_time'].'","type":"phrase"}}}';
+        $json .= ',{"match":{"date":{"query":"' . trim($params['start_time']) . '","type":"phrase"}}}';
 
         if (!empty($params['logic_junction_id'])) { // 单路口报警分析查询
             // where logic_junction_id
-            $json .= ',{"match":{"logic_junction_id":{"query":"'.$params['logic_junction_id'].'","type":"phrase"}}}';
+            $json .= ',{"match":{"logic_junction_id":{"query":"' . trim($params['logic_junction_id']) . '","type":"phrase"}}}';
         }
 
         // 当选择了报警频率时
         if ($params['frequency_type'] != 0
             && array_key_exists($params['frequency_type'], $this->config->item('frequency_type'))) {
             // where frequency_type
-            $json .= ',{"match":{"frequency_type":{"query":'. $params['frequency_type'] .',"type":"phrase"}}}';
+            $json .= ',{"match":{"frequency_type":{"query":' . $params['frequency_type'] . ',"type":"phrase"}}}';
         }
 
         $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":["hour","type","frequency_type"],"aggregations":{"hour":{"terms":{"field":"hour","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
@@ -90,7 +90,7 @@ class AlarmanalysisService extends BaseService
 
             $tempRes = array_map(function($item) use ($junctionAlarmType) {
                 if (!empty($item['type']['buckets'])) {
-                    $tempData[$item['key'] . ':00'] = array_map(function($typeData) use ($junctionAlarmType) {
+                    $tempData[$item['key'] . ':00']['list'] = array_map(function($typeData) use ($junctionAlarmType) {
                         return [
                             'name'  => $junctionAlarmType[$typeData['key']],
                             'value' => $typeData['num']['value'],
@@ -113,8 +113,13 @@ class AlarmanalysisService extends BaseService
 
         // 平铺数组
         $temp = Collection::make($tempRes)->collapse()->get();
+        foreach ($temp as $k=>$v) {
+            // 各种报警条数总数
+            $temp[$k]['count'] = array_sum(array_column($v['list'], 'value'));
+        }
+
         // 合并数组
-        $resultData['dataList'] = array_merge($continuousHour, $temp);
+        $resultData = array_merge($continuousHour, $temp);
 
         return $resultData;
     }
@@ -137,15 +142,15 @@ class AlarmanalysisService extends BaseService
         $json .= '{"match":{"city_id":{"query":' . $params['city_id'] . ',"type":"phrase"}}}';
 
         // where date >= start_time
-        $json .= ',{"range":{"date":{"from":"' . $params['start_time'] . '","to":null,"include_lower":true,"include_upper":true}}}';
+        $json .= ',{"range":{"date":{"from":"' . trim($params['start_time']) . '","to":null,"include_lower":true,"include_upper":true}}}';
 
         // where date <= end_time
-        $json .= ',{"range":{"date":{"from":null,"to":"' . $params['end_time'] . '","include_lower":true,"include_upper":true}}}';
+        $json .= ',{"range":{"date":{"from":null,"to":"' . trim($params['end_time']) . '","include_lower":true,"include_upper":true}}}';
 
         // 当按路口报警分析查询时
         if (!empty($params['logic_junction_id'])) {
             // where logic_junction_id
-            $json .= ',{"match":{"logic_junction_id":{"query":"'.$params['logic_junction_id'].'","type":"phrase"}}}';
+            $json .= ',{"match":{"logic_junction_id":{"query":"' . trim($params['logic_junction_id']) . '","type":"phrase"}}}';
         }
 
         // 当选择了报警频率时
@@ -173,7 +178,7 @@ class AlarmanalysisService extends BaseService
                 if (!empty($item['type']['buckets'])) {
                     // $item['key'] / 1000 es返回的是毫秒级的时间戳，固除以1000
                     $key = date('Y-m-d', $item['key'] / 1000);
-                    $tempData[$key] = array_map(function($typeData) use ($junctionAlarmType) {
+                    $tempData[$key]['list'] = array_map(function($typeData) use ($junctionAlarmType) {
                         return [
                             'name'  => $junctionAlarmType[$typeData['key']],
                             'value' => $typeData['num']['value'],
@@ -197,8 +202,13 @@ class AlarmanalysisService extends BaseService
 
         // 平铺数组
         $temp = Collection::make($tempRes)->collapse()->get();
+        foreach ($temp as $k=>$v) {
+            // 各种报警条数总数
+            $temp[$k]['count'] = array_sum(array_column($v['list'], 'value'));
+        }
+
         // 合并数组
-        $resultData['dataList'] = array_merge($continuousTime, $temp);
+        $resultData = array_merge($continuousTime, $temp);
 
         return $resultData;
     }
@@ -226,16 +236,16 @@ class AlarmanalysisService extends BaseService
 
         if ($params['start_time'] == $params['end_time']) { // 当天
             // where date
-            $json .= ',{"match":{"date":{"query":"' . $params['start_time'] . '","type":"phrase"}}}';
+            $json .= ',{"match":{"date":{"query":"' . trim($params['start_time']) . '","type":"phrase"}}}';
         } else { // 多天
             // where date
-            $json .= ',{"range":{"date":{"from":"' . $params['start_time'] . '","to":null,"include_lower":true,"include_upper":true}}}';
-            $json .= ',{"range":{"date":{"from":null,"to":"' . $params['end_time'] . '","include_lower":true,"include_upper":true}}}';
+            $json .= ',{"range":{"date":{"from":"' . trim($params['start_time']) . '","to":null,"include_lower":true,"include_upper":true}}}';
+            $json .= ',{"range":{"date":{"from":null,"to":"' . trim($params['end_time']) . '","include_lower":true,"include_upper":true}}}';
         }
 
         // 按路口查询
         if (!empty($params['logic_junction_id'])) {
-            $json .= ',{"match":{"logic_junction_id":{"query":"' . $params['logic_junction_id'] . '","type":"phrase"}}}';
+            $json .= ',{"match":{"logic_junction_id":{"query":"' . trim($params['logic_junction_id']) . '","type":"phrase"}}}';
         }
 
         // 当选择了报警频率时

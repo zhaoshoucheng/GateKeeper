@@ -885,26 +885,33 @@ class JunctionsService extends BaseService
         // 获取最新路网版本 在全部路网版本中取最新的
         $newMapVersion = $this->waymap_model->getLastMapVersion();
 
-        // 获取路口所有相位
-        $allFlows = $this->waymap_model->getFlowsInfo($logicJunctionId);
+        // 获取配时数据 地图底图数据源用配时的
+        $timing_data = [
+            'junction_id' => $logicJunctionId,
+            'dates'       => $data['dates'],
+            'timingType'  => $data['timingType']
+        ];
+        if ((int)$data['search_type'] == 1) { // 按方案查询
+            $time_range = array_filter(explode('-', $data['time_range']));
+            $timing_data['time_range'] = trim($time_range[0]) . '-' . date("H:i", strtotime($time_range[1]) - 60);
+        } else { // 按时间点查询
+            $timing_data['time_point'] = trim($data['time_point']);
+            $timing_data['time_range'] = trim($data['task_time_range']);
+        }
 
-        if (empty($allFlows)) {
+        $timing = $this->timing_model->getTimingDataForJunctionMap($timing_data);
+        if (!$timing || empty($timing)) {
             return [];
         }
 
-        // 获取路网路口各相位坐标
-        if (empty($allFlows[$logicJunctionId])) {
-            return [];
-        }
-
-        $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionId, array_keys($allFlows[$logicJunctionId]));
+        $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionId, array_keys($timing['list']));
 
         foreach ($ret as $k => $v) {
-            if (!empty($allFlows[$logicJunctionId][$v['logic_flow_id']])) {
+            if (!empty($timing['list'][$v['logic_flow_id']])) {
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
-                $result['dataList'][$k]['flow_label']    = $allFlows[$logicJunctionId][$v['logic_flow_id']];
-                $result['dataList'][$k]['lng']           = $v['flows'][0][0];
-                $result['dataList'][$k]['lat']           = $v['flows'][0][1];
+                $result['dataList'][$k]['flow_label'] = $timing['list'][$v['logic_flow_id']];
+                $result['dataList'][$k]['lng'] = $v['flows'][0][0];
+                $result['dataList'][$k]['lat'] = $v['flows'][0][1];
             }
         }
         // 获取路口中心坐标
