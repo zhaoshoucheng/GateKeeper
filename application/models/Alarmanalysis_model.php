@@ -7,9 +7,6 @@
 
 class Alarmanalysis_model extends CI_Model
 {
-    private $tb = '';
-    private $db = '';
-
     public function __construct()
     {
         parent::__construct();
@@ -28,7 +25,7 @@ class Alarmanalysis_model extends CI_Model
         $hosts = $this->config->item('alarm_es_interface');
         $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
 
-        $index = 'its_alarm_movement_month*';
+        $index = $this->config->item('alarm_es_index');
 
         $params = [
             'index' => $index,

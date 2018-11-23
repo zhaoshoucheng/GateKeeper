@@ -90,7 +90,7 @@ class AlarmanalysisService extends BaseService
 
             $tempRes = array_map(function($item) use ($junctionAlarmType) {
                 if (!empty($item['type']['buckets'])) {
-                    $tempData[$item['key'] . ':00'] = array_map(function($typeData) use ($junctionAlarmType) {
+                    $tempData[$item['key'] . ':00']['list'] = array_map(function($typeData) use ($junctionAlarmType) {
                         return [
                             'name'  => $junctionAlarmType[$typeData['key']],
                             'value' => $typeData['num']['value'],
@@ -113,8 +113,13 @@ class AlarmanalysisService extends BaseService
 
         // 平铺数组
         $temp = Collection::make($tempRes)->collapse()->get();
+        foreach ($temp as $k=>$v) {
+            // 各种报警条数总数
+            $temp[$k]['count'] = array_sum(array_column($v['list'], 'value'));
+        }
+
         // 合并数组
-        $resultData['dataList'] = array_merge($continuousHour, $temp);
+        $resultData = array_merge($continuousHour, $temp);
 
         return $resultData;
     }

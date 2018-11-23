@@ -61,10 +61,12 @@ if ($development == 2) {
     $xmmtrace_port   = '8001';
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
-    // 报警es
+    // 报警es接口
     $alarm_es_interface = [
         '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
     ];
+    // 报警ES索引
+    $alarm_es_index = 'online_its_alarm_movement_month*';
 
 } else {
     // 路网接口服务器地址
@@ -111,6 +113,8 @@ if ($development == 2) {
     $alarm_es_interface = [
         '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
     ];
+    // 报警ES索引
+    $alarm_es_index = 'its_alarm_junction_month*';
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -145,6 +149,8 @@ $config['warning_interface'] = 'http://monitor.odin.xiaojukeji.com';
 
 // 报警es接口地址
 $config['alarm_es_interface'] = $alarm_es_interface;
+// 报警ES索引
+$config['alarm_es_index'] = $alarm_es_index;
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;
