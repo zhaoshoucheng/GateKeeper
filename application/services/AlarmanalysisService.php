@@ -178,7 +178,7 @@ class AlarmanalysisService extends BaseService
                 if (!empty($item['type']['buckets'])) {
                     // $item['key'] / 1000 es返回的是毫秒级的时间戳，固除以1000
                     $key = date('Y-m-d', $item['key'] / 1000);
-                    $tempData[$key] = array_map(function($typeData) use ($junctionAlarmType) {
+                    $tempData[$key]['list'] = array_map(function($typeData) use ($junctionAlarmType) {
                         return [
                             'name'  => $junctionAlarmType[$typeData['key']],
                             'value' => $typeData['num']['value'],
@@ -202,6 +202,11 @@ class AlarmanalysisService extends BaseService
 
         // 平铺数组
         $temp = Collection::make($tempRes)->collapse()->get();
+        foreach ($temp as $k=>$v) {
+            // 各种报警条数总数
+            $temp[$k]['count'] = array_sum(array_column($v['list'], 'value'));
+        }
+
         // 合并数组
         $resultData['dataList'] = array_merge($continuousTime, $temp);
 
