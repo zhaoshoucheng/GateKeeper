@@ -136,11 +136,22 @@ class CommonService extends BaseService
     public function getAllAdminAreaByCityId($cityId)
     {
         $res = $this->waymap_model->getDistrictInfo($cityId);
-        if (!$res) {
+        if (!$res || $res['districts']) {
             return (object)[];
         }
 
-        print_r($res);
+        foreach ($res['districts'] as $k=>$v) {
+            $result[$k] = [
+                'areaId'   => $key,
+                'areaName' => $v,
+                'level'    => 1,
+                'apid'     => -1,
+            ];
+        }
+
+        $result = array_values($result);
+
+        return $result;
     }
 
     /**
@@ -214,6 +225,15 @@ class CommonService extends BaseService
             return (object)[];
         }
 
-        print_r($res);
+        foreach ($res as $k=>$v) {
+            $result[$k] = [
+                'areaId'   => $v['logic_junction_id'],
+                'areaName' => $v['name'],
+                'level'    => 1,
+                'apid'     => -1,
+            ];
+        }
+
+        return $result;
     }
 }
