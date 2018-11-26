@@ -380,17 +380,21 @@ class AlarmanalysisService extends BaseService
 
         $tempRes = array_map(function($item) {
             return [
-                'hour'  => $item['key'],
+                'hour'  => $item['key'] . ':00', // 10:00
                 'value' => round($item['num']['value'] / 7 , 2),
             ];
         }, $result['aggregations']['hour']['buckets']);
 
         /* 0-23整点小时保持连续 原因：数据表中可以会有某个整点没有报警，这样会导致前端画表时出现异常 */
         for ($i = 0; $i < 24; $i++) {
-            $continuousHour[$i] = [];
+            $continuousHour[$i . ':00'] = 0;
         }
-        // 合并
-        $resultData = array_merge($continuousHour, array_column($tempRes, 'value', 'hour'));
+        foreach(array_merge($continuousHour, array_column($tempRes, 'value', 'hour')) as $k=>$v) {
+            $resultData['dataList'][] = [
+                'hour'  => $k,
+                'value' => $v,
+            ];
+        }
 
         return $resultData;
     }
