@@ -385,7 +385,13 @@ class AlarmanalysisService extends BaseService
             ];
         }, $result['aggregations']['hour']['buckets']);
 
-        print_r($tempRes);
+        /* 0-23整点小时保持连续 原因：数据表中可以会有某个整点没有报警，这样会导致前端画表时出现异常 */
+        for ($i = 0; $i < 24; $i++) {
+            $continuousHour[$i] = [];
+        }
+        // 合并
+        $resultData = array_merge($continuousHour, array_column($tempRes, 'value', 'hour'));
 
+        return $resultData;
     }
 }
