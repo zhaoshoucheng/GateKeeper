@@ -125,7 +125,21 @@ class CommonService extends BaseService
      */
     public function getOpenCityList()
     {
+        $res = $this->common_model->getOpenCityList();
+        if (!$res || empty($res)) {
+            return (object)[];
+        }
 
+        foreach ($res as $k => $v) {
+            $result[$k] = [
+                'areaId'   => $v['city_id'],
+                'areaName' => $v['city_name'],
+                'level'    => 1,
+                'apid'     => -1,
+            ];
+        }
+
+        return $result;
     }
 
     /**
@@ -136,13 +150,13 @@ class CommonService extends BaseService
     public function getAllAdminAreaByCityId($cityId)
     {
         $res = $this->waymap_model->getDistrictInfo($cityId);
-        if (!$res || $res['districts']) {
+        if (!$res || empty($res['districts'])) {
             return (object)[];
         }
 
         foreach ($res['districts'] as $k=>$v) {
             $result[$k] = [
-                'areaId'   => $key,
+                'areaId'   => $k,
                 'areaName' => $v,
                 'level'    => 1,
                 'apid'     => -1,
