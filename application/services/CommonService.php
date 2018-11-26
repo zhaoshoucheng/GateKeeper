@@ -127,7 +127,7 @@ class CommonService extends BaseService
     {
         $res = $this->common_model->getOpenCityList();
         if (!$res || empty($res)) {
-            return (object)[];
+            return [];
         }
 
         foreach ($res as $k => $v) {
@@ -151,7 +151,7 @@ class CommonService extends BaseService
     {
         $res = $this->waymap_model->getDistrictInfo($cityId);
         if (!$res || empty($res['districts'])) {
-            return (object)[];
+            return [];
         }
 
         foreach ($res['districts'] as $k=>$v) {
@@ -181,7 +181,7 @@ class CommonService extends BaseService
 
         $res = $this->common_model->search($table, $select, $where);
         if (!$res) {
-            return (object)[];
+            return [];
         }
 
         $result = [];
@@ -210,7 +210,7 @@ class CommonService extends BaseService
 
         $res = $this->common_model->search($table, $select, $where);
         if (!$res) {
-            return (object)[];
+            return [];
         }
 
         $result = [];
@@ -236,7 +236,7 @@ class CommonService extends BaseService
         // 获取路网全城路口
         $res = $this->waymap_model->getAllCityJunctions($cityId);
         if (!$res) {
-            return (object)[];
+            return [];
         }
 
         foreach ($res as $k=>$v) {

@@ -56,7 +56,7 @@ class Common_model extends CI_Model
      */
     public function getOpenCityList()
     {
-        $this->its_db = $this->load->database('its_db', true);
+        $this->its_db = $this->load->database('db_its', true);
 
         $select = 'city_id, city_name';
         $this->its_db->select($select);
