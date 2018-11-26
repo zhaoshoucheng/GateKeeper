@@ -84,25 +84,27 @@ class AlarmanalysisService extends BaseService
 
         /* 处理数据 */
         $tempRes = [];
-        if (!empty($result['aggregations']['hour']['buckets'])) {
-            // 路口报警类型配置
-            $junctionAlarmType = $this->config->item('junction_alarm_type');
-
-            $tempRes = array_map(function($item) use ($junctionAlarmType) {
-                if (!empty($item['type']['buckets'])) {
-                    $tempData[$item['key'] . ':00']['list'] = array_map(function($typeData) use ($junctionAlarmType) {
-                        return [
-                            'name'  => $junctionAlarmType[$typeData['key']],
-                            'value' => $typeData['num']['value'],
-                            'key'   => $typeData['key'],
-                        ];
-                    }, $item['type']['buckets']);
-                    return $tempData;
-                } else {
-                    return [];
-                }
-            }, $result['aggregations']['hour']['buckets']);
+        if (empty($result['aggregations']['hour']['buckets'])) {
+            return (object)[];
         }
+
+        // 路口报警类型配置
+        $junctionAlarmType = $this->config->item('junction_alarm_type');
+
+        $tempRes = array_map(function($item) use ($junctionAlarmType) {
+            if (!empty($item['type']['buckets'])) {
+                $tempData[$item['key'] . ':00']['list'] = array_map(function($typeData) use ($junctionAlarmType) {
+                    return [
+                        'name'  => $junctionAlarmType[$typeData['key']],
+                        'value' => $typeData['num']['value'],
+                        'key'   => $typeData['key'],
+                    ];
+                }, $item['type']['buckets']);
+                return $tempData;
+            } else {
+                return [];
+            }
+        }, $result['aggregations']['hour']['buckets']);
 
         /* 0-23整点小时保持连续 原因：数据表中可以会有某个整点没有报警，这样会导致前端画表时出现异常 */
         // 当前整点
@@ -170,27 +172,28 @@ class AlarmanalysisService extends BaseService
         /* 处理数据 */
         $tempRes = [];
 
-        if (!empty($result['aggregations']['date']['buckets'])) {
-            // 路口报警类型配置
-            $junctionAlarmType = $this->config->item('junction_alarm_type');
-
-            $tempRes = array_map(function($item) use ($junctionAlarmType) {
-                if (!empty($item['type']['buckets'])) {
-                    // $item['key'] / 1000 es返回的是毫秒级的时间戳，固除以1000
-                    $key = date('Y-m-d', $item['key'] / 1000);
-                    $tempData[$key]['list'] = array_map(function($typeData) use ($junctionAlarmType) {
-                        return [
-                            'name'  => $junctionAlarmType[$typeData['key']],
-                            'value' => $typeData['num']['value'],
-                            'key'   => $typeData['key'],
-                        ];
-                    }, $item['type']['buckets']);
-                    return $tempData;
-                } else {
-                    return [];
-                }
-            }, $result['aggregations']['date']['buckets']);
+        if (empty($result['aggregations']['date']['buckets'])) {
+            return (object)[];
         }
+        // 路口报警类型配置
+        $junctionAlarmType = $this->config->item('junction_alarm_type');
+
+        $tempRes = array_map(function($item) use ($junctionAlarmType) {
+            if (!empty($item['type']['buckets'])) {
+                // $item['key'] / 1000 es返回的是毫秒级的时间戳，固除以1000
+                $key = date('Y-m-d', $item['key'] / 1000);
+                $tempData[$key]['list'] = array_map(function($typeData) use ($junctionAlarmType) {
+                    return [
+                        'name'  => $junctionAlarmType[$typeData['key']],
+                        'value' => $typeData['num']['value'],
+                        'key'   => $typeData['key'],
+                    ];
+                }, $item['type']['buckets']);
+                return $tempData;
+            } else {
+                return [];
+            }
+        }, $result['aggregations']['date']['buckets']);
 
         /* 使日期连续 因为表中可能某个日期是没有的，就会出现断裂*/
         $startTime = strtotime($params['start_time']);
@@ -265,17 +268,18 @@ class AlarmanalysisService extends BaseService
         /* 处理数据 */
         $tempRes = [];
 
-        if (!empty($result['aggregations']['hour']['buckets'])) {
-            // 路口报警类型配置
-            $junctionAlarmType = $this->config->item('junction_alarm_type');
-
-            $tempRes = array_map(function($item) use ($junctionAlarmType) {
-                return [
-                    'hour'  => $item['key'],
-                    'value' => $item['num']['value'],
-                ];
-            }, $result['aggregations']['hour']['buckets']);
+        if (empty($result['aggregations']['hour']['buckets'])) {
+            return (object)[];
         }
+        // 路口报警类型配置
+        $junctionAlarmType = $this->config->item('junction_alarm_type');
+
+        $tempRes = array_map(function($item) use ($junctionAlarmType) {
+            return [
+                'hour'  => $item['key'],
+                'value' => $item['num']['value'],
+            ];
+        }, $result['aggregations']['hour']['buckets']);
 
         // 当前整点
         $nowHour = date('H');
@@ -319,7 +323,69 @@ class AlarmanalysisService extends BaseService
         }
 
         return $resultData;
+    }
 
+    /**
+     * 7日报警均值
+     * @param $params['city_id']           int    Y 城市ID
+     * @param $params['logic_junction_id'] string N 逻辑路口ID 当：不为空时，按路口查询;为空时，按城市查询
+     * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
+     * @return json
+     */
+    public function sevenDayAlarmMeanValue($params)
+    {
+        if (empty($params)) {
+            return (object)[];
+        }
+
+        $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
+
+        // where city_id
+        $json .= '{"match":{"city_id":{"query":' . $params['city_id'] . ',"type":"phrase"}}}';
+
+        // 前七日开始时间
+        $startTime = date('Y-m-d', strtotime('-7 days'));
+        // 前七日结束时间
+        $endTime = date('Y-m-d', strtotime('-1 days'));
+
+        // where date
+        $json .= ',{"range":{"date":{"from":"' . $startTime . '","to":null,"include_lower":true,"include_upper":true}}}';
+        $json .= ',{"range":{"date":{"from":null,"to":"' . $endTime . '","include_lower":true,"include_upper":true}}}';
+
+        // 按路口查询
+        if (!empty($params['logic_junction_id'])) {
+            $json .= ',{"match":{"logic_junction_id":{"query":"' . $params['logic_junction_id'] . '","type":"phrase"}}}';
+        }
+
+        // 当选择了报警频率时
+        if ($params['frequency_type'] != 0
+            && array_key_exists($params['frequency_type'], $this->config->item('frequency_type'))) {
+            // where frequency_type
+            $json .= ',{"match":{"frequency_type":{"query":'. $params['frequency_type'] .',"type":"phrase"}}}';
+        }
+
+        $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":"hour","sort":[{"hour":{"order":"asc"}}],"aggregations":{"hour":{"terms":{"field":"hour","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}';
+
+        $result = $this->alarmanalysis_model->search($json);
+        if (!$result) {
+            return (object)[];
+        }
+
+        /* 处理数据 */
+        $tempRes = [];
+
+        if (empty($result['aggregations']['hour']['buckets'])) {
+            return (object)[];
+        }
+
+        $tempRes = array_map(function($item) {
+            return [
+                'hour'  => $item['key'],
+                'value' => round($item['num']['value'] / 7 , 2),
+            ];
+        }, $result['aggregations']['hour']['buckets']);
+
+        print_r($tempRes);
 
     }
 }
