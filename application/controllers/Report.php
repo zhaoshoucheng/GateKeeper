@@ -102,10 +102,9 @@ class Report extends MY_Controller
     public function downReport()
     {
         $params = $this->input->get(null, true);
-
-        $this->validate([
-            'key' => 'required',
-        ]);
+        if (empty($params['key'])) {
+            throw new \Exception('key不能为空！', ERR_PARAMETERS);
+        }
 
         $this->reportService->downReport($params);
     }

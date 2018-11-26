@@ -214,9 +214,9 @@ class Road extends MY_Controller
     {
         $params = $this->input->get();
 
-        $this->validate([
-            'download_id' => 'required|min_length[1]'
-        ]);
+        if (empty($params['download_id'])) {
+            throw new \Exception('参数download_id不能为空！', ERR_PARAMETERS);
+        }
 
         $this->roadService->download($params);
     }
