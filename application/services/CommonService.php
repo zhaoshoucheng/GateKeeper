@@ -135,7 +135,12 @@ class CommonService extends BaseService
      */
     public function getAllAdminAreaByCityId($cityId)
     {
+        $res = $this->waymap_model->getDistrictInfo($cityId);
+        if (!$res) {
+            return (object)[];
+        }
 
+        print_r($res);
     }
 
     /**
@@ -203,6 +208,12 @@ class CommonService extends BaseService
      */
     public function getAllJunctionByCityId($cityId)
     {
+        // 获取路网全城路口
+        $res = $this->waymap_model->getAllCityJunctions($cityId);
+        if (!$res) {
+            return (object)[];
+        }
 
+        print_r($res);
     }
 }
