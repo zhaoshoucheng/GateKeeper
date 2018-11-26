@@ -125,7 +125,21 @@ class CommonService extends BaseService
      */
     public function getOpenCityList()
     {
+        $res = $this->common_model->getOpenCityList();
+        if (!$res || empty($res)) {
+            return [];
+        }
 
+        foreach ($res as $k => $v) {
+            $result[$k] = [
+                'areaId'   => $v['city_id'],
+                'areaName' => $v['city_name'],
+                'level'    => 1,
+                'apid'     => -1,
+            ];
+        }
+
+        return $result;
     }
 
     /**
@@ -135,7 +149,23 @@ class CommonService extends BaseService
      */
     public function getAllAdminAreaByCityId($cityId)
     {
+        $res = $this->waymap_model->getDistrictInfo($cityId);
+        if (!$res || empty($res['districts'])) {
+            return [];
+        }
 
+        foreach ($res['districts'] as $k=>$v) {
+            $result[$k] = [
+                'areaId'   => $k,
+                'areaName' => $v,
+                'level'    => 1,
+                'apid'     => -1,
+            ];
+        }
+
+        $result = array_values($result);
+
+        return $result;
     }
 
     /**
@@ -151,7 +181,7 @@ class CommonService extends BaseService
 
         $res = $this->common_model->search($table, $select, $where);
         if (!$res) {
-            return (object)[];
+            return [];
         }
 
         $result = [];
@@ -180,7 +210,7 @@ class CommonService extends BaseService
 
         $res = $this->common_model->search($table, $select, $where);
         if (!$res) {
-            return (object)[];
+            return [];
         }
 
         $result = [];
@@ -203,6 +233,21 @@ class CommonService extends BaseService
      */
     public function getAllJunctionByCityId($cityId)
     {
+        // 获取路网全城路口
+        $res = $this->waymap_model->getAllCityJunctions($cityId);
+        if (!$res) {
+            return [];
+        }
 
+        foreach ($res as $k=>$v) {
+            $result[$k] = [
+                'areaId'   => $v['logic_junction_id'],
+                'areaName' => $v['name'],
+                'level'    => 1,
+                'apid'     => -1,
+            ];
+        }
+
+        return $result;
     }
 }
