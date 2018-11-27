@@ -58,7 +58,7 @@ class AlarmanalysisService extends BaseService
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
         // where city_id
-        $json .= '{"match":{"city_id":{"query":' . $params['city_id'] . ',"type":"phrase"}}}';
+        $json .= '{"match":{"city_id":{"query":' . (int)$params['city_id'] . ',"type":"phrase"}}}';
 
         // where date
         $json .= ',{"match":{"date":{"query":"' . trim($params['start_time']) . '","type":"phrase"}}}';
@@ -72,7 +72,7 @@ class AlarmanalysisService extends BaseService
         if ($params['frequency_type'] != 0
             && array_key_exists($params['frequency_type'], $this->config->item('frequency_type'))) {
             // where frequency_type
-            $json .= ',{"match":{"frequency_type":{"query":' . $params['frequency_type'] . ',"type":"phrase"}}}';
+            $json .= ',{"match":{"frequency_type":{"query":' . (int)$params['frequency_type'] . ',"type":"phrase"}}}';
         }
 
         $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":["hour","type","frequency_type"],"aggregations":{"hour":{"terms":{"field":"hour","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
@@ -141,7 +141,7 @@ class AlarmanalysisService extends BaseService
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
         // where city_id
-        $json .= '{"match":{"city_id":{"query":' . $params['city_id'] . ',"type":"phrase"}}}';
+        $json .= '{"match":{"city_id":{"query":' . (int)$params['city_id'] . ',"type":"phrase"}}}';
 
         // where date >= start_time
         $json .= ',{"range":{"date":{"from":"' . trim($params['start_time']) . '","to":null,"include_lower":true,"include_upper":true}}}';
@@ -159,7 +159,7 @@ class AlarmanalysisService extends BaseService
         if ($params['frequency_type'] != 0
             && array_key_exists($params['frequency_type'], $this->config->item('frequency_type'))) {
             // where frequency_type
-            $json .= ',{"match":{"frequency_type":{"query":'. $params['frequency_type'] .',"type":"phrase"}}}';
+            $json .= ',{"match":{"frequency_type":{"query":'. (int)$params['frequency_type'] .',"type":"phrase"}}}';
         }
 
         $json .= ']}}}},"_source":{"includes":["COUNT","date"],"excludes":[]},"fields":"date","aggregations":{"date":{"terms":{"field":"date","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
@@ -235,7 +235,7 @@ class AlarmanalysisService extends BaseService
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
         // where city_id
-        $json .= '{"match":{"city_id":{"query":' . $params['city_id'] . ',"type":"phrase"}}}';
+        $json .= '{"match":{"city_id":{"query":' . (int)$params['city_id'] . ',"type":"phrase"}}}';
 
         if ($params['start_time'] == $params['end_time']) { // 当天
             // where date
@@ -255,7 +255,7 @@ class AlarmanalysisService extends BaseService
         if ($params['frequency_type'] != 0
             && array_key_exists($params['frequency_type'], $this->config->item('frequency_type'))) {
             // where frequency_type
-            $json .= ',{"match":{"frequency_type":{"query":'. $params['frequency_type'] .',"type":"phrase"}}}';
+            $json .= ',{"match":{"frequency_type":{"query":'. (int)$params['frequency_type'] .',"type":"phrase"}}}';
         }
 
         $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":"hour","sort":[{"hour":{"order":"asc"}}],"aggregations":{"hour":{"terms":{"field":"hour","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}';
@@ -341,7 +341,7 @@ class AlarmanalysisService extends BaseService
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
         // where city_id
-        $json .= '{"match":{"city_id":{"query":' . $params['city_id'] . ',"type":"phrase"}}}';
+        $json .= '{"match":{"city_id":{"query":' . (int)$params['city_id'] . ',"type":"phrase"}}}';
 
         // 前七日开始时间
         $startTime = date('Y-m-d', strtotime('-7 days'));
@@ -354,14 +354,14 @@ class AlarmanalysisService extends BaseService
 
         // 按路口查询
         if (!empty($params['logic_junction_id'])) {
-            $json .= ',{"match":{"logic_junction_id":{"query":"' . $params['logic_junction_id'] . '","type":"phrase"}}}';
+            $json .= ',{"match":{"logic_junction_id":{"query":"' . trim($params['logic_junction_id']) . '","type":"phrase"}}}';
         }
 
         // 当选择了报警频率时
         if ($params['frequency_type'] != 0
             && array_key_exists($params['frequency_type'], $this->config->item('frequency_type'))) {
             // where frequency_type
-            $json .= ',{"match":{"frequency_type":{"query":'. $params['frequency_type'] .',"type":"phrase"}}}';
+            $json .= ',{"match":{"frequency_type":{"query":'. (int)$params['frequency_type'] .',"type":"phrase"}}}';
         }
 
         $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":"hour","sort":[{"hour":{"order":"asc"}}],"aggregations":{"hour":{"terms":{"field":"hour","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}';
