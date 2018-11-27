@@ -49,19 +49,4 @@ class Common_model extends CI_Model
 
         return $this->db->get()->result_array();
     }
-
-    /**
-     * 获取开城城市列表
-     * @return mixed
-     */
-    public function getOpenCityList()
-    {
-        $this->its_db = $this->load->database('db_its', true);
-
-        $select = 'city_id, city_name';
-        $this->its_db->select($select);
-        $this->its_db->from('estimate_city');
-
-        return $this->its_db->get()->result_array();
-    }
 }
