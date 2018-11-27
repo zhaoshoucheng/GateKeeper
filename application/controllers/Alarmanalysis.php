@@ -94,10 +94,24 @@ class Alarmanalysis extends MY_Controller
      * 7日报警均值
      * @param $params['city_id']           int    Y 城市ID
      * @param $params['logic_junction_id'] string N 逻辑路口ID 当：不为空时，按路口查询;为空时，按城市查询
-     * @param $params['alarm_type']        int    Y 报警类型 1: 过饱和 2: 溢流 3:失衡
+     * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
+     * @return json
      */
     public function sevenDayAlarmMeanValue()
     {
         $params = $this->input->post(null, true);
+        // 校验参数
+        $this->validate([
+            'frequency_type' => 'required|in_list[' . implode(',', array_keys($this->config->item('frequency_type'))) . ']',
+            'city_id'        => 'required|is_natural_no_zero',
+        ]);
+
+        $params['logic_junction_id'] = !empty($params['logic_junction_id'])
+                                        ? strip_tags(trim($params['logic_junction_id']))
+                                        : '';
+
+        $result = $this->alarmanalysisService->sevenDayAlarmMeanValue($params);
+
+        $this->response($result);
     }
 }
