@@ -60,12 +60,12 @@ class Traj_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function post($url, $data, $timeout = 20000, $header = [])
+    public function post($url, $data, $timeout = 20000, $contentType='x-www-form-urlencoded', $header = [])
     {
         $data['token'] = $this->token;
         $data['user_id'] = $this->userid;
 
-        $res = httpPOST($url, $data, $timeout, $contentType='x-www-form-urlencoded', $header);
+        $res = httpPOST($url, $data, $timeout, $contentType, $header);
 
         if (!$res) {
             throw new \Exception('轨迹数据获取失败', ERR_REQUEST_WAYMAP_API);
