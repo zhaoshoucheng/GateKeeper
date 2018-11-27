@@ -48,9 +48,8 @@ class Arterialspacetimediagram extends MY_Controller
         $params = $this->input->post(NULL, TRUE);
         $result = $this->traj_model->getSpaceTimeDiagram($params);
         $result['token'] = $params['token'];
-        var_dump($result);
         return $this->response($result);
-
+        
         // 校验参数
         $validate = Validate::make($params,
             [
