@@ -12,7 +12,8 @@ class Arterialspacetimediagram extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('arterialspacetimediagram_model');
+//        $this->load->model('arterialspacetimediagram_model');
+        $this->load->model('traj_model');
     }
 
     /**
@@ -45,6 +46,10 @@ class Arterialspacetimediagram extends MY_Controller
     public function getSpaceTimeDiagram()
     {
         $params = $this->input->post(NULL, TRUE);
+        $result = $this->traj_model->getSpaceTimeDiagram($params);
+        $result['token'] = $params['token'];
+        var_dump($result);
+        return $this->response($result);
 
         // 校验参数
         $validate = Validate::make($params,

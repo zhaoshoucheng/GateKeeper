@@ -61,6 +61,11 @@ if ($development == 2) {
     $xmmtrace_port   = '8001';
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
+    //traj  config
+    $traj_server = '100.69.238.158';
+    $traj_port   = '8001';
+    $traj_ext   = '/traj-service';
+
     // 报警es接口
     $alarm_es_interface = [
         '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
@@ -109,6 +114,11 @@ if ($development == 2) {
     $xmmtrace_port   = '8001';
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
+    //traj  config
+    $traj_server = '100.69.238.158';
+    $traj_port   = '8001';
+    $traj_ext   = '/traj-service';
+
     // 报警es
     $alarm_es_interface = [
         '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
@@ -128,6 +138,11 @@ $config['waymap_interface'] = 'http://' . $waymap_server . $temp_waymap_port . $
 // 路网接口token
 $config['waymap_token']  = '4c3e3b6a3588161128d0604daab528db';
 $config['waymap_userid'] = 'signalPro';
+
+// 路网接口地址
+$config['traj_interface'] = 'http://' . $traj_server . $traj_port . $traj_ext;
+$config['traj_token']  = '4c3e3b6a3588161128d0604daab528dbxxxx';
+$config['traj_userid'] = 'signalPro';
 
 // 配时接口地址
 $config['timing_interface'] = 'http://' . $timing_server . $temp_timing_port . $timing_ext;
