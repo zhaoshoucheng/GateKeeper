@@ -125,12 +125,16 @@ class CommonService extends BaseService
      */
     public function getOpenCityList()
     {
-        $res = $this->common_model->getOpenCityList();
-        if (!$res || empty($res)) {
+        $table = 'open_city';
+        $select = 'city_id, city_name';
+
+        $res = $this->common_model->search($table, $select);
+        if (!$res) {
             return [];
         }
 
-        foreach ($res as $k => $v) {
+        $result = [];
+        foreach ($res as $k=>$v) {
             $result[$k] = [
                 'areaId'   => $v['city_id'],
                 'areaName' => $v['city_name'],
