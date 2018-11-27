@@ -66,7 +66,7 @@ class Traj_model extends CI_Model
         $data['user_id'] = $this->userid;
 
         $res = httpPOST($url, $data, $timeout, $contentType, $header);
-
+        
         if (!$res) {
             throw new \Exception('轨迹数据获取失败', ERR_REQUEST_WAYMAP_API);
         }

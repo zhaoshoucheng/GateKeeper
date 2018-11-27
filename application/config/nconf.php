@@ -62,8 +62,7 @@ if ($development == 2) {
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
     //traj  config
-    $traj_server = '100.90.164.31';
-    $traj_port   = '8032';
+    $traj_server = '100.90.164.31:8032';
     $traj_ext   = '/traj-service';
 
     // 报警es接口
@@ -115,10 +114,9 @@ if ($development == 2) {
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
     //traj  config
-    $traj_server = '100.90.164.31';
-    $traj_port   = '8032';
+    $traj_server = '100.90.164.31:8032';
     $traj_ext   = '/traj-service';
-    
+
     // 报警es
     $alarm_es_interface = [
         '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
@@ -140,7 +138,7 @@ $config['waymap_token']  = '4c3e3b6a3588161128d0604daab528db';
 $config['waymap_userid'] = 'signalPro';
 
 // 路网接口地址
-$config['traj_interface'] = 'http://' . $traj_server . $traj_port . $traj_ext;
+$config['traj_interface'] = 'http://' . $traj_server . $traj_ext;
 $config['traj_token']  = '4c3e3b6a3588161128d0604daab528dbxxxx';
 $config['traj_userid'] = 'signalPro';
 
