@@ -62,8 +62,8 @@ if ($development == 2) {
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
     //traj  config
-    $traj_server = '100.69.238.158';
-    $traj_port   = '8001';
+    $traj_server = '100.90.164.31';
+    $traj_port   = '8032';
     $traj_ext   = '/traj-service';
 
     // 报警es接口
@@ -115,10 +115,10 @@ if ($development == 2) {
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
     //traj  config
-    $traj_server = '100.69.238.158';
-    $traj_port   = '8001';
+    $traj_server = '100.90.164.31';
+    $traj_port   = '8032';
     $traj_ext   = '/traj-service';
-
+    
     // 报警es
     $alarm_es_interface = [
         '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
