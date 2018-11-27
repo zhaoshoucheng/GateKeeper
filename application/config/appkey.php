@@ -83,4 +83,15 @@ $config['authirized_apps'] = array(
         'white_ips' => array(
         )
     ),
+    'junctionsuggest' => array(
+        'name'  => 'token',
+        'method'  => 'any',
+        'timeout'  => 100,
+        'secret'=> '3a01e6c56bcce94ee5de073df3d512d6',
+        'open_api'   => array(
+            'Demo/mapJunctionSuggest',
+        ),
+        'white_ips' => array(
+        )
+    ),
 );
