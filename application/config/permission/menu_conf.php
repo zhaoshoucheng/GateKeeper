@@ -111,9 +111,9 @@ $config['menu'] = [
             6 =>
                 [
                     'name'   => '管理',
-                    'url'    => '/manage/',
+                    'url'    => '/manage/configuration',
                     'remark' => 'signal',
-                    'son'    => [
+                    /*'son'    => [
                         0 =>
                             [
                                 'name' => '路口管理',
@@ -129,7 +129,7 @@ $config['menu'] = [
                                 'name' => '参数管理',
                                 'url'  => 'argument',
                             ],
-                    ],
+                    ],*/
                 ],
         ],
         // 北京区域受限菜单
