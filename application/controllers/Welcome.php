@@ -54,8 +54,6 @@ class Welcome extends CI_Controller
             'body' => $json
         ];
         if(!empty($scroll_id)){
-            echo $scroll_id;
-            echo "\n";
             $response = $client->scroll([
                     "scroll_id" => $scroll_id,
                     "scroll" => "2m",
