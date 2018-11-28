@@ -42,6 +42,7 @@ class Welcome extends CI_Controller
 
     public function estest()
     {
+        $scroll_id = $_GET['scroll_id'] ? $_GET['scroll_id'] : "";
         $hosts = [
             '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',         // IP + Port
         ];
@@ -52,7 +53,15 @@ class Welcome extends CI_Controller
             'index' => 'its_alarm_movement_month*',
             'body' => $json
         ];
-        $response = $client->search($params);
+        if(!empty($scroll_id)){
+            $response = $client->scroll([
+                    "scroll_id" => $scroll_id,
+                    "scroll" => "30s",
+                ]
+            );
+        }else{
+            $response = $client->search($params);
+        }
         var_export($response);
         $count=0;
 //        while (isset($response['hits']['hits']) && count($response['hits']['hits']) > 0) {
