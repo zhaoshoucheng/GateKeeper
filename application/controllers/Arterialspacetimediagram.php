@@ -46,7 +46,7 @@ class Arterialspacetimediagram extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
         $result = $this->traj_model->getSpaceTimeDiagram($params);
-        $result['token'] = $params['token'];
+        $result['token'] = isset($params['token']) ?  $params['token'] : "";
         return $this->response($result);
     }
 
@@ -54,8 +54,7 @@ class Arterialspacetimediagram extends MY_Controller
     {
         $params = file_get_contents("php://input");
         $result = $this->traj_model->getClockShiftCorrect($params);
-        $result['token'] = $params['token'];
+        $result['token'] = isset($params['token']) ?  $params['token'] : "";
         return $this->response($result);
     }
-
 }
