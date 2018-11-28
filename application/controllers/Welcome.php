@@ -56,7 +56,7 @@ class Welcome extends CI_Controller
         if(!empty($scroll_id)){
             $response = $client->scroll([
                     "scroll_id" => $scroll_id,
-                    "scroll" => "30s",
+                    "scroll" => "2m",
                 ]
             );
         }else{
