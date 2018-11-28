@@ -127,7 +127,7 @@ class Arterialjunction_model extends CI_Model
             }
         }
 
-        $adjJunctions = $this->waymap_model->getConnectionAdjJunctions($data['q']['city_id'], $data['q']['selected_junctionid'], $data['q']['selected_path']);
+        $adjJunctions = $this->waymap_model->getConnectionAdjJunctions($data['q']['map_version'], $data['q']['city_id'], $data['q']['selected_junctionid'], $data['q']['selected_path']);
 
         //获取一个方向的links
         $getDirectionLinks = function ($direction, $qData) {
