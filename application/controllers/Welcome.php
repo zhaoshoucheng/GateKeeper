@@ -53,23 +53,29 @@ class Welcome extends CI_Controller
             'body' => $json
         ];
         $response = $client->search($params);
-        while (isset($response['hits']['hits']) && count($response['hits']['hits']) > 0) {
-            // **
-            // Do your work here, on the $response['hits']['hits'] array
-            // **
-
-            // When done, get the new scroll_id
-            // You must always refresh your _scroll_id!  It can change sometimes
-            $scroll_id = $response['_scroll_id'];
-            // Execute a Scroll request and repeat
-            $response = $client->scroll([
-                    "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
-                    "scroll" => "30s"           // and the same timeout window
-                ]
-            );
-            print_r("loop");
-        }
-        print_r("loop_over");
+        var_export($response);
+        $count=0;
+//        while (isset($response['hits']['hits']) && count($response['hits']['hits']) > 0) {
+//            if($count>5){
+//
+//            }
+//            // **
+//            // Do your work here, on the $response['hits']['hits'] array
+//            // **
+//
+//            // When done, get the new scroll_id
+//            // You must always refresh your _scroll_id!  It can change sometimes
+//            $scroll_id = $response['_scroll_id'];
+//            // Execute a Scroll request and repeat
+//            $response = $client->scroll([
+//                    "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
+//                    "scroll" => "30s"           // and the same timeout window
+//                ]
+//            );
+//            print_r("loop");
+//            $count++;
+//        }
+//        print_r("loop_over");
         exit;
     }
     
