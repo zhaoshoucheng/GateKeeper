@@ -364,7 +364,7 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function getConnectionAdjJunctions($map_version, $city_id, $city_id, $selected_junctionid, $selected_path)
+    public function getConnectionAdjJunctions($map_version, $city_id, $selected_junctionid, $selected_path)
     {
 //        $map_version = self::$lastMapVersion;
         $data = compact('city_id', 'selected_junctionid', 'selected_path', 'map_version');
