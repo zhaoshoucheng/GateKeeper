@@ -42,7 +42,7 @@ class Welcome extends CI_Controller
 
     public function estest()
     {
-        $scroll_id = $_GET['scroll_id'] ? $_GET['scroll_id'] : "";
+        $scroll_id = isset($_GET['scroll_id']) ? $_GET['scroll_id'] : "";
         $hosts = [
             '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',         // IP + Port
         ];
