@@ -74,13 +74,23 @@ $config['junction_status_formula'] = function ($val) {
 // 报警类别
 $config['alarm_category'] = [
     1 => [
-        'name' => '溢流', // 类别名称
+        'name' => '过饱和', // 类别名称
         'key' => 1,       // 类别KEY
         'desc' => '',      // 描述
     ],
     2 => [
-        'name' => '过饱和',
+        'name' => '溢流',
         'key' => 2,
+        'desc' => '',
+    ],
+    3 => [
+        'name' => '空放',
+        'key' => 3,
+        'desc' => '',
+    ],
+    4 => [
+        'name' => '轻度过饱和',
+        'key' => 4,
         'desc' => '',
     ],
 ];

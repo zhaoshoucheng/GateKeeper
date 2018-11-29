@@ -474,7 +474,7 @@ class OverviewService extends BaseService
             $lastTime  = date('Y-m-d') . ' ' . $hour;
 
             // 组织ES接口所需DSL
-            $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
+            $json = '{"from":0,"size":200,"query":{"bool":{"must":{"bool":{"must":[';
 
             // where city_id
             $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
