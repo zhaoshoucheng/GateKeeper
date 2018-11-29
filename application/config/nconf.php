@@ -71,6 +71,8 @@ if ($development == 2) {
         'flow'     => 'online_its_alarm_movement_month*',
     ];
 
+    //报警数据历史处理
+    $realtime_callback = 'http://100.90.164.31:8033';
 } else {
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
@@ -121,6 +123,9 @@ if ($development == 2) {
         'junction' => 'its_alarm_junction_month*',
         'flow'     => 'its_alarm_movement_month*',
     ];
+
+    //报警数据历史处理
+    $realtime_callback = 'http://100.90.164.31:8033';
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -152,6 +157,9 @@ $config['xmmtrace_interface'] = 'http://' . $xmmtrace_server . ":" . $xmmtrace_p
 
 // 新版轨迹地址
 $config['warning_interface'] = 'http://monitor.odin.xiaojukeji.com';
+
+// 实时报警数据回调接口
+$config['realtime_callback'] = $realtime_callback;
 
 // 报警es接口地址
 $config['alarm_es_interface'] = $alarm_es_interface;

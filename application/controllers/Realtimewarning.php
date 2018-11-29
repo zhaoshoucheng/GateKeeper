@@ -8,6 +8,7 @@ class Realtimewarning extends Inroute_Controller
         date_default_timezone_set('Asia/Shanghai');
         parent::__construct();
         $this->load->model('realtimewarning_model');
+        $this->load->config('nconf');
     }
 
     public function callback()
@@ -38,6 +39,17 @@ class Realtimewarning extends Inroute_Controller
         $cityId  = $params["city_id"];
         $traceId = $params["trace_id"];
         $uid     = $params["uid"];
+
+
+        //回调历史报警接口
+        $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params);
+        if (!$res) {
+            com_log_warning('realtime_callback_task_handler_error', 0, $res, compact("params"));
+        }
+        $res = json_decode($res, true);
+        if($res['errno'] != 0){
+            com_log_warning('realtime_callback_task_handler_error', $res['errno'], $res, compact("params"));
+        }
 
         exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
