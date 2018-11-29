@@ -28,7 +28,29 @@ class Alarmanalysis_model extends CI_Model
         $index = $this->config->item('alarm_es_index');
 
         $params = [
-            'index' => $index,
+            'index' => $index['junction'],
+            'body'  => $body
+        ];
+
+        $response = $client->search($params);
+
+        return $response;
+    }
+
+    /**
+     * 报警相位表ES查询接口
+     * @param $body json 查询DSL
+     * @return array
+     */
+    public function searchFlowTable($body)
+    {
+        $hosts = $this->config->item('alarm_es_interface');
+        $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
+
+        $index = $this->config->item('alarm_es_index');
+
+        $params = [
+            'index' => $index['flow'],
             'body'  => $body
         ];
 

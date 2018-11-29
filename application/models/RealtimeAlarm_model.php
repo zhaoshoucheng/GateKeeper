@@ -78,10 +78,10 @@ class RealtimeAlarm_model extends CI_Model
     /**
      * 获取实时报警信息详情
      *
-     * @param $cityId
-     * @param $date
-     * @param $lastTime
-     * @param $cycleTime
+     * @param $cityId     int    城市ID
+     * @param $date       string 日期 yyyy-mm-dd
+     * @param $lastTime   string 时间 yyyy-mm-dd HH:ii:ss
+     * @param $cycleTime  string 报警周期 yyyy-mm-dd HH:ii:ss
      *
      * @return array
      */

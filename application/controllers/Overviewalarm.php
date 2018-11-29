@@ -72,7 +72,10 @@ class Overviewalarm extends MY_Controller
 
     /**
      * 获取实时报警列表
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 当前时间点 格式：H:i:s 例：09:10:00
+     * @return json
      * @throws Exception
      */
     public function realTimeAlarmList()

@@ -352,6 +352,7 @@ class Redis_model extends CI_Model
     }
 
     /**
+     * 获取实时报警数据
      * @param $cityId
      *
      * @return bool|mixed

@@ -29,6 +29,7 @@ class Realtimewarning_model extends CI_Model
 
         $this->config->load('realtime_conf');
         $this->load->model('waymap_model');
+        $this->load->model('alarmanalysis_model');
     }
 
     public function process($cityId, $date, $hour, $traceId)
@@ -298,17 +299,37 @@ class Realtimewarning_model extends CI_Model
         // 获取最近时间
         $lastTime = date('Y-m-d') . ' ' . $hour;
 
-        $sql = '/*{"router":"m"}*';
-        $sql .= '/select type, logic_junction_id, logic_flow_id, start_time, last_time';
-        $sql .= ' from real_time_alarm';
-        $sql .= ' where city_id = ? and date = ? and last_time >= ?';
-        $sql .= ' order by type asc, (last_time - start_time) desc';
+        // 组织ES接口所需DSL
+        $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
-        $arr = [$data['city_id'], $data['date'], $lastTime];
+        // where city_id
+        $json .= '{"match":{"city_id":{"query":' . $data['city_id'] . ',"type":"phrase"}}}';
 
-        $realTimeAlarmsInfo = $this->db->query($sql, $arr)->result_array();
+        // where date
+        $json .= ',{"match":{"date":{"query":"' . $data['date'] . '","type":"phrase"}}}';
 
-        return $realTimeAlarmsInfo;
+        // where last_time
+        $json .= ',{"match":{"last_time":{"query":"' . $lastTime . '","type":"phrase"}}}';
+
+        $json .= ']}}}},"_source":{"includes":["type","logic_junction_id","count","logic_flow_id","start_time","last_time"],"excludes":[]},"sort":[{"type":{"order":"asc"}},{"count":{"order":"desc"}}]}';
+
+        $esRes = $this->alarmanalysis_model->searchFlowTable($json);
+
+        if (empty($esRes) || empty($esRes['hits']['hits'])) {
+            return [];
+        }
+
+        foreach ($esRes['hits']['hits'] as $k=>$v) {
+            $res[$k] = [
+                'logic_junction_id' => $v['_source']['logic_junction_id'],
+                'logic_flow_id'     => $v['_source']['logic_flow_id'],
+                'start_time'        => $v['_source']['start_time'],
+                'last_time'         => $v['_source']['last_time'],
+                'type'              => $v['_source']['type'],
+            ];
+        }
+
+        return $res;
     }
 
     /**
@@ -328,7 +349,7 @@ class Realtimewarning_model extends CI_Model
         //获取路口信息的自定义返回格式
         $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0);
         $junctionsInfo = array_column($junctionsInfo, null, 'logic_junction_id');
-        
+
         //获取需要报警的全部路口ID
         $ids = implode(',', array_column($realTimeAlarmsInfo, 'logic_junction_id'));
 

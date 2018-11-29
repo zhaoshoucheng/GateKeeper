@@ -14,6 +14,9 @@ class Realtime_model extends CI_Model
     protected $db;
     private $tb = 'real_time_';
 
+    // es interface addr
+    private $esUrl = '';
+
     /**
      * Area_model constructor.
      * @throws \Exception
@@ -23,6 +26,52 @@ class Realtime_model extends CI_Model
         parent::__construct();
 
         $this->db = $this->load->database('default', true);
+
+        // load config
+        $this->load->config('nconf');
+        $this->esUrl = $this->config->item('es_interface');
+    }
+
+    /**
+     * ES诊断明细查询方法
+     * @param $data array es查询条件数组
+     * @return array
+     */
+    public function searchDetail($data)
+    {
+        $result = httpPOST($this->esUrl . '/estimate/diagnosis/queryIndices', $data, 0, 'json');
+
+        if (!$result) {
+            throw new \Exception('调用es接口 queryIndices 失败！', ERR_DEFAULT);
+        }
+        $result = json_decode($result, true);
+
+        if ($result['code'] != '000000') {
+            throw new \Exception($result['message'], ERR_DEFAULT);
+        }
+
+        return $result;
+    }
+
+    /**
+     * ES诊断指标查询方法 avg sum 等
+     * @param $data array es查询条件数组
+     * @return array
+     */
+    public function searchQuota($data)
+    {
+        $result = httpPOST($this->esUrl . '/estimate/diagnosis/queryQuota', $data, 0, 'json');
+
+        if (!$result) {
+            throw new \Exception('调用es接口 queryIndices 失败！', ERR_DEFAULT);
+        }
+        $result = json_decode($result, true);
+
+        if ($result['code'] != '000000') {
+            throw new \Exception($result['message'], ERR_DEFAULT);
+        }
+
+        return $result;
     }
 
     /**
@@ -35,16 +84,32 @@ class Realtime_model extends CI_Model
      */
     public function getLastestHour($cityId)
     {
-        $this->isExisted($cityId);
+        $data = [
+            'source'        => 'signal_control', // 调用方
+            'cityId'        => $cityId,          // 城市ID
+            'requestId'     => get_traceid(),    // trace id
+            'timestamp'     => strtotime(date('Y-m-d')) * 1000, // 当天0点(yyyy-mm-dd 00:00:00)毫秒时间戳
+            'andOperations' => [
+                'cityId'    => 'eq', // cityId相等
+                'timestamp' => 'gte' // 大于等于当天开始时间
+            ],
+            'quotaRequest'  => [
+                "groupField" => 'dayTime',
+                "limit"      => 1,
+                "orderField" => "max_timestamp",
+                "asc"        => false,
+                "quotas"     => "max_timestamp",
+            ],
+        ];
 
-        $res = $this->db->select('hour')
-            ->from($this->tb . $cityId)
-            ->order_by('updated_at', 'DESC')
-            ->order_by('hour', 'DESC')
-            ->limit(1)
-            ->get();
+        $res = $this->searchQuota($data);
 
-        return $res instanceof CI_DB_result ? $res->row_array() : $res;
+        if (empty($res['result']['quotaResults']['quotaMap'])) {
+            throw new \Exception('获取实时数据最新批次hour失败！', ERR_DEFAULT);
+        }
+
+        $lastHour = date('H:i:s', strtotime($res['result']['quotaResults']['quotaMap']['dayTime']));
+        return $lastHour;
     }
 
     /**

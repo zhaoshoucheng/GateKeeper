@@ -33,6 +33,7 @@ class OverviewService extends BaseService
         $this->load->model('waymap_model');
         $this->load->model('realtime_model');
         $this->load->model('realtimeAlarm_model');
+        $this->load->model('alarmanalysis_model');
 
         $this->config->load('realtime_conf');
     }
@@ -142,9 +143,9 @@ class OverviewService extends BaseService
 
     /**
      * 拥堵概览
-     *
-     * @param $params
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 当前时间点 格式：H:i:s 例：09:10:00
      * @return array
      * @throws \Exception
      */
@@ -452,8 +453,10 @@ class OverviewService extends BaseService
     }
 
     /**
-     * @param $params
-     *
+     * 获取实时报警信息
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 当前时间点 格式：H:i:s 例：09:10:00
      * @return array
      * @throws \Exception
      */
@@ -469,12 +472,35 @@ class OverviewService extends BaseService
         if (!$res || empty($res)) {
 
             $lastTime  = date('Y-m-d') . ' ' . $hour;
-            $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 300);
 
-            $res = $this->realtimeAlarm_model->getRealtimeAlarmList($cityId, $date, $lastTime, $cycleTime);
+            // 组织ES接口所需DSL
+            $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
-            if (empty($res)) {
+            // where city_id
+            $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
+
+            // where date
+            $json .= ',{"match":{"date":{"query":"' . $date . '","type":"phrase"}}}';
+
+            // where last_time
+            $json .= ',{"match":{"last_time":{"query":"' . $lastTime . '","type":"phrase"}}}';
+
+            $json .= ']}}}},"_source":{"includes":["type","logic_junction_id","count","logic_flow_id","start_time","last_time"],"excludes":[]},"sort":[{"type":{"order":"asc"}},{"count":{"order":"desc"}}]}';
+
+            $esRes = $this->alarmanalysis_model->searchFlowTable($json);
+
+            if (empty($esRes) || empty($esRes['hits']['hits'])) {
                 return [];
+            }
+
+            foreach ($esRes['hits']['hits'] as $k=>$v) {
+                $res[$k] = [
+                    'logic_junction_id' => $v['_source']['logic_junction_id'],
+                    'logic_flow_id'     => $v['_source']['logic_flow_id'],
+                    'start_time'        => $v['_source']['start_time'],
+                    'last_time'         => $v['_source']['last_time'],
+                    'type'              => $v['_source']['type'],
+                ];
             }
         }
         $result = [];
@@ -495,16 +521,8 @@ class OverviewService extends BaseService
         foreach ($res as $k => $val) {
             // 持续时间
             $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
-            if ($durationTime == 0) {
-                // 当前时间
-                $nowTime          = time();
-                $tempDurationTime = ($nowTime - strtotime($val['start_time'])) / 60;
-                // 默认持续时间为2分钟 有的只出现一次，表里记录last_time与start_time相等
-                if ($tempDurationTime < 2) {
-                    $durationTime = $tempDurationTime;
-                } else {
-                    $durationTime = 2;
-                }
+            if ($durationTime < 1) {
+                $durationTime = 2;
             }
 
             if (!empty($junctionIdName[$val['logic_junction_id']])

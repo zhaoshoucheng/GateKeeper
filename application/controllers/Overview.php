@@ -92,7 +92,10 @@ class Overview extends MY_Controller
 
     /**
      * 拥堵概览
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 当前时间点 格式：H:i:s 例：09:10:00
+     * @return json
      * @throws Exception
      */
     public function getCongestionInfo()
@@ -100,8 +103,8 @@ class Overview extends MY_Controller
         $params = $this->input->post(null, true);
 
         $this->validate([
-            'city_id' => 'required|is_natural_no_zero',
-            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'city_id'    => 'required|is_natural_no_zero',
+            'date'       => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'time_point' => 'exact_length[8]|regex_match[/\d{2}:\d{2}:\d{2}/]',
         ]);
 

@@ -47,8 +47,8 @@ if ($development == 2) {
     $signal_mis_ext    = '/its/signal-mis';
 
     // es
-    $es_server = '100.69.238.158';
-    $es_port   = '8001';
+    $es_server = '10.89.236.25';
+    $es_port   = '8087';
     $es_ext    = '';
 
     // new timing
@@ -66,7 +66,10 @@ if ($development == 2) {
         '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
     ];
     // 报警ES索引
-    $alarm_es_index = 'online_its_alarm_movement_month*';
+    $alarm_es_index = [
+        'junction' => 'online_its_alarm_junction_month*',
+        'flow'     => 'online_its_alarm_movement_month*',
+    ];
 
 } else {
     // 路网接口服务器地址
@@ -114,7 +117,10 @@ if ($development == 2) {
         '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
     ];
     // 报警ES索引
-    $alarm_es_index = 'its_alarm_junction_month*';
+    $alarm_es_index = [
+        'junction' => 'its_alarm_junction_month*',
+        'flow'     => 'its_alarm_movement_month*',
+    ];
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
