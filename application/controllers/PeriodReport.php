@@ -174,5 +174,9 @@ class PeriodReport extends MY_Controller
         $this->response($data);
     }
 
+    public static function quotasort($a,$b){
+        return $b[1]-$a[1];
+    }
+
 
 }

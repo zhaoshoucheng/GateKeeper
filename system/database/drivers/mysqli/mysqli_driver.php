@@ -231,7 +231,13 @@ class CI_DB_mysqli_driver extends CI_DB {
 	 */
 	public function reconnect()
 	{
-		if ($this->conn_id !== FALSE && $this->conn_id->ping() === FALSE)
+	    //捕获ping异常
+        try{
+            $pingFlag = $this->conn_id->ping();
+        }catch (\Exception $e){
+            $pingFlag = false;
+        }
+		if ($this->conn_id !== FALSE && $pingFlag === FALSE)
 		{
             //如果reconnect都执行在trans_begin之前这样操作是ok的
 			$this->conn_id = FALSE;

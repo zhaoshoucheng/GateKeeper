@@ -491,7 +491,7 @@ class PeriodReportService extends BaseService
         $junctionInfos = array_column($junctionInfos, 'name', 'logic_junction_id');
 
 
-        $summary = "其中" . $junctionInfos[$finalData['junction_list'][0]['logic_junction_id']]['name'];
+        $summary = "其中" . $junctionInfos[$finalData['junction_list'][0]['logic_junction_id']];
         if ($type == self::WEEK) {
             $period = "周";
         } else {
@@ -521,7 +521,7 @@ class PeriodReportService extends BaseService
         $summary .= "在" . $dayWorstQuota[0]['date'] . $quotaInfo[$quotaKey]['name'] . "最大,达到" . round($dayWorstQuota[0][$quotaKey], 2) . "。";
 
         if ($maxMoMJunction['d'] > 0) {
-            $summary .= "环比上" . $period . $junctionInfos[$maxMoMJunction['logic_junction_id']]['name'] . "恶化情况最严重,由上个" . $period . $maxMoMJunction['last_rank'] . "名,变化至本" . $period . $maxMoMJunction['rank'] . "名,";
+            $summary .= "环比上" . $period . $junctionInfos[$maxMoMJunction['logic_junction_id']] . "恶化情况最严重,由上个" . $period . $maxMoMJunction['last_rank'] . "名,变化至本" . $period . $maxMoMJunction['rank'] . "名,";
             $summary .= "下个" . $period . "需要重点关注延误变大原因";
         }
 
@@ -544,7 +544,7 @@ class PeriodReportService extends BaseService
 
         //补齐路口名称
         foreach ($finalData['junction_list'] as $fjk => $fjv) {
-            $finalData['junction_list'][$fjk]['junction_name'] = $junctionInfos[$fjv['logic_junction_id']]['name'];
+            $finalData['junction_list'][$fjk]['junction_name'] = $junctionInfos[$fjv['logic_junction_id']];
         }
 
         return $finalData;

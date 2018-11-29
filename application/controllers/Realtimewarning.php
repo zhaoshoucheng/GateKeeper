@@ -94,10 +94,6 @@ class Realtimewarning extends Inroute_Controller
             echo "date 必须为日期! \n";
             exit;
         }
-        if (!in_array($uid, ["traj_index"])) {
-            echo "uid 不在白名单中! \n";
-            exit;
-        }
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=processing\n\r";
         $this->realtimewarning_model->process($cityId, $date, $hour, $traceId);
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=processed\n\r";

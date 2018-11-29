@@ -356,6 +356,7 @@ class Waymap_model extends CI_Model
      * 获取某一个路口与相邻路口的links
      * http://wiki.intra.xiaojukeji.com/pages/viewpage.action?pageId=146798263
      *
+     * @param     $map_version
      * @param int $city_id
      * @param     $selected_junctionid
      * @param     $selected_path
@@ -363,10 +364,9 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function getConnectionAdjJunctions($city_id, $selected_junctionid, $selected_path)
+    public function getConnectionAdjJunctions($map_version, $city_id, $selected_junctionid, $selected_path)
     {
-        $map_version = self::$lastMapVersion;
-
+//        $map_version = self::$lastMapVersion;
         $data = compact('city_id', 'selected_junctionid', 'selected_path', 'map_version');
 
         $url = $this->waymap_interface . '/signal-map/connect/adj_junctions';
@@ -519,7 +519,13 @@ class Waymap_model extends CI_Model
     {
         $map_version = $map_version ?? self::$lastMapVersion;
 
-        $data = compact('city_id', 'logic_junction_id', 'map_version');
+        if(empty($map_version)){
+            $map_version = self::$lastMapVersion;
+        }
+        
+        $logic_junction_ids = $logic_junction_id;
+
+        $data = compact('city_id', 'logic_junction_ids', 'map_version');
 
         $url = $this->waymap_interface . '/signal-map/mapJunction/detail';
 

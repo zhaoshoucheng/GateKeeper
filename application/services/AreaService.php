@@ -194,13 +194,11 @@ class AreaService extends BaseService
         $centerLng = $junctionInfoCollection->avg('lng', $round);
 
         return [
-            'list' => [
-                'center_lat' => $centerLat,
-                'center_lng' => $centerLng,
-                'area_id' => $areaId,
-                'area_name' => $areaInfo['area_name'] ?? '',
-                'junction_list' => $junctionInfoList,
-            ],
+            'center_lat' => $centerLat,
+            'center_lng' => $centerLng,
+            'area_id' => $areaId,
+            'area_name' => $areaInfo['area_name'] ?? '',
+            'junction_list' => $junctionInfoList,
         ];
     }
 
