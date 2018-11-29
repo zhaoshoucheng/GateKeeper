@@ -429,7 +429,7 @@ class Realtimewarning_model extends CI_Model
      */
     private function getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo)
     {
-        $alarmCategory = $this->config->item('alarm_category');
+        $alarmCategory = $this->config->item('flow_alarm_category');
 
         $result = [];
 

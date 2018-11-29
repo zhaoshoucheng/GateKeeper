@@ -516,7 +516,7 @@ class OverviewService extends BaseService
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
 
         // 报警类别
-        $alarmCate = $this->config->item('alarm_category');
+        $alarmCate = $this->config->item('flow_alarm_category');
 
         foreach ($res as $k => $val) {
             // 持续时间
