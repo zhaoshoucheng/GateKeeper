@@ -79,7 +79,7 @@ class Arterialgreenwave extends MY_Controller
      */
     public function getGreenWaveOptPlan()
     {
-        $params = file_get_contents("php://input");
+        $params = $this->input->post(NULL, TRUE);
         $result = $this->traj_model->getGreenWaveOptPlan($params);
         return $this->response($result);
     }

@@ -140,7 +140,6 @@ if ( ! function_exists('load_class'))
 	 */
 	function &load_class($class, $directory = 'libraries', $param = NULL)
 	{
-	    var_dump($class);
 		static $_classes = array();
 
 		// Does the class exist? If so, we're done...
