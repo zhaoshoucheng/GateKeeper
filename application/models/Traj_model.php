@@ -72,7 +72,7 @@ class Traj_model extends CI_Model
     public function queryGreenWaveOptPlan($data)
     {
         $data = file_get_contents("php://input");
-        $url = $this->interface . '/Arterialspacetimediagram/queryGreenWaveOptPlan';
+        $url = $this->interface . '/Arterialgreenwave/queryGreenWaveOptPlan';
         return $this->postRaw($url, $data, 20000, "json");
     }
 
