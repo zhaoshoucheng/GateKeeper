@@ -75,8 +75,8 @@ class Arterialgreenwave_model extends CI_Model
 
                 $res = json_decode($res, true);
             }
-        } else { // token不在redis中，说明第一次调用
-
+        } else {
+            // token不在redis中，说明第一次调用
             // 调用算法组thrift接口
             $serive = new Arterialgreenwave_vendor();
             $res = $serive->getGreenWaveOptPlan($data);

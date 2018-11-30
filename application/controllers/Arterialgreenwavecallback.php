@@ -26,6 +26,19 @@ class Arterialgreenwavecallback extends CI_Controller
     public function fillData()
     {
         $params = $this->input->post(NULL, TRUE);
+        $result = $this->traj_model->fillData($params);
+        return $this->response($result);
+
+
+
+
+
+
+
+
+
+
+        $params = $this->input->post(NULL, TRUE);
 
         if (!empty($params['data']) && !empty($params['key'])) {
             $res = $this->redis_model->setData($params['key'], $params['data']);
