@@ -77,7 +77,7 @@ class Arterialgreenwave extends MY_Controller
     /**
      * 轮询获取绿波优化方案
      */
-    public function getGreenWaveOptPlan__()
+    public function getGreenWaveOptPlan()
     {
         $params = file_get_contents("php://input");
         $result = $this->traj_model->getGreenWaveOptPlan($params);
@@ -118,7 +118,7 @@ class Arterialgreenwave extends MY_Controller
     * @param token          string   N 唯一标识，用于前端轮询
     * @return json
     */
-    public function getGreenWaveOptPlan()
+    public function getGreenWaveOptPlan1()
     {
         $params = $this->input->post(NULL, TRUE);
 
