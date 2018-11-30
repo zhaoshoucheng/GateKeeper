@@ -80,6 +80,9 @@ class Arterialgreenwave extends MY_Controller
     public function getGreenWaveOptPlan()
     {
         $params = $this->input->post(NULL, TRUE);
+        if (empty($params['token'])) {
+            return $this->getGreenWaveOptPlanOld();
+        }
         $result = $this->traj_model->getGreenWaveOptPlan($params);
         return $this->response($result);
     }
@@ -118,7 +121,7 @@ class Arterialgreenwave extends MY_Controller
     * @param token          string   N 唯一标识，用于前端轮询
     * @return json
     */
-    public function getGreenWaveOptPlan1()
+    public function getGreenWaveOptPlanOld()
     {
         $params = $this->input->post(NULL, TRUE);
 
