@@ -68,7 +68,9 @@ class Arterialgreenwave extends MY_Controller
     public function queryGreenWaveOptPlan()
     {
         $params = file_get_contents("php://input");
-        $result = $this->traj_model->queryGreenWaveOptPlan($params);
+        $data = json_decode($params,false);
+        $data['token'] = md5(microtime(true) * mt_rand(1, 10000));
+        $result = $this->traj_model->queryGreenWaveOptPlan(json_encode($params));
         $result['token'] = isset($result['token']) ?  $result['token'] : "";
         return $this->response($result);
     }
@@ -112,6 +114,8 @@ class Arterialgreenwave extends MY_Controller
         $params = $this->input->post(NULL, TRUE);
 
         if (empty($params['token'])) {
+            //此话括号内的代码将在v4.1之后弃用
+
             $data['token'] = md5(microtime(true) * mt_rand(1, 10000));
 
             // junctions
