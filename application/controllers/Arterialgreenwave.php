@@ -68,10 +68,9 @@ class Arterialgreenwave extends MY_Controller
     public function queryGreenWaveOptPlan()
     {
         $params = file_get_contents("php://input");
-        $data = json_decode($params,false);
+        $data = json_decode($params,true);
         $data['token'] = md5(microtime(true) * mt_rand(1, 10000));
         $result = $this->traj_model->queryGreenWaveOptPlan(json_encode($params));
-        $result['token'] = isset($result['token']) ?  $result['token'] : "";
         return $this->response($result);
     }
 
