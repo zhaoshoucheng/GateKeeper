@@ -13,6 +13,7 @@ class Arterialgreenwave extends MY_Controller
     {
         parent::__construct();
         $this->load->model('arterialgreenwave_model');
+        $this->load->model('traj_model');
     }
 
     /**
