@@ -63,6 +63,21 @@ class Traj_model extends CI_Model
     }
 
     /**
+     * 请求绿波图优化接口
+     *
+     * @param array $data 请求的参数
+     * @return array
+     * @throws \Exception
+     */
+    public function queryGreenWaveOptPlan($data)
+    {
+        $data = file_get_contents("php://input");
+        $url = $this->interface . '/Arterialspacetimediagram/queryGreenWaveOptPlan';
+        return $this->postRaw($url, $data, 20000, "json");
+    }
+
+
+    /**
      * 轨迹接口统一调用 Post
      *
      * @param string $url 请求的地址

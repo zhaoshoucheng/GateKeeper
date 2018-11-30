@@ -88,7 +88,6 @@ class Arterialgreenwave_model extends CI_Model
             }
         }
 
-
     	if (empty($res)) {
     		return [];
     	}

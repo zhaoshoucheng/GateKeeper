@@ -16,7 +16,64 @@ class Arterialgreenwave extends MY_Controller
     }
 
     /**
-    * 获取绿波优化方案
+     * 请求绿波图优化接口
+     *
+     * @param body json
+     * {
+     * "end_time": "13:30:00", //结束时间
+     * "start_time": "11:30:00",  //开始时间
+     * "dates": ["20181102"],  //开始日期
+     * "request": {
+     * "junction_list": [{
+     * "junction_id": "111", //路口id
+     * "cycle": 1, //周期
+     * "offset": 1, //相位
+     * "min_cycle": 1, //最小周期
+     * "max_cycle": 1, //最大周期
+     * "lock_cycle": 1, //周期锁定
+     * "lock_offset": 1, //相位锁定
+     * "clock_shift": 1, //相位偏移量
+     * "forward_movement": {
+     * "movement_id": "1111", //正向flow_id
+     * "green": [{
+     * "green_start": 1, //绿灯开始
+     * "green_duration": 1, //绿灯持续
+     * "yellow": 1,   //黄灯
+     * "red_clean": 1 //全红
+     * }],
+     * "weight": 11 //权重
+     *             },
+     *             "backward_movement": {
+     *     "movement_id": "22222",
+     *                 "green": [{
+     *         "green_start": 1,
+     *                     "green_duration": 1,
+     *                     "yellow": 1,
+     *                     "red_clean": 1
+     *                 }],
+     *                 "weight": 11
+     *             },
+     *             "in_length": 1, //进入轨迹长度
+     *             "out_length": 1, //出轨迹长度
+     *             "in_speed": 1,  //正向进入速度
+     *             "out_speed": 11  //反向进入速度
+     *         }],
+     *         "opt_type": 1,  //0为带宽模型，1为轨迹模型
+     *         "equal_cycle": 1,  //周期一致标志，0为可不一致，1为必须一致
+     *         "direction": 1 //优化方向，0为正向，1为反向，2为双向
+     *     }
+     * }
+     **/
+    public function queryGreenWaveOptPlan()
+    {
+        $params = file_get_contents("php://input");
+        $result = $this->traj_model->queryGreenWaveOptPlan($params);
+        $result['token'] = isset($params['token']) ?  $params['token'] : "";
+        return $this->response($result);
+    }
+
+    /**
+    * 轮询获取绿波优化方案
     * @param junctions      array     Y 路口集合 如下示例：
     * [
     *    {
