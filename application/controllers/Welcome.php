@@ -13,6 +13,7 @@ class Welcome extends CI_Controller
         $this->load->helper('http');
         $this->load->model('task_model');
         $this->load->model('overview_model');
+        $this->load->model('realtime_model');
     }
 
 
@@ -494,5 +495,26 @@ class Welcome extends CI_Controller
         $query_str = http_build_query($params);
         $str = substr(md5($query_str . "&" . $secret), 7, 16);
         return $str;
+    }
+
+    public function testEsPage()
+    {
+        $data = [
+            'source' => 'signal_control',
+            'cityId' => 12,
+            'requestId' => 121231231231,
+            'trailNum' => 10,
+            'dayTime'  => '2018-11-29 16:47:00',
+            'andOperations' => [
+                'cityId' => 'eq',
+                'trailNum' => 'gte',
+                'dayTime' => 'eq',
+            ],
+            'limit' => 500,
+        ];
+
+        $res = $this->realtime_model->searchDetail($data);
+
+        print_r($res);
     }
 }

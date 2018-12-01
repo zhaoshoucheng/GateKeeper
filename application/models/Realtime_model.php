@@ -34,11 +34,13 @@ class Realtime_model extends CI_Model
 
     /**
      * ES诊断明细查询方法
-     * @param $data array es查询条件数组
+     * @param $data      array es查询条件数组
+     * @param $scrollsId string 分页ID 不为空时表示有分页
      * @return array
      */
     public function searchDetail($data)
     {
+        $resData = [];
         $result = httpPOST($this->esUrl . '/estimate/diagnosis/queryIndices', $data, 0, 'json');
 
         if (!$result) {
@@ -46,11 +48,21 @@ class Realtime_model extends CI_Model
         }
         $result = json_decode($result, true);
 
-        if ($result['code'] != '000000') {
+        if ($result['code'] == '000000') {  // 000000:还有数据可查询 400001:查询完成
+            $resData = $result['result']['diagnosisIndices'];
+            $data['scrollsId'] = $result['result']['scrollsId'];
+            $resData = array_merge($resData, $this->searchDetail($data));
+        }
+
+        if ($result['code'] == '400001') {
+            $resData = array_merge($resData, $result['result']['diagnosisIndices']);
+        }
+
+        if ($result['code'] != '000000' && $result['code'] != '400001') {
             throw new \Exception($result['message'], ERR_DEFAULT);
         }
 
-        return $result;
+        return $resData;
     }
 
     /**
