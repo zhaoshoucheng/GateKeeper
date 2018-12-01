@@ -499,6 +499,8 @@ class Welcome extends CI_Controller
 
     public function testEsPage()
     {
+        $result = $this->realtime_model->testData();
+        print_r($result);exit;
         $data = [
             'source' => 'signal_control',
             'cityId' => 12,

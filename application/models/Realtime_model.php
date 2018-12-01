@@ -317,4 +317,13 @@ class Realtime_model extends CI_Model
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
+
+    public function testData()
+    {
+        $data = '2018-11-29';
+        $sql    = "select * from real_time_12 where hour = ? and traj_count >= ? and updated_at >= ? and updated_at <= ?";
+        $arr    = ['16:47:00', 10, $date . ' 00:00:00', $date . ' 23:59:59'];
+        $result = $this->db->query($sql, $arr)->result_array();
+        return $result;
+    }
 }

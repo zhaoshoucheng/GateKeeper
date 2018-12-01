@@ -234,25 +234,36 @@ class Realtimewarning_model extends CI_Model
 
         //========计算缓存数据start==========>
         //获取实时指标数据
-        $startTime = strtotime($date . ' 00:00:00') * 1000;
-        $endTime = strtotime($date . ' 23:59:59') * 1000;
         $data = [
             'source'        => 'signal_control', // 调用方
             'cityId'        => $cityId,          // 城市ID
             'requestId'     => get_traceid(),    // trace id
-            'timestamp'     => "[$startTime, $endTime]", // 0点-24点
             'trailNum'      => 10,
             'dayTime'       => $date . $hour,
             'andOperations' => [
                 'cityId'    => 'eq', // cityId相等
-                'timestamp' => 'range', // 大于等于当天开始时间
                 'trailNum'  => 'gte', // 轨迹数大于等于10
                 'dayTime'   => 'eq',  // 等于hour
             ],
+            'limit'         => 5000,
         ];
-        $sql    = "/*{\"router\":\"m\"}*/select * from $tableName where hour = ? and traj_count >= ? and updated_at >= ? and updated_at <= ?";
-        $arr    = [$hour, 10, $date . ' 00:00:00', $date . ' 23:59:59'];
-        $result = $this->db->query($sql, $arr)->result_array();
+        $realTimeEsData = $this->realtime_model->searchDetail($data);
+        foreach ($realTimeEsData as $k=>$v) {
+            $result[$k] = [
+                'logic_junction_id' => $v['junctionId'],
+                'hour' => date('H:i:s', strtotime($v['dayTime'])),
+                'logic_flow_id' => $v['movementId'],
+                'stop_time_cycle' => $v['avgStopNumUp'],
+                'spillover_rate' => $v['spilloverRateDown'],
+                'queue_length' => $v['queueLengthUp'],
+                'stop_delay' => $v['stopDelayUp'],
+                'stop_rate' => $v['oneStopRatioUp'] + $v['multiStopRatioUp'],
+                'twice_stop_rate' => $v['multiStopRatioUp'],
+                'speed' => $v['avgSpeedUp'],
+                'free_flow_speed' => $v['freeFlowSpeedUp'],
+                'traj_count' => $v['trailNum'],
+            ];
+        }
 
         //获取实时报警表数据
         $data['date'] = $date;
