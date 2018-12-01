@@ -119,7 +119,7 @@ if ($development == 2) {
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
     //traj  config
-    $traj_server = '100.90.164.31:8032';
+        $traj_server = '100.90.164.31:8032';
     $traj_ext   = '/traj-service';
 
     // 报警es

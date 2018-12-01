@@ -57,9 +57,47 @@ class Traj_model extends CI_Model
      */
     public function getClockShiftCorrect($data)
     {
-        $data = file_get_contents("php://input");
         $url = $this->interface . '/Arterialspacetimediagram/getClockShiftCorrect';
         return $this->postRaw($url, $data, 20000, "json");
+    }
+
+    /**
+     * 请求绿波图优化接口
+     *
+     * @param array $data 请求的参数
+     * @return array
+     * @throws \Exception
+     */
+    public function queryGreenWaveOptPlan($data)
+    {
+        $url = $this->interface . '/Arterialgreenwave/queryGreenWaveOptPlan';
+        return $this->postRaw($url, $data, 20000, "json");
+    }
+
+    /**
+     * 轮询获取绿波图优化接口数据
+     *
+     * @param array $data 请求的参数
+     * @return array
+     * @throws \Exception
+     */
+    public function getGreenWaveOptPlan($data)
+    {
+        $url = $this->interface . '/Arterialgreenwave/getGreenWaveOptPlan';
+        return $this->post($url, $data, 20000, "json");
+    }
+
+    /**
+     * 填充绿波图优化接口数据
+     *
+     * @param array $data 请求的参数
+     * @return array
+     * @throws \Exception
+     */
+    public function fillData($data)
+    {
+        $url = $this->interface . '/Arterialgreenwave/fillData';
+        return $this->post($url, $data, 20000, "json");
     }
 
     /**

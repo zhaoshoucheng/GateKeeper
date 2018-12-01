@@ -57,4 +57,13 @@ class Arterialspacetimediagram extends MY_Controller
         $result['token'] = isset($params['token']) ?  $params['token'] : "";
         return $this->response($result);
     }
+
+    //请求绿波优化接口
+    public function getGreenWaveOptPlan()
+    {
+        $params = file_get_contents("php://input");
+        $result = $this->traj_model->getGreenWaveOptPlan($params);
+        $result['token'] = isset($params['token']) ?  $params['token'] : "";
+        return $this->response($result);
+    }
 }
