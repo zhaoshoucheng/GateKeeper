@@ -34,11 +34,13 @@ class Realtime_model extends CI_Model
 
     /**
      * ES诊断明细查询方法
-     * @param $data array es查询条件数组
+     * @param $data      array es查询条件数组
+     * @param $scrollsId string 分页ID 不为空时表示有分页
      * @return array
      */
     public function searchDetail($data)
     {
+        $resData = [];
         $result = httpPOST($this->esUrl . '/estimate/diagnosis/queryIndices', $data, 0, 'json');
 
         if (!$result) {
@@ -46,11 +48,21 @@ class Realtime_model extends CI_Model
         }
         $result = json_decode($result, true);
 
-        if ($result['code'] != '000000') {
+        if ($result['code'] == '000000') {  // 000000:还有数据可查询 400001:查询完成
+            $resData = $result['result']['diagnosisIndices'];
+            $data['scrollsId'] = $result['result']['scrollsId'];
+            $resData = array_merge($resData, $this->searchDetail($data));
+        }
+
+        if ($result['code'] == '400001') {
+            $resData = array_merge($resData, $result['result']['diagnosisIndices']);
+        }
+
+        if ($result['code'] != '000000' && $result['code'] != '400001') {
             throw new \Exception($result['message'], ERR_DEFAULT);
         }
 
-        return $result;
+        return $resData;
     }
 
     /**
@@ -304,5 +316,14 @@ class Realtime_model extends CI_Model
             ->get();
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
+
+    public function testData()
+    {
+        $data = '2018-11-29';
+        $sql    = "select * from real_time_12 where hour = ? and traj_count >= ? and updated_at >= ? and updated_at <= ?";
+        $arr    = ['16:47:00', 10, $date . ' 00:00:00', $date . ' 23:59:59'];
+        $result = $this->db->query($sql, $arr)->result_array();
+        return $result;
     }
 }
