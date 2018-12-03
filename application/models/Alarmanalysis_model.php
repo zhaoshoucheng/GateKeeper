@@ -5,7 +5,7 @@
 # date:    2018-11-19
 ********************************************/
 
-use \Services\HelperService
+use \Services\HelperService;
 
 class Alarmanalysis_model extends CI_Model
 {
