@@ -372,6 +372,9 @@ class Realtimewarning_model extends CI_Model
 
         //处理数据内容格式
         $temp = array_map(function ($item) use ($junctionsInfo) {
+            if($item['quota']['traj_count']>0){   
+                var_dump($item);
+            }
             return [
                     'jid' => $item['logic_junction_id'],
                     'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
