@@ -13,6 +13,9 @@ class Alarmanalysis_model extends CI_Model
 
         // load config
         $this->load->config('nconf');
+
+        // load model
+        $this->load->model('redis_model');
     }
 
     /**
@@ -57,5 +60,58 @@ class Alarmanalysis_model extends CI_Model
         $response = $client->search($params);
 
         return $response;
+    }
+
+    /**
+     * 获取实时报警数据
+     * @param $cityId int 城市ID
+     * @param $date   string 日期 yyyy-mm-dd
+     * @param $hour   string 时间 HH:ii:ss
+     * @return array
+     */
+    public function getRealTimeAlarmsInfo($cityId, $date, $hour = '')
+    {
+        if (empty($hour)) {
+            $hour = $this->helperService->getLastestHour($cityId);
+        }
+
+        $res = $this->redis_model->getRealtimeAlarmList($cityId);
+
+        if (!$res || empty($res)) {
+
+            $lastTime  = date('Y-m-d') . ' ' . $hour;
+
+            // 组织ES接口所需DSL
+            $json = '{"from":0,"size":200,"query":{"bool":{"must":{"bool":{"must":[';
+
+            // where city_id
+            $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
+
+            // where date
+            $json .= ',{"match":{"date":{"query":"' . $date . '","type":"phrase"}}}';
+
+            // where last_time
+            $json .= ',{"match":{"last_time":{"query":"' . $lastTime . '","type":"phrase"}}}';
+
+            $json .= ']}}}},"_source":{"includes":["type","logic_junction_id","count","logic_flow_id","start_time","last_time"],"excludes":[]},"sort":[{"type":{"order":"asc"}},{"count":{"order":"desc"}}]}';
+
+            $esRes = $this->searchFlowTable($json);
+
+            if (empty($esRes) || empty($esRes['hits']['hits'])) {
+                return [];
+            }
+
+            foreach ($esRes['hits']['hits'] as $k=>$v) {
+                $res[$k] = [
+                    'logic_junction_id' => $v['_source']['logic_junction_id'],
+                    'logic_flow_id'     => $v['_source']['logic_flow_id'],
+                    'start_time'        => $v['_source']['start_time'],
+                    'last_time'         => $v['_source']['last_time'],
+                    'type'              => $v['_source']['type'],
+                ];
+            }
+        }
+
+        return $res;
     }
 }

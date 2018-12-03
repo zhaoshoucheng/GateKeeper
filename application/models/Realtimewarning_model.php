@@ -269,7 +269,7 @@ class Realtimewarning_model extends CI_Model
         //获取实时报警表数据
         $data['date'] = $date;
         $data['city_id'] = $cityId;
-        $realTimeAlarmsInfoResult = $this->getRealTimeAlarmsInfo($data, $hour);
+        $realTimeAlarmsInfoResult = $this->alarmanalysis_model->getRealTimeAlarmsInfo($cityId, $date, $hour);
 
         //聚合路口数据
         $realTimeAlarmsInfo = [];
@@ -313,52 +313,6 @@ class Realtimewarning_model extends CI_Model
     }
 
     //================以下方法全部为数据处理方法=====================//
-
-    /**
-     * 获取实时指标表中的报警信息
-     *
-     * @param $data
-     * @param $hour
-     *
-     * @return array
-     */
-    private function getRealTimeAlarmsInfo($data, $hour)
-    {
-        // 获取最近时间
-        $lastTime = date('Y-m-d') . ' ' . $hour;
-
-        // 组织ES接口所需DSL
-        $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
-
-        // where city_id
-        $json .= '{"match":{"city_id":{"query":' . $data['city_id'] . ',"type":"phrase"}}}';
-
-        // where date
-        $json .= ',{"match":{"date":{"query":"' . $data['date'] . '","type":"phrase"}}}';
-
-        // where last_time
-        $json .= ',{"match":{"last_time":{"query":"' . $lastTime . '","type":"phrase"}}}';
-
-        $json .= ']}}}},"_source":{"includes":["type","logic_junction_id","count","logic_flow_id","start_time","last_time"],"excludes":[]},"sort":[{"type":{"order":"asc"}},{"count":{"order":"desc"}}]}';
-
-        $esRes = $this->alarmanalysis_model->searchFlowTable($json);
-
-        if (empty($esRes) || empty($esRes['hits']['hits'])) {
-            return [];
-        }
-
-        foreach ($esRes['hits']['hits'] as $k=>$v) {
-            $res[$k] = [
-                'logic_junction_id' => $v['_source']['logic_junction_id'],
-                'logic_flow_id'     => $v['_source']['logic_flow_id'],
-                'start_time'        => $v['_source']['start_time'],
-                'last_time'         => $v['_source']['last_time'],
-                'type'              => $v['_source']['type'],
-            ];
-        }
-
-        return $res;
-    }
 
     /**
      * 处理从数据库中取出的原始数据并返回
