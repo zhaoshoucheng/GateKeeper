@@ -369,7 +369,8 @@ class Realtimewarning_model extends CI_Model
                 $this->mergeFlowInfo($temp[$item['logic_junction_id']], $item) :
                 $item;
         };
-
+        var_dump($temp);
+        
         //处理数据内容格式
         $temp = array_map(function ($item) use ($junctionsInfo) {
             if($item['quota']['traj_count']==0){   
