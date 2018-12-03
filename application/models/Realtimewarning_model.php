@@ -373,7 +373,7 @@ class Realtimewarning_model extends CI_Model
         };
 
         //处理数据内容格式
-        $temp = array_map(function ($item) use ($junctionsInfo) {
+        $temporgin = array_map(function ($item) use ($junctionsInfo) {
             return [
                     'jid' => $item['logic_junction_id'],
                     'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
@@ -384,7 +384,14 @@ class Realtimewarning_model extends CI_Model
                     'status' => $this->getJunctionStatus($quota),
                 ];
         }, $temp);
-
+        //过滤null的数据
+        $temp = [];
+        foreach ($temporgin as $item) {
+            if(!empty($item)){
+                $temp[] = $item;
+            }
+        };
+        
         $lngs = array_filter(array_column($temp, 'lng'));
         $lats = array_filter(array_column($temp, 'lat'));
 
