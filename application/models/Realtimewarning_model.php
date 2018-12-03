@@ -242,7 +242,7 @@ class Realtimewarning_model extends CI_Model
             'dayTime'       => $date ." ". $hour,
             'andOperations' => [
                 'cityId'    => 'eq', // cityId相等
-                'trailNum'  => 'gte', // 轨迹数大于等于10
+                'trailNum'  => 'gte', // 轨迹数大于等于5
                 'dayTime'   => 'eq',  // 等于hour
             ],
             'limit'         => 5000,
@@ -372,8 +372,7 @@ class Realtimewarning_model extends CI_Model
 
         //处理数据内容格式
         $temp = array_map(function ($item) use ($junctionsInfo) {
-            if($item['quota']['traj_count']>0){            
-                return [
+            return [
                     'jid' => $item['logic_junction_id'],
                     'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
                     'lng' => $junctionsInfo[$item['logic_junction_id']]['lng'] ?? '',
@@ -382,7 +381,6 @@ class Realtimewarning_model extends CI_Model
                     'alarm' => $this->getFinalAlarmInfo($item),
                     'status' => $this->getJunctionStatus($quota),
                 ];
-            }
         }, $temp);
 
         $lngs = array_filter(array_column($temp, 'lng'));
