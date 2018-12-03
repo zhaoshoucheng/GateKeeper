@@ -355,57 +355,39 @@ class OverviewService extends BaseService
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
         // where city_id
-        $json .= '{"match":{"' . $cityId . '":{"query":12,"type":"phrase"}}}'
+        $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}'
 
         // where date
         $json .= ',{"match":{"date":{"query":"' . trim($date) . '","type":"phrase"}}}';
 
         $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"aggregations":{"type":{"terms":{"field":"type","size":200},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
 
-        $res = $this->alarmanalysis_model->search($json);
-        print_r($res);exit;
-
-        $select = 'count(DISTINCT logic_junction_id) as num';
-
-        $res = $this->realtimeAlarm_model->countJunctionByType($cityId, $date, 1, $select);
-
-        if (!$res) {
-            throw new \Exception('数据获取失败', ERR_DATABASE);
+        $esRes = $this->alarmanalysis_model->search($json);
+        if (empty($esRes['aggregations']['type']['buckets']) || !$esRes) {
+            return [];
         }
 
-        $spilloverCount = $res['num'];
-
-        $res = $this->realtimeAlarm_model->countJunctionByType($cityId, $date, 2, $select);
-
-        if (!$res) {
-            throw new \Exception('数据获取失败', ERR_DATABASE);
+        $res = [];
+        $total = 0;
+        // 格式
+        foreach ($esRes['aggregations']['type']['buckets'] as $k=>$v) {
+            $res[$v['key']] = $v['num']['value'];
+            $total += $v['num']['value'];
         }
-
-        $saturationCount = $res['num'];
-
-        $result = [];
-
-        $total = intval($spilloverCount) + intval($saturationCount);
 
         // 报警类别配置
         $alarmCate = $this->config->item('alarm_category');
 
-        foreach ($alarmCate as $k => $v) {
-            if ($k == 1) {
-                // 溢流
-                $num = intval($spilloverCount);
-            } else {
-                // 过饱和
-                $num = intval($saturationCount);
-            }
+        $result = [];
+        foreach ($alarmCate as $k=>$v) {
             $result['count'][$k] = [
                 'cate' => $v['name'],
-                'num' => $num,
+                'num'  => $res[$v['key']],
             ];
 
             $result['ratio'][$k] = [
                 'cate' => $v['name'],
-                'ratio' => ($total >= 1) ? round(($num / $total) * 100) . '%' : '0%',
+                'ratio' => ($total >= 1) ? round(($res[$v['key']] / $total) * 100) . '%' : '0%',
             ];
         }
 
