@@ -238,7 +238,7 @@ class Realtimewarning_model extends CI_Model
             'source'        => 'signal_control', // 调用方
             'cityId'        => $cityId,          // 城市ID
             'requestId'     => get_traceid(),    // trace id
-            'trailNum'      => 5,
+            'trailNum'      => 0,
             'dayTime'       => $date ." ". $hour,
             'andOperations' => [
                 'cityId'    => 'eq', // cityId相等
@@ -269,7 +269,7 @@ class Realtimewarning_model extends CI_Model
         //获取实时报警表数据
         $data['date'] = $date;
         $data['city_id'] = $cityId;
-        $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfo($cityId, $date, $hour);
+        $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
         //实时数据flow排重===>开始
         $realTimeAlarmsInfoResult = [];  
         foreach ($realTimeAlarmsInfoResultOrigal as $item) {
@@ -352,11 +352,14 @@ class Realtimewarning_model extends CI_Model
 
         //数组初步处理，去除无用数据
         $result = array_map(function ($item) use ($flowsInfo, $realTimeAlarmsInfo) {
-            return [
-                'logic_junction_id' => $item['logic_junction_id'],
-                'quota' => $this->getRawQuotaInfo($item),
-                'alarm_info' => $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo),
-            ];
+            $alarmInfo = $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo);
+            if($item['traj_count']>=10 || !empty($alarmInfo)){
+                return [
+                    'logic_junction_id' => $item['logic_junction_id'],
+                    'quota' => $this->getRawQuotaInfo($item),
+                    'alarm_info' => $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo),
+                ];
+            }
         }, $result);
 
         //数组按照 logic_junction_id 进行合并
@@ -369,15 +372,17 @@ class Realtimewarning_model extends CI_Model
 
         //处理数据内容格式
         $temp = array_map(function ($item) use ($junctionsInfo) {
-            return [
-                'jid' => $item['logic_junction_id'],
-                'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
-                'lng' => $junctionsInfo[$item['logic_junction_id']]['lng'] ?? '',
-                'lat' => $junctionsInfo[$item['logic_junction_id']]['lat'] ?? '',
-                'quota' => ($quota = $this->getFinalQuotaInfo($item)),
-                'alarm' => $this->getFinalAlarmInfo($item),
-                'status' => $this->getJunctionStatus($quota),
-            ];
+            if($item['quota']['traj_count']>0){            
+                return [
+                    'jid' => $item['logic_junction_id'],
+                    'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
+                    'lng' => $junctionsInfo[$item['logic_junction_id']]['lng'] ?? '',
+                    'lat' => $junctionsInfo[$item['logic_junction_id']]['lat'] ?? '',
+                    'quota' => ($quota = $this->getFinalQuotaInfo($item)),
+                    'alarm' => $this->getFinalAlarmInfo($item),
+                    'status' => $this->getJunctionStatus($quota),
+                ];
+            }
         }, $temp);
 
         $lngs = array_filter(array_column($temp, 'lng'));
@@ -469,7 +474,6 @@ class Realtimewarning_model extends CI_Model
     {
         //实时指标配置文件
         $realTimeQuota = $this->config->item('real_time_quota');
-
         return [
             'stop_delay' => [
                 'name' => '平均延误',

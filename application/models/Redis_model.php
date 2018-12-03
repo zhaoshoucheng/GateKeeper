@@ -354,6 +354,24 @@ class Redis_model extends CI_Model
     /**
      * 获取实时报警数据
      * @param $cityId
+     * @param $date
+     * @param $hour
+     *
+     * @return bool|mixed
+     */
+    public function getRealtimeAlarmListByDateHour($cityId,$date,$hour)
+    {
+        $key = sprintf('its_realtime_alarm_%s_%s_%s', $cityId, $date, $hour);
+        if(!($data = $this->getData($key))) {
+            return false;
+        }
+
+        return json_decode($data, true);
+    }
+
+    /**
+     * 获取实时报警数据
+     * @param $cityId
      *
      * @return bool|mixed
      */
