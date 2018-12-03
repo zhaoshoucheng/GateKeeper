@@ -116,7 +116,7 @@ class Alarmanalysis_model extends CI_Model
     public function getRealTimeAlarmsInfo($cityId, $date, $hour = '')
     {
         if (empty($hour)) {
-            $hour = $this->common_model->getLastestHour($cityId);
+            $hour   = $this->common_model->getLastestHour($cityId, $date);
         }
         $res = $this->redis_model->getRealtimeAlarmListByDateHour($cityId,$date,$hour);
         return $res;
