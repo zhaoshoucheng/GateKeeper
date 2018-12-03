@@ -351,6 +351,20 @@ class OverviewService extends BaseService
         $cityId = $params['city_id'];
         $date   = $params['date'];
 
+        // 组织ES所需JSON
+        $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
+
+        // where city_id
+        $json .= '{"match":{"' . $cityId . '":{"query":12,"type":"phrase"}}}'
+
+        // where date
+        $json .= ',{"match":{"date":{"query":"' . trim($date) . '","type":"phrase"}}}';
+
+        $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"aggregations":{"type":{"terms":{"field":"type","size":200},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
+
+        $res = $this->alarmanalysis_model->search($json);
+        print_r($res);exit;
+
         $select = 'count(DISTINCT logic_junction_id) as num';
 
         $res = $this->realtimeAlarm_model->countJunctionByType($cityId, $date, 1, $select);

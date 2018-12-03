@@ -258,7 +258,7 @@ class Realtimewarning_model extends CI_Model
                 'spillover_rate' => $v['spilloverRateDown'],
                 'queue_length' => $v['queueLengthUp'],
                 'stop_delay' => $v['stopDelayUp'],
-                'stop_rate' => $v['oneStopRatioUp'] + $v['multiStopRatioUp'],
+                'stop_rate' => ($v['oneStopRatioUp'] + $v['multiStopRatioUp']),
                 'twice_stop_rate' => $v['multiStopRatioUp'],
                 'speed' => $v['avgSpeedUp'],
                 'free_flow_speed' => $v['freeFlowSpeedUp'],
