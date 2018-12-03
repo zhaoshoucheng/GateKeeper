@@ -269,7 +269,14 @@ class Realtimewarning_model extends CI_Model
         //获取实时报警表数据
         $data['date'] = $date;
         $data['city_id'] = $cityId;
-        $realTimeAlarmsInfoResult = $this->alarmanalysis_model->getRealTimeAlarmsInfo($cityId, $date, $hour);
+        $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfo($cityId, $date, $hour);
+        //实时数据flow排重===>开始
+        $realTimeAlarmsInfoResult = [];  
+        foreach ($realTimeAlarmsInfoResultOrigal as $item) {
+            $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;
+        }
+        $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
+        //实时数据flow排重<===结束
 
         //聚合路口数据
         $realTimeAlarmsInfo = [];
@@ -333,7 +340,8 @@ class Realtimewarning_model extends CI_Model
         $junctionsInfo = array_column($junctionsInfo, null, 'logic_junction_id');
 
         //获取需要报警的全部路口ID
-        $ids = implode(',', array_column($realTimeAlarmsInfo, 'logic_junction_id'));
+        $alarmJunctonIdArr = array_unique(array_column($realTimeAlarmsInfo, 'logic_junction_id'));
+        $ids = implode(',', $alarmJunctonIdArr);
 
         //获取需要报警的全部路口的全部方向的信息
         try {
