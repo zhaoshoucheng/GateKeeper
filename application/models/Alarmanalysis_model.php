@@ -7,6 +7,7 @@
 
 class Alarmanalysis_model extends CI_Model
 {
+    protected $helperService;
     public function __construct()
     {
         parent::__construct();
@@ -17,6 +18,7 @@ class Alarmanalysis_model extends CI_Model
         // load model
         $this->load->model('redis_model');
         $this->load->model('common_model');
+        $this->helperService = new HelperService();
     }
 
     /**
@@ -116,7 +118,7 @@ class Alarmanalysis_model extends CI_Model
     public function getRealTimeAlarmsInfo($cityId, $date, $hour = '')
     {
         if (empty($hour)) {
-            $hour   = $this->common_model->getLastestHour($cityId, $date);
+            $hour = $this->helperService->getLastestHour($cityId);
         }
         $res = $this->redis_model->getRealtimeAlarmListByDateHour($cityId,$date,$hour);
         return $res;
