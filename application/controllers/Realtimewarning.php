@@ -13,7 +13,6 @@ class Realtimewarning extends Inroute_Controller
 
     public function callback()
     {
-        exit;
         $params   = array_merge($this->input->get(), $this->input->post());
         $validate = Validate::make($params, [
             'hour' => 'min:1',
@@ -87,7 +86,6 @@ class Realtimewarning extends Inroute_Controller
         }
 
         //回调历史报警接口
-        /*
         $params = [
             'hour' => $hour,
             'date' => $date,
@@ -104,7 +102,6 @@ class Realtimewarning extends Inroute_Controller
         if($res['errno'] != 0){
             com_log_warning('realtime_callback_task_handler_error', $res['errno'], $res, compact("params"));
         }
-        */
 
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=task_handler done\n\r";
         // echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=processing\n\r";
