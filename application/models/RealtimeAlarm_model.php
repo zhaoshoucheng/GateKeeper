@@ -33,28 +33,6 @@ class RealtimeAlarm_model extends CI_Model
     }
 
     /**
-     * 获取指定类型信息数目
-     *
-     * @param        $cityId
-     * @param        $date
-     * @param        $type
-     * @param string $select
-     *
-     * @return array
-     */
-    public function countJunctionByType($cityId, $date, $type, $select = '*')
-    {
-        $res = $this->db->select($select)
-            ->from($this->tb)
-            ->where('date', $date)
-            ->where('city_id', $cityId)
-            ->where('type', $type)
-            ->get();
-
-        return $res instanceof CI_DB_result ? $res->row_array() : $res;
-    }
-
-    /**
      * 获取指定日期路口
      *
      * @param        $cityId
