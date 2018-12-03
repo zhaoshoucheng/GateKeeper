@@ -40,17 +40,6 @@ class Realtimewarning extends Inroute_Controller
         $traceId = $params["trace_id"];
         $uid     = $params["uid"];
 
-
-        //回调历史报警接口
-        $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params);
-        if (!$res) {
-            com_log_warning('realtime_callback_task_handler_error', 0, $res, compact("params"));
-        }
-        $res = json_decode($res, true);
-        if($res['errno'] != 0){
-            com_log_warning('realtime_callback_task_handler_error', $res['errno'], $res, compact("params"));
-        }
-
         exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
 
@@ -94,6 +83,18 @@ class Realtimewarning extends Inroute_Controller
             echo "date 必须为日期! \n";
             exit;
         }
+
+        //回调历史报警接口
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=task_handler doing\n\r";
+        $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params, 0);
+        if (!$res) {
+            com_log_warning('realtime_callback_task_handler_error', 0, $res, compact("params"));
+        }
+        $res = json_decode($res, true);
+        if($res['errno'] != 0){
+            com_log_warning('realtime_callback_task_handler_error', $res['errno'], $res, compact("params"));
+        }
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=task_handler done\n\r";
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=processing\n\r";
         $this->realtimewarning_model->process($cityId, $date, $hour, $traceId);
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=processed\n\r";

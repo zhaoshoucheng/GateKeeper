@@ -81,6 +81,7 @@ class Arterialgreenwave extends MY_Controller
     {
         $params = $this->input->post(NULL, TRUE);
         if (empty($params['token'])) {
+            //待正式算法给出后该行删除
             return $this->getGreenWaveOptPlanOld();
         }
         $result = $this->traj_model->getGreenWaveOptPlan($params);
