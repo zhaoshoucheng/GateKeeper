@@ -353,7 +353,7 @@ class Realtimewarning_model extends CI_Model
         //数组初步处理，去除无用数据
         $result = array_map(function ($item) use ($flowsInfo, $realTimeAlarmsInfo) {
             $alarmInfo = $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo);
-            if($item['traj_count']>=10 || !empty($alarmInfo)){
+            if($item['traj_count']>=10){
                 return [
                     'logic_junction_id' => $item['logic_junction_id'],
                     'quota' => $this->getRawQuotaInfo($item),
@@ -370,7 +370,7 @@ class Realtimewarning_model extends CI_Model
                 $item;
         };
         var_dump($temp);
-        
+
         //处理数据内容格式
         $temp = array_map(function ($item) use ($junctionsInfo) {
             if($item['quota']['traj_count']==0){   
