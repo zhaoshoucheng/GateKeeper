@@ -465,43 +465,9 @@ class OverviewService extends BaseService
         $cityId = $params['city_id'];
         $date   = $params['date'];
 
-        $hour = $this->helperService->getLastestHour($cityId);
-
-        $res = $this->redis_model->getRealtimeAlarmList($cityId);
-
+        $res = $this->alarmanalysis_model->getRealTimeAlarmsInfo($cityId, $date);
         if (!$res || empty($res)) {
-
-            $lastTime  = date('Y-m-d') . ' ' . $hour;
-
-            // 组织ES接口所需DSL
-            $json = '{"from":0,"size":200,"query":{"bool":{"must":{"bool":{"must":[';
-
-            // where city_id
-            $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
-
-            // where date
-            $json .= ',{"match":{"date":{"query":"' . $date . '","type":"phrase"}}}';
-
-            // where last_time
-            $json .= ',{"match":{"last_time":{"query":"' . $lastTime . '","type":"phrase"}}}';
-
-            $json .= ']}}}},"_source":{"includes":["type","logic_junction_id","count","logic_flow_id","start_time","last_time"],"excludes":[]},"sort":[{"type":{"order":"asc"}},{"count":{"order":"desc"}}]}';
-
-            $esRes = $this->alarmanalysis_model->searchFlowTable($json);
-
-            if (empty($esRes) || empty($esRes['hits']['hits'])) {
-                return [];
-            }
-
-            foreach ($esRes['hits']['hits'] as $k=>$v) {
-                $res[$k] = [
-                    'logic_junction_id' => $v['_source']['logic_junction_id'],
-                    'logic_flow_id'     => $v['_source']['logic_flow_id'],
-                    'start_time'        => $v['_source']['start_time'],
-                    'last_time'         => $v['_source']['last_time'],
-                    'type'              => $v['_source']['type'],
-                ];
-            }
+            return [];
         }
         $result = [];
 
