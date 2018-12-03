@@ -523,8 +523,8 @@ $config['rewrite_short_tags'] = FALSE;
 $config['proxy_ips'] = '';
 
 //遇到错误是否自动降级
-// if(gethostname()=="ipd-cloud-server01.gz01"){
-    const ERROR_AUTO_DOWNGRADE = false;
-// }else{
-    // const ERROR_AUTO_DOWNGRADE = true;
-// }
+if(gethostname()=="ipd-cloud-server01.gz01"){
+    define("ERROR_AUTO_DOWNGRADE", false);
+}else{
+    define("ERROR_AUTO_DOWNGRADE", false);
+}
