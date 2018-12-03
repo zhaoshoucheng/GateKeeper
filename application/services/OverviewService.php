@@ -355,7 +355,7 @@ class OverviewService extends BaseService
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
         // where city_id
-        $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}'
+        $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
 
         // where date
         $json .= ',{"match":{"date":{"query":"' . trim($date) . '","type":"phrase"}}}';
