@@ -5,6 +5,8 @@
 # date:    2018-11-19
 ********************************************/
 
+use \Services\HelperService
+
 class Alarmanalysis_model extends CI_Model
 {
     protected $helperService;
@@ -17,7 +19,6 @@ class Alarmanalysis_model extends CI_Model
 
         // load model
         $this->load->model('redis_model');
-        $this->load->model('common_model');
         $this->helperService = new HelperService();
     }
 
