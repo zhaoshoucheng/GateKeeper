@@ -239,7 +239,7 @@ class Realtimewarning_model extends CI_Model
             'cityId'        => $cityId,          // 城市ID
             'requestId'     => get_traceid(),    // trace id
             'trailNum'      => 10,
-            'dayTime'       => $date . $hour,
+            'dayTime'       => $date ." ". $hour,
             'andOperations' => [
                 'cityId'    => 'eq', // cityId相等
                 'trailNum'  => 'gte', // 轨迹数大于等于10
@@ -248,6 +248,7 @@ class Realtimewarning_model extends CI_Model
             'limit'         => 5000,
         ];
         $realTimeEsData = $this->realtime_model->searchDetail($data);
+        $result = [];
         foreach ($realTimeEsData as $k=>$v) {
             $result[$k] = [
                 'logic_junction_id' => $v['junctionId'],
