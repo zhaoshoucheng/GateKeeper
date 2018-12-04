@@ -15,6 +15,7 @@ class Timeframeoptimize extends MY_Controller
         $this->load->model('timeframeoptimize_model');
         $this->load->model('timing_model');
         $this->setTimingType();
+        $this->load->model('traj_model');
     }
 
     /**
@@ -144,6 +145,10 @@ class Timeframeoptimize extends MY_Controller
     public function getTodOptimizePlan()
     {
         $params = $this->input->post(NULL, TRUE);
+        $result = $this->traj_model->getTodOptimizePlan($params);
+        return $this->response($result);
+        /*
+        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $validate = Validate::make($params,
             [
@@ -181,5 +186,6 @@ class Timeframeoptimize extends MY_Controller
         $result = $this->timeframeoptimize_model->getTodOptimizePlan($data);
 
         return $this->response($result);
+        */
     }
 }

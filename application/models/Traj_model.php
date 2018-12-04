@@ -36,6 +36,19 @@ class Traj_model extends CI_Model
     }
 
     /**
+     * 获取时段划分方案
+     *
+     * @param array $data 请求的参数
+     * @return array
+     * @throws \Exception
+     */
+    public function getTodOptimizePlan($data)
+    {
+        $url = $this->interface . '/timeframeoptimize/getTodOptimizePlan';
+        return $this->post($url, $data, 20000, "json");
+    }
+    
+    /**
      * 获取干线协调时空图
      *
      * @param array $data 请求的参数

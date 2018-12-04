@@ -380,6 +380,9 @@ class OverviewService extends BaseService
 
         $result = [];
         foreach ($alarmCate as $k=>$v) {
+            if(empty($res[$v['key']])){
+                continue;
+            }
             $result['count'][$k] = [
                 'cate' => $v['name'],
                 'num'  => $res[$v['key']],
