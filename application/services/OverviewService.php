@@ -437,7 +437,7 @@ class OverviewService extends BaseService
                 $json .= ',';
             }
         }
-        $json .= ']}}]}}}},"_source":{"includes":["COUNT"],"excludes":[]},"aggregations":{"date":{"terms":{"field":"date","size":200},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
+        $json .= ']}}]}}}},"_source":{"includes":["COUNT"],"excludes":[]},"sort":[{"date":{"order":"asc"}}],"aggregations":{"date":{"terms":{"field":"date","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
 
         $data = $this->alarmanalysis_model->search($json);
         if (!$data || empty($data['aggregations']['date']['buckets'])) {
