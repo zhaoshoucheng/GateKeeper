@@ -208,9 +208,8 @@ class Waymap_model extends CI_Model
     /**
      * 获取全城路口
      *
-     * @param int $city_id 城市ID
-     * @param int $version 版本号
-     *
+     * @param int $city_id   城市ID
+     * @param int $version   版本号
      * @return array
      *
      * @throws \Exception
@@ -225,8 +224,9 @@ class Waymap_model extends CI_Model
             $version = self::$lastMapVersion;
         }
 
-        $redis_key = 'all_city_junctions_' . $city_id . '_' . $version . '}';
+        $result = [];
 
+        $redis_key = 'all_city_junctions_' . $city_id . '_' . $version . '}';
         $result = $this->redis_model->getData($redis_key);
 
         if (!$result) {
@@ -240,9 +240,47 @@ class Waymap_model extends CI_Model
 
             $res = $this->get($url, $data);
 
-            $this->redis_model->deleteData($redis_key);
-            $this->redis_model->setData($redis_key, json_encode($res));
-            $this->redis_model->setExpire($redis_key, 3600 * 24);
+            $this->redis_model->setEx($redis_key, json_encode($res), 24 * 3600);
+
+            return $res;
+        }
+
+        return json_decode($result, true);
+    }
+
+    /**
+     * 按行政区域获取城市路口
+     *
+     * @param int $city_id   城市ID
+     * @param int $districts 行政区域ID
+     * @param int $version   版本号
+     * @return array
+     * @throws \Exception
+     */
+    public function getCityJunctionsByDistricts($city_id, $districts = 0, $version = 0)
+    {
+        $this->load->model('redis_model');
+        if ($version == 0) {
+            $version = self::$lastMapVersion;
+        }
+
+        $result = [];
+
+        $redis_key = 'districts_junctions_' . $city_id . '_' . $districts . '_' . $version . '}';
+        $result = $this->redis_model->getData($redis_key);
+
+        if (!$result) {
+
+            $offset = 0;
+            $count  = 10000;
+
+            $data = compact('offset', 'count', 'version', 'city_id', 'districts');
+
+            $url = $this->waymap_interface . '/signal-map/map/getList';
+
+            $res = $this->get($url, $data);
+
+            $this->redis_model->setEx($redis_key, json_encode($res), 24 * 3600);
 
             return $res;
         }
