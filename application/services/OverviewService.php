@@ -155,11 +155,7 @@ class OverviewService extends BaseService
         $date   = $params['date'];
 
         $hour = $this->helperService->getLastestHour($cityId);
-
-        $select = 'SUM(`stop_delay` * `traj_count`) / SUM(`traj_count`) as stop_delay, logic_junction_id, hour, updated_at';
-
-        $res = $this->realtime_model->getAvgQuotaByJunction($cityId, $hour, $date, $select);
-
+        $res = $this->realtime_model->getAvgQuotaByJunction($cityId, $date, $hour);
         if (!$res) {
             return [];
         }
@@ -178,7 +174,7 @@ class OverviewService extends BaseService
         $junctinStatusFormula = $this->config->item('junction_status_formula');
 
         foreach ($res as $k => $v) {
-            $congestionNum[$junctinStatusFormula($v['stop_delay'])][$k] = 1;
+            $congestionNum[$junctinStatusFormula($v['quotaMap']['weight_avg'])][$k] = 1;
         }
 
         $result['count'] = [];
