@@ -94,7 +94,7 @@ class Realtimewarning extends Inroute_Controller
             'uid' => $uid,
         ];
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=task_handler doing\n\r";
-        $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params, 0);
+        $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params, 200000);
         if (!$res) {
             com_log_warning('realtime_callback_task_handler_error', 0, $res, compact("params"));
         }
