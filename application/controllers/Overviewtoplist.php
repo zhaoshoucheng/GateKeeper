@@ -24,7 +24,9 @@ class Overviewtoplist extends MY_Controller
 
     /**
      * 获取延误TOP20
-     *
+     * @param $params['city_id']  int    Y 城市ID
+     * @param $params['date']     string N 日期 yyyy-mm-dd
+     * @param $params['pagesize'] int    N 获取数量
      * @throws Exception
      */
     public function stopDelayTopList()

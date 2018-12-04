@@ -256,9 +256,9 @@ class OverviewService extends BaseService
 
     /**
      * 获取停车延误TOP20
-     *
-     * @param $params
-     *
+     * @param $params['city_id']  int    Y 城市ID
+     * @param $params['date']     string N 日期 yyyy-mm-dd
+     * @param $params['pagesize'] int    N 获取数量
      * @return array
      * @throws \Exception
      */
@@ -269,10 +269,8 @@ class OverviewService extends BaseService
         $pagesize = $params['pagesize'];
 
         $hour = $this->helperService->getLastestHour($cityId);
-
-        $select = 'logic_junction_id, hour, sum(stop_delay * traj_count) / sum(traj_count) as stop_delay';
-
-        $result = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $select);
+        $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize);
+        $result = Collection::make($esRes)->collapse();
 
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
@@ -281,12 +279,12 @@ class OverviewService extends BaseService
 
         $realTimeQuota = $this->config->item('real_time_quota');
 
-        $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota) {
+        $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota, $hour) {
             return [
-                'time' => $item['hour'],
+                'time' => $hour,
                 'logic_junction_id' => $item['logic_junction_id'],
                 'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
-                'stop_delay' => $realTimeQuota['stop_delay']['round']($item['stop_delay']),
+                'stop_delay' => $realTimeQuota['stop_delay']['round']($item['weight_avg']),
                 'quota_unit' => $realTimeQuota['stop_delay']['unit'],
             ];
         }, $result);

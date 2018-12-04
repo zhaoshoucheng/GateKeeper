@@ -343,31 +343,44 @@ class Realtime_model extends CI_Model
     }
 
     /**
-     * @param        $cityId
-     * @param        $date
-     * @param        $hour
-     * @param        $pagesize
-     * @param string $select
-     *
+     * 延误top20
+     * @param  $cityId    int    城市ID
+     * @param  $date      string 日期 yyyy-mm-dd
+     * @param  $hour      string 时间 HH:ii:ss
+     * @param  $pagesize  int    获取数量
      * @return array
      * @throws Exception
      */
-    public function getTopStopDelay($cityId, $date, $hour, $pagesize, $select = '*')
+    public function getTopStopDelay($cityId, $date, $hour, $pagesize)
     {
-        $this->isExisted($cityId);
+        $dayTime = $date . ' ' . $hour;
+        $data = [
+            "source"    => "signal_control",
+            "cityId"    => $cityId,
+            'requestId' => get_traceid(),
+            "dayTime"   => $dayTime,
+            "trailNum"  => 10,
+            "andOperations" => [
+                "cityId"   => "eq",
+                "dayTime"  => "eq",
+                "trailNum" => 'gte',
+            ],
+            "quotaRequest" => [
+                "quotaType"  => "weight_avg",
+                "quotas"     => "sum_stopDelayUp*trailNum, sum_trailNum",
+                "groupField" => "logic_junction_id",
+                "orderField" => "weight_avg",
+                "asc"        => "false",
+                "limit"      => $pagesize,
+            ],
+        ];
 
-        $res = $this->db->select($select)
-            ->from($this->tb . $cityId)
-            ->where('hour', $hour)
-            ->where('traj_count >=', 10)
-            ->where('updated_at >=', $date . ' 00:00:00')
-            ->where('updated_at <=', $date . ' 23:59:59')
-            ->group_by('logic_junction_id')
-            ->order_by('stop_delay', 'desc')
-            ->limit($pagesize)
-            ->get();
+        $esRes = $this->searchQuota($data);
+        if (empty($esRes['result']['quotaResults'])) {
+            return [];
+        }
 
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+        return $esRes['result']['quotaResults'];
     }
 
     /**
