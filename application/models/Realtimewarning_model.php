@@ -212,18 +212,13 @@ class Realtimewarning_model extends CI_Model
         $this->load->model('redis_model');
 
         //生成平均延误曲线数据
-        $splitHour  = explode(':', $hour);
-        $limitMinus = [5, 6, 7];  //只在分钟级的5-7之间执行
-        if (isset($splitHour[1][1]) && in_array($splitHour[1][1], $limitMinus)) {
-            $result = $this->realtime_model->avgStopdelay($cityId, $date);
-            if (empty($result)) {
-                echo "生成 avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
-                exit;
-            }
-
-            $avgStopDelayKey = "its_realtime_avg_stop_delay_{$cityId}_{$date}";
-            $this->redis_model->setEx($avgStopDelayKey, json_encode($result), 24 * 3600);
+        $result = $this->realtime_model->avgStopdelay($cityId, $date);
+        if (empty($result)) {
+            echo "生成 avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
+            exit;
         }
+        $avgStopDelayKey = "its_realtime_avg_stop_delay_{$cityId}_{$date}";
+        $this->redis_model->setEx($avgStopDelayKey, json_encode($result), 24 * 3600);
 
         //========计算缓存数据start==========>
         //获取实时指标数据
