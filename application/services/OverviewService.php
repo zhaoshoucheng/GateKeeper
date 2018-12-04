@@ -341,8 +341,10 @@ class OverviewService extends BaseService
     }
 
     /**
-     * @param $params
-     *
+     * 获取今日报警预览
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
      * @return array
      * @throws \Exception
      */
@@ -382,12 +384,13 @@ class OverviewService extends BaseService
         foreach ($alarmCate as $k=>$v) {
             $result['count'][$k] = [
                 'cate' => $v['name'],
-                'num'  => $res[$v['key']],
+                'num'  => $res[$v['key']] ?? 0,
             ];
 
             $result['ratio'][$k] = [
+                $num = $res[$v['key']] ?? 0;
                 'cate' => $v['name'],
-                'ratio' => ($total >= 1) ? round(($res[$v['key']] / $total) * 100) . '%' : '0%',
+                'ratio' => ($total >= 1) ? round(($num / $total) * 100) . '%' : '0%',
             ];
         }
 

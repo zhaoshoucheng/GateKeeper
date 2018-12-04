@@ -25,8 +25,11 @@ class Overviewalarm extends MY_Controller
 
     /**
      * 获取今日报警概览
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
      * @throws Exception
+     * @return json
      */
     public function todayAlarmInfo()
     {
