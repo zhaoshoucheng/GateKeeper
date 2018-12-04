@@ -47,8 +47,9 @@ class Overview extends MY_Controller
     }
 
     /**
-     * 运行情况
-     *
+     * 运行情况 （概览页 平均延误）
+     * @param $params['city_id'] int    Y 城市ID
+     * @param $params['date']    string N 日期 yyyy-mm-dd
      * @throws Exception
      */
     public function operationCondition()

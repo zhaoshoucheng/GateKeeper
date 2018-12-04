@@ -79,7 +79,7 @@ class Realtime_model extends CI_Model
         }
         $result = json_decode($result, true);
 
-        if ($result['code'] != '000000') {
+        if ($result['code'] != '000000' && $result['code'] != '400001') {
             throw new \Exception($result['message'], ERR_DEFAULT);
         }
 
@@ -122,6 +122,95 @@ class Realtime_model extends CI_Model
 
         $lastHour = date('H:i:s', strtotime($res['result']['quotaResults']['quotaMap']['dayTime']));
         return $lastHour;
+    }
+
+    /**
+     * 平均延误曲线图
+     * @param $cityId int    城市ID
+     * @param $date   string 日期 yyyy-mm-dd
+     * @return array
+     */
+    public function avgStopdelay($cityId, $date)
+    {
+        $startTime = strtotime($date . ' 00:00:00') * 1000;
+        $endTime = strtotime($date . ' 23:59:59') * 1000;
+
+        $data = [
+            "source" => "signal_control",
+            "cityId" => $cityId,
+            'requestId' => get_traceid(),
+            "timestamp" => "[{$startTime}, {$endTime}]",
+            "andOperations" => [
+                "cityId" => "eq",
+                "timestamp" => "range",
+            ],
+            "quotaRequest" => [
+                "quotaType" => "weight_avg",
+                "quotas" => "sum_stopDelayUp*trailNum, sum_trailNum",
+                "groupField" => "dayTime",
+                "orderField" => "dayTime",
+                "asc" => "true",
+            ],
+        ];
+
+        $esRes = $this->searchQuota($data);
+        if (empty($esRes['result']['quotaResults'])) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($esRes['result']['quotaResults'] as $k=>$v) {
+            $result[$k] = [
+                'avg_stop_delay' => $v['quotaMap']['weight_avg'],
+                'hour'           => date('H:i:s', strtotime($v['quotaMap']['dayTime'])),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * 获取实时指标路口数据（概览页路口列表）
+     * @param $cityId int    城市ID
+     * @param $date   string 日期 yyyy-mm-dd
+     * @param $hour   string 时间 HH:ii:ss
+     * @return array
+     */
+    public function getRealTimeJunctions($cityId, $date, $hour)
+    {
+        $data = [
+            'source'        => 'signal_control', // 调用方
+            'cityId'        => $cityId,          // 城市ID
+            'requestId'     => get_traceid(),    // trace id
+            'trailNum'      => 5,
+            'dayTime'       => $date ." ". $hour,
+            'andOperations' => [
+                'cityId'    => 'eq',  // cityId相等
+                'trailNum'  => 'gte', // 轨迹数大于等于5
+                'dayTime'   => 'eq',  // 等于hour
+            ],
+            'limit'         => 5000,
+        ];
+        $realTimeEsData = $this->searchDetail($data);
+        $result = [];
+        foreach ($realTimeEsData as $k=>$v) {
+            $result[$k] = [
+                'logic_junction_id' => $v['junctionId'],
+                'hour'              => date('H:i:s', strtotime($v['dayTime'])),
+                'logic_flow_id'     => $v['movementId'],
+                'stop_time_cycle'   => $v['avgStopNumUp'],
+                'spillover_rate'    => $v['spilloverRateDown'],
+                'queue_length'      => $v['queueLengthUp'],
+                'stop_delay'        => $v['stopDelayUp'],
+                'stop_rate'         => ($v['oneStopRatioUp'] + $v['multiStopRatioUp']),
+                'twice_stop_rate'   => $v['multiStopRatioUp'],
+                'speed'             => $v['avgSpeedUp'],
+                'free_flow_speed'   => $v['freeFlowSpeedUp'],
+                'traj_count'        => $v['trailNum'],
+            ];
+        }
+
+        return $result;
     }
 
     /**
@@ -211,28 +300,6 @@ class Realtime_model extends CI_Model
             ->where('logic_junction_id', $logicJunctionId)
             ->where('logic_flow_id', $logicFlowId)
             ->where('updated_at >', $upTime)
-            ->get();
-
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
-    }
-
-    /**
-     * @param        $cityId
-     * @param        $date
-     * @param string $select
-     *
-     * @return array
-     * @throws Exception
-     */
-    public function getAvgQuotaByCityId($cityId, $date, $select = '*')
-    {
-        $this->isExisted($cityId);
-
-        $res = $this->db->select($select)
-            ->from($this->tb . $cityId)
-            ->where('updated_at >=', $date . ' 00:00:00')
-            ->where('updated_at <=', $date . ' 23:59:59')
-            ->group_by('hour')
             ->get();
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;

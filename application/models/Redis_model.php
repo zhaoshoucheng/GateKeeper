@@ -306,6 +306,7 @@ class Redis_model extends CI_Model
     }
 
     /**
+     * 平均延误
      * @param $cityId
      * @param $date
      *

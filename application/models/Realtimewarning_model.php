@@ -211,67 +211,31 @@ class Realtimewarning_model extends CI_Model
         //todo生成rediskey
         $this->load->model('redis_model');
 
-        //生成 avg(stop_delay) group by hour
         //生成平均延误曲线数据
         $splitHour  = explode(':', $hour);
         $limitMinus = [5, 6, 7];  //只在分钟级的5-7之间执行
         if (isset($splitHour[1][1]) && in_array($splitHour[1][1], $limitMinus)) {
-            $sql = "SELECT `hour`, sum(stop_delay * traj_count) / sum(traj_count) as avg_stop_delay FROM `{$tableName}` WHERE `updated_at` >= '{$date} 00:00:00' AND `updated_at` <= '{$date} 23:59:59' GROUP BY `hour`";
-            $this->db->setQueryFlag("100001");
-            $this->db->forceMaster();
-            $query = $this->db->query($sql);
-            $this->db->ignoreMaster();
-            $this->db->setQueryFlag("");
-
-            $result = $query->result_array();
+            $result = $this->realtime_model->avgStopdelay($cityId, $date);
             if (empty($result)) {
                 echo "生成 avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
                 exit;
             }
+
             $avgStopDelayKey = "its_realtime_avg_stop_delay_{$cityId}_{$date}";
             $this->redis_model->setEx($avgStopDelayKey, json_encode($result), 24 * 3600);
         }
 
         //========计算缓存数据start==========>
         //获取实时指标数据
-        $data = [
-            'source'        => 'signal_control', // 调用方
-            'cityId'        => $cityId,          // 城市ID
-            'requestId'     => get_traceid(),    // trace id
-            'trailNum'      => 5,
-            'dayTime'       => $date ." ". $hour,
-            'andOperations' => [
-                'cityId'    => 'eq', // cityId相等
-                'trailNum'  => 'gte', // 轨迹数大于等于5
-                'dayTime'   => 'eq',  // 等于hour
-            ],
-            'limit'         => 5000,
-        ];
-        $realTimeEsData = $this->realtime_model->searchDetail($data);
         $result = [];
-        foreach ($realTimeEsData as $k=>$v) {
-            $result[$k] = [
-                'logic_junction_id' => $v['junctionId'],
-                'hour' => date('H:i:s', strtotime($v['dayTime'])),
-                'logic_flow_id' => $v['movementId'],
-                'stop_time_cycle' => $v['avgStopNumUp'],
-                'spillover_rate' => $v['spilloverRateDown'],
-                'queue_length' => $v['queueLengthUp'],
-                'stop_delay' => $v['stopDelayUp'],
-                'stop_rate' => ($v['oneStopRatioUp'] + $v['multiStopRatioUp']),
-                'twice_stop_rate' => $v['multiStopRatioUp'],
-                'speed' => $v['avgSpeedUp'],
-                'free_flow_speed' => $v['freeFlowSpeedUp'],
-                'traj_count' => $v['trailNum'],
-            ];
-        }
+        $result = $this->realtime_model->getRealTimeJunctions($cityId, $date, $hour);
 
         //获取实时报警表数据
         $data['date'] = $date;
         $data['city_id'] = $cityId;
         $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
         //实时数据flow排重===>开始
-        $realTimeAlarmsInfoResult = [];  
+        $realTimeAlarmsInfoResult = [];
         foreach ($realTimeAlarmsInfoResultOrigal as $item) {
             $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;
         }

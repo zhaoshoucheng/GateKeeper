@@ -87,10 +87,10 @@ class OverviewService extends BaseService
     }
 
     /**
-     * 运行情况
+     * 运行情况 概览页 平均延误
      *
-     * @param $params
-     *
+     * @param $params['city_id'] int    Y 城市ID
+     * @param $params['date']    string N 日期 yyyy-mm-dd
      * @return array
      * @throws \Exception
      */
@@ -101,7 +101,7 @@ class OverviewService extends BaseService
 
         $res = $this->redis_model->getRealtimeAvgStopDelay($cityId, $date);
 
-        $result = $res ? $res : $this->realtime_model->getAvgQuotaByCityId($cityId, $date, 'hour, avg(stop_delay) as avg_stop_delay');
+        $result = $res ? $res : $this->realtime_model->avgStopdelay($cityId, $date);
 
         $realTimeQuota = $this->config->item('real_time_quota');
 
