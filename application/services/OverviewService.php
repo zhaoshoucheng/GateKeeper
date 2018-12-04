@@ -341,8 +341,10 @@ class OverviewService extends BaseService
     }
 
     /**
-     * @param $params
-     *
+     * 获取今日报警预览
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
      * @return array
      * @throws \Exception
      */
@@ -380,17 +382,15 @@ class OverviewService extends BaseService
 
         $result = [];
         foreach ($alarmCate as $k=>$v) {
-            if(empty($res[$v['key']])){
-                continue;
-            }
+            $num = $res[$v['key']] ?? 0;
             $result['count'][$k] = [
                 'cate' => $v['name'],
-                'num'  => $res[$v['key']],
+                'num'  => $num,
             ];
 
             $result['ratio'][$k] = [
                 'cate' => $v['name'],
-                'ratio' => ($total >= 1) ? round(($res[$v['key']] / $total) * 100) . '%' : '0%',
+                'ratio' => ($total >= 1) ? round(($num / $total) * 100) . '%' : '0%',
             ];
         }
 
@@ -401,8 +401,12 @@ class OverviewService extends BaseService
     }
 
     /**
-     * @param $params
-     *
+     * 获取七日报警变化
+     * 规则：取当前日期前六天的报警路口数+当天到现在时刻的报警路口数
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
+     * @throws Exception
      * @return array
      */
     public function sevenDaysAlarmChange($params)
@@ -418,34 +422,33 @@ class OverviewService extends BaseService
         // 当前日期时间戳作为结束时间
         $endDate = strtotime($date);
 
+        // 组织DSL所需json
+        $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
+
+        // where city_id
+        $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
+
+        /* where date in*/
+        $json .= ',{"bool":{"should":[';
         for ($i = $startDate; $i <= $endDate; $i += 24 * 3600) {
-            $sevenDates[] = date('Y-m-d', $i);
+            $json .= '{"match":{"date":{"query":"' . date('Y-m-d', $i) . '","type":"phrase"}}}';
+            if ($i < $endDate) {
+                $json .= ',';
+            }
         }
+        $json .= ']}}]}}}},"_source":{"includes":["COUNT"],"excludes":[]},"sort":[{"date":{"order":"asc"}}],"aggregations":{"date":{"terms":{"field":"date","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
 
-        $select = 'logic_junction_id, date';
-
-        $data = $this->realtimeAlarm_model->getJunctionByDate($cityId, $sevenDates, $select);
-
-        $result = [];
-
-        $tempData = [];
-        foreach ($data as $k => $v) {
-            $tempData[$v['date']][$v['logic_junction_id']] = 1;
-        }
-
-        if (empty($tempData)) {
+        $data = $this->alarmanalysis_model->search($json);
+        if (!$data || empty($data['aggregations']['date']['buckets'])) {
             return [];
         }
 
-        foreach ($sevenDates as $k => $v) {
-            $result['dataList'][$v] = [
-                'date' => $v,
-                'value' => isset($tempData[$v]) ? count($tempData[$v]) : 0,
+        $result['dataList'] = [];
+        foreach ($data['aggregations']['date']['buckets'] as $k=>$v) {
+            $result['dataList'][$k] = [
+                'date'  => date('Y-m-d', $v['key'] / 1000),
+                'value' => $v['num']['value'],
             ];
-        };
-
-        if (!empty($result['dataList'])) {
-            $result['dataList'] = array_values($result['dataList']);
         }
 
         return $result;
