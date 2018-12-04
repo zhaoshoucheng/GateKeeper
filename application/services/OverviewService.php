@@ -270,7 +270,7 @@ class OverviewService extends BaseService
 
         $hour = $this->helperService->getLastestHour($cityId);
         $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize);
-        $result = Collection::make($esRes)->collapse();
+        $result = array_column($esRes, 'quotaMap');
 
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
