@@ -232,13 +232,15 @@ class CommonService extends BaseService
 
     /**
      * 根据城市ID获取所有路口
-     * @param $cityId long 城市ID
+     * @param $cityId   long 城市ID
+     * @param $page     int  分页偏移量
+     * @param $pagesize int  查询个数
      * @return mixed
      */
-    public function getAllJunctionByCityId($cityId)
+    public function getAllJunctionByCityId($cityId, $page, $pagesize)
     {
         // 获取路网全城路口
-        $res = $this->waymap_model->getAllCityJunctions($cityId);
+        $res = $this->waymap_model->getAllCityJunctions($cityId, 0, $page, $pagesize);
         if (!$res) {
             return [];
         }

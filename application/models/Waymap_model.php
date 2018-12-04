@@ -208,14 +208,15 @@ class Waymap_model extends CI_Model
     /**
      * 获取全城路口
      *
-     * @param int $city_id 城市ID
-     * @param int $version 版本号
-     *
+     * @param int $city_id  城市ID
+     * @param int $version  版本号
+     * @param int $page     偏移量
+     * @param int $pagesize 获取个数
      * @return array
      *
      * @throws \Exception
      */
-    public function getAllCityJunctions($city_id, $version = 0)
+    public function getAllCityJunctions($city_id, $version = 0, $page = 0, $pagesize = 2000)
     {
         /*-------------------------------------------------
         | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
@@ -231,8 +232,8 @@ class Waymap_model extends CI_Model
 
         if (!$result) {
 
-            $offset = 0;
-            $count  = 10000;
+            $offset = $page;
+            $count  = $pagesize;
 
             $data = compact('offset', 'count', 'version', 'city_id');
 
