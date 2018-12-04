@@ -427,10 +427,10 @@ class OverviewService extends BaseService
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
         // where city_id
-        $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}'
+        $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
 
         /* where date in*/
-        $json .= '{"bool":{"should":[';
+        $json .= ',{"bool":{"should":[';
         for ($i = $startDate; $i <= $endDate; $i += 24 * 3600) {
             $json .= '{"match":{"date":{"query":"' . date('Y-m-d', $i) . '","type":"phrase"}}}';
             if ($i < $endDate) {
@@ -440,33 +440,16 @@ class OverviewService extends BaseService
         $json .= ']}}]}}}},"_source":{"includes":["COUNT"],"excludes":[]},"aggregations":{"date":{"terms":{"field":"date","size":200},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
 
         $data = $this->alarmanalysis_model->search($json);
-        print_r($data);
-        echo $json;exit;
-
-        $select = 'logic_junction_id, date';
-
-        $data = $this->realtimeAlarm_model->getJunctionByDate($cityId, $sevenDates, $select);
-
-        $result = [];
-
-        $tempData = [];
-        foreach ($data as $k => $v) {
-            $tempData[$v['date']][$v['logic_junction_id']] = 1;
-        }
-
-        if (empty($tempData)) {
+        if (!$data || empty($data['aggregations']['date']['buckets'])) {
             return [];
         }
 
-        foreach ($sevenDates as $k => $v) {
-            $result['dataList'][$v] = [
-                'date' => $v,
-                'value' => isset($tempData[$v]) ? count($tempData[$v]) : 0,
+        $result['dataList'] = [];
+        foreach ($data['aggregations']['date']['buckets'] as $k=>$v) {
+            $result['dataList'][$k] = [
+                'date'  => date('Y-m-d', $v['key'] / 1000),
+                'value' => $v['num']['value'],
             ];
-        };
-
-        if (!empty($result['dataList'])) {
-            $result['dataList'] = array_values($result['dataList']);
         }
 
         return $result;

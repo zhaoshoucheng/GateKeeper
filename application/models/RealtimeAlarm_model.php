@@ -33,27 +33,6 @@ class RealtimeAlarm_model extends CI_Model
     }
 
     /**
-     * 获取指定日期路口
-     *
-     * @param        $cityId
-     * @param        $dates
-     * @param string $select
-     *
-     * @return array
-     */
-    public function getJunctionByDate($cityId, $dates, $select = '*')
-    {
-        $res = $this->db->select($select)
-            ->from($this->tb)
-            ->where('city_id', $cityId)
-            ->where_in('date', $dates)
-            ->group_by('logic_junction_id, date')
-            ->get();
-
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
-    }
-
-    /**
      * 获取实时报警信息详情
      *
      * @param $cityId     int    城市ID
