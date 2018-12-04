@@ -436,7 +436,7 @@ class OverviewService extends BaseService
             if ($i < $endDate) {
                 $json .= ',';
             }
-        },
+        }
         $json .= ']}}]}}}},"_source":{"includes":["COUNT"],"excludes":[]},"aggregations":{"date":{"terms":{"field":"date","size":200},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
 
         $data = $this->alarmanalysis_model->search($json);
