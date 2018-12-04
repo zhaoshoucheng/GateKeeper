@@ -79,8 +79,6 @@ class Common extends MY_Controller
      * 权限sso用，获取开城城市列表、行政区域、自定义区域、自定义干线、所有路口
      * @param $params['city_id']  long N 城市ID areaType非零情况下必填，取自开城城市列表返回接口中的areaId
      * @param $params['areaType'] int  Y 0：开城城市列表，1：行政区域 ，2：自定义区域，3：干线，4：路口
-     * @param $params['page']     int  N 分页偏移量 当areaType=4时使用
-     * @param $params['pagesize'] int  N 获取个数 当areaType=4时使用
      * @return json
      */
     public function areaData()
@@ -116,9 +114,7 @@ class Common extends MY_Controller
 
             case 4:
                 // 根据城市ID获取所有路口
-                $page = $params['page'] ?? 0;
-                $pagesize = $params['pagesize'] ?? 1000;
-                $result = $this->commonService->getAllJunctionByCityId($params['city_id'], $page, $pagesize);
+                $result = $this->commonService->getAllJunctionByCityId($params['city_id']);
                 break;
             default:
                 // 获取开城城市列表
