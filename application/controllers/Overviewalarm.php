@@ -52,8 +52,11 @@ class Overviewalarm extends MY_Controller
     /**
      * 获取七日报警变化
      * 规则：取当前日期前六天的报警路口数+当天到现在时刻的报警路口数
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
      * @throws Exception
+     * @return json
      */
     public function sevenDaysAlarmChange()
     {

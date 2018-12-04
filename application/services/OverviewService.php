@@ -402,8 +402,12 @@ class OverviewService extends BaseService
     }
 
     /**
-     * @param $params
-     *
+     * 获取七日报警变化
+     * 规则：取当前日期前六天的报警路口数+当天到现在时刻的报警路口数
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
+     * @throws Exception
      * @return array
      */
     public function sevenDaysAlarmChange($params)
@@ -419,9 +423,25 @@ class OverviewService extends BaseService
         // 当前日期时间戳作为结束时间
         $endDate = strtotime($date);
 
+        // 组织DSL所需json
+        $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
+
+        // where city_id
+        $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}'
+
+        /* where date in*/
+        $json .= '{"bool":{"should":[';
         for ($i = $startDate; $i <= $endDate; $i += 24 * 3600) {
-            $sevenDates[] = date('Y-m-d', $i);
-        }
+            $json .= '{"match":{"date":{"query":"' . date('Y-m-d', $i) . '","type":"phrase"}}}';
+            if ($i < $endDate) {
+                $json .= ',';
+            }
+        },
+        $json .= ']}}]}}}},"_source":{"includes":["COUNT"],"excludes":[]},"aggregations":{"date":{"terms":{"field":"date","size":200},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
+
+        $data = $this->alarmanalysis_model->search($json);
+        print_r($data);
+        echo $json;exit;
 
         $select = 'logic_junction_id, date';
 
