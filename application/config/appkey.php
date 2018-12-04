@@ -90,6 +90,7 @@ $config['authirized_apps'] = array(
         'secret'=> '3a01e6c56bcce94ee5de073df3d512d6',
         'open_api'   => array(
             'Demo/mapJunctionSuggest',
+            'Demo/getShortUrl'
         ),
         'white_ips' => array(
         )

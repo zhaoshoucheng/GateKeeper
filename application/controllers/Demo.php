@@ -26,4 +26,16 @@ class Demo extends MY_Controller{
         $this->response($finalRet['data']);
 
     }
+
+    public function getShortUrl(){
+        $params = $this->input->post();
+
+        $url = "http://100.69.238.11:8000/daijia/shortserver/admin/add";
+        $data = array();
+        $data['appkey'] = "oveS7s8f3DymeHjnrUy0lfqBW1x1n3KD";
+        $data['url']  = $params['url'];
+        $ret  = httpPOST($url,$data);
+        $finalRet = json_decode($ret,true);
+        $this->response($finalRet['short_url']);
+    }
 }
