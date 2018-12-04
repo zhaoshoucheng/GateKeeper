@@ -382,13 +382,14 @@ class OverviewService extends BaseService
 
         $result = [];
         foreach ($alarmCate as $k=>$v) {
+            $num = $res[$v['key']] ?? 0;
+
             $result['count'][$k] = [
                 'cate' => $v['name'],
-                'num'  => $res[$v['key']] ?? 0,
+                'num'  => $num,
             ];
 
             $result['ratio'][$k] = [
-                $num = $res[$v['key']] ?? 0;
                 'cate' => $v['name'],
                 'ratio' => ($total >= 1) ? round(($num / $total) * 100) . '%' : '0%',
             ];
