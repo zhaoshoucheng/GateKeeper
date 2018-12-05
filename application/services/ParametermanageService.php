@@ -7,7 +7,7 @@
 
 namespace Services;
 
-class ParametermangeService extends BaseService
+class ParametermanageService extends BaseService
 {
     public function __construct()
     {
@@ -29,24 +29,8 @@ class ParametermangeService extends BaseService
         $cityId = $params['city_id'];
         $areaId = $params['area_id'];
         $isDefault = $params['is_default'];
-        $ret = [];
-        for ($i = 1; $i < 5; $i++) {
-            $temp = [];
-            for ($j = 0; $j < 24; $j++) {
-                array_push(
-                    $temp,
-                    $this->parametermanage_model->getParameterByArea(
-                        $cityId,
-                        $areaId,
-                        $isDefault,
-                        $i,
-                        $j,
-                    ),
-                );
-            }
-            $ret[$i] = $temp;
-        }
-        return ['status'=>$ret];
+        $res = $this->parametermanage_model->getParameterByArea($cityId, $areaId, $isDefault);
+        return $res
     }
 
     /**

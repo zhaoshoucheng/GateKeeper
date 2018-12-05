@@ -7,17 +7,17 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use Services\ParametermangeService;
+use Services\ParametermanageService;
 
-class Parametermange extends MY_Controller
+class Parametermanage extends MY_Controller
 {
-    protected $parametermangeService;
+    protected $parametermanageService;
 
     public function __construct()
     {
         parent::__construct();
 
-        $this->parametermangeService = new parametermangeService();
+        $this->parametermanageService = new parametermanageService();
     }
 
     /**
@@ -38,7 +38,7 @@ class Parametermange extends MY_Controller
             'is_default' => 'required|in_list[0, 1]',
         ]);
 
-        $data = $this->parametermangeService->paramList($params);
+        $data = $this->parametermanageService->paramList($params);
         $this->response($data);
     }
 }

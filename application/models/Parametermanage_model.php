@@ -26,23 +26,21 @@ class Parametermanage_model extends CI_Model
      * @param $cityId
      * @param $areaId
      * @param $isDefault
-     * @param $status
-     * @param $hour
      * @return array
      */
-    public function getParameterByArea($cityId, $areaId, $isDefault, $status, $hour)
+    public function getParameterByArea($cityId, $areaId, $isDefault)
     {
         $res = $this->db->select('*')
-                    ->where('city_id', $cityId),
-                    ->where('area_id', $areaId),
-                    ->where('is_default', $isDefault),
-                    ->where('status', $status),
-                    ->where('hour', $hour),
+                    ->where('city_id', $cityId)
+                    ->where('area_id', $areaId)
+                    ->where('is_default', $isDefault)
+                    ->order_by('status')
+                    ->order_by('hour')
                     ->get()->result_array();
         if (empty($res)) {
-            $res = $this->getParameter($isDefault, $status, $hour);
+            $res = $this->getParameter($isDefault);
             if (empty($res)) {
-                $res = $this->getParameter(1, $status, $hour);
+                $res = $this->getParameter(1);
             }
         }
 
@@ -53,16 +51,14 @@ class Parametermanage_model extends CI_Model
      * 获取优化配置的参数
      *
      * @param $isDefault
-     * @param $status
-     * @param $hour
      * @return array
      */
-    public function getParameter($isDefault, $status, $hour)
+    public function getParameter($isDefault)
     {
         $res = $this->db->select('*')
-                    ->where('is_default', $isDefault),
-                    ->where('status', $status),
-                    ->where('hour', $hour),
+                    ->where('is_default', $isDefault)
+                    ->order_by('status')
+                    ->order_by('hour')
                     ->get();
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
