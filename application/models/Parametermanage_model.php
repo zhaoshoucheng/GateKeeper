@@ -31,6 +31,7 @@ class Parametermanage_model extends CI_Model
     public function getParameterByArea($cityId, $areaId, $isDefault)
     {
         $res = $this->db->select('*')
+                    ->from($this->tb)
                     ->where('city_id', $cityId)
                     ->where('area_id', $areaId)
                     ->where('is_default', $isDefault)
@@ -56,6 +57,7 @@ class Parametermanage_model extends CI_Model
     public function getParameter($isDefault)
     {
         $res = $this->db->select('*')
+                    ->from($this->tb)
                     ->where('is_default', $isDefault)
                     ->order_by('status')
                     ->order_by('hour')

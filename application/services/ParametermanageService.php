@@ -30,7 +30,7 @@ class ParametermanageService extends BaseService
         $areaId = $params['area_id'];
         $isDefault = $params['is_default'];
         $res = $this->parametermanage_model->getParameterByArea($cityId, $areaId, $isDefault);
-        return $res
+        return $res;
     }
 
     /**

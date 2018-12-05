@@ -35,7 +35,7 @@ class Parametermanage extends MY_Controller
         $this->validate([
             'city_id'    => 'required|is_natural_no_zero',
             'area_id'    => 'required|is_natural_no_zero',
-            'is_default' => 'required|in_list[0, 1]',
+            'is_default' => 'required|in_list[0,1]',
         ]);
 
         $data = $this->parametermanageService->paramList($params);
