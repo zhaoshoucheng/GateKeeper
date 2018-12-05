@@ -307,6 +307,12 @@ class Realtime_model extends CI_Model
                 'movementId' => 'eq',
             ],
             'limit'         => 5000,
+            "orderOperations" => [
+                [
+                    'orderField' => 'dayTime',
+                    'orderType'  => 'ASC',
+                ],
+            ],
         ];
         $realTimeEsData = $this->searchDetail($data);
         return $realTimeEsData;
