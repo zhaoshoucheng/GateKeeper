@@ -420,9 +420,14 @@ class Realtime_model extends CI_Model
             ],
             'limit'         => 20,
             'orderField'    => 'avgStopNumUp',
-            'asc'           => false,
+            "orderOperations" => [
+                [
+                    'orderField' => 'avgStopNumUp',
+                    'orderType'  => 'DESC',
+                ],
+            ],
         ];
         $realTimeEsData = $this->searchDetail($data);
-
+        return $realTimeEsData;
     }
 }
