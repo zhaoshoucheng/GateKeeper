@@ -78,10 +78,10 @@ class Parametermanage_model extends CI_Model
         unset($data['update_at']);
         $data['is_default'] = 0;
 
-        $cityId = $params['city_id'];
-        $areaId = $params['area_id'];
-        $hour = $params['hour'];
-        $status = $params['status'];
+        $cityId = $data['city_id'];
+        $areaId = $data['area_id'];
+        $hour = $data['hour'];
+        $status = $data['status'];
 
         $res = $this->db->select('*')
                     ->from($this->tb)
