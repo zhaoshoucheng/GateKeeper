@@ -21,6 +21,8 @@ if (in_array($hostname, $online_host)) {
 }
 
 if ($development == 2) {
+    //线上及预发环境配置
+
     // 路网接口服务器地址
     $waymap_server = '100.69.238.11';
     // 路网接口服务器端口
@@ -52,17 +54,17 @@ if ($development == 2) {
     $es_ext    = '';
 
     // new timing
-    $signal_control_server = '10.85.128.81';
-    $signal_control_port   = '30062';
+    $signal_control_server = '10.88.128.149';
+    $signal_control_port   = '30516';
     $signal_control_ext    = '/signal-timing';
-
+    
     // xmmtrace
     $xmmtrace_server = '100.69.238.158';
     $xmmtrace_port   = '8001';
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
     //traj  config
-    $traj_server = '100.90.164.31:8032';
+    $traj_server = '10.85.128.81:30187';
     $traj_ext   = '/traj-service';
 
     // 报警es接口
@@ -76,8 +78,11 @@ if ($development == 2) {
     ];
 
     //报警数据历史处理
-    $realtime_callback = 'http://100.90.164.31:8033';
+    $realtime_callback = 'http://10.85.128.81:30101';
 } else {
+    //测试环境配置
+
+
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
     // 路网接口服务器端口
@@ -119,7 +124,7 @@ if ($development == 2) {
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
     //traj  config
-        $traj_server = '100.90.164.31:8032';
+    $traj_server = '100.90.164.31:8032';
     $traj_ext   = '/traj-service';
 
     // 报警es
