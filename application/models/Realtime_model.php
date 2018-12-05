@@ -48,14 +48,16 @@ class Realtime_model extends CI_Model
         }
         $result = json_decode($result, true);
 
-        if ($result['code'] == '000000') {  // 000000:还有数据可查询 400001:查询完成
-            $resData = $result['result']['diagnosisIndices'];
-            $data['scrollsId'] = $result['result']['scrollsId'];
-            $resData = array_merge($resData, $this->searchDetail($data));
-        }
+        if (!isset($data['limit']) || $data['limit'] == 0) { // limit查询不需要再去轮循
+            if ($result['code'] == '000000') {  // 000000:还有数据可查询 400001:查询完成
+                $resData = $result['result']['diagnosisIndices'];
+                $data['scrollsId'] = $result['result']['scrollsId'];
+                $resData = array_merge($resData, $this->searchDetail($data));
+            }
 
-        if ($result['code'] == '400001') {
-            $resData = array_merge($resData, $result['result']['diagnosisIndices']);
+            if ($result['code'] == '400001') {
+                $resData = array_merge($resData, $result['result']['diagnosisIndices']);
+            }
         }
 
         if ($result['code'] != '000000' && $result['code'] != '400001') {
@@ -418,7 +420,7 @@ class Realtime_model extends CI_Model
                 'trailNum'  => 'gte', // 轨迹数大于等于5
                 'dayTime'   => 'eq',  // 等于hour
             ],
-            'limit'         => 20,
+            'limit'         => $pagesize,
             'orderField'    => 'avgStopNumUp',
             "orderOperations" => [
                 [
