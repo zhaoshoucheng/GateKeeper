@@ -139,7 +139,7 @@ class CommonService extends BaseService
                 'areaId'   => (string)$v['city_id'],
                 'areaName' => $v['city_name'],
                 'level'    => 1,
-                'apid'     => -1,
+                'apid'     => '-1',
             ];
         }
 
@@ -163,7 +163,7 @@ class CommonService extends BaseService
                 'areaId'   => (string)$k,
                 'areaName' => $v,
                 'level'    => 2,
-                'apid'     => $cityId,
+                'apid'     => (string)$cityId,
             ];
         }
 
@@ -194,7 +194,7 @@ class CommonService extends BaseService
                 'areaId'   => (string)$v['id'],
                 'areaName' => $v['area_name'],
                 'level'    => 2,
-                'apid'     => $cityId,
+                'apid'     => (string)$cityId,
             ];
         }
 
@@ -223,7 +223,7 @@ class CommonService extends BaseService
                 'areaId'   => (string)$v['id'],
                 'areaName' => $v['road_name'],
                 'level'    => 2,
-                'apid'     => $cityId,
+                'apid'     => (string)$cityId,
             ];
         }
 
@@ -249,7 +249,7 @@ class CommonService extends BaseService
                 'areaId'   => (string)$v['logic_junction_id'],
                 'areaName' => $v['name'],
                 'level'    => 3,
-                'apid'     => $areaId,
+                'apid'     => (string)$areaId,
             ];
         }
 
