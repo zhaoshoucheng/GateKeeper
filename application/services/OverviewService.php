@@ -320,13 +320,13 @@ class OverviewService extends BaseService
 
         $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota, $flowsInfo) {
             return [
-                'time' => date('H:i:s', strtotime($item['dayTime'])),
+                'time'              => date('H:i:s', strtotime($item['dayTime'])),
                 'logic_junction_id' => $item['junctionId'],
-                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
-                'logic_flow_id' => $item['movementId'],
-                'flow_name' => $flowsInfo[$item['junctionId']][$item['movementId']] ?? '未知方向',
-                'stop_time_cycle' => $realTimeQuota['stop_time_cycle']['round']($item['avgStopNumUp']),
-                'quota_unit' => $realTimeQuota['stop_time_cycle']['unit'],
+                'junction_name'     => $junctionIdNames[$item['junctionId']] ?? '未知路口',
+                'logic_flow_id'     => $item['movementId'],
+                'flow_name'         => $flowsInfo[$item['junctionId']][$item['movementId']] ?? '未知方向',
+                'stop_time_cycle'   => $realTimeQuota['stop_time_cycle']['round']($item['avgStopNumUp']),
+                'quota_unit'        => $realTimeQuota['stop_time_cycle']['unit'],
             ];
         }, $result);
 

@@ -58,6 +58,8 @@ class Realtime_model extends CI_Model
             if ($result['code'] == '400001') {
                 $resData = array_merge($resData, $result['result']['diagnosisIndices']);
             }
+        } else {
+            $resData = $result['result']['diagnosisIndices'];
         }
 
         if ($result['code'] != '000000' && $result['code'] != '400001') {
@@ -421,7 +423,6 @@ class Realtime_model extends CI_Model
                 'dayTime'   => 'eq',  // 等于hour
             ],
             'limit'         => $pagesize,
-            'orderField'    => 'avgStopNumUp',
             "orderOperations" => [
                 [
                     'orderField' => 'avgStopNumUp',
