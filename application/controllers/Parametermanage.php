@@ -41,4 +41,25 @@ class Parametermanage extends MY_Controller
         $data = $this->parametermanageService->paramList($params);
         $this->response($data);
     }
+
+    /**
+     * 更新参数列表
+     *
+     * @throws Exception
+     */
+    public function editParamList()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        // 校验参数
+        $this->validate([
+            'city_id'    => 'required|is_natural_no_zero',
+            'area_id'    => 'required|is_natural_no_zero',
+            'hour'       => 'required|in_list['.implode(',', range(0,23)).']',
+            'status'     => 'required|in_list['.implode(',', range(1,4)).']',
+        ]);
+
+        $data = $this->parametermanageService->updateParamList($params);
+        $this->response($data);
+    }
 }

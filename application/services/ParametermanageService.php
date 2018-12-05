@@ -38,10 +38,12 @@ class ParametermanageService extends BaseService
      *
      * @param $params
      *
-     * @return array
+     * @return bool
      * @throws \Exception
      */
     public function updateParamList($param)
     {
+        $res = $this->parametermanage_model->updateParameter($param);
+        return $res;
     }
 }

@@ -65,4 +65,37 @@ class Parametermanage_model extends CI_Model
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
+
+    /**
+     * 更新优化配置的参数
+     *
+     * @param $data
+     * @return bool 更新的结果
+     */
+    public function updateParameter($data)
+    {
+        unset($data['create_at']);
+        unset($data['update_at']);
+        $data['is_default'] = 0;
+
+        $cityId = $params['city_id'];
+        $areaId = $params['area_id'];
+        $hour = $params['hour'];
+        $status = $params['status'];
+
+        $res = $this->db->select('*')
+                    ->from($this->tb)
+                    ->where('city_id', $cityId)
+                    ->where('area_id', $areaId)
+                    ->where('hour', $hour)
+                    ->where('status', $status)
+                    ->where('is_default', 0)
+                    ->get()->result_array();
+
+        if (empty($res)) {
+            return $this->db->insert($this->tb, $data);
+        }
+        return $this->db->where('id', $res[0]['id'])
+                    ->update($this->tb, $data);
+    }
 }
