@@ -162,8 +162,8 @@ class CommonService extends BaseService
             $result[$k] = [
                 'areaId'   => (string)$k,
                 'areaName' => $v,
-                'level'    => 1,
-                'apid'     => -1,
+                'level'    => 2,
+                'apid'     => $cityId,
             ];
         }
 
@@ -193,8 +193,8 @@ class CommonService extends BaseService
             $result[$k] = [
                 'areaId'   => (string)$v['id'],
                 'areaName' => $v['area_name'],
-                'level'    => 1,
-                'apid'     => -1,
+                'level'    => 2,
+                'apid'     => $cityId,
             ];
         }
 
@@ -222,8 +222,8 @@ class CommonService extends BaseService
             $result[$k] = [
                 'areaId'   => (string)$v['id'],
                 'areaName' => $v['road_name'],
-                'level'    => 1,
-                'apid'     => -1,
+                'level'    => 2,
+                'apid'     => $cityId,
             ];
         }
 
@@ -233,13 +233,13 @@ class CommonService extends BaseService
     /**
      * 根据城市ID获取所有路口
      * @param $cityId    long 城市ID
-     * @param $districts int  N 行政区域ID 当areaType=4时传递
+     * @param $areaId    int  行政区域ID
      * @return mixed
      */
-    public function getAllJunctionByCityId($cityId, $districts)
+    public function getAllJunctionByCityId($cityId, $areaId)
     {
         // 获取路网全城路口
-        $res = $this->waymap_model->getCityJunctionsByDistricts($cityId, $districts);
+        $res = $this->waymap_model->getCityJunctionsByDistricts($cityId, $areaId);
         if (!$res) {
             return [];
         }
@@ -248,8 +248,8 @@ class CommonService extends BaseService
             $result[$k] = [
                 'areaId'   => (string)$v['logic_junction_id'],
                 'areaName' => $v['name'],
-                'level'    => 1,
-                'apid'     => -1,
+                'level'    => 3,
+                'apid'     => $areaId,
             ];
         }
 
