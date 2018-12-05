@@ -282,27 +282,34 @@ class Realtime_model extends CI_Model
     }
 
     /**
-     * @param        $cityId
-     * @param        $logicJunctionId
-     * @param        $logicFlowId
-     * @param        $upTime
-     * @param string $select
-     *
+     * 获取指标趋势图
+     * @param $params['city_id']      int    Y 城市ID
+     * @param $params['date']         string N 日期 yyyy-mm-dd 不传默认当天
+     * @param $params['junction_id']  string Y 路口ID
+     * @param $params['flow_id']      string Y 相位ID
      * @return array
      * @throws Exception
      */
-    public function getQuotaByFlowId($cityId, $logicJunctionId, $logicFlowId, $upTime, $select = '*')
+    public function getQuotaByFlowId($params)
     {
-        $this->isExisted($cityId);
-
-        $res = $this->db->select($select)
-            ->from($this->tb . $cityId)
-            ->where('logic_junction_id', $logicJunctionId)
-            ->where('logic_flow_id', $logicFlowId)
-            ->where('updated_at >', $upTime)
-            ->get();
-
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+        $timestamp = strtotime($params['date'] . ' 00:00:00') * 1000;
+        $data = [
+            'source'        => 'signal_control',   // 调用方
+            'cityId'        => $params['city_id'], // 城市ID
+            'requestId'     => get_traceid(),      // trace id
+            'timestamp'     => $timestamp,
+            'junctionId'    => $params['junction_id'],
+            'movementId'    => $params['flow_id'],
+            'andOperations' => [
+                'cityId'     => 'eq',  // cityId相等
+                'timestamp'  => 'gte', // 大于等于当天开始时间
+                'junctionId' => 'eq',
+                'movementId' => 'eq',
+            ],
+            'limit'         => 5000,
+        ];
+        $realTimeEsData = $this->searchDetail($data);
+        return $realTimeEsData;
     }
 
     /**
@@ -384,29 +391,32 @@ class Realtime_model extends CI_Model
     }
 
     /**
-     * @param        $cityId
-     * @param        $date
-     * @param        $hour
-     * @param        $pagesize
-     * @param string $select
-     *
+     * 停车top20
+     * @param  $cityId    int    城市ID
+     * @param  $date      string 日期 yyyy-mm-dd
+     * @param  $hour      string 时间 HH:ii:ss
+     * @param  $pagesize  int    获取数量
      * @return array
      * @throws Exception
      */
-    public function getTopCycleTime($cityId, $date, $hour, $pagesize, $select = '*')
+    public function getTopCycleTime($cityId, $date, $hour, $pagesize)
     {
-        $this->isExisted($cityId);
+        $data = [
+            'source'        => 'signal_control', // 调用方
+            'cityId'        => $cityId,          // 城市ID
+            'requestId'     => get_traceid(),    // trace id
+            'trailNum'      => 10,
+            'dayTime'       => $date ." ". $hour,
+            'andOperations' => [
+                'cityId'    => 'eq',  // cityId相等
+                'trailNum'  => 'gte', // 轨迹数大于等于5
+                'dayTime'   => 'eq',  // 等于hour
+            ],
+            'limit'         => 20,
+            'orderField'    => 'avgStopNumUp',
+            'asc'           => false,
+        ];
+        $realTimeEsData = $this->searchDetail($data);
 
-        $res = $this->db->select($select)
-            ->from($this->tb . $cityId)
-            ->where('hour', $hour)
-            ->where('traj_count >=', 10)
-            ->where('updated_at >=', $date . ' 00:00:00')
-            ->where('updated_at <=', $date . ' 23:59:59')
-            ->order_by('stop_time_cycle', 'desc')
-            ->limit($pagesize)
-            ->get();
-
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 }

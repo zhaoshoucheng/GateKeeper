@@ -136,7 +136,7 @@ class CommonService extends BaseService
         $result = [];
         foreach ($res as $k=>$v) {
             $result[$k] = [
-                'areaId'   => $v['city_id'],
+                'areaId'   => (string)$v['city_id'],
                 'areaName' => $v['city_name'],
                 'level'    => 1,
                 'apid'     => -1,
@@ -160,7 +160,7 @@ class CommonService extends BaseService
 
         foreach ($res['districts'] as $k=>$v) {
             $result[$k] = [
-                'areaId'   => $k,
+                'areaId'   => (string)$k,
                 'areaName' => $v,
                 'level'    => 1,
                 'apid'     => -1,
@@ -191,7 +191,7 @@ class CommonService extends BaseService
         $result = [];
         foreach ($res as $k=>$v) {
             $result[$k] = [
-                'areaId'   => $v['id'],
+                'areaId'   => (string)$v['id'],
                 'areaName' => $v['area_name'],
                 'level'    => 1,
                 'apid'     => -1,
@@ -220,7 +220,7 @@ class CommonService extends BaseService
         $result = [];
         foreach ($res as $k=>$v) {
             $result[$k] = [
-                'areaId'   => $v['id'],
+                'areaId'   => (string)$v['id'],
                 'areaName' => $v['road_name'],
                 'level'    => 1,
                 'apid'     => -1,
@@ -246,7 +246,7 @@ class CommonService extends BaseService
 
         foreach ($res as $k=>$v) {
             $result[$k] = [
-                'areaId'   => $v['logic_junction_id'],
+                'areaId'   => (string)$v['logic_junction_id'],
                 'areaName' => $v['name'],
                 'level'    => 1,
                 'apid'     => -1,

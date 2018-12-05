@@ -175,45 +175,45 @@ class EvaluateService extends BaseService
     }
 
     /**
-     * 获取指标趋势数据
-     *
-     * @param $params
-     *
+     * 获取指标趋势图
+     * @param $params['city_id']     int    Y 城市ID
+     * @param $params['quota_key']   string Y 指标KEY
+     * @param $params['date']        string N 日期 yyyy-mm-dd 不传默认当天
+     * @param $params['time_point']  string N 时间 HH:ii:ss
+     * @param $params['junction_id'] string Y 路口ID
+     * @param $params['flow_id']     string Y 相位ID
      * @return array
      * @throws \Exception
      */
     public function getQuotaTrend($params)
     {
-        $cityId          = $params['city_id'];
-        $quotaKey        = $params['quota_key'];
-        $date            = $params['date'];
-        $logicJunctionId = $params['junction_id'];
-        $logicFlowId     = $params['flow_id'];
-
-        $select = 'hour, ' . $quotaKey;
-        $upTime = $date . ' 00:00:00';
-
-        $data = $this->realtime_model->getQuotaByFlowId($cityId, $logicJunctionId, $logicFlowId, $upTime, $select);
-
-        $result = [];
-
         // 指标配置
         $quotaConf = $this->config->item('real_time_quota');
+        // 比如stop_rate现在对应的es的新字段是oneStopRatioUp+multiStopRatioUp
+        $esQuotaKey = explode(',', $quotaConf[$params['quota_key']]['escolumn']);
 
-        $result['dataList'] = array_map(function ($val) use ($quotaKey) {
+        $data = $this->realtime_model->getQuotaByFlowId($params);
+        $result = [];
+
+        $result['dataList'] = array_map(function ($val) use ($params, $esQuotaKey) {
+            $value = 0;
+            foreach ($esQuotaKey as $k=>$v) {
+                $value += $val[$v];
+            }
+
             return [
                 // 指标值 Y轴
-                $val[$quotaKey],
+                $value,
                 // 时间点 X轴
-                $val['hour'],
+                date('H:i:s', strtotime($val['dayTime'])),
             ];
         }, $data);
 
         // 返回数据：指标信息
         $result['quota_info'] = [
-            'name' => $quotaConf[$quotaKey]['name'],
-            'key' => $quotaKey,
-            'unit' => $quotaConf[$quotaKey]['unit'],
+            'name' => $quotaConf[$params['quota_key']]['name'],
+            'key' => $params['quota_key'],
+            'unit' => $quotaConf[$params['quota_key']]['unit'],
         ];
 
         return $result;

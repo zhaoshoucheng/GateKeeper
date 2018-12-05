@@ -98,7 +98,12 @@ class Evaluate extends MY_Controller
 
     /**
      * 获取指标趋势图
-     *
+     * @param $params['city_id']     int    Y 城市ID
+     * @param $params['quota_key']   string Y 指标KEY
+     * @param $params['date']        string N 日期 yyyy-mm-dd 不传默认当天
+     * @param $params['time_point']  string N 时间 HH:ii:ss
+     * @param $params['junction_id'] string Y 路口ID
+     * @param $params['flow_id']     string Y 相位ID
      * @throws Exception
      */
     public function getQuotaTrend()

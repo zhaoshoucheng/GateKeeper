@@ -350,7 +350,7 @@ class Realtimewarning_model extends CI_Model
                 $temp[] = $item;
             }
         };
-        
+
         $lngs = array_filter(array_column($temp, 'lng'));
         $lats = array_filter(array_column($temp, 'lat'));
 
