@@ -54,10 +54,10 @@ if ($development == 2) {
     $es_ext    = '';
 
     // new timing
-    $signal_control_server = '10.85.128.81';
-    $signal_control_port   = '30062';
+    $signal_control_server = '10.88.128.149';
+    $signal_control_port   = '30516';
     $signal_control_ext    = '/signal-timing';
-
+    
     // xmmtrace
     $xmmtrace_server = '100.69.238.158';
     $xmmtrace_port   = '8001';
