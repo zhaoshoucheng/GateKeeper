@@ -7,9 +7,3 @@ package.json
 application/logs/
 vendor/
 composer.lock
-
-# vim
-*~
-*.un~
-*.*[~]
-*.swp
