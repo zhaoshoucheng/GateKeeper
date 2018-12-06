@@ -147,15 +147,11 @@ class TimingAdaptionService extends BaseService
         $res = $this->adapt_model->getAdaptByJunctionId($logicJunctionId);
 
         if (!$res) {
-            throw new \Exception('获取自适应配时信息失败', ERR_DATABASE);
-        }
-
-        if (!isset($res['timing_info'])) {
-            throw new \Exception('数据格式错误', ERR_DATABASE);
+            throw new \Exception('此路口无自适应配时信息', ERR_DATABASE);
         }
 
         if (empty($res['timing_info'])) {
-            throw new \Exception('改路口无优化数据', ERR_DEFAULT);
+            throw new \Exception('该路口无优化数据', ERR_DEFAULT);
         }
 
         $result = json_decode($res['timing_info'], true);

@@ -249,13 +249,15 @@ class Realtime_model extends CI_Model
     {
         $date = date('Y-m-d');
 
+        $flowIds = implode(',', $logicFlowId);
+
         $data = [
             'source'        => 'signal_control', // 调用方
             'cityId'        => $cityId,          // 城市ID
             'requestId'     => get_traceid(),    // trace id
             'junctionId'    => $logicJunctionId,
             'dayTime'       => $date ." ". $hour,
-            'movementId'    => "{$logicFlowId}",
+            'movementId'    => "{$flowIds}",
             'andOperations' => [
                 'cityId'     => 'eq',
                 'junctionId' => 'eq',
