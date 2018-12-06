@@ -33,10 +33,9 @@ class Insidecommon extends CI_Controller
     {
         $params = $this->input->post(null, true);
 
-        // 校验参数
-        $this->validate([
-            'areaType' => 'required|is_natural',
-        ]);
+        if (!isset($params['areaType'])) {
+            throw new \Exception('areaType不可为空！', ERR_PARAMETERS);
+        }
 
         if (in_array($params['areaType'], [1, 2, 3, 4])) {
             if (intval($params['areaId']) < 1) {
@@ -70,6 +69,15 @@ class Insidecommon extends CI_Controller
                 break;
         }
 
-        $this->response($result);
+        $output = [
+            'errno'    => 0,
+            'errmsg'   => 'success.',
+            'data'     => $result,
+            'traceid'  => get_traceid(),
+            'username' => 'unknown',
+        ];
+        header("Content-Type:application/json;charset=UTF-8");
+        echo json_encode($output);
+        exit;
     }
 }
