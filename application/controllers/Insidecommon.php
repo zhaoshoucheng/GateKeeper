@@ -34,12 +34,30 @@ class Insidecommon extends CI_Controller
         $params = $this->input->post(null, true);
 
         if (!isset($params['areaType'])) {
-            throw new \Exception('areaType不可为空！', ERR_PARAMETERS);
+            $output = [
+                'errno'    => -1,
+                'errmsg'   => 'areaType不能为空！',
+                'data'     => [],
+                'traceid'  => get_traceid(),
+                'username' => 'unknown',
+            ];
+            header("Content-Type:application/json;charset=UTF-8");
+            echo json_encode($output);
+            exit;
         }
 
         if (in_array($params['areaType'], [1, 2, 3, 4])) {
             if (intval($params['areaId']) < 1) {
-                throw new \Exception('areaId不能为空！', ERR_PARAMETERS);
+                $output = [
+                    'errno'    => -1,
+                    'errmsg'   => 'areaId不能为空！',
+                    'data'     => [],
+                    'traceid'  => get_traceid(),
+                    'username' => 'unknown',
+                ];
+                header("Content-Type:application/json;charset=UTF-8");
+                echo json_encode($output);
+                exit;
             }
         }
 
