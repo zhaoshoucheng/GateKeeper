@@ -142,14 +142,13 @@ class RoadService extends BaseService
     /**
      * 获取全城全部路口详情
      *
-     * @param $params
+     * @param $params['city_id'] int 城市ID
      *
      * @return array
      */
     public function getAllRoadDetail($params)
     {
         $cityId = $params['city_id'];
-        $flag   = $params['flag'] ?? false;
 
         $select = 'road_id, logic_junction_ids, road_name, road_direction';
 
@@ -159,8 +158,8 @@ class RoadService extends BaseService
 
         foreach ($roadList as $item) {
             $roadId = $item['road_id'];
-            //从 Redis 获取数据失败
-            if ($flag || !($res = $this->redis_model->getData('Road_' . $roadId))) {
+            $res = $this->redis_model->getData('Road_' . $roadId);
+            if (!$res) {
                 $data = [
                     'city_id' => $cityId,
                     'road_id' => $roadId,
@@ -175,7 +174,7 @@ class RoadService extends BaseService
             } else {
                 $res = json_decode($res, true);
             }
-
+            $res['road_info'] = array_values($res['road_info']);
             $res['road'] = $item;
             $results[]   = $res;
         }

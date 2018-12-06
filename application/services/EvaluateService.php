@@ -122,9 +122,10 @@ class EvaluateService extends BaseService
 
     /**
      * 获取路口指标排序列表
-     *
-     * @param $params
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['quota_key']  string Y 指标KEY
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
      * @return array
      * @throws \Exception
      */
