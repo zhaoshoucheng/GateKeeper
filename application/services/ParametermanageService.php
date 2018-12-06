@@ -72,7 +72,7 @@ class ParametermanageService extends BaseService
      * @return bool
      * @throws \Exception
      */
-    public function updateParamList($param)
+    public function updateParamLimit($param)
     {
         $res = $this->parametermanage_model->updateParameterLimit($param);
         return $res;

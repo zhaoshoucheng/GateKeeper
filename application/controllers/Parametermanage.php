@@ -60,7 +60,7 @@ class Parametermanage extends MY_Controller
             'is_default' => 'required|in_list[0,1]',
         ]);
 
-        $data = $this->parametermanageService->paramList($params);
+        $data = $this->parametermanageService->paramLimi($params);
         $this->response($data);
     }
     /**

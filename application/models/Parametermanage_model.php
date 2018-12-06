@@ -8,7 +8,7 @@
 class Parametermanage_model extends CI_Model
 {
     private $tb = 'optimized_parameter_config';
-    private $parameterLimitTB = 'optimized_parameter_config_limit';
+    private $parameterLimitTB = 'optimized_parameter_config_limits';
     private $db = '';
 
     public function __construct()
@@ -143,12 +143,12 @@ class Parametermanage_model extends CI_Model
     }
 
     /**
-     * 更新优化配置的参数
+     * 更新优化配置的参数阀值
      *
      * @param $data
      * @return bool 更新的结果
      */
-    public function updateParameter($data)
+    public function updateParameterLimit($data)
     {
         unset($data['create_at']);
         unset($data['update_at']);
@@ -158,16 +158,16 @@ class Parametermanage_model extends CI_Model
         $areaId = $data['area_id'];
 
         $res = $this->db->select('*')
-                    ->from($this->tb)
+                    ->from($this->parameterLimitTB)
                     ->where('city_id', $cityId)
                     ->where('area_id', $areaId)
                     ->where('is_default', 0)
                     ->get()->result_array();
 
         if (empty($res)) {
-            return $this->db->insert($this->tb, $data);
+            return $this->db->insert($this->parameterLimitTB, $data);
         }
         return $this->db->where('id', $res[0]['id'])
-                    ->update($this->tb, $data);
+                    ->update($this->parameterLimitTB, $data);
     }
 }
