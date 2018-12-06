@@ -245,19 +245,28 @@ class Realtime_model extends CI_Model
      * @return array
      * @throws Exception
      */
-    public function getFlowsInFlowIds($cityId, $hour, $logicJunctionId, $logicFlowId, $select = '*')
+    public function getFlowsInFlowIds($cityId, $hour, $logicJunctionId, $logicFlowId)
     {
-        $this->isExisted($cityId);
+        $date = date('Y-m-d');
 
-        $res = $this->db->select($select)
-            ->from($this->tb . $cityId)
-            ->where('hour', $hour)
-            ->where('logic_junction_id', $logicJunctionId)
-            ->where('updated_at > ', date('Y-m-d', strtotime('-10  minutes')))
-            ->where_in('logic_flow_id', $logicFlowId)
-            ->get();
+        $data = [
+            'source'        => 'signal_control', // 调用方
+            'cityId'        => $cityId,          // 城市ID
+            'requestId'     => get_traceid(),    // trace id
+            'junctionId'    => $logicJunctionId,
+            'dayTime'       => $date ." ". $hour,
+            'movementId'    => "{$logicFlowId}",
+            'andOperations' => [
+                'cityId'     => 'eq',
+                'junctionId' => 'eq',
+                'dayTime'    => 'eq',
+                'movementId' => 'in',
+            ],
+            'limit'         => 5000,
+        ];
+        $realTimeEsData = $this->searchDetail($data);
 
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+        return $realTimeEsData;
     }
 
     /**
