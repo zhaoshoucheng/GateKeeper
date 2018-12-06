@@ -66,7 +66,10 @@ class TimingAdaptationArea extends MY_Controller
 
     /**
      * 获取区域实时报警信息
-     *
+     * @param $params['city_id']     int 城市ID
+     * @param $params['area_id']     int 区域ID
+     * @param $params['alarm_type']  int 报警类型 0，全部，1，过饱和，2，溢流。默认0
+     * @param $params['ignore_type'] int 类型：0，全部，1，已忽略，2，未忽略。默认0
      * @throws Exception
      */
     public function realTimeAlarmList()
@@ -74,9 +77,9 @@ class TimingAdaptationArea extends MY_Controller
         $params = $this->input->post(null, true);
 
         $this->validate([
-            'city_id' => 'required|is_natural_no_zero',
-            'area_id' => 'required|is_natural_no_zero',
-            'alarm_type' => 'in_list[1,2]',
+            'city_id'     => 'required|is_natural_no_zero',
+            'area_id'     => 'required|is_natural_no_zero',
+            'alarm_type'  => 'in_list[1,2]',
             'ignore_type' => 'in_list[1,2]',
         ]);
 

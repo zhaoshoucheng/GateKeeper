@@ -13,7 +13,6 @@ use Didi\Cloud\Collection\Collection;
 /**
  * Class OverviewService
  * @package Services
- * @property \RealtimeAlarm_model $realtimeAlarm_model
  * @property \Realtime_model      $realtime_model
  */
 class OverviewService extends BaseService
@@ -32,7 +31,6 @@ class OverviewService extends BaseService
         $this->load->model('redis_model');
         $this->load->model('waymap_model');
         $this->load->model('realtime_model');
-        $this->load->model('realtimeAlarm_model');
         $this->load->model('alarmanalysis_model');
 
         $this->config->load('realtime_conf');

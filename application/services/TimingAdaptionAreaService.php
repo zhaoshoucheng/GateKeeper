@@ -16,7 +16,6 @@ use Overtrue\Pinyin\Pinyin;
  * @package Services
  * @property \TimeAlarmRemarks_model $timeAlarmRemarks_model
  * @property \Adapt_model            $adapt_model
- * @property \RealtimeAlarm_model    $realtimeAlarm_model
  */
 class TimingAdaptionAreaService extends BaseService
 {
@@ -28,13 +27,15 @@ class TimingAdaptionAreaService extends BaseService
     {
         parent::__construct();
 
+        // load model
         $this->load->model('redis_model');
         $this->load->model('waymap_model');
         $this->load->model('adapt_model');
-        $this->load->model('realtimeAlarm_model');
+        $this->load->model('alarmanalysis_model');
 
+        // load config
         $this->load->config('nconf');
-
+        $this->load->config('realtime_conf');
         $this->load->helper('http_helper');
 
         $this->helperService = new HelperService();
@@ -409,12 +410,9 @@ class TimingAdaptionAreaService extends BaseService
 
             // 获取最近时间
             $lastHour = $this->helperService->getLastestHour($cityId);
+            $date = date('Y-m-d');
 
-            $lastTime  = date('Y-m-d') . ' ' . $lastHour;
-            $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 300);
-            $date      = date('Y-m-d');
-
-            $result = $this->realtimeAlarm_model->getRealtimeAlarmList($cityId, $date, $lastTime, $cycleTime);
+            $result = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $lastHour);
         }
 
         return $result;
@@ -422,9 +420,10 @@ class TimingAdaptionAreaService extends BaseService
 
     /**
      * 获取区域实时报警信息
-     *
-     * @param $params
-     *
+     * @param $params['city_id']     int 城市ID
+     * @param $params['area_id']     int 区域ID
+     * @param $params['alarm_type']  int 报警类型 0，全部，1，过饱和，2，溢流。默认0
+     * @param $params['ignore_type'] int 类型：0，全部，1，已忽略，2，未忽略。默认0
      * @return array
      * @throws \Exception
      */
@@ -439,13 +438,15 @@ class TimingAdaptionAreaService extends BaseService
 
         // 获取实时报警路口信息（全城）
         $alarmJunctions = $this->getRealTimeAlarmJunctions($cityId);
-
         if (empty($alarmJunctions)) {
             return [];
         }
 
+        // 相位报警类型
+        $flowAlarmCate = $this->config->item('flow_alarm_category');
+
         // 根据alarm_type过滤路口
-        if ($alarmType != 0 && in_array($alarmType, [1, 2])) {
+        if ($alarmType != 0 && array_key_exists($alarmType, $flowAlarmCate)) {
             $alarmJunctions = array_filter($alarmJunctions, function ($item) use ($alarmType) {
                 return $item['type'] == $alarmType;
             });
@@ -464,7 +465,7 @@ class TimingAdaptionAreaService extends BaseService
             /**
              * redids中存在的是json格式的,json_decode后格式：
              * $areaIgnoreJunctionFlows = [
-             * 'xxxxxxxxxxxx', // logic_junction_id
+             * 'xxxxxxxxxxxx', // logic_flow_id
              * 'xxxxxxxxxxxx',
              * ];
              */
@@ -523,8 +524,6 @@ class TimingAdaptionAreaService extends BaseService
         $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
         // 获取路口相位信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
-        // 报警类别
-        $alarmCate = $this->config->item('alarm_category');
 
         /* 获取报警信息人工校验信息 */
         // 路口ID
@@ -542,15 +541,7 @@ class TimingAdaptionAreaService extends BaseService
             // 持续时间
             $durationTime = (strtotime($val['last_time']) - strtotime($val['start_time'])) / 60;
             if ($durationTime == 0) {
-                // 当前时间
-                $nowTime          = time();
-                $tempDurationTime = ($nowTime - strtotime($val['start_time'])) / 60;
-                // 默认持续时间为1分钟 有的只出现一次，表里记录last_time与start_time相等
-                if ($tempDurationTime < 1) {
-                    $durationTime = 1;
-                } else {
-                    $durationTime = $tempDurationTime;
-                }
+                $durationTime = 2;
             }
 
             $is_ignore = 2; // 是否忽略 默认未忽略
@@ -575,7 +566,7 @@ class TimingAdaptionAreaService extends BaseService
                     'junction_name' => $junctionIdName[$val['logic_junction_id']] ?? '',
                     'logic_flow_id' => $val['logic_flow_id'],
                     'flow_name' => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
-                    'alarm_comment' => $alarmCate[$val['type']]['name'] ?? '',
+                    'alarm_comment' => $flowAlarmCate[$val['type']]['name'] ?? '',
                     'alarm_key' => $val['type'],
                     'is_ignore' => $is_ignore,
                     'check' => $check,
