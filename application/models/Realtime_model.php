@@ -272,31 +272,6 @@ class Realtime_model extends CI_Model
     }
 
     /**
-     * @param        $cityId
-     * @param        $hour
-     * @param        $quotaKey
-     * @param string $select
-     *
-     * @return array
-     * @throws Exception
-     */
-    public function getQuotasByHour($cityId, $hour, $quotaKey, $select = '*')
-    {
-        $this->isExisted($cityId);
-
-        $res = $this->db->select($select)
-            ->from($this->tb . $cityId)
-            ->where('traj_count >= 10')
-            ->where('hour', $hour)
-            ->group_by('logic_junction_id')
-            ->order_by($quotaKey, 'DESC')
-            ->limit(100)
-            ->get();
-
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
-    }
-
-    /**
      * 获取指标趋势图
      * @param $params['city_id']      int    Y 城市ID
      * @param $params['date']         string N 日期 yyyy-mm-dd 不传默认当天
@@ -358,7 +333,7 @@ class Realtime_model extends CI_Model
             "quotaRequest" => [
                 "quotaType" => "weight_avg",
                 "quotas" => "sum_stopDelayUp*trailNum, sum_trailNum",
-                "groupField" => "logic_junction_id",
+                "groupField" => "junctionId",
             ],
         ];
 
@@ -396,7 +371,7 @@ class Realtime_model extends CI_Model
             "quotaRequest" => [
                 "quotaType"  => "weight_avg",
                 "quotas"     => "sum_stopDelayUp*trailNum, sum_trailNum",
-                "groupField" => "logic_junction_id",
+                "groupField" => "junctionId",
                 "orderField" => "weight_avg",
                 "asc"        => "false",
                 "limit"      => $pagesize,
