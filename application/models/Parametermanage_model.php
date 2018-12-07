@@ -36,8 +36,7 @@ class Parametermanage_model extends CI_Model
                     ->where('city_id', $cityId)
                     ->where('area_id', $areaId)
                     ->where('is_default', $isDefault)
-                    ->order_by('status')
-                    ->order_by('hour')
+                    ->order_by('status', 'hour')
                     ->get()->result_array();
         if (empty($res)) {
             $res = $this->getParameter($isDefault);

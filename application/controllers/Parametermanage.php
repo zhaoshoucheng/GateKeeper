@@ -24,7 +24,7 @@ class Parametermanage extends MY_Controller
      * 获取参数列表
      * @param $params['city_id'] int    Y 城市ID
      * @param $params['area_id'] int    Y 区域ID
-     * @param $params['is_default'] int    Y 1:默认, 2:非默认
+     * @param $params['is_default'] int    Y 1:默认, 0:非默认
      * @throws Exception
      */
     public function paramList()
@@ -60,7 +60,7 @@ class Parametermanage extends MY_Controller
             'is_default' => 'required|in_list[0,1]',
         ]);
 
-        $data = $this->parametermanageService->paramLimi($params);
+        $data = $this->parametermanageService->paramLimit($params);
         $this->response($data);
     }
     /**
