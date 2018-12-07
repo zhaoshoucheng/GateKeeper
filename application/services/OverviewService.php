@@ -270,7 +270,7 @@ class OverviewService extends BaseService
         $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize);
         $result = array_column($esRes, 'quotaMap');
 
-        $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
+        $ids = implode(',', array_unique(array_column($result, 'junctionId')));
 
         $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
         $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
@@ -280,8 +280,8 @@ class OverviewService extends BaseService
         $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota, $hour) {
             return [
                 'time' => $hour,
-                'logic_junction_id' => $item['logic_junction_id'],
-                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
+                'logic_junction_id' => $item['junctionId'],
+                'junction_name' => $junctionIdNames[$item['junctionId']] ?? '未知路口',
                 'stop_delay' => $realTimeQuota['stop_delay']['round']($item['weight_avg']),
                 'quota_unit' => $realTimeQuota['stop_delay']['unit'],
             ];
