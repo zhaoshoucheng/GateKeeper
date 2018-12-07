@@ -195,9 +195,9 @@ class EvaluateService extends BaseService
 
         // 返回数据：指标信息
         $result['quota_info'] = [
-            'name' => $quotaConf[$quotaKey]['name'],
-            'key' => $quotaKey,
-            'unit' => $quotaConf[$quotaKey]['unit'],
+            'name' => $quotaConf[$params['quota_key']]['name'],
+            'key' => $params['quota_key'],
+            'unit' => $quotaConf[$params['quota_key']]['unit'],
         ];
 
         return $result;
