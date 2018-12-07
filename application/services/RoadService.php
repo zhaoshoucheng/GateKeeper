@@ -174,7 +174,6 @@ class RoadService extends BaseService
             } else {
                 $res = json_decode($res, true);
             }
-            $res['road_info'] = array_values($res['road_info']);
             $res['road'] = $item;
             $results[]   = $res;
         }
@@ -374,10 +373,8 @@ class RoadService extends BaseService
 
         // 获取数据源集合
         $result = $this->road_model->getJunctionByCityId($dates, $hours, $junctionIdList, $flowIdList, $cityId, $select);
-
-        // 获取数据源失败
         if (!$result) {
-            throw new \Exception('获取数据源失败', ERR_PARAMETERS);
+            return [];
         }
 
         // 将数据按照 日期（基准 和 评估）进行分组的键名函数
