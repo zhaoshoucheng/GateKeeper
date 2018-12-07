@@ -110,8 +110,9 @@ class Parametermanage_model extends CI_Model
                         ->from($this->tb)
                         ->where('city_id', $cityId)
                         ->where('area_id', $areaId)
-                        ->where('is_default', 0)
-                        ->order_by('status', 'hour')
+                        ->where('hour', $hour)
+                        ->where('status', $status)
+                        ->where('is_default', 1)
                         ->get()->result_array();
             $res = $res[0];
             unset($res['id']);
@@ -151,7 +152,7 @@ class Parametermanage_model extends CI_Model
             $res = $this->db->select('*')
                         ->from($this->parameterLimitTB)
                         ->where('city_id', $cityId)
-                        ->where('is_default', 0)
+                        ->where('is_default', 1)
                         ->get()->result_array();
             $res = $res[0];
             unset($res['id']);
