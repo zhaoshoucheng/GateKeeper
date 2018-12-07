@@ -45,7 +45,6 @@ class Parametermanage extends MY_Controller
     /**
      * 获取优化参数配置阀值
      * @param $params['city_id'] int    Y 城市ID
-     * @param $params['area_id'] int    Y 区域ID
      * @param $params['is_default'] int    Y 1:默认, 2:非默认
      * @throws Exception
      */
@@ -56,50 +55,27 @@ class Parametermanage extends MY_Controller
         // 校验参数
         $this->validate([
             'city_id'    => 'required|is_natural_no_zero',
-            'area_id'    => 'required|is_natural_no_zero',
             'is_default' => 'required|in_list[0,1]',
         ]);
 
         $data = $this->parametermanageService->paramLimit($params);
         $this->response($data);
     }
+
     /**
      * 更新优化参数配置阀值
      *
      * @throws Exception
      */
-    public function editParamLimit()
+    public function editParam()
     {
-        $params = $this->input->post(NULL, TRUE);
+        $params = file_get_contents("php://input");
+        $json = json_decode($param, true);
 
-        // 校验参数
-        $this->validate([
-            'city_id'    => 'required|is_natural_no_zero',
-            'area_id'    => 'required|is_natural_no_zero',
-        ]);
-
-        $data = $this->parametermanageService->updateParamLimit($params);
-        $this->response($data);
-    }
-
-    /**
-     * 更新参数列表
-     *
-     * @throws Exception
-     */
-    public function editParamList()
-    {
-        $params = $this->input->post(NULL, TRUE);
-
-        // 校验参数
-        $this->validate([
-            'city_id'    => 'required|is_natural_no_zero',
-            'area_id'    => 'required|is_natural_no_zero',
-            'hour'       => 'required|in_list['.implode(',', range(0,23)).']',
-            'status'     => 'required|in_list['.implode(',', range(1,4)).']',
-        ]);
-
-        $data = $this->parametermanageService->updateParamList($params);
+        if (!$this->parametermanageService->updateParam($json)) {
+            $data = 'wrong query';
+        }
+        $data = 'ok';
         $this->response($data);
     }
 }

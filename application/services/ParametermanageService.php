@@ -44,9 +44,8 @@ class ParametermanageService extends BaseService
     public function paramLimit($params)
     {
         $cityId = $params['city_id'];
-        $areaId = $params['area_id'];
         $isDefault = $params['is_default'];
-        $res = $this->parametermanage_model->getParameterLimitByArea($cityId, $areaId, $isDefault);
+        $res = $this->parametermanage_model->getParameterLimit($cityId, $isDefault);
         return $res;
     }
 
@@ -58,23 +57,18 @@ class ParametermanageService extends BaseService
      * @return bool
      * @throws \Exception
      */
-    public function updateParamList($param)
+    public function updateParam($param)
     {
-        $res = $this->parametermanage_model->updateParameter($param);
-        return $res;
-    }
-
-    /**
-     * 更新参数优化配置阀值
-     *
-     * @param $params
-     *
-     * @return bool
-     * @throws \Exception
-     */
-    public function updateParamLimit($param)
-    {
-        $res = $this->parametermanage_model->updateParameterLimit($param);
-        return $res;
+        if (!$this->parametermanage_model->updateParameterLimit($param['param_limits'])) {
+            return false;
+        }
+        $data = $param['params'];
+        $num = count($data);
+        for ($i = 0; $i < $num; $i++) {
+            if (!$this->parametermanage_model->updateParameter($data[$i])) {
+                return false;
+            }
+        }
+        return true;
     }
 }

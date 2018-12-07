@@ -38,74 +38,26 @@ class Parametermanage_model extends CI_Model
                     ->where('is_default', $isDefault)
                     ->order_by('status', 'hour')
                     ->get()->result_array();
-        if (empty($res)) {
-            $res = $this->getParameter($isDefault);
-            if (empty($res)) {
-                $res = $this->getParameter(1);
-            }
-        }
 
         return $res;
-    }
-
-    /**
-     * 获取优化配置的参数
-     *
-     * @param $isDefault
-     * @return array
-     */
-    public function getParameter($isDefault)
-    {
-        $res = $this->db->select('*')
-                    ->from($this->tb)
-                    ->where('is_default', $isDefault)
-                    ->order_by('status')
-                    ->order_by('hour')
-                    ->get();
-
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
      * 根据城市ID以及区域ID等参数获取优化配置阀值的参数
      *
      * @param $cityId
-     * @param $areaId
      * @param $isDefault
      * @return array
      */
-    public function getParameterLimitByArea($cityId, $areaId, $isDefault)
+    public function getParameterLimit($cityId, $isDefault)
     {
         $res = $this->db->select('*')
                     ->from($this->parameterLimitTB)
                     ->where('city_id', $cityId)
-                    ->where('area_id', $areaId)
                     ->where('is_default', $isDefault)
                     ->get()->result_array();
-        if (empty($res)) {
-            $res = $this->getParameterLimit($isDefault);
-            if (empty($res)) {
-                $res = $this->getParameterLimit(1);
-            }
-        }
 
         return $res;
-    }
-
-    /**
-     * 获取优化配置阀值的参数
-     *
-     * @param $isDefault
-     * @return array
-     */
-    public function getParameterLimit($isDefault)
-    {
-        $res = $this->db->select('*')
-                    ->from($this->parameterLimitTB)
-                    ->where('is_default', $isDefault)
-                    ->get();
-
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
     /**
@@ -154,12 +106,10 @@ class Parametermanage_model extends CI_Model
         $data['is_default'] = 0;
 
         $cityId = $data['city_id'];
-        $areaId = $data['area_id'];
 
         $res = $this->db->select('*')
                     ->from($this->parameterLimitTB)
                     ->where('city_id', $cityId)
-                    ->where('area_id', $areaId)
                     ->where('is_default', 0)
                     ->get()->result_array();
 
