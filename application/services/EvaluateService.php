@@ -159,22 +159,22 @@ class EvaluateService extends BaseService
                 "limit"      => 100,
             ],
         ];
-        if ($quotaKey == 'stop_delay') {
-            $esData['quotaRequest'] = [
-                'quotas'     => 'sum_' . $quotaKey . '*trailNum, sum_trailNum',
-                "quotaType"  => "weight_avg", // 加权平均
-                "orderField" => "weight_avg",
-            ];
+        if ($params['quota_key'] == 'stop_delay') {
+            $esData['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
+            $esData['quotaRequest']['orderField'] = "weight_avg";
+            $esData['quotaRequest']['quotaType'] = "weight_avg";
             $esQuotaKey = 'weight_avg'; // es接口返回的字段名
         } else {
-            $esData['quotaRequest'] = [
-                'quotas'     => 'avg_' . $quotaKey,
-                "orderField" => 'avg_' . $quotaKey,
-            ];
+            $esData['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
+            $esData['quotaRequest']['orderField'] = 'avg_' . $quotaKey;
             $esQuotaKey = 'avg_' . $quotaKey; // es接口返回的字段名
         }
 
-        $data = $this->realtime_model->searchQuota($esData);
+        $esRes = $this->realtime_model->searchQuota($esData);
+        if (!$esRes) {
+            return [];
+        }
+        $data = array_column($esRes['result']['quotaResults'], 'quotaMap');
 
         $result = [];
 
