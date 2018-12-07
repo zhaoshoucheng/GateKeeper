@@ -39,7 +39,7 @@ class Parametermanage_model extends CI_Model
                     ->order_by('status', 'hour')
                     ->get()->result_array();
         if (empty($res)) {
-            $isDefault = 0;
+            $isDefault = 1;
             $res = $this->db->select('*')
                         ->from($this->tb)
                         ->where('city_id', $cityId)
@@ -67,7 +67,7 @@ class Parametermanage_model extends CI_Model
                     ->where('is_default', $isDefault)
                     ->get()->result_array();
         if (empty($res)) {
-            $isDefault = 0;
+            $isDefault = 1;
             $res = $this->db->select('*')
                         ->from($this->parameterLimitTB)
                         ->where('city_id', $cityId)
