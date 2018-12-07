@@ -59,14 +59,18 @@ class ParametermanageService extends BaseService
      */
     public function updateParam($param)
     {
-        if (!$this->parametermanage_model->updateParameterLimit($param['param_limits'])) {
-            return false;
-        }
-        $data = $param['params'];
-        $num = count($data);
-        for ($i = 0; $i < $num; $i++) {
-            if (!$this->parametermanage_model->updateParameter($data[$i])) {
+        if (isset($param['param_limits']) {
+            if (!$this->parametermanage_model->updateParameterLimit($param['param_limits'])) {
                 return false;
+            }
+        }
+        if (isset($param['params'])) {
+            $data = $param['params'];
+            $num = count($data);
+            for ($i = 0; $i < $num; $i++) {
+                if (!$this->parametermanage_model->updateParameter($data[$i])) {
+                    return false;
+                }
             }
         }
         return true;
