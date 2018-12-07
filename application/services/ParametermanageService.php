@@ -66,9 +66,8 @@ class ParametermanageService extends BaseService
         }
         if (isset($param['params'])) {
             $data = $param['params'];
-            $num = count($data);
-            for ($i = 0; $i < $num; $i++) {
-                if (!$this->parametermanage_model->updateParameter($data[$i])) {
+            foreach ($data as $d) {
+                if (!$this->parametermanage_model->updateParameter($d)) {
                     return false;
                 }
             }

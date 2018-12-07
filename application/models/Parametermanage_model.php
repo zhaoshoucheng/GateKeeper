@@ -38,6 +38,16 @@ class Parametermanage_model extends CI_Model
                     ->where('is_default', $isDefault)
                     ->order_by('status', 'hour')
                     ->get()->result_array();
+        if (empty($res)) {
+            $isDefault = 0;
+            $res = $this->db->select('*')
+                        ->from($this->tb)
+                        ->where('city_id', $cityId)
+                        ->where('area_id', $areaId)
+                        ->where('is_default', $isDefault)
+                        ->order_by('status', 'hour')
+                        ->get()->result_array();
+        }
 
         return $res;
     }
@@ -56,6 +66,14 @@ class Parametermanage_model extends CI_Model
                     ->where('city_id', $cityId)
                     ->where('is_default', $isDefault)
                     ->get()->result_array();
+        if (empty($res)) {
+            $isDefault = 0;
+            $res = $this->db->select('*')
+                        ->from($this->parameterLimitTB)
+                        ->where('city_id', $cityId)
+                        ->where('is_default', $isDefault)
+                        ->get()->result_array();
+        }
 
         return $res;
     }
@@ -70,6 +88,7 @@ class Parametermanage_model extends CI_Model
     {
         unset($data['create_at']);
         unset($data['update_at']);
+        unset($data['id']);
         $data['is_default'] = 0;
 
         $cityId = $data['city_id'];
@@ -87,7 +106,21 @@ class Parametermanage_model extends CI_Model
                     ->get()->result_array();
 
         if (empty($res)) {
-            return $this->db->insert($this->tb, $data);
+            $res = $this->db->select('*')
+                        ->from($this->tb)
+                        ->where('city_id', $cityId)
+                        ->where('area_id', $areaId)
+                        ->where('is_default', 0)
+                        ->order_by('status', 'hour')
+                        ->get()->result_array();
+            $res = $res[0];
+            unset($res['id']);
+            unset($res['create_at']);
+            unset($res['update_at']);
+            foreach ($data as $k=>$v) {
+                $res[$k] = $v;
+            }
+            return $this->db->insert($this->tb, $res);
         }
         return $this->db->where('id', $res[0]['id'])
                     ->update($this->tb, $data);
@@ -103,6 +136,7 @@ class Parametermanage_model extends CI_Model
     {
         unset($data['create_at']);
         unset($data['update_at']);
+        unset($data['id']);
         $data['is_default'] = 0;
 
         $cityId = $data['city_id'];
@@ -114,7 +148,19 @@ class Parametermanage_model extends CI_Model
                     ->get()->result_array();
 
         if (empty($res)) {
-            return $this->db->insert($this->parameterLimitTB, $data);
+            $res = $this->db->select('*')
+                        ->from($this->parameterLimitTB)
+                        ->where('city_id', $cityId)
+                        ->where('is_default', 0)
+                        ->get()->result_array();
+            $res = $res[0];
+            unset($res['id']);
+            unset($res['create_at']);
+            unset($res['update_at']);
+            foreach ($data as $k=>$v) {
+                $res[$k] = $v;
+            }
+            return $this->db->insert($this->parameterLimitTB, $res);
         }
         return $this->db->where('id', $res[0]['id'])
                     ->update($this->parameterLimitTB, $data);
