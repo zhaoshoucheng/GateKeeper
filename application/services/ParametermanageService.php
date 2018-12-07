@@ -59,7 +59,7 @@ class ParametermanageService extends BaseService
      */
     public function updateParam($param)
     {
-        if (isset($param['param_limits']) {
+        if (isset($param['param_limits'])) {
             if (!$this->parametermanage_model->updateParameterLimit($param['param_limits'])) {
                 return false;
             }

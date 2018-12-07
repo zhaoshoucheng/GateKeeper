@@ -70,7 +70,7 @@ class Parametermanage extends MY_Controller
     public function editParam()
     {
         $params = file_get_contents("php://input");
-        $json = json_decode($param, true);
+        $json = json_decode($params, true);
 
         if (!$this->parametermanageService->updateParam($json)) {
             $data = 'wrong query';
