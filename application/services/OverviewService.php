@@ -13,7 +13,6 @@ use Didi\Cloud\Collection\Collection;
 /**
  * Class OverviewService
  * @package Services
- * @property \RealtimeAlarm_model $realtimeAlarm_model
  * @property \Realtime_model      $realtime_model
  */
 class OverviewService extends BaseService
@@ -32,7 +31,6 @@ class OverviewService extends BaseService
         $this->load->model('redis_model');
         $this->load->model('waymap_model');
         $this->load->model('realtime_model');
-        $this->load->model('realtimeAlarm_model');
         $this->load->model('alarmanalysis_model');
 
         $this->config->load('realtime_conf');
@@ -272,7 +270,7 @@ class OverviewService extends BaseService
         $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize);
         $result = array_column($esRes, 'quotaMap');
 
-        $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
+        $ids = implode(',', array_unique(array_column($result, 'junctionId')));
 
         $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
         $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
@@ -282,8 +280,8 @@ class OverviewService extends BaseService
         $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota, $hour) {
             return [
                 'time' => $hour,
-                'logic_junction_id' => $item['logic_junction_id'],
-                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
+                'logic_junction_id' => $item['junctionId'],
+                'junction_name' => $junctionIdNames[$item['junctionId']] ?? '未知路口',
                 'stop_delay' => $realTimeQuota['stop_delay']['round']($item['weight_avg']),
                 'quota_unit' => $realTimeQuota['stop_delay']['unit'],
             ];
@@ -293,8 +291,10 @@ class OverviewService extends BaseService
     }
 
     /**
-     * @param $params
-     *
+     * 获取停车次数TOP20
+     * @param $params['city_id']  int    Y 城市ID
+     * @param $params['date']     string N 日期 yyyy-mm-dd
+     * @param $params['pagesize'] int    N 获取数量
      * @return array
      * @throws \Exception
      */
@@ -305,12 +305,9 @@ class OverviewService extends BaseService
         $pagesize = $params['pagesize'];
 
         $hour = $this->helperService->getLastestHour($cityId);
+        $result = $this->realtime_model->getTopCycleTime($cityId, $date, $hour, $pagesize);
 
-        $select = 'logic_junction_id, hour, stop_time_cycle, logic_flow_id';
-
-        $result = $this->realtime_model->getTopCycleTime($cityId, $date, $hour, $pagesize, $select);
-
-        $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
+        $ids = implode(',', array_unique(array_column($result, 'junctionId')));
 
         $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
         $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
@@ -321,13 +318,13 @@ class OverviewService extends BaseService
 
         $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota, $flowsInfo) {
             return [
-                'time' => $item['hour'],
-                'logic_junction_id' => $item['logic_junction_id'],
-                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
-                'logic_flow_id' => $item['logic_flow_id'],
-                'flow_name' => $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] ?? '未知方向',
-                'stop_time_cycle' => $realTimeQuota['stop_time_cycle']['round']($item['stop_time_cycle']),
-                'quota_unit' => $realTimeQuota['stop_time_cycle']['unit'],
+                'time'              => date('H:i:s', strtotime($item['dayTime'])),
+                'logic_junction_id' => $item['junctionId'],
+                'junction_name'     => $junctionIdNames[$item['junctionId']] ?? '未知路口',
+                'logic_flow_id'     => $item['movementId'],
+                'flow_name'         => $flowsInfo[$item['junctionId']][$item['movementId']] ?? '未知方向',
+                'stop_time_cycle'   => $realTimeQuota['stop_time_cycle']['round']($item['avgStopNumUp']),
+                'quota_unit'        => $realTimeQuota['stop_time_cycle']['unit'],
             ];
         }, $result);
 

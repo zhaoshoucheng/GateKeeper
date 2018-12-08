@@ -122,53 +122,82 @@ class EvaluateService extends BaseService
 
     /**
      * 获取路口指标排序列表
-     *
-     * @param $params
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['quota_key']  string Y 指标KEY
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
      * @return array
      * @throws \Exception
      */
     public function getJunctionQuotaSortList($params)
     {
         $cityId   = $params['city_id'];
-        $quotaKey = $params['quota_key'];
+
+        // 指标配置
+        $quotaConf = $this->config->item('real_time_quota');
+        $quotaKey = $quotaConf[$params['quota_key']]['escolumn'];
 
         // 获取最近时间
         $hour = $this->helperService->getLastestHour($cityId);
+        $dayTime = date('Y-m-d') . ' ' . $hour;
 
-        if ($quotaKey == 'stop_delay') {
-            $select = 'logic_junction_id, sum(' . $quotaKey . ' * traj_count) / sum(traj_count) as ' . $quotaKey;
+        // es所需data
+        $esData = [
+            "source"    => "signal_control",
+            "cityId"    => $cityId,
+            'requestId' => get_traceid(),
+            "dayTime"   => $dayTime,
+            "trailNum"  => 10,
+            "andOperations" => [
+                "cityId"   => "eq",
+                "dayTime"  => "eq",
+                "trailNum" => 'gte',
+            ],
+            "quotaRequest" => [
+                "groupField" => "junctionId",
+                "asc"        => "false",
+                "limit"      => 100,
+            ],
+        ];
+        if ($params['quota_key'] == 'stop_delay') {
+            $esData['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
+            $esData['quotaRequest']['orderField'] = "weight_avg";
+            $esData['quotaRequest']['quotaType'] = "weight_avg";
+            $esQuotaKey = 'weight_avg'; // es接口返回的字段名
         } else {
-            $select = 'logic_junction_id, avg(' . $quotaKey . ') as ' . $quotaKey;
+            $esData['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
+            $esData['quotaRequest']['orderField'] = 'avg_' . $quotaKey;
+            $esQuotaKey = 'avg_' . $quotaKey; // es接口返回的字段名
         }
 
-        $data = $this->realtime_model->getQuotasByHour($cityId, $hour, $quotaKey, $select);
+        $esRes = $this->realtime_model->searchQuota($esData);
+        if (!$esRes) {
+            return [];
+        }
+        $data = array_column($esRes['result']['quotaResults'], 'quotaMap');
 
         $result = [];
 
         // 所需查询路口名称的路口ID串
-        $junctionIds = implode(',', array_unique(array_column($data, 'logic_junction_id')));
+        $junctionIds = implode(',', array_unique(array_column($data, 'junctionId')));
 
         // 获取路口信息
         $junctionsInfo  = $this->waymap_model->getJunctionInfo($junctionIds);
         $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
 
-        // 指标配置
-        $quotaConf = $this->config->item('real_time_quota');
-
         foreach ($data as $k => $val) {
             $result['dataList'][$k] = [
-                'logic_junction_id' => $val['logic_junction_id'],
-                'junction_name' => $junctionIdName[$val['logic_junction_id']] ?? '未知路口',
-                'quota_value' => $val[$quotaKey],
+                'logic_junction_id' => $val['junctionId'],
+                'junction_name' => $junctionIdName[$val['junctionId']] ?? '未知路口',
+                'quota_value' => $val[$esQuotaKey],
             ];
         }
 
         // 返回数据：指标信息
         $result['quota_info'] = [
-            'name' => $quotaConf[$quotaKey]['name'],
-            'key' => $quotaKey,
-            'unit' => $quotaConf[$quotaKey]['unit'],
+            'name' => $quotaConf[$params['quota_key']]['name'],
+            'key' => $params['quota_key'],
+            'unit' => $quotaConf[$params['quota_key']]['unit'],
         ];
 
         return $result;

@@ -142,14 +142,13 @@ class RoadService extends BaseService
     /**
      * 获取全城全部路口详情
      *
-     * @param $params
+     * @param $params['city_id'] int 城市ID
      *
      * @return array
      */
     public function getAllRoadDetail($params)
     {
         $cityId = $params['city_id'];
-        $flag   = $params['flag'] ?? false;
 
         $select = 'road_id, logic_junction_ids, road_name, road_direction';
 
@@ -159,8 +158,8 @@ class RoadService extends BaseService
 
         foreach ($roadList as $item) {
             $roadId = $item['road_id'];
-            //从 Redis 获取数据失败
-            if ($flag || !($res = $this->redis_model->getData('Road_' . $roadId))) {
+            $res = $this->redis_model->getData('Road_' . $roadId);
+            if (!$res) {
                 $data = [
                     'city_id' => $cityId,
                     'road_id' => $roadId,
@@ -175,7 +174,6 @@ class RoadService extends BaseService
             } else {
                 $res = json_decode($res, true);
             }
-
             $res['road'] = $item;
             $results[]   = $res;
         }
@@ -375,10 +373,8 @@ class RoadService extends BaseService
 
         // 获取数据源集合
         $result = $this->road_model->getJunctionByCityId($dates, $hours, $junctionIdList, $flowIdList, $cityId, $select);
-
-        // 获取数据源失败
         if (!$result) {
-            throw new \Exception('获取数据源失败', ERR_PARAMETERS);
+            return [];
         }
 
         // 将数据按照 日期（基准 和 评估）进行分组的键名函数

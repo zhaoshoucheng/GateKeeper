@@ -37,9 +37,8 @@ class TimingAdaptionService extends BaseService
 
     /**
      * 获取基准配时详情
-     *
-     * @param $params
-     *
+     * @param $params['logic_junction_id'] string Y 路口ID
+     * @param $params['city_id']           int    Y 城市ID
      * @return array
      * @throws \Exception
      */
@@ -148,15 +147,11 @@ class TimingAdaptionService extends BaseService
         $res = $this->adapt_model->getAdaptByJunctionId($logicJunctionId);
 
         if (!$res) {
-            throw new \Exception('获取自适应配时信息失败', ERR_DATABASE);
-        }
-
-        if (!isset($res['timing_info'])) {
-            throw new \Exception('数据格式错误', ERR_DATABASE);
+            throw new \Exception('此路口无自适应配时信息', ERR_DATABASE);
         }
 
         if (empty($res['timing_info'])) {
-            throw new \Exception('改路口无优化数据', ERR_DEFAULT);
+            throw new \Exception('该路口无优化数据', ERR_DEFAULT);
         }
 
         $result = json_decode($res['timing_info'], true);
@@ -201,11 +196,9 @@ class TimingAdaptionService extends BaseService
 
     /**
      * 获取指定 flow id 集合的二次停车比率
-     *
-     * @param $logicFlowIds
-     * @param $logicJunctionId
-     * @param $cityId
-     *
+     * @param $logicFlowIds     相位ID
+     * @param $logicJunctionId  路口ID
+     * @param $cityId           城市ID
      * @return array
      * @throws \Exception
      */
@@ -216,16 +209,12 @@ class TimingAdaptionService extends BaseService
         }
 
         $hour = $this->helperService->getLastestHour($cityId);
-
-        $select = 'logic_flow_id, twice_stop_rate';
-
-        $res = $this->realtime_model->getFlowsInFlowIds($cityId, $hour, $logicJunctionId, $logicFlowIds, $select);
-
+        $res = $this->realtime_model->getFlowsInFlowIds($cityId, $hour, $logicJunctionId, $logicFlowIds);
         if (!$res) {
             throw new \Exception('数据获取失败', ERR_DATABASE);
         }
 
-        return array_column($res, 'twice_stop_rate', 'logic_flow_id');
+        return array_column($res, 'multiStopRatioUp', 'movementId');
     }
 
     /**

@@ -48,14 +48,18 @@ class Realtime_model extends CI_Model
         }
         $result = json_decode($result, true);
 
-        if ($result['code'] == '000000') {  // 000000:还有数据可查询 400001:查询完成
-            $resData = $result['result']['diagnosisIndices'];
-            $data['scrollsId'] = $result['result']['scrollsId'];
-            $resData = array_merge($resData, $this->searchDetail($data));
-        }
+        if (!isset($data['limit']) || $data['limit'] == 0) { // limit查询不需要再去轮循
+            if ($result['code'] == '000000') {  // 000000:还有数据可查询 400001:查询完成
+                $resData = $result['result']['diagnosisIndices'];
+                $data['scrollsId'] = $result['result']['scrollsId'];
+                $resData = array_merge($resData, $this->searchDetail($data));
+            }
 
-        if ($result['code'] == '400001') {
-            $resData = array_merge($resData, $result['result']['diagnosisIndices']);
+            if ($result['code'] == '400001') {
+                $resData = array_merge($resData, $result['result']['diagnosisIndices']);
+            }
+        } else {
+            $resData = $result['result']['diagnosisIndices'];
         }
 
         if ($result['code'] != '000000' && $result['code'] != '400001') {
@@ -241,44 +245,30 @@ class Realtime_model extends CI_Model
      * @return array
      * @throws Exception
      */
-    public function getFlowsInFlowIds($cityId, $hour, $logicJunctionId, $logicFlowId, $select = '*')
+    public function getFlowsInFlowIds($cityId, $hour, $logicJunctionId, $logicFlowId)
     {
-        $this->isExisted($cityId);
+        $date = date('Y-m-d');
 
-        $res = $this->db->select($select)
-            ->from($this->tb . $cityId)
-            ->where('hour', $hour)
-            ->where('logic_junction_id', $logicJunctionId)
-            ->where('updated_at > ', date('Y-m-d', strtotime('-10  minutes')))
-            ->where_in('logic_flow_id', $logicFlowId)
-            ->get();
+        $flowIds = implode(',', $logicFlowId);
 
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
-    }
+        $data = [
+            'source'        => 'signal_control', // 调用方
+            'cityId'        => $cityId,          // 城市ID
+            'requestId'     => get_traceid(),    // trace id
+            'junctionId'    => $logicJunctionId,
+            'dayTime'       => $date ." ". $hour,
+            'movementId'    => "{$flowIds}",
+            'andOperations' => [
+                'cityId'     => 'eq',
+                'junctionId' => 'eq',
+                'dayTime'    => 'eq',
+                'movementId' => 'in',
+            ],
+            'limit'         => 5000,
+        ];
+        $realTimeEsData = $this->searchDetail($data);
 
-    /**
-     * @param        $cityId
-     * @param        $hour
-     * @param        $quotaKey
-     * @param string $select
-     *
-     * @return array
-     * @throws Exception
-     */
-    public function getQuotasByHour($cityId, $hour, $quotaKey, $select = '*')
-    {
-        $this->isExisted($cityId);
-
-        $res = $this->db->select($select)
-            ->from($this->tb . $cityId)
-            ->where('traj_count >= 10')
-            ->where('hour', $hour)
-            ->group_by('logic_junction_id')
-            ->order_by($quotaKey, 'DESC')
-            ->limit(100)
-            ->get();
-
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+        return $realTimeEsData;
     }
 
     /**
@@ -307,6 +297,12 @@ class Realtime_model extends CI_Model
                 'movementId' => 'eq',
             ],
             'limit'         => 5000,
+            "orderOperations" => [
+                [
+                    'orderField' => 'dayTime',
+                    'orderType'  => 'ASC',
+                ],
+            ],
         ];
         $realTimeEsData = $this->searchDetail($data);
         return $realTimeEsData;
@@ -337,7 +333,7 @@ class Realtime_model extends CI_Model
             "quotaRequest" => [
                 "quotaType" => "weight_avg",
                 "quotas" => "sum_stopDelayUp*trailNum, sum_trailNum",
-                "groupField" => "logic_junction_id",
+                "groupField" => "junctionId",
             ],
         ];
 
@@ -375,7 +371,7 @@ class Realtime_model extends CI_Model
             "quotaRequest" => [
                 "quotaType"  => "weight_avg",
                 "quotas"     => "sum_stopDelayUp*trailNum, sum_trailNum",
-                "groupField" => "logic_junction_id",
+                "groupField" => "junctionId",
                 "orderField" => "weight_avg",
                 "asc"        => "false",
                 "limit"      => $pagesize,
@@ -412,11 +408,15 @@ class Realtime_model extends CI_Model
                 'trailNum'  => 'gte', // 轨迹数大于等于5
                 'dayTime'   => 'eq',  // 等于hour
             ],
-            'limit'         => 20,
-            'orderField'    => 'avgStopNumUp',
-            'asc'           => false,
+            'limit'         => $pagesize,
+            "orderOperations" => [
+                [
+                    'orderField' => 'avgStopNumUp',
+                    'orderType'  => 'DESC',
+                ],
+            ],
         ];
         $realTimeEsData = $this->searchDetail($data);
-
+        return $realTimeEsData;
     }
 }

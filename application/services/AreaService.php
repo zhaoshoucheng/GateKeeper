@@ -337,7 +337,7 @@ class AreaService extends BaseService
         $resultList = $this->area_model->getJunctionByCityId($dates, $junctionIds, $hours, $cityId, $select);
 
         if (!$resultList || empty($resultList)) {
-            throw new \Exception('路口数据获取失败', ERR_PARAMETERS);
+            return  [];
         }
 
         $resultCollection = Collection::make($resultList);
