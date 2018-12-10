@@ -189,18 +189,18 @@ class Realtime_model extends CI_Model
                 "groupField" => "dayTime",
                 "quotaType" => "weight_avg",
                 "quotas" => "sum_{$quotaKey}*trailNum, sum_trailNum",
-                "limit" => 50,
-                "orderField" => "weight_avg",
             ],
         ];
 
         $res = $this->searchQuota($esData);
         if (!empty($res['result']['quotaResults'])) {
             list($quotaValueInfo) = $res['result']['quotaResults'];
-            $quotaValue = $quotaValueInfo['quotaMap']['weight_avg'];
         }
 
-        return $quotaValue;
+        return [
+            'value' => $quotaValueInfo['quotaMap']['weight_avg'],
+            'hour'  => date('H:i:s', strtotime($quotaValueInfo['quotaMap']['dayTime'])),
+        ];
     }
 
     /**

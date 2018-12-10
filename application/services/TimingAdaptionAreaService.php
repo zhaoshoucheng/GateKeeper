@@ -115,10 +115,12 @@ class TimingAdaptionAreaService extends BaseService
                 $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
 
                 // 获取区域平均速度
-                $speed = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'avgSpeedUp');
+                $esSpeed = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'avgSpeedUp');
+                $speed = !empty($esSpeed['value']) ? $esSpeed['value'] : 0;
 
                 // 获取区域平均延误
-                $stop_delay = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'stopDelayUp');
+                $esStopDelay = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'stopDelayUp');
+                $stop_delay = !empty($esStopDelay['value']) ? $esStopDelay['value'] : 0;
 
                 /**
                  * 获取上一次的平均延误、平均速度数据
@@ -610,9 +612,9 @@ class TimingAdaptionAreaService extends BaseService
 
     /**
      * 获取区域指标折线图
-     *
-     * @param $data
-     *
+     * @param $data['city_id']   int    城市ID
+     * @param $data['area_id']   int    区域ID
+     * @param $data['quota_key'] string 指标KEY
      * @return mixed
      * @throws \Exception
      */
@@ -626,56 +628,41 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
+        // 最新批次
+        $lastHour = $this->helperService->getLastestHour($cityId);
+        $dayTime = date('Y-m-d H:i:s', strtotime($lastHour));
 
-        // 当前时间 毫秒级时间戳
-        $endTime = (int)(time() * 1000);
-        // 开始时间 当天开始时间 毫秒级时间戳
-        $startTime = strtotime('00:00:00') * 1000;
+        // $data['quota_key'] = avgSpeed 或 stopDelay 新ES的字段改变了....（此处省略多字！）做了配置
+        $avgQuotaKeyConf = $this->config->item('avg_quota_key');
+        $quotaKey = $avgQuotaKeyConf[$data['quota_key']]['esColumn'];
 
-        $esData = [
-            "source" => "signal_control",
-            "cityId" => $data['city_id'],
-            'requestId' => get_traceid(),
-            "junctionId" => $esJunctionIds,
-            "timestamp" => "[{$startTime}, {$endTime}]",
-            "andOperations" => [
-                "junctionId" => "in",
-                "cityId" => "eq",
-                "timestamp" => "range",
-            ],
-            "quotaRequest" => [
-                "quotaType" => "weight_avg",
-                "quotas" => "sum_{$data['quota_key']}*trailNum, sum_trailNum",
-                "groupField" => "dayTime",
-                "orderField" => "dayTime",
-                "asc" => "true",
-            ],
-        ];
-
-        $esUrl = $this->config->item('es_interface') . '/estimate/diagnosis/queryQuota';
-
-        $quotaInfo = httpPOST($esUrl, $esData, 0, 'json');
-        if (!$quotaInfo) {
-            throw new \Exception('调用es接口 获取区域指标折线图 失败！', ERR_DEFAULT);
+        // 因为一次性获取当天批次的指标平均值会影响ES集群（真弱鸡）所以只能按批次获取，再追回到redis中
+        $quotaInfo = $this->realtime_model->getEsAreaQuotaValue($data['city_id'], $junctions, $dayTime, $quotaKey);
+        $redisKey = 'its_tool_quota_avg_value_' . $data['city_id'];
+        // 获取redis中数据
+        $redisData = $this->redis_model->getData($redisKey);
+        if (!empty($redisData)) {
+            $redisData = json_decode($redisData, true);
         }
-        $quotaInfo = json_decode($quotaInfo, true);
-        if ($quotaInfo['code'] != '000000') {
-            $result['errmsg'] = $quotaInfo['message'];
-            throw new \Exception($quotaInfo['message'], ERR_DEFAULT);
+        // 将新获取的数据追加到redis数据中
+        if (!empty($quotaInfo)) {
+            $redisData[] = $quotaInfo;
         }
-        $quotaValueInfo = [];
-        if (!empty($quotaInfo['result']['quotaResults'])) {
-            $quotaValueInfo = $quotaInfo['result']['quotaResults'];
+
+        if (empty($redisData)) {
+            return [];
         }
+        // 将新的数据再放入redis中
+        $this->redis_model->setEx($redisKey, json_encode($redisData), 24 * 3600);
 
         $ret = [];
-        foreach ($quotaValueInfo as $k => $item) {
-            $value = $item['quotaMap']['weight_avg'];
+        foreach ($redisData as $k => $item) {
+            $value = $item['weight_avg'];
             if ($data['quota_key'] == 'avgSpeed') {
                 // 速度m/s转换为km/h
-                $value = $item['quotaMap']['weight_avg'] * 3.6;
+                $value = $item['weight_avg'] * 3.6;
             }
-            $dayTime = date('H:i:s', strtotime($item['quotaMap']['dayTime']));
+            $dayTime = date('H:i:s', strtotime($item['dayTime']));
             $ret[$k] = [
                 $dayTime, // 时间 X轴
                 round($value, 2),                                       // 值   Y轴

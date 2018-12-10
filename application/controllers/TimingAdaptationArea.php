@@ -179,7 +179,9 @@ class TimingAdaptationArea extends MY_Controller
 
     /**
      * 获取区域指标折线图
-     *
+     * @param $params['city_id']   int    城市ID
+     * @param $params['area_id']   int    区域ID
+     * @param $params['quota_key'] string 指标KEY
      * @throws Exception
      */
     public function getAreaQuotaInfo()
