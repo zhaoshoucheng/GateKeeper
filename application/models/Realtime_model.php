@@ -5,17 +5,14 @@
  * Date: 2018/10/20
  * Time: 下午4:22
  */
+namespace Services;
 
 class Realtime_model extends CI_Model
 {
-    /**
-     * @var \CI_DB_query_builder
-     */
-    protected $db;
-    private $tb = 'real_time_';
-
     // es interface addr
     private $esUrl = '';
+
+    protected $helperService;
 
     /**
      * Area_model constructor.
@@ -25,8 +22,7 @@ class Realtime_model extends CI_Model
     {
         parent::__construct();
 
-        $this->db = $this->load->database('default', true);
-
+        $this->helperService = new HelperService();
         // load config
         $this->load->config('nconf');
         $this->esUrl = $this->config->item('es_interface');
@@ -138,7 +134,7 @@ class Realtime_model extends CI_Model
     public function avgStopdelay($cityId, $date, $hour = '')
     {
         if (empty($hour)) {
-            $hour = $this->getLastestHour($cityId);
+            $hour = $this->helperService->getLastestHour($cityId);
         }
 
         $data = [
@@ -164,7 +160,7 @@ class Realtime_model extends CI_Model
 
         $result = [];
         foreach ($esRes['result']['quotaResults'] as $k=>$v) {
-            $result[$k] = [
+            $result = [
                 'avg_stop_delay' => $v['quotaMap']['weight_avg'],
                 'hour'           => date('H:i:s', strtotime($v['quotaMap']['dayTime'])),
             ];
