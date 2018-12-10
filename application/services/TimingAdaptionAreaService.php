@@ -643,6 +643,8 @@ class TimingAdaptionAreaService extends BaseService
         $redisData = $this->redis_model->getData($redisKey);
         if (!empty($redisData)) {
             $redisData = json_decode($redisData, true);
+        } else {
+            $redisData = [];
         }
         // 将新获取的数据追加到redis数据中
         if (!empty($quotaInfo)) {
@@ -654,6 +656,7 @@ class TimingAdaptionAreaService extends BaseService
         }
         // 将新的数据再放入redis中
         $this->redis_model->setEx($redisKey, json_encode($redisData), 24 * 3600);
+        $redisData = array_values($redisData);
 
         $ret = [];
         foreach ($redisData as $k => $item) {
