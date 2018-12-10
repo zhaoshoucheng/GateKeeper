@@ -97,10 +97,7 @@ class OverviewService extends BaseService
         $cityId = $params['city_id'];
         $date   = $params['date'];
 
-        $res = $this->redis_model->getRealtimeAvgStopDelay($cityId, $date);
-
-        $hour = $this->helperService->getLastestHour($cityId);
-        $result = $res ? $res : $this->realtime_model->avgStopdelay($cityId, $date, $hour);
+        $result = $this->redis_model->getRealtimeAvgStopDelay($cityId, $date);
         if (empty($result)) {
             return (object)[];
         }
