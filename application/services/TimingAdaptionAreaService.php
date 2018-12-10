@@ -662,7 +662,7 @@ class TimingAdaptionAreaService extends BaseService
                 // 速度m/s转换为km/h
                 $value = $item['value'] * 3.6;
             }
-            $dayTime = $hour;
+            $dayTime = $item['hour'];
             $ret[$k] = [
                 $dayTime, // 时间 X轴
                 round($value, 2),                                       // 值   Y轴
