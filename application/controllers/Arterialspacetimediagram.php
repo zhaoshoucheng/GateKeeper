@@ -12,7 +12,7 @@ class Arterialspacetimediagram extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('arterialspacetimediagram_model');
+        $this->load->model('traj_model');
     }
 
     /**
@@ -45,105 +45,25 @@ class Arterialspacetimediagram extends MY_Controller
     public function getSpaceTimeDiagram()
     {
         $params = $this->input->post(NULL, TRUE);
+        $result = $this->traj_model->getSpaceTimeDiagram($params);
+        $result['token'] = isset($params['token']) ?  $params['token'] : "";
+        return $this->response($result);
+    }
 
-        // 校验参数
-        $validate = Validate::make($params,
-            [
-                'task_id'     => 'min:1',
-                'method'      => 'min:0',
-                'time_point'  => 'nullunable',
-                'map_version' => 'nullunable',
-            ]
-        );
-        if (!$validate['status']) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = $validate['errmsg'];
-            return;
-        }
+    public function getClockShiftCorrect()
+    {
+        $params = file_get_contents("php://input");
+        $result = $this->traj_model->getClockShiftCorrect($params);
+        $result['token'] = isset($params['token']) ?  $params['token'] : "";
+        return $this->response(array_values($result));
+    }
 
-        $data['task_id'] = intval($params['task_id']);
-        $data['method'] = intval($params['method']);
-        $data['time_point'] = trim($params['time_point']);
-        $data['map_version'] = trim($params['map_version']);
-
-        if (empty($params['dates']) || !is_array($params['dates'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数 dates 必须为数组格式且不可为空！';
-            return;
-        }
-        $data['dates'] = $params['dates'];
-
-        if (empty($params['token'])) {
-            $data['token'] = md5(microtime(true) * mt_rand(1, 10000));
-        } else {
-            $data['token'] = html_escape(trim($params['token']));
-        }
-
-        // junctions
-        if (empty($params['junctions']) || !is_array($params['junctions'])) {
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = '参数junctions 必须为数组格式且不能为空！';
-            return;
-        }
-        $junctions = $params['junctions'];
-        foreach ($junctions as $k=>$v) {
-            if (!isset($v['junction_id'])
-                || !isset($v['forward_flow_id'])
-                || !isset($v['forward_in_links'])
-                || !isset($v['forward_out_links'])
-                || !isset($v['reverse_flow_id'])
-                || !isset($v['reverse_in_links'])
-                || !isset($v['reverse_out_links'])
-                || !isset($v['junction_inner_links'])
-                || !isset($v['tod_start_time'])
-                || !isset($v['tod_end_time'])
-                || !isset($v['cycle'])
-                || !isset($v['offset']))
-            {
-                $this->errno = ERR_PARAMETERS;
-                $this->errmsg = 'junctions中有参数未传递，数据结构不完整！';
-                return;
-            }
-            if (empty($v['forward_in_links'])) {
-                $junctions[$k]['forward_in_links'] = [];
-            } else {
-                $junctions[$k]['forward_in_links'] = explode(',', $v['forward_in_links']);
-            }
-
-            if (empty($v['forward_out_links'])) {
-                $junctions[$k]['forward_out_links'] = [];
-            } else {
-                $junctions[$k]['forward_out_links'] = explode(',', $v['forward_out_links']);
-            }
-
-            if (empty($v['reverse_in_links'])) {
-                $junctions[$k]['reverse_in_links'] = [];
-            } else {
-                $junctions[$k]['reverse_in_links'] = explode(',', $v['reverse_in_links']);
-            }
-
-            if (empty($v['reverse_out_links'])) {
-                $junctions[$k]['reverse_out_links'] = [];
-            } else {
-                $junctions[$k]['reverse_out_links'] = explode(',', $v['reverse_out_links']);
-            }
-
-            if (empty($v['junction_inner_links'])) {
-                $junctions[$k]['junction_inner_links'] = [];
-            } else {
-                $junctions[$k]['junction_inner_links'] = explode(',', $v['junction_inner_links']);
-            }
-
-            $junctions[$k]['tod_start_time'] = date('H:i:s', strtotime($v['tod_start_time']));
-            $junctions[$k]['tod_end_time'] = date('H:i:s', strtotime($v['tod_end_time']));
-
-        }
-        $data['junctions'] = $junctions;
-
-
-    	$result = $this->arterialspacetimediagram_model->getSpaceTimeDiagram($data);
-
-        $result['token'] = $data['token'];
+    //请求绿波优化接口
+    public function getGreenWaveOptPlan()
+    {
+        $params = file_get_contents("php://input");
+        $result = $this->traj_model->getGreenWaveOptPlan($params);
+        $result['token'] = isset($params['token']) ?  $params['token'] : "";
         return $this->response($result);
     }
 }

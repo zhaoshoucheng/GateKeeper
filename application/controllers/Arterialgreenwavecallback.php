@@ -16,6 +16,7 @@ class Arterialgreenwavecallback extends CI_Controller
         $this->load->model('junction_model');
         $this->load->model('redis_model');
         $this->load->config('nconf');
+        $this->load->model('traj_model');
     }
 
     /**
@@ -25,6 +26,10 @@ class Arterialgreenwavecallback extends CI_Controller
     */
     public function fillData()
     {
+        $params = $this->input->post(NULL, TRUE);
+        $result = $this->traj_model->fillData($params);
+        //return $this->response($result);
+
         $params = $this->input->post(NULL, TRUE);
 
         if (!empty($params['data']) && !empty($params['key'])) {
