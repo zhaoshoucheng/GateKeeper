@@ -157,7 +157,7 @@ class Realtime_model extends CI_Model
         foreach ($esRes['result']['quotaResults'] as $k=>$v) {
             $result = [
                 'avg_stop_delay' => $v['quotaMap']['weight_avg'],
-                'hour'           => date('H:i:s', $v['quotaMap']['dayTime']),
+                'hour'           => date('H:i:s', strtotime($v['quotaMap']['dayTime'])),
             ];
         }
 
