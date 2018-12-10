@@ -165,6 +165,40 @@ class Realtime_model extends CI_Model
     }
 
     /**
+     * 获取区域指标平均值
+     * @param $cityId      int    城市ID
+     * @param $junctionIds string 区域路口ID串
+     * @param $dayTime     string 时间 yyyy-mm-dd HH:ii:ss
+     * @param $quotaKey    string 指标KEY
+     * @return array
+     */
+    public function getEsAreaQuotaValue($cityId, $junctionIds, $dayTime, $quotaKey)
+    {
+        $esData = [
+            'source' => 'signal_control',
+            'cityId' => $cityId,
+            'junctionId' => $junctionIds,
+            'dayTime' => $dayTime,
+            'requestId' => get_traceid(),
+            'andOperations' => [
+                'junctionId' => 'in',
+                'cityId' => 'eq',
+                'dayTime' => 'eq',
+            ],
+            'quotaRequest' => [
+                "groupField" => "dayTime",
+                "quotaType" => "weight_avg",
+                "quotas" => "sum_{$quotaKey}*trailNum, sum_trailNum",
+                "limit" => 50,
+                "orderField" => "weight_avg",
+            ],
+        ];
+
+        $res = $this->searchQuota($esData);
+        print_r($res);exit;
+    }
+
+    /**
      * 获取实时指标路口数据（概览页路口列表）
      * @param $cityId int    城市ID
      * @param $date   string 日期 yyyy-mm-dd

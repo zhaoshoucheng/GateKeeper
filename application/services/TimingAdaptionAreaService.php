@@ -115,18 +115,8 @@ class TimingAdaptionAreaService extends BaseService
                 // 路口ID串
                 $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
 
-                /* 调用es接口获取区域平均延误、平均速度 */
-                $esData = [
-                    'city_id' => $cityId,
-                    'area_id' => $v['id'],
-                    'junctionIds' => $esJunctionIds,
-                    'time' => $esTime,
-                ];
-
                 // 获取区域平均速度
-                $esData['quota_key'] = 'avgSpeed';
-
-                $esSpeed = $this->getEsAreaQuotaValue($esData);
+                $esSpeed = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'avgSpeedUp');
 
                 $speed = $esSpeed;
 
