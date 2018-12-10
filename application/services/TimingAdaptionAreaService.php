@@ -116,11 +116,11 @@ class TimingAdaptionAreaService extends BaseService
 
                 // 获取区域平均速度
                 $esSpeed = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'avgSpeedUp');
-                $speed = !empty($esSpeed['value']) ? $esSpeed['value'] : 0;
+                $speed = !empty($esSpeed[$lastHour]['value']) ? $esSpeed[$lastHour]['value'] : 0;
 
                 // 获取区域平均延误
                 $esStopDelay = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'stopDelayUp');
-                $stop_delay = !empty($esStopDelay['value']) ? $esStopDelay['value'] : 0;
+                $stop_delay = !empty($esStopDelay[$lastHour]['value']) ? $esStopDelay[$lastHour]['value'] : 0;
 
                 /**
                  * 获取上一次的平均延误、平均速度数据
@@ -646,7 +646,7 @@ class TimingAdaptionAreaService extends BaseService
         }
         // 将新获取的数据追加到redis数据中
         if (!empty($quotaInfo)) {
-            $redisData[] = $quotaInfo;
+            $redisData = array_merge($redisData, $quotaInfo);
         }
 
         if (empty($redisData)) {
