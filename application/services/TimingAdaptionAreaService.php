@@ -629,7 +629,7 @@ class TimingAdaptionAreaService extends BaseService
 
         $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
         // 最新批次
-        $lastHour = $this->helperService->getLastestHour($cityId);
+        $lastHour = $this->helperService->getLastestHour($data['city_id']);
         $dayTime = date('Y-m-d H:i:s', strtotime($lastHour));
 
         // $data['quota_key'] = avgSpeed 或 stopDelay 新ES的字段改变了....（此处省略多字！）做了配置
@@ -637,7 +637,7 @@ class TimingAdaptionAreaService extends BaseService
         $quotaKey = $avgQuotaKeyConf[$data['quota_key']]['esColumn'];
 
         // 因为一次性获取当天批次的指标平均值会影响ES集群（真弱鸡）所以只能按批次获取，再追回到redis中
-        $quotaInfo = $this->realtime_model->getEsAreaQuotaValue($data['city_id'], $junctions, $dayTime, $quotaKey);
+        $quotaInfo = $this->realtime_model->getEsAreaQuotaValue($data['city_id'], $esJunctionIds, $dayTime, $quotaKey);
         $redisKey = 'its_tool_quota_avg_value_' . $data['city_id'];
         // 获取redis中数据
         $redisData = $this->redis_model->getData($redisKey);
@@ -657,12 +657,12 @@ class TimingAdaptionAreaService extends BaseService
 
         $ret = [];
         foreach ($redisData as $k => $item) {
-            $value = $item['weight_avg'];
+            $value = $item['value'];
             if ($data['quota_key'] == 'avgSpeed') {
                 // 速度m/s转换为km/h
-                $value = $item['weight_avg'] * 3.6;
+                $value = $item['value'] * 3.6;
             }
-            $dayTime = date('H:i:s', strtotime($item['dayTime']));
+            $dayTime = $hour;
             $ret[$k] = [
                 $dayTime, // 时间 X轴
                 round($value, 2),                                       // 值   Y轴
