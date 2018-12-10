@@ -42,7 +42,6 @@ class Realtimewarning extends Inroute_Controller
 
         exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
-
         //执行任务
         $command = "";
         if ($processNum == 0) {
@@ -56,6 +55,25 @@ class Realtimewarning extends Inroute_Controller
                 "{$logPath}realtimewarning.log  2>&1 &";
             exec($command);
         }
+
+        //附加执行济南大脑项目
+        exec("ps aux | grep \"realtimewarn\" | grep 'jinan_task/{$cityId}' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
+        $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
+        //执行任务
+        $command = "";
+        if ($processNum == 0) {
+            $logPath = $this->config->item('log_path');
+
+            $phpPath = "/home/xiaoju/php7/bin/php -c /home/xiaoju/php7/etc/php.ini ";
+            if (gethostname() == 'ipd-cloud-server01.gz01') {
+                $phpPath = "php ";
+            }
+            $command = "nohup {$phpPath}  /home/xiaoju/webroot/ipd-cloud/application/jinan-city-brain/itstool/index.php realtimewarning jinan_task/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
+                "{$logPath}jinan_task_realtimewarning.log  2>&1 &";
+            exec($command);
+        }
+
+
         $output = [
             'errno' => ERR_SUCCESS,
             'errmsg' => "",
