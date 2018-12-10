@@ -5,14 +5,11 @@
  * Date: 2018/10/20
  * Time: 下午4:22
  */
-namespace Services;
 
 class Realtime_model extends CI_Model
 {
     // es interface addr
     private $esUrl = '';
-
-    protected $helperService;
 
     /**
      * Area_model constructor.
@@ -22,10 +19,12 @@ class Realtime_model extends CI_Model
     {
         parent::__construct();
 
-        $this->helperService = new HelperService();
         // load config
         $this->load->config('nconf');
         $this->esUrl = $this->config->item('es_interface');
+
+        // load model
+        $this->load->model('redis_model');
     }
 
     /**
@@ -134,7 +133,7 @@ class Realtime_model extends CI_Model
     public function avgStopdelay($cityId, $date, $hour = '')
     {
         if (empty($hour)) {
-            $hour = $this->helperService->getLastestHour($cityId);
+            $hour = $this->redis_model->getHour($cityId);
         }
 
         $data = [
