@@ -400,7 +400,7 @@ class TimingAdaptionAreaService extends BaseService
     private function getRealTimeAlarmJunctions($cityId)
     {
         // 先去redis查数据，如果没有则查表
-        $alarmRedisKey = 'its_realtime_alarm_' . $cityId;
+        $alarmRedisKey = 'new_its_realtime_alarm_' . $cityId;
 
         $result = $this->redis_model->getData($alarmRedisKey);
 

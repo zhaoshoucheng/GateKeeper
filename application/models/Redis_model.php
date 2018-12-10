@@ -176,7 +176,7 @@ class Redis_model extends CI_Model
      */
     public function getHour($cityId)
     {
-        $key = 'its_realtime_lasthour_' . $cityId;
+        $key = 'new_its_realtime_lasthour_' . $cityId;
 
         return $this->getData($key);
     }
@@ -296,7 +296,7 @@ class Redis_model extends CI_Model
      */
     public function getRealtimePretreatJunctionList($cityId, $date, $hour)
     {
-        $key = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
+        $key = "new_its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
 
         if(!($data = $this->getData($key))) {
             return false;
@@ -314,7 +314,7 @@ class Redis_model extends CI_Model
      */
     public function getRealtimeAvgStopDelay($cityId, $date)
     {
-        $key = 'its_realtime_avg_stop_delay_' . $cityId . '_' . $date;
+        $key = 'new_its_realtime_avg_stop_delay_' . $cityId . '_' . $date;
 
         if(!($data = $this->getData($key))) {
             return false;
@@ -362,7 +362,7 @@ class Redis_model extends CI_Model
      */
     public function getRealtimeAlarmListByDateHour($cityId,$date,$hour)
     {
-        $key = sprintf('its_realtime_alarm_%s_%s_%s', $cityId, $date, $hour);
+        $key = sprintf('new_its_realtime_alarm_%s_%s_%s', $cityId, $date, $hour);
         if(!($data = $this->getData($key))) {
             return false;
         }
@@ -378,7 +378,7 @@ class Redis_model extends CI_Model
      */
     public function getRealtimeAlarmList($cityId)
     {
-        $key = 'its_realtime_alarm_' . $cityId;
+        $key = 'new_its_realtime_alarm_' . $cityId;
 
         if(!($data = $this->getData($key))) {
             return false;

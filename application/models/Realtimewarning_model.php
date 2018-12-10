@@ -218,7 +218,7 @@ class Realtimewarning_model extends CI_Model
             exit;
         }
         // 缓存数据
-        $avgStopDelayKey = "its_realtime_avg_stop_delay_{$cityId}_{$date}";
+        $avgStopDelayKey = "new_its_realtime_avg_stop_delay_{$cityId}_{$date}";
         $esStopDelay = $this->redis_model->getData($avgStopDelayKey);
         if (!empty($esStopDelay)) {
             $esStopDelay = json_decode($esStopDelay, true);
@@ -263,24 +263,20 @@ class Realtimewarning_model extends CI_Model
         $junctionSurvey = $result;
         //<========计算缓存数据end==========
 
-        // 缓存诊断路口统计数据
-        $junctionSurveyKey = "its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
-        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
-
         // 缓存诊断路口列表数据
-        $junctionListKey = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
+        $junctionListKey = "new_its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
         $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
 
         // 缓存最新hour
-        $redisKey = "its_realtime_lasthour_$cityId";
+        $redisKey = "new_its_realtime_lasthour_$cityId";
         $this->redis_model->setEx($redisKey, $hour, 24 * 3600);
 
         // 缓存实时报警路口数据
-        $realTimeAlarmRedisKey = 'its_realtime_alarm_' . $cityId;
+        $realTimeAlarmRedisKey = 'new_its_realtime_alarm_' . $cityId;
         $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
 
         // 冗余缓存实时报警路口数据,每一个批次一份
-        $realTimeAlarmBakKey = "its_realtime_alarm_{$cityId}_{$date}_{$hour}";
+        $realTimeAlarmBakKey = "new_its_realtime_alarm_{$cityId}_{$date}_{$hour}";
         $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
     }
 
