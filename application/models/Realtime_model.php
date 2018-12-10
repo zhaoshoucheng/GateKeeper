@@ -132,28 +132,28 @@ class Realtime_model extends CI_Model
      * 平均延误曲线图
      * @param $cityId int    城市ID
      * @param $date   string 日期 yyyy-mm-dd
+     * @param $hour   string 时间 HH:ii:ss
      * @return array
      */
-    public function avgStopdelay($cityId, $date)
+    public function avgStopdelay($cityId, $date, $hour = '')
     {
-        $startTime = strtotime($date . ' 00:00:00') * 1000;
-        $endTime = strtotime($date . ' 23:59:59') * 1000;
+        if (empty($hour)) {
+            $hour = $this->getLastestHour($cityId);
+        }
 
         $data = [
             "source" => "signal_control",
             "cityId" => $cityId,
             'requestId' => get_traceid(),
-            "timestamp" => "[{$startTime}, {$endTime}]",
+            "dayTime" => $date . ' ' . $hour,
             "andOperations" => [
                 "cityId" => "eq",
-                "timestamp" => "range",
+                "dayTime" => "eq",
             ],
             "quotaRequest" => [
                 "quotaType" => "weight_avg",
                 "quotas" => "sum_stopDelayUp*trailNum, sum_trailNum",
                 "groupField" => "dayTime",
-                "orderField" => "dayTime",
-                "asc" => "true",
             ],
         ];
 
@@ -215,22 +215,6 @@ class Realtime_model extends CI_Model
         }
 
         return $result;
-    }
-
-    /**
-     * 判断数据表是否存在
-     *
-     * @param $cityId
-     *
-     * @throws Exception
-     */
-    protected function isExisted($cityId)
-    {
-        $isExisted = $this->db->table_exists($this->tb . $cityId);
-
-        if (!$isExisted) {
-            throw new \Exception('数据表不存在', ERR_DATABASE);
-        }
     }
 
     /**

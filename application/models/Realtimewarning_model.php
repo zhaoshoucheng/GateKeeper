@@ -211,14 +211,20 @@ class Realtimewarning_model extends CI_Model
         //todo生成rediskey
         $this->load->model('redis_model');
 
-        //生成平均延误曲线数据
-        $result = $this->realtime_model->avgStopdelay($cityId, $date);
+        //生成平均延误曲线数据 因为ES直接查询当天所有批次会影响到集群（真弱鸡！）所有要每次只取一个批次进行追加缓存。
+        $result = $this->realtime_model->avgStopdelay($cityId, $date, $hour);
         if (empty($result)) {
             echo "生成 avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
             exit;
         }
+        // 缓存数据
         $avgStopDelayKey = "its_realtime_avg_stop_delay_{$cityId}_{$date}";
-        $this->redis_model->setEx($avgStopDelayKey, json_encode($result), 24 * 3600);
+        $esStopDelay = $this->redis_model->getData($avgStopDelayKey);
+        if (!empty($esStopDelay)) {
+            $esStopDelay = json_decode($esStopDelay, true);
+        }
+        $esStopDelay[$hour] = $result;
+        $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 24 * 3600);
 
         //========计算缓存数据start==========>
         //获取实时指标数据
