@@ -223,7 +223,7 @@ class Realtimewarning_model extends CI_Model
         if (!empty($esStopDelay)) {
             $esStopDelay = json_decode($esStopDelay, true);
         }
-        $esStopDelay[$hour] = $result;
+        array_push($esStopDelay, $result);
         $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 24 * 3600);
 
         //========计算缓存数据start==========>
