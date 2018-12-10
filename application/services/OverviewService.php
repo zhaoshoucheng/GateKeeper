@@ -99,7 +99,12 @@ class OverviewService extends BaseService
 
         $res = $this->redis_model->getRealtimeAvgStopDelay($cityId, $date);
 
-        $result = $res ? $res : $this->realtime_model->avgStopdelay($cityId, $date);
+        $hour = $this->helperService->getLastestHour($cityId);
+        $result = $res ? $res : $this->realtime_model->avgStopdelay($cityId, $date, $hour);
+        if (empty($result)) {
+            return (object)[];
+        }
+        $result = array_values($result);
 
         $realTimeQuota = $this->config->item('real_time_quota');
 

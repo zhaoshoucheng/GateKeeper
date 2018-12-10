@@ -130,12 +130,8 @@ class Realtime_model extends CI_Model
      * @param $hour   string 时间 HH:ii:ss
      * @return array
      */
-    public function avgStopdelay($cityId, $date, $hour = '')
+    public function avgStopdelay($cityId, $date, $hour)
     {
-        if (empty($hour)) {
-            $hour = $this->redis_model->getHour($cityId);
-        }
-
         $data = [
             "source" => "signal_control",
             "cityId" => $cityId,
