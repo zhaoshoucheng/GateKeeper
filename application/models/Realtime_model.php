@@ -195,7 +195,12 @@ class Realtime_model extends CI_Model
         ];
 
         $res = $this->searchQuota($esData);
-        print_r($res);exit;
+        if (!empty($res['result']['quotaResults'])) {
+            list($quotaValueInfo) = $res['result']['quotaResults'];
+            $quotaValue = $quotaValueInfo['quotaMap']['weight_avg'];
+        }
+
+        return $quotaValue;
     }
 
     /**

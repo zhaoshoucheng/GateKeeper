@@ -83,7 +83,6 @@ class TimingAdaptionAreaService extends BaseService
          * ]
          */
         $redisData = $this->redis_model->getData($areaRedisKey);
-
         if (!empty($redisData)) {
             $redisData = json_decode($redisData, true);
         }
@@ -116,16 +115,10 @@ class TimingAdaptionAreaService extends BaseService
                 $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
 
                 // 获取区域平均速度
-                $esSpeed = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'avgSpeedUp');
-
-                $speed = $esSpeed;
+                $speed = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'avgSpeedUp');
 
                 // 获取区域平均延误
-                $esData['quota_key'] = 'stopDelay';
-
-                $esStopDelay = $this->getEsAreaQuotaValue($esData);
-
-                $stop_delay = $esStopDelay;
+                $stop_delay = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'stopDelayUp');
 
                 /**
                  * 获取上一次的平均延误、平均速度数据
@@ -197,58 +190,6 @@ class TimingAdaptionAreaService extends BaseService
         $url = $this->signal_mis_interface . '/TimingAdaptation/getAreaJunctionList';
 
         return $this->waymap_model->post($url, $data);
-    }
-
-    /**
-     * 调用ES接口，获取区域指标值
-     *
-     * @param $data
-     *
-     * @return int
-     * @throws \Exception
-     */
-    private function getEsAreaQuotaValue($data)
-    {
-        $esUrl = $this->config->item('es_interface') . '/estimate/diagnosis/queryQuota';
-
-        $esData = [
-            'source' => 'signal_control',
-            'cityId' => $data['city_id'],
-            'junctionId' => $data['junctionIds'],
-            'dayTime' => $data['time'],
-            'requestId' => get_traceid(),
-            'andOperations' => [
-                'junctionId' => 'in',
-                'cityId' => 'eq',
-                'dayTime' => 'eq',
-            ],
-            'quotaRequest' => [
-                "groupField" => "dayTime",
-                "quotaType" => "weight_avg",
-                "quotas" => "sum_{$data['quota_key']}*trailNum, sum_trailNum",
-                "limit" => 50,
-                "orderField" => "weight_avg",
-            ],
-        ];
-
-        $quotaInfo = httpPOST($esUrl, $esData, 0, 'json');
-
-        if (!$quotaInfo) {
-            throw new \Exception('调用es接口 queryQuota 失败！', ERR_DEFAULT);
-        }
-        $quotaInfo = json_decode($quotaInfo, true);
-
-        $quotaValue = 0;
-        if ($quotaInfo['code'] != '000000') {
-            throw new \Exception($quotaInfo['message'], ERR_DEFAULT);
-        }
-
-        if (!empty($quotaInfo['result']['quotaResults'])) {
-            list($quotaValueInfo) = $quotaInfo['result']['quotaResults'];
-            $quotaValue = $quotaValueInfo['quotaMap']['weight_avg'];
-        }
-
-        return $quotaValue;
     }
 
     /**
