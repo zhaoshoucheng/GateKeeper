@@ -14,7 +14,7 @@ namespace Services;
  *
  * @property \Gift_model       $gift_model
  * @property \Report_model     $report_model
- * @property \UploadFile_model $uploadfile_model
+ * @property \UploadFile_model $uploadFile_model
  */
 class ReportService extends BaseService
 {
@@ -23,7 +23,7 @@ class ReportService extends BaseService
         parent::__construct();
 
         $this->load->model('report_model');
-        $this->load->model('uploadfile_model');
+        $this->load->model('uploadFile_model');
         $this->load->model('gift_model');
         $this->load->model('waymap_model');
     }
@@ -424,7 +424,7 @@ class ReportService extends BaseService
                 "namespace" => $namespace,
                 "b_type" => 1,
             ];
-            $this->uploadfile_model->insertUploadFile($param);
+            $this->uploadFile_model->insertUploadFile($param);
         }
 
         return $data['itstool_private'];
