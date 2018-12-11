@@ -82,7 +82,7 @@ class MY_Controller extends CI_Controller
                 // 通过vip进行的请求
                 $token = isset($_REQUEST['token']) ? $_REQUEST['token'] : "";
                 // token列表不为空，且不匹配token时退出
-                if (!empty($escapeClient[$clientIp]) && !isset($escapeClient[$clientIp][$token])) {
+                if (!empty($escapeClient[$clientIp]) && !in_array($token,$escapeClient[$clientIp])) {
                     $this->_output();
                     exit();
                 }
