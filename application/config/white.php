@@ -21,5 +21,5 @@ $config['white_escape_sso'] = [
 $config['white_token_clientip_escape'] = [
     '100.90.164.31'=>["c43694c21ae778f9de213e24db78e057"],  //验证token+ip
     '10.179.132.61'=>["c43694c21ae778f9de213e24db78e057"],  //验证token+ip
-    '127.0.0.1'=>[] //不验token
+    '127.0.0.1'=>[], //不验token
 ];
