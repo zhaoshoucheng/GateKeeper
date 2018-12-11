@@ -44,7 +44,7 @@ class MY_Controller extends CI_Controller
         date_default_timezone_set('Asia/Shanghai');
 
         $host = $_SERVER['HTTP_HOST'];
-        $clientIp = $_SERVER['REMOTE_ADDR'] 
+        $clientIp = $_SERVER['REMOTE_ADDR'];
 
         $this->load->config('white');
         $escapeSso = $this->config->item('white_escape_sso');
