@@ -378,8 +378,11 @@ class ReportService extends BaseService
     }
 
     /**
-     * @param $params
-     *
+     * 生成报告
+     * @param $params['city_id'] int    城市ID
+     * @param $params['title']   string 报告标题
+     * @param $params['type']    int    报告类型 1，路口分析报告；2，路口优化对比报告；3，城市分析报告（周报）；4，城市分析报告（月报）
+     * @param $params['file']    binary 二进制文件
      * @return mixed
      * @throws \Exception
      */

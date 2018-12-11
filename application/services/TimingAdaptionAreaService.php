@@ -745,6 +745,9 @@ class TimingAdaptionAreaService extends BaseService
 
         // 获取相位配时信息
         $timingInfo = $this->getFlowTimingInfo($data);
+        if (empty($timingInfo)) {
+            return [];
+        }
 
         $cycleLength = $timingInfo['cycle'];
         $offset      = $timingInfo['offset'];
@@ -822,6 +825,9 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         $Info = json_decode($resData['timing_info'], true);
+        if (empty($Info['data'])) {
+            return [];
+        }
 
         list($timingInfo) = $Info['data']['tod'];
         if (empty($timingInfo)) {
