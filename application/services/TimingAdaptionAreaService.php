@@ -628,35 +628,13 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
-        // 最新批次
-        $lastHour = $this->helperService->getLastestHour($data['city_id']);
-        $dayTime = date('Y-m-d H:i:s', strtotime($lastHour));
+        $date = date('Y-m-d');
 
         // $data['quota_key'] = avgSpeed 或 stopDelay 新ES的字段改变了....（此处省略多字！）做了配置
         $avgQuotaKeyConf = $this->config->item('avg_quota_key');
         $quotaKey = $avgQuotaKeyConf[$data['quota_key']]['esColumn'];
 
-        // 因为一次性获取当天批次的指标平均值会影响ES集群（真弱鸡）所以只能按批次获取，再追回到redis中
-        $quotaInfo = $this->realtime_model->getEsAreaQuotaValue($data['city_id'], $esJunctionIds, $dayTime, $quotaKey);
-        $redisKey = 'its_tool_quota_avg_value_' . $data['city_id'];
-        // 获取redis中数据
-        $redisData = $this->redis_model->getData($redisKey);
-        if (!empty($redisData)) {
-            $redisData = json_decode($redisData, true);
-        } else {
-            $redisData = [];
-        }
-        // 将新获取的数据追加到redis数据中
-        if (!empty($quotaInfo)) {
-            $redisData = array_merge($redisData, $quotaInfo);
-        }
-
-        if (empty($redisData)) {
-            return [];
-        }
-        // 将新的数据再放入redis中
-        $this->redis_model->setEx($redisKey, json_encode($redisData), 24 * 3600);
-        $redisData = array_values($redisData);
+        $quotaInfo = $this->realtime_model->getEsAreaQuotaValueCurve($data['city_id'], $esJunctionIds, $date, $quotaKey);
 
         $ret = [];
         foreach ($redisData as $k => $item) {

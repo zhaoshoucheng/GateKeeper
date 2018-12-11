@@ -204,9 +204,7 @@ class AreaService extends BaseService
 
     /**
      * 获取城市全部区域详情
-     *
-     * @param $params
-     *
+     * @param $params['city_id'] int 城市ID
      * @return array
      * @throws \Exception
      */
@@ -216,6 +214,9 @@ class AreaService extends BaseService
 
         // 获取城市全部区域信息
         $areaList       = $this->area_model->getAreasByCityId($cityId, 'id, area_name');
+        if (empty($areaList)) {
+            return (object)[];
+        }
         $areaCollection = Collection::make($areaList);
 
         // 获取区域ID
