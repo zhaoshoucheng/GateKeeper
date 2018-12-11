@@ -635,9 +635,12 @@ class TimingAdaptionAreaService extends BaseService
         $quotaKey = $avgQuotaKeyConf[$data['quota_key']]['esColumn'];
 
         $quotaInfo = $this->realtime_model->getEsAreaQuotaValueCurve($data['city_id'], $esJunctionIds, $date, $quotaKey);
+        if (empty($quotaInfo)) {
+            return [];
+        }
 
         $ret = [];
-        foreach ($redisData as $k => $item) {
+        foreach ($quotaInfo as $k => $item) {
             $value = $item['value'];
             if ($data['quota_key'] == 'avgSpeed') {
                 // 速度m/s转换为km/h
@@ -657,7 +660,6 @@ class TimingAdaptionAreaService extends BaseService
         unset($ret[3]);
         $ret = array_values($ret);
         */
-
         $tmpRet      = [];
         $lastDayTime = "00:00:00";
         for ($i = 0; $i < count($ret);) {

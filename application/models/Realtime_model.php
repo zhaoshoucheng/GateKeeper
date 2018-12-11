@@ -226,7 +226,6 @@ class Realtime_model extends CI_Model
             'andOperations' => [
                 'junctionId' => 'in',
                 'cityId'     => 'eq',
-                'dayTime'    => 'eq',
                 'timestamp'  => 'range',
             ],
             'quotaRequest' => [
@@ -234,21 +233,22 @@ class Realtime_model extends CI_Model
                 "quotaType"  => "weight_avg",
                 "quotas"     => "sum_{$quotaKey}*trailNum, sum_trailNum",
                 "orderField" => 'dayTime',
+                "asc"        => true,
             ],
         ];
-
         $res = $this->searchQuota($esData);
-        print_r($res);exit;
-        if (!empty($res['result']['quotaResults'])) {
-            list($quotaValueInfo) = $res['result']['quotaResults'];
+        if (empty($res['result']['quotaResults'])) {
+            return [];
         }
 
-        return [
-            date('H:i:s', strtotime($dayTime)) =>[
-                'value' => $quotaValueInfo['quotaMap']['weight_avg'],
-                'hour'  => date('H:i:s', strtotime($quotaValueInfo['quotaMap']['dayTime'])),
-            ]
-        ];
+        $result = [];
+        foreach ($res['result']['quotaResults'] as $k=>$v) {
+            $result[$k] = [
+                'value' => $v['quotaMap']['weight_avg'],
+                'hour'  => date('H:i:s', strtotime($v['quotaMap']['dayTime'])),
+            ];
+        }
+        return $result;
     }
 
     /**
