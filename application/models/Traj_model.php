@@ -125,7 +125,7 @@ class Traj_model extends CI_Model
      */
     public function postRaw($url, $data, $timeout = 20000, $contentType='x-www-form-urlencoded')
     {
-        $res = httpPOST($url, $data, 0, 'raw');
+        $res = httpPOST($url, $data, $timeout, 'raw');
         if (!$res) {
             throw new \Exception('轨迹数据获取失败', ERR_REQUEST_WAYMAP_API);
         }
