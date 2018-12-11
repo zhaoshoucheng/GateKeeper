@@ -16,3 +16,10 @@ $config['white_escape_sso'] = [
     '100.90.165.32:8088',
     'localhost:8000', //本地调试环境
 ];
+
+// 白名单Ip及token就可以登陆
+$config['white_token_clientip_escape'] = [
+    '100.90.164.31'=>["c43694c21ae778f9de213e24db78e057"],  //验证token+ip
+    '10.179.132.61'=>["c43694c21ae778f9de213e24db78e057"],  //验证token+ip
+    '127.0.0.1'=>[] //不验token
+];
