@@ -336,7 +336,6 @@ class AreaService extends BaseService
         $dates  = array_merge($baseDates, $evaluateDates);
 
         $resultList = $this->area_model->getJunctionByCityId($dates, $junctionIds, $hours, $cityId, $select);
-
         if (!$resultList || empty($resultList)) {
             return  [];
         }
@@ -480,7 +479,7 @@ class AreaService extends BaseService
             $rows_cnt   = count($table);
             $cols_cnt   = count($table[0]) - 1;
             $rows_index = $rows_cnt + $line - 1;
-            $objSheet->getStyle("A≈{$line}:" . intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
+            //$objSheet->getStyle("A≈{$line}:" . intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
             $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($excelStyle['header']);
             $objSheet->getStyle("A{$line}:" . intToChr($cols_cnt) . $line)->applyFromArray($excelStyle['header']);
         }
