@@ -81,7 +81,12 @@ class KeyJunction extends MY_Controller
             "evaluate_time_start_end"=>[],
         ];
         // print_r($requestData);exit;
-        $result = $this->evaluateService->quotaEvaluateCompare($requestData);
+        $response = $this->evaluateService->quotaEvaluateCompare($requestData);
+        $result["datalist"] = isset($response['base']) ? $response['base']:[];
+        $result["info"] = [
+            "value"=>"停车延误",
+            "unit"=>"秒",
+        ];
         $this->response($data);
     }
 
