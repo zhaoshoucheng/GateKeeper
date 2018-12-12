@@ -64,7 +64,7 @@ class KeyJunction extends MY_Controller
         $baseTime = [];
         $incTime = 0;
         while(1){
-            if(($incTime+1)>=$dayLength){
+            if(($incTime)>=($dayLength+1)){
                 break;
             }
             $baseTime[] = strtotime($params['date'])-($dayLength-$incTime)*24*3600;
