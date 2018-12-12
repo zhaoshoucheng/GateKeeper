@@ -54,8 +54,8 @@ class Arterialspacetimediagram extends MY_Controller
     {
         $params = file_get_contents("php://input");
         $result = $this->traj_model->getClockShiftCorrect($params);
-        $result['token'] = isset($params['token']) ?  $params['token'] : "";
-        return $this->response(array_values($result));
+        $result['token'] = isset($params['token']) ?  $params['token'] : "";        
+        return $this->response(array_filter(array_values($result)));
     }
 
     //请求绿波优化接口
