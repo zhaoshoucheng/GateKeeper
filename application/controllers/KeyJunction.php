@@ -59,7 +59,7 @@ class KeyJunction extends MY_Controller
         $dayLength = 7;
         $params['date'] = $params['date'] ?? date('Y-m-d',strtotime('-1 day'));
         $baseTimeStartEnd = [];
-        $baseTimeStartEnd['start'] = date("Y-m-d 00:00:00", strtotime($params['date'])-$dayLength*24*3600)
+        $baseTimeStartEnd['start'] = date("Y-m-d 00:00:00", strtotime($params['date'])-$dayLength*24*3600);
         $baseTimeStartEnd['end'] = date("Y-m-d 00:00:00", strtotime($params['date']));
         $baseTime = [];
         $dayCnt = 0;
