@@ -8,6 +8,8 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Services\OverviewService;
+use Services\EvaluateService;
+
 
 class KeyJunction extends MY_Controller
 {
@@ -15,6 +17,7 @@ class KeyJunction extends MY_Controller
     {
         parent::__construct();
         $this->overviewService = new OverviewService();
+        $this->evaluateService = new EvaluateService();
     }
 
     /**
@@ -52,10 +55,28 @@ class KeyJunction extends MY_Controller
             'junction_id' => 'required',
         ]);
 
-        //默认数据从昨天开始
+        //默认数据从昨天开始，往前推7天
+        $dayLength = 7;
         $params['date'] = $params['date'] ?? date('Y-m-d',strtotime('-1 day'));
-        
-        $data = $this->overviewService->junctionStopDelayCurve($params);
+        $baseTimeStartEnd = [];
+        $baseTimeStartEnd['start'] = date("Y-m-d 00:00:00", strtotime($params['date'])-$dayLength*24*3600)
+        $baseTimeStartEnd['end'] = date("Y-m-d 00:00:00", strtotime($params['date']))
+        $baseTime = [];
+        $dayCnt = 0;
+        while(1){
+            $baseTime[] = strtotime($params['date'])-($dayLength-$dayCnt)*24*3600;
+            $dayCnt++;
+        }
+        $requestData = [
+            "city_id"=>$params['city_id'],
+            "quota_key"=>"stop_delay",
+            "junction_id"=>$params['junction_id'],
+            "flow_id"=>"9999",
+            "base_time_start_end"=>$baseTimeStartEnd,
+            "base_time"=>$baseTime,
+        ];
+        print_r($requestData);exit;
+        $result = $this->evaluateService->quotaEvaluateCompare($requestData);
         $this->response($data);
     }
 
