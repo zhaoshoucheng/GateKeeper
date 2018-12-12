@@ -115,10 +115,12 @@ class TimingAdaptionAreaService extends BaseService
                 $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
 
                 // 获取区域平均速度
-                $speed = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'avgSpeedUp');
+                $esSpeed = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'avgSpeedUp');
+                $speed = !empty($esSpeed[$lastHour]['value']) ? $esSpeed[$lastHour]['value'] : 0;
 
                 // 获取区域平均延误
-                $stop_delay = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'stopDelayUp');
+                $esStopDelay = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'stopDelayUp');
+                $stop_delay = !empty($esStopDelay[$lastHour]['value']) ? $esStopDelay[$lastHour]['value'] : 0;
 
                 /**
                  * 获取上一次的平均延误、平均速度数据
@@ -610,9 +612,9 @@ class TimingAdaptionAreaService extends BaseService
 
     /**
      * 获取区域指标折线图
-     *
-     * @param $data
-     *
+     * @param $data['city_id']   int    城市ID
+     * @param $data['area_id']   int    区域ID
+     * @param $data['quota_key'] string 指标KEY
      * @return mixed
      * @throws \Exception
      */
@@ -626,56 +628,25 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
+        $date = date('Y-m-d');
 
-        // 当前时间 毫秒级时间戳
-        $endTime = (int)(time() * 1000);
-        // 开始时间 当天开始时间 毫秒级时间戳
-        $startTime = strtotime('00:00:00') * 1000;
+        // $data['quota_key'] = avgSpeed 或 stopDelay 新ES的字段改变了....（此处省略多字！）做了配置
+        $avgQuotaKeyConf = $this->config->item('avg_quota_key');
+        $quotaKey = $avgQuotaKeyConf[$data['quota_key']]['esColumn'];
 
-        $esData = [
-            "source" => "signal_control",
-            "cityId" => $data['city_id'],
-            'requestId' => get_traceid(),
-            "junctionId" => $esJunctionIds,
-            "timestamp" => "[{$startTime}, {$endTime}]",
-            "andOperations" => [
-                "junctionId" => "in",
-                "cityId" => "eq",
-                "timestamp" => "range",
-            ],
-            "quotaRequest" => [
-                "quotaType" => "weight_avg",
-                "quotas" => "sum_{$data['quota_key']}*trailNum, sum_trailNum",
-                "groupField" => "dayTime",
-                "orderField" => "dayTime",
-                "asc" => "true",
-            ],
-        ];
-
-        $esUrl = $this->config->item('es_interface') . '/estimate/diagnosis/queryQuota';
-
-        $quotaInfo = httpPOST($esUrl, $esData, 0, 'json');
-        if (!$quotaInfo) {
-            throw new \Exception('调用es接口 获取区域指标折线图 失败！', ERR_DEFAULT);
-        }
-        $quotaInfo = json_decode($quotaInfo, true);
-        if ($quotaInfo['code'] != '000000') {
-            $result['errmsg'] = $quotaInfo['message'];
-            throw new \Exception($quotaInfo['message'], ERR_DEFAULT);
-        }
-        $quotaValueInfo = [];
-        if (!empty($quotaInfo['result']['quotaResults'])) {
-            $quotaValueInfo = $quotaInfo['result']['quotaResults'];
+        $quotaInfo = $this->realtime_model->getEsAreaQuotaValueCurve($data['city_id'], $esJunctionIds, $date, $quotaKey);
+        if (empty($quotaInfo)) {
+            return [];
         }
 
         $ret = [];
-        foreach ($quotaValueInfo as $k => $item) {
-            $value = $item['quotaMap']['weight_avg'];
+        foreach ($quotaInfo as $k => $item) {
+            $value = $item['value'];
             if ($data['quota_key'] == 'avgSpeed') {
                 // 速度m/s转换为km/h
-                $value = $item['quotaMap']['weight_avg'] * 3.6;
+                $value = $item['value'] * 3.6;
             }
-            $dayTime = date('H:i:s', strtotime($item['quotaMap']['dayTime']));
+            $dayTime = $item['hour'];
             $ret[$k] = [
                 $dayTime, // 时间 X轴
                 round($value, 2),                                       // 值   Y轴
@@ -689,7 +660,6 @@ class TimingAdaptionAreaService extends BaseService
         unset($ret[3]);
         $ret = array_values($ret);
         */
-
         $tmpRet      = [];
         $lastDayTime = "00:00:00";
         for ($i = 0; $i < count($ret);) {
@@ -755,6 +725,9 @@ class TimingAdaptionAreaService extends BaseService
 
         // 获取相位配时信息
         $timingInfo = $this->getFlowTimingInfo($data);
+        if (empty($timingInfo)) {
+            return [];
+        }
 
         $cycleLength = $timingInfo['cycle'];
         $offset      = $timingInfo['offset'];
@@ -832,6 +805,9 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         $Info = json_decode($resData['timing_info'], true);
+        if (empty($Info['data'])) {
+            return [];
+        }
 
         list($timingInfo) = $Info['data']['tod'];
         if (empty($timingInfo)) {

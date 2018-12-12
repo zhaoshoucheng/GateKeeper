@@ -121,3 +121,15 @@ $config['flow_alarm_category'] = [
 
 // 指标评估数据redis KEY前缀
 $config['quota_evaluate_key_prefix'] = 'quotaEvaluateDataKey_';
+
+// 求指标平均值时的key
+$config['avg_quota_key'] = [
+    'avgSpeed' => [
+        'name'     => '平均速度',    // 名称
+        'esColumn' => 'avgSpeedUp', // 对应新ES字段
+    ],
+    'stopDelay' => [
+        'name'     => '平均延误',
+        'esColumn' => 'stopDelayUp',
+    ],
+];

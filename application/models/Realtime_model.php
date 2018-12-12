@@ -175,32 +175,80 @@ class Realtime_model extends CI_Model
     public function getEsAreaQuotaValue($cityId, $junctionIds, $dayTime, $quotaKey)
     {
         $esData = [
-            'source' => 'signal_control',
-            'cityId' => $cityId,
+            'source'     => 'signal_control',
+            'cityId'     => $cityId,
             'junctionId' => $junctionIds,
-            'dayTime' => $dayTime,
-            'requestId' => get_traceid(),
+            'dayTime'    => $dayTime,
+            'requestId'  => get_traceid(),
             'andOperations' => [
                 'junctionId' => 'in',
-                'cityId' => 'eq',
-                'dayTime' => 'eq',
+                'cityId'     => 'eq',
+                'dayTime'    => 'eq',
             ],
             'quotaRequest' => [
                 "groupField" => "dayTime",
-                "quotaType" => "weight_avg",
-                "quotas" => "sum_{$quotaKey}*trailNum, sum_trailNum",
-                "limit" => 50,
-                "orderField" => "weight_avg",
+                "quotaType"  => "weight_avg",
+                "quotas"     => "sum_{$quotaKey}*trailNum, sum_trailNum",
             ],
         ];
 
         $res = $this->searchQuota($esData);
         if (!empty($res['result']['quotaResults'])) {
             list($quotaValueInfo) = $res['result']['quotaResults'];
-            $quotaValue = $quotaValueInfo['quotaMap']['weight_avg'];
         }
 
-        return $quotaValue;
+        return [
+            date('H:i:s', strtotime($dayTime)) =>[
+                'value' => $quotaValueInfo['quotaMap']['weight_avg'],
+                'hour'  => date('H:i:s', strtotime($quotaValueInfo['quotaMap']['dayTime'])),
+            ]
+        ];
+    }
+
+    /**
+     * 获取区域指标平均值
+     * @param $cityId      int    城市ID
+     * @param $junctionIds string 区域路口ID串
+     * @param $date        string 时间 yyyy-mm-dd
+     * @param $quotaKey    string 指标KEY
+     * @return array
+     */
+    public function getEsAreaQuotaValueCurve($cityId, $junctionIds, $date, $quotaKey)
+    {
+        $startTime = strtotime($date . ' 00:00:00') * 1000;
+        $endTime = strtotime($date . ' 23:59:59') * 1000;
+        $esData = [
+            'source'     => 'signal_control',
+            'cityId'     => $cityId,
+            'junctionId' => $junctionIds,
+            'timestamp'  => "[{$startTime}, {$endTime}]",
+            'requestId'  => get_traceid(),
+            'andOperations' => [
+                'junctionId' => 'in',
+                'cityId'     => 'eq',
+                'timestamp'  => 'range',
+            ],
+            'quotaRequest' => [
+                "groupField" => "dayTime",
+                "quotaType"  => "weight_avg",
+                "quotas"     => "sum_{$quotaKey}*trailNum, sum_trailNum",
+                "orderField" => 'dayTime',
+                "asc"        => true,
+            ],
+        ];
+        $res = $this->searchQuota($esData);
+        if (empty($res['result']['quotaResults'])) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($res['result']['quotaResults'] as $k=>$v) {
+            $result[$k] = [
+                'value' => $v['quotaMap']['weight_avg'],
+                'hour'  => date('H:i:s', strtotime($v['quotaMap']['dayTime'])),
+            ];
+        }
+        return $result;
     }
 
     /**

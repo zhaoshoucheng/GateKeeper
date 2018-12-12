@@ -120,7 +120,7 @@ class Area extends MY_Controller
 
     /**
      * 获取城市全部区域的详细信息
-     *
+     * @param $params['city_id'] int 城市ID
      * @throws Exception
      */
     public function getAllAreaJunctionList()

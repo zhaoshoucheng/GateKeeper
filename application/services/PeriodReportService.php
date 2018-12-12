@@ -427,6 +427,9 @@ class PeriodReportService extends BaseService
 
             $datatmp    = $this->period_model->getJunctionHourData($cityId, $dateList, $hour, $quotaKey . ' desc');
             $predatatmp = $this->period_model->getJunctionHourData($cityId, $preDateList, $hour, $quotaKey . ' desc');
+            if (empty($datatmp) || empty($predatatmp)) {
+                return [];
+            }
 
             $evaluate = new \EvaluateQuota();
 
@@ -454,6 +457,10 @@ class PeriodReportService extends BaseService
                     $quotaKey => $pdtv[1],
                 ];
             }
+        }
+
+        if (empty($data) || empty($predata)) {
+            return [];
         }
 
         $finalData = [];
@@ -644,6 +651,9 @@ class PeriodReportService extends BaseService
         $preDataList     = self::getDateFromRange($prelastTime['start_time'], $prelastTime['end_time']);
         $data            = $this->period_model->getCityHourData($cityId, $dateList, $hour);
         $preData         = $this->period_model->getCityHourData($cityId, $preDataList, $hour);
+        if (empty($data) || empty($preData)) {
+            return [];
+        }
         $evaluate        = new \EvaluateQuota();
         $lastcharData    = $evaluate->getCityStopDelayAve($data);
         $preLastcharData = $evaluate->getCityStopDelayAve($preData);
@@ -707,7 +717,9 @@ class PeriodReportService extends BaseService
         $preDataList = self::getDateFromRange($prelastTime['start_time'], $prelastTime['end_time']);
         $data        = $this->period_model->getCityHourData($cityId, $dateList, $hour);
         $preData     = $this->period_model->getCityHourData($cityId, $preDataList, $hour);
-
+        if (empty($data) || empty($preData)) {
+            return [];
+        }
         $evaluate        = new \EvaluateQuota();
         $lastcharData    = $evaluate->getCitySpeedAve($data);
         $preLastcharData = $evaluate->getCitySpeedAve($preData);
