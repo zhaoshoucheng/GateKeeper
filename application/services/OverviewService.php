@@ -270,12 +270,13 @@ class OverviewService extends BaseService
         $cityId   = $params['city_id'];
         $date     = $params['date'];
         $pagesize = $params['pagesize'];
+        $junctionIds = !empty($params['junction_ids']) ? $params['junction_ids'] : [];
 
         $hour = $this->helperService->getLastestHour($cityId);
 
         $select = 'logic_junction_id, hour, sum(stop_delay * traj_count) / sum(traj_count) as stop_delay';
 
-        $result = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $select);
+        $result = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $select, $junctionIds);
 
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 

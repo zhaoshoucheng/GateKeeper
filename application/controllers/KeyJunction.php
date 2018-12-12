@@ -7,13 +7,44 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\OverviewService;
+
 class KeyJunction extends MY_Controller
 {
     public function __construct()
     {
         parent::__construct();
+        $this->overviewService = new OverviewService();
     }
 
+    /**
+     * 获取延误TOP20
+     *
+     * @throws Exception
+     */
+    public function stopDelayTopList()
+    {
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'pagesize' => 'is_natural_no_zero'
+        ]);
+        $params['date'] = $params['date'] ?? date('Y-m-d');
+        $params['pagesize'] = $params['pagesize'] ?? 20;
+        //获取重点路口数据
+        $keyJunctionList  = $this->config->item('key_junction_list');
+        $params['junction_ids'] = !empty($keyJunctionList[$params['city_id']]) ? $keyJunctionList[$params['city_id']] : [];
+        if(empty($params['junction_ids'])){
+            $this->errno = -1;
+            $this->errmsg = 'key_junction_ids empty.';
+            return;
+        }
+        $data = $this->overviewService->stopDelayTopList($params);
+        $this->response($data);
+    }
+    
+    /*
     public function stopDelayTopList(){
         echo '{
     "errno": 0,
@@ -40,6 +71,7 @@ class KeyJunction extends MY_Controller
 }';
     exit;
     }
+    */
 
 
     public function stopDelayCurve(){
