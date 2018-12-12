@@ -44,36 +44,6 @@ class KeyJunction extends MY_Controller
         $this->response($data);
     }
     
-    /*
-    public function stopDelayTopList(){
-        echo '{
-    "errno": 0,
-    "errmsg": "",
-    "data": {
-        "dataList": [
-            {
-                "time": "07:20",               
-                "logic_junction_id": "xxxxxxxx",
-                "junction_name": "yyyyyyy",
-                "stop_delay":120,
-                "quota_unit":"秒"
-            },
-            {
-                "time": "07:20",
-                "logic_junction_id": "xxxxxxxx",
-                "junction_name": "yyyyyyy",
-                "stop_delay":120,
-                "quota_unit":"秒"                  
-            }
-       ]
-    },
-    "username": "unknown"
-}';
-    exit;
-    }
-    */
-
-
     public function stopDelayCurve(){
         echo '{
     "errno": 0,
