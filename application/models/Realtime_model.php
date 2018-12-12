@@ -268,7 +268,7 @@ class Realtime_model extends CI_Model
     public function getJunctionAvgStopDelayList($cityId, $junctionId, $date)
     {
         $this->isExisted($cityId);
-        $res = $this->db->select("avg(`stop_delay`) as avg_stop_delay", "hour")
+        $res = $this->db->select("avg(`stop_delay`) as avg_stop_delay, hour")
                 ->from($this->tb . $cityId)
                 ->where('logic_junction_id', $junctionId)
                 // ->where('traj_count >=', 10)
