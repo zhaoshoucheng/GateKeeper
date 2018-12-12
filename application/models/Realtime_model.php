@@ -365,32 +365,58 @@ class Realtime_model extends CI_Model
      * @param  $date      string 日期 yyyy-mm-dd
      * @param  $hour      string 时间 HH:ii:ss
      * @param  $pagesize  int    获取数量
+     * @param  $junctionIds  array    路口id数组
      * @return array
      * @throws Exception
      */
-    public function getTopStopDelay($cityId, $date, $hour, $pagesize)
+    public function getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds=[])
     {
         $dayTime = $date . ' ' . $hour;
-        $data = [
-            "source"    => "signal_control",
-            "cityId"    => $cityId,
-            'requestId' => get_traceid(),
-            "dayTime"   => $dayTime,
-            "trailNum"  => 10,
-            "andOperations" => [
-                "cityId"   => "eq",
-                "dayTime"  => "eq",
-                "trailNum" => 'gte',
-            ],
-            "quotaRequest" => [
-                "quotaType"  => "weight_avg",
-                "quotas"     => "sum_stopDelayUp*trailNum, sum_trailNum",
-                "groupField" => "junctionId",
-                "orderField" => "weight_avg",
-                "asc"        => "false",
-                "limit"      => $pagesize,
-            ],
-        ];
+        if(!empty($junctionIds)){
+            $data = [
+                "source"    => "signal_control",
+                "cityId"    => $cityId,
+                'junctionId' => $junctionIds,
+                'requestId' => get_traceid(),
+                "dayTime"   => $dayTime,
+                "trailNum"  => 10,
+                "andOperations" => [
+                    'junctionId' => 'in',
+                    "cityId"   => "eq",
+                    "dayTime"  => "eq",
+                    "trailNum" => 'gte',
+                ],
+                "quotaRequest" => [
+                    "quotaType"  => "weight_avg",
+                    "quotas"     => "sum_stopDelayUp*trailNum, sum_trailNum",
+                    "groupField" => "junctionId",
+                    "orderField" => "weight_avg",
+                    "asc"        => "false",
+                    "limit"      => $pagesize,
+                ],
+            ];
+        }else{
+            $data = [
+                "source"    => "signal_control",
+                "cityId"    => $cityId,
+                'requestId' => get_traceid(),
+                "dayTime"   => $dayTime,
+                "trailNum"  => 10,
+                "andOperations" => [
+                    "cityId"   => "eq",
+                    "dayTime"  => "eq",
+                    "trailNum" => 'gte',
+                ],
+                "quotaRequest" => [
+                    "quotaType"  => "weight_avg",
+                    "quotas"     => "sum_stopDelayUp*trailNum, sum_trailNum",
+                    "groupField" => "junctionId",
+                    "orderField" => "weight_avg",
+                    "asc"        => "false",
+                    "limit"      => $pagesize,
+                ],
+            ];
+        }
 
         $esRes = $this->searchQuota($data);
         if (empty($esRes['result']['quotaResults'])) {
