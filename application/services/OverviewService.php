@@ -267,9 +267,11 @@ class OverviewService extends BaseService
         $cityId   = $params['city_id'];
         $date     = $params['date'];
         $pagesize = $params['pagesize'];
+        $junctionIds = !empty($params['junction_ids']) ? $params['junction_ids'] : [];
 
         $hour = $this->helperService->getLastestHour($cityId);
-        $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize);
+        // $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize);
+        $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds);
         $result = array_column($esRes, 'quotaMap');
 
         $ids = implode(',', array_unique(array_column($result, 'junctionId')));
