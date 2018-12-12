@@ -271,7 +271,7 @@ class Realtime_model extends CI_Model
         $res = $this->db->select("avg(`stop_delay`) as avg_stop_delay", "hour")
                 ->from($this->tb . $cityId)
                 ->where('logic_junction_id', $junctionId)
-                ->where('traj_count >=', 10)
+                // ->where('traj_count >=', 10)
                 ->where('updated_at >=', $date . ' 00:00:00')
                 ->where('updated_at <=', $date . ' 23:59:59')
                 ->group_by('hour')
