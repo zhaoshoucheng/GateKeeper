@@ -272,7 +272,7 @@ class OverviewService extends BaseService
         $junction_id     = $params['junction_id'];
         $date     = $params['date'];
         while(1){
-            $result = $this->realtime_model->getJunctionAvgStopDelayList($cityId, $date, $hour, $pagesize, $select, $junctionIds);
+            $result = $this->realtime_model->getJunctionAvgStopDelayList($cityId, $junction_id, $date);
             print_r($result);
             exit;
         }
