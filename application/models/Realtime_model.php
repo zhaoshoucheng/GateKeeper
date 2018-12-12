@@ -253,4 +253,30 @@ class Realtime_model extends CI_Model
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
+
+    /**
+     * 获取路口的当天平均延误数据
+     * @param        $cityId
+     * @param        $date
+     * @param        $hour
+     * @param        $pagesize
+     * @param string $select
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function getJunctionAvgStopDelayList($cityId, $junctionId, $date)
+    {
+        $this->isExisted($cityId);
+        $res = $this->db->select("avg(`stop_delay`) as avg_stop_delay", "hour")
+                ->from($this->tb . $cityId)
+                ->where('logic_junction_id', $junctionId)
+                ->where('traj_count >=', 10)
+                ->where('updated_at >=', $date . ' 00:00:00')
+                ->where('updated_at <=', $date . ' 23:59:59')
+                ->group_by('hour')
+                ->order_by('hour')
+                ->get();
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
 }

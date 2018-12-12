@@ -45,33 +45,18 @@ class KeyJunction extends MY_Controller
     }
     
     public function stopDelayCurve(){
-        echo '{
-    "errno": 0,
-    "errmsg": "",
-    "data": {
-        "datalist": {
-            "2018-12-11": [ 
-                [9.72, "00:00"],
-                [9.75, "00:06"],
-                [9.66, "00:10"],
-                [9.57, "00:15"],
-                [9.54, "00:20"],
-                [9.33, "00:27"]
-            ]
-        },
-        "info": {
-            "value": 0,
-            "unit": "秒"
-        }
-    },
-    "traceid": "645acf295c0f682bb59a0cd30db17a02",
-    "username": "18953101270",
-    "time": {
-        "a": "0.1136秒",
-        "s": "0.0438秒"
-    }
-}';
-exit;
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'junction_id' => 'required',
+        ]);
+
+        //默认数据从昨天开始
+        $params['date'] = $params['date'] ?? date('Y-m-d',strtotime('-1 day'));
+        
+        $data = $this->overviewService->junctionStopDelayCurve($params);
+        $this->response($data);
     }
 
     public function getJunctionTiming()

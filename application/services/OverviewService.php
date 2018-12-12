@@ -257,6 +257,27 @@ class OverviewService extends BaseService
         ];
     }
 
+
+    /**
+     * 获取路口的停车延误时间曲线
+     *
+     * @param $params
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function junctionStopDelayCurve($params)
+    {
+        $cityId   = $params['city_id'];
+        $junction_id     = $params['junction_id'];
+        $date     = $params['date'];
+        while{
+            $result = $this->realtime_model->getJunctionAvgStopDelayList($cityId, $date, $hour, $pagesize, $select, $junctionIds);
+            print_r($result);
+            exit;
+        }
+    }
+
     /**
      * 获取停车延误TOP20
      *
