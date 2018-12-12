@@ -14,7 +14,7 @@ class KeyJunction extends MY_Controller
         parent::__construct();
     }
 
-    pubic function stopDelayTopList(){
+    public function stopDelayTopList(){
         echo '{
     "errno": 0,
     "errmsg": "",
@@ -42,7 +42,7 @@ class KeyJunction extends MY_Controller
     }
 
 
-    pubic function stopDelayCurve(){
+    public function stopDelayCurve(){
         echo '{
     "errno": 0,
     "errmsg": "",
