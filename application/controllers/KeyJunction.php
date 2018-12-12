@@ -77,8 +77,10 @@ class KeyJunction extends MY_Controller
             "flow_id"=>"9999",
             "base_time_start_end"=>$baseTimeStartEnd,
             "base_time"=>$baseTime,
+            "evaluate_time"=>[],
+            "evaluate_time_start_end"=>[],
         ];
-        print_r($requestData);exit;
+        // print_r($requestData);exit;
         $result = $this->evaluateService->quotaEvaluateCompare($requestData);
         $this->response($data);
     }
