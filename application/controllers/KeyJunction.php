@@ -56,11 +56,11 @@ class KeyJunction extends MY_Controller
         ]);
 
         //默认数据从昨天开始，往前推7天
-        $dayLength = 7;
+        $dayLength = 6;
         $params['date'] = $params['date'] ?? date('Y-m-d',strtotime('-1 day'));
         $baseTimeStartEnd = [];
         $baseTimeStartEnd['start'] = date("Y-m-d 00:00:00", strtotime($params['date'])-$dayLength*24*3600);
-        $baseTimeStartEnd['end'] = date("Y-m-d 00:00:00", strtotime($params['date']));
+        $baseTimeStartEnd['end'] = date("Y-m-d 23:59:59", strtotime($params['date']));
         $baseTime = [];
         $incTime = 0;
         while(1){
