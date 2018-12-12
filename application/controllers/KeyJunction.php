@@ -62,10 +62,13 @@ class KeyJunction extends MY_Controller
         $baseTimeStartEnd['start'] = date("Y-m-d 00:00:00", strtotime($params['date'])-$dayLength*24*3600);
         $baseTimeStartEnd['end'] = date("Y-m-d 00:00:00", strtotime($params['date']));
         $baseTime = [];
-        $dayCnt = 0;
+        $incTime = 0;
         while(1){
-            $baseTime[] = strtotime($params['date'])-($dayLength-$dayCnt)*24*3600;
-            $dayCnt++;
+            if($incTime>=$dayLength){
+                break;
+            }
+            $baseTime[] = strtotime($params['date'])-($dayLength-$incTime)*24*3600;
+            $incTime++;
         }
         $requestData = [
             "city_id"=>$params['city_id'],
