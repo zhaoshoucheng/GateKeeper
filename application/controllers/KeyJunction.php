@@ -87,7 +87,7 @@ class KeyJunction extends MY_Controller
             "value"=>"停车延误",
             "unit"=>"秒",
         ];
-        $this->response($data);
+        $this->response($result);
     }
 
     public function getJunctionTiming()
