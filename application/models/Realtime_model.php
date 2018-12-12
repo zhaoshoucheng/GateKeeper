@@ -215,13 +215,10 @@ class Realtime_model extends CI_Model
      */
     public function getEsAreaQuotaValueCurve($cityId, $junctionIds, $date, $quotaKey)
     {
-        $startTime = strtotime($date . ' 00:00:00') * 1000;
-        $endTime = strtotime($date . ' 23:59:59') * 1000;
         $esData = [
             'source'     => 'signal_control',
             'cityId'     => $cityId,
             'junctionId' => $junctionIds,
-            'timestamp'  => "[{$startTime}, {$endTime}]",
             'requestId'  => get_traceid(),
             'andOperations' => [
                 'junctionId' => 'in',
@@ -236,17 +233,30 @@ class Realtime_model extends CI_Model
                 "asc"        => true,
             ],
         ];
-        $res = $this->searchQuota($esData);
-        if (empty($res['result']['quotaResults'])) {
-            return [];
-        }
 
         $result = [];
-        foreach ($res['result']['quotaResults'] as $k=>$v) {
-            $result[$k] = [
-                'value' => $v['quotaMap']['weight_avg'],
-                'hour'  => date('H:i:s', strtotime($v['quotaMap']['dayTime'])),
-            ];
+        // 因为一次性获取全天的数据会影响集群性能，会被禁止，所有要分断进行获取
+        $nowHour = date('i') + 1;
+        for ($i = 0; $i < $nowHour; $i+=3) {
+            $sTime = strtotime($i . ':00') * 1000;
+            $eTime = strtotime(($i+3) . ':00') * 1000;
+            if ($i == 21) {
+                $eTime = strtotime('23:59:59') * 1000;
+            }
+            $esData['timestamp'] = "[{$sTime}, {$eTime}]";
+            $res = $this->searchQuota($esData);
+            if (!empty($res['result']['quotaResults'])) {
+                foreach ($res['result']['quotaResults'] as $k=>$v) {
+                    $hour = date('H:i:s', strtotime($v['quotaMap']['dayTime']));
+                    $result[$hour] = [
+                        'value' => $v['quotaMap']['weight_avg'],
+                        'hour'  => $hour,
+                    ];
+                }
+            }
+        }
+        if (!empty($result)) {
+            $result = array_values($result);
         }
         return $result;
     }
