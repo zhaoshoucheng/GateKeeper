@@ -427,7 +427,7 @@ class Realtime_model extends CI_Model
      * @return array
      * @throws Exception
      */
-    public function getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds=[])
+    public function getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds = '')
     {
         $dayTime = $date . ' ' . $hour;
         $data = [
