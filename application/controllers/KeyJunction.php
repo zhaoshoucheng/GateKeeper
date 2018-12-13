@@ -52,41 +52,49 @@ class KeyJunction extends MY_Controller
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
             'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
-            'junction_id' => 'required',
         ]);
 
-        //默认数据从昨天开始，往前推7天
-        $dayLength = 6;
-        $params['date'] = $params['date'] ?? date('Y-m-d',strtotime('-1 day'));
-        $baseTimeStartEnd = [];
-        $baseTimeStartEnd['start'] = date("Y-m-d 00:00:00", strtotime($params['date'])-$dayLength*24*3600);
-        $baseTimeStartEnd['end'] = date("Y-m-d 23:59:59", strtotime($params['date']));
-        $baseTime = [];
-        $incTime = 0;
-        while(1){
-            if(($incTime)>=($dayLength+1)){
-                break;
+        //获取重点路口数据
+        $keyJunctionList  = $this->config->item('key_junction_list');
+        $junctionIds = !empty($keyJunctionList[$params['city_id']]) ? $keyJunctionList[$params['city_id']] : [];
+
+        $junctionList = [];
+        foreach ($junctionIds as $key => $junctionId) {
+            //默认数据从昨天开始，往前推7天
+            $dayLength = 6;
+            $params['date'] = $params['date'] ?? date('Y-m-d',strtotime('-1 day'));
+            $baseTimeStartEnd = [];
+            $baseTimeStartEnd['start'] = date("Y-m-d 00:00:00", strtotime($params['date'])-$dayLength*24*3600);
+            $baseTimeStartEnd['end'] = date("Y-m-d 23:59:59", strtotime($params['date']));
+            $baseTime = [];
+            $incTime = 0;
+            while(1){
+                if(($incTime)>=($dayLength+1)){
+                    break;
+                }
+                $baseTime[] = strtotime($params['date'])-($dayLength-$incTime)*24*3600;
+                $incTime++;
             }
-            $baseTime[] = strtotime($params['date'])-($dayLength-$incTime)*24*3600;
-            $incTime++;
+            $requestData = [
+                "city_id"=>$params['city_id'],
+                "quota_key"=>"stop_delay",
+                "junction_id"=>$junctionId,
+                "flow_id"=>"9999",
+                "base_time_start_end"=>$baseTimeStartEnd,
+                "base_time"=>$baseTime,
+                "evaluate_time"=>[],
+                "evaluate_time_start_end"=>[],
+            ];
+            // print_r($requestData);exit;
+            $response = $this->evaluateService->quotaEvaluateCompare($requestData);
+            $junctionResult = [];
+            $junctionResult["datalist"] = isset($response['base']) ? $response['base']:[];
+            $junctionResult["info"] = [
+                "value"=>"停车延误",
+                "unit"=>"秒",
+            ];
+            $junctionList[$junctionId] = $junctionResult;
         }
-        $requestData = [
-            "city_id"=>$params['city_id'],
-            "quota_key"=>"stop_delay",
-            "junction_id"=>$params['junction_id'],
-            "flow_id"=>"9999",
-            "base_time_start_end"=>$baseTimeStartEnd,
-            "base_time"=>$baseTime,
-            "evaluate_time"=>[],
-            "evaluate_time_start_end"=>[],
-        ];
-        // print_r($requestData);exit;
-        $response = $this->evaluateService->quotaEvaluateCompare($requestData);
-        $result["datalist"] = isset($response['base']) ? $response['base']:[];
-        $result["info"] = [
-            "value"=>"停车延误",
-            "unit"=>"秒",
-        ];
         $this->response($result);
     }
 
