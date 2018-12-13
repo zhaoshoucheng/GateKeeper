@@ -430,50 +430,29 @@ class Realtime_model extends CI_Model
     public function getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds=[])
     {
         $dayTime = $date . ' ' . $hour;
+        $data = [
+            "source"    => "signal_control",
+            "cityId"    => $cityId,
+            'requestId' => get_traceid(),
+            "dayTime"   => $dayTime,
+            "trailNum"  => 10,
+            "andOperations" => [
+                "cityId"   => "eq",
+                "dayTime"  => "eq",
+                "trailNum" => 'gte',
+            ],
+            "quotaRequest" => [
+                "quotaType"  => "weight_avg",
+                "quotas"     => "sum_stopDelayUp*trailNum, sum_trailNum",
+                "groupField" => "junctionId",
+                "orderField" => "weight_avg",
+                "asc"        => "false",
+                "limit"      => $pagesize,
+            ],
+        ];
         if(!empty($junctionIds)){
-            $data = [
-                "source"    => "signal_control",
-                "cityId"    => $cityId,
-                'junctionId' => $junctionIds,
-                'requestId' => get_traceid(),
-                "dayTime"   => $dayTime,
-                "trailNum"  => 10,
-                "andOperations" => [
-                    'junctionId' => 'in',
-                    "cityId"   => "eq",
-                    "dayTime"  => "eq",
-                    "trailNum" => 'gte',
-                ],
-                "quotaRequest" => [
-                    "quotaType"  => "weight_avg",
-                    "quotas"     => "sum_stopDelayUp*trailNum, sum_trailNum",
-                    "groupField" => "junctionId",
-                    "orderField" => "weight_avg",
-                    "asc"        => "false",
-                    "limit"      => $pagesize,
-                ],
-            ];
-        }else{
-            $data = [
-                "source"    => "signal_control",
-                "cityId"    => $cityId,
-                'requestId' => get_traceid(),
-                "dayTime"   => $dayTime,
-                "trailNum"  => 10,
-                "andOperations" => [
-                    "cityId"   => "eq",
-                    "dayTime"  => "eq",
-                    "trailNum" => 'gte',
-                ],
-                "quotaRequest" => [
-                    "quotaType"  => "weight_avg",
-                    "quotas"     => "sum_stopDelayUp*trailNum, sum_trailNum",
-                    "groupField" => "junctionId",
-                    "orderField" => "weight_avg",
-                    "asc"        => "false",
-                    "limit"      => $pagesize,
-                ],
-            ];
+            $data['junctionId'] = $junctionIds;
+            $data["andOperations"]['junctionId'] = 'in';
         }
 
         $esRes = $this->searchQuota($data);
