@@ -20,6 +20,7 @@ $config['white_escape_sso'] = [
 
 // 白名单Ip及token就可以登陆
 $config['white_token_clientip_escape'] = [
+    '100.90.165.32'=>["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //沙盒ip
     '100.90.164.31'=>["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //验证token+ip
     '100.90.163.51'=>["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //验证token+ip
     '100.90.163.52'=>["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //验证token+ip
