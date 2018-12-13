@@ -95,7 +95,7 @@ class KeyJunction extends MY_Controller
             ];
             $junctionList[$junctionId] = $junctionResult;
         }
-        $this->response($result);
+        $this->response($junctionList);
     }
 
     public function getJunctionTiming()
