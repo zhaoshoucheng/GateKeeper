@@ -73,7 +73,7 @@ class SignalmanageService extends BaseService
 
         if (empty($junctionIdName)) {
             // 获取路口信息
-            $junctionInfos = $this->waymap_model->getJunctionInfo(implode(',', array_column($res, 'junction_id')));
+            $junctionInfos = $this->waymap_model->getJunctionInfo(implode(',', array_column($result, 'junction_id')));
             $junctionIdName = array_column($junctionInfos, 'name', 'logic_junction_id');
         }
 
