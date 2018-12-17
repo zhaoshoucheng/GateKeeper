@@ -155,4 +155,19 @@ class SignalmanageService extends BaseService
 
         return [];
     }
+
+    /**
+     * 路口管理-删除
+     * @param $id int Y 唯一ID
+     * @return mixed
+     */
+    public function junctionManageDel($id)
+    {
+        $res = $this->signalmanage_model->del($id);
+        if (!$res) {
+            throw new \Exception("删除失败！", ERR_DEFAULT);
+        }
+
+        return [];
+    }
 }

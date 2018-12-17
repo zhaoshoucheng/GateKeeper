@@ -99,9 +99,21 @@ class Signalmanage extends MY_Controller
 
     /**
      * 路口管理-删除
+     * @param $params['id']      int Y 唯一ID
+     * @param $params['city_id'] int Y 城市ID
      */
     public function junctionManageDel()
     {
         $params = $this->input->post(null, true);
+
+        // 校验参数
+        $this->validate([
+            'id'                 => 'required|is_natural_no_zero',
+            'city_id'            => 'required|is_natural_no_zero',
+        ]);
+
+        $result = $this->signalmanageService->junctionManageDel($params['id']);
+
+        $this->response($result);
     }
 }
