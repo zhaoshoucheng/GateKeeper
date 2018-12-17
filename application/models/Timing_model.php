@@ -526,7 +526,7 @@ class Timing_model extends CI_Model
         );
         $timing = json_decode($timing, true);
         if (isset($timing['errorCode']) && $timing['errorCode'] != 0) {
-            throw new \Exception('获取配时详情失败！', $timing['errorMsg']);
+            throw new \Exception('获取配时详情失败: ' . $timing['errorMsg'], ERR_DEFAULT);
         }
         if (isset($timing['data']) && count($timing['data']) >= 1) {
             return $timing['data'];
