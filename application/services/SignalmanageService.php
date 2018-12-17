@@ -135,7 +135,9 @@ class SignalmanageService extends BaseService
         $item = '新增';
 
         if (isset($params['id']) && intval($params['id']) >= 1) { // 编辑
-            $res = $this->signalmanage_model->edit($params);
+            $id = $params['id'];
+            unset($params['id']);
+            $res = $this->signalmanage_model->edit($id, $params);
             $item = '编辑';
         } else { // 新增
             $res = $this->signalmanage_model->add($params);
