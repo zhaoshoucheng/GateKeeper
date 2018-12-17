@@ -34,7 +34,7 @@ class Signalmanage_model extends CI_Model
      * @param $pagesize 个数
      * @return mixd
      */
-    public function search($where = '', $wehreIn = [], $orderby = '', $page = 0, $pagesize = 0, $select = '*')
+    public function search($where = '', $whereIn = [], $orderby = '', $page = 0, $pagesize = 0, $select = '*')
     {
         $this->db->select($select);
         $this->db->from($this->tb);
@@ -44,7 +44,7 @@ class Signalmanage_model extends CI_Model
         }
 
         if (!empty($whereIn)) {
-            $this->db->where_in('junction_id', $wehreIn);
+            $this->db->where_in('junction_id', $whereIn);
         }
 
         if (!empty($orderby)) {
@@ -118,7 +118,7 @@ class Signalmanage_model extends CI_Model
         }
 
         if (!empty($whereIn)) {
-            $this->db->where_in('junction_id', $wehreIn);
+            $this->db->where_in('junction_id', $whereIn);
         }
 
         return $this->db->get()->row_array();
