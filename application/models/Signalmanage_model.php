@@ -112,6 +112,7 @@ class Signalmanage_model extends CI_Model
     public function count($where = '' , $whereIn = [], $select = '*')
     {
         $this->db->select($select);
+        $this->db->from($this->tb);
         if (!empty($where)) {
             $this->db->where($where);
         }
