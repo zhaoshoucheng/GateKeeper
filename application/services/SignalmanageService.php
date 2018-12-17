@@ -104,7 +104,7 @@ class SignalmanageService extends BaseService
         }
 
         // 获取总数
-        $countInfo = $this->signalmanage_model->search($whereData, $whereInData, 'count(id) as total');
+        $countInfo = $this->signalmanage_model->count($whereData, $whereInData, 'count(id) as total');
 
         return [
             'total'    => $countInfo['total'],
