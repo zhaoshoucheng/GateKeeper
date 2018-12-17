@@ -103,7 +103,15 @@ class SignalmanageService extends BaseService
             $result[$k]['communication_mode_name'] = $communicationMode[$v['communication_mode']]['name'];
         }
 
-        return $result;
+        // 获取总数
+        $countInfo = $this->signalmanage_model->search($whereData, $whereInData, 'count(id) as total');
+
+        return [
+            'total'    => $countInfo['total'],
+            'page'     => $params['page'],
+            'pagesize' => $params['pagesize'],
+            'dataList' => $result
+        ];
     }
 
     /**

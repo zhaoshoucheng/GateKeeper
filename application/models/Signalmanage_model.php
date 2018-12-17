@@ -105,4 +105,21 @@ class Signalmanage_model extends CI_Model
 
         return $this->db->where('id', $id)->delete($this->tb);
     }
+
+    /**
+     * 统计
+     */
+    public function count($where = '' , $whereIn = [], $select = '*')
+    {
+        $this->db->select($select);
+        if (!empty($where)) {
+            $this->db->where($where);
+        }
+
+        if (!empty($whereIn)) {
+            $this->db->where_in('junction_id', $wehreIn);
+        }
+
+        return $this->db->get()->row_array();
+    }
 }
