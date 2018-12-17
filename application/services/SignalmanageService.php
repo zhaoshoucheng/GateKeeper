@@ -61,14 +61,12 @@ class SignalmanageService extends BaseService
             $junctionIdName = array_column($junctions, 'name', 'logic_junction_id');
         }
 
-        $limit = "{$params['page']}, {$params['pagesize']}";
-
         $orderby = '';
         if (!empty($params['orderby'])) {
             $orderby = str_replace(['，', '|'], [',', ' '], $params['orderby']);
         }
 
-        $result = $this->signalmanage_model->junctionManageList($whereData, $whereInData, $orderby, $limit);
+        $result = $this->signalmanage_model->search($whereData, $whereInData, $orderby, ($params['page'] - 1), $params['pagesize']);
         if (empty($result) || !$result) {
             return [];
         }

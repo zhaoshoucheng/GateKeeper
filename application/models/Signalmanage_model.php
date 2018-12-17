@@ -26,14 +26,15 @@ class Signalmanage_model extends CI_Model
 
     /**
      * 查询
-     * @param $select  select column
-     * @param $where   where
-     * @param $whereIn where in
-     * @param $orderby order by
-     * @param $limit   limit
+     * @param $select   select column
+     * @param $where    where
+     * @param $whereIn  where in
+     * @param $orderby  order by
+     * @param $page     偏移量
+     * @param $pagesize 个数
      * @return mixd
      */
-    public function search($where = '', $wehreIn = [], $orderby = '', $limit = '', $select = '*')
+    public function search($where = '', $wehreIn = [], $orderby = '', $page = 0, $pagesize = 0, $select = '*')
     {
         $this->db->select($select);
         $this->db->from($this->tb);
@@ -50,8 +51,8 @@ class Signalmanage_model extends CI_Model
             $this->db->order_by($orderby);
         }
 
-        if (!empty($limit)) {
-            $this->db->limit($limit);
+        if ($pagesize >= 1) {
+            $this->db->limit($pagesize, $page);
         }
 
         return $this->db->get()->result_array();
