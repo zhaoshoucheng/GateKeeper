@@ -188,6 +188,7 @@ class ParametermanageService extends BaseService
             foreach ($data as $now) {
                 $temp = [];
                 $status = 1;
+                $temp['hour'] = $now['hour'];
                 $temp['over_saturation_traj_num'] = $now['over_saturation_traj_num'];
                 $temp['multi_stop_ratio_up'] = $now['over_saturation_multi_stop_ratio_up'];
                 $temp['one_stop_ratio_up'] = 1 - $now['over_saturation_none_stop_ratio_up'] - $now['over_saturation_multi_stop_ratio_up'];
@@ -198,6 +199,7 @@ class ParametermanageService extends BaseService
                 }
                 $temp = [];
                 $status = 2;
+                $temp['hour'] = $now['hour'];
                 $temp['spillover_traj_num'] = $now['spillover_traj_num'];
                 $temp['spillover_rate_down'] = $now['spillover_rate_down'];
                 $temp['queue_rate_down'] = $now['spillover_queue_rate_down'];
@@ -207,6 +209,7 @@ class ParametermanageService extends BaseService
                 }
                 $temp = [];
                 $status = 3;
+                $temp['hour'] = $now['hour'];
                 $temp['unbalance_traj_num'] = $now['unbalance_traj_num'];
                 $temp['multi_stop_ratio_up'] = $now['unbalance_free_multi_stop_ratio_up'];
                 $temp['one_stop_ratio_up'] = 1 - $now['unbalance_free_none_stop_ratio_up'] - $now['unbalance_free_multi_stop_ratio_up'];
@@ -216,6 +219,7 @@ class ParametermanageService extends BaseService
                 }
                 $temp = [];
                 $status = 4;
+                $temp['hour'] = $now['hour'];
                 $temp['unbalance_traj_num'] = $now['unbalance_traj_num'];
                 $temp['multi_stop_ratio_up'] = $now['unbalance_over_saturation_multi_stop_ratio_up'];
                 $temp['one_stop_ratio_up'] = 1 - $now['unbalance_over_saturation_none_stop_ratio_up'] - $now['unbalance_over_saturation_multi_stop_ratio_up'];
