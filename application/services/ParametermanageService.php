@@ -69,9 +69,9 @@ class ParametermanageService extends BaseService
             }
             $res[$hour] = $now;
         }
-        $res['params'] = $res;
-        $res['keys'] = $this->getKeys();
-        return $res;
+        $temp['params'] = $res;
+        $temp['keys'] = $this->getKeys();
+        return $temp;
     }
 
     /**
@@ -176,15 +176,51 @@ class ParametermanageService extends BaseService
      */
     public function updateParam($param)
     {
+        $cityID = $param['city_id'];
+        $areaID = $param['area_id'];
         if (isset($param['param_limits'])) {
-            if (!$this->parametermanage_model->updateParameterLimit($param['param_limits'])) {
+            if (!$this->parametermanage_model->updateParameterLimit($cityID, $param['param_limits'])) {
                 return false;
             }
         }
         if (isset($param['params'])) {
             $data = $param['params'];
-            foreach ($data as $d) {
-                if (!$this->parametermanage_model->updateParameter($d)) {
+            foreach ($data as $now) {
+                $temp = [];
+                $status = 1;
+                $temp['over_saturation_traj_num'] = $now['over_saturation_traj_num'];
+                $temp['multi_stop_ratio_up'] = $now['over_saturation_multi_stop_ratio_up'];
+                $temp['one_stop_ratio_up'] = 1 - $now['over_saturation_none_stop_ratio_up'] - $now['over_saturation_multi_stop_ratio_up'];
+                $temp['queue_length_up'] = $now['over_saturation_queue_length_up'];
+                $temp['queue_rate_up'] = $now['over_saturation_queue_rate_up'];
+                if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
+                    return false;
+                }
+                $temp = [];
+                $status = 2;
+                $temp['spillover_traj_num'] = $now['spillover_traj_num'];
+                $temp['spillover_rate_down'] = $now['spillover_rate_down'];
+                $temp['queue_rate_down'] = $now['spillover_queue_rate_down'];
+                $temp['avg_speed_down'] = $now['spillover_avg_speed_down'];
+                if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
+                    return false;
+                }
+                $temp = [];
+                $status = 3;
+                $temp['unbalance_traj_num'] = $now['unbalance_traj_num'];
+                $temp['multi_stop_ratio_up'] = $now['unbalance_free_multi_stop_ratio_up'];
+                $temp['one_stop_ratio_up'] = 1 - $now['unbalance_free_none_stop_ratio_up'] - $now['unbalance_free_multi_stop_ratio_up'];
+                $temp['queue_length_up'] = $now['unbalance_free_queue_length_up'];
+                if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
+                    return false;
+                }
+                $temp = [];
+                $status = 4;
+                $temp['unbalance_traj_num'] = $now['unbalance_traj_num'];
+                $temp['multi_stop_ratio_up'] = $now['unbalance_over_saturation_multi_stop_ratio_up'];
+                $temp['one_stop_ratio_up'] = 1 - $now['unbalance_over_saturation_none_stop_ratio_up'] - $now['unbalance_over_saturation_multi_stop_ratio_up'];
+                $temp['queue_length_up'] = $now['unbalance_over_saturation_queue_length_up'];
+                if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
                     return false;
                 }
             }
