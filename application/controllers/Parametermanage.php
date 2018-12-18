@@ -43,16 +43,6 @@ class Parametermanage extends MY_Controller
     }
 
     /**
-     * 获取优化参数配置的展示指标
-     * @throws Exception
-     */
-    public function getParamKeys()
-    {
-        $data = $this->parametermanageService->getKeys();
-        $this->response($data);
-    }
-
-    /**
      * 获取优化参数配置阀值
      * @param $params['city_id'] int    Y 城市ID
      * @throws Exception

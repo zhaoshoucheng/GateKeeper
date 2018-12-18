@@ -69,6 +69,8 @@ class ParametermanageService extends BaseService
             }
             $res[$hour] = $now;
         }
+        $res['params'] = $res;
+        $res['keys'] = $this->getKeys();
         return $res;
     }
 
@@ -81,69 +83,69 @@ class ParametermanageService extends BaseService
     public function getKeys()
     {
         $res = [
-            'over_saturation_traj_num':[
-                'name':'过饱和轨迹量',
-                'key':'over_saturation_traj_num',
+            'over_saturation_traj_num'=>[
+                'name'=>'过饱和轨迹量',
+                'key'=>'over_saturation_traj_num',
             ],
-            'over_saturation_multi_stop_ratio_up':[
-                'name':'过饱和上游二次停车比例',
-                'key':'over_saturation_multi_stop_ratio_up',
+            'over_saturation_multi_stop_ratio_up'=>[
+                'name'=>'过饱和上游二次停车比例',
+                'key'=>'over_saturation_multi_stop_ratio_up',
             ],
-            'over_saturation_none_stop_ratio_up':[
-                'name':'过饱和上游无停车比例',
-                'key':'over_saturation_none_stop_ratio_up',
+            'over_saturation_none_stop_ratio_up'=>[
+                'name'=>'过饱和上游无停车比例',
+                'key'=>'over_saturation_none_stop_ratio_up',
             ],
-            'over_saturation_queue_length_up':[
-                'name':'过饱和上游排队长度',
-                'key':'over_saturation_queue_length_up',
+            'over_saturation_queue_length_up'=>[
+                'name'=>'过饱和上游排队长度',
+                'key'=>'over_saturation_queue_length_up',
             ],
-            'over_saturation_queue_rate_up':[
-                'name':'过饱和上游排队占比',
-                'key':'over_saturation_queue_rate_up',
+            'over_saturation_queue_rate_up'=>[
+                'name'=>'过饱和上游排队占比',
+                'key'=>'over_saturation_queue_rate_up',
             ],
-            'spillover_traj_num':[
-                'name':'溢流轨迹量',
-                'key':'spillover_traj_num',
+            'spillover_traj_num'=>[
+                'name'=>'溢流轨迹量',
+                'key'=>'spillover_traj_num',
             ],
-            'spillover_rate_down':[
-                'name':'溢流下游溢流比率',
-                'key':'spillover_rate_down',
+            'spillover_rate_down'=>[
+                'name'=>'溢流下游溢流比率',
+                'key'=>'spillover_rate_down',
             ],
-            'spillover_queue_rate_down':[
-                'name':'溢流下游排队占比',
-                'key':'spillover_queue_rate_down',
+            'spillover_queue_rate_down'=>[
+                'name'=>'溢流下游排队占比',
+                'key'=>'spillover_queue_rate_down',
             ],
-            'spillover_avg_speed_down':[
-                'name':'溢流下游平均速度',
-                'key':'spillover_avg_speed_down',
+            'spillover_avg_speed_down'=>[
+                'name'=>'溢流下游平均速度',
+                'key'=>'spillover_avg_speed_down',
             ],
-            'unbalance_traj_num':[
-                'name':'失衡轨迹量',
-                'key':'unbalance_traj_num',
+            'unbalance_traj_num'=>[
+                'name'=>'失衡轨迹量',
+                'key'=>'unbalance_traj_num',
             ],
-            'unbalance_over_saturation_multi_stop_ratio_up':[
-                'name':'失衡过饱和上游二次停车比例',
-                'key':'unbalance_over_saturation_multi_stop_ratio_up',
+            'unbalance_over_saturation_multi_stop_ratio_up'=>[
+                'name'=>'失衡过饱和上游二次停车比例',
+                'key'=>'unbalance_over_saturation_multi_stop_ratio_up',
             ],
-            'unbalance_over_saturation_none_stop_ratio_up':[
-                'name':'失衡过饱和上游无停车比例',
-                'key':'unbalance_over_saturation_none_stop_ratio_up',
+            'unbalance_over_saturation_none_stop_ratio_up'=>[
+                'name'=>'失衡过饱和上游无停车比例',
+                'key'=>'unbalance_over_saturation_none_stop_ratio_up',
             ],
-            'unbalance_over_saturation_queue_length_up':[
-                'name':'失衡过饱和上游排队长度',
-                'key':'unbalance_over_saturation_queue_length_up',
+            'unbalance_over_saturation_queue_length_up'=>[
+                'name'=>'失衡过饱和上游排队长度',
+                'key'=>'unbalance_over_saturation_queue_length_up',
             ],
-            'unbalance_free_multi_stop_ratio_up':[
-                'name':'失衡空放上游二次停车比例',
-                'key':'unbalance_free_multi_stop_ratio_up',
+            'unbalance_free_multi_stop_ratio_up'=>[
+                'name'=>'失衡空放上游二次停车比例',
+                'key'=>'unbalance_free_multi_stop_ratio_up',
             ],
-            'unbalance_free_none_stop_ratio_up':[
-                'name':'失衡空放上游无停车比例',
-                'key':'unbalance_free_none_stop_ratio_up',
+            'unbalance_free_none_stop_ratio_up'=>[
+                'name'=>'失衡空放上游无停车比例',
+                'key'=>'unbalance_free_none_stop_ratio_up',
             ],
-            'unbalance_free_queue_length_up':[
-                'name':'失衡空放上游排队长度',
-                'key':'unbalance_free_queue_length_up',
+            'unbalance_free_queue_length_up'=>[
+                'name'=>'失衡空放上游排队长度',
+                'key'=>'unbalance_free_queue_length_up',
             ],
         ];
         return $res;
