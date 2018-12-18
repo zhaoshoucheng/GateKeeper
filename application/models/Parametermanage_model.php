@@ -56,24 +56,14 @@ class Parametermanage_model extends CI_Model
      * 根据城市ID以及区域ID等参数获取优化配置阀值的参数
      *
      * @param $cityId
-     * @param $isDefault
      * @return array
      */
-    public function getParameterLimit($cityId, $isDefault)
+    public function getParameterLimit($cityId)
     {
         $res = $this->db->select('*')
                     ->from($this->parameterLimitTB)
                     ->where('city_id', $cityId)
-                    ->where('is_default', $isDefault)
                     ->get()->result_array();
-        if (empty($res)) {
-            $isDefault = 1;
-            $res = $this->db->select('*')
-                        ->from($this->parameterLimitTB)
-                        ->where('city_id', $cityId)
-                        ->where('is_default', $isDefault)
-                        ->get()->result_array();
-        }
 
         return $res;
     }

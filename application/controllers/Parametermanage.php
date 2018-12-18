@@ -43,9 +43,18 @@ class Parametermanage extends MY_Controller
     }
 
     /**
+     * 获取优化参数配置的展示指标
+     * @throws Exception
+     */
+    public function getParamKeys()
+    {
+        $data = $this->parametermanageService->getKeys();
+        $this->response($data);
+    }
+
+    /**
      * 获取优化参数配置阀值
      * @param $params['city_id'] int    Y 城市ID
-     * @param $params['is_default'] int    Y 1:默认, 2:非默认
      * @throws Exception
      */
     public function paramLimit()
@@ -55,7 +64,6 @@ class Parametermanage extends MY_Controller
         // 校验参数
         $this->validate([
             'city_id'    => 'required|is_natural_no_zero',
-            'is_default' => 'required|in_list[0,1]',
         ]);
 
         $data = $this->parametermanageService->paramLimit($params);
@@ -71,6 +79,7 @@ class Parametermanage extends MY_Controller
     {
         $params = file_get_contents("php://input");
         $json = json_decode($params, true);
+		$json = $this->security->xss_clean($json);
 
         if (!$this->parametermanageService->updateParam($json)) {
             $data = 'wrong query';
