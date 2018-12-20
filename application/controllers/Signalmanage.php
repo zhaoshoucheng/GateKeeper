@@ -90,9 +90,26 @@ class Signalmanage extends MY_Controller
         ]);
 
         // 当前用户
-        $params['user'] = $this->username;
+        $data = [
+            'junction_id'        => strip_tags(trim($params['junction_id'])),
+            'city_id'            => intval($params['city_id']),
+            'area_id'            => intval($params['area_id']),
+            'manufacturer'       => strip_tags(trim($params['manufacturer'])),
+            'son_junction_id'    => strip_tags(trim($params['son_junction_id'])),
+            'junction_type'      => strip_tags(trim($params['junction_type'])),
+            'mfg_junction_id'    => strip_tags(trim($params['mfg_junction_id'])),
+            'communication_mode' => intval($params['communication_mode']),
+            'semaphore_addr'     => strip_tags(trim($params['semaphore_addr'])),
+            'IPv4'               => strip_tags(trim($params['IPv4'])),
+            'IPv6'               => strip_tags(trim($params['IPv6'])),
+            'junction_comment'   => strip_tags(trim($params['junction_comment'])),
+            'user' => $this->username,
+        ];
+        if (isset($params['id']) && $params['id'] >= 1) {
+            $data['id'] = intval($params['id']);
+        }
 
-        $result = $this->signalmanageService->junctionManageEdit($params);
+        $result = $this->signalmanageService->junctionManageEdit($data);
 
         $this->response($result);
     }
