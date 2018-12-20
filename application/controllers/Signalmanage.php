@@ -82,7 +82,7 @@ class Signalmanage extends MY_Controller
             'son_junction_id'    => 'min_length[4]',
             'junction_type'      => 'min_length[2]',
             'mfg_junction_id'    => 'min_length[4]',
-            'communication_mode' => 'in_list(' . implode(',', array_column($this->config->item('communication_mode'), 'id')) . ')',
+            'communication_mode' => 'in_list[' . implode(',', array_column($this->config->item('communication_mode'), 'id')) . ']',
             'semaphore_addr'     => 'min_length[2]',
             'IPv4'               => 'min_length[2]',
             'IPv6'               => 'min_length[2]',
