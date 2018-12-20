@@ -257,6 +257,27 @@ class OverviewService extends BaseService
         ];
     }
 
+
+    /**
+     * 获取路口的停车延误时间曲线
+     *
+     * @param $params
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function junctionStopDelayCurve($params)
+    {
+        $cityId   = $params['city_id'];
+        $junction_id     = $params['junction_id'];
+        $date     = $params['date'];
+        while(1){
+            $result = $this->realtime_model->getJunctionAvgStopDelayList($cityId, $junction_id, $date);
+            print_r($result);
+            exit;
+        }
+    }
+
     /**
      * 获取停车延误TOP20
      *
@@ -270,12 +291,13 @@ class OverviewService extends BaseService
         $cityId   = $params['city_id'];
         $date     = $params['date'];
         $pagesize = $params['pagesize'];
+        $junctionIds = !empty($params['junction_ids']) ? $params['junction_ids'] : [];
 
         $hour = $this->helperService->getLastestHour($cityId);
 
         $select = 'logic_junction_id, hour, sum(stop_delay * traj_count) / sum(traj_count) as stop_delay';
 
-        $result = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $select);
+        $result = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $select, $junctionIds);
 
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 

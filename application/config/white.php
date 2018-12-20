@@ -7,6 +7,7 @@
 $config['white_escape_sso'] = [
     '100.90.164.31:8013',
     '100.90.164.31:8088',
+    '100.90.164.31:8083',
     //'100.90.164.31:8082',
     '100.90.164.31:8089',
     '100.90.164.31:8099',
@@ -15,4 +16,13 @@ $config['white_escape_sso'] = [
     'www.itstool.com',
     '100.90.165.32:8088',
     'localhost:8000', //本地调试环境
+];
+
+// 白名单Ip及token就可以登陆
+$config['white_token_clientip_escape'] = [
+    '100.90.165.32'=>["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //沙盒ip
+    '100.90.164.31'=>["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //验证token+ip
+    '100.90.163.51'=>["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //验证token+ip
+    '100.90.163.52'=>["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //验证token+ip
+    '127.0.0.1'=>[], //不验token
 ];

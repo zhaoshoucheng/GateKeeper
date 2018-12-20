@@ -44,9 +44,11 @@ class MY_Controller extends CI_Controller
         date_default_timezone_set('Asia/Shanghai');
 
         $host = $_SERVER['HTTP_HOST'];
+        $clientIp = $_SERVER['REMOTE_ADDR'];
 
         $this->load->config('white');
         $escapeSso = $this->config->item('white_escape_sso');
+        $escapeClient = $this->config->item('white_token_clientip_escape');
 
         $this->load->config('nconf');
         $this->routerUri = $this->uri->ruri_string();
@@ -76,6 +78,14 @@ class MY_Controller extends CI_Controller
                     exit();
                 }
 
+            } elseif (isset($escapeClient[$clientIp])) {
+                // 通过vip进行的请求
+                $token = isset($_REQUEST['token']) ? $_REQUEST['token'] : "";
+                // token列表不为空，且不匹配token时退出
+                if (!empty($escapeClient[$clientIp]) && !in_array($token,$escapeClient[$clientIp])) {
+                    $this->_output();
+                    exit();
+                }
             } else {
                 // 检测用户
                 if (!$this->_checkUser()) {
