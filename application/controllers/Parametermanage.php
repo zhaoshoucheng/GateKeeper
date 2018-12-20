@@ -34,7 +34,7 @@ class Parametermanage extends MY_Controller
         // 校验参数
         $this->validate([
             'city_id'    => 'required|is_natural_no_zero',
-            'area_id'    => 'required|is_natural_no_zero',
+            'area_id'    => 'required|integer',
             'is_default' => 'required|in_list[0,1]',
         ]);
 
