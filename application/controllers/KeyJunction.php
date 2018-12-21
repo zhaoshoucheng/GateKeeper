@@ -55,7 +55,7 @@ class KeyJunction extends MY_Controller
         ]);
 
         //获取重点路口数据
-        $keyJunctionList  = $this->config->item('key_junction_list');
+        $keyJunctionList  = $this->config->item('timing_junction_list');
         $junctionIds = !empty($keyJunctionList[$params['city_id']]) ? $keyJunctionList[$params['city_id']] : [];
 
         $junctionList = [];
