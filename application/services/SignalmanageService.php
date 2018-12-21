@@ -45,7 +45,7 @@ class SignalmanageService extends BaseService
         $areaWhere = 'city_id = ' . $params['city_id'];
         if (isset($params['area_id']) && intval($params['area_id']) >= 1) {
             $whereData['area_id'] = $params['area_id'];
-            $areaWhere = ' and id = ' . $params['area_id'];
+            $areaWhere .= ' and id = ' . $params['area_id'];
         }
 
         // where in
