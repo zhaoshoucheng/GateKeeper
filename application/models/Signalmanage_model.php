@@ -88,6 +88,7 @@ class Signalmanage_model extends CI_Model
         if (empty($data)) {
             return false;
         }
+        $data['updated_at'] = date('Y-m-d H:i:s');
 
         return $this->db->where('id', $id)->update($this->tb, $data);
     }
