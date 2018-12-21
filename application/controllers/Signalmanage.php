@@ -40,7 +40,7 @@ class Signalmanage extends MY_Controller
         $this->validate([
             'junction_id' => 'trim|min_length[4]',
             'city_id'     => 'required|is_natural_no_zero',
-            'area_id'     => 'is_natural_no_zero',
+            'area_id'     => 'is_natural',
             'page'        => 'required|is_natural',
             'pagesize'    => 'required|is_natural_no_zero',
             'orderby'     => 'min_length[2]',
