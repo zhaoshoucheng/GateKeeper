@@ -145,13 +145,6 @@ class Signalmanage extends MY_Controller
     {
         $params = $this->input->post_get(null, true);
 
-        // 校验参数
-        $this->validate([
-            'junction_id' => 'trim|min_length[4]',
-            'city_id'     => 'required|is_natural_no_zero',
-            'area_id'     => 'is_natural',
-        ]);
-
         $result = $this->signalmanageService->download($params);
 
         $this->response($result);

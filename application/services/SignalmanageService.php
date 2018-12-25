@@ -314,6 +314,11 @@ class SignalmanageService extends BaseService
         $cellCount = count($cellTitle);
         for ($i = 0; $i < $cellCount; $i ++) {
             $objSheet->setCellValue($cellName[$i] . $rowIdx, $cellTitle[$i]['name']);
+            // 全部设置为文本格式
+            $objSheet->getActiveSheet()
+                     ->getStyle($cellName[$i])
+                     ->getNumberFormat()
+                     ->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
         }
 
         $rowIdx++;
@@ -323,6 +328,8 @@ class SignalmanageService extends BaseService
             }
             $rowIdx++;
         }
+
+        $fileName = $cityName . '_' . date('Y-m-d');
 
         $objWriter = new \PHPExcel_Writer_Excel5($objPHPExcel);
 
