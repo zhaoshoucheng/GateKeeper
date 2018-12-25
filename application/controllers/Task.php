@@ -599,6 +599,12 @@ class Task extends MY_Controller
 			$taskService = new TaskService();
 			$response = $taskService->areaFlowProcess($city_id, $task_id, $trace_id, $hdfs_dir, array_values(array_unique($dateVersion)));
 		} catch (Exception $e) {
+			com_log_warning('_its_areaFlowProcess', -1, 'areaFlowProcess failed', [
+				'task_id' => $task_id,
+				'city_id' => $city_id,
+				'dates' => $dates,
+				'error' => $e,
+			]);
 			$this->errno = -1;
 			$this->errmsg = 'areaFlowProcess failed.';
 		}
