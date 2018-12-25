@@ -314,17 +314,12 @@ class SignalmanageService extends BaseService
         $cellCount = count($cellTitle);
         for ($i = 0; $i < $cellCount; $i ++) {
             $objSheet->setCellValue($cellName[$i] . $rowIdx, $cellTitle[$i]['name']);
-            // 全部设置为文本格式
-            $objSheet->getActiveSheet()
-                     ->getStyle($cellName[$i])
-                     ->getNumberFormat()
-                     ->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
         }
 
         $rowIdx++;
         foreach ($result as $k=>$v) {
             foreach ($cellTitle as $kk=>$vv) {
-                $objSheet->setCellValue($cellName[$kk] . $rowIdx, $v[$vv['key']]);
+                $objSheet->setCellValueExplicit($cellName[$kk] . $rowIdx, $v[$vv['key']]);
             }
             $rowIdx++;
         }
