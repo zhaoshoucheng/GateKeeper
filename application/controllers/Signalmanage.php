@@ -133,4 +133,27 @@ class Signalmanage extends MY_Controller
 
         $this->response($result);
     }
+
+    /**
+     * 导出下载
+     * @param $params['city_id']       int    Y 城市ID
+     * @param $params['area_id']       int    N 区域ID
+     * @param $params['junction_name'] string N 路口名称 模糊查询
+     * @return json
+     */
+    public function download()
+    {
+        $params = $this->input->post_get(null, true);
+
+        // 校验参数
+        $this->validate([
+            'junction_id' => 'trim|min_length[4]',
+            'city_id'     => 'required|is_natural_no_zero',
+            'area_id'     => 'is_natural',
+        ]);
+
+        $result = $this->signalmanageService->download($params);
+
+        $this->response($result);
+    }
 }
