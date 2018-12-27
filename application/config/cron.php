@@ -203,7 +203,7 @@ $config['checkItems'] = [
     ],
 ];
 
-$config['webhook'] = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd3a5a4b7758c55f790fd85aef10fb43130be60d2797a3fd6ee80f9403';
+$config['webhook'] = 'https://oapi.dingtalk.com/robot/send?access_token=9123576d4bb80d3a963c5addd4e4f5a3152d85a62484b14a50efb777e8c68f78';
 $config['app_id'] = '1001';
 $config['secret'] = 'e9b0a9042d1840dcdb9b9c7095391949';
 $config['basedir'] = '/home/xiaoju/webroot/cache/itstool/';
