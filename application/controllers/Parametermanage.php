@@ -44,7 +44,6 @@ class Parametermanage extends MY_Controller
         } catch (Exception $e) {
             $this->response('', 500, $e);
         }
-        $this->response('');
     }
 
     /**
@@ -82,6 +81,5 @@ class Parametermanage extends MY_Controller
         } catch (Exception $e) {
             $this->response('', 500, $e);
         }
-        $this->response('');
     }
 }
