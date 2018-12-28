@@ -26,50 +26,55 @@ class ParametermanageService extends BaseService
      */
     public function paramList($params)
     {
-        $cityId = $params['city_id'];
-        $areaId = $params['area_id'];
-        $isDefault = $params['is_default'];
-        $data = $this->parametermanage_model->getParameterByArea($cityId, $areaId, $isDefault);
-        if (empty($data)) {
-            return [];
-        }
-        $res = [];
-        foreach ($data as $k => $v) {
-            $hour = $v['hour'];
-            $status = $v['status'];
-            switch ($status) {
-                case 1:
-                    $res[$hour]['over_saturation_traj_num'] = $v['over_saturation_traj_num'];
-                    $res[$hour]['over_saturation_multi_stop_ratio_up'] = $v['multi_stop_ratio_up'];
-                    $res[$hour]['over_saturation_none_stop_ratio_up'] = 1 - $v['multi_stop_ratio_up'] - $v['one_stop_ratio_up'];
-                    $res[$hour]['over_saturation_queue_length_up'] = $v['queue_length_up'];
-                    $res[$hour]['over_saturation_queue_rate_up'] = $v['queue_rate_up'];
-                    break;
-                case 2:
-                    $res[$hour]['spillover_traj_num'] = $v['spillover_traj_num'];
-                    $res[$hour]['spillover_rate_down'] = $v['spillover_rate_down'];
-                    $res[$hour]['spillover_queue_rate_down'] = $v['queue_rate_down'];
-                    $res[$hour]['spillover_avg_speed_down'] = $v['avg_speed_down'];
-                    break;
-                case 3:
-                    $res[$hour]['unbalance_traj_num'] = $v['unbalance_traj_num'];
-                    $res[$hour]['unbalance_free_multi_stop_ratio_up'] = $v['multi_stop_ratio_up'];
-                    $res[$hour]['unbalance_free_none_stop_ratio_up'] = 1 - $v['multi_stop_ratio_up'] - $v['one_stop_ratio_up'];
-                    $res[$hour]['unbalance_free_queue_length_up'] = $v['queue_length_up'];
-                    break;
-                case 4:
-                    $res[$hour]['unbalance_traj_num'] = $v['unbalance_traj_num'];
-                    $res[$hour]['unbalance_over_saturation_multi_stop_ratio_up'] = $v['multi_stop_ratio_up'];
-                    $res[$hour]['unbalance_over_saturation_none_stop_ratio_up'] = 1 - $v['multi_stop_ratio_up'] - $v['one_stop_ratio_up'];
-                    $res[$hour]['unbalance_over_saturation_queue_length_up'] = $v['queue_length_up'];
-                    break;
-                default:
-                    return [];
+        try {
+            $cityId = $params['city_id'];
+            $areaId = $params['area_id'];
+            $isDefault = $params['is_default'];
+            $data = $this->parametermanage_model->getParameterByArea($cityId, $areaId, $isDefault);
+            if (empty($data)) {
+                return [];
             }
+            $res = [];
+            foreach ($data as $k => $v) {
+                $hour = $v['hour'];
+                $status = $v['status'];
+                switch ($status) {
+                    case 1:
+                        $res[$hour]['over_saturation_traj_num'] = $v['over_saturation_traj_num'];
+                        $res[$hour]['over_saturation_multi_stop_ratio_up'] = $v['multi_stop_ratio_up'];
+                        $res[$hour]['over_saturation_none_stop_ratio_up'] = 1 - $v['multi_stop_ratio_up'] - $v['one_stop_ratio_up'];
+                        $res[$hour]['over_saturation_queue_length_up'] = $v['queue_length_up'];
+                        $res[$hour]['over_saturation_queue_rate_up'] = $v['queue_rate_up'];
+                        break;
+                    case 2:
+                        $res[$hour]['spillover_traj_num'] = $v['spillover_traj_num'];
+                        $res[$hour]['spillover_rate_down'] = $v['spillover_rate_down'];
+                        $res[$hour]['spillover_queue_rate_down'] = $v['queue_rate_down'];
+                        $res[$hour]['spillover_avg_speed_down'] = $v['avg_speed_down'];
+                        break;
+                    case 3:
+                        $res[$hour]['unbalance_traj_num'] = $v['unbalance_traj_num'];
+                        $res[$hour]['unbalance_free_multi_stop_ratio_up'] = $v['multi_stop_ratio_up'];
+                        $res[$hour]['unbalance_free_none_stop_ratio_up'] = 1 - $v['multi_stop_ratio_up'] - $v['one_stop_ratio_up'];
+                        $res[$hour]['unbalance_free_queue_length_up'] = $v['queue_length_up'];
+                        break;
+                    case 4:
+                        $res[$hour]['unbalance_traj_num'] = $v['unbalance_traj_num'];
+                        $res[$hour]['unbalance_over_saturation_multi_stop_ratio_up'] = $v['multi_stop_ratio_up'];
+                        $res[$hour]['unbalance_over_saturation_none_stop_ratio_up'] = 1 - $v['multi_stop_ratio_up'] - $v['one_stop_ratio_up'];
+                        $res[$hour]['unbalance_over_saturation_queue_length_up'] = $v['queue_length_up'];
+                        break;
+                    default:
+                        return [];
+                }
+            }
+            $temp['params'] = $res;
+            $temp['keys'] = $this->getKeys();
+            return $temp;
+        } catch (Exception $e) {
+            throw $e;
         }
-        $temp['params'] = $res;
-        $temp['keys'] = $this->getKeys();
-        return $temp;
+        return [];
     }
 
     /**
@@ -174,66 +179,71 @@ class ParametermanageService extends BaseService
      */
     public function updateParam($param)
     {
-        $cityID = $param['city_id'];
-        $areaID = $param['area_id'];
-        if (isset($param['param_limits'])) {
-            if (!$this->parametermanage_model->updateParameterLimit($cityID, $param['param_limits'])) {
-                return false;
+        try {
+            $cityID = $param['city_id'];
+            $areaID = $param['area_id'];
+            if (isset($param['param_limits'])) {
+                if (!$this->parametermanage_model->updateParameterLimit($cityID, $param['param_limits'])) {
+                    return false;
+                }
             }
+            if (isset($param['params'])) {
+                $data = $param['params'];
+                if (empty($data)) {
+                    return true;
+                }
+                foreach ($data as $now) {
+                    $status = 1;
+                    $temp = [
+                        'hour' => $now['hour'],
+                        'over_saturation_traj_num' => $now['over_saturation_traj_num'],
+                        'multi_stop_ratio_up' => $now['over_saturation_multi_stop_ratio_up'],
+                        'one_stop_ratio_up' => 1 - $now['over_saturation_none_stop_ratio_up'] - $now['over_saturation_multi_stop_ratio_up'],
+                        'queue_length_up' => $now['over_saturation_queue_length_up'],
+                        'queue_rate_up' => $now['over_saturation_queue_rate_up'],
+                    ];
+                    if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
+                        return false;
+                    }
+                    $status = 2;
+                    $temp = [
+                        'hour' => $now['hour'],
+                        'spillover_traj_num' => $now['spillover_traj_num'],
+                        'spillover_rate_down' => $now['spillover_rate_down'],
+                        'queue_rate_down' => $now['spillover_queue_rate_down'],
+                        'avg_speed_down' => $now['spillover_avg_speed_down'],
+                    ];
+                    if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
+                        return false;
+                    }
+                    $status = 3;
+                    $temp = [
+                        'hour' => $now['hour'],
+                        'unbalance_traj_num' => $now['unbalance_traj_num'],
+                        'multi_stop_ratio_up' => $now['unbalance_free_multi_stop_ratio_up'],
+                        'one_stop_ratio_up' => 1 - $now['unbalance_free_none_stop_ratio_up'] - $now['unbalance_free_multi_stop_ratio_up'],
+                        'queue_length_up' => $now['unbalance_free_queue_length_up'],
+                    ];
+                    if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
+                        return false;
+                    }
+                    $status = 4;
+                    $temp = [
+                        'hour' => $now['hour'],
+                        'unbalance_traj_num' => $now['unbalance_traj_num'],
+                        'multi_stop_ratio_up' => $now['unbalance_over_saturation_multi_stop_ratio_up'],
+                        'one_stop_ratio_up' => 1 - $now['unbalance_over_saturation_none_stop_ratio_up'] - $now['unbalance_over_saturation_multi_stop_ratio_up'],
+                        'queue_length_up' => $now['unbalance_over_saturation_queue_length_up'],
+                    ];
+                    if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } catch (Exception $e) {
+            throw $e;
         }
-        if (isset($param['params'])) {
-            $data = $param['params'];
-            if (empty($data)) {
-                return true;
-            }
-            foreach ($data as $now) {
-                $status = 1;
-                $temp = [
-                    'hour' => $now['hour'],
-                    'over_saturation_traj_num' => $now['over_saturation_traj_num'],
-                    'multi_stop_ratio_up' => $now['over_saturation_multi_stop_ratio_up'],
-                    'one_stop_ratio_up' => 1 - $now['over_saturation_none_stop_ratio_up'] - $now['over_saturation_multi_stop_ratio_up'],
-                    'queue_length_up' => $now['over_saturation_queue_length_up'],
-                    'queue_rate_up' => $now['over_saturation_queue_rate_up'],
-                ];
-                if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
-                    return false;
-                }
-                $status = 2;
-                $temp = [
-                    'hour' => $now['hour'],
-                    'spillover_traj_num' => $now['spillover_traj_num'],
-                    'spillover_rate_down' => $now['spillover_rate_down'],
-                    'queue_rate_down' => $now['spillover_queue_rate_down'],
-                    'avg_speed_down' => $now['spillover_avg_speed_down'],
-                ];
-                if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
-                    return false;
-                }
-                $status = 3;
-                $temp = [
-                    'hour' => $now['hour'],
-                    'unbalance_traj_num' => $now['unbalance_traj_num'],
-                    'multi_stop_ratio_up' => $now['unbalance_free_multi_stop_ratio_up'],
-                    'one_stop_ratio_up' => 1 - $now['unbalance_free_none_stop_ratio_up'] - $now['unbalance_free_multi_stop_ratio_up'],
-                    'queue_length_up' => $now['unbalance_free_queue_length_up'],
-                ];
-                if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
-                    return false;
-                }
-                $status = 4;
-                $temp = [
-                    'hour' => $now['hour'],
-                    'unbalance_traj_num' => $now['unbalance_traj_num'],
-                    'multi_stop_ratio_up' => $now['unbalance_over_saturation_multi_stop_ratio_up'],
-                    'one_stop_ratio_up' => 1 - $now['unbalance_over_saturation_none_stop_ratio_up'] - $now['unbalance_over_saturation_multi_stop_ratio_up'],
-                    'queue_length_up' => $now['unbalance_over_saturation_queue_length_up'],
-                ];
-                if (!$this->parametermanage_model->updateParameter($cityID, $areaID, $status, $temp)) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return false;
     }
 }
