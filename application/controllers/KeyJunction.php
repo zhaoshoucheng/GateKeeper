@@ -56,10 +56,10 @@ class KeyJunction extends MY_Controller
 
         //获取重点路口数据
         $keyJunctionList  = $this->config->item('timing_junction_list');
-        $junctionIds = !empty($keyJunctionList[$params['city_id']]) ? $keyJunctionList[$params['city_id']] : [];
+        $cityJunction = !empty($keyJunctionList[$params['city_id']]) ? $keyJunctionList[$params['city_id']] : [];
 
         $junctionList = [];
-        foreach ($junctionIds as $key => $junctionId) {
+        foreach ($cityJunction as $junctionId => $junctionName) {
             //默认数据从昨天开始，往前推7天
             $dayLength = 6;
             $params['date'] = $params['date'] ?? date('Y-m-d',strtotime('-1 day'));
@@ -91,6 +91,7 @@ class KeyJunction extends MY_Controller
             $junctionResult["datalist"] = isset($response['base']) ? $response['base']:[];
             $junctionResult["info"] = [
                 "value"=>"停车延误",
+                "name"=>$junctionName,
                 "unit"=>"秒",
             ];
             $junctionList[$junctionId] = $junctionResult;
