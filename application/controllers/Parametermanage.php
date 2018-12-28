@@ -38,8 +38,13 @@ class Parametermanage extends MY_Controller
             'is_default' => 'required|in_list[0,1]',
         ]);
 
-        $data = $this->parametermanageService->paramList($params);
-        $this->response($data);
+        try {
+            $data = $this->parametermanageService->paramList($params);
+            $this->response($data);
+        } catch (Exception $e) {
+            $this->response('', 500, $e)
+        }
+        $this->response('')
     }
 
     /**
@@ -71,10 +76,12 @@ class Parametermanage extends MY_Controller
         $json = json_decode($params, true);
 		$json = $this->security->xss_clean($json);
 
-        if (!$this->parametermanageService->updateParam($json)) {
-            $data = 'wrong query';
+        try {
+            $this->parametermanageService->updateParam($json);
+            $this->response('');
+        } catch (Exception $e) {
+            $this->response('', 500, $e);
         }
-        $data = 'ok';
-        $this->response($data);
+        $this->response('');
     }
 }
