@@ -42,9 +42,9 @@ class Parametermanage extends MY_Controller
             $data = $this->parametermanageService->paramList($params);
             $this->response($data);
         } catch (Exception $e) {
-            $this->response('', 500, $e)
+            $this->response('', 500, $e);
         }
-        $this->response('')
+        $this->response('');
     }
 
     /**
