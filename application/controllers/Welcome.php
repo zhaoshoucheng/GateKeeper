@@ -42,7 +42,7 @@ class Welcome extends CI_Controller
 
     public function gateway_test()
     {
-        sleep(2);
+        // sleep(1);
         $jsonStr='{"errno":0,"errmsg":"","data":{}}';
         echo $jsonStr;
         exit; 
