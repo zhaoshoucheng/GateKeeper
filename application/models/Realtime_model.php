@@ -396,7 +396,7 @@ class Realtime_model extends CI_Model
             "cityId"    => $cityId,
             'requestId' => get_traceid(),
             "dayTime"   => $dayTime,
-            "trailNum"  => 10,
+            "trailNum"  => 5,
             "andOperations" => [
                 "cityId"   => "eq",
                 "dayTime"  => "eq",
