@@ -12,7 +12,7 @@ class Welcome extends CI_Controller
         parent::__construct();
         $this->load->helper('http');
         $this->load->model('task_model');
-        $this->load->model('overview_model');
+        // $this->load->model('overview_model');
         $this->load->model('realtime_model');
     }
 
