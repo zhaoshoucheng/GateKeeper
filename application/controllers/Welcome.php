@@ -12,7 +12,7 @@ class Welcome extends CI_Controller
         parent::__construct();
         $this->load->helper('http');
         $this->load->model('task_model');
-        $this->load->model('overview_model');
+        // $this->load->model('overview_model');
         $this->load->model('realtime_model');
     }
 
@@ -40,6 +40,13 @@ class Welcome extends CI_Controller
         $this->load->view('welcome_message');
     }
 
+    public function gateway_test()
+    {
+        sleep(1);
+        $jsonStr='{"errno":0,"errmsg":"","data":{}}';
+        echo $jsonStr;
+        exit; 
+    }
 
     public function estest()
     {
