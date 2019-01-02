@@ -80,7 +80,7 @@ class OverviewService extends BaseService
         $hour = $this->helperService->getLastestHour($cityId);
 
         $data = $this->redis_model->getRealtimePretreatJunctionList($cityId, $date, $hour);
-        if (!$data) {
+        if (empty($data['dataList'])) {
             $data = $this->realtime_model->getRealTimeJunctions($cityId, $date, $hour);
         }
 

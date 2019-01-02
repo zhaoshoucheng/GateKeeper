@@ -289,6 +289,10 @@ class AlarmanalysisService extends BaseService
         for ($i = 0; $i < $nowHour; $i++) {
             if (!array_key_exists($i, $tempResData)) {
                 $tempResData[$i] = 0;
+                $tempRes[] = [
+                    'hour'  => $i,
+                    'value' => 0,
+                ];
             }
         }
 
