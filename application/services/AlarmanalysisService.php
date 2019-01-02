@@ -320,6 +320,7 @@ class AlarmanalysisService extends BaseService
             unset($topData[$top2key]);
         }
 
+        array_multisort($tempRes, $tempResData);
         $resultData['dataList'] = $tempRes;
         // 组织top信息
         foreach($topData as $hour=>$value) {
