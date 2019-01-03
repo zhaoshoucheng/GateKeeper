@@ -56,6 +56,9 @@ class SignalmanageService extends BaseService
         if (!empty($params['junction_name'])) {
             // 去路网获取相关路口信息
             $junctions = $this->waymap_model->getSuggestJunction($params['city_id'], $params['junction_name']);
+            if (empty($junctions)) {
+                return [];
+            }
             // 取出路口ID 组织为where in
             $whereInData = array_column($junctions, 'logic_junction_id');
             $junctionIdName = array_column($junctions, 'name', 'logic_junction_id');
