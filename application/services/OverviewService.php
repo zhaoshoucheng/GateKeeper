@@ -313,6 +313,9 @@ class OverviewService extends BaseService
 
         $hour = $this->helperService->getLastestHour($cityId);
         $result = $this->realtime_model->getTopCycleTime($cityId, $date, $hour, $pagesize);
+        if (empty($result)) {
+            return [];
+        }
 
         $ids = implode(',', array_unique(array_column($result, 'junctionId')));
 
