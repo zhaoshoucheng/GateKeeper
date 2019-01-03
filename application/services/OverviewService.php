@@ -276,6 +276,9 @@ class OverviewService extends BaseService
         // $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize);
         $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds);
         $result = array_column($esRes, 'quotaMap');
+        if (empty($result)) {
+            return [];
+        }
 
         $ids = implode(',', array_unique(array_column($result, 'junctionId')));
 
