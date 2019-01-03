@@ -47,6 +47,20 @@ class RoadService extends BaseService
     }
 
     /**
+     * 由干线自增id获取干线子路口
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function getJunctionsByRoadID($params)
+    {
+        $roadIDs = $params['road_ids'];
+
+        return $this->road_model->getJunctionsByRoadID($roadIDs);
+    }
+
+    /**
      * 新增干线
      *
      * @param $params
