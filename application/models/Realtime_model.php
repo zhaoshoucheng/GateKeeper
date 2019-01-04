@@ -321,7 +321,6 @@ class Realtime_model extends CI_Model
                 'limit' => 5000,
             ];
         }
-        print_r(json_encode($data));
         $realTimeEsData = $this->searchDetail($data);
         $result = [];
         foreach ($realTimeEsData as $k => $v) {

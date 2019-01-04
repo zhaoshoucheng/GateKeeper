@@ -287,7 +287,7 @@ class Realtimewarning_model extends CI_Model
         }
         $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo);
 
-
+        
         //计算junctionSurvey 数据
         $jDataList = $junctionList['dataList'] ?? [];
         $result = [];
@@ -302,12 +302,10 @@ class Realtimewarning_model extends CI_Model
         //<========计算缓存数据end==========
 
         //写入分组数据
-        /*
         $groupIds = $this->userperm_model->getUserPermAllGroupid();
         foreach ($groupIds as $groupId) {
             $this->dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionList, $realTimeAlarmsInfoResult);
         }
-        */
 
         // 写入缓存数据
         // 平均延误数据

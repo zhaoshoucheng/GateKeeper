@@ -125,8 +125,8 @@ class Realtimewarning extends Inroute_Controller
             exit;
         }
 
-        //临时附加线上地址,正式上线时去掉
-        if (gethostname()=="ipd-cloud-server01.gz01"){
+        //临时附加线上地址,r
+        if (gethostbyname()=="ipd-cloud-server01.gz01"){
             httpGET("http://10.85.128.81:30101/task_handler", $params, 600000);
         }
 
