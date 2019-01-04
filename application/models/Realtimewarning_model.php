@@ -328,7 +328,7 @@ class Realtimewarning_model extends CI_Model
         $junctionIds = $this->userperm_model->getJunctionidByGroup($groupId);
 
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",",$cityIds) . "||junctionIds=" . implode(",",$junctionIds) . "||trace_id=" . $traceId . "||message=dealGroupData\n\r";
-        
+
         //有城市权限则路口数据为空
         if (in_array($cityId, $cityIds)) {
             $junctionIds = [];
@@ -344,16 +344,17 @@ class Realtimewarning_model extends CI_Model
         //生成平均延误曲线数据
         //因为ES直接查询当天所有批次会影响到集群（真弱鸡！）所有要每次只取一个批次进行追加缓存。
         $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour, $junctionIds);
+        print_r($avgStopDelayList);
         if (empty($avgStopDelayList)) {
             echo "生成 usergroup avg(stop_delay) group by hour failed! \n\rgroupId={$groupId} cityId={$cityId} date={$date} hour={$hour}\n\r";
-            exit;
         }
         $esStopDelay = $this->redis_model->getData($avgStopDelayKey);
         if (!empty($esStopDelay)) {
             $esStopDelay = json_decode($esStopDelay, true);
         }
-        $esStopDelay[] = $avgStopDelayList;
-
+        if(!empty($avgStopDelayList)){
+            $esStopDelay[] = $avgStopDelayList;
+        }
 
         //过滤实时指标数据
         $realtimeJunctionList = [];
