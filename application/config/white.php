@@ -25,4 +25,5 @@ $config['white_token_clientip_escape'] = [
     '100.90.163.51'=>["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //验证token+ip
     '100.90.163.52'=>["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //验证token+ip
     '127.0.0.1'=>[], //不验token
+    '10.160.128.94'=>["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //city_brain
 ];

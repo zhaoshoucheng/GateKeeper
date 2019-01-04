@@ -146,6 +146,15 @@ class PeriodReportService extends BaseService
     }
 
     /**
+     * 用于hour比较排序
+    */
+    function cmp($a, $b)
+    {
+        return strcmp($a[0], $b[0]);
+    }
+
+
+    /**
      * @param $params
      *
      * @return array
@@ -182,6 +191,8 @@ class PeriodReportService extends BaseService
 
             $charData                  = $evaluate->getCityStopDelayAve($hourDate);
             $precharData               = $evaluate->getCityStopDelayAve($prehourDate);
+            usort($charData['total'], array($this, "cmp"));
+            usort($precharData['total'], array($this, "cmp"));
             $final_data['period']      = $charData['total'];
             $final_data['last_period'] = $precharData['total'];
         }

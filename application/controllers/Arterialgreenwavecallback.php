@@ -28,7 +28,7 @@ class Arterialgreenwavecallback extends CI_Controller
     {
         $params = $this->input->post(NULL, TRUE);
         $result = $this->traj_model->fillData($params);
-        //return $this->response($result);
+        return $this->response($result);
 
         $params = $this->input->post(NULL, TRUE);
 
