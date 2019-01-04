@@ -256,17 +256,12 @@ class Realtimewarning_model extends CI_Model
 
         //获取实时指标数据
         $realtimeJunctionList = $this->realtime_model->getRealTimeJunctions($cityId, $date, $hour);
-        /*
-         计算路口总数
-         为什么拿原始数据来计算，是因为如果处理后再统计，因为有的路口不在路网，
-         会导致丢失，这样就和拥堵概览的路口总数匹配不上了
-         */
-        $countData = [];
-        foreach ($realtimeJunctionList as $v) {
-            $countData[$v['logic_junction_id']] = $v['logic_junction_id'];
-        }
-        $junctionTotal = count($countData); //记录实时指标的路口总数
-
+        //计算路口总数
+        //为什么拿原始数据来计算，是因为如果处理后再统计，因为有的路口不在路网，
+        //会导致丢失，这样就和拥堵概览的路口总数匹配不上了
+        $countData = array_column($realtimeJunctionList, 'traj_count', 'logic_junction_id');
+        $junctionTotal = count($countData);
+        
 
         //获取实时报警表数据
         $data['date'] = $date;
