@@ -304,7 +304,7 @@ class Realtimewarning_model extends CI_Model
         //写入分组数据
         $groupIds = $this->userperm_model->getUserPermAllGroupid();
         foreach ($groupIds as $groupId) {
-            $this->dealGroupData($cityId, $date, $hour, $groupId, $realtimeJunctionList, $realTimeAlarmsInfoResult);
+            $this->dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionList, $realTimeAlarmsInfoResult);
         }
 
         // 写入缓存数据
@@ -322,11 +322,13 @@ class Realtimewarning_model extends CI_Model
         $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
     }
 
-    public function dealGroupData($cityId, $date, $hour, $groupId, $realtimeJunctionListOri, $realTimeAlarmsInfoResultOri)
+    public function dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionListOri, $realTimeAlarmsInfoResultOri)
     {
         $cityIds = $this->userperm_model->getCityidByGroup($groupId);
         $junctionIds = $this->userperm_model->getJunctionidByGroup($groupId);
 
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",",$cityIds) . "||junctionIds=" . implode(",",$junctionIds) . "||trace_id=" . $traceId . "||message=dealGroupData\n\r";
+        
         //有城市权限则路口数据为空
         if (in_array($cityId, $cityIds)) {
             $junctionIds = [];
