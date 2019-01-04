@@ -237,7 +237,7 @@ class Realtimewarning_model extends CI_Model
          */
         $countData = [];
         foreach ($result as $v) {
-            $countData['logic_junction_id'] = $v['logic_junction_id'];
+            $countData[$v['logic_junction_id']] = $v['logic_junction_id'];
         }
         $junctionTotal = count($countData);
 
