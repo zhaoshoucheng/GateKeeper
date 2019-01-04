@@ -322,6 +322,7 @@ class Realtime_model extends CI_Model
             ];
         }
         echo $data;
+        exit;
         $realTimeEsData = $this->searchDetail($data);
         $result = [];
         foreach ($realTimeEsData as $k => $v) {
