@@ -343,7 +343,7 @@ class Realtimewarning_model extends CI_Model
         //因为ES直接查询当天所有批次会影响到集群（真弱鸡！）所有要每次只取一个批次进行追加缓存。
         $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour, $junctionIds);
         if (empty($avgStopDelayList)) {
-            echo "生成 avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
+            echo "生成 usergroup avg(stop_delay) group by hour failed! \n\rgroupId={$groupId} cityId={$cityId} date={$date} hour={$hour}\n\r";
             exit;
         }
         $esStopDelay = $this->redis_model->getData($avgStopDelayKey);
