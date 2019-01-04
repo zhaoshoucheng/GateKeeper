@@ -50,7 +50,11 @@ class OverviewService extends BaseService
         $hour = $this->helperService->getLastestHour($params['city_id']);
         $data = $this->redis_model->getData($redisKey . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
         if (empty($data)) {
-            return [];
+            return [
+                'junction_total'   => 0,
+                'alarm_total'      => 0,
+                'congestion_total' => 0,
+            ];
         }
 
         $result = json_decode($data, true);
