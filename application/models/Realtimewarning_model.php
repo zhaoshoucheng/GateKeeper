@@ -253,6 +253,7 @@ class Realtimewarning_model extends CI_Model
             echo "生成 avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
             exit;
         }
+        print_r($avgStopDelayList);
         $esStopDelay = $this->redis_model->getData($avgStopDelayKey);
         if (!empty($esStopDelay)) {
             $esStopDelay = json_decode($esStopDelay, true);
@@ -262,6 +263,7 @@ class Realtimewarning_model extends CI_Model
 
         //获取实时指标数据
         $realtimeJunctionList = $this->realtime_model->getRealTimeJunctions($cityId, $date, $hour);
+        print_r($realtimeJunctionList);
         //计算路口总数
         //为什么拿原始数据来计算，是因为如果处理后再统计，因为有的路口不在路网，
         //会导致丢失，这样就和拥堵概览的路口总数匹配不上了
@@ -302,10 +304,12 @@ class Realtimewarning_model extends CI_Model
         //<========计算缓存数据end==========
 
         //写入分组数据
+        /*
         $groupIds = $this->userperm_model->getUserPermAllGroupid();
         foreach ($groupIds as $groupId) {
             $this->dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionList, $realTimeAlarmsInfoResult);
         }
+        */
 
         // 写入缓存数据
         // 平均延误数据
