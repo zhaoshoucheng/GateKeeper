@@ -285,23 +285,42 @@ class Realtime_model extends CI_Model
      * @param $cityId int    城市ID
      * @param $date   string 日期 yyyy-mm-dd
      * @param $hour   string 时间 HH:ii:ss
+     * @param $junctionIds   array 路口数组
      * @return array
      */
-    public function getRealTimeJunctions($cityId, $date, $hour)
+    public function getRealTimeJunctions($cityId, $date, $hour, $junctionIds=[])
     {
-        $data = [
-            'source' => 'signal_control', // 调用方
-            'cityId' => $cityId,          // 城市ID
-            'requestId' => get_traceid(),    // trace id
-            'trailNum' => 5,
-            'dayTime' => $date . " " . $hour,
-            'andOperations' => [
-                'cityId' => 'eq',  // cityId相等
-                'trailNum' => 'gte', // 轨迹数大于等于5
-                'dayTime' => 'eq',  // 等于hour
-            ],
-            'limit' => 5000,
-        ];
+        if(!empty($junctionIds)) {
+            $data = [
+                'source' => 'signal_control', // 调用方
+                'cityId' => $cityId,          // 城市ID
+                "junctionId" => implode(",",$junctionIds),
+                'requestId' => get_traceid(),    // trace id
+                'trailNum' => 5,
+                'dayTime' => $date . " " . $hour,
+                'andOperations' => [
+                    'cityId' => 'eq',  // cityId相等
+                    'junctionId' => 'in',  // 存在于junctionId
+                    'trailNum' => 'gte', // 轨迹数大于等于5
+                    'dayTime' => 'eq',  // 等于hour
+                ],
+                'limit' => 5000,
+            ];
+        }else{
+            $data = [
+                'source' => 'signal_control', // 调用方
+                'cityId' => $cityId,          // 城市ID
+                'requestId' => get_traceid(),    // trace id
+                'trailNum' => 5,
+                'dayTime' => $date . " " . $hour,
+                'andOperations' => [
+                    'cityId' => 'eq',  // cityId相等
+                    'trailNum' => 'gte', // 轨迹数大于等于5
+                    'dayTime' => 'eq',  // 等于hour
+                ],
+                'limit' => 5000,
+            ];
+        }
         $realTimeEsData = $this->searchDetail($data);
         $result = [];
         foreach ($realTimeEsData as $k => $v) {
