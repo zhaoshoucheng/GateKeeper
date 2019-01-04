@@ -386,4 +386,5 @@ class Redis_model extends CI_Model
 
         return json_decode($data, true);
     }
+
 }
