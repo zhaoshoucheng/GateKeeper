@@ -46,20 +46,14 @@ class OverviewService extends BaseService
      */
     public function junctionSurvey($params)
     {
-        $data = $this->junctionsList($params);
-
-        $data = $data['dataList'] ?? [];
-
-        $result = [];
-
-        $result['junction_total']   = count($data);
-        $result['alarm_total']      = 0;
-        $result['congestion_total'] = 0;
-
-        foreach ($data as $datum) {
-            $result['alarm_total']      += $datum['alarm']['is'] ?? 0;
-            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+        $redisKey = 'new_its_realtime_pretreat_junction_survey_';
+        $hour = $this->helperService->getLastestHour($params['city_id']);
+        $data = $this->redis_model->getData($redisKey . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
+        if (empty($data)) {
+            return [];
         }
+
+        $result = json_decode($data, true);
 
         return $result;
     }
