@@ -287,7 +287,7 @@ class Realtimewarning_model extends CI_Model
         }
         $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo);
 
-        
+
         //计算junctionSurvey 数据
         $jDataList = $junctionList['dataList'] ?? [];
         $result = [];
