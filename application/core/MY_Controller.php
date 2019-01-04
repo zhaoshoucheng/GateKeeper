@@ -51,9 +51,7 @@ class MY_Controller extends CI_Controller
 
         $this->load->config('nconf');
         $this->routerUri = $this->uri->ruri_string();
-        print_r($_SERVER);
-        $this->userPerm = json_decode($_SERVER['HTTP_DIDI_HEADER_USERPERM'],true);
-        
+
         // 有一些机器是不需要进行sso验证的，这里就直接跳过
         if (!in_array($host, $escapeSso)) {
 
@@ -125,6 +123,11 @@ class MY_Controller extends CI_Controller
             exit;
         }
         //<============降级结束
+
+        //写入权限信息
+        if(!empty($_SERVER['HTTP_DIDI_HEADER_USERPERM'])){
+            $this->userPerm = json_decode($_SERVER['HTTP_DIDI_HEADER_USERPERM'],true);
+        }
     }
 
     // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时
