@@ -40,15 +40,21 @@ class OverviewService extends BaseService
      * 路口概况
      *
      * @param $params
+     * @param $userPerm 用户权限点
      *
      * @return array
      * @throws \Exception
      */
-    public function junctionSurvey($params)
+    public function junctionSurvey($params,$userPerm=[])
     {
-        $redisKey = 'new_its_realtime_pretreat_junction_survey_';
         $hour = $this->helperService->getLastestHour($params['city_id']);
-        $data = $this->redis_model->getData($redisKey . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
+        if(!empty($userPerm['group_id'])){
+            $redisKey = 'new_its_usergroup_realtime_pretreat_junction_survey_';
+            $data = $this->redis_model->getData($redisKey . $userPerm['group_id'] . '_' . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
+        }else{
+            $redisKey = 'new_its_realtime_pretreat_junction_survey_';
+            $data = $this->redis_model->getData($redisKey . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
+        }
         if (empty($data)) {
             return [
                 'junction_total'   => 0,
