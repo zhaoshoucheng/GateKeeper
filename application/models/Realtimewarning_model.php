@@ -261,7 +261,7 @@ class Realtimewarning_model extends CI_Model
         //会导致丢失，这样就和拥堵概览的路口总数匹配不上了
         $countData = array_column($realtimeJunctionList, 'traj_count', 'logic_junction_id');
         $junctionTotal = count($countData);
-        
+
 
         //获取实时报警表数据
         $data['date'] = $date;
