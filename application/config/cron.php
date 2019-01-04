@@ -117,6 +117,7 @@ $config['checkItems'] = [
         ],
         'checker' => function($result){
             global $junctionSurveyAlarmTotal;
+            global $junctionTotal;
             $ret = json_decode($result,true);
             if(!isset($ret['errno']) || $ret['errno']!=0){
                 return false;
@@ -124,10 +125,13 @@ $config['checkItems'] = [
             if(!isset($ret['data']['junction_total']) || $ret['data']['junction_total']==0){
                 return false;
             }
+
+
             if(!isset($ret['data']['alarm_total'])){
                 return false;
             }
             $junctionSurveyAlarmTotal = $ret['data']['alarm_total'];
+            $junctionTotal = $ret['data']['junction_total'];
             return true;
         },
     ],
