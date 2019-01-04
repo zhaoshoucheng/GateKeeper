@@ -307,14 +307,15 @@ class Realtimewarning_model extends CI_Model
         }
         $junctionSurvey = $result;
         //<========计算缓存数据end==========
-        $junctionSurveyKey = "new_its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
-        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
 
         //基于分组生成数据
         foreach($groupIds as $groupId)
         {
-            $this->groupRealtimeData($cityId,$date,$hour,$groupId);
+            $this->groupRealtimeData($cityId,$date,$hour,$groupId,$junctionSurvey,$junctionList,$realTimeAlarmsInfoResult);
         }
+
+        $junctionSurveyKey = "new_its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
+        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
 
         // 缓存诊断路口列表数据
         $junctionListKey = "new_its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
@@ -333,34 +334,25 @@ class Realtimewarning_model extends CI_Model
         $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
     }
 
-    public function groupRealtimeData($junctionList,$cityId,$date,$hour){
-        //计算junctionSurvey 数据
-        $data                       = $junctionList['dataList'] ?? [];
-        $result                     = [];
-        $result['junction_total']   = count($data);
-        $result['alarm_total']      = 0;
-        $result['congestion_total'] = 0;
-        foreach ($data as $datum) {
-            $result['alarm_total']      += $datum['alarm']['is'] ?? 0;
-            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
-        }
-        $junctionSurvey = $result;
-        //<========计算缓存数据end==========
+    public function groupRealtimeData($cityId,$date,$hour,$groupId,$junctionSurvey,$junctionList,$realTimeAlarmsInfoResult){
+        //根据路口过滤数据
+
+
+
+        // 路口概览
+        $junctionSurveyKey = "new_its_usergroup_realtime_pretreat_junction_survey_{$groupId}_{$cityId}_{$date}_{$hour}";
+        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
 
         // 缓存诊断路口列表数据
-        $junctionListKey = "new_its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
+        $junctionListKey = "new_its_usergroup_realtime_pretreat_junction_list_{$groupId}_{$cityId}_{$date}_{$hour}";
         $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
 
-        // 缓存最新hour
-        $redisKey = "new_its_realtime_lasthour_$cityId";
-        $this->redis_model->setEx($redisKey, $hour, 24 * 3600);
-
         // 缓存实时报警路口数据
-        $realTimeAlarmRedisKey = 'new_its_realtime_alarm_' . $cityId;
+        $realTimeAlarmRedisKey = "new_its_usergroup_realtime_alarm_{$groupId}_{$cityId}";
         $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
 
         // 冗余缓存实时报警路口数据,每一个批次一份
-        $realTimeAlarmBakKey = "new_its_realtime_alarm_{$cityId}_{$date}_{$hour}";
+        $realTimeAlarmBakKey = "new_its_usergroup_realtime_alarm_{$groupId}_{$cityId}_{$date}_{$hour}";
         $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
     }
 
