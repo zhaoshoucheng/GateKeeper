@@ -719,4 +719,4 @@ $config['key_junction_list'] = [
 ];
 
 //upm权限
-$confg['upm_usergroup_prefix'] = "signal_gateway_upm_";
+$config['upm_usergroup_prefix'] = "signal_gateway_upm_";

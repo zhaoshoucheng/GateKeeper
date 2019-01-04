@@ -32,7 +32,6 @@ class Userperm_model extends CI_Model
      */
     public function getUserPermAllGroupid()
     {
-        echo $this->config->item('upm_usergroup_prefix');
         $key = $this->redisPrefix . "_usergroup_app";
         echo $key;
         if (!($data = $this->redis_model->getData($key))) {
