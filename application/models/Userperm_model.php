@@ -6,7 +6,7 @@
  * Date: 2019/1/4
  * Time: 下午1:51
  */
-class UserPerm_model extends CI_Model
+class Userperm_model extends CI_Model
 {
     private $redisPrefix = "";
 
