@@ -51,8 +51,9 @@ class MY_Controller extends CI_Controller
 
         $this->load->config('nconf');
         $this->routerUri = $this->uri->ruri_string();
+        print_r($_SERVER);
         $this->userPerm = json_decode($_SERVER['HTTP_DIDI_HEADER_USERPERM'],true);
-
+        
         // 有一些机器是不需要进行sso验证的，这里就直接跳过
         if (!in_array($host, $escapeSso)) {
 
