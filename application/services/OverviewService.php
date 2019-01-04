@@ -46,20 +46,18 @@ class OverviewService extends BaseService
      */
     public function junctionSurvey($params)
     {
-        $data = $this->junctionsList($params);
-
-        $data = $data['dataList'] ?? [];
-
-        $result = [];
-
-        $result['junction_total']   = count($data);
-        $result['alarm_total']      = 0;
-        $result['congestion_total'] = 0;
-
-        foreach ($data as $datum) {
-            $result['alarm_total']      += $datum['alarm']['is'] ?? 0;
-            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+        $redisKey = 'new_its_realtime_pretreat_junction_survey_';
+        $hour = $this->helperService->getLastestHour($params['city_id']);
+        $data = $this->redis_model->getData($redisKey . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
+        if (empty($data)) {
+            return [
+                'junction_total'   => 0,
+                'alarm_total'      => 0,
+                'congestion_total' => 0,
+            ];
         }
+
+        $result = json_decode($data, true);
 
         return $result;
     }
@@ -80,9 +78,6 @@ class OverviewService extends BaseService
         $hour = $this->helperService->getLastestHour($cityId);
 
         $data = $this->redis_model->getRealtimePretreatJunctionList($cityId, $date, $hour);
-        if (empty($data['dataList'])) {
-            $data = $this->realtime_model->getRealTimeJunctions($cityId, $date, $hour);
-        }
 
         return $data ? $data : [];
     }
@@ -276,6 +271,9 @@ class OverviewService extends BaseService
         // $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize);
         $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds);
         $result = array_column($esRes, 'quotaMap');
+        if (empty($result)) {
+            return [];
+        }
 
         $ids = implode(',', array_unique(array_column($result, 'junctionId')));
 
@@ -313,6 +311,9 @@ class OverviewService extends BaseService
 
         $hour = $this->helperService->getLastestHour($cityId);
         $result = $this->realtime_model->getTopCycleTime($cityId, $date, $hour, $pagesize);
+        if (empty($result)) {
+            return [];
+        }
 
         $ids = implode(',', array_unique(array_column($result, 'junctionId')));
 

@@ -560,7 +560,7 @@ class Waymap_model extends CI_Model
         if(empty($map_version)){
             $map_version = self::$lastMapVersion;
         }
-        
+
         $logic_junction_ids = $logic_junction_id;
 
         $data = compact('city_id', 'logic_junction_ids', 'map_version');

@@ -307,6 +307,8 @@ class Realtimewarning_model extends CI_Model
         }
         $junctionSurvey = $result;
         //<========计算缓存数据end==========
+        $junctionSurveyKey = "new_its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
+        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
 
         //基于分组生成数据
         foreach($groupIds as $groupId)

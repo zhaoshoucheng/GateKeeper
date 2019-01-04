@@ -29,9 +29,10 @@ class CommonService extends BaseService
      */
     public function getJunctionAdAndCross($params)
     {
+        $mapVersion = $params['map_version'] ?? '';
         $result = $this->waymap_model->gitJunctionDetail($params['logic_junction_id']
                                                             , $params['city_id']
-                                                            , $params['map_version']
+                                                            , $mapVersion
                                                         );
         if (empty($result['junctions'])) {
             return (object)[];

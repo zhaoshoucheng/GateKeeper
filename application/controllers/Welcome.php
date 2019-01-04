@@ -506,20 +506,18 @@ class Welcome extends CI_Controller
 
     public function testEsPage()
     {
-        $result = $this->realtime_model->testData();
-        print_r($result);exit;
         $data = [
             'source' => 'signal_control',
-            'cityId' => 12,
+            'cityId' => 1,
             'requestId' => 121231231231,
             'trailNum' => 10,
-            'dayTime'  => '2018-11-29 16:47:00',
+            'dayTime'  => '2018-11-29 14:59:00',
             'andOperations' => [
                 'cityId' => 'eq',
                 'trailNum' => 'gte',
                 'dayTime' => 'eq',
             ],
-            'limit' => 500,
+            'limit' => 5000,
         ];
 
         $res = $this->realtime_model->searchDetail($data);

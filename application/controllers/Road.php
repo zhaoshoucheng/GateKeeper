@@ -45,6 +45,26 @@ class Road extends MY_Controller
     }
 
     /**
+     * 由干线自增id获取干线子路口
+     *
+     * @throws Exception
+     */
+    public function batchGetJunctions()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'road_ids' => 'required',
+        ]);
+
+        $params['road_ids'] = explode(';', $params['road_ids']);
+
+        $data = $this->roadService->getJunctionsByRoadID($params);
+
+        $this->response($data);
+    }
+
+    /**
      * 新增干线
      *
      * @throws Exception

@@ -30,10 +30,10 @@ class Realtime_model extends CI_Model
     /**
      * ES诊断明细查询方法
      * @param $data      array es查询条件数组
-     * @param $scrollsId string 分页ID 不为空时表示有分页
+     * @param $scroll    bool  是否需要轮循 默认需要 true
      * @return array
      */
-    public function searchDetail($data)
+    public function searchDetail($data, $scroll = true)
     {
         $resData = [];
         $result = httpPOST($this->esUrl . '/estimate/diagnosis/queryIndices', $data, 0, 'json');
@@ -43,7 +43,7 @@ class Realtime_model extends CI_Model
         }
         $result = json_decode($result, true);
 
-        if (!isset($data['limit']) || $data['limit'] == 0) { // limit查询不需要再去轮循
+        if ($scroll) {
             if ($result['code'] == '000000') {  // 000000:还有数据可查询 400001:查询完成
                 $resData = $result['result']['diagnosisIndices'];
                 $data['scrollsId'] = $result['result']['scrollsId'];
@@ -512,7 +512,7 @@ class Realtime_model extends CI_Model
                 ],
             ],
         ];
-        $realTimeEsData = $this->searchDetail($data);
-        return $realTimeEsData;
+
+        return $this->searchDetail($data, false);
     }
 }
