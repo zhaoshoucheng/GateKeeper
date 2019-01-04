@@ -411,13 +411,19 @@ class OverviewService extends BaseService
      * @param $params['city_id']    int    Y 城市ID
      * @param $params['date']       string N 日期 yyyy-mm-dd
      * @param $params['time_point'] string N 时间 HH:ii:ss
+     * @param $userPerm             array N 用户权限
      * @throws Exception
      * @return array
      */
-    public function sevenDaysAlarmChange($params)
+    public function sevenDaysAlarmChange($params,$userPerm=[])
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
+        $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+        $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+        if(in_array($cityId,$cityIds)){
+            $junctionIds = [];
+        }
 
         // 七日日期
         $sevenDates = [];
@@ -441,7 +447,21 @@ class OverviewService extends BaseService
                 $json .= ',';
             }
         }
-        $json .= ']}}]}}}},"_source":{"includes":["COUNT"],"excludes":[]},"sort":[{"date":{"order":"asc"}}],"aggregations":{"date":{"terms":{"field":"date","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
+        $json .= ']}}';
+
+        /* where junctionId in*/
+        if(!empty($junctionIds)){
+            $json .= ',{"bool":{"should":[';
+            for ($i = $startDate; $i <= $endDate; $i += 24 * 3600) {
+                $json .= '{"match":{"date":{"query":"' . date('Y-m-d', $i) . '","type":"phrase"}}}';
+                if ($i < $endDate) {
+                    $json .= ',';
+                }
+            }
+            $json .= ']}}';
+        }
+
+        $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"sort":[{"date":{"order":"asc"}}],"aggregations":{"date":{"terms":{"field":"date","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
 
         $data = $this->alarmanalysis_model->search($json);
         if (!$data || empty($data['aggregations']['date']['buckets'])) {

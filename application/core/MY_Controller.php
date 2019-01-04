@@ -127,6 +127,13 @@ class MY_Controller extends CI_Controller
         //写入权限信息
         if(!empty($_SERVER['HTTP_DIDI_HEADER_USERPERM'])){
             $this->userPerm = json_decode($_SERVER['HTTP_DIDI_HEADER_USERPERM'],true);
+            if(!empty($this->userPerm)){
+                $userPerm['city_id'] = !empty($userPerm['city_id']) ? implode(";",$userPerm['city_id']) : [];
+                $userPerm['area_id'] = !empty($userPerm['area_id']) ? implode(";",$userPerm['area_id']) : [];
+                $userPerm['admin_area_id'] = !empty($userPerm['admin_area_id']) ? implode(";",$userPerm['admin_area_id']) : [];
+                $userPerm['route_id'] = !empty($userPerm['route_id']) ? implode(";",$userPerm['route_id']) : [];
+                $userPerm['junction_id'] = !empty($userPerm['junction_id']) ? implode(";",$userPerm['junction_id']) : [];
+            }
         }
     }
 
