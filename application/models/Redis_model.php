@@ -309,13 +309,17 @@ class Redis_model extends CI_Model
      * 平均延误
      * @param $cityId
      * @param $date
+     * @param $userPerm
      *
      * @return bool|mixed
      */
-    public function getRealtimeAvgStopDelay($cityId, $date)
+    public function getRealtimeAvgStopDelay($cityId, $date, $userPerm=[])
     {
-        $key = 'new_its_realtime_avg_stop_delay_' . $cityId . '_' . $date;
-
+        if(!empty($userPerm['group_id'])){
+            $key = 'new_its_usergroup_realtime_avg_stop_delay_' . $userPerm['group_id'] . '_' . $cityId . '_' . $date;
+        }else{
+            $key = 'new_its_realtime_avg_stop_delay_' . $cityId . '_' . $date;
+        }
         if(!($data = $this->getData($key))) {
             return false;
         }

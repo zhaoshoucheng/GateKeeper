@@ -63,7 +63,7 @@ class Overview extends MY_Controller
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data = $this->overviewService->operationCondition($params);
+        $data = $this->overviewService->operationCondition($params,$this->userPerm);
 
         $this->response($data);
 
@@ -112,7 +112,7 @@ class Overview extends MY_Controller
         $params['date']       = $params['date'] ?? date('Y-m-d');
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        $result = $this->overviewService->getCongestionInfo($params);
+        $result = $this->overviewService->getCongestionInfo($params,$this->userPerm);
 
         $this->response($result);
     }

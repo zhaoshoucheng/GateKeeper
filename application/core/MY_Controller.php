@@ -128,11 +128,11 @@ class MY_Controller extends CI_Controller
         if(!empty($_SERVER['HTTP_DIDI_HEADER_USERPERM'])){
             $this->userPerm = json_decode($_SERVER['HTTP_DIDI_HEADER_USERPERM'],true);
             if(!empty($this->userPerm)){
-                $userPerm['city_id'] = !empty($userPerm['city_id']) ? implode(";",$userPerm['city_id']) : [];
-                $userPerm['area_id'] = !empty($userPerm['area_id']) ? implode(";",$userPerm['area_id']) : [];
-                $userPerm['admin_area_id'] = !empty($userPerm['admin_area_id']) ? implode(";",$userPerm['admin_area_id']) : [];
-                $userPerm['route_id'] = !empty($userPerm['route_id']) ? implode(";",$userPerm['route_id']) : [];
-                $userPerm['junction_id'] = !empty($userPerm['junction_id']) ? implode(";",$userPerm['junction_id']) : [];
+                $this->userPerm['city_id'] = !empty($this->userPerm['city_id']) ? explode(";",$this->userPerm['city_id']) : [];
+                $this->userPerm['area_id'] = !empty($this->userPerm['area_id']) ? explode(";",$this->userPerm['area_id']) : [];
+                $this->userPerm['admin_area_id'] = !empty($this->userPerm['admin_area_id']) ? explode(";",$this->userPerm['admin_area_id']) : [];
+                $this->userPerm['route_id'] = !empty($this->userPerm['route_id']) ? explode(";",$this->userPerm['route_id']) : [];
+                $this->userPerm['junction_id'] = !empty($this->userPerm['junction_id']) ? explode(";",$this->userPerm['junction_id']) : [];
             }
         }
     }

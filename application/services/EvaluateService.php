@@ -126,12 +126,19 @@ class EvaluateService extends BaseService
      * @param $params['quota_key']  string Y 指标KEY
      * @param $params['date']       string N 日期 yyyy-mm-dd
      * @param $params['time_point'] string N 时间 HH:ii:ss
+     * @param $userPerm array N 用户权限点
      * @return array
      * @throws \Exception
      */
-    public function getJunctionQuotaSortList($params)
+    public function getJunctionQuotaSortList($params, $userPerm=[])
     {
         $cityId   = $params['city_id'];
+
+        $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+        $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+        if(in_array($cityId,$cityIds)){
+            $junctionIds = [];
+        }
 
         // 指标配置
         $quotaConf = $this->config->item('real_time_quota');
@@ -168,6 +175,11 @@ class EvaluateService extends BaseService
             $esData['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
             $esData['quotaRequest']['orderField'] = 'avg_' . $quotaKey;
             $esQuotaKey = 'avg_' . $quotaKey; // es接口返回的字段名
+        }
+
+        if (!empty($junctionIds)) {
+            $esData['junctionId'] = implode(",",$junctionIds);
+            $esData["andOperations"]['junctionId'] = 'in';
         }
 
         $esRes = $this->realtime_model->searchQuota($esData);

@@ -94,7 +94,7 @@ class Evaluate extends MY_Controller
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        $data = $this->evaluateService->getJunctionQuotaSortList($params);
+        $data = $this->evaluateService->getJunctionQuotaSortList($params,$this->userPerm);
 
         $this->response($data);
     }

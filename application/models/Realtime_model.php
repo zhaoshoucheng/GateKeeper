@@ -133,40 +133,24 @@ class Realtime_model extends CI_Model
      */
     public function avgStopdelay($cityId, $date, $hour, $junctionIds=[])
     {
-        if(!empty($junctionIds)){
-            $data = [
-                "source" => "signal_control",
-                "cityId" => $cityId,
-                "junctionId" => implode(",",$junctionIds),
-                'requestId' => get_traceid(),
-                "dayTime" => $date . ' ' . $hour,
-                "andOperations" => [
-                    "cityId" => "eq",
-                    "junctionId" => "in",
-                    "dayTime" => "eq",
-                ],
-                "quotaRequest" => [
-                    "quotaType" => "weight_avg",
-                    "quotas" => "sum_stopDelayUp*trailNum, sum_trailNum",
-                    "groupField" => "dayTime",
-                ],
-            ];
-        }else{
-            $data = [
-                "source" => "signal_control",
-                "cityId" => $cityId,
-                'requestId' => get_traceid(),
-                "dayTime" => $date . ' ' . $hour,
-                "andOperations" => [
-                    "cityId" => "eq",
-                    "dayTime" => "eq",
-                ],
-                "quotaRequest" => [
-                    "quotaType" => "weight_avg",
-                    "quotas" => "sum_stopDelayUp*trailNum, sum_trailNum",
-                    "groupField" => "dayTime",
-                ],
-            ];
+        $data = [
+            "source" => "signal_control",
+            "cityId" => $cityId,
+            'requestId' => get_traceid(),
+            "dayTime" => $date . ' ' . $hour,
+            "andOperations" => [
+                "cityId" => "eq",
+                "dayTime" => "eq",
+            ],
+            "quotaRequest" => [
+                "quotaType" => "weight_avg",
+                "quotas" => "sum_stopDelayUp*trailNum, sum_trailNum",
+                "groupField" => "dayTime",
+            ],
+        ];
+        if (!empty($junctionIds)) {
+            $data['junctionId'] = implode(",",$junctionIds);
+            $data["andOperations"]['junctionId'] = 'in';
         }
         $esRes = $this->searchQuota($data);
         if (empty($esRes['result']['quotaResults'])) {
@@ -290,36 +274,22 @@ class Realtime_model extends CI_Model
      */
     public function getRealTimeJunctions($cityId, $date, $hour, $junctionIds=[])
     {
-        if(!empty($junctionIds)) {
-            $data = [
-                'source' => 'signal_control', // 调用方
-                'cityId' => $cityId,          // 城市ID
-                "junctionId" => implode(",",$junctionIds),
-                'requestId' => get_traceid(),    // trace id
-                'trailNum' => 5,
-                'dayTime' => $date . " " . $hour,
-                'andOperations' => [
-                    'cityId' => 'eq',  // cityId相等
-                    'junctionId' => 'in',  // 存在于junctionId
-                    'trailNum' => 'gte', // 轨迹数大于等于5
-                    'dayTime' => 'eq',  // 等于hour
-                ],
-                'limit' => 5000,
-            ];
-        }else{
-            $data = [
-                'source' => 'signal_control', // 调用方
-                'cityId' => $cityId,          // 城市ID
-                'requestId' => get_traceid(),    // trace id
-                'trailNum' => 5,
-                'dayTime' => $date . " " . $hour,
-                'andOperations' => [
-                    'cityId' => 'eq',  // cityId相等
-                    'trailNum' => 'gte', // 轨迹数大于等于5
-                    'dayTime' => 'eq',  // 等于hour
-                ],
-                'limit' => 5000,
-            ];
+        $data = [
+            'source' => 'signal_control', // 调用方
+            'cityId' => $cityId,          // 城市ID
+            'requestId' => get_traceid(),    // trace id
+            'trailNum' => 5,
+            'dayTime' => $date . " " . $hour,
+            'andOperations' => [
+                'cityId' => 'eq',  // cityId相等
+                'trailNum' => 'gte', // 轨迹数大于等于5
+                'dayTime' => 'eq',  // 等于hour
+            ],
+            'limit' => 5000,
+        ];
+        if (!empty($junctionIds)) {
+            $data['junctionId'] = implode(",",$junctionIds);
+            $data["andOperations"]['junctionId'] = 'in';
         }
         $realTimeEsData = $this->searchDetail($data);
         $result = [];
@@ -423,11 +393,18 @@ class Realtime_model extends CI_Model
      * @param $cityId int    城市ID
      * @param $hour   string 时间 HH:ii:ss
      * @param $date   string 日期 yyyy-mm-dd
+     * @param $userPerm   array 用户权限
      * @return array
      * @throws Exception
      */
-    public function getAvgQuotaByJunction($cityId, $date, $hour)
+    public function getAvgQuotaByJunction($cityId, $date, $hour, $userPerm)
     {
+        $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+        $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+        if(in_array($cityId,$cityIds)){
+            $junctionIds = [];
+        }
+
         $dayTime = $date . ' ' . $hour;
         $data = [
             "source" => "signal_control",
@@ -446,7 +423,10 @@ class Realtime_model extends CI_Model
                 "groupField" => "junctionId",
             ],
         ];
-
+        if (!empty($junctionIds)) {
+            $data['junctionId'] = implode(",",$junctionIds);
+            $data["andOperations"]['junctionId'] = 'in';
+        }
         $esRes = $this->searchQuota($data);
         if (empty($esRes['result']['quotaResults'])) {
             return [];
@@ -465,7 +445,7 @@ class Realtime_model extends CI_Model
      * @return array
      * @throws Exception
      */
-    public function getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds = '')
+    public function getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds = [])
     {
         $dayTime = $date . ' ' . $hour;
         $data = [
@@ -489,7 +469,7 @@ class Realtime_model extends CI_Model
             ],
         ];
         if (!empty($junctionIds)) {
-            $data['junctionId'] = $junctionIds;
+            $data['junctionId'] = implode(",",$junctionIds);
             $data["andOperations"]['junctionId'] = 'in';
         }
 
@@ -507,10 +487,11 @@ class Realtime_model extends CI_Model
      * @param  $date      string 日期 yyyy-mm-dd
      * @param  $hour      string 时间 HH:ii:ss
      * @param  $pagesize  int    获取数量
+     * @param  $junctionIds  array    路口数组
      * @return array
      * @throws Exception
      */
-    public function getTopCycleTime($cityId, $date, $hour, $pagesize)
+    public function getTopCycleTime($cityId, $date, $hour, $pagesize, $junctionIds=[])
     {
         $data = [
             'source' => 'signal_control', // 调用方
@@ -532,6 +513,10 @@ class Realtime_model extends CI_Model
             ],
         ];
 
+        if (!empty($junctionIds)) {
+            $data['junctionId'] = implode(",",$junctionIds);
+            $data["andOperations"]['junctionId'] = 'in';
+        }
         return $this->searchDetail($data, false);
     }
 }
