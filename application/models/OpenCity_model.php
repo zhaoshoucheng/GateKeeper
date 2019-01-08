@@ -1,8 +1,4 @@
-
 <?php
-
-use Didi\Cloud\Collection\Collection;
-
 class OpenCity_model extends CI_Model
 {
     private $tb = 'open_city';

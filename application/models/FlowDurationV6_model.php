@@ -107,7 +107,9 @@ class FlowDurationV6_model extends CI_Model
     public function delOldQuotaData($cityId, $date, $offset)
     {
         $this->isExisted($cityId);
-        return $this->db->delete($this->tb . $cityId)->where('date <', $date)->limit($offset);
+        $this->db->where('date <', $date);
+        $this->db->limit($offset);
+        return $this->db->delete($this->tb . $cityId);
     }
 
     public function getOldQuotaDataCnt($cityId, $date)
