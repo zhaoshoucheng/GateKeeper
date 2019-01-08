@@ -40,6 +40,14 @@ class Welcome extends CI_Controller
         $this->load->view('welcome_message');
     }
 
+    public function ping()
+    {
+        //print_r($_SERVER);
+        $jsonStr='{"errno":0,"errmsg":"","data":{}}';
+        echo $jsonStr;
+        exit;
+    }
+
     public function gateway_test()
     {
         sleep(1);

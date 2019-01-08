@@ -84,7 +84,7 @@ class Traj_model extends CI_Model
     public function queryGreenWaveOptPlan($data)
     {
         $url = $this->interface . '/Arterialgreenwave/queryGreenWaveOptPlan';
-        return $this->postRaw($url, $data, 20000, "json");
+        return $this->postRaw($url, $data, 15000, "json");
     }
 
     /**
