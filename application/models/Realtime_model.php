@@ -279,4 +279,34 @@ class Realtime_model extends CI_Model
                 ->get();
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
+
+    /**
+     * 获取路口的当天平均延误数据
+     * @param        $cityId
+     * @param        $date
+     * @param        $offset
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function delOutdateRealtimeData($cityId, $date, $offset)
+    {
+        $this->isExisted($cityId);
+        $res = $this->db->delete($this->tb . $cityId)->where("updated_at < ", $date . ' 00:00:00')->limit($offset);
+        return $res;
+    }
+
+    public function getOutdateRealtimeDataCnt($cityId, $date)
+    {
+        $this->isExisted($cityId);
+        $res = $this->db->select("count(id) as cnt")
+                        ->from($this->tb . $cityId)
+                        ->where("updated_at < ", $date . ' 00:00:00')
+                        ->get()
+                        ->row_array();
+        if (!isset($res['cnt'])) {
+            return false;
+        }
+        return $res['cnt'];
+    }
 }

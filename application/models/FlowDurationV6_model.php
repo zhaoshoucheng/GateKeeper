@@ -97,4 +97,27 @@ class FlowDurationV6_model extends CI_Model
             ->get()->result_array();
     }
 
+    /**
+     *
+     * @param        $cityId
+     * @param        $date
+     * @return array
+     * @throws Exception
+     */
+    public function delOldQuotaData($cityId, $date, $offset)
+    {
+        $this->isExisted($cityId);
+        return $this->db->delete($this->tb . $cityId)->where('date <', $date)->limit($offset);
+    }
+
+    public function getOldQuotaDataCnt($cityId, $date)
+    {
+        $this->isExisted($cityId);
+        $res = $this->db->select("count(*) as cnt")->from($this->tb . $cityId)->where('date <', $date)->get()->row_array();
+        if (!isset($res['cnt'])) {
+            return false;
+        }
+        return $res['cnt'];
+    }
+
 }

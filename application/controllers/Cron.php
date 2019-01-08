@@ -24,6 +24,8 @@ class Cron extends CI_Controller
         $this->load->model('task_model');
         $this->load->model('taskdateversion_model');
         $this->load->model('downgrade_model');
+        $this->load->model('opencity_model');
+        $this->load->model('flowdurationv6_model');
     }
 
     public function scan_custom_task()
@@ -34,6 +36,45 @@ class Cron extends CI_Controller
     public function scan_cycle_task()
     {
         $this->cycletask_model->process();
+    }
+
+    public function del_old_offline_data($cityIds, $date)
+    {
+        if ($cityIds == -1) {
+            $cities = $this->opencity_model->getCities();
+        } else {
+            $cities = explode(",", $cityIds);
+        }
+        $offset = 1000;
+        foreach ($cities as $city) {
+            $cnt = $this->flowdurationv6_model->getOldQuotaDataCnt($city, $date);
+            if ($cnt == 0) {
+                continue;
+            }
+            for ($i = 0; $i < intval($cnt / $offset); $i ++) {
+                $this->flowdurationv6_model->delOldQuotaData($city, $date, $offset);
+            }
+        } 
+    }
+
+    public function del_old_realtime_data($cityIds, $days)
+    {
+        $date = date('Y-m-d', strtotime("-{$days} days"));
+        if ($cityIds == -1) {
+            $cities = $this->opencity_model->getCities();
+        } else {
+            $cities = explode(",", $cityIds);
+        }
+        $offset = 1000;
+        foreach ($cities as $city) {
+            $cnt = $this->realtime_model->getOutdateRealtimeDataCnt($city, $date);
+            if ($cnt == 0) {
+                continue;
+            }
+            for ($i = 0; $i < intval($cnt / $offset); $i ++) {
+                $ret = $this->realtime_model->delOutdateRealtimeData($city, $date, $offset);
+            }
+        } 
     }
 
     public function start()
