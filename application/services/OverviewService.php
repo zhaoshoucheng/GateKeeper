@@ -301,9 +301,10 @@ class OverviewService extends BaseService
 
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
-        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
-        $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
-
+        if(!empty($ids)){
+            $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
+            $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
+        }
         $realTimeQuota = $this->config->item('real_time_quota');
 
         $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota) {
@@ -339,10 +340,13 @@ class OverviewService extends BaseService
 
         $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
 
-        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
-        $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
-
-        $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+        $junctionIdNames = [];
+        $flowsInfo = [];
+        if(!empty($ids)){
+            $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
+            $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
+            $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+        }
 
         $realTimeQuota = $this->config->item('real_time_quota');
 

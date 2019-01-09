@@ -181,6 +181,7 @@ class Realtime_model extends CI_Model
             ->where('hour', $hour)
             ->where('traj_count >=', 10)
             ->group_by('hour, logic_junction_id')
+            ->forceMaster()
             ->get();
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
@@ -210,6 +211,7 @@ class Realtime_model extends CI_Model
                 ->where('updated_at <=', $date . ' 23:59:59')
                 ->group_by('logic_junction_id')
                 ->order_by('stop_delay', 'desc')
+                ->forceMaster()
                 ->limit($pagesize)
                 ->get();
         }else{
@@ -221,6 +223,7 @@ class Realtime_model extends CI_Model
                 ->where('updated_at <=', $date . ' 23:59:59')
                 ->group_by('logic_junction_id')
                 ->order_by('stop_delay', 'desc')
+                ->forceMaster()
                 ->limit($pagesize)
                 ->get();
         }
@@ -248,6 +251,7 @@ class Realtime_model extends CI_Model
             ->where('updated_at >=', $date . ' 00:00:00')
             ->where('updated_at <=', $date . ' 23:59:59')
             ->order_by('stop_time_cycle', 'desc')
+            ->forceMaster()
             ->limit($pagesize)
             ->get();
 
