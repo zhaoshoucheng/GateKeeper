@@ -44,7 +44,7 @@ class Overviewalarm extends MY_Controller
         $params['date']       = $params['date'] ?? date('Y-m-d');
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        $data = $this->overviewService->todayAlarmInfo($params);
+        $data = $this->overviewService->todayAlarmInfo($params,$this->userPerm);
 
         $this->response($data);
     }
@@ -71,7 +71,7 @@ class Overviewalarm extends MY_Controller
         $params['date']       = $params['date'] ?? date('Y-m-d');
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        $data = $this->overviewService->sevenDaysAlarmChange($params);
+        $data = $this->overviewService->sevenDaysAlarmChange($params,$this->userPerm);
 
         $this->response($data);
     }

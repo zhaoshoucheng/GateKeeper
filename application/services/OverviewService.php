@@ -40,15 +40,21 @@ class OverviewService extends BaseService
      * 路口概况
      *
      * @param $params
+     * @param $userPerm 用户权限点
      *
      * @return array
      * @throws \Exception
      */
-    public function junctionSurvey($params)
+    public function junctionSurvey($params,$userPerm=[])
     {
-        $redisKey = 'new_its_realtime_pretreat_junction_survey_';
         $hour = $this->helperService->getLastestHour($params['city_id']);
-        $data = $this->redis_model->getData($redisKey . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
+        if(!empty($userPerm['group_id'])){
+            $redisKey = 'new_its_usergroup_realtime_pretreat_junction_survey_';
+            $data = $this->redis_model->getData($redisKey . $userPerm['group_id'] . '_' . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
+        }else{
+            $redisKey = 'new_its_realtime_pretreat_junction_survey_';
+            $data = $this->redis_model->getData($redisKey . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
+        }
         if (empty($data)) {
             return [
                 'junction_total'   => 0,
@@ -87,15 +93,16 @@ class OverviewService extends BaseService
      *
      * @param $params['city_id'] int    Y 城市ID
      * @param $params['date']    string N 日期 yyyy-mm-dd
+     * @param $userPerm    array N 权限数据
      * @return array
      * @throws \Exception
      */
-    public function operationCondition($params)
+    public function operationCondition($params,$userPerm)
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
 
-        $result = $this->redis_model->getRealtimeAvgStopDelay($cityId, $date);
+        $result = $this->redis_model->getRealtimeAvgStopDelay($cityId, $date, $userPerm);
         if (empty($result)) {
             return (object)[];
         }
@@ -144,16 +151,17 @@ class OverviewService extends BaseService
      * @param $params['city_id']    int    Y 城市ID
      * @param $params['date']       string N 日期 yyyy-mm-dd
      * @param $params['time_point'] string N 当前时间点 格式：H:i:s 例：09:10:00
+     * @param $userPerm array N 用户权限点
      * @return array
      * @throws \Exception
      */
-    public function getCongestionInfo($params)
+    public function getCongestionInfo($params, $userPerm=[])
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
 
         $hour = $this->helperService->getLastestHour($cityId);
-        $res = $this->realtime_model->getAvgQuotaByJunction($cityId, $date, $hour);
+        $res = $this->realtime_model->getAvgQuotaByJunction($cityId, $date, $hour, $userPerm);
         if (!$res) {
             return [];
         }
@@ -257,18 +265,25 @@ class OverviewService extends BaseService
      * @param $params['city_id']  int    Y 城市ID
      * @param $params['date']     string N 日期 yyyy-mm-dd
      * @param $params['pagesize'] int    N 获取数量
+     * @param $params['junction_ids'] string    N 路口id以逗号间隔
+     * @param $userPerm array    N 路口id以逗号间隔
      * @return array
      * @throws \Exception
      */
-    public function stopDelayTopList($params)
+    public function stopDelayTopList($params,$userPerm=[])
     {
         $cityId   = $params['city_id'];
         $date     = $params['date'];
         $pagesize = $params['pagesize'];
-        $junctionIds = !empty($params['junction_ids']) ? $params['junction_ids'] : [];
-
+        $junctionIds = !empty($params['junction_ids']) ? explode(",",$params['junction_ids']) : [];  //array
+        if(!empty($userPerm)){
+            $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+            $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+            if(in_array($cityId,$cityIds)){
+                $junctionIds = [];
+            }
+        }
         $hour = $this->helperService->getLastestHour($cityId);
-        // $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize);
         $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds);
         $result = array_column($esRes, 'quotaMap');
         if (empty($result)) {
@@ -300,17 +315,27 @@ class OverviewService extends BaseService
      * @param $params['city_id']  int    Y 城市ID
      * @param $params['date']     string N 日期 yyyy-mm-dd
      * @param $params['pagesize'] int    N 获取数量
+     * @param $userPerm array    N 用户权限
      * @return array
      * @throws \Exception
      */
-    public function stopTimeCycleTopList($params)
+    public function stopTimeCycleTopList($params,$userPerm=[])
     {
         $cityId   = $params['city_id'];
         $date     = $params['date'];
         $pagesize = $params['pagesize'];
 
+        $junctionIds = !empty($params['junction_ids']) ? explode(",",$params['junction_ids']) : [];  //array
+        if(!empty($userPerm)){
+            $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+            $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+            if(in_array($cityId,$cityIds)){
+                $junctionIds = [];
+            }
+        }
+
         $hour = $this->helperService->getLastestHour($cityId);
-        $result = $this->realtime_model->getTopCycleTime($cityId, $date, $hour, $pagesize);
+        $result = $this->realtime_model->getTopCycleTime($cityId, $date, $hour, $pagesize, $junctionIds);
         if (empty($result)) {
             return [];
         }
@@ -344,13 +369,20 @@ class OverviewService extends BaseService
      * @param $params['city_id']    int    Y 城市ID
      * @param $params['date']       string N 日期 yyyy-mm-dd
      * @param $params['time_point'] string N 时间 HH:ii:ss
+     * @param $userPerm array N 用户权限
      * @return array
      * @throws \Exception
      */
-    public function todayAlarmInfo($params)
+    public function todayAlarmInfo($params,$userPerm=[])
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
+
+        $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+        $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+        if(in_array($cityId,$cityIds)){
+            $junctionIds = [];
+        }
 
         // 组织ES所需JSON
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
@@ -361,8 +393,20 @@ class OverviewService extends BaseService
         // where date
         $json .= ',{"match":{"date":{"query":"' . trim($date) . '","type":"phrase"}}}';
 
-        $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"aggregations":{"type":{"terms":{"field":"type","size":200},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
+        /* where junctionId in*/
+        if(!empty($junctionIds)){
+            $json .= ',{"bool":{"should":[';
 
+            for($x=0;$x<count($junctionIds);$x++){
+                $json .= '{"match":{"logic_junction_id":{"query":"' . $junctionIds[$x] . '","type":"phrase"}}}';
+                if ($x<(count($junctionIds)-1)) {
+                    $json .= ',';
+                }
+            }
+            $json .= ']}}';
+        }
+
+        $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"aggregations":{"type":{"terms":{"field":"type","size":200},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
         $esRes = $this->alarmanalysis_model->search($json);
         if (empty($esRes['aggregations']['type']['buckets']) || !$esRes) {
             return [];
@@ -405,13 +449,20 @@ class OverviewService extends BaseService
      * @param $params['city_id']    int    Y 城市ID
      * @param $params['date']       string N 日期 yyyy-mm-dd
      * @param $params['time_point'] string N 时间 HH:ii:ss
+     * @param $userPerm             array N 用户权限
      * @throws Exception
      * @return array
      */
-    public function sevenDaysAlarmChange($params)
+    public function sevenDaysAlarmChange($params,$userPerm=[])
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
+
+        $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+        $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+        if(in_array($cityId,$cityIds)){
+            $junctionIds = [];
+        }
 
         // 七日日期
         $sevenDates = [];
@@ -435,8 +486,22 @@ class OverviewService extends BaseService
                 $json .= ',';
             }
         }
-        $json .= ']}}]}}}},"_source":{"includes":["COUNT"],"excludes":[]},"sort":[{"date":{"order":"asc"}}],"aggregations":{"date":{"terms":{"field":"date","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
+        $json .= ']}}';
 
+        /* where junctionId in*/
+        if(!empty($junctionIds)){
+            $json .= ',{"bool":{"should":[';
+
+            for($x=0;$x<count($junctionIds);$x++){
+                $json .= '{"match":{"logic_junction_id":{"query":"' . $junctionIds[$x] . '","type":"phrase"}}}';
+                if ($x<(count($junctionIds)-1)) {
+                    $json .= ',';
+                }
+            }
+            $json .= ']}}';
+        }
+
+        $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"sort":[{"date":{"order":"asc"}}],"aggregations":{"date":{"terms":{"field":"date","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
         $data = $this->alarmanalysis_model->search($json);
         if (!$data || empty($data['aggregations']['date']['buckets'])) {
             return [];

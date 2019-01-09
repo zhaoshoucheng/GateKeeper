@@ -40,21 +40,6 @@ class Realtimewarning extends Inroute_Controller
         $traceId = $params["trace_id"];
         $uid     = $params["uid"];
 
-        exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
-        $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
-        //执行任务
-        $command = "";
-        if ($processNum == 0) {
-            $logPath = $this->config->item('log_path');
-
-            $phpPath = "/home/xiaoju/php7/bin/php -c /home/xiaoju/php7/etc/php.ini ";
-            if (gethostname() == 'ipd-cloud-server01.gz01') {
-                $phpPath = "php ";
-            }
-            $command = "nohup {$phpPath} index.php realtimewarning process/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
-                "{$logPath}realtimewarning.log  2>&1 &";
-            exec($command);
-        }
 
         //附加执行济南大脑项目
         exec("ps aux | grep \"realtimewarn\" | grep 'jinan_task/{$cityId}' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
@@ -73,6 +58,61 @@ class Realtimewarning extends Inroute_Controller
             exec($command);
         }
 
+
+        $output = [
+            'errno' => ERR_SUCCESS,
+            'errmsg' => "",
+            'command' => $command,
+            'traceid' => $traceId,
+        ];
+        echo json_encode($output);
+        return;
+    }
+
+    public function escallback()
+    {
+        $params   = array_merge($this->input->get(), $this->input->post());
+        $validate = Validate::make($params, [
+            'hour' => 'min:1',
+            'date' => 'min:1',
+            'city_id' => 'min:1',
+            'trace_id' => 'min:1',
+            'uid' => 'min:1',
+        ]);
+        if (!$validate['status']) {
+            $output = [
+                'errno' => ERR_PARAMETERS,
+                'errmsg' => $validate['errmsg'],
+            ];
+            echo json_encode($output);
+            return;
+        }
+
+        //权限验证
+        if (ENVIRONMENT != 'development') {
+            $this->authToken($params);
+        }
+        $hour    = $params["hour"];
+        $date    = $params["date"];
+        $cityId  = $params["city_id"];
+        $traceId = $params["trace_id"];
+        $uid     = $params["uid"];
+
+        exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
+        $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
+        //执行任务
+        $command = "";
+        if ($processNum == 0) {
+            $logPath = $this->config->item('log_path');
+
+            $phpPath = "/home/xiaoju/php7/bin/php -c /home/xiaoju/php7/etc/php.ini ";
+            if (gethostname() == 'ipd-cloud-server01.gz01') {
+                $phpPath = "php ";
+            }
+            $command = "nohup {$phpPath} index.php realtimewarning process/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
+                "{$logPath}realtimewarning.log  2>&1 &";
+            exec($command);
+        }
 
         $output = [
             'errno' => ERR_SUCCESS,
@@ -124,6 +164,9 @@ class Realtimewarning extends Inroute_Controller
             com_log_warning('realtime_callback_task_handler_error_errno', $res['errno'], $res, compact("params"));
             exit;
         }
+
+        //临时附加线上地址
+        httpGET("http://10.85.128.81:30101/task_handler", $params, 600000);
 
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=task_handler done\n\r";
         // echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=processing\n\r";
