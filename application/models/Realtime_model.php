@@ -292,8 +292,9 @@ class Realtime_model extends CI_Model
     public function delOutdateRealtimeData($cityId, $date, $offset)
     {
         $this->isExisted($cityId);
-        $res = $this->db->delete($this->tb . $cityId)->where("updated_at < ", $date . ' 00:00:00')->limit($offset);
-        return $res;
+        $this->db->where("updated_at < ", $date . ' 00:00:00');
+        $this->db->limit($offset);
+        return $this->db->delete($this->tb . $cityId);
     }
 
     public function getOutdateRealtimeDataCnt($cityId, $date)

@@ -56,6 +56,8 @@ class Cron extends CI_Controller
             if ($cnt == 0) {
                 continue;
             }
+            var_dump($cityId);
+            var_dump($cnt);
             for ($i = 0; $i < intval($cnt / $offset) + 1; $i ++) {
                 $res = $this->flowDurationV6_model->delOldQuotaData($cityId, $date, $offset);
                 if (empty($res)) {
@@ -78,12 +80,14 @@ class Cron extends CI_Controller
         } else {
             $cityIds = explode(",", $cityIdsStr);
         }
-        $offset = 1000;
+        $offset = 500;
         foreach ($cityIds as $cityId) {
             $cnt = $this->realtime_model->getOutdateRealtimeDataCnt($cityId, $date);
             if ($cnt == 0) {
                 continue;
             }
+            var_dump($cityId);
+            var_dump($cnt);
             for ($i = 0; $i < intval($cnt / $offset); $i ++) {
                 $ret = $this->realtime_model->delOutdateRealtimeData($cityId, $date, $offset);
                 if (empty($ret)) {
