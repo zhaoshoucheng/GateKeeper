@@ -49,8 +49,8 @@ if ($development == 2) {
     $signal_mis_ext    = '/its/signal-mis';
 
     // es
-    $es_server = '10.89.236.25';
-    $es_port   = '8087';
+    $es_server = '100.69.238.158';
+    $es_port   = '8001';
     $es_ext    = '';
 
     // new timing
@@ -62,10 +62,6 @@ if ($development == 2) {
     $xmmtrace_server = '100.69.238.158';
     $xmmtrace_port   = '8001';
     $xmmtrace_ext    = '/api/transmit/Traffic';
-
-    //traj  config
-    $traj_server = '10.85.128.81:30187';
-    $traj_ext   = '/traj-service';
 
     //traj  config
     $traj_server = '10.85.128.81:30187';
