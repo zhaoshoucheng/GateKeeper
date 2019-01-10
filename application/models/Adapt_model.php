@@ -35,7 +35,7 @@ class Adapt_model extends CI_Model
     /**
      * 获取指定路口的自适应配时信息
      *
-     * @param        $logicJunctionId
+     * @param string $logicJunctionId
      * @param string $select
      *
      * @return array

@@ -24,7 +24,9 @@ class Overviewtoplist extends MY_Controller
 
     /**
      * 获取延误TOP20
-     *
+     * @param $params['city_id']  int    Y 城市ID
+     * @param $params['date']     string N 日期 yyyy-mm-dd
+     * @param $params['pagesize'] int    N 获取数量
      * @throws Exception
      */
     public function stopDelayTopList()
@@ -39,15 +41,16 @@ class Overviewtoplist extends MY_Controller
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['pagesize'] = $params['pagesize'] ?? 20;
-
-        $data = $this->overviewService->stopDelayTopList($params);
+        $data = $this->overviewService->stopDelayTopList($params,$this->userPerm);
 
         $this->response($data);
     }
 
     /**
      * 获取停车次数TOP20
-     *
+     * @param $params['city_id']  int    Y 城市ID
+     * @param $params['date']     string N 日期 yyyy-mm-dd
+     * @param $params['pagesize'] int    N 获取数量
      * @throws Exception
      */
     public function stopTimeCycleTopList()
@@ -63,7 +66,7 @@ class Overviewtoplist extends MY_Controller
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['pagesize'] = $params['pagesize'] ?? 20;
 
-        $data = $this->overviewService->stopTimeCycleTopList($params);
+        $data = $this->overviewService->stopTimeCycleTopList($params,$this->userPerm);
 
         $this->response($data);
     }

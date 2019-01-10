@@ -25,8 +25,11 @@ class Overviewalarm extends MY_Controller
 
     /**
      * 获取今日报警概览
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
      * @throws Exception
+     * @return json
      */
     public function todayAlarmInfo()
     {
@@ -41,7 +44,7 @@ class Overviewalarm extends MY_Controller
         $params['date']       = $params['date'] ?? date('Y-m-d');
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        $data = $this->overviewService->todayAlarmInfo($params);
+        $data = $this->overviewService->todayAlarmInfo($params,$this->userPerm);
 
         $this->response($data);
     }
@@ -49,8 +52,11 @@ class Overviewalarm extends MY_Controller
     /**
      * 获取七日报警变化
      * 规则：取当前日期前六天的报警路口数+当天到现在时刻的报警路口数
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
      * @throws Exception
+     * @return json
      */
     public function sevenDaysAlarmChange()
     {
@@ -65,14 +71,17 @@ class Overviewalarm extends MY_Controller
         $params['date']       = $params['date'] ?? date('Y-m-d');
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        $data = $this->overviewService->sevenDaysAlarmChange($params);
+        $data = $this->overviewService->sevenDaysAlarmChange($params,$this->userPerm);
 
         $this->response($data);
     }
 
     /**
      * 获取实时报警列表
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 当前时间点 格式：H:i:s 例：09:10:00
+     * @return json
      * @throws Exception
      */
     public function realTimeAlarmList()

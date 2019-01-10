@@ -520,17 +520,13 @@ class Timing_model extends CI_Model
                         'end_time'          => date('H:i', strtotime(trim($time_range[1])) - 60),
                         'source'            => $data['timingType']
                     ];
-        try {
-            $timing = httpGET(
-                $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingVersion',
-                $timing_data
-            );
-            $timing = json_decode($timing, true);
-            if (isset($timing['errorCode']) && $timing['errorCode'] != 0) {
-                return [];
-            }
-        } catch (Exception $e) {
-            return [];
+        $timing = httpGET(
+            $this->config->item('timing_interface') . '/TimingService/queryTimingVersion',
+            $timing_data
+        );
+        $timing = json_decode($timing, true);
+        if (isset($timing['errorCode']) && $timing['errorCode'] != 0) {
+            throw new \Exception('获取配时详情失败: ' . $timing['errorMsg'], ERR_DEFAULT);
         }
         if (isset($timing['data']) && count($timing['data']) >= 1) {
             return $timing['data'];
@@ -564,15 +560,11 @@ class Timing_model extends CI_Model
         ];
         try {
             $timing = httpGET(
-                $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingVersionBatch',
+                $this->config->item('timing_interface') . '/TimingService/queryTimingVersionBatch',
                 $timing_data
             );
             $timing = json_decode($timing, true);
             if (isset($timing['errorCode']) && $timing['errorCode'] != 0) {
-                $content = "form_data : " . json_encode($timing_data);
-                $content .= "<br>interface : " . $this->config->item('timing_interface') . '/signal-mis/TimingService/queryTimingVersionBatch';
-                $content .= '<br> result : ' . json_encode($timing);
-                sendMail($this->email_to, 'logs: 获取配时数据', $content);
                 return [];
             }
         } catch (Exception $e) {

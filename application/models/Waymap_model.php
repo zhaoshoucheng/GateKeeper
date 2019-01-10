@@ -208,9 +208,8 @@ class Waymap_model extends CI_Model
     /**
      * 获取全城路口
      *
-     * @param int $city_id 城市ID
-     * @param int $version 版本号
-     *
+     * @param int $city_id   城市ID
+     * @param int $version   版本号
      * @return array
      *
      * @throws \Exception
@@ -225,8 +224,9 @@ class Waymap_model extends CI_Model
             $version = self::$lastMapVersion;
         }
 
-        $redis_key = 'all_city_junctions_' . $city_id . '_' . $version . '}';
+        $result = [];
 
+        $redis_key = 'all_city_junctions_' . $city_id . '_' . $version . '}';
         $result = $this->redis_model->getData($redis_key);
 
         if (!$result) {
@@ -240,9 +240,7 @@ class Waymap_model extends CI_Model
 
             $res = $this->get($url, $data);
 
-            $this->redis_model->deleteData($redis_key);
-            $this->redis_model->setData($redis_key, json_encode($res));
-            $this->redis_model->setExpire($redis_key, 3600 * 24);
+            $this->redis_model->setEx($redis_key, json_encode($res), 24 * 3600);
 
             return $res;
         }
@@ -562,7 +560,7 @@ class Waymap_model extends CI_Model
         if(empty($map_version)){
             $map_version = self::$lastMapVersion;
         }
-        
+
         $logic_junction_ids = $logic_junction_id;
 
         $data = compact('city_id', 'logic_junction_ids', 'map_version');

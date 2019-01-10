@@ -21,6 +21,8 @@ if (in_array($hostname, $online_host)) {
 }
 
 if ($development == 2) {
+    //线上及预发环境配置
+
     // 路网接口服务器地址
     $waymap_server = '100.69.238.11';
     // 路网接口服务器端口
@@ -60,7 +62,7 @@ if ($development == 2) {
     $xmmtrace_server = '100.69.238.158';
     $xmmtrace_port   = '8001';
     $xmmtrace_ext    = '/api/transmit/Traffic';
-    
+
     //traj  config
     $traj_server = '10.85.128.81:30187';
     $traj_ext   = '/traj-service';
@@ -70,9 +72,17 @@ if ($development == 2) {
         '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
     ];
     // 报警ES索引
-    $alarm_es_index = 'online_its_alarm_movement_month*';
+    $alarm_es_index = [
+        'junction' => 'online_its_alarm_junction_month*',
+        'flow'     => 'online_its_alarm_movement_month*',
+    ];
 
+    //报警数据历史处理
+    $realtime_callback = 'http://10.85.128.81:30101';
 } else {
+    //测试环境配置
+
+
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
     // 路网接口服务器端口
@@ -83,9 +93,9 @@ if ($development == 2) {
     // 配时接口服务器地址
     $timing_server = '100.90.164.31';
     // 配时接口服务器端口
-    $timing_port = '8006';
+    $timing_port = '8031';
     // 配时接口前缀
-    $timing_ext = '';
+    $timing_ext = '/signal-timing';
 
     $config['redis'] = [
         'host' => '127.0.0.1',
@@ -116,13 +126,19 @@ if ($development == 2) {
     //traj  config
     $traj_server = '100.90.164.31:8032';
     $traj_ext   = '/traj-service';
-    
+
     // 报警es
     $alarm_es_interface = [
         '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
     ];
     // 报警ES索引
-    $alarm_es_index = 'its_alarm_junction_month*';
+    $alarm_es_index = [
+        'junction' => 'its_alarm_junction_month*',
+        'flow'     => 'its_alarm_movement_month*',
+    ];
+
+    //报警数据历史处理
+    $realtime_callback = 'http://100.90.164.31:8033';
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -159,6 +175,9 @@ $config['xmmtrace_interface'] = 'http://' . $xmmtrace_server . ":" . $xmmtrace_p
 
 // 新版轨迹地址
 $config['warning_interface'] = 'http://monitor.odin.xiaojukeji.com';
+
+// 实时报警数据回调接口
+$config['realtime_callback'] = $realtime_callback;
 
 // 报警es接口地址
 $config['alarm_es_interface'] = $alarm_es_interface;
@@ -702,7 +721,6 @@ $config['timing_junction_list'] = [
         '2017030116_1322134'=>"仓边路_中山四路",
         '2017030116_1322138'=>"中山四路_德政北路",
         '1860bd7677da44c9e60ee9405d33709a'=>"中山四路_榨粉街(秉政街)",
-        
         '2017030116_1325121'=>"江南大道中_江南西路",
         '2017030116_1354281'=>"解放北路_三元里大道",
         '2017030116_1313534'=>"天河路_体育东路_1313534",
@@ -719,3 +737,6 @@ $config['timing_junction_list'] = [
 
     ],
 ];
+
+//upm权限
+$config['upm_usergroup_prefix'] = "signal_gateway_upm_";

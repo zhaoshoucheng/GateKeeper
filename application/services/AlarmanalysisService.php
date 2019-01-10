@@ -289,6 +289,10 @@ class AlarmanalysisService extends BaseService
         for ($i = 0; $i < $nowHour; $i++) {
             if (!array_key_exists($i, $tempResData)) {
                 $tempResData[$i] = 0;
+                $tempRes[] = [
+                    'hour'  => $i,
+                    'value' => 0,
+                ];
             }
         }
 
@@ -316,6 +320,7 @@ class AlarmanalysisService extends BaseService
             unset($topData[$top2key]);
         }
 
+        array_multisort($tempRes, $tempResData);
         $resultData['dataList'] = $tempRes;
         // 组织top信息
         foreach($topData as $hour=>$value) {
