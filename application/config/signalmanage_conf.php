@@ -7,3 +7,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | 信控管理配置文件
 |-----------------------------------------------------
 */
+
+// 通信方式
+$config['communication_mode'] = [
+	0 => [
+		'id'   => 0,
+		'name' => '网口-RJ45'
+	],
+	1 => [
+		'id'   => 1,
+		'name' => '串口-RS232'
+	],
+	2 => [
+		'id'   => 2,
+		'name' => '无线-3G'
+	],
+	3 => [
+		'id'   => 3,
+		'name' => '无线-4G'
+	],
+	4 => [
+		'id'   => 4,
+		'name' => '无线-5G'
+	],
+];

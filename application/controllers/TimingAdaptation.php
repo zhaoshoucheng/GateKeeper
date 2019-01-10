@@ -15,7 +15,8 @@ class TimingAdaptation extends MY_Controller
 
     /**
      * 自适应配时详情
-     *
+     * @param $params['logic_junction_id'] string Y 路口ID
+     * @param $params['city_id']           int    Y 城市ID
      * @throws Exception
      */
     public function getAdaptTimingInfo()

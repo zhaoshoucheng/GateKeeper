@@ -204,9 +204,7 @@ class AreaService extends BaseService
 
     /**
      * 获取城市全部区域详情
-     *
-     * @param $params
-     *
+     * @param $params['city_id'] int 城市ID
      * @return array
      * @throws \Exception
      */
@@ -216,6 +214,9 @@ class AreaService extends BaseService
 
         // 获取城市全部区域信息
         $areaList       = $this->area_model->getAreasByCityId($cityId, 'id, area_name');
+        if (empty($areaList)) {
+            return (object)[];
+        }
         $areaCollection = Collection::make($areaList);
 
         // 获取区域ID
@@ -335,9 +336,8 @@ class AreaService extends BaseService
         $dates  = array_merge($baseDates, $evaluateDates);
 
         $resultList = $this->area_model->getJunctionByCityId($dates, $junctionIds, $hours, $cityId, $select);
-
         if (!$resultList || empty($resultList)) {
-            throw new \Exception('路口数据获取失败', ERR_PARAMETERS);
+            return  [];
         }
 
         $resultCollection = Collection::make($resultList);
@@ -479,7 +479,7 @@ class AreaService extends BaseService
             $rows_cnt   = count($table);
             $cols_cnt   = count($table[0]) - 1;
             $rows_index = $rows_cnt + $line - 1;
-            $objSheet->getStyle("A≈{$line}:" . intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
+            //$objSheet->getStyle("A≈{$line}:" . intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
             $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($excelStyle['header']);
             $objSheet->getStyle("A{$line}:" . intToChr($cols_cnt) . $line)->applyFromArray($excelStyle['header']);
         }

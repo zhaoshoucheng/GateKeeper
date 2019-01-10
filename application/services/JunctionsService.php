@@ -249,7 +249,7 @@ class JunctionsService extends BaseService
                         = $vv['movement_id'];
                         // movement中文名称-相位名称
                         $resultData['diagnose_detail'][$k]['movements'][$kk]['comment']
-                        = $flowIdName[$vv['movement_id']];
+                        = $flowIdName[$vv['movement_id']] ?? '未知相位';
                         // 此问题对应指标值
                         $resultData['diagnose_detail'][$k]['movements'][$kk][$diagnoseQuota]
                         = $flowQuotaKeyConf[$diagnoseQuota]['round']($vv[$diagnoseQuota]);

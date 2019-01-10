@@ -19,14 +19,15 @@ class Common_model extends CI_Model
 
     /**
      * 查询
-     * @param $table   table name
-     * @param $select  select colum
-     * @param $where   where
-     * @param $groupby group by
-     * @param $limit   limit
+     * @param $table    table name
+     * @param $select   select colum
+     * @param $where    where
+     * @param $groupby  group by
+     * @param $page     offset
+     * @param $pagesize count
      * @return mixed
      */
-    public function search($table, $select = '*', $where = '1', $groupby = '', $limit = '')
+    public function search($table, $select = '*', $where = '', $groupby = '', $page = 0, $pagesize = 0)
     {
         $isExisted = $this->db->table_exists($table);
         if (!$isExisted) {
@@ -35,7 +36,7 @@ class Common_model extends CI_Model
 
         $this->db->select($select);
         $this->db->from($table);
-        if ($where != '1' && !empty($where)) {
+        if (!empty($where)) {
             $this->db->where($where);
         }
 
@@ -43,8 +44,8 @@ class Common_model extends CI_Model
             $this->db->group_by($groupby);
         }
 
-        if (!empty($limit)) {
-            $this->db->limit($limit);
+        if ($pagesize >= 1) {
+            $this->db->limit($pagesize, $page);
         }
 
         return $this->db->get()->result_array();

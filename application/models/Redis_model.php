@@ -176,7 +176,7 @@ class Redis_model extends CI_Model
      */
     public function getHour($cityId)
     {
-        $key = 'its_realtime_lasthour_' . $cityId;
+        $key = 'new_its_realtime_lasthour_' . $cityId;
 
         return $this->getData($key);
     }
@@ -296,7 +296,7 @@ class Redis_model extends CI_Model
      */
     public function getRealtimePretreatJunctionList($cityId, $date, $hour)
     {
-        $key = "its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
+        $key = "new_its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
 
         if(!($data = $this->getData($key))) {
             return false;
@@ -306,15 +306,20 @@ class Redis_model extends CI_Model
     }
 
     /**
+     * 平均延误
      * @param $cityId
      * @param $date
+     * @param $userPerm
      *
      * @return bool|mixed
      */
-    public function getRealtimeAvgStopDelay($cityId, $date)
+    public function getRealtimeAvgStopDelay($cityId, $date, $userPerm=[])
     {
-        $key = 'its_realtime_avg_stop_delay_' . $cityId . '_' . $date;
-
+        if(!empty($userPerm['group_id'])){
+            $key = 'new_its_usergroup_realtime_avg_stop_delay_' . $userPerm['group_id'] . '_' . $cityId . '_' . $date;
+        }else{
+            $key = 'new_its_realtime_avg_stop_delay_' . $cityId . '_' . $date;
+        }
         if(!($data = $this->getData($key))) {
             return false;
         }
@@ -352,13 +357,32 @@ class Redis_model extends CI_Model
     }
 
     /**
+     * 获取实时报警数据
+     * @param $cityId
+     * @param $date
+     * @param $hour
+     *
+     * @return bool|mixed
+     */
+    public function getRealtimeAlarmListByDateHour($cityId,$date,$hour)
+    {
+        $key = sprintf('new_its_realtime_alarm_%s_%s_%s', $cityId, $date, $hour);
+        if(!($data = $this->getData($key))) {
+            return false;
+        }
+
+        return json_decode($data, true);
+    }
+
+    /**
+     * 获取实时报警数据
      * @param $cityId
      *
      * @return bool|mixed
      */
     public function getRealtimeAlarmList($cityId)
     {
-        $key = 'its_realtime_alarm_' . $cityId;
+        $key = 'new_its_realtime_alarm_' . $cityId;
 
         if(!($data = $this->getData($key))) {
             return false;
@@ -366,4 +390,5 @@ class Redis_model extends CI_Model
 
         return json_decode($data, true);
     }
+
 }

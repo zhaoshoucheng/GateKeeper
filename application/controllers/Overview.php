@@ -47,8 +47,9 @@ class Overview extends MY_Controller
     }
 
     /**
-     * 运行情况
-     *
+     * 运行情况 （概览页 平均延误）
+     * @param $params['city_id'] int    Y 城市ID
+     * @param $params['date']    string N 日期 yyyy-mm-dd
      * @throws Exception
      */
     public function operationCondition()
@@ -62,7 +63,7 @@ class Overview extends MY_Controller
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data = $this->overviewService->operationCondition($params);
+        $data = $this->overviewService->operationCondition($params,$this->userPerm);
 
         $this->response($data);
 
@@ -84,7 +85,7 @@ class Overview extends MY_Controller
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data = $this->overviewService->junctionSurvey($params);
+        $data = $this->overviewService->junctionSurvey($params,$this->userPerm);
 
         $this->response($data);
 
@@ -92,7 +93,10 @@ class Overview extends MY_Controller
 
     /**
      * 拥堵概览
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 当前时间点 格式：H:i:s 例：09:10:00
+     * @return json
      * @throws Exception
      */
     public function getCongestionInfo()
@@ -100,15 +104,15 @@ class Overview extends MY_Controller
         $params = $this->input->post(null, true);
 
         $this->validate([
-            'city_id' => 'required|is_natural_no_zero',
-            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'city_id'    => 'required|is_natural_no_zero',
+            'date'       => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'time_point' => 'exact_length[8]|regex_match[/\d{2}:\d{2}:\d{2}/]',
         ]);
 
         $params['date']       = $params['date'] ?? date('Y-m-d');
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        $result = $this->overviewService->getCongestionInfo($params);
+        $result = $this->overviewService->getCongestionInfo($params,$this->userPerm);
 
         $this->response($result);
     }
