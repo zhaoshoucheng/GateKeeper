@@ -166,7 +166,7 @@ class Realtimewarning extends Inroute_Controller
         }
 
         //临时附加线上地址
-        httpGET("http://10.85.128.81:30101/task_handler", $params, 600000);
+        //httpGET("http://10.85.128.81:30101/task_handler", $params, 600000);
 
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=task_handler done\n\r";
         // echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=processing\n\r";
