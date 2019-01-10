@@ -34,7 +34,7 @@ class Userperm_model extends CI_Model
     {
         $key = $this->redisPrefix . "usergroup_app";
         if (!($data = $this->redis_model->getData($key))) {
-            com_log_warning('_itstool_' . __CLASS__ . '_' . __FUNCTION__ . '_error', 0, "redis_get_error", compact("key"));
+            com_log_notice('_itstool_' . __CLASS__ . '_' . __FUNCTION__ . '_error', 0, "redis_get_error", compact("key"));
             return [];
         }
         return explode(";", $data);
