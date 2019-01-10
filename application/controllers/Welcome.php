@@ -12,7 +12,8 @@ class Welcome extends CI_Controller
         parent::__construct();
         $this->load->helper('http');
         $this->load->model('task_model');
-        $this->load->model('overview_model');
+        // $this->load->model('overview_model');
+        $this->load->model('realtime_model');
     }
 
 
@@ -39,20 +40,67 @@ class Welcome extends CI_Controller
         $this->load->view('welcome_message');
     }
 
+    public function ping()
+    {
+        //print_r($_SERVER);
+        $jsonStr='{"errno":0,"errmsg":"","data":{}}';
+        echo $jsonStr;
+        exit;
+    }
+
+    public function gateway_test()
+    {
+        sleep(1);
+        $jsonStr='{"errno":0,"errmsg":"","data":{}}';
+        echo $jsonStr;
+        exit; 
+    }
 
     public function estest()
     {
+        $scroll_id = isset($_GET['scroll_id']) ? $_GET['scroll_id'] : "";
         $hosts = [
             '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',         // IP + Port
         ];
         $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
-        $json = '{"query":{"match":{"id":"0_2017030116_i_64019260_2017030116_o_603226541_1_1_1542181063000"}}}';
+        $json = '{"from":0,"size":1,"query":{"bool":{"must":{"bool":{"must":[{"match":{"city_id":{"query":12,"type":"phrase"}}},{"match":{"date":{"query":"2018-11-25","type":"phrase"}}}]}}}},"sort":[{"timestamp":{"order":"desc"}}]}';
         $params = [
+            "scroll" => "2m",
             'index' => 'its_alarm_movement_month*',
             'body' => $json
         ];
-        $response = $client->search($params);
-        print_r($response);
+        if(!empty($scroll_id)){
+            $response = $client->scroll([
+                    "scroll_id" => $scroll_id,
+                    "scroll" => "2m",
+                ]
+            );
+        }else{
+            $response = $client->search($params);
+        }
+        var_export($response);
+        $count=0;
+//        while (isset($response['hits']['hits']) && count($response['hits']['hits']) > 0) {
+//            if($count>5){
+//
+//            }
+//            // **
+//            // Do your work here, on the $response['hits']['hits'] array
+//            // **
+//
+//            // When done, get the new scroll_id
+//            // You must always refresh your _scroll_id!  It can change sometimes
+//            $scroll_id = $response['_scroll_id'];
+//            // Execute a Scroll request and repeat
+//            $response = $client->scroll([
+//                    "scroll_id" => $scroll_id,  //...using our previously obtained _scroll_id
+//                    "scroll" => "30s"           // and the same timeout window
+//                ]
+//            );
+//            print_r("loop");
+//            $count++;
+//        }
+//        print_r("loop_over");
         exit;
     }
     
@@ -462,5 +510,26 @@ class Welcome extends CI_Controller
         $query_str = http_build_query($params);
         $str = substr(md5($query_str . "&" . $secret), 7, 16);
         return $str;
+    }
+
+    public function testEsPage()
+    {
+        $data = [
+            'source' => 'signal_control',
+            'cityId' => 1,
+            'requestId' => 121231231231,
+            'trailNum' => 10,
+            'dayTime'  => '2018-11-29 14:59:00',
+            'andOperations' => [
+                'cityId' => 'eq',
+                'trailNum' => 'gte',
+                'dayTime' => 'eq',
+            ],
+            'limit' => 5000,
+        ];
+
+        $res = $this->realtime_model->searchDetail($data);
+
+        print_r($res);
     }
 }

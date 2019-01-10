@@ -25,6 +25,7 @@ class MY_Controller extends CI_Controller
     public $templates = [];
     public $routerUri = '';
     public $username = 'unknown';
+    public $userPerm = [];
 
     /**
      * @var CI_Output
@@ -132,6 +133,18 @@ class MY_Controller extends CI_Controller
             exit;
         }
         //<============降级结束
+
+        //写入权限信息
+        if(!empty($_SERVER['HTTP_DIDI_HEADER_USERPERM'])){
+            $this->userPerm = json_decode($_SERVER['HTTP_DIDI_HEADER_USERPERM'],true);
+            if(!empty($this->userPerm)){
+                $this->userPerm['city_id'] = !empty($this->userPerm['city_id']) ? explode(";",$this->userPerm['city_id']) : [];
+                $this->userPerm['area_id'] = !empty($this->userPerm['area_id']) ? explode(";",$this->userPerm['area_id']) : [];
+                $this->userPerm['admin_area_id'] = !empty($this->userPerm['admin_area_id']) ? explode(";",$this->userPerm['admin_area_id']) : [];
+                $this->userPerm['route_id'] = !empty($this->userPerm['route_id']) ? explode(";",$this->userPerm['route_id']) : [];
+                $this->userPerm['junction_id'] = !empty($this->userPerm['junction_id']) ? explode(";",$this->userPerm['junction_id']) : [];
+            }
+        }
     }
 
     // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时

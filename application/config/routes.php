@@ -56,6 +56,7 @@ $route['signalpro/api/Flow/(:any)'] = 'flow/proxy/$1';
 $route['signalpro/api/SignalControl/(:any)'] = 'SignalControl/proxy/$1';
 $route['signalpro/api/TimingRelease/(:any)'] = 'TimingRelease/proxy/$1';
 $route['signalpro/api/AdaptMovement/(:any)'] = 'AdaptMovement/proxy/$1';
+$route['signalpro/api/AdaptStage/(:any)'] = 'AdaptStage/proxy/$1';
 $route['signalpro/api/Xmmtrace/(:any)'] = 'Xmmtrace/proxy/$1';
 $route['itstool/(.+)'] = "$1";
 $route['signalpro/api/(.+)'] = "$1";

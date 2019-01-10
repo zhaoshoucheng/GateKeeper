@@ -45,6 +45,6 @@ class HelperService extends BaseService
             throw new \Exception('获取 hour 失败', ERR_DATABASE);
         }
 
-        return $res['hour'];
+        return $res;
     }
 }

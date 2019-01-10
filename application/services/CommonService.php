@@ -29,9 +29,10 @@ class CommonService extends BaseService
      */
     public function getJunctionAdAndCross($params)
     {
+        $mapVersion = $params['map_version'] ?? '';
         $result = $this->waymap_model->gitJunctionDetail($params['logic_junction_id']
                                                             , $params['city_id']
-                                                            , $params['map_version']
+                                                            , $mapVersion
                                                         );
         if (empty($result['junctions'])) {
             return (object)[];
@@ -136,10 +137,10 @@ class CommonService extends BaseService
         $result = [];
         foreach ($res as $k=>$v) {
             $result[$k] = [
-                'areaId'   => $v['city_id'],
+                'areaId'   => (string)$v['city_id'],
                 'areaName' => $v['city_name'],
                 'level'    => 1,
-                'apid'     => -1,
+                'apid'     => '-1',
             ];
         }
 
@@ -160,10 +161,10 @@ class CommonService extends BaseService
 
         foreach ($res['districts'] as $k=>$v) {
             $result[$k] = [
-                'areaId'   => $k,
+                'areaId'   => (string)$k,
                 'areaName' => $v,
-                'level'    => 1,
-                'apid'     => -1,
+                'level'    => 2,
+                'apid'     => (string)$cityId,
             ];
         }
 
@@ -182,6 +183,7 @@ class CommonService extends BaseService
         $table = 'area';
         $select = 'id, area_name';
         $where = 'city_id = ' . $cityId;
+        $where .= " and delete_at = '1970-01-01 00:00:00'";
 
         $res = $this->common_model->search($table, $select, $where);
         if (!$res) {
@@ -191,10 +193,10 @@ class CommonService extends BaseService
         $result = [];
         foreach ($res as $k=>$v) {
             $result[$k] = [
-                'areaId'   => $v['id'],
+                'areaId'   => (string)$v['id'],
                 'areaName' => $v['area_name'],
-                'level'    => 1,
-                'apid'     => -1,
+                'level'    => 2,
+                'apid'     => (string)$cityId,
             ];
         }
 
@@ -220,10 +222,10 @@ class CommonService extends BaseService
         $result = [];
         foreach ($res as $k=>$v) {
             $result[$k] = [
-                'areaId'   => $v['id'],
+                'areaId'   => (string)$v['id'],
                 'areaName' => $v['road_name'],
-                'level'    => 1,
-                'apid'     => -1,
+                'level'    => 2,
+                'apid'     => (string)$cityId,
             ];
         }
 
@@ -232,23 +234,24 @@ class CommonService extends BaseService
 
     /**
      * 根据城市ID获取所有路口
-     * @param $cityId long 城市ID
+     * @param $cityId    long 城市ID
+     * @param $areaId    int  行政区域ID
      * @return mixed
      */
-    public function getAllJunctionByCityId($cityId)
+    public function getAllJunctionByCityId($cityId, $areaId)
     {
         // 获取路网全城路口
-        $res = $this->waymap_model->getAllCityJunctions($cityId);
+        $res = $this->waymap_model->getCityJunctionsByDistricts($cityId, $areaId);
         if (!$res) {
             return [];
         }
 
         foreach ($res as $k=>$v) {
             $result[$k] = [
-                'areaId'   => $v['logic_junction_id'],
+                'areaId'   => (string)$v['logic_junction_id'],
                 'areaName' => $v['name'],
-                'level'    => 1,
-                'apid'     => -1,
+                'level'    => 3,
+                'apid'     => (string)$areaId,
             ];
         }
 

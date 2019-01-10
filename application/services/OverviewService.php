@@ -13,7 +13,6 @@ use Didi\Cloud\Collection\Collection;
 /**
  * Class OverviewService
  * @package Services
- * @property \RealtimeAlarm_model $realtimeAlarm_model
  * @property \Realtime_model      $realtime_model
  */
 class OverviewService extends BaseService
@@ -32,7 +31,7 @@ class OverviewService extends BaseService
         $this->load->model('redis_model');
         $this->load->model('waymap_model');
         $this->load->model('realtime_model');
-        $this->load->model('realtimeAlarm_model');
+        $this->load->model('alarmanalysis_model');
 
         $this->config->load('realtime_conf');
     }
@@ -41,26 +40,30 @@ class OverviewService extends BaseService
      * 路口概况
      *
      * @param $params
+     * @param $userPerm 用户权限点
      *
      * @return array
      * @throws \Exception
      */
-    public function junctionSurvey($params)
+    public function junctionSurvey($params,$userPerm=[])
     {
-        $data = $this->junctionsList($params);
-
-        $data = $data['dataList'] ?? [];
-
-        $result = [];
-
-        $result['junction_total']   = count($data);
-        $result['alarm_total']      = 0;
-        $result['congestion_total'] = 0;
-
-        foreach ($data as $datum) {
-            $result['alarm_total']      += $datum['alarm']['is'] ?? 0;
-            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+        $hour = $this->helperService->getLastestHour($params['city_id']);
+        if(!empty($userPerm['group_id'])){
+            $redisKey = 'new_its_usergroup_realtime_pretreat_junction_survey_';
+            $data = $this->redis_model->getData($redisKey . $userPerm['group_id'] . '_' . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
+        }else{
+            $redisKey = 'new_its_realtime_pretreat_junction_survey_';
+            $data = $this->redis_model->getData($redisKey . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
         }
+        if (empty($data)) {
+            return [
+                'junction_total'   => 0,
+                'alarm_total'      => 0,
+                'congestion_total' => 0,
+            ];
+        }
+
+        $result = json_decode($data, true);
 
         return $result;
     }
@@ -86,21 +89,24 @@ class OverviewService extends BaseService
     }
 
     /**
-     * 运行情况
+     * 运行情况 概览页 平均延误
      *
-     * @param $params
-     *
+     * @param $params['city_id'] int    Y 城市ID
+     * @param $params['date']    string N 日期 yyyy-mm-dd
+     * @param $userPerm    array N 权限数据
      * @return array
      * @throws \Exception
      */
-    public function operationCondition($params)
+    public function operationCondition($params,$userPerm)
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
 
-        $res = $this->redis_model->getRealtimeAvgStopDelay($cityId, $date);
-
-        $result = $res ? $res : $this->realtime_model->getAvgQuotaByCityId($cityId, $date, 'hour, avg(stop_delay) as avg_stop_delay');
+        $result = $this->redis_model->getRealtimeAvgStopDelay($cityId, $date, $userPerm);
+        if (empty($result)) {
+            return (object)[];
+        }
+        $result = array_values($result);
 
         $realTimeQuota = $this->config->item('real_time_quota');
 
@@ -142,23 +148,20 @@ class OverviewService extends BaseService
 
     /**
      * 拥堵概览
-     *
-     * @param $params
-     *
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 当前时间点 格式：H:i:s 例：09:10:00
+     * @param $userPerm array N 用户权限点
      * @return array
      * @throws \Exception
      */
-    public function getCongestionInfo($params)
+    public function getCongestionInfo($params, $userPerm=[])
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
 
         $hour = $this->helperService->getLastestHour($cityId);
-
-        $select = 'SUM(`stop_delay` * `traj_count`) / SUM(`traj_count`) as stop_delay, logic_junction_id, hour, updated_at';
-
-        $res = $this->realtime_model->getAvgQuotaByJunction($cityId, $hour, $date, $select);
-
+        $res = $this->realtime_model->getAvgQuotaByJunction($cityId, $date, $hour, $userPerm);
         if (!$res) {
             return [];
         }
@@ -177,7 +180,7 @@ class OverviewService extends BaseService
         $junctinStatusFormula = $this->config->item('junction_status_formula');
 
         foreach ($res as $k => $v) {
-            $congestionNum[$junctinStatusFormula($v['stop_delay'])][$k] = 1;
+            $congestionNum[$junctinStatusFormula($v['quotaMap']['weight_avg'])][$k] = 1;
         }
 
         $result['count'] = [];
@@ -280,38 +283,48 @@ class OverviewService extends BaseService
 
     /**
      * 获取停车延误TOP20
-     *
-     * @param $params
-     *
+     * @param $params['city_id']  int    Y 城市ID
+     * @param $params['date']     string N 日期 yyyy-mm-dd
+     * @param $params['pagesize'] int    N 获取数量
+     * @param $params['junction_ids'] string    N 路口id以逗号间隔
+     * @param $userPerm array    N 路口id以逗号间隔
      * @return array
      * @throws \Exception
      */
-    public function stopDelayTopList($params)
+    public function stopDelayTopList($params,$userPerm=[])
     {
         $cityId   = $params['city_id'];
         $date     = $params['date'];
         $pagesize = $params['pagesize'];
-        $junctionIds = !empty($params['junction_ids']) ? $params['junction_ids'] : [];
-
+        $junctionIds = !empty($params['junction_ids']) ? explode(",",$params['junction_ids']) : [];  //array
+        if(!empty($userPerm)){
+            $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+            $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+            if(in_array($cityId,$cityIds)){
+                $junctionIds = [];
+            }
+        }
         $hour = $this->helperService->getLastestHour($cityId);
+        $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds);
+        $result = array_column($esRes, 'quotaMap');
+        if (empty($result)) {
+            return [];
+        }
 
-        $select = 'logic_junction_id, hour, sum(stop_delay * traj_count) / sum(traj_count) as stop_delay';
+        $ids = implode(',', array_unique(array_column($result, 'junctionId')));
 
-        $result = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $select, $junctionIds);
-
-        $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
-
-        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
-        $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
-
+        if(!empty($ids)){
+            $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
+            $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
+        }
         $realTimeQuota = $this->config->item('real_time_quota');
 
-        $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota) {
+        $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota, $hour) {
             return [
-                'time' => $item['hour'],
-                'logic_junction_id' => $item['logic_junction_id'],
-                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
-                'stop_delay' => $realTimeQuota['stop_delay']['round']($item['stop_delay']),
+                'time' => $hour,
+                'logic_junction_id' => $item['junctionId'],
+                'junction_name' => $junctionIdNames[$item['junctionId']] ?? '未知路口',
+                'stop_delay' => $realTimeQuota['stop_delay']['round']($item['weight_avg']),
                 'quota_unit' => $realTimeQuota['stop_delay']['unit'],
             ];
         }, $result);
@@ -320,41 +333,56 @@ class OverviewService extends BaseService
     }
 
     /**
-     * @param $params
-     *
+     * 获取停车次数TOP20
+     * @param $params['city_id']  int    Y 城市ID
+     * @param $params['date']     string N 日期 yyyy-mm-dd
+     * @param $params['pagesize'] int    N 获取数量
+     * @param $userPerm array    N 用户权限
      * @return array
      * @throws \Exception
      */
-    public function stopTimeCycleTopList($params)
+    public function stopTimeCycleTopList($params,$userPerm=[])
     {
         $cityId   = $params['city_id'];
         $date     = $params['date'];
         $pagesize = $params['pagesize'];
 
+        $junctionIds = !empty($params['junction_ids']) ? explode(",",$params['junction_ids']) : [];  //array
+        if(!empty($userPerm)){
+            $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+            $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+            if(in_array($cityId,$cityIds)){
+                $junctionIds = [];
+            }
+        }
+
         $hour = $this->helperService->getLastestHour($cityId);
+        $result = $this->realtime_model->getTopCycleTime($cityId, $date, $hour, $pagesize, $junctionIds);
+        if (empty($result)) {
+            return [];
+        }
 
-        $select = 'logic_junction_id, hour, stop_time_cycle, logic_flow_id';
+        $ids = implode(',', array_unique(array_column($result, 'junctionId')));
 
-        $result = $this->realtime_model->getTopCycleTime($cityId, $date, $hour, $pagesize, $select);
-
-        $ids = implode(',', array_unique(array_column($result, 'logic_junction_id')));
-
-        $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
-        $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
-
-        $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+        $junctionIdNames = [];
+        $flowsInfo = [];
+        if(!empty($ids)){
+            $junctionIdNames = $this->waymap_model->getJunctionInfo($ids);
+            $junctionIdNames = array_column($junctionIdNames, 'name', 'logic_junction_id');
+            $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+        }
 
         $realTimeQuota = $this->config->item('real_time_quota');
 
         $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota, $flowsInfo) {
             return [
-                'time' => $item['hour'],
-                'logic_junction_id' => $item['logic_junction_id'],
-                'junction_name' => $junctionIdNames[$item['logic_junction_id']] ?? '未知路口',
-                'logic_flow_id' => $item['logic_flow_id'],
-                'flow_name' => $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] ?? '未知方向',
-                'stop_time_cycle' => $realTimeQuota['stop_time_cycle']['round']($item['stop_time_cycle']),
-                'quota_unit' => $realTimeQuota['stop_time_cycle']['unit'],
+                'time'              => date('H:i:s', strtotime($item['dayTime'])),
+                'logic_junction_id' => $item['junctionId'],
+                'junction_name'     => $junctionIdNames[$item['junctionId']] ?? '未知路口',
+                'logic_flow_id'     => $item['movementId'],
+                'flow_name'         => $flowsInfo[$item['junctionId']][$item['movementId']] ?? '未知方向',
+                'stop_time_cycle'   => $realTimeQuota['stop_time_cycle']['round']($item['avgStopNumUp']),
+                'quota_unit'        => $realTimeQuota['stop_time_cycle']['unit'],
             ];
         }, $result);
 
@@ -362,52 +390,70 @@ class OverviewService extends BaseService
     }
 
     /**
-     * @param $params
-     *
+     * 获取今日报警预览
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
+     * @param $userPerm array N 用户权限
      * @return array
      * @throws \Exception
      */
-    public function todayAlarmInfo($params)
+    public function todayAlarmInfo($params,$userPerm=[])
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
 
-        $select = 'count(DISTINCT logic_junction_id) as num';
-
-        $res = $this->realtimeAlarm_model->countJunctionByType($cityId, $date, 1, $select);
-
-        if (!$res) {
-            throw new \Exception('数据获取失败', ERR_DATABASE);
+        $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+        $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+        if(in_array($cityId,$cityIds)){
+            $junctionIds = [];
         }
 
-        $spilloverCount = $res['num'];
+        // 组织ES所需JSON
+        $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
-        $res = $this->realtimeAlarm_model->countJunctionByType($cityId, $date, 2, $select);
+        // where city_id
+        $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
 
-        if (!$res) {
-            throw new \Exception('数据获取失败', ERR_DATABASE);
+        // where date
+        $json .= ',{"match":{"date":{"query":"' . trim($date) . '","type":"phrase"}}}';
+
+        /* where junctionId in*/
+        if(!empty($junctionIds)){
+            $json .= ',{"bool":{"should":[';
+
+            for($x=0;$x<count($junctionIds);$x++){
+                $json .= '{"match":{"logic_junction_id":{"query":"' . $junctionIds[$x] . '","type":"phrase"}}}';
+                if ($x<(count($junctionIds)-1)) {
+                    $json .= ',';
+                }
+            }
+            $json .= ']}}';
         }
 
-        $saturationCount = $res['num'];
+        $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"aggregations":{"type":{"terms":{"field":"type","size":200},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
+        $esRes = $this->alarmanalysis_model->search($json);
+        if (empty($esRes['aggregations']['type']['buckets']) || !$esRes) {
+            return [];
+        }
 
-        $result = [];
-
-        $total = intval($spilloverCount) + intval($saturationCount);
+        $res = [];
+        $total = 0;
+        // 格式
+        foreach ($esRes['aggregations']['type']['buckets'] as $k=>$v) {
+            $res[$v['key']] = $v['num']['value'];
+            $total += $v['num']['value'];
+        }
 
         // 报警类别配置
         $alarmCate = $this->config->item('alarm_category');
 
-        foreach ($alarmCate as $k => $v) {
-            if ($k == 1) {
-                // 溢流
-                $num = intval($spilloverCount);
-            } else {
-                // 过饱和
-                $num = intval($saturationCount);
-            }
+        $result = [];
+        foreach ($alarmCate as $k=>$v) {
+            $num = $res[$v['key']] ?? 0;
             $result['count'][$k] = [
                 'cate' => $v['name'],
-                'num' => $num,
+                'num'  => $num,
             ];
 
             $result['ratio'][$k] = [
@@ -423,14 +469,25 @@ class OverviewService extends BaseService
     }
 
     /**
-     * @param $params
-     *
+     * 获取七日报警变化
+     * 规则：取当前日期前六天的报警路口数+当天到现在时刻的报警路口数
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
+     * @param $userPerm             array N 用户权限
+     * @throws Exception
      * @return array
      */
-    public function sevenDaysAlarmChange($params)
+    public function sevenDaysAlarmChange($params,$userPerm=[])
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
+
+        $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+        $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+        if(in_array($cityId,$cityIds)){
+            $junctionIds = [];
+        }
 
         // 七日日期
         $sevenDates = [];
@@ -440,42 +497,57 @@ class OverviewService extends BaseService
         // 当前日期时间戳作为结束时间
         $endDate = strtotime($date);
 
+        // 组织DSL所需json
+        $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
+
+        // where city_id
+        $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
+
+        /* where date in*/
+        $json .= ',{"bool":{"should":[';
         for ($i = $startDate; $i <= $endDate; $i += 24 * 3600) {
-            $sevenDates[] = date('Y-m-d', $i);
+            $json .= '{"match":{"date":{"query":"' . date('Y-m-d', $i) . '","type":"phrase"}}}';
+            if ($i < $endDate) {
+                $json .= ',';
+            }
+        }
+        $json .= ']}}';
+
+        /* where junctionId in*/
+        if(!empty($junctionIds)){
+            $json .= ',{"bool":{"should":[';
+
+            for($x=0;$x<count($junctionIds);$x++){
+                $json .= '{"match":{"logic_junction_id":{"query":"' . $junctionIds[$x] . '","type":"phrase"}}}';
+                if ($x<(count($junctionIds)-1)) {
+                    $json .= ',';
+                }
+            }
+            $json .= ']}}';
         }
 
-        $select = 'logic_junction_id, date';
-
-        $data = $this->realtimeAlarm_model->getJunctionByDate($cityId, $sevenDates, $select);
-
-        $result = [];
-
-        $tempData = [];
-        foreach ($data as $k => $v) {
-            $tempData[$v['date']][$v['logic_junction_id']] = 1;
-        }
-
-        if (empty($tempData)) {
+        $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"sort":[{"date":{"order":"asc"}}],"aggregations":{"date":{"terms":{"field":"date","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
+        $data = $this->alarmanalysis_model->search($json);
+        if (!$data || empty($data['aggregations']['date']['buckets'])) {
             return [];
         }
 
-        foreach ($sevenDates as $k => $v) {
-            $result['dataList'][$v] = [
-                'date' => $v,
-                'value' => isset($tempData[$v]) ? count($tempData[$v]) : 0,
+        $result['dataList'] = [];
+        foreach ($data['aggregations']['date']['buckets'] as $k=>$v) {
+            $result['dataList'][$k] = [
+                'date'  => date('Y-m-d', $v['key'] / 1000),
+                'value' => $v['num']['value'],
             ];
-        };
-
-        if (!empty($result['dataList'])) {
-            $result['dataList'] = array_values($result['dataList']);
         }
 
         return $result;
     }
 
     /**
-     * @param $params
-     *
+     * 获取实时报警信息
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 当前时间点 格式：H:i:s 例：09:10:00
      * @return array
      * @throws \Exception
      */
@@ -484,20 +556,9 @@ class OverviewService extends BaseService
         $cityId = $params['city_id'];
         $date   = $params['date'];
 
-        $hour = $this->helperService->getLastestHour($cityId);
-
-        $res = $this->redis_model->getRealtimeAlarmList($cityId);
-
+        $res = $this->alarmanalysis_model->getRealTimeAlarmsInfo($cityId, $date);
         if (!$res || empty($res)) {
-
-            $lastTime  = date('Y-m-d') . ' ' . $hour;
-            $cycleTime = date('Y-m-d H:i:s', strtotime($lastTime) + 300);
-
-            $res = $this->realtimeAlarm_model->getRealtimeAlarmList($cityId, $date, $lastTime, $cycleTime);
-
-            if (empty($res)) {
-                return [];
-            }
+            return [];
         }
         $result = [];
 
@@ -512,21 +573,13 @@ class OverviewService extends BaseService
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
 
         // 报警类别
-        $alarmCate = $this->config->item('alarm_category');
+        $alarmCate = $this->config->item('flow_alarm_category');
 
         foreach ($res as $k => $val) {
             // 持续时间
             $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
-            if ($durationTime == 0) {
-                // 当前时间
-                $nowTime          = time();
-                $tempDurationTime = ($nowTime - strtotime($val['start_time'])) / 60;
-                // 默认持续时间为2分钟 有的只出现一次，表里记录last_time与start_time相等
-                if ($tempDurationTime < 2) {
-                    $durationTime = $tempDurationTime;
-                } else {
-                    $durationTime = 2;
-                }
+            if ($durationTime < 1) {
+                $durationTime = 2;
             }
 
             if (!empty($junctionIdName[$val['logic_junction_id']])

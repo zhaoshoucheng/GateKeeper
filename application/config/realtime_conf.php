@@ -5,39 +5,44 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // 指标
 $config['real_time_quota'] = [
     'stop_delay' => [
-        'name' => '停车延误',
-        'unit' => '秒',
-        'round' => function ($val) {
+        'name'     => '停车延误',
+        'unit'     => '秒',
+        'round'    => function ($val) {
             return round($val, 2);
         },
+        'escolumn' => 'stopDelayUp',
     ],
     'stop_time_cycle' => [
-        'name' => '停车次数', // 指标名称
-        'unit' => '次',        // 指标单位
-        'round' => function ($val) {
+        'name'     => '停车次数', // 指标名称
+        'unit'     => '次',        // 指标单位
+        'round'    => function ($val) {
             return round($val, 2);
         }, // 取指标几位小数 用于返给前端时round()
+        'escolumn' => 'avgStopNumUp',
     ],
     'spillover_rate' => [
-        'name' => '溢流指标',
-        'unit' => '',
-        'round' => function ($val) {
+        'name'     => '溢流指标',
+        'unit'     => '',
+        'round'    => function ($val) {
             return round($val, 5);
         },
+        'escolumn' => 'spilloverRateDown',
     ],
     'queue_length' => [
-        'name' => '排队长度',
-        'unit' => '米',
-        'round' => function ($val) {
+        'name'     => '排队长度',
+        'unit'     => '米',
+        'round'    => function ($val) {
             return round($val);
         },
+        'escolumn' => 'queueLengthUp',
     ],
     'stop_rate' => [
-        'name' => '失调指标',
-        'unit' => '',
-        'round' => function ($val) {
+        'name'     => '失调指标',
+        'unit'     => '',
+        'round'    => function ($val) {
             return round($val, 4);
         },
+        'escolumn' => 'oneStopRatioUp+multiStopRatioUp',
     ],
 ];
 
@@ -74,36 +79,57 @@ $config['junction_status_formula'] = function ($val) {
 // 报警类别
 $config['alarm_category'] = [
     1 => [
-        'name' => '溢流', // 类别名称
+        'name' => '过饱和', // 类别名称
         'key' => 1,       // 类别KEY
         'desc' => '',      // 描述
     ],
     2 => [
-        'name' => '过饱和',
+        'name' => '溢流',
         'key' => 2,
+        'desc' => '',
+    ],
+    3 => [
+        'name' => '失衡',
+        'key' => 3,
         'desc' => '',
     ],
 ];
 
-// 报警计算规则 $val = ['指标KEY' => 指标值]
-$config['alarm_formula'] = function ($val) {
-    $res = [];
-    if (array_key_exists('spillover_rate', $val)
-        && $val['spillover_rate'] >= 0.2
-        && $val['traj_count'] >= 10
-        && $val['stop_delay'] >= 40) {
-        array_push($res, 1);
-    }
-
-    if ((array_key_exists('twice_stop_rate', $val) && $val['twice_stop_rate'] >= 0.2)
-        && (array_key_exists('queue_length', $val) && $val['queue_length'] >= 180)
-        && (array_key_exists('stop_delay', $val) && $val['stop_delay'] >= 50)
-        && $val['traj_count'] >= 10) {
-        array_push($res, 2);
-    }
-
-    return $res;
-};
+// 相位报警类型
+$config['flow_alarm_category'] = [
+    1 => [
+        'name' => '过饱和', // 类别名称
+        'key' => 1,       // 类别KEY
+        'desc' => '',      // 描述
+    ],
+    2 => [
+        'name' => '溢流',
+        'key' => 2,
+        'desc' => '',
+    ],
+    3 => [
+        'name' => '空放',
+        'key' => 3,
+        'desc' => '',
+    ],
+    4 => [
+        'name' => '轻度过饱和',
+        'key' => 4,
+        'desc' => '',
+    ],
+];
 
 // 指标评估数据redis KEY前缀
 $config['quota_evaluate_key_prefix'] = 'quotaEvaluateDataKey_';
+
+// 求指标平均值时的key
+$config['avg_quota_key'] = [
+    'avgSpeed' => [
+        'name'     => '平均速度',    // 名称
+        'esColumn' => 'avgSpeedUp', // 对应新ES字段
+    ],
+    'stopDelay' => [
+        'name'     => '平均延误',
+        'esColumn' => 'stopDelayUp',
+    ],
+];

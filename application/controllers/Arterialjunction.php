@@ -15,7 +15,7 @@ class Arterialjunction extends MY_Controller
         $this->load->model('arterialjunction_model');
         $this->load->model('timing_model');
     }
-
+    
     /**
      * 获取绿波全城路口集合接口
      */
