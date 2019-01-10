@@ -38,6 +38,8 @@ class KeyJunction extends MY_Controller
         //获取重点路口数据
         $keyJunctionList  = $this->config->item('key_junction_list');
         $params['junction_ids'] = !empty($keyJunctionList[$params['city_id']]) ? $keyJunctionList[$params['city_id']] : [];
+        $params['junction_ids'] = implode($params['junction_ids'],",");
+
         if(empty($params['junction_ids'])){
             $this->errno = -1;
             $this->errmsg = 'key_junction_ids empty.';
