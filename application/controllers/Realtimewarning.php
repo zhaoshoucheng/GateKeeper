@@ -42,7 +42,7 @@ class Realtimewarning extends Inroute_Controller
 
 
         //附加执行济南大脑项目
-        exec("ps aux | grep \"realtimewarn\" | grep 'jinan_task/{$cityId}' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
+        exec("ps aux | grep \"realtimewarn\" | grep 'jinan_task/{$cityId}/' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
         //执行任务
         $command = "";
@@ -98,7 +98,7 @@ class Realtimewarning extends Inroute_Controller
         $traceId = $params["trace_id"];
         $uid     = $params["uid"];
 
-        exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
+        exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}/' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
         //执行任务
         $command = "";
