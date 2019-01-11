@@ -24,6 +24,9 @@ class Cron extends CI_Controller
         $this->load->model('task_model');
         $this->load->model('taskdateversion_model');
         $this->load->model('downgrade_model');
+        $this->load->model('openCity_model');
+        $this->load->model('flowDurationV6_model');
+        $this->load->model('realtime_model');
     }
 
     public function scan_custom_task()
@@ -34,6 +37,64 @@ class Cron extends CI_Controller
     public function scan_cycle_task()
     {
         $this->cycletask_model->process();
+    }
+
+    public function del_old_offline_data($cityIdsStr, $date)
+    {
+        if ($cityIdsStr == -1) {
+            $cities = $this->openCity_model->getCities();
+            $cityIds = [];
+            foreach ($cities as $city) {
+                $cityIds[] = $city['city_id'];
+            }
+        } else {
+            $cityIds = explode(",", $cityIdsStr);
+        }
+        $offset = 1000;
+        foreach ($cityIds as $cityId) {
+            $cnt = $this->flowDurationV6_model->getOldQuotaDataCnt($cityId, $date);
+            if ($cnt == 0) {
+                continue;
+            }
+            var_dump($cityId);
+            var_dump($cnt);
+            for ($i = 0; $i < intval($cnt / $offset) + 1; $i ++) {
+                $res = $this->flowDurationV6_model->delOldQuotaData($cityId, $date, $offset);
+                if (empty($res)) {
+                    return;
+                }
+            }
+        } 
+    }
+
+    public function del_old_realtime_data($cityIdsStr, $days)
+    {
+        $date = date('Y-m-d', strtotime("-{$days} days"));
+        var_dump($date);
+        if ($cityIdsStr == -1) {
+            $cities = $this->openCity_model->getCities();
+            $cityIds = [];
+            foreach ($cities as $city) {
+                $cityIds[] = $city['city_id'];
+            }
+        } else {
+            $cityIds = explode(",", $cityIdsStr);
+        }
+        $offset = 500;
+        foreach ($cityIds as $cityId) {
+            $cnt = $this->realtime_model->getOutdateRealtimeDataCnt($cityId, $date);
+            if ($cnt == 0) {
+                continue;
+            }
+            var_dump($cityId);
+            var_dump($cnt);
+            for ($i = 0; $i < intval($cnt / $offset); $i ++) {
+                $ret = $this->realtime_model->delOutdateRealtimeData($cityId, $date, $offset);
+                if (empty($ret)) {
+                    return;
+                }
+            }
+        } 
     }
 
     public function start()
