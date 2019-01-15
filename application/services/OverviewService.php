@@ -170,15 +170,18 @@ class OverviewService extends BaseService
         if (!$res) {
             return [];
         }
+        $res = json_decode($res, true);
 
         $result = [];
 
+        // 缓存数
+        $ambleNum = $res['amble_total'] ?? 0;
         $congestionNumData = [
             // 畅通
-            1 => $res['junction_total'] - ($res['amble_total'] + $res['congestion_total']),
+            1 => $res['junction_total'] - ($ambleNum + $res['congestion_total']),
 
             // 缓行
-            2 => $res['amble_total'],
+            2 => $ambleNum,
 
             // 拥堵
             3 => $res['congestion_total'],
