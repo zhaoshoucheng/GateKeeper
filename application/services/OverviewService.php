@@ -161,41 +161,44 @@ class OverviewService extends BaseService
         $date   = $params['date'];
 
         $hour = $this->helperService->getLastestHour($cityId);
-        $res = $this->realtime_model->getAvgQuotaByJunction($cityId, $date, $hour, $userPerm);
+
+        // 路口概况redis key
+        $redisKey = 'new_its_realtime_pretreat_junction_survey_' . $cityId . '_' . $date . '_' . $hour;
+
+        // 获取路口概况信息
+        $res = $this->redis_model->getData($redisKey);
         if (!$res) {
             return [];
         }
 
         $result = [];
 
-        // 拥堵数量
-        $congestionNum = [];
+        $congestionNumData = [
+            // 畅通
+            1 => $res['junction_total'] - ($res['amble_total'] + $res['congestion_total']),
 
-        // 路口总数
-        $junctionTotal = count($res);
+            // 缓行
+            2 => $res['amble_total'],
+
+            // 拥堵
+            3 => $res['congestion_total'],
+        ];
 
         // 路口状态配置
         $junctionStatusConf = $this->config->item('junction_status');
-        // 路口状态计算规则
-        $junctinStatusFormula = $this->config->item('junction_status_formula');
 
-        foreach ($res as $k => $v) {
-            $congestionNum[$junctinStatusFormula($v['quotaMap']['weight_avg'])][$k] = 1;
-        }
 
         $result['count'] = [];
         $result['ratio'] = [];
         foreach ($junctionStatusConf as $k => $v) {
             $result['count'][$k] = [
                 'cate' => $v['name'],
-                'num' => isset($congestionNum[$k]) ? count($congestionNum[$k]) : 0,
+                'num' => $congestionNumData[$k],
             ];
 
             $result['ratio'][$k] = [
                 'cate' => $v['name'],
-                'ratio' => isset($congestionNum[$k])
-                    ? round((count($congestionNum[$k]) / $junctionTotal) * 100) . '%'
-                    : '0%',
+                'ratio' => round(($congestionNumData[$k] / $res['junction_total']) * 100) . '%',
             ];
         }
 

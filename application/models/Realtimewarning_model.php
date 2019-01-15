@@ -392,9 +392,16 @@ class Realtimewarning_model extends CI_Model
         $result['junction_total'] = $junctionTotal;
         $result['alarm_total'] = 0;
         $result['congestion_total'] = 0;
+        $result['amble_total'] = 0;
         foreach ($jDataList as $datum) {
+            // 报警数
             $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+
+            // 拥堵数
             $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+
+            // 缓行数
+            $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
         }
         $junctionSurvey = $result;
 
