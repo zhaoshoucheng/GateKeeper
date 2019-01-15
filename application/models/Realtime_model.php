@@ -389,53 +389,6 @@ class Realtime_model extends CI_Model
     }
 
     /**
-     * 获取平均延误-按时间与路口
-     * @param $cityId int    城市ID
-     * @param $hour   string 时间 HH:ii:ss
-     * @param $date   string 日期 yyyy-mm-dd
-     * @param $userPerm   array 用户权限
-     * @return array
-     * @throws Exception
-     */
-    public function getAvgQuotaByJunction($cityId, $date, $hour, $userPerm)
-    {
-        $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
-        $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
-        if(in_array($cityId,$cityIds)){
-            $junctionIds = [];
-        }
-
-        $dayTime = $date . ' ' . $hour;
-        $data = [
-            "source" => "signal_control",
-            "cityId" => $cityId,
-            'requestId' => get_traceid(),
-            "dayTime" => $dayTime,
-            "trailNum" => 5,
-            "andOperations" => [
-                "cityId" => "eq",
-                "dayTime" => "eq",
-                "trailNum" => 'gte',
-            ],
-            "quotaRequest" => [
-                "quotaType" => "weight_avg",
-                "quotas" => "sum_stopDelayUp*trailNum, sum_trailNum",
-                "groupField" => "junctionId",
-            ],
-        ];
-        if (!empty($junctionIds)) {
-            $data['junctionId'] = implode(",",$junctionIds);
-            $data["andOperations"]['junctionId'] = 'in';
-        }
-        $esRes = $this->searchQuota($data);
-        if (empty($esRes['result']['quotaResults'])) {
-            return [];
-        }
-
-        return $esRes['result']['quotaResults'];
-    }
-
-    /**
      * 延误top20
      * @param  $cityId    int    城市ID
      * @param  $date      string 日期 yyyy-mm-dd
