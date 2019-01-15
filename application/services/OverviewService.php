@@ -174,17 +174,25 @@ class OverviewService extends BaseService
 
         $result = [];
 
+        // 路口总数
+        $junctionTotal = $res['junction_total'] ?? 0;
+        if ($junctionTotal < 1) {
+            return [];
+        }
         // 缓存数
         $ambleNum = $res['amble_total'] ?? 0;
-        $congestionNumData = [
+        // 拥堵数
+        $congestionNum = $res['congestion_total'] ?? 0;
+
+        $congestionInfo = [
             // 畅通
-            1 => $res['junction_total'] - ($ambleNum + $res['congestion_total']),
+            1 => $junctionTotal - ($ambleNum + $congestionNum),
 
             // 缓行
             2 => $ambleNum,
 
             // 拥堵
-            3 => $res['congestion_total'],
+            3 => $congestionNum,
         ];
 
         // 路口状态配置
@@ -196,12 +204,12 @@ class OverviewService extends BaseService
         foreach ($junctionStatusConf as $k => $v) {
             $result['count'][$k] = [
                 'cate' => $v['name'],
-                'num' => $congestionNumData[$k],
+                'num' => $congestionInfo[$k],
             ];
 
             $result['ratio'][$k] = [
                 'cate' => $v['name'],
-                'ratio' => round(($congestionNumData[$k] / $res['junction_total']) * 100) . '%',
+                'ratio' => round(($congestionInfo[$k] / $junctionTotal) * 100) . '%',
             ];
         }
 
