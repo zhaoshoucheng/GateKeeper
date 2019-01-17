@@ -42,7 +42,7 @@ class JunctionsService extends BaseService
         // 查询字段定义
         $select = 'id, junction_id';
         // where条件
-        $where = 'task_id = ' . $params['task_id'];
+        $where = ['task_id' => $params['task_id']];
         // group_by
         $groupBy = '';
         // limit
@@ -60,13 +60,16 @@ class JunctionsService extends BaseService
 
         // where条件组织
         if ($params['type'] == 0) { // 按时间点查询
-            $where .= " and type = {$params['type']} and time_point = '{$params['time_point']}'";
+            $where = array_merge($where, [
+                'type'       => $params['type'],
+                'time_point' => $params['time_point'],
+            ]);
         }
 
         // 是否选择置信度
         if ((int)$params['confidence'] >= 1) { // 选择了置信度条件
             $confidenceConf = $this->config->item('confidence');
-            $where .= ' and ' . $confidenceConf[$params['confidence']]['sql_where']($params['quotaKey'] . '_confidence');
+            $where = array_merge($where, $confidenceConf[$params['confidence']]['sql_where']($params['quotaKey'] . '_confidence'));
         }
 
         // 判断是否是综合查询
@@ -157,9 +160,12 @@ class JunctionsService extends BaseService
         $select = "id, junction_id, {$selectStr}, start_time, end_time, movements, time_point";
 
         // 组织where条件
-        $where = 'task_id = ' . $params['task_id'] . ' and junction_id = "' . $params['junction_id'] . '"';
-        $where  .= ' and type = 0';
-        $where  .= ' and time_point = "' . $params['time_point'] . '"';
+        $where = [
+            'task_id'     => $params['task_id'],
+            'junction_id' => $params['junction_id'],
+            'type'        => 0,
+            'time_point'  => $params['time_point'],
+        ];
 
         $data = $this->junction_model->searchDB($select, $where, 'row_array');
         if (!$data) {
@@ -302,7 +308,11 @@ class JunctionsService extends BaseService
         }
 
         // 组织where条件
-        $where = 'task_id = ' . $params['task_id'] . ' and junction_id = "' . $params['junction_id'] . '" and type = 0';
+        $where = [
+            'task_id'     => $params['task_id'],
+            'junction_id' => $params['junction_id'],
+            'type'        => 0,
+        ];
 
         $data = $this->junction_model->searchDB($select, $where);
         if (!$data) {
@@ -541,7 +551,10 @@ class JunctionsService extends BaseService
 
         /* 获取此任务路口总数 */
         $select = 'count(DISTINCT junction_id) as count';
-        $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
+        $where = [
+            'task_id' => $data['task_id'],
+            'type'    => 0,
+        ];
         $junctionTotal = 0;
         $allJunction = $this->junction_model->searchDB($select, $where, 'row_array');
         $junctionTotal = $allJunction['count'];
@@ -637,7 +650,10 @@ class JunctionsService extends BaseService
         $diagnoseKeyConf = $this->config->item('diagnose_key');
 
         $select = 'count(DISTINCT junction_id) as count';
-        $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
+        $where = [
+            'task_id' => $data['task_id'],
+            'type'    => 0,
+        ];
 
         // 获取此任务路口总数
         $junctionTotal = 0;
@@ -659,12 +675,12 @@ class JunctionsService extends BaseService
             if ($diagnose == 'over_saturation') {
                 $diagnose = 'saturation_index';
             }
-            $nWhere = $where . ' and ' . $v['sql_where']();
+            $where  = array_merge($where, $v['sql_where']());
             if ($data['confidence'] >= 1) {
-                $nWhere .= ' and ' . $confidenceThreshold[$data['confidence']]['sql_where']($diagnose . '_confidence');
+                $where  = array_merge($where, $confidenceThreshold[$data['confidence']]['sql_where']($diagnose . '_confidence'));
             }
 
-            $res[$k] = $this->junction_model->searchDB($diagnoseSelect, $nWhere, 'result_array', $groupBy);
+            $res[$k] = $this->junction_model->searchDB($diagnoseSelect, $where, 'result_array', $groupBy);
         }
 
         $result = [];
@@ -825,7 +841,10 @@ class JunctionsService extends BaseService
                 $selectstr .= " max({$diagnose_key}) as {$diagnose_key}, {$diagnose_key}_confidence";
             }
 
-            $where = 'task_id = ' . $data['task_id'] . ' and type = 1';
+            $where = [
+                'task_id' => $data['task_id'],
+                'type'    => 1,
+            ];
             $temp_data = $this->junction_model->searchDB($selectstr, $where);
             $new_data = [];
             if ($temp_data && count($temp_data) >= 1) {
@@ -950,7 +969,11 @@ class JunctionsService extends BaseService
 
         $selectstr = empty($this->selectColumns($selectQuotaKey)) ? '' : ',' . $this->selectColumns($selectQuotaKey);
         $select = 'id, junction_id, stop_delay, avg_speed' . $selectstr;
-        $where = "task_id = {$data['task_id']} and time_point = '{$data['time_point']}' and type = 0";
+        $where = [
+            'task_id'    => $data['task_id'],
+            'time_point' => $data['time_point'],
+            'type'       => 0,
+        ];
 
         // 诊断问题总数
         $diagnoseKeyCount = count($data['diagnose_key']);
@@ -965,13 +988,15 @@ class JunctionsService extends BaseService
         }
         $confidenceThreshold = $this->config->item('diagnose_confidence_threshold');
 
-        $confidenceExpression[1] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '>=' . $confidenceThreshold;
-        $confidenceExpression[2] = '(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '<' . $confidenceThreshold;
+        $confidenceExpression = [
+            1 => ['(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '>=' => $confidenceThreshold],
+            2 => ['(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '<'  => $confidenceThreshold],
+        ];
 
         $confidenceConf = $this->config->item('confidence');
         $res = [];
         if ($data['confidence'] >= 1 && array_key_exists($data['confidence'], $confidenceConf)) {
-            $where .= ' and ' . $confidenceExpression[$data['confidence']];
+            $where = array_merge($where, $confidenceExpression[$data['confidence']]);
             $res = $this->junction_model->searchDB($select, $where);
         } else {
             $res = $this->junction_model->searchDB($select, $where);
@@ -1015,18 +1040,25 @@ class JunctionsService extends BaseService
         $select = "id, junction_id, {$selectQuota}, start_time, end_time, result_comment, movements";
 
         // 组织where条件
-        $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
+        $where = [
+            'task_id'     => (int)$data['task_id'],
+            'junction_id' => trim($data['junction_id']),
+        ];
 
         if ((int)$data['search_type'] == 1) { // 按方案查询
             // 综合查询
             $time_range = array_filter(explode('-', $data['time_range']));
-            $where  .= ' and type = 1';
-            $where  .= ' and start_time = "' . trim($time_range[0]) . '"';
-            $where  .= ' and end_time = "' . trim($time_range[1]) . '"';;
+            $where = array_merge($where, [
+                'type'       => 1,
+                'start_time' => trim($time_range[0]),
+                'end_time'   => trim($time_range[1]),
+            ]);
         } else { // 按时间点查询
             $select .= ', time_point';
-            $where  .= ' and type = 0';
-            $where  .= ' and time_point = "' . trim($data['time_point']) . '"';
+            $where = array_merge($where, [
+                'type'       => 0,
+                'time_point' => trim($data['time_point']),
+            ]);
         }
 
         $res = $this->junction_model->searchDB($select, $where, 'row_array');
@@ -1058,24 +1090,28 @@ class JunctionsService extends BaseService
         $select = 'id, junction_id, start_time, end_time, result_comment, movements';
 
         // 组织where条件
-        $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
+        $where = [
+            'task_id'     => (int)$data['task_id'],
+            'junction_id' => trim($data['junction_id']),
+        ];
 
         if ((int)$data['search_type'] == 0) {
             $select .= ', time_point';
         }
 
-        // 组织where条件
-        $where = 'task_id = ' . (int)$data['task_id'] . ' and junction_id = "' . trim($data['junction_id']) . '"';
-
         if ((int)$data['search_type'] == 1) { // 按方案查询
             // 综合查询
             $time_range = array_filter(explode('-', $data['time_range']));
-            $where  .= ' and type = 1';
-            $where  .= ' and start_time = "' . trim($time_range[0]) . '"';
-            $where  .= ' and end_time = "' . trim($time_range[1]) . '"';;
+            $where = array_merge($where, [
+                'type'       => 1,
+                'start_time' => trim($time_range[0]),
+                'end_time'   => trim($time_range[1]),
+            ]);
         } else { // 按时间点查询
-            $where  .= ' and type = 0';
-            $where  .= ' and time_point = "' . trim($data['time_point']) . '"';
+            $where = array_merge($where, [
+                'type'       => 0,
+                'time_point' => trim($data['time_point']),
+            ]);
         }
 
         $res = $this->junction_model->searchDB($select, $where, 'row_array');
