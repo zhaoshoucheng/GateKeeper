@@ -82,7 +82,10 @@ class InsidecommonService extends BaseService
     {
         $table = 'area';
         $select = 'id, area_name';
-        $where = 'city_id = ' . $cityId;
+        $where = [
+            'city_id'   => $cityId,
+            'delete_at' => '1970-01-01 00:00:00',
+        ];
 
         $res = $this->common_model->search($table, $select, $where);
         if (!$res) {
@@ -111,7 +114,10 @@ class InsidecommonService extends BaseService
     {
         $table = 'road';
         $select = 'id, road_name';
-        $where = 'city_id = ' . $cityId . ' and is_delete = 0';
+        $where = [
+            'city_id'   => $cityId,
+            'is_delete' => 0,
+        ];
 
         $res = $this->common_model->search($table, $select, $where);
         if (!$res) {

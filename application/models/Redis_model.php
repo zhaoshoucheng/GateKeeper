@@ -299,7 +299,7 @@ class Redis_model extends CI_Model
         $key = "new_its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
 
         if(!($data = $this->getData($key))) {
-            return false;
+            return [];
         }
 
         return json_decode($data, true);
@@ -368,27 +368,9 @@ class Redis_model extends CI_Model
     {
         $key = sprintf('new_its_realtime_alarm_%s_%s_%s', $cityId, $date, $hour);
         if(!($data = $this->getData($key))) {
-            return false;
+            return [];
         }
 
         return json_decode($data, true);
     }
-
-    /**
-     * 获取实时报警数据
-     * @param $cityId
-     *
-     * @return bool|mixed
-     */
-    public function getRealtimeAlarmList($cityId)
-    {
-        $key = 'new_its_realtime_alarm_' . $cityId;
-
-        if(!($data = $this->getData($key))) {
-            return false;
-        }
-
-        return json_decode($data, true);
-    }
-
 }

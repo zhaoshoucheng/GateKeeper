@@ -31,7 +31,10 @@ class Timeframeoptimize_model extends CI_Model
             return [];
         }
         // 获取任务路口ids
-        $where = 'task_id = ' . $data['task_id'] . ' and type = 0';
+        $where = [
+            'task_id' => $data['task_id'],
+            'type'    => 0,
+        ];
         $query = $this->db->select('*')
             ->from($this->tb)
             ->where($where)
@@ -145,7 +148,11 @@ class Timeframeoptimize_model extends CI_Model
         $result = [];
 
         $select = 'task_id, junction_id, dates, clock_shift';
-        $where  = "task_id = {$data['task_id']} and junction_id = '{$data['junction_id']}' and type = 1";
+        $where = [
+            'task_id'     => $data['task_id'],
+            'junction_id' => $data['junction_id'],
+            'type'        => 1,
+        ];
 
         $result = $this->db->select($select)
                             ->from($this->tb)

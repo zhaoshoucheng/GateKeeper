@@ -35,7 +35,7 @@ class Junction_model extends CI_Model
      * @param $groupBy     group by
      * @param $limit       limit 例：1,100
      */
-    public function searchDB($select = '*', $where = '1', $resultType = 'result_array', $groupBy = '', $limit= '')
+    public function searchDB($select = '*', $where = [], $resultType = 'result_array', $groupBy = '', $limit= '')
     {
         $this->db->select($select);
         $this->db->from($this->tb);
@@ -79,12 +79,22 @@ class Junction_model extends CI_Model
         $result = [];
 
         $select = 'task_id, junction_id, dates, start_time, end_time, clock_shift, movements';
-        $where  = "task_id = {$data['task_id']} and junction_id = '{$data['junction_id']}'";
+        $where = [
+            'task_id'     => $data['task_id'],
+            'junction_id' => $data['junction_id'],
+        ];
         if ((int)$data['search_type'] == 1) {
             $time_range = explode('-', $data['time_range']);
-            $where .= " and type = 1 and start_time = '{$time_range[0]}' and end_time = '{$time_range[1]}'";
+            $where = array_merge($where, [
+                'type'       => 1,
+                'start_time' => $time_range[0],
+                'end_time'   => $time_range[1],
+            ]);
         } else {
-            $where .= " and type = 0 and time_point = '{$data['time_point']}'";
+            $where = array_merge($where, [
+                'type'       => 0,
+                'time_point' => $data['time_point'],
+            ]);
         }
 
         $result = $this->db->select($select)
@@ -92,10 +102,6 @@ class Junction_model extends CI_Model
                             ->where($where)
                             ->get();
         if (!$result) {
-            $content = "form_data = " . json_encode($data);
-            $content .= "<br>sql = " . $this->db->last_query();
-            $content .= "<br>result = " . $result;
-            sendMail($this->email_to, 'logs: 获取时空/散点图（'.$type.'）->获取路口详情为空', $content);
             return [];
         }
 
