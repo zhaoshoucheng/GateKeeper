@@ -204,17 +204,23 @@ $config['confidence'] = [
         'name' => '全部',
         // 用于组织sql语句的where条件
         'sql_where' => function ($val) {
-            return $val . ' > 0';
+            return [
+                $val . '>' => 0,
+            ];
         },
         // 用于判断
         'formula' => function ($val) {
-            return $val > 0;
+            return [
+                $val . '>' => 0,
+            ];
         },
     ],
     1 => [
         'name' => '高',
         'sql_where' => function ($val) use ($confidence_threshold) {
-            return $val . ' > ' . $confidence_threshold;
+            return [
+                $val . '>' => $confidence_threshold,
+            ];
         },
         'formula' => function ($val) use ($confidence_threshold) {
             return $val > $confidence_threshold;
@@ -223,7 +229,9 @@ $config['confidence'] = [
     2 => [
         'name' => '低',
         'sql_where' => function ($val) use ($confidence_threshold) {
-            return $val . ' < ' . $confidence_threshold;
+            return [
+                $val . '<' => $confidence_threshold,
+            ];
         },
         'formula' => function ($val) use ($confidence_threshold) {
             return $val < $confidence_threshold;
@@ -232,7 +240,9 @@ $config['confidence'] = [
     3 => [
         'name' => '中',
         'sql_where' => function ($val) {
-            return $val . ' > 0';
+            return [
+                $val . '>' => 0,
+            ];
         },
         'formula' => function ($val) {
             return $val > 0;
@@ -431,7 +441,9 @@ $config['diagnose_key'] = [
             return $val > 0.008;
         },
         'sql_where' => function () {
-            return '`spillover_index` > 0.008';
+            return [
+                'spillover_index >' => 0.008,
+            ];
         },
         'nature_formula' => function ($val) {
             if ($val > 0.6) {
@@ -480,7 +492,9 @@ $config['diagnose_key'] = [
             return $val > 0;
         },
         'sql_where' => function () {
-            return '`imbalance_index` > 0';
+            return [
+                'imbalance_index > ' => 0,
+            ];
         },
         'nature_formula' => function ($val) {
             if ($val > 0.08) {
@@ -529,7 +543,9 @@ $config['diagnose_key'] = [
             return $val < 0.3;
         },
         'sql_where' => function () {
-            return '`saturation_index` < 0.3';
+            return [
+                'saturation_index < ' => 0.3,
+            ];
         },
         'nature_formula' => function ($val) {
             if ($val < 0.1) {
@@ -570,7 +586,9 @@ $config['diagnose_key'] = [
             return $val > 1;
         },
         'sql_where' => function () {
-            return '`saturation_index` > 1';
+            return [
+                'saturation_index > ' => 1,
+            ];
         },
         'nature_formula' => function ($val) {
             if ($val > 1.5) {
