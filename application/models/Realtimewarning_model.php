@@ -311,7 +311,7 @@ class Realtimewarning_model extends CI_Model
         //写入分组数据
         $groupIds = $this->userperm_model->getUserPermAllGroupid();
         foreach ($groupIds as $groupId) {
-            $this->dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionList, $realTimeAlarmsInfoResult);
+            $this->dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionList, $realTimeAlarmsInfoResult,$esStopDelay);
         }
 
         // 写入缓存数据
@@ -329,7 +329,7 @@ class Realtimewarning_model extends CI_Model
         $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
     }
 
-    public function dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionListOri, $realTimeAlarmsInfoResultOri)
+    public function dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionListOri, $realTimeAlarmsInfoResultOri, $esStopDelayOri)
     {
         $cityIds = $this->userperm_model->getCityidByGroup($groupId);
         $junctionIds = $this->userperm_model->getJunctionidByGroup($groupId);
@@ -361,6 +361,9 @@ class Realtimewarning_model extends CI_Model
         }
         if(!empty($avgStopDelayList)){
             $esStopDelay[] = $avgStopDelayList;
+        }
+        if (in_array($cityId, $cityIds)) {
+            $esStopDelay = $esStopDelayOri;
         }
 
         //过滤实时指标数据
