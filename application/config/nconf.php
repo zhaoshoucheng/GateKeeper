@@ -35,7 +35,7 @@ if ($development == 2) {
     // 配时接口服务器端口
     $timing_port = '8000';
     // 配时接口前缀
-    $timing_ext = '/its';
+    $timing_ext = '/its/signal-mis';
 
     $config['redis'] = [
         'host' => '100.69.239.57',
