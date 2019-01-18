@@ -164,10 +164,9 @@ class RoadService extends BaseService
     {
         $cityId = $params['city_id'];
 
-        $select = 'road_id, logic_junction_ids, road_name, road_direction';
+        $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
 
         $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
-
         $results = [];
 
         foreach ($roadList as $item) {
@@ -189,7 +188,7 @@ class RoadService extends BaseService
                 $res = json_decode($res, true);
             }
             $res['road'] = $item;
-            $res['road_id'] = $roadId;
+            $res['road_id'] = $item['id'];
             $results[]   = $res;
         }
 

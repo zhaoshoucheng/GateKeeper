@@ -49,12 +49,11 @@ class OverviewService extends BaseService
     {
         $hour = $this->helperService->getLastestHour($params['city_id']);
         if(!empty($userPerm['group_id'])){
-            $redisKey = 'new_its_usergroup_realtime_pretreat_junction_survey_';
-            $data = $this->redis_model->getData($redisKey . $userPerm['group_id'] . '_' . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
+            $redisKey = 'new_its_usergroup_realtime_pretreat_junction_survey_'. $userPerm['group_id'] . '_' . $params['city_id'] . '_' . $params['date'] . '_' . $hour;
         }else{
-            $redisKey = 'new_its_realtime_pretreat_junction_survey_';
-            $data = $this->redis_model->getData($redisKey . $params['city_id'] . '_' . $params['date'] . '_' . $hour);
+            $redisKey = 'new_its_realtime_pretreat_junction_survey_' . $params['city_id'] . '_' . $params['date'] . '_' . $hour;
         }
+        $data = $this->redis_model->getData($redisKey);
         if (empty($data)) {
             return [
                 'junction_total'   => 0,
@@ -163,7 +162,11 @@ class OverviewService extends BaseService
         $hour = $this->helperService->getLastestHour($cityId);
 
         // 路口概况redis key
-        $redisKey = 'new_its_realtime_pretreat_junction_survey_' . $cityId . '_' . $date . '_' . $hour;
+        if(!empty($userPerm['group_id'])){
+            $redisKey = 'new_its_usergroup_realtime_pretreat_junction_survey_'. $userPerm['group_id'] . '_' . $cityId . '_' . $date . '_' . $hour;
+        }else{
+            $redisKey = 'new_its_realtime_pretreat_junction_survey_' . $cityId . '_' . $date . '_' . $hour;
+        }
 
         // 获取路口概况信息
         $res = $this->redis_model->getData($redisKey);

@@ -353,6 +353,7 @@ class Realtimewarning_model extends CI_Model
         $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour, $junctionIds);
         if (empty($avgStopDelayList)) {
             echo "生成 usergroup avg(stop_delay) group by hour failed! \n\rgroupId={$groupId} cityId={$cityId} date={$date} hour={$hour}\n\r";
+            $avgStopDelayList = [];
         }
         $esStopDelay = $this->redis_model->getData($avgStopDelayKey);
         if (!empty($esStopDelay)) {
@@ -377,7 +378,7 @@ class Realtimewarning_model extends CI_Model
         $realTimeAlarmsInfoResult = [];
         foreach ($realTimeAlarmsInfoResultOri as $k=>$rtItem){
             if(in_array($rtItem["logic_junction_id"],$junctionIds) || in_array($cityId, $cityIds)){
-                $realTimeAlarmsInfoResult[$k] = $realtimeJunctionItem;
+                $realTimeAlarmsInfoResult[$k] = $rtItem;
             }
         }
         $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
@@ -397,11 +398,14 @@ class Realtimewarning_model extends CI_Model
         $result['junction_total'] = $junctionTotal;
         $result['alarm_total'] = 0;
         $result['congestion_total'] = 0;
+        $result['amble_total'] = 0;
         foreach ($jDataList as $datum) {
             // 报警数
             $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
             // 拥堵数
             $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+            // 缓行数
+            $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
         }
         $junctionSurvey = $result;
 

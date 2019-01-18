@@ -762,7 +762,6 @@ $config['timing_junction_list'] = [
         '7ef723cc51f7616791d7a30f51c9c2fc'=>"黄埔大道西-体育西路",
         'ef2761d061f11a46014a7b920e2cd445'=>"体育西路_天河北路",
         'f04abf18906dfe64a0de80e41164adba'=>"越秀中路_中山四路",
-
     ],
 ];
 
