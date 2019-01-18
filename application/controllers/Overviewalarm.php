@@ -45,7 +45,7 @@ class Overviewalarm extends MY_Controller
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
         $data = $this->overviewService->todayAlarmInfo($params,$this->userPerm);
-
+        com_log_notice('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_data', compact("params","data"));
         $this->response($data);
     }
 

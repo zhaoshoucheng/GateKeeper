@@ -27,7 +27,7 @@ class Common_model extends CI_Model
      * @param $pagesize count
      * @return mixed
      */
-    public function search($table, $select = '*', $where = '', $groupby = '', $page = 0, $pagesize = 0)
+    public function search($table, $select = '*', $where = [], $groupby = '', $page = 0, $pagesize = 0)
     {
         $isExisted = $this->db->table_exists($table);
         if (!$isExisted) {

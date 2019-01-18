@@ -38,9 +38,8 @@ class Alarmanalysis_model extends CI_Model
             'index' => $index['junction'],
             'body'  => $body
         ];
-
         $response = $client->search($params);
-
+        com_log_notice('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_log', compact("params","response"));
         return $response;
     }
 

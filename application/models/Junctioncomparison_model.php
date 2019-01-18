@@ -505,8 +505,10 @@ class Junctioncomparison_model extends CI_Model
         $quotaFormula = 'sum(`' . $data['quota_key'] . '` * `traj_count`) / sum(`traj_count`)';
         $this->db->select("logic_flow_id, hour,date,  {$quotaFormula} as quota_value");
         $this->db->from($table);
-        $where = 'logic_junction_id = "' . $data['logic_junction_id'] . '"';
-        $where .= ' and traj_count >= 10';
+        $where = [
+            'logic_junction_id' => $data['logic_junction_id'],
+            'traj_count >='     => 10,
+        ];
         $this->db->where($where);
         $this->db->where_in('date', $data['date']);
         $this->db->group_by('date, hour');

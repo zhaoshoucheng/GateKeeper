@@ -230,12 +230,14 @@ class Realtimewarning_model extends CI_Model
         //验证数据表是否存在?
         $rtwRule = $this->config->item('realtimewarning_rule');
         $rtwRule = empty($rtwRule[$cityId]) ? $rtwRule['default'] : $rtwRule[$cityId];
+        /*
         $tableName = "real_time_" . $cityId;
         $isExisted = $this->db->table_exists($tableName);
         if (!$isExisted) {
             echo "{$tableName} not exists!\n\r";
             exit;
         }
+        */
         $this->load->model('redis_model');
 
         //设置rediskey
@@ -294,9 +296,14 @@ class Realtimewarning_model extends CI_Model
         $result['junction_total'] = $junctionTotal;
         $result['alarm_total'] = 0;
         $result['congestion_total'] = 0;
+        $result['amble_total'] = 0;
         foreach ($jDataList as $datum) {
+            // 报警数
             $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+            // 拥堵数
             $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+            // 缓行数
+            $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
         }
         $junctionSurvey = $result;
         //<========计算缓存数据end==========
@@ -391,7 +398,9 @@ class Realtimewarning_model extends CI_Model
         $result['alarm_total'] = 0;
         $result['congestion_total'] = 0;
         foreach ($jDataList as $datum) {
+            // 报警数
             $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+            // 拥堵数
             $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
         }
         $junctionSurvey = $result;

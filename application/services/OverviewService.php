@@ -161,41 +161,55 @@ class OverviewService extends BaseService
         $date   = $params['date'];
 
         $hour = $this->helperService->getLastestHour($cityId);
-        $res = $this->realtime_model->getAvgQuotaByJunction($cityId, $date, $hour, $userPerm);
+
+        // 路口概况redis key
+        $redisKey = 'new_its_realtime_pretreat_junction_survey_' . $cityId . '_' . $date . '_' . $hour;
+
+        // 获取路口概况信息
+        $res = $this->redis_model->getData($redisKey);
         if (!$res) {
             return [];
         }
+        $res = json_decode($res, true);
 
         $result = [];
 
-        // 拥堵数量
-        $congestionNum = [];
-
         // 路口总数
-        $junctionTotal = count($res);
+        $junctionTotal = $res['junction_total'] ?? 0;
+        if ($junctionTotal < 1) {
+            return [];
+        }
+        // 缓存数
+        $ambleNum = $res['amble_total'] ?? 0;
+        // 拥堵数
+        $congestionNum = $res['congestion_total'] ?? 0;
+
+        $congestionInfo = [
+            // 畅通
+            1 => $junctionTotal - ($ambleNum + $congestionNum),
+
+            // 缓行
+            2 => $ambleNum,
+
+            // 拥堵
+            3 => $congestionNum,
+        ];
 
         // 路口状态配置
         $junctionStatusConf = $this->config->item('junction_status');
-        // 路口状态计算规则
-        $junctinStatusFormula = $this->config->item('junction_status_formula');
 
-        foreach ($res as $k => $v) {
-            $congestionNum[$junctinStatusFormula($v['quotaMap']['weight_avg'])][$k] = 1;
-        }
 
         $result['count'] = [];
         $result['ratio'] = [];
         foreach ($junctionStatusConf as $k => $v) {
             $result['count'][$k] = [
                 'cate' => $v['name'],
-                'num' => isset($congestionNum[$k]) ? count($congestionNum[$k]) : 0,
+                'num' => $congestionInfo[$k],
             ];
 
             $result['ratio'][$k] = [
                 'cate' => $v['name'],
-                'ratio' => isset($congestionNum[$k])
-                    ? round((count($congestionNum[$k]) / $junctionTotal) * 100) . '%'
-                    : '0%',
+                'ratio' => round(($congestionInfo[$k] / $junctionTotal) * 100) . '%',
             ];
         }
 
