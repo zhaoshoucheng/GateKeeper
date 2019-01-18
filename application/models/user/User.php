@@ -67,7 +67,7 @@ class User extends CI_Model{
             return array();
         }
         //$ret = $this->auth->getUserFeatureAndArea($this->access_token, $this->username);
-        $ret = $this->upm->getUserAreas($this->username); 
+        $ret = $this->upm->getUserAreas($this->username);
         if(!$ret){
             return array();
         }

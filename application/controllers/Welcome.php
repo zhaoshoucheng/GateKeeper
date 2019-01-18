@@ -42,7 +42,7 @@ class Welcome extends CI_Controller
 
     public function ping()
     {
-        //print_r($_SERVER);
+        print_r($_SERVER);
         $jsonStr='{"errno":0,"errmsg":"","data":{}}';
         echo $jsonStr;
         exit;

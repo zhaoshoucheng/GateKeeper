@@ -6,14 +6,14 @@
  * Time: 14:14
  */
 $config['sso_server'] = array(
-    'remote_host'     => 'http://10.95.177.247/auth',
+    'remote_host'     => 'http://100.90.164.31:8014/auth',
     'timeout'         => 400,
     'connect_timeout' => 200,
     //'retry'           => 1,
 );
 
 $config['upm_server'] = array(
-    'remote_host'     => 'http://api.upm-test.xiaojukeji.com',
+    'remote_host'     => 'http://100.90.164.31:8074',
     'timeout'         => 400,
     'connect_timeout' => 200,
     //'retry'           => 1,
@@ -38,6 +38,6 @@ $config['uri'] = array(
     'upm_isValidFeature' => '/user/check/feature',
 );
 
-$config['appid'] = '360';
-$config['appkey'] = '9a1a4978e7be77d7995afbf5ea015c5f';
+$config['appid'] = '789';
+$config['appkey'] = '428ffe82b8f7048aa446a58bc988719e';
 

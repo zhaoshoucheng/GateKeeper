@@ -79,6 +79,9 @@ if ($development == 2) {
 
     //报警数据历史处理
     $realtime_callback = 'http://10.85.128.81:30101';
+
+    //需要验证城市权限
+    $validateCity = 1;
 } else {
     //测试环境配置
 
@@ -139,6 +142,9 @@ if ($development == 2) {
 
     //报警数据历史处理
     $realtime_callback = 'http://100.90.164.31:8033';
+
+    //需要验证城市权限
+    $validateCity = 0;
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -181,8 +187,12 @@ $config['realtime_callback'] = $realtime_callback;
 
 // 报警es接口地址
 $config['alarm_es_interface'] = $alarm_es_interface;
+
 // 报警ES索引
 $config['alarm_es_index'] = $alarm_es_index;
+
+// 是否验证城市权限
+$config['validate_city'] = $validateCity;
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;
