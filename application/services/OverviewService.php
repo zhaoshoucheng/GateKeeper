@@ -320,6 +320,9 @@ class OverviewService extends BaseService
             if(in_array($cityId,$cityIds)){
                 $junctionIds = [];
             }
+            if(!in_array($cityId,$cityIds) && empty($junctionIds)){
+                return [];
+            }
         }
         $hour = $this->helperService->getLastestHour($cityId);
         $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds);
@@ -370,6 +373,9 @@ class OverviewService extends BaseService
             $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
             if(in_array($cityId,$cityIds)){
                 $junctionIds = [];
+            }
+            if(!in_array($cityId,$cityIds) && empty($junctionIds)){
+                return [];
             }
         }
 
@@ -424,6 +430,10 @@ class OverviewService extends BaseService
         $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
         if(in_array($cityId,$cityIds)){
             $junctionIds = [];
+        }
+        //用户登陆,但没有数据权限
+        if(!empty($userPerm) && !in_array($cityId,$cityIds) && empty($junctionIds)){
+            return [];
         }
 
         // 组织ES所需JSON
@@ -504,6 +514,9 @@ class OverviewService extends BaseService
         $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
         if(in_array($cityId,$cityIds)){
             $junctionIds = [];
+        }
+        if(!empty($userPerm) && !in_array($cityId,$cityIds) && empty($junctionIds)){
+            return [];
         }
 
         // 七日日期

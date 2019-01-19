@@ -359,6 +359,10 @@ class Realtimewarning_model extends CI_Model
         if (!empty($esStopDelay)) {
             $esStopDelay = json_decode($esStopDelay, true);
         }
+        //没有数据权限
+        if(!in_array($cityId,$cityIds) && empty($junctionIds)){
+            $avgStopDelayList = [];
+        }
         if(!empty($avgStopDelayList)){
             $esStopDelay[] = $avgStopDelayList;
         }
