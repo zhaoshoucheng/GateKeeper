@@ -129,8 +129,11 @@ class MY_Controller extends CI_Controller
         //<============降级结束
 
         //写入权限信息
-        if(!empty($_SERVER['HTTP_DIDI_HEADER_USERPERM'])){
-            $this->userPerm = json_decode($_SERVER['HTTP_DIDI_HEADER_USERPERM'],true);
+        if(!empty($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'])){
+            $redisKey = $_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'];
+            $this->load->model('Redis_model');
+            $permData = $this->Redis_model->getData($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY']);
+            $this->userPerm = json_decode($permData,true);
             if(!empty($this->userPerm)){
                 $this->userPerm['city_id'] = !empty($this->userPerm['city_id']) ? explode(";",$this->userPerm['city_id']) : [];
                 $this->userPerm['area_id'] = !empty($this->userPerm['area_id']) ? explode(";",$this->userPerm['area_id']) : [];

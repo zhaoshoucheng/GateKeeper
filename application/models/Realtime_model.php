@@ -71,8 +71,8 @@ class Realtime_model extends CI_Model
      */
     public function searchQuota($data)
     {
-        $result = httpPOST($this->esUrl . '/estimate/diagnosis/queryQuota', $data, 0, 'json');
-
+        $result = httpPOST($this->esUrl . '/estimate/diagnosis/queryQuota', $data, 9000, 'json');
+        
         if (!$result) {
             throw new \Exception('调用es接口 queryIndices 失败！', ERR_DEFAULT);
         }
