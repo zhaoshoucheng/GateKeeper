@@ -72,7 +72,7 @@ class Realtime_model extends CI_Model
     public function searchQuota($data)
     {
         $result = httpPOST($this->esUrl . '/estimate/diagnosis/queryQuota', $data, 9000, 'json');
-        
+
         if (!$result) {
             throw new \Exception('调用es接口 queryIndices 失败！', ERR_DEFAULT);
         }
@@ -157,13 +157,14 @@ class Realtime_model extends CI_Model
             return [];
         }
         $result = [];
-        foreach ($esRes['result']['quotaResults'] as $k => $v) {
-            $result = [
-                'avg_stop_delay' => $v['quotaMap']['weight_avg'],
-                'hour' => date('H:i:s', strtotime($v['quotaMap']['dayTime'])),
-            ];
+        if(!empty($esRes['result']['quotaResults'])){
+            foreach ($esRes['result']['quotaResults'] as $k => $v) {
+                $result = [
+                    'avg_stop_delay' => $v['quotaMap']['weight_avg'],
+                    'hour' => date('H:i:s', strtotime($v['quotaMap']['dayTime'])),
+                ];
+            }
         }
-
         return $result;
     }
 
