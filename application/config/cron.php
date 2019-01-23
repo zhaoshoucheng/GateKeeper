@@ -146,7 +146,7 @@ $config['checkItems'] = [
             if(!isset($ret['errno']) || $ret['errno']!=0){
                 return false;
             }
-            if(!isset($ret['data']['count']) || count($ret['data']['count'])==0){
+            if(!isset($ret['data'])){
                 return false;
             }
             return true;
