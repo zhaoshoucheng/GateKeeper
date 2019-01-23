@@ -127,7 +127,7 @@ class Realtimewarning extends Inroute_Controller
     public function process($cityId = '12', $hour = '00:00', $date = "", $traceId = "", $uid = "")
     {
         ini_set('memory_limit', '-1');
-        sleep(10);
+        //sleep(1);
         ob_end_flush();
         date_default_timezone_set('Asia/Shanghai');
         if (!is_numeric($cityId)) {

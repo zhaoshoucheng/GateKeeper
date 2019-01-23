@@ -132,8 +132,10 @@ class MY_Controller extends CI_Controller
         if(!empty($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'])){
             $redisKey = $_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'];
             $this->load->model('Redis_model');
-            $permData = $this->Redis_model->getData($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY']);
+            $permData = $this->Redis_model->getData($redisKey);
             $this->userPerm = json_decode($permData,true);
+            //获取的city_id对应权限
+            $this->userPerm = !empty($this->userPerm["data"][$downgradeCityId]) ? $this->userPerm["data"][$downgradeCityId] : [];
             if(!empty($this->userPerm)){
                 $this->userPerm['city_id'] = !empty($this->userPerm['city_id']) ? explode(";",$this->userPerm['city_id']) : [];
                 $this->userPerm['area_id'] = !empty($this->userPerm['area_id']) ? explode(";",$this->userPerm['area_id']) : [];

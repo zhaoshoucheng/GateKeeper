@@ -569,7 +569,6 @@ class OverviewService extends BaseService
                 'value' => $v['num']['value'],
             ];
         }
-
         return $result;
     }
 

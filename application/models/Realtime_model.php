@@ -169,6 +169,65 @@ class Realtime_model extends CI_Model
     }
 
     /**
+     * 平均延误曲线图
+     * @param $cityId int    城市ID
+     * @param $date   string 日期 yyyy-mm-dd
+     * @param $hour   string 时间 HH:ii:ss
+     * @param $junctionIds   array 路口Id
+     * @return array
+     */
+    public function avgStopdelayByJunctionId($cityId, $date, $hour, $junctionIds=[])
+    {
+        $chunkJunctionIds = array_chunk($junctionIds,500);
+        $tmpRs = [];
+        foreach ($chunkJunctionIds as $ids){
+            $data = [
+                "source" => "signal_control",
+                "cityId" => $cityId,
+                'requestId' => get_traceid(),
+                "dayTime" => $date . ' ' . $hour,
+                "andOperations" => [
+                    "cityId" => "eq",
+                    "dayTime" => "eq",
+                ],
+                "quotaRequest" => [
+                    "quotas" => "sum_stopDelayUp*trailNum, sum_trailNum",
+                    "groupField" => "dayTime",
+                ],
+            ];
+            $data['junctionId'] = implode(",",$ids);
+            $data["andOperations"]['junctionId'] = 'in';
+            $esRes = $this->searchQuota($data);
+            if (empty($esRes['result']['quotaResults'])) {
+                return [];
+            }
+            if(!empty($esRes['result']['quotaResults'])){
+                foreach ($esRes['result']['quotaResults'] as $k => $v) {
+                    $hour=date('H:i:s', strtotime($v['quotaMap']['dayTime']));
+                    if(!empty($tmpRs[$hour])){
+                        $tmpRs[$hour]['sum_stopDelayUp*trailNum']+=$tmpRs[$hour]['sum_stopDelayUp*trailNum'];
+                        $tmpRs[$hour]['sum_trailNum']+=$tmpRs[$hour]['sum_trailNum'];
+                    }else{
+                        $tmpRs[$hour] = [
+                            'sum_stopDelayUp*trailNum' => $v['quotaMap']['sum_stopDelayUp*trailNum'],
+                            'sum_trailNum' => $v['quotaMap']['sum_trailNum'],
+                        ];
+                    }
+                }
+            }
+        }
+
+        $result = [];
+        foreach ($tmpRs as $hour=>$item){
+            $result = [
+                'avg_stop_delay' => $item['sum_stopDelayUp*trailNum']/$item['sum_trailNum'],
+                'hour' => $hour,
+            ];
+        }
+        return $result;
+    }
+
+    /**
      * 获取区域指标平均值
      * @param $cityId      int    城市ID
      * @param $junctionIds string 区域路口ID串
