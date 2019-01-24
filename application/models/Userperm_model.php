@@ -71,7 +71,7 @@ class Userperm_model extends CI_Model
                 }
             }
         }
-        return [];
+        return $cityList;
     }
 
     /**
