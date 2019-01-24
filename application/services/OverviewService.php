@@ -417,6 +417,88 @@ class OverviewService extends BaseService
      * @param $params['city_id']    int    Y 城市ID
      * @param $params['date']       string N 日期 yyyy-mm-dd
      * @param $params['time_point'] string N 时间 HH:ii:ss
+     * @param $junctionIds          array  N 路口Ids
+     * @return array
+     * @throws \Exception
+     */
+    public function todayAlarmInfoByJunctionIds($params,$junctionIds)
+    {
+        $cityId = $params['city_id'];
+        $date   = $params['date'];
+
+        $chunkJunctionIds = array_chunk($junctionIds,1000);
+
+        $res = [];
+        $total = 0;
+        foreach ($chunkJunctionIds as $Jids){
+            // 组织ES所需JSON
+            $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
+
+            // where city_id
+            $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
+
+            // where date
+            $json .= ',{"match":{"date":{"query":"' . trim($date) . '","type":"phrase"}}}';
+
+            /* where junctionId in*/
+            if(!empty($Jids)){
+                $json .= ',{"bool":{"should":[';
+
+                for($x=0;$x<count($Jids);$x++){
+                    $json .= '{"match":{"logic_junction_id":{"query":"' . $Jids[$x] . '","type":"phrase"}}}';
+                    if ($x<(count($Jids)-1)) {
+                        $json .= ',';
+                    }
+                }
+                $json .= ']}}';
+            }
+
+            $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"aggregations":{"type":{"terms":{"field":"type","size":200},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
+            $esRes = $this->alarmanalysis_model->search($json);
+
+            if (!$esRes) {
+                return [];
+            }
+
+            // 格式
+            foreach ($esRes['aggregations']['type']['buckets'] as $k=>$v) {
+                if(!empty($res[$v['key']])){
+                    $res[$v['key']]+=$v['num']['value'];
+                }else{
+                    $res[$v['key']] = $v['num']['value'];
+                }
+                $total += $v['num']['value'];
+            }
+        }
+
+        // 报警类别配置
+        $alarmCate = $this->config->item('alarm_category');
+
+        $result = [];
+        foreach ($alarmCate as $k=>$v) {
+            $num = $res[$v['key']] ?? 0;
+            $result['count'][$k] = [
+                'cate' => $v['name'],
+                'num'  => $num,
+            ];
+
+            $result['ratio'][$k] = [
+                'cate' => $v['name'],
+                'ratio' => ($total >= 1) ? round(($num / $total) * 100) . '%' : '0%',
+            ];
+        }
+
+        $result['count'] = array_values($result['count']);
+        $result['ratio'] = array_values($result['ratio']);
+
+        return $result;
+    }
+
+    /**
+     * 获取今日报警预览
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
      * @param $userPerm array N 用户权限
      * @return array
      * @throws \Exception
@@ -436,6 +518,10 @@ class OverviewService extends BaseService
             return [];
         }
 
+        if(!empty($junctionIds)){
+            return $this->todayAlarmInfoByJunctionIds($params,$junctionIds);
+        }
+
         // 组织ES所需JSON
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
@@ -444,19 +530,6 @@ class OverviewService extends BaseService
 
         // where date
         $json .= ',{"match":{"date":{"query":"' . trim($date) . '","type":"phrase"}}}';
-
-        /* where junctionId in*/
-        if(!empty($junctionIds)){
-            $json .= ',{"bool":{"should":[';
-
-            for($x=0;$x<count($junctionIds);$x++){
-                $json .= '{"match":{"logic_junction_id":{"query":"' . $junctionIds[$x] . '","type":"phrase"}}}';
-                if ($x<(count($junctionIds)-1)) {
-                    $json .= ',';
-                }
-            }
-            $json .= ']}}';
-        }
 
         $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"aggregations":{"type":{"terms":{"field":"type","size":200},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
         $esRes = $this->alarmanalysis_model->search($json);
@@ -495,6 +568,89 @@ class OverviewService extends BaseService
         return $result;
     }
 
+
+    /**
+     * 获取七日报警变化通过路口
+     * 规则：取当前日期前六天的报警路口数+当天到现在时刻的报警路口数
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $params['date']       string N 日期 yyyy-mm-dd
+     * @param $params['time_point'] string N 时间 HH:ii:ss
+     * @param $junctionIds          array  N 路口ids
+     * @throws Exception
+     * @return array
+     */
+    public function sevenDaysAlarmChangeByJunctionId($params,$junctionIds)
+    {
+        $cityId = $params['city_id'];
+        $date   = $params['date'];
+
+        // 七日日期
+        $sevenDates = [];
+
+        // 前6天时间戳作为开始时间
+        $startDate = strtotime($date . '-6 day');
+        // 当前日期时间戳作为结束时间
+        $endDate = strtotime($date);
+        $chunkJunctionIds = array_chunk($junctionIds,1000);
+
+        //分组获取权限数据
+        $tmpRs = [];
+        foreach ($chunkJunctionIds as $jIds){
+            // 组织DSL所需json
+            $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
+
+            // where city_id
+            $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
+
+            /* where date in*/
+            $json .= ',{"bool":{"should":[';
+            for ($i = $startDate; $i <= $endDate; $i += 24 * 3600) {
+                $json .= '{"match":{"date":{"query":"' . date('Y-m-d', $i) . '","type":"phrase"}}}';
+                if ($i < $endDate) {
+                    $json .= ',';
+                }
+            }
+            $json .= ']}}';
+
+            /* where junctionId in*/
+            if(!empty($jIds)){
+                $json .= ',{"bool":{"should":[';
+
+                for($x=0;$x<count($jIds);$x++){
+                    $json .= '{"match":{"logic_junction_id":{"query":"' . $jIds[$x] . '","type":"phrase"}}}';
+                    if ($x<(count($jIds)-1)) {
+                        $json .= ',';
+                    }
+                }
+                $json .= ']}}';
+            }
+
+            $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"sort":[{"date":{"order":"asc"}}],"aggregations":{"date":{"terms":{"field":"date","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
+            $data = $this->alarmanalysis_model->search($json);
+            if (!$data || empty($data['aggregations']['date']['buckets'])) {
+                return [];
+            }
+
+            foreach ($data['aggregations']['date']['buckets'] as $k=>$v) {
+                $dataStr = date('Y-m-d', $v['key'] / 1000);
+                if(!empty($tmpRs[$dataStr])){
+                    $tmpRs[$dataStr]+=$v['num']['value'];
+                }else{
+                    $tmpRs[$dataStr] = $v['num']['value'];
+                }
+            }
+        }
+
+        $result['dataList'] = [];
+        foreach ($tmpRs as $date=>$value){
+            $result['dataList'][] = [
+                "date"=>$date,
+                "value"=>$value,
+            ];
+        }
+        return $result;
+    }
+
     /**
      * 获取七日报警变化
      * 规则：取当前日期前六天的报警路口数+当天到现在时刻的报警路口数
@@ -510,14 +666,20 @@ class OverviewService extends BaseService
         $cityId = $params['city_id'];
         $date   = $params['date'];
 
+        //权限逻辑开始
         $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
         $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
         if(in_array($cityId,$cityIds)){
             $junctionIds = [];
         }
+        //权限不为空 且 无城市权限 且 无路口数据
         if(!empty($userPerm) && !in_array($cityId,$cityIds) && empty($junctionIds)){
             return [];
         }
+        if(!empty($junctionIds)){
+            return $this->sevenDaysAlarmChangeByJunctionId($params,$junctionIds);
+        }
+        //权限逻辑结束
 
         // 七日日期
         $sevenDates = [];
@@ -542,20 +704,6 @@ class OverviewService extends BaseService
             }
         }
         $json .= ']}}';
-
-        /* where junctionId in*/
-        if(!empty($junctionIds)){
-            $json .= ',{"bool":{"should":[';
-
-            for($x=0;$x<count($junctionIds);$x++){
-                $json .= '{"match":{"logic_junction_id":{"query":"' . $junctionIds[$x] . '","type":"phrase"}}}';
-                if ($x<(count($junctionIds)-1)) {
-                    $json .= ',';
-                }
-            }
-            $json .= ']}}';
-        }
-
         $json .= ']}}}},"_source":{"includes":["COUNT"],"excludes":[]},"sort":[{"date":{"order":"asc"}}],"aggregations":{"date":{"terms":{"field":"date","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"cardinality":{"field":"logic_junction_id","precision_threshold":40000}}}}}}';
         $data = $this->alarmanalysis_model->search($json);
         if (!$data || empty($data['aggregations']['date']['buckets'])) {

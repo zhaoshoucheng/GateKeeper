@@ -149,43 +149,94 @@ class EvaluateService extends BaseService
         $dayTime = date('Y-m-d') . ' ' . $hour;
 
         // es所需data
-        $esData = [
-            "source"    => "signal_control",
-            "cityId"    => $cityId,
-            'requestId' => get_traceid(),
-            "dayTime"   => $dayTime,
-            "trailNum"  => 10,
-            "andOperations" => [
-                "cityId"   => "eq",
-                "dayTime"  => "eq",
-                "trailNum" => 'gte',
-            ],
-            "quotaRequest" => [
-                "groupField" => "junctionId",
-                "asc"        => "false",
-                "limit"      => 100,
-            ],
-        ];
-        if ($params['quota_key'] == 'stop_delay') {
-            $esData['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
-            $esData['quotaRequest']['orderField'] = "weight_avg";
-            $esData['quotaRequest']['quotaType'] = "weight_avg";
-            $esQuotaKey = 'weight_avg'; // es接口返回的字段名
-        } else {
-            $esData['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
-            $esData['quotaRequest']['orderField'] = 'avg_' . $quotaKey;
-            $esQuotaKey = 'avg_' . $quotaKey; // es接口返回的字段名
+        if(empty($junctionIds)){
+            $esData = [
+                "source"    => "signal_control",
+                "cityId"    => $cityId,
+                'requestId' => get_traceid(),
+                "dayTime"   => $dayTime,
+                "trailNum"  => 10,
+                "andOperations" => [
+                    "cityId"   => "eq",
+                    "dayTime"  => "eq",
+                    "trailNum" => 'gte',
+                ],
+                "quotaRequest" => [
+                    "groupField" => "junctionId",
+                    "asc"        => "false",
+                    "limit"      => 100,
+                ],
+            ];
+            if ($params['quota_key'] == 'stop_delay') {
+                $esData['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
+                $esData['quotaRequest']['orderField'] = "weight_avg";
+                $esData['quotaRequest']['quotaType'] = "weight_avg";
+                $esQuotaKey = 'weight_avg'; // es接口返回的字段名
+            } else {
+                $esData['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
+                $esData['quotaRequest']['orderField'] = 'avg_' . $quotaKey;
+                $esQuotaKey = 'avg_' . $quotaKey; // es接口返回的字段名
+            }
+
+            if (!empty($junctionIds)) {
+                $esData['junctionId'] = implode(",",$junctionIds);
+                $esData["andOperations"]['junctionId'] = 'in';
+            }
+
+            $esRes = $this->realtime_model->searchQuota($esData);
+            if (!$esRes) {
+                return [];
+            }
+        }else{
+            $chunkJunctionIds = array_chunk($junctionIds,1000);
+            $tmpRes = [];
+            foreach ($chunkJunctionIds as $Jids){
+                $esData = [
+                    "source"    => "signal_control",
+                    "cityId"    => $cityId,
+                    'requestId' => get_traceid(),
+                    "dayTime"   => $dayTime,
+                    "trailNum"  => 10,
+                    "andOperations" => [
+                        "cityId"   => "eq",
+                        "dayTime"  => "eq",
+                        "trailNum" => 'gte',
+                    ],
+                    "quotaRequest" => [
+                        "groupField" => "junctionId",
+                        "asc"        => "false",
+                        "limit"      => 100,
+                    ],
+                ];
+                if ($params['quota_key'] == 'stop_delay') {
+                    $esData['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
+                    $esData['quotaRequest']['orderField'] = "weight_avg";
+                    $esData['quotaRequest']['quotaType'] = "weight_avg";
+                    $esQuotaKey = 'weight_avg'; // es接口返回的字段名
+                } else {
+                    $esData['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
+                    $esData['quotaRequest']['orderField'] = 'avg_' . $quotaKey;
+                    $esQuotaKey = 'avg_' . $quotaKey; // es接口返回的字段名
+                }
+
+                $esData['junctionId'] = implode(",",$Jids);
+                $esData["andOperations"]['junctionId'] = 'in';
+
+                $searchRes = $this->realtime_model->searchQuota($esData);
+                if (!empty($searchRes['result']['quotaResults'])) {
+                    $tmpRes = array_merge($tmpRes,$searchRes['result']['quotaResults']);
+                }
+            }
+            $esRes = [];
+            uasort($tmpRes,function ($a,$b) use($esQuotaKey) {
+                $aValue = !empty($a["quotaMap"][$esQuotaKey]) ? $a["quotaMap"][$esQuotaKey] : 0;
+                $bValue = !empty($b["quotaMap"][$esQuotaKey]) ? $b["quotaMap"][$esQuotaKey] : 0;
+                if ($aValue==$bValue) return 0;
+                return ($aValue<$bValue)?1:-1;
+            });
+            $esRes['result']['quotaResults'] = array_values($tmpRes);
         }
 
-        if (!empty($junctionIds)) {
-            $esData['junctionId'] = implode(",",$junctionIds);
-            $esData["andOperations"]['junctionId'] = 'in';
-        }
-
-        $esRes = $this->realtime_model->searchQuota($esData);
-        if (!$esRes) {
-            return [];
-        }
         $data = array_column($esRes['result']['quotaResults'], 'quotaMap');
 
         $result = [];
