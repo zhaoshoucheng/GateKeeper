@@ -46,9 +46,17 @@ class Welcome extends CI_Controller
         $this->load->model('Redis_model');
         $permData = $this->Redis_model->getData($redisKey);
         $this->userPerm = json_decode($permData,true);
+        echo "login INFO:";
+        echo "<pre>";
+        print_r($_COOKIE);
+        echo "</pre>";
         echo "perm INFO:";
         echo "<pre>";
-            print_r($this->userPerm);
+            $userPerm = $this->userPerm;
+            foreach ($userPerm["data"] as $cityId=>$cityPerm){
+                $userPerm["data"][$cityId]["junction_num"] = count(explode(";",$cityPerm["junction_id"]));
+            }
+            print_r($userPerm);
         echo "</pre>";
         echo "header INFO:";
         echo "<pre>";
