@@ -56,17 +56,22 @@ class Userperm_model extends CI_Model
     }
 
     /**
-     * 获取用户组关联的城市id
+     * 获取用户组有权限的城市id
      * @param $groupId
      * @return array
      */
     public function getCityidByGroup($groupId)
     {
+        $cityList = [];
         $perm = $this->getPermGroupid($groupId);
-        if(!empty($perm["city_id"])){
-            return explode(";",$perm["city_id"]);
+        if(!empty($perm["data"]) && is_array($perm["data"])){
+            foreach ($perm["data"] as $cityId=>$cityItem){
+                if(!empty($cityItem["city_id"])){
+                    $cityList[] = $cityItem["city_id"];
+                }
+            }
         }
-        return [];
+        return $cityList;
     }
 
     /**
@@ -74,11 +79,12 @@ class Userperm_model extends CI_Model
      * @param $groupId
      * @return array
      */
-    public function getJunctionidByGroup($groupId)
+    public function getJunctionidByGroup($groupId,$cityId)
     {
         $perm = $this->getPermGroupid($groupId);
-        if(!empty($perm["junction_id"])){
-            return explode(";",$perm["junction_id"]);
+
+        if(!empty($perm["data"][$cityId]["junction_id"])){
+            return explode(";",$perm["data"][$cityId]["junction_id"]);
         }
         return [];
     }

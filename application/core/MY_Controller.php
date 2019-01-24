@@ -53,14 +53,13 @@ class MY_Controller extends CI_Controller
 
         $this->load->config('nconf');
         $this->routerUri = $this->uri->ruri_string();
-
+        $token = isset($_REQUEST['token']) ? $_REQUEST['token'] : "";
         // 有一些机器是不需要进行sso验证的，这里就直接跳过
         if (!in_array($host, $escapeSso)) {
 
             $this->load->model('user/user', 'user');
 
             com_log_notice('_com_sign', ['ip' => $_SERVER["REMOTE_ADDR"], 'ip2' => $this->input->get_request_header('X-Real-Ip')]);
-
 
             if (isset($_REQUEST['app_id'])) {
                 // 此处采用appid + appkey的验证, 开放平台
@@ -73,20 +72,14 @@ class MY_Controller extends CI_Controller
 
             } elseif (in_array($host, ['100.69.238.11:8000'])) {
                 // 通过vip进行的请求
-                $token = isset($_REQUEST['token']) ? $_REQUEST['token'] : "";
                 if (!$this->_checkInnerVipAccess($token, $this->routerUri)) {
                     $this->_output();
                     exit();
                 }
 
-            } elseif (isset($escapeClient[$clientIp])) {
-                // 通过vip进行的请求
-                $token = isset($_REQUEST['token']) ? $_REQUEST['token'] : "";
-                // token列表不为空，且不匹配token时退出
-                if (!empty($escapeClient[$clientIp]) && !in_array($token,$escapeClient[$clientIp])) {
-                    $this->_output();
-                    exit();
-                }
+            } elseif (!empty($escapeClient[$clientIp]) && in_array($token,$escapeClient[$clientIp])) {
+                com_log_notice('_com_sign_escape_client', ['token' => $token, 'escapeClient' => $escapeClient[$clientIp]]);
+                //pass
             } else {
                 // 检测用户
                 if (!$this->_checkUser()) {
@@ -104,7 +97,8 @@ class MY_Controller extends CI_Controller
                 }
 
                 // 验证城市
-                if (isset($_REQUEST['city_id']) && !$this->_validateCity($_REQUEST['city_id'])) {
+                $needValidateCity = $this->config->item('validate_city');
+                if (isset($_REQUEST['city_id']) && $needValidateCity && !$this->_validateCity($_REQUEST['city_id'])) {
                     $this->_output();
                     exit();
                 }
@@ -135,8 +129,14 @@ class MY_Controller extends CI_Controller
         //<============降级结束
 
         //写入权限信息
-        if(!empty($_SERVER['HTTP_DIDI_HEADER_USERPERM'])){
-            $this->userPerm = json_decode($_SERVER['HTTP_DIDI_HEADER_USERPERM'],true);
+        if(!empty($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'])){
+            $redisKey = $_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'];
+            $this->load->model('Redis_model');
+            $permData = $this->Redis_model->getData($redisKey);
+            $this->userPerm = json_decode($permData,true);
+            //获取的city_id对应权限
+            $this->userPerm = !empty($this->userPerm["data"][$downgradeCityId]) ? $this->userPerm["data"][$downgradeCityId] : [];
+            $this->userPerm['group_id'] = $_SERVER['HTTP_DIDI_HEADER_USERGROUP'];
             if(!empty($this->userPerm)){
                 $this->userPerm['city_id'] = !empty($this->userPerm['city_id']) ? explode(";",$this->userPerm['city_id']) : [];
                 $this->userPerm['area_id'] = !empty($this->userPerm['area_id']) ? explode(";",$this->userPerm['area_id']) : [];
@@ -310,7 +310,6 @@ class MY_Controller extends CI_Controller
     private function _checkUser()
     {
         $ret = $this->user->isUserLogin();
-
         if (!$ret) {
             $this->errno       = ERR_AUTH_LOGIN;
             $this->output_data = $this->user->getLoginUrl();

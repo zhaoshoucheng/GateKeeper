@@ -164,13 +164,10 @@ class Road extends MY_Controller
     public function getAllRoadDetail()
     {
         $params = $this->input->post(null, true);
-
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
         ]);
-
         $data = $this->roadService->getAllRoadDetail($params);
-
         $this->response($data);
     }
 

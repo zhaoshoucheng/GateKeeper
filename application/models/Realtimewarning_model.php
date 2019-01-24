@@ -194,7 +194,7 @@ class Realtimewarning_model extends CI_Model
     public function groupAvgStopDelayKey($cityId, $date, $hour, $groupId)
     {
         $cityIds = $this->userperm_model->getCityidByGroup($groupId);
-        $junctionIds = $this->userperm_model->getJunctionidByGroup($groupId);
+        $junctionIds = $this->userperm_model->getJunctionidByGroup($groupId,$cityId);
 
         //有城市权限则路口数据为空
         if (in_array($cityId, $cityIds)) {
@@ -311,7 +311,7 @@ class Realtimewarning_model extends CI_Model
         //写入分组数据
         $groupIds = $this->userperm_model->getUserPermAllGroupid();
         foreach ($groupIds as $groupId) {
-            $this->dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionList, $realTimeAlarmsInfoResult);
+            $this->dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionList, $realTimeAlarmsInfoResult,$esStopDelay);
         }
 
         // 写入缓存数据
@@ -329,12 +329,12 @@ class Realtimewarning_model extends CI_Model
         $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
     }
 
-    public function dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionListOri, $realTimeAlarmsInfoResultOri)
+    public function dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionListOri, $realTimeAlarmsInfoResultOri, $esStopDelayOri)
     {
         $cityIds = $this->userperm_model->getCityidByGroup($groupId);
-        $junctionIds = $this->userperm_model->getJunctionidByGroup($groupId);
+        $junctionIds = $this->userperm_model->getJunctionidByGroup($groupId,$cityId);
 
-        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",",$cityIds) . "||junctionIds=" . implode(",",$junctionIds) . "||trace_id=" . $traceId . "||message=dealGroupData\n\r";
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",",$cityIds) . "||group_id=" . $groupId . "||junctionIdNum=" . count($junctionIds) . "||trace_id=" . $traceId . "||message=dealGroupData\n\r";
 
         //有城市权限则路口数据为空
         if (in_array($cityId, $cityIds)) {
@@ -350,16 +350,24 @@ class Realtimewarning_model extends CI_Model
 
         //生成平均延误曲线数据
         //因为ES直接查询当天所有批次会影响到集群（真弱鸡！）所有要每次只取一个批次进行追加缓存。
-        $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour, $junctionIds);
+        $avgStopDelayList = $this->realtime_model->avgStopdelayByJunctionId($cityId, $date, $hour, $junctionIds);
         if (empty($avgStopDelayList)) {
             echo "生成 usergroup avg(stop_delay) group by hour failed! \n\rgroupId={$groupId} cityId={$cityId} date={$date} hour={$hour}\n\r";
+            $avgStopDelayList = [];
         }
         $esStopDelay = $this->redis_model->getData($avgStopDelayKey);
         if (!empty($esStopDelay)) {
             $esStopDelay = json_decode($esStopDelay, true);
         }
+        //没有数据权限
+        if(!in_array($cityId,$cityIds) && empty($junctionIds)){
+            $avgStopDelayList = [];
+        }
         if(!empty($avgStopDelayList)){
             $esStopDelay[] = $avgStopDelayList;
+        }
+        if (in_array($cityId, $cityIds)) {
+            $esStopDelay = $esStopDelayOri;
         }
 
         //过滤实时指标数据
@@ -377,7 +385,7 @@ class Realtimewarning_model extends CI_Model
         $realTimeAlarmsInfoResult = [];
         foreach ($realTimeAlarmsInfoResultOri as $k=>$rtItem){
             if(in_array($rtItem["logic_junction_id"],$junctionIds) || in_array($cityId, $cityIds)){
-                $realTimeAlarmsInfoResult[$k] = $realtimeJunctionItem;
+                $realTimeAlarmsInfoResult[$k] = $rtItem;
             }
         }
         $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
@@ -397,11 +405,14 @@ class Realtimewarning_model extends CI_Model
         $result['junction_total'] = $junctionTotal;
         $result['alarm_total'] = 0;
         $result['congestion_total'] = 0;
+        $result['amble_total'] = 0;
         foreach ($jDataList as $datum) {
             // 报警数
             $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
             // 拥堵数
             $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+            // 缓行数
+            $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
         }
         $junctionSurvey = $result;
 

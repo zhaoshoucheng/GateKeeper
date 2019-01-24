@@ -35,7 +35,7 @@ if ($development == 2) {
     // 配时接口服务器端口
     $timing_port = '8000';
     // 配时接口前缀
-    $timing_ext = '/its';
+    $timing_ext = '/its/signal-mis';
 
     $config['redis'] = [
         'host' => '100.69.239.57',
@@ -79,6 +79,9 @@ if ($development == 2) {
 
     //报警数据历史处理
     $realtime_callback = 'http://10.85.128.81:30101';
+
+    //需要验证城市权限
+    $validateCity = 1;
 } else {
     //测试环境配置
 
@@ -139,6 +142,9 @@ if ($development == 2) {
 
     //报警数据历史处理
     $realtime_callback = 'http://100.90.164.31:8033';
+
+    //需要验证城市权限
+    $validateCity = 0;
 }
 
 $temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -181,8 +187,12 @@ $config['realtime_callback'] = $realtime_callback;
 
 // 报警es接口地址
 $config['alarm_es_interface'] = $alarm_es_interface;
+
 // 报警ES索引
 $config['alarm_es_index'] = $alarm_es_index;
+
+// 是否验证城市权限
+$config['validate_city'] = $validateCity;
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;
@@ -752,7 +762,6 @@ $config['timing_junction_list'] = [
         '7ef723cc51f7616791d7a30f51c9c2fc'=>"黄埔大道西-体育西路",
         'ef2761d061f11a46014a7b920e2cd445'=>"体育西路_天河北路",
         'f04abf18906dfe64a0de80e41164adba'=>"越秀中路_中山四路",
-
     ],
 ];
 

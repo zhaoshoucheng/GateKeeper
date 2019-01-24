@@ -85,7 +85,6 @@ class Common extends MY_Controller
     public function areaData()
     {
         $params = $this->input->post(null, true);
-
         // 校验参数
         $this->validate([
             'areaType' => 'required|is_natural',

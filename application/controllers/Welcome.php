@@ -42,7 +42,27 @@ class Welcome extends CI_Controller
 
     public function ping()
     {
-        //print_r($_SERVER);
+        $redisKey = $_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'];
+        $this->load->model('Redis_model');
+        $permData = $this->Redis_model->getData($redisKey);
+        $this->userPerm = json_decode($permData,true);
+        echo "login INFO:";
+        echo "<pre>";
+        print_r($_COOKIE);
+        echo "</pre>";
+        echo "perm INFO:";
+        echo "<pre>";
+            $userPerm = $this->userPerm;
+            foreach ($userPerm["data"] as $cityId=>$cityPerm){
+                $userPerm["data"][$cityId]["junction_num"] = count(explode(";",$cityPerm["junction_id"]));
+            }
+            print_r($userPerm);
+        echo "</pre>";
+        echo "header INFO:";
+        echo "<pre>";
+        print_r($_SERVER);
+        echo "</pre>";
+        exit;
         $jsonStr='{"errno":0,"errmsg":"","data":{}}';
         echo $jsonStr;
         exit;
