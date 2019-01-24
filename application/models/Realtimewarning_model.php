@@ -334,7 +334,7 @@ class Realtimewarning_model extends CI_Model
         $cityIds = $this->userperm_model->getCityidByGroup($groupId);
         $junctionIds = $this->userperm_model->getJunctionidByGroup($groupId,$cityId);
 
-        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",",$cityIds) . "||junctionIds=" . implode(",",$junctionIds) . "||trace_id=" . $traceId . "||message=dealGroupData\n\r";
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",",$cityIds) . "||group_id=" . $groupId . "||junctionIdNum=" . count($junctionIds) . "||trace_id=" . $traceId . "||message=dealGroupData\n\r";
 
         //有城市权限则路口数据为空
         if (in_array($cityId, $cityIds)) {
