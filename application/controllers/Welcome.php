@@ -42,7 +42,7 @@ class Welcome extends CI_Controller
 
     public function ping()
     {
-        $redisKey = $_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'];
+        $redisKey = !empty($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY']) ?  $_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'] : "";
         $this->load->model('Redis_model');
         $permData = $this->Redis_model->getData($redisKey);
         $this->userPerm = json_decode($permData,true);
@@ -53,8 +53,12 @@ class Welcome extends CI_Controller
         echo "perm INFO:";
         echo "<pre>";
             $userPerm = $this->userPerm;
-            foreach ($userPerm["data"] as $cityId=>$cityPerm){
-                $userPerm["data"][$cityId]["junction_num"] = count(explode(";",$cityPerm["junction_id"]));
+            if(!empty($userPerm["data"])) {
+                foreach ($userPerm["data"] as $cityId => $cityPerm) {
+                    if (!empty($userPerm["data"][$cityId]["junction_id"])) {
+                        $userPerm["data"][$cityId]["junction_num"] = count(explode(";", $cityPerm["junction_id"]));
+                    }
+                }
             }
             print_r($userPerm);
         echo "</pre>";
