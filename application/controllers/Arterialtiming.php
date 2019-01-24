@@ -107,4 +107,116 @@ class Arterialtiming extends MY_Controller
         $ret['junctions_info'] = $sortJunctions;
         return $this->response($ret);
     }
+
+    /**
+     * 临时方法,下发柳州干线优化配时
+     */
+    public function UpRoadOptTiming()
+    {
+        $this->load->model('timing_model');
+
+        $params = file_get_contents("php://input");
+        $params = json_decode($params,true);
+        $timepoint = $params['time_point'];
+        $junctionList = $params['junction_infos'];
+
+        $date = $params['dates'];
+        $badjunc = [];
+        foreach ($junctionList as $j ){
+            $ret = $this->timing_model->getTimingDataBatch(array(
+                'junction_ids'      => $j['logic_junction_id'],
+                'days'              => end($date),
+                'start_time'        => $timepoint,
+                'end_time'          => $timepoint,
+                'source'            => 1
+            ));
+            $r = self::formatNewCycle($ret[$j['logic_junction_id']][0],$j['cycle'],$j['offset']);
+            $resp = $this->timing_model->uploadTimingData($r);
+            if($resp == False){
+                $badjunc[] = $j['logic_junction_id'];
+            }
+        }
+        if(!empty($badjunc)){
+            return $this->response(array(), ERR_UNKNOWN, $badjunc);
+        }
+
+        return $this->response("success");
+    }
+
+    public function formatNewCycle($junctionInfo,$newCycle,$newOffset)
+    {
+        $oldCycle = $junctionInfo['time_plan'][0]['plan_detail']['extra_timing']['cycle'];
+        $movementMap = [];
+
+        $newMoveMap = [];
+        $finalMove = [];
+
+        $stageMap = [];
+        $addMap = [];
+
+        foreach ($junctionInfo['time_plan'][0]['plan_detail']['movement_timing'] as $k => $v){
+            $movementMap[$k]=$v[0]['duration'];
+
+            if(($v[0]['duration']+$v[0]['start_time']) == $oldCycle){
+                $finalMove[] = $k;
+            }
+        }
+
+        $change = $newCycle - $oldCycle;
+
+        foreach ($movementMap as $k => $v){
+            $newMoveMap[$k] = round($change*$v/$oldCycle);
+        }
+
+        foreach ($junctionInfo['time_plan'][0]['plan_detail']['movement_timing'] as $k => $v){
+            $junctionInfo['time_plan'][0]['plan_detail']['movement_timing'][$k][0]['duration'] = $v[0]['duration'] + $newMoveMap[$k];
+            $addMap[$k] = $newMoveMap[$k];
+            $stageMap[$v[0]['start_time']][] = $k;
+        }
+
+        ksort($stageMap);
+        $stageAdd = [];
+        $stageOne = 0;
+        foreach ($stageMap as $k => $v){
+            $stageOne = $k;
+            break;
+        }
+
+        foreach ($stageMap as $k => $v){
+            if($k == $stageOne){
+                foreach ($v as $mid){
+                    $stageAdd[$mid] = 0;
+                }
+                continue;
+            }
+            foreach ($stageMap as $k2 => $v2){
+                if ($k2 > $k){
+                    foreach ($v2 as $mid){
+                        if(!isset($stageAdd[$mid])){
+                            $stageAdd[$mid]=0;
+                        }
+                        $stageAdd[$mid] += $newMoveMap[$v[0]];
+                    }
+                }
+            }
+        }
+
+
+
+        foreach ($junctionInfo['time_plan'][0]['plan_detail']['movement_timing'] as $k => $v){
+            $junctionInfo['time_plan'][0]['plan_detail']['movement_timing'][$k][0]['start_time'] = $v[0]['start_time']+$stageAdd[$k];
+            if(in_array($k,$finalMove) && $v[0]['start_time']+$stageAdd[$k]+$v[0]['duration'] != $newCycle){
+                $junctionInfo['time_plan'][0]['plan_detail']['movement_timing'][$k][0]['duration'] = $newCycle-$v[0]['start_time']-$stageAdd[$k];
+            }
+
+        }
+
+
+        $junctionInfo['time_plan'][0]['plan_detail']['extra_timing']['cycle'] = $newCycle;
+        $junctionInfo['time_plan'][0]['plan_detail']['extra_timing']['offset'] = $newOffset;
+
+
+
+        return $junctionInfo;
+    }
 }

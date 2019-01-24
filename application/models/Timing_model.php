@@ -574,4 +574,16 @@ class Timing_model extends CI_Model
         return $timing['data'];
     }
 
+    /**
+     * 临时需求,上传优化后的配时
+     */
+    public function uploadTimingData($data)
+    {
+        $authorization = "Authorization: Basic ".base64_encode("test:1234");
+        $res = httpPOST('http://10.148.28.204:8001/xinkong/profile/static/release',$data,0,'json',array($authorization));
+
+        return $res;
+
+    }
+
 }
