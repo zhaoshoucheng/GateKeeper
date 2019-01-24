@@ -289,23 +289,6 @@ class Waymap_model extends CI_Model
     }
 
     /**
-     * 获取最新地图版本号
-     *
-     * @param string $date 日期
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public function getMapVersion($date)
-    {
-        $data = compact('date');
-
-        $url = $this->waymap_interface . '/signal-map/map/getDateVersion';
-
-        return $this->post($url, $data);
-    }
-
-    /**
      * 获取多个links的geo数据
      *
      * @param string $link_ids
