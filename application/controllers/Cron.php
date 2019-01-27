@@ -203,10 +203,10 @@ class Cron extends CI_Controller
                 //union checker
                 global $realTimeAlarmListCount,$junctionSurveyAlarmTotal,$junctionTotal;
                 if($realTimeAlarmListCount>0 && $junctionSurveyAlarmTotal==0){
-                    throw new Exception("city_id={$city_id} union checker false", 1);
+                    throw new Exception("city_id={$city_id} realTimeAlarmListCount={$realTimeAlarmListCount} junctionSurveyAlarmTotal={$junctionSurveyAlarmTotal} union checker false", 1);
                 }
                 if($realTimeAlarmListCount==0 && $junctionSurveyAlarmTotal>0){
-                    throw new Exception("city_id={$city_id} union checker false", 1);
+                    throw new Exception("city_id={$city_id} realTimeAlarmListCount={$realTimeAlarmListCount} junctionSurveyAlarmTotal={$junctionSurveyAlarmTotal} union checker false", 1);
                 }
                 //高峰时段数据异常
                 if(in_array(date("H"), [8,9,10,17,18,19,20])){
