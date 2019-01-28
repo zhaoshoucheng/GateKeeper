@@ -192,7 +192,7 @@ class Cron extends CI_Controller
                         'data' => json_encode($retArr),
                     ];
 
-                    $message = sprintf("get %s success.",json_encode($item));
+                    $message = sprintf("check %s success.",json_encode($item));
                     echo "[INFO] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
                 }
                 if (!file_exists($basedir)) {
