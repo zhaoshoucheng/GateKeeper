@@ -177,9 +177,9 @@ class Cron extends CI_Controller
 
                     //checker
                     $checker = $item['checker'];
-                    $checkerInfo = $item['checkerInfo'];
                     if(!$checker($ret)){
-                        throw new Exception("checkerInfo:{$checkerInfo}, rule:".json_encode($item)." checker false, content:{$ret}", 1);
+                        $message = sprintf("check %s failure. content:%s",json_encode($item),$ret);
+                        throw new Exception($message, 1);
                     }
 
                     //设置缓存时间
@@ -192,7 +192,7 @@ class Cron extends CI_Controller
                         'data' => json_encode($retArr),
                     ];
 
-                    $message = sprintf("checkerInfo:%s get %s success.",$checkerInfo,json_encode($item));
+                    $message = sprintf("get %s success.",json_encode($item));
                     echo "[INFO] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
                 }
                 if (!file_exists($basedir)) {
