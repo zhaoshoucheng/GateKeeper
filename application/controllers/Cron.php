@@ -177,8 +177,9 @@ class Cron extends CI_Controller
 
                     //checker
                     $checker = $item['checker'];
+                    $checkerInfo = $item['checkerInfo'];
                     if(!$checker($ret)){
-                        throw new Exception(json_encode($item)." checker false", 1);
+                        throw new Exception("checkerInfo:{$checkerInfo}, rule:".json_encode($item)." checker false, content:{$ret}", 1);
                     }
 
                     //设置缓存时间
@@ -230,8 +231,9 @@ class Cron extends CI_Controller
                 echo "[INFO] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
             } catch (Exception $e) {
                 $message = $e->getMessage();
+                $host = gethostname();
                 echo "[ERROR] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
-                $data = array('msgtype' => 'text', 'text' => array('content' => "兜底数据写入报警: ".$message));
+                $data = array('msgtype' => 'text', 'text' => array('content' => "兜底数据写入报警: ".$message." host={$host}"));
                 httpPOST($webhook, $data, 0, 'json');
                 com_log_warning('downgradeWrite_error', 0, $e->getMessage());
                 continue;
