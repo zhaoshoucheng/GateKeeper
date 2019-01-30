@@ -335,8 +335,13 @@ class Junctioncomparison_model extends CI_Model
             $maxValue,             // 差距最大值
             $minValue,             // 差距最小值
         ];
+        // 指标统计方案所需数据
+        $summary = [
+            'max' => $maxValue,
+            'min' => $minValue,
+        ];
         $result['describe_info'] = $quotaConf[$info['quotaKey']]['describe']($describe);
-        $result['summary_info'] = $quotaConf[$info['quotaKey']]['name'] . '由' . $maxValue . '变化为' . $minValue;
+        $result['summary_info'] = $quotaConf[$info['quotaKey']]['name'] . $quotaConf[$info['quotaKey']]['summary']($summary);
 
         return $result;
     }
