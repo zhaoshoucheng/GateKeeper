@@ -97,6 +97,11 @@ class Realtimewarning extends Inroute_Controller
         $cityId  = $params["city_id"];
         $traceId = $params["trace_id"];
         $uid     = $params["uid"];
+        if (ENVIRONMENT == 'development') {
+            if($uid!="traj_index_pro"){
+                throw new \Exception('invalid_uid');
+            }
+        }
 
         exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}/' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
