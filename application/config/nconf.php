@@ -113,7 +113,7 @@ if ($development == 2) {
 
     // es
     $es_server = '10.89.236.25';
-    $es_port   = '8087';
+    $es_port   = '8090';
     $es_ext    = '';
 
     // new timing
