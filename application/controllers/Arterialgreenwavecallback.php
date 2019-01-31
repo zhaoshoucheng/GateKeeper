@@ -27,28 +27,8 @@ class Arterialgreenwavecallback extends CI_Controller
     public function fillData()
     {
         $params = $this->input->post(NULL, TRUE);
-        $result = $this->traj_model->fillData($params);
-        return $this->response($result);
-
-        $params = $this->input->post(NULL, TRUE);
-
-        if (!empty($params['data']) && !empty($params['key'])) {
-            $res = $this->redis_model->setData($params['key'], $params['data']);
-            if (!$res) {
-                $return = ['errno'=>100400, 'errmsg'=>'result:'.json_encode($res) . 'params:' . json_encode($params), 'data'=>['']];
-                $content = "form_data : " . json_encode($params);
-                $content .= '<br> result : ' . json_encode($res);
-                sendMail('ningxiangbing@didichuxing.com', 'logs: 干线绿波结果存储失败', $content);
-                echo json_encode($return);
-                exit;
-            }
-        } else {
-            $return = ['errno'=>100400, 'errmsg'=>'key 或 data 为空', 'data'=>['']];
-            echo json_encode($return);
-            exit;
-        }
-
-        $result = ['errno'=>0, 'errmsg'=>'', 'data'=>['success']];
+        $data = $this->traj_model->fillData($params);
+        $result = ['errno'=>0, 'errmsg'=>'', 'data'=>$data];
         echo json_encode($result);
         exit;
     }
