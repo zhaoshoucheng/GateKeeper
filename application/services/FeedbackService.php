@@ -21,6 +21,7 @@ class FeedbackService extends BaseService
 
         $this->load->model('feedback_model');
         $this->load->config('nconf');
+        $this->load->helper('http_helper');
     }
 
     /**

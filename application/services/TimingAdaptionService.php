@@ -259,7 +259,7 @@ class TimingAdaptionService extends BaseService
         $url = $this->config->item('signal_mis_interface') . '/TimingAdaptation/uploadSignalTiming';
 
         // 通过路网接口获取数据
-        $res = httpPOST($url, $params);
+        $res = ($url, $params);
 
         if (!$res) {
             throw new \Exception('配时下发失败', ERR_DEFAULT);
