@@ -47,6 +47,35 @@ class FeedbackService extends BaseService
      * @return bool
      * @throws \Exception
      */
+    public function handleOptFeedback($params)
+    {
+        $params['description'] = $params['description'] ?? '';
+        $params['user_id']     = get_instance()->username;
+
+        $res = $this->feedback_model->insertOptFeedback($params);
+
+        if (!$res) {
+            throw new \Exception('优化方案反馈入库失败', ERR_DATABASE);
+        }
+
+        $arr = ['content'=>"@18562830658 有反馈"];
+        $result = [
+            'msgtype'=>'text',
+            'text'=>$arr
+        ];
+        $data = json_encode($result);
+
+        $url = "https://oapi.dingtalk.com/robot/send?access_token=f9947bd6e25c7ee0264108e242999a89d425e347eaea257e9e99405c54cab97f";
+        httpPOST($url, $data,0,'json');
+        return [];
+    }
+
+    /**
+     * @param $params
+     *
+     * @return bool
+     * @throws \Exception
+     */
     public function insertFeedback($params)
     {
         $params['description'] = $params['desc'] ?? '';
@@ -55,6 +84,19 @@ class FeedbackService extends BaseService
         if (isset($params['desc'])) {
             unset($params['desc']);
         }
+
+        $arr = array(
+            'content'=>"@18562830658 有反馈"
+        );
+
+        $result = array(
+            'msgtype'=>'text',
+            'text'=>$arr
+        );
+        $data = json_encode($result,JSON_UNESCAPED_UNICODE);
+
+        $url = "https://oapi.dingtalk.com/robot/send?access_token=f9947bd6e25c7ee0264108e242999a89d425e347eaea257e9e99405c54cab97f";
+        httpPOST($url, $data,0,'json');
 
         $res = $this->feedback_model->insertFeedback($params);
 
