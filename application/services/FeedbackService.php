@@ -67,7 +67,8 @@ class FeedbackService extends BaseService
         $data = json_encode($result);
 
         $url = "https://oapi.dingtalk.com/robot/send?access_token=f9947bd6e25c7ee0264108e242999a89d425e347eaea257e9e99405c54cab97f";
-        httpPOST($url, $data,0,'json');
+        $aaa = httpPOST($url, $data,0,'json');
+        var_dump($aaa);
         return [];
     }
 
