@@ -245,8 +245,10 @@ class Realtimewarning_model extends CI_Model
         $junctionSurveyKey = "new_its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
         $junctionListKey = "new_its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
         $lastHourKey = "new_its_realtime_lasthour_{$cityId}";
+        $lastScheduleKey = "new_its_schedule_lasthour_{$cityId}";
         $realTimeAlarmRedisKey = "new_its_realtime_alarm_{$cityId}";
         $realTimeAlarmBakKey = "new_its_realtime_alarm_{$cityId}_{$date}_{$hour}";
+        $this->redis_model->setEx($lastScheduleKey, $hour, 24 * 3600);  //最新调度hour
 
         //生成平均延误曲线数据
         //因为ES直接查询当天所有批次会影响到集群（真弱鸡！）所有要每次只取一个批次进行追加缓存。
