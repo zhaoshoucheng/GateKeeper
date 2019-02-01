@@ -9,7 +9,7 @@
 class Feedback_model extends CI_Model
 {
     protected $tb = 'user_feedback';
-    protected $opttb = 'opt_plan_feedback';
+    protected $opttb = 'opt_feedback';
 
     /**
      * @var CI_DB_query_builder
