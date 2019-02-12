@@ -59,11 +59,18 @@ class FeedbackService extends BaseService
             throw new \Exception('优化方案反馈入库失败', ERR_DATABASE);
         }
 
-        $data = [];
-        $data['msgtype'] = 'text';
-        $data['text']['content'] = '有反馈';
-        $data['at']['atMobiles'] = ["18562830658"];
-        $data['at']['isAtAll'] = false;
+        $data = [
+            'msgtype' => 'text',
+            'text'    => [
+                'content' => '有反馈',
+            ],
+            'at'      => [
+                'atMobiles' => [
+                    '18562830658',
+                ],
+                'isAtAll'   => false,
+            ],
+        ];
 
         $url = "https://oapi.dingtalk.com/robot/send?access_token=f9947bd6e25c7ee0264108e242999a89d425e347eaea257e9e99405c54cab97f";
         httpPOST($url, $data,0,'json');
