@@ -42,6 +42,25 @@ class Feedback extends MY_Controller
     }
 
     /**
+     * 优化方案反馈入库并通知
+     *
+     * @throws Exception
+     */
+    public function handleOptFeedback()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'isSatisfy' => 'required|in_list[0,1]',
+        ]);
+
+        $data = $this->feedbackService->handleOptFeedback($params);
+
+        $this->response($data);
+    }
+
+    /**
      * 获取用户反馈类型
      */
     public function getTypes()
