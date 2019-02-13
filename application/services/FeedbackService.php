@@ -62,7 +62,7 @@ class FeedbackService extends BaseService
         $data = [
             'msgtype' => 'text',
             'text'    => [
-                'content' => "结果：" . ($params['isSatisfy']==1?'合理':'不合理') . "，反馈：" . ($params['description']?$params['description']:'空'),
+                'content' => "结果：" . ($params['isSatisfy']==1?'合理':'不合理') . "; 反馈：" . ($params['description']?$params['description']:'空'),
             ],
             'at'      => [
                 'atMobiles' => [
@@ -72,8 +72,7 @@ class FeedbackService extends BaseService
             ],
         ];
 
-        //$url = "https://oapi.dingtalk.com/robot/send?access_token=f9947bd6e25c7ee0264108e242999a89d425e347eaea257e9e99405c54cab97f";
-        $url = "https://oapi.dingtalk.com/robot/send?access_token=048d5a452c9a01d8b7aa39c7c953c30a2cdc9b4d713981b98fe8b9682593129e";
+        $url = "https://oapi.dingtalk.com/robot/send?access_token=f9947bd6e25c7ee0264108e242999a89d425e347eaea257e9e99405c54cab97f";
         httpPOST($url, $data,0,'json');
         return [];
     }
