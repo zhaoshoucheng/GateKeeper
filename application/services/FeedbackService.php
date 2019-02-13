@@ -62,7 +62,7 @@ class FeedbackService extends BaseService
         $data = [
             'msgtype' => 'text',
             'text'    => [
-                'content' => '有反馈',
+                'content' => "结果：" . ($params['isSatisfy']==1?'合理':'不合理') . "; 反馈：" . ($params['description']?$params['description']:'空'),
             ],
             'at'      => [
                 'atMobiles' => [
