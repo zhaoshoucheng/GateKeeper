@@ -50,8 +50,11 @@ $config['checkItems'] = [
             if(!isset($ret['errno']) || $ret['errno']!=0){
                 return false;
             }
-            if(!isset($ret['data']) || count($ret['data'])==0){
-                return false;
+            //避免误报
+            if(intval(date("H"))>=6){
+                if(!isset($ret['data']) || count($ret['data'])==0){
+                    return false;
+                }
             }
             return true;
         },
@@ -69,8 +72,10 @@ $config['checkItems'] = [
             if(!isset($ret['errno']) || $ret['errno']!=0){
                 return false;
             }
-            if(!isset($ret['data']) || count($ret['data'])==0){
-                return false;
+            if(intval(date("H"))>=6){
+                if(!isset($ret['data']) || count($ret['data'])==0){
+                    return false;
+                }
             }
             return true;
         },
