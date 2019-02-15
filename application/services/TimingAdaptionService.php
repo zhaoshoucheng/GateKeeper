@@ -394,6 +394,7 @@ class TimingAdaptionService extends BaseService
             throw new \Exception('该路口配时错误', ERR_DEFAULT);
         }
 
+        //指定路口自适应配时信息
         $currentInfo = json_decode($res['current_info'], true);
 
         // 获取基准配时数据
@@ -427,12 +428,13 @@ class TimingAdaptionService extends BaseService
             '3' => '正在切换基本方案',
         ];
 
-        // 上次下发时间
+        // 上次方案下发时间: 信号机的成功下发时间
         $lastUploadTime = strtotime($res['down_time']) > 0
             ? $res['down_time']
             : 'N/A';
 
         // 预计下次下发时间
+        // 如果距离上次下发5分钟以内就是上次结果, 否则就是当前时间+5分钟
         $nextUploadTime = $lastUploadTime == 'N/A'
             ? time()
             : ((strtotime($res['down_time']) > (time() - 5 * 60)
@@ -440,9 +442,13 @@ class TimingAdaptionService extends BaseService
                     : time()) + 5 * 60);
 
         return [
+            //方案获取时间
             'get_current_plan_time' => date('H:i:s'),
+            //上次方案下发时间  : 信号机的成功下发时间
             'last_upload_time' => $lastUploadTime == 'N/A' ? 'N/A' : date('H:i:s', strtotime($lastUploadTime)),
+            //优化方案生成时间???  这个就是: 优化配时保存时间
             'adapte_time' => isset($res['timing_update_time']) ? date('H:i:s', strtotime($res['timing_update_time'])) : 'N/A',
+            //预计下次方案下发时间
             'next_upload_time' => date('H:i:s', $nextUploadTime),
             'status' => $status,
             'tmp' => $tmp,

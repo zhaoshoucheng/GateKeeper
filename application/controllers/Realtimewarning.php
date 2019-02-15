@@ -9,6 +9,31 @@ class Realtimewarning extends Inroute_Controller
         parent::__construct();
         $this->load->model('realtimewarning_model');
         $this->load->config('nconf');
+        $this->load->model('redis_model');
+    }
+
+    public function getNewHour(){
+        $params   = array_merge($this->input->get(), $this->input->post());
+        $validate = Validate::make($params, [
+            'city_id' => 'min:1',
+            'uid' => 'min:1',
+        ]);
+        if (!$validate['status']) {
+            $output = [
+                'errno' => ERR_PARAMETERS,
+                'errmsg' => $validate['errmsg'],
+            ];
+            echo json_encode($output);
+            return;
+        }
+
+        $hour = $this->redis_model->getHour($params["city_id"]);
+        $output = [
+            'errno' => ERR_SUCCESS,
+            'errmsg' => "",
+            'data' => $hour,
+        ];
+        echo json_encode($output);
     }
 
     public function callback()
