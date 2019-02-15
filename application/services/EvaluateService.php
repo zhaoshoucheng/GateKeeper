@@ -365,6 +365,14 @@ class EvaluateService extends BaseService
         return $result;
     }
 
+    public function reverse_arrays($params)
+    {
+        foreach ($params as $key=>$val){
+            $params[$key] = array_reverse($val);
+        }
+        return $params;
+    }
+
     /**
      * 指标评估对比
      *
@@ -486,7 +494,7 @@ class EvaluateService extends BaseService
                     $hour,
                 ];
             }, $avgArr['average']['base']);
-            $result['average']['base'] = array_values($result['average']['base']);
+            $result['average']['base'] = $this->reverse_arrays(array_values($result['average']['base']));
         }
         // 处理评估平均值
         if (!empty($avgArr['average']['evaluate'])) {
@@ -504,7 +512,7 @@ class EvaluateService extends BaseService
                         $hour,
                     ];
                 }, $v);
-                $result['average']['evaluate'][$k + 1] = array_values($result['average']['evaluate'][$k + 1]);
+                $result['average']['evaluate'][$k + 1] = $this->reverse_arrays(array_values($result['average']['evaluate'][$k + 1]));
             }
         }
 
@@ -512,7 +520,7 @@ class EvaluateService extends BaseService
         if (!empty($result['base'])) {
             foreach ($result['base'] as $k => $v) {
                 ksort($result['base'][$k]);
-                $result['base'][$k] = array_values($result['base'][$k]);
+                $result['base'][$k] = $this->reverse_arrays(array_values($result['base'][$k]));
             }
 
             // 补全基准日期
@@ -527,7 +535,7 @@ class EvaluateService extends BaseService
             foreach ($result['evaluate'] as $k => $v) {
                 foreach ($v as $kk => $vv) {
                     ksort($result['evaluate'][$k][$kk]);
-                    $result['evaluate'][$k][$kk] = array_values($result['evaluate'][$k][$kk]);
+                    $result['evaluate'][$k][$kk] = $this->reverse_arrays(array_values($result['evaluate'][$k][$kk]));
                 }
             }
 
