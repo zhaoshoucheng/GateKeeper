@@ -609,7 +609,7 @@ class EvaluateService extends BaseService
         array_unshift($table[0], "日期-时间");
 
         $data = array_map(function ($value) {
-            return array_column($value, 0, 0);
+            return array_column($value, 0, 1);
         }, $data);
 
         foreach ($data as $key => $value) {
