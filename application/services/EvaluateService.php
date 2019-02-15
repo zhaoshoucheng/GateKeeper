@@ -673,7 +673,7 @@ class EvaluateService extends BaseService
 
         if (!empty($data['base'])) {
 
-            $table = getExcelArrayOther($data['base']);
+            $table = $this->getExcelArrayOther($data['base']);
 
             $objSheet->fromArray($table, null, 'A' . $line);
 
@@ -691,7 +691,7 @@ class EvaluateService extends BaseService
         if (!empty($data['evaluate'])) {
 
             foreach ($data['evaluate'] as $datum) {
-                $table = getExcelArrayOther($datum);
+                $table = $this->getExcelArrayOther($datum);
 
                 $objSheet->fromArray($table, null, 'A' . $line);
 
