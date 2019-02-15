@@ -512,7 +512,11 @@ class EvaluateService extends BaseService
         if (!empty($result['base'])) {
             foreach ($result['base'] as $k => $v) {
                 ksort($result['base'][$k]);
-                $result['base'][$k] = array_reverse(array_values($result['base'][$k]));
+                $result_base_day = array_values($result['base'][$k]);
+                foreach ($result_base_day as $key=>$val){
+                    $result_base_day[$key] = array_reverse($val);
+                }
+                $result['base'][$k] = $result_base_day;
             }
 
             // 补全基准日期
@@ -527,7 +531,11 @@ class EvaluateService extends BaseService
             foreach ($result['evaluate'] as $k => $v) {
                 foreach ($v as $kk => $vv) {
                     ksort($result['evaluate'][$k][$kk]);
-                    $result['evaluate'][$k][$kk] = array_reverse(array_values($result['evaluate'][$k][$kk]));
+                    $result_evaluate_tmp = array_values($result['evaluate'][$k][$kk]);
+                    foreach ($result_evaluate_tmp as $key=>$val){
+                        $result_evaluate_tmp[$key] = array_reverse($val);
+                    }
+                    $result['evaluate'][$k][$kk] = $result_evaluate_tmp;
                 }
             }
 
