@@ -54,6 +54,7 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 $route['signalpro/api/Flow/(:any)'] = 'flow/proxy/$1';
 $route['signalpro/api/SignalControl/(:any)'] = 'SignalControl/proxy/$1';
+$route['signalpro/api/machinetiming/(:any)'] = 'machinetiming/proxy/$1';
 $route['signalpro/api/TimingRelease/(:any)'] = 'TimingRelease/proxy/$1';
 $route['signalpro/api/AdaptMovement/(:any)'] = 'AdaptMovement/proxy/$1';
 $route['signalpro/api/AdaptStage/(:any)'] = 'AdaptStage/proxy/$1';
