@@ -169,9 +169,15 @@ class RoadService extends BaseService
         $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
         $results = [];
 
-        foreach ($roadList as $item) {
+        $item = $roadList[0];
+
+//        foreach ($roadList as $item)
+        if (1)
+        {
             $roadId = $item['road_id'];
+            echo $roadId;
             $res = $this->redis_model->getData('Road_' . $roadId);
+            print_r($res);
             if (!$res) {
                 $data = [
                     'city_id' => $cityId,
