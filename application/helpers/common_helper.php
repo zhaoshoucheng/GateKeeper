@@ -326,3 +326,11 @@ if (!function_exists('intToChr')) {
         return $str . chr($index % 26 + $start);
     }
 }
+
+if (!function_exists('getTodayTimeOrFullTime')) {
+    function getTodayTimeOrFullTime(int $timeStamp){
+        return ($timeStamp > strtotime(date("Y-m-d")))
+            ? date("H:i:s",$timeStamp)
+            : date("Y-m-d H:i:s",$timeStamp);
+    }
+}
