@@ -87,6 +87,12 @@ if ($development == 2) {
 
     //需要验证城市权限
     $validateCity = 1;
+
+    //城市自适应配时下发频率配置
+    $city_upsigntime_interval = [
+        "12"=>2,
+        "134"=>2,
+    ];
 } else {
     //测试环境配置
 
@@ -115,6 +121,10 @@ if ($development == 2) {
     $signal_mis_server = '100.90.164.31';
     $signal_mis_port   = '8006';
     $signal_mis_ext    = '/signal-mis';
+    // 线下接口有问题
+    $signal_mis_server = '100.69.238.11';
+    $signal_mis_port   = '8000';
+    $signal_mis_ext    = '/its/signal-mis';
 
     // es
     $es_server = '10.89.236.25';
@@ -155,6 +165,12 @@ if ($development == 2) {
 
     //需要验证城市权限
     $validateCity = 0;
+
+    //城市自适应配时下发频率配置
+    $city_upsigntime_interval = [
+        "12"=>2,
+        "134"=>2,
+    ];
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -204,6 +220,9 @@ $config['alarm_es_index'] = $alarm_es_index;
 
 // 是否验证城市权限
 $config['validate_city'] = $validateCity;
+
+// 城市自适应配时下发频率配置
+$config['city_upsigntime_interval'] = $city_upsigntime_interval;
 
 // 数据服务
 $config['data_service_interface'] = 'http://' . $data_service_server . $data_service_prot . $data_service_ext;

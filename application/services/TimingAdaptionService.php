@@ -47,8 +47,9 @@ class TimingAdaptionService extends BaseService
         $cityId          = $params['city_id'];
         $logicJunctionId = $params['logic_junction_id'];
 
-        $adapt   = $this->getAdaptInfo($logicJunctionId);
-        $current = $this->getCurrentInfo($logicJunctionId);
+        $adapt   = $this->getAdaptInfo($logicJunctionId);   //本地快照
+
+        $current = $this->getCurrentInfo($logicJunctionId); //信号机当前
 
         // 自适应和基准数据合并之后的格式化处理
         $formatTiming = function ($timing) {
@@ -178,13 +179,13 @@ class TimingAdaptionService extends BaseService
         $res = httpGET($address, compact('logic_junction_id'));
 
         if (!$res) {
-            throw new \Exception('路网数据获取失败', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception('获取当前生效配时失败', ERR_REQUEST_WAYMAP_API);
         }
 
         $result = json_decode($res, true);
 
         if (!$result) {
-            throw new \Exception('路网数据错误', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception('生效配时错误', ERR_REQUEST_WAYMAP_API);
         }
 
         if (isset($result['errorCode']) && $result['errorCode'] != 0) {
@@ -211,7 +212,8 @@ class TimingAdaptionService extends BaseService
         $hour = $this->helperService->getLastestHour($cityId);
         $res = $this->realtime_model->getFlowsInFlowIds($cityId, $hour, $logicJunctionId, $logicFlowIds);
         if (!$res) {
-            throw new \Exception('数据获取失败', ERR_DATABASE);
+            com_log_warning('getTwiceStopRate_getFlowsInFlowIds_error', 0, "数据获取失败", array($cityId, $hour, $logicJunctionId, $logicFlowIds));
+            return [];
         }
 
         return array_column($res, 'multiStopRatioUp', 'movementId');
@@ -259,7 +261,7 @@ class TimingAdaptionService extends BaseService
         $url = $this->config->item('signal_mis_interface') . '/TimingAdaptation/uploadSignalTiming';
 
         // 通过路网接口获取数据
-        $res = ($url, $params);
+        $res = httpPOST($url, $params);
 
         if (!$res) {
             throw new \Exception('配时下发失败', ERR_DEFAULT);
@@ -347,7 +349,7 @@ class TimingAdaptionService extends BaseService
     }
 
     /**
-     * 获取上一次配时下发状态
+     * 获取路口配时成功下发时间
      *
      * @param $logic_junction_id
      *
@@ -361,7 +363,7 @@ class TimingAdaptionService extends BaseService
         $res = httpGET($url, compact('logic_junction_id'));
 
         $res = json_decode($res, true);
-
+//        var_dump($res);exit;
         if (!$res || $res['errorCode'] != 0) {
             throw new \Exception('无法获取配时下发状态', ERR_DEFAULT);
         }
@@ -381,7 +383,7 @@ class TimingAdaptionService extends BaseService
     {
         $logicJunctionId = $params['logic_junction_id'];
 
-        // 获取数据源
+        // 获取上次优化配时结果
         $res = $this->adapt_model->getAdaptByJunctionId($logicJunctionId);
 
         // 没有数据
@@ -394,11 +396,18 @@ class TimingAdaptionService extends BaseService
             throw new \Exception('该路口配时错误', ERR_DEFAULT);
         }
 
-        //指定路口自适应配时信息
         $currentInfo = json_decode($res['current_info'], true);
 
-        // 获取基准配时数据
+        // 获取路口配时成功下发时间
         $currentResult = $this->getCurrentUpdateResult($logicJunctionId);
+
+        // 获取信号机生效配时
+        $currentTimingInfo = $this->getCurrentTimingInfo($params);
+
+        // 获取方案时间
+        $planTime = !empty($currentTimingInfo["start_time"])
+            ? getTodayTimeOrFullTime($currentTimingInfo["start_time"])
+            : "N/A";
 
         if (!$params['is_open']) {
             // 路口下发按钮未开启
@@ -428,28 +437,34 @@ class TimingAdaptionService extends BaseService
             '3' => '正在切换基本方案',
         ];
 
-        // 上次方案下发时间: 信号机的成功下发时间
-        $lastUploadTime = strtotime($res['down_time']) > 0
-            ? $res['down_time']
-            : 'N/A';
+        // 下发频率获取
+        $uploadInterval = 2;
 
+        // 路口方案上次下发时间
+        $lastUploadTime = !empty($res["down_time"])
+            ? getTodayTimeOrFullTime(strtotime($res["down_time"]))
+            : "N/A";
+        
         // 预计下次下发时间
-        // 如果距离上次下发5分钟以内就是上次结果, 否则就是当前时间+5分钟
-        $nextUploadTime = $lastUploadTime == 'N/A'
-            ? time()
-            : ((strtotime($res['down_time']) > (time() - 5 * 60)
-                    ? strtotime($res['down_time'])
-                    : time()) + 5 * 60);
+        // 上次无下发时,显示当前时间
+        // 否则,显示上次下发+2分钟
+        $nextUploadTime = !isset($res['timing_update_time'])
+            ? getTodayTimeOrFullTime(time())
+            : getTodayTimeOrFullTime(strtotime($res['timing_update_time']) + $uploadInterval * 60);
+
+        $adapteTime = isset($res['timing_update_time'])
+            ? getTodayTimeOrFullTime(strtotime($res['timing_update_time']))
+            : 'N/A';
 
         return [
             //方案获取时间
-            'get_current_plan_time' => date('H:i:s'),
-            //上次方案下发时间  : 信号机的成功下发时间
-            'last_upload_time' => $lastUploadTime == 'N/A' ? 'N/A' : date('H:i:s', strtotime($lastUploadTime)),
-            //优化方案生成时间???  这个就是: 优化配时保存时间
-            'adapte_time' => isset($res['timing_update_time']) ? date('H:i:s', strtotime($res['timing_update_time'])) : 'N/A',
+            'get_current_plan_time' => $planTime,
+            //上次方案下发时间(信号机的成功下发时间)
+            'last_upload_time' => $lastUploadTime,
+            //优化方案保存生成时间 == 优化方案下发时间 (是否下发取决于开关)
+            'adapte_time' => $adapteTime,
             //预计下次方案下发时间
-            'next_upload_time' => date('H:i:s', $nextUploadTime),
+            'next_upload_time' => $nextUploadTime,
             'status' => $status,
             'tmp' => $tmp,
             'message' => $messages[$status],
