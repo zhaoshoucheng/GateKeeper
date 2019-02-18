@@ -167,8 +167,6 @@ class RoadService extends BaseService
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
 
         $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
-        echo print_r($roadList);
-        echo '<hr>';
         $results = [];
 
         foreach ($roadList as $item) {
@@ -218,15 +216,19 @@ class RoadService extends BaseService
         echo '<hr>';
 
         $maxWaymapVersion = $this->waymap_model->getLastMapVersion();
-        echo print_r($maxWaymapVersion);
+        echo $maxWaymapVersion;
         echo '<hr>';
 
-//        if ($params['show_type']){
-//            $IdsLength = sizeof($junctionIdList);
-//            if ($IdsLength > 1) {
-//                $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[0], 'all', 1);
-//            }
-//        }
+        if ($params['show_type']){
+            $IdsLength = sizeof($junctionIdList);
+            echo $IdsLength;
+            echo '<hr>';
+            if ($IdsLength > 1) {
+                $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[0], 'all', 1);
+                echo print_r($juncMovements);
+                echo '<hr>';
+            }
+        }
 
         $res = $this->waymap_model->getConnectPath($cityId, $maxWaymapVersion, $junctionIdList);
 
