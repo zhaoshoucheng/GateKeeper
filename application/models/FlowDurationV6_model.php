@@ -33,10 +33,38 @@ class FlowDurationV6_model extends CI_Model
      * @return array
      * @throws Exception
      */
-    public function getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, $groupBy, $select = '*')
+    public function getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, $groupBy, $quotaKey = '', $select = '*', $type = 'quota')
     {
+        if ($cityId == 12) { // 济南先试行数据服务
+            $url = $this->config->item('data_service_interface');
+            $dates = array_values($dates);
+            if ($type == 'detail') {
+                $data = [
+                    'city_id' => $cityId,
+                    'select_column' => $select,
+                    'logic_junction_id' => $logicJunctionId,
+                    'logic_flow_id' => $logicFlowId,
+                    'date' => $dates,
+                    'engine' => 'elastic',
+                ];
+                return httpPOST($url . '/getQuotaEvaluateDetail', $data, 0, 'json');
+            } else {
+                $data = [
+                    'city_id' => $cityId,
+                    'select_column' => $select,
+                    'quota' => $quotaKey,
+                    'logic_junction_id' => $logicJunctionId,
+                    'group_by' => 'logic_junction_id, hour, date',
+                    'date' => $dates,
+                    'engine' => 'elastic',
+                ];
+                return httpPOST($url . '/getQuotaEvalute', $data, 0, 'json');
+            }
+        }
         $this->isExisted($cityId);
-
+        if (!empty($quotaKey)) {
+            $select .= ', avg(' . $quotaKey . ') as ' . $quotaKey;
+        }
         $this->db->select($select)
             ->from($this->tb . $cityId)
             ->where('logic_junction_id', $logicJunctionId);
@@ -83,9 +111,27 @@ class FlowDurationV6_model extends CI_Model
      * @return array
      * @throws Exception
      */
-    public function getQuotaByJunction($cityId, $logicJunctionId, $dates, $hours, $select = '*')
+    public function getQuotaByJunction($cityId, $logicJunctionId, $dates, $hours, $quotaKey = '', $select = '*')
     {
+        if ($cityId == 12) {
+            $data = [
+                'city_id' => $cityId,
+                'select_column' => $select,
+                'quota' => $quotaKey,
+                'logic_junction_id' => $logicJunctionId,
+                'group_by' => 'logic_flow_id, hour',
+                'order_by' => 'logic_flow_id, hour',
+                'traj_count_value' => 10,
+                'date' => $dates,
+                'hour' => $hours,
+                'engine' => 'elastic',
+            ];
+            $url = $this->config->item('data_service_interface');
+            return httpPOST($url . '/getFlowQuota', $data, 0, 'json');
+        }
         $this->isExisted($cityId);
+
+        $select .= ', sum('.$quotaKey.' * traj_count) / sum(traj_count) as ' . $quotaKey;
         return $this->db->select($select)
             ->from($this->tb . $cityId)
             ->where('logic_junction_id', $logicJunctionId)
