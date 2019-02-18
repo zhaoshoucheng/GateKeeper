@@ -112,7 +112,7 @@ class Junctioncomparison_model extends CI_Model
                     $result['dataList'][$k]['base_list'] = $newBaseQuotaData[$k][$hour] ?? '';
                     $value = 'null';
                     if (isset($newBaseQuotaData[$k][$hour]) && intval($newBaseQuotaData[$k][$hour]) >= 0) {
-                        $value = $quotaConf[$info['quotaKey']]['round']($newBaseQuotaData[$k][$hour]);
+                        $value = $quotaConf[$data['quota_key']]['round']($newBaseQuotaData[$k][$hour]);
                     }
                     $result['dataList'][$k]['base'][] = [
                         $value,
@@ -130,7 +130,7 @@ class Junctioncomparison_model extends CI_Model
                     $result['dataList'][$k]['evaluate_list'][$hour] = $newEvaluateQuotaData[$k][$hour] ?? '';
                     $value = 'null';
                     if (isset($newEvaluateQuotaData[$k][$hour]) && intval($newEvaluateQuotaData[$k][$hour]) >= 0) {
-                        $value = $quotaConf[$info['quotaKey']]['round']($newEvaluateQuotaData[$k][$hour]);
+                        $value = $quotaConf[$data['quota_key']]['round']($newEvaluateQuotaData[$k][$hour]);
                     }
                     $result['dataList'][$k]['evaluate'][] = [
                         $value,
@@ -141,14 +141,6 @@ class Junctioncomparison_model extends CI_Model
                 $result['dataList'][$k]['evaluate_list'] = [];
                 $result['dataList'][$k]['evaluate'] = [];
             }
-
-            if (empty($formatData[$k]['evaluate_time_list']) && empty($formatData[$k]['base_time_list'])) {
-                unset($formatData[$k]);
-            }
-        }
-
-        if (empty($formatData)) {
-            return (object)[];
         }
 
         $infoData = [
