@@ -41,23 +41,23 @@ class FlowDurationV6_model extends CI_Model
             $res = [];
             if ($type == 'detail') {
                 $data = [
-                    'city_id' => $cityId,
-                    'select_column' => $select,
+                    'city_id'           => (int)$cityId,
+                    'select_column'     => $select,
                     'logic_junction_id' => $logicJunctionId,
-                    'logic_flow_id' => $logicFlowId,
-                    'date' => $dates,
-                    'engine' => 'elastic',
+                    'logic_flow_id'     => $logicFlowId,
+                    'date'              => $dates,
+                    'engine'            => 'elastic',
                 ];
                 $res = httpPOST($url . '/getQuotaEvaluateDetail', $data, 0, 'json');
             } else {
                 $data = [
-                    'city_id' => $cityId,
-                    'select_column' => $select,
-                    'quota' => $quotaKey,
+                    'city_id'           => (int)$cityId,
+                    'select_column'     => $select,
+                    'quota'             => $quotaKey,
                     'logic_junction_id' => $logicJunctionId,
-                    'group_by' => 'logic_junction_id, hour, date',
-                    'date' => $dates,
-                    'engine' => 'elastic',
+                    'group_by'          => 'logic_junction_id, hour, date',
+                    'date'              => $dates,
+                    'engine'            => 'elastic',
                 ];
                 $res =  httpPOST($url . '/getQuotaEvalute', $data, 0, 'json');
             }
@@ -125,16 +125,16 @@ class FlowDurationV6_model extends CI_Model
     {
         if ($cityId == 12) {
             $data = [
-                'city_id' => $cityId,
-                'select_column' => $select,
-                'quota' => $quotaKey,
+                'city_id'           => (int)$cityId,
+                'select_column'     => $select,
+                'quota'             => $quotaKey,
                 'logic_junction_id' => $logicJunctionId,
-                'group_by' => 'logic_flow_id, hour',
-                'order_by' => 'logic_flow_id, hour',
-                'traj_count_value' => 10,
-                'date' => $dates,
-                'hour' => $hours,
-                'engine' => 'elastic',
+                'group_by'          => 'logic_flow_id, hour',
+                'order_by'          => 'logic_flow_id, hour',
+                'traj_count_value'  => 10,
+                'date'              => $dates,
+                'hour'              => $hours,
+                'engine'            => 'elastic',
             ];
             $url = $this->config->item('data_service_interface');
 
