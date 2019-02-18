@@ -169,10 +169,7 @@ class RoadService extends BaseService
         $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
         $results = [];
 
-        $item = $roadList[0];
-
-//        foreach ($roadList as $item)
-        if (1)
+        foreach ($roadList as $item)
         {
             $roadId = $item['road_id'];
             $res = $this->redis_model->getData('Road_' . $roadId);
@@ -190,7 +187,7 @@ class RoadService extends BaseService
                     $res = [];
                 }
                 // 将数据刷新到 Redis
-                $this->redis_model->setData('Road_' . $roadId, json_encode($res));
+//                $this->redis_model->setData('Road_' . $roadId, json_encode($res));
             } else {
                 $res = json_decode($res, true);
             }
@@ -245,7 +242,7 @@ class RoadService extends BaseService
                 foreach ($juncMovements as $item) {
                     if ($item['junction_id'] == $junctionIdList[sizeof($junctionIdList)-1] and
                         $item['downstream_junction_id'][0] != '-' and
-                        $item['upstream_junction_id'][0] == $junctionIdList[sizeof($junctionIdList)-2]) {
+                        $item['upstream_junction_id'] == $junctionIdList[sizeof($junctionIdList)-2]) {
                         $down_road_degree[$item['downstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
                     }
                 }
