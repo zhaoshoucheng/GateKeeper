@@ -218,23 +218,44 @@ class RoadService extends BaseService
         $roadInfo = $this->road_model->getRoadByRoadId($roadId, 'logic_junction_ids');
 
         $junctionIdList = explode(',', $roadInfo['logic_junction_ids']);
-        echo print_r($junctionIdList);
-        echo '<hr>';
+        print_r($junctionIdList);
 
         $maxWaymapVersion = $this->waymap_model->getLastMapVersion();
-        echo $maxWaymapVersion;
-        echo '<hr>';
 
         if ($params['show_type']){
             $IdsLength = sizeof($junctionIdList);
-            echo $IdsLength;
-            echo '<hr>';
             if ($IdsLength > 1) {
                 $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[0], 'all', 1);
-                echo print_r($juncMovements);
-                echo '<hr>';
+                $up_road_degree = [];
+                foreach ($juncMovements as $item) {
+                    if ($item['junction_id'] == $junctionIdList[0] and
+                        $item['downstream_junction_id'] == $junctionIdList[1] and
+                        $item['upstream_junction_id'][0] != '-') {
+                        $up_road_degree[$item['upstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                    }
+                }
+                if (!empty($up_road_degree)) {
+                    asort($up_road_degree);
+                    array_unshift($junctionIdList, key($up_road_degree));
+                }
+
+                $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[sizeof($junctionIdList)-1], 'all', 1);
+                $down_road_degree = [];
+                foreach ($juncMovements as $item) {
+                    if ($item['junction_id'] == $junctionIdList[sizeof($junctionIdList)-1] and
+                        $item['downstream_junction_id'][0] != '-' and
+                        $item['upstream_junction_id'][0] == $junctionIdList[sizeof($junctionIdList)-2]) {
+                        $down_road_degree[$item['downstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                    }
+                }
+                if (!empty($up_road_degree)) {
+                    asort($down_road_degree);
+                    array_push($junctionIdList, key($down_road_degree));
+                }
             }
         }
+
+        print_r($junctionIdList);
 
         $res = $this->waymap_model->getConnectPath($cityId, $maxWaymapVersion, $junctionIdList);
 
