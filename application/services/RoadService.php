@@ -175,10 +175,10 @@ class RoadService extends BaseService
         if (1)
         {
             $roadId = $item['road_id'];
-            echo $roadId;
             $res = $this->redis_model->getData('Road_' . $roadId);
-            print_r($res);
-            if (!$res) {
+//            if (!$res)
+            if (1)
+            {
                 $data = [
                     'city_id' => $cityId,
                     'road_id' => $roadId,
