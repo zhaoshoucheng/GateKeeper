@@ -47,7 +47,7 @@ class Traj_model extends CI_Model
         $url = $this->interface . '/timeframeoptimize/getTodOptimizePlan';
         return $this->post($url, $data, 20000, "json");
     }
-    
+
     /**
      * 获取干线协调时空图
      *

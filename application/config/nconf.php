@@ -77,6 +77,11 @@ if ($development == 2) {
         'flow'     => 'online_its_alarm_movement_month*',
     ];
 
+    // 数据服务
+    $data_service_server = ':100.90.164.31';
+    $data_service_prot = '8190';
+    $data_service_ext = '';
+
     //报警数据历史处理
     $realtime_callback = 'http://10.85.128.81:30101';
 } else {
@@ -137,15 +142,21 @@ if ($development == 2) {
         'flow'     => 'its_alarm_movement_month*',
     ];
 
+    // 数据服务
+    $data_service_server = '100.90.163.51';
+    $data_service_prot = '8099';
+    $data_service_ext = '';
+
     //报警数据历史处理
     $realtime_callback = 'http://100.90.164.31:8033';
 }
 
-$temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
-$temp_timing_port = !empty($timing_port) ? ":" . $timing_port : "";
-$signal_mis_port  = !empty($signal_mis_port) ? ":" . $signal_mis_port : "";
-$es_port          = !empty($es_port) ? ":" . $es_port : "";
-$alarm_port       = !empty($alarm_port) ? ":" . $alarm_port : "";
+$temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
+$temp_timing_port  = !empty($timing_port) ? ":" . $timing_port : "";
+$signal_mis_port   = !empty($signal_mis_port) ? ":" . $signal_mis_port : "";
+$es_port           = !empty($es_port) ? ":" . $es_port : "";
+$alarm_port        = !empty($alarm_port) ? ":" . $alarm_port : "";
+$data_service_prot = !empty($data_service_prot) ? ':' . $data_service_prot : '';
 
 // 路网接口地址
 $config['waymap_interface'] = 'http://' . $waymap_server . $temp_waymap_port . $waymap_ext;
@@ -183,6 +194,9 @@ $config['realtime_callback'] = $realtime_callback;
 $config['alarm_es_interface'] = $alarm_es_interface;
 // 报警ES索引
 $config['alarm_es_index'] = $alarm_es_index;
+
+// 数据服务
+$config['data_service_interface'] = 'http://' . $data_service_server . $data_service_prot . $data_service_ext;
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;
