@@ -215,7 +215,6 @@ class RoadService extends BaseService
         $roadInfo = $this->road_model->getRoadByRoadId($roadId, 'logic_junction_ids');
 
         $junctionIdList = explode(',', $roadInfo['logic_junction_ids']);
-        print_r($junctionIdList);
 
         $maxWaymapVersion = $this->waymap_model->getLastMapVersion();
 
@@ -236,6 +235,11 @@ class RoadService extends BaseService
                     asort($up_road_degree);
                     array_unshift($junctionIdList, key($up_road_degree));
                 }
+                else{
+                    echo 'up_road is empty' . $roadId .  '\n';
+                    print_r($junctionIdList);
+                    echo '\n';
+                }
 
                 $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[sizeof($junctionIdList)-1], 'all', 1);
                 $down_road_degree = [];
@@ -246,15 +250,17 @@ class RoadService extends BaseService
                         $down_road_degree[$item['downstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
                     }
                 }
-                print_r($down_road_degree);
                 if (!empty($down_road_degree)) {
                     asort($down_road_degree);
                     array_push($junctionIdList, key($down_road_degree));
                 }
+                else{
+                    echo 'down_road is empty' . $roadId .  '\n';
+                    print_r($junctionIdList);
+                    echo '\n';
+                }
             }
         }
-
-        print_r($junctionIdList);
 
         $res = $this->waymap_model->getConnectPath($cityId, $maxWaymapVersion, $junctionIdList);
 
