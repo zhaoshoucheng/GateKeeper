@@ -110,7 +110,7 @@ class Junctioncomparison_model extends CI_Model
             // 基准
             if (array_key_exists($k, $newBaseQuotaData)) {
                 foreach ($scheduleArr as $hour) {
-                    $result['dataList'][$k]['base_list'] = $newBaseQuotaData[$k][$hour] ?? '';
+                    $result['dataList'][$k]['base_list'][$hour] = $newBaseQuotaData[$k][$hour] ?? '';
                     $value = 'null';
                     if (isset($newBaseQuotaData[$k][$hour]) && intval($newBaseQuotaData[$k][$hour]) >= 0) {
                         $value = $quotaConf[$data['quota_key']]['round']($newBaseQuotaData[$k][$hour]);
@@ -166,7 +166,7 @@ class Junctioncomparison_model extends CI_Model
      * @param $info['allFlows']     array  flow信息 [相位ID=>相位名称]
      * @return array
      */
-    private function formatData($data, $schedule, $info)
+    private function formatData($result, $schedule, $info)
     {
         $quotaConf = $this->config->item('quotas');
 
@@ -331,8 +331,8 @@ class Junctioncomparison_model extends CI_Model
         // 临时数组 放置每个时间点每个相位的指标平均值
         $tempData = [];
         foreach ($data as $direc => $val) {
-            if (!empty($val['' . $type . '_list'])) {
-                foreach ($val['' . $type . '_list'] as $hour=>$v) {
+            if (!empty($val["{$type}_list"])) {
+                foreach ($val["{$type}_list"] as $hour=>$v) {
                     $tempData[$hour][$direc] = $v;
                     $maxValueCount[$direc] = 0;
                 }
