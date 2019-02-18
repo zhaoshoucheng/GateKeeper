@@ -60,6 +60,15 @@ class Junctioncomparison_model extends CI_Model
             'city_id'           => $data['city_id'],
         ];
 
+        // 处理时段
+        $scheduleArr = [];
+        $scheduleStart = strtotime($data['schedule_start']);
+        $scheduleEnd = strtotime($data['schedule_end']);
+        for ($i = $scheduleStart; $i <= $scheduleEnd; $i += 30 * 60) {
+            $scheduleArr[] = date('H:i', $i);
+        }
+        $publicData['hour'] = $scheduleArr;
+
         /* 获取基准日期指标加权平均值 计算出需要查的周几具体日期*/
         $dateWeek = $this->getDate($data['base_start_date'], $data['base_end_date'], $data['week']);
         $baseDateArr = $dateWeek['date'];
@@ -87,14 +96,6 @@ class Junctioncomparison_model extends CI_Model
         if (empty($newBaseQuotaData) && empty($newEvaluateQuotaData)) {
             com_log_warning('_itstool_JuctionCompareReport_data_error', 0, '评估&基准数据都没有', compact("publicData"));
             return (object)[];
-        }
-
-        // 处理时段
-        $scheduleArr = [];
-        $scheduleStart = strtotime($data['schedule_start']);
-        $scheduleEnd = strtotime($data['schedule_end']);
-        for ($i = $scheduleStart; $i <= $scheduleEnd; $i += 30 * 60) {
-            $scheduleArr[] = date('H:i', $i);
         }
 
         $result = [];
@@ -492,6 +493,7 @@ class Junctioncomparison_model extends CI_Model
         ];
         $this->db->where($where);
         $this->db->where_in('date', $data['date']);
+        $this->db->where_in('hour', $data['hour']);
         $this->db->group_by('logic_flow_id, hour');
         $res = $this->db->get()->result_array();
         if (!$res) {
