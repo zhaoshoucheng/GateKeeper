@@ -234,6 +234,7 @@ class RoadService extends BaseService
                         $up_road_degree[$item['upstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
                     }
                 }
+                print_r($up_road_degree);
                 if (!empty($up_road_degree)) {
                     asort($up_road_degree);
                     array_unshift($junctionIdList, key($up_road_degree));
@@ -248,7 +249,8 @@ class RoadService extends BaseService
                         $down_road_degree[$item['downstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
                     }
                 }
-                if (!empty($up_road_degree)) {
+                print_r($down_road_degree);
+                if (!empty($down_road_degree)) {
                     asort($down_road_degree);
                     array_push($junctionIdList, key($down_road_degree));
                 }
