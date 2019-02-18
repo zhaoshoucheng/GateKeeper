@@ -399,13 +399,13 @@ class EvaluateService extends BaseService
             })->get();
 
         if ($logicFlowId == 9999) {
-            $select  = 'logic_junction_id, date, hour, avg(' . $quotaKey . ') as ' . $quotaKey;
+            $select  = 'logic_junction_id, date, hour';
             $groupBy = 'logic_junction_id, hour, date';
 
-            $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, '', $dates, $groupBy, $select);
+            $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, '', $dates, $groupBy, $quotaKey, $select);
         } else {
             $select = 'logic_junction_id, logic_flow_id, date, hour, ' . $quotaKey;
-            $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, '', $select);
+            $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, '', $quotaKey, $select, 'detail');
         }
 
         if (!$data) {
