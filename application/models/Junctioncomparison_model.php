@@ -60,6 +60,15 @@ class Junctioncomparison_model extends CI_Model
             'city_id'           => $data['city_id'],
         ];
 
+        // 处理时段
+        $scheduleArr = [];
+        $scheduleStart = strtotime($data['schedule_start']);
+        $scheduleEnd = strtotime($data['schedule_end']);
+        for ($i = $scheduleStart; $i <= $scheduleEnd; $i += 30 * 60) {
+            $scheduleArr[] = date('H:i', $i);
+        }
+        $publicData['hour'] = $scheduleArr;
+
         /* 获取基准日期指标加权平均值 计算出需要查的周几具体日期*/
         $dateWeek = $this->getDate($data['base_start_date'], $data['base_end_date'], $data['week']);
         $baseDateArr = $dateWeek['date'];
@@ -89,14 +98,6 @@ class Junctioncomparison_model extends CI_Model
             return (object)[];
         }
 
-        // 处理时段
-        $scheduleArr = [];
-        $scheduleStart = strtotime($data['schedule_start']);
-        $scheduleEnd = strtotime($data['schedule_end']);
-        for ($i = $scheduleStart; $i <= $scheduleEnd; $i += 30 * 60) {
-            $scheduleArr[] = date('H:i', $i);
-        }
-
         $result = [];
         $quotaConf = $this->config->item('quotas');
         foreach ($allFlows[$data['logic_junction_id']] as $k=>$v) {
@@ -109,10 +110,10 @@ class Junctioncomparison_model extends CI_Model
             // 基准
             if (array_key_exists($k, $newBaseQuotaData)) {
                 foreach ($scheduleArr as $hour) {
-                    $result['dataList'][$k]['base_list'] = $newBaseQuotaData[$k][$hour] ?? '';
+                    $result['dataList'][$k]['base_list'][$hour] = $newBaseQuotaData[$k][$hour] ?? '';
                     $value = 'null';
                     if (isset($newBaseQuotaData[$k][$hour]) && intval($newBaseQuotaData[$k][$hour]) >= 0) {
-                        $value = $quotaConf[$info['quotaKey']]['round']($newBaseQuotaData[$k][$hour]);
+                        $value = $quotaConf[$data['quota_key']]['round']($newBaseQuotaData[$k][$hour]);
                     }
                     $result['dataList'][$k]['base'][] = [
                         $value,
@@ -130,7 +131,7 @@ class Junctioncomparison_model extends CI_Model
                     $result['dataList'][$k]['evaluate_list'][$hour] = $newEvaluateQuotaData[$k][$hour] ?? '';
                     $value = 'null';
                     if (isset($newEvaluateQuotaData[$k][$hour]) && intval($newEvaluateQuotaData[$k][$hour]) >= 0) {
-                        $value = $quotaConf[$info['quotaKey']]['round']($newEvaluateQuotaData[$k][$hour]);
+                        $value = $quotaConf[$data['quota_key']]['round']($newEvaluateQuotaData[$k][$hour]);
                     }
                     $result['dataList'][$k]['evaluate'][] = [
                         $value,
@@ -141,14 +142,6 @@ class Junctioncomparison_model extends CI_Model
                 $result['dataList'][$k]['evaluate_list'] = [];
                 $result['dataList'][$k]['evaluate'] = [];
             }
-
-            if (empty($formatData[$k]['evaluate_time_list']) && empty($formatData[$k]['base_time_list'])) {
-                unset($formatData[$k]);
-            }
-        }
-
-        if (empty($formatData)) {
-            return (object)[];
         }
 
         $infoData = [
@@ -173,7 +166,7 @@ class Junctioncomparison_model extends CI_Model
      * @param $info['allFlows']     array  flow信息 [相位ID=>相位名称]
      * @return array
      */
-    private function formatData($data, $schedule, $info)
+    private function formatData($result, $schedule, $info)
     {
         $quotaConf = $this->config->item('quotas');
 
@@ -338,8 +331,8 @@ class Junctioncomparison_model extends CI_Model
         // 临时数组 放置每个时间点每个相位的指标平均值
         $tempData = [];
         foreach ($data as $direc => $val) {
-            if (!empty($val['' . $type . '_list'])) {
-                foreach ($val['' . $type . '_list'] as $hour=>$v) {
+            if (!empty($val["{$type}_list"])) {
+                foreach ($val["{$type}_list"] as $hour=>$v) {
                     $tempData[$hour][$direc] = $v;
                     $maxValueCount[$direc] = 0;
                 }
@@ -500,6 +493,7 @@ class Junctioncomparison_model extends CI_Model
         ];
         $this->db->where($where);
         $this->db->where_in('date', $data['date']);
+        $this->db->where_in('hour', $data['hour']);
         $this->db->group_by('logic_flow_id, hour');
         $res = $this->db->get()->result_array();
         if (!$res) {
