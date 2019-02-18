@@ -78,8 +78,8 @@ if ($development == 2) {
     ];
 
     // 数据服务
-    $data_service_server = ':100.90.164.31';
-    $data_service_prot = '8093';
+    $data_service_server = '100.90.163.51';
+    $data_service_prot = '8099';
     $data_service_ext = '';
 
     //报警数据历史处理
@@ -143,8 +143,8 @@ if ($development == 2) {
     ];
 
     // 数据服务
-    $data_service_server = '100.90.163.51';
-    $data_service_prot = '8099';
+    $data_service_server = ':100.90.164.31';
+    $data_service_prot = '8093';
     $data_service_ext = '';
 
     //报警数据历史处理
