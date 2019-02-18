@@ -37,6 +37,7 @@ class FlowDurationV6_model extends CI_Model
     {
         if ($cityId == 12) { // 济南先试行数据服务
             $url = $this->config->item('data_service_interface');
+            $dates = array_values($dates);
             if ($type == 'detail') {
                 $data = [
                     'city_id' => $cityId,
