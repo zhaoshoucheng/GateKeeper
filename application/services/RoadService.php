@@ -168,6 +168,7 @@ class RoadService extends BaseService
 
         $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
         $results = [];
+        echo sizeof($roadList);
 
         foreach ($roadList as $item)
         {
@@ -230,7 +231,6 @@ class RoadService extends BaseService
                         $up_road_degree[$item['upstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
                     }
                 }
-                print_r($up_road_degree);
                 if (!empty($up_road_degree)) {
                     asort($up_road_degree);
                     array_unshift($junctionIdList, key($up_road_degree));
