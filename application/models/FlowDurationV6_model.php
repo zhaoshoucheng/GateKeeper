@@ -38,6 +38,7 @@ class FlowDurationV6_model extends CI_Model
         if ($cityId == 12) { // 济南先试行数据服务
             $url = $this->config->item('data_service_interface');
             $dates = array_values($dates);
+            $res = [];
             if ($type == 'detail') {
                 $data = [
                     'city_id' => $cityId,
@@ -47,7 +48,7 @@ class FlowDurationV6_model extends CI_Model
                     'date' => $dates,
                     'engine' => 'elastic',
                 ];
-                return httpPOST($url . '/getQuotaEvaluateDetail', $data, 0, 'json');
+                $res = httpPOST($url . '/getQuotaEvaluateDetail', $data, 0, 'json');
             } else {
                 $data = [
                     'city_id' => $cityId,
@@ -58,8 +59,17 @@ class FlowDurationV6_model extends CI_Model
                     'date' => $dates,
                     'engine' => 'elastic',
                 ];
-                return httpPOST($url . '/getQuotaEvalute', $data, 0, 'json');
+                $res =  httpPOST($url . '/getQuotaEvalute', $data, 0, 'json');
             }
+            if (!$res) {
+                return [];
+            }
+
+            $res = json_decode($res, true);
+            if ($res['errno'] != 0) {
+                return [];
+            }
+            return $res['data'];
         }
         $this->isExisted($cityId);
         if (!empty($quotaKey)) {
@@ -127,7 +137,17 @@ class FlowDurationV6_model extends CI_Model
                 'engine' => 'elastic',
             ];
             $url = $this->config->item('data_service_interface');
-            return httpPOST($url . '/getFlowQuota', $data, 0, 'json');
+
+            $res = httpPOST($url . '/getFlowQuota', $data, 0, 'json');
+            if (!$res) {
+                return [];
+            }
+
+            $res = json_decode($res, true);
+            if ($res['errno'] != 0) {
+                return [];
+            }
+            return $res['data'];
         }
         $this->isExisted($cityId);
 
