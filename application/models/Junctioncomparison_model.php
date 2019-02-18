@@ -42,11 +42,6 @@ class Junctioncomparison_model extends CI_Model
         }
 
         $table = $this->tb . $data['city_id'];
-        // 判断数据表是否存在
-        if (!$this->isTableExisted($table)) {
-            com_log_warning('_itstool_JuctionCompareReport_table_error', 0, '数据表不存在', compact("table"));
-            return (object)[];
-        }
 
         // 获取路口名称
         $junctionsInfo = $this->waymap_model->getJunctionInfo($data['logic_junction_id']);
@@ -62,6 +57,7 @@ class Junctioncomparison_model extends CI_Model
         $publicData = [
             'logic_junction_id' => $data['logic_junction_id'],
             'quota_key'         => $data['quota_key'],
+            'city_id'           => $data['city_id'],
         ];
 
         /* 获取基准日期指标加权平均值 计算出需要查的周几具体日期*/
@@ -70,10 +66,10 @@ class Junctioncomparison_model extends CI_Model
         $baseWeekDays = $dateWeek['week'];
         $publicData['date'] = $baseDateArr;
         $baseQuotaData = $this->getQuotaInfoByDate($table, $publicData);
-        // 相位->日期->时间->值
+        // 相位->时间->值
         $newBaseQuotaData = [];
         foreach ($baseQuotaData as $val) {
-            $newBaseQuotaData[$val['logic_flow_id']][$val['date']][$val['hour']] = $val['quota_value'];
+            $newBaseQuotaData[$val['logic_flow_id']][$val['hour']] = $val['quota_value'];
         }
 
         /* 获取评估日期指标加权平均值 计算出需要查的周几具体日期*/
@@ -82,10 +78,10 @@ class Junctioncomparison_model extends CI_Model
         $evaluateWeekDays = $dateWeek['week'];
         $publicData['date'] = $evaluateDateArr;
         $evaluateQuotaData = $this->getQuotaInfoByDate($table, $publicData);
-        // 相位->日期->时间->值
+        // 相位->时间->值
         $newEvaluateQuotaData = [];
         foreach ($evaluateQuotaData as $val) {
-            $newEvaluateQuotaData[$val['logic_flow_id']][$val['date']][$val['hour']] = $val['quota_value'];
+            $newEvaluateQuotaData[$val['logic_flow_id']][$val['hour']] = $val['quota_value'];
         }
 
         if (empty($newBaseQuotaData) && empty($newEvaluateQuotaData)) {
@@ -101,30 +97,49 @@ class Junctioncomparison_model extends CI_Model
             $scheduleArr[] = date('H:i', $i);
         }
 
-        $formatData = [];
+        $result = [];
+        $quotaConf = $this->config->item('quotas');
         foreach ($allFlows[$data['logic_junction_id']] as $k=>$v) {
             // flow信息
-            $formatData[$k]['flow_info'] = [
+            $result['dataList'][$k]['flow_info'] = [
                 'logic_flow_id' => $k,
                 'flow_name'     => $v,
             ];
 
             // 基准
             if (array_key_exists($k, $newBaseQuotaData)) {
-                foreach ($baseWeekDays as $day) {
-                    foreach ($scheduleArr as $hour) {
-                        $formatData[$k]['base_time_list'][$hour][$day] = $newBaseQuotaData[$k][$day][$hour] ?? '';
+                foreach ($scheduleArr as $hour) {
+                    $result['dataList'][$k]['base_list'] = $newBaseQuotaData[$k][$hour] ?? '';
+                    $value = 'null';
+                    if (isset($newBaseQuotaData[$k][$hour]) && intval($newBaseQuotaData[$k][$hour]) >= 0) {
+                        $value = $quotaConf[$info['quotaKey']]['round']($newBaseQuotaData[$k][$hour]);
                     }
+                    $result['dataList'][$k]['base'][] = [
+                        $value,
+                        $hour
+                    ];
                 }
+            } else {
+                $result['dataList'][$k]['base_list'] = [];
+                $result['dataList'][$k]['base'] = [];
             }
 
             // 评估
             if (array_key_exists($k, $newEvaluateQuotaData)) {
-                foreach ($evaluateWeekDays as $day) {
-                    foreach ($scheduleArr as $hour) {
-                        $formatData[$k]['evaluate_time_list'][$hour][$day] = $newEvaluateQuotaData[$k][$day][$hour] ?? '';
+                foreach ($scheduleArr as $hour) {
+                    $result['dataList'][$k]['evaluate_list'][$hour] = $newEvaluateQuotaData[$k][$hour] ?? '';
+                    $value = 'null';
+                    if (isset($newEvaluateQuotaData[$k][$hour]) && intval($newEvaluateQuotaData[$k][$hour]) >= 0) {
+                        $value = $quotaConf[$info['quotaKey']]['round']($newEvaluateQuotaData[$k][$hour]);
                     }
+                    $result['dataList'][$k]['evaluate'][] = [
+                        $value,
+                        $hour,
+                    ];
                 }
+            } else {
+                $result['dataList'][$k]['evaluate_list'] = [];
+                $result['dataList'][$k]['evaluate'] = [];
             }
 
             if (empty($formatData[$k]['evaluate_time_list']) && empty($formatData[$k]['base_time_list'])) {
@@ -141,12 +156,12 @@ class Junctioncomparison_model extends CI_Model
             'junctionName' => $junctionName,
             'allFlows'     => $allFlows[$data['logic_junction_id']],
         ];
-        $result = $this->formatData($formatData, $scheduleArr, $infoData);
-        if (empty($result)) {
+        $res = $this->formatData($result, $scheduleArr, $infoData);
+        if (empty($res)) {
             return (object)[];
         }
 
-        return $result;
+        return $res;
     }
 
     /**
@@ -160,45 +175,8 @@ class Junctioncomparison_model extends CI_Model
      */
     private function formatData($data, $schedule, $info)
     {
-        $result = [];
         $quotaConf = $this->config->item('quotas');
 
-        foreach ($data as $k=>$v) {
-            $result['dataList'][$k]['flow_info'] = $v['flow_info'];
-            if (!empty($v['base_time_list'])) {
-                foreach ($v['base_time_list'] as $hour=>$val) {
-                    $value = array_sum($val) / count($val);
-                    $result['dataList'][$k]['base_list'][$hour] = $value;
-                    if (empty(array_filter($val))) {
-                        $value = 'null';
-                    }
-                    $result['dataList'][$k]['base'][] = [
-                        $value == 'null' ? 'null' : $quotaConf[$info['quotaKey']]['round']($value),
-                        $hour
-                    ];
-                }
-            } else {
-                $result['dataList'][$k]['base_list'] = [];
-                $result['dataList'][$k]['base'] = [];
-            }
-
-            if (!empty($v['evaluate_time_list'])) {
-                foreach ($v['evaluate_time_list'] as $hour=>$val) {
-                    $value = array_sum($val) / count($val);
-                    $result['dataList'][$k]['evaluate_list'][$hour] = $value;
-                    if (empty(array_filter($val))) {
-                        $value = 'null';
-                    }
-                    $result['dataList'][$k]['evaluate'][] = [
-                        $value == 'null' ? 'null' : $quotaConf[$info['quotaKey']]['round']($value),
-                        $hour,
-                    ];
-                }
-            } else {
-                $result['dataList'][$k]['evaluate_list'] = [];
-                $result['dataList'][$k]['evaluate'] = [];
-            }
-        }
         if (empty($result['dataList'])) {
             return [];
         }
@@ -507,8 +485,14 @@ class Junctioncomparison_model extends CI_Model
      */
     private function getQuotaInfoByDate($table, $data)
     {
+        // 判断数据表是否存在
+        if (!$this->isTableExisted($table)) {
+            com_log_warning('_itstool_JuctionCompareReport_table_error', 0, '数据表不存在', compact("table"));
+            return (object)[];
+        }
+
         $quotaFormula = 'sum(`' . $data['quota_key'] . '` * `traj_count`) / sum(`traj_count`)';
-        $this->db->select("logic_flow_id, hour,date,  {$quotaFormula} as quota_value");
+        $this->db->select("logic_flow_id, hour,  {$quotaFormula} as quota_value");
         $this->db->from($table);
         $where = [
             'logic_junction_id' => $data['logic_junction_id'],
@@ -516,7 +500,7 @@ class Junctioncomparison_model extends CI_Model
         ];
         $this->db->where($where);
         $this->db->where_in('date', $data['date']);
-        $this->db->group_by('date, hour');
+        $this->db->group_by('logic_flow_id, hour');
         $res = $this->db->get()->result_array();
         if (!$res) {
             return (object)[];
