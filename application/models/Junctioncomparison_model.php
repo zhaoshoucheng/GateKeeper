@@ -142,6 +142,9 @@ class Junctioncomparison_model extends CI_Model
                 $result['dataList'][$k]['evaluate_list'] = [];
                 $result['dataList'][$k]['evaluate'] = [];
             }
+            if (empty($result['dataList'][$k]['evaluate']) && empty($result['dataList'][$k]['base'])) {
+                unset($result['dataList'][$k]);
+            }
         }
 
         $infoData = [
@@ -258,11 +261,11 @@ class Junctioncomparison_model extends CI_Model
         $result['diff_info'] = [
             'flow_id' => $diffMaxFlow,
             'base' => [
-                $baseDiffValue,
+                intval($baseDiffValue),
                 $diffMaxHour,
             ],
             'evaluate' => [
-                $evaluateDiffValue,
+                intval($evaluateDiffValue),
                 $diffMaxHour,
             ],
         ];
