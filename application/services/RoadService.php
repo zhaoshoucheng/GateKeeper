@@ -159,6 +159,8 @@ class RoadService extends BaseService
     public function getAllRoadDetail($params)
     {
         $cityId = $params['city_id'];
+        $show_type = $params['show_type'];
+        $pre_key = $show_type?'Road_extend_':'Road_';
 
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
 
@@ -168,22 +170,22 @@ class RoadService extends BaseService
         foreach ($roadList as $item)
         {
             $roadId = $item['road_id'];
-            $res = $this->redis_model->getData('Road_' . $roadId);
-            echo 'Road_' . $roadId;
+            $res = $this->redis_model->getData($pre_key . $roadId);
             if (!$res)
             {
                 $data = [
                     'city_id' => $cityId,
                     'road_id' => $roadId,
-                    'show_type' => $params['show_type'],
+                    'show_type' => $show_type,
                 ];
                 try {
                     $res = $this->getRoadDetail($data);
                 } catch (\Exception $e) {
                     $res = [];
                 }
+                echo $pre_key . $roadId;
                 // 将数据刷新到 Redis
-                $this->redis_model->setData('Road_' . $roadId, json_encode($res));
+                $this->redis_model->setData($pre_key . $roadId, json_encode($res));
             } else {
                 $res = json_decode($res, true);
             }
@@ -192,8 +194,7 @@ class RoadService extends BaseService
             $results[]   = $res;
         }
 
-        $end = microtime(true);
-        echo "end ". $end;
+//        $end = microtime(true);
 
         return $results;
     }
