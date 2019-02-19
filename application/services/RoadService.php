@@ -194,8 +194,6 @@ class RoadService extends BaseService
             $results[]   = $res;
         }
 
-//        $end = microtime(true);
-
         return $results;
     }
 
