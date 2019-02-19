@@ -73,14 +73,12 @@ class RoadService extends BaseService
         $cityId        = $params['city_id'];
         $junctionIds   = $params['junction_ids'];
         $roadName      = $params['road_name'];
-        $roadDirection = $params['road_direction'];
 
         $data = [
             'city_id' => intval($cityId),
             'road_id' => md5(implode(',', $junctionIds) . $roadName),
             'road_name' => strip_tags(trim($roadName)),
             'logic_junction_ids' => implode(',', $junctionIds),
-            'road_direction' => intval($roadDirection),
             'user_id' => 0,
         ];
 
@@ -111,12 +109,10 @@ class RoadService extends BaseService
         $roadId        = $params['road_id'];
         $junctionIds   = $params['junction_ids'];
         $roadName      = $params['road_name'];
-        $roadDirection = $params['road_direction'];
 
         $data = [
             'road_name' => strip_tags(trim($roadName)),
             'logic_junction_ids' => implode(',', $junctionIds),
-            'road_direction' => intval($roadDirection),
         ];
 
         if (!$this->road_model->roadNameIsUnique($roadName, $cityId, $roadId)) {
@@ -163,27 +159,33 @@ class RoadService extends BaseService
     public function getAllRoadDetail($params)
     {
         $cityId = $params['city_id'];
+        $show_type = $params['show_type'];
+        $pre_key = $show_type?'Road_extend_':'Road_';
 
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
 
         $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
         $results = [];
 
-        foreach ($roadList as $item) {
+        foreach ($roadList as $item)
+        {
             $roadId = $item['road_id'];
-            $res = $this->redis_model->getData('Road_' . $roadId);
-            if (!$res) {
+            $res = $this->redis_model->getData($pre_key . $roadId);
+            if (!$res)
+            {
                 $data = [
                     'city_id' => $cityId,
                     'road_id' => $roadId,
+                    'show_type' => $show_type,
                 ];
                 try {
                     $res = $this->getRoadDetail($data);
                 } catch (\Exception $e) {
                     $res = [];
                 }
+                echo $pre_key . $roadId;
                 // 将数据刷新到 Redis
-                $this->redis_model->setData('Road_' . $roadId, json_encode($res));
+                $this->redis_model->setData($pre_key . $roadId, json_encode($res));
             } else {
                 $res = json_decode($res, true);
             }
@@ -213,6 +215,49 @@ class RoadService extends BaseService
         $junctionIdList = explode(',', $roadInfo['logic_junction_ids']);
 
         $maxWaymapVersion = $this->waymap_model->getLastMapVersion();
+
+        if ($params['show_type']){
+            $IdsLength = sizeof($junctionIdList);
+            if ($IdsLength > 1) {
+                $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[0], 'all', 1);
+                $up_road_degree = [];
+                foreach ($juncMovements as $item) {
+                    if ($item['junction_id'] == $junctionIdList[0] and
+                        $item['downstream_junction_id'] == $junctionIdList[1] and
+                        $item['upstream_junction_id'][0] != '-') {
+                        $up_road_degree[$item['upstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                    }
+                }
+                if (!empty($up_road_degree)) {
+                    asort($up_road_degree);
+                    array_unshift($junctionIdList, key($up_road_degree));
+                }
+                else{
+                    echo 'up_road is empty' . $roadId .  '\n';
+                    print_r($junctionIdList);
+                    echo '\n';
+                }
+
+                $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[sizeof($junctionIdList)-1], 'all', 1);
+                $down_road_degree = [];
+                foreach ($juncMovements as $item) {
+                    if ($item['junction_id'] == $junctionIdList[sizeof($junctionIdList)-1] and
+                        $item['downstream_junction_id'][0] != '-' and
+                        $item['upstream_junction_id'] == $junctionIdList[sizeof($junctionIdList)-2]) {
+                        $down_road_degree[$item['downstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                    }
+                }
+                if (!empty($down_road_degree)) {
+                    asort($down_road_degree);
+                    array_push($junctionIdList, key($down_road_degree));
+                }
+                else{
+                    echo 'down_road is empty' . $roadId .  '\n';
+                    print_r($junctionIdList);
+                    echo '\n';
+                }
+            }
+        }
 
         $res = $this->waymap_model->getConnectPath($cityId, $maxWaymapVersion, $junctionIdList);
 
