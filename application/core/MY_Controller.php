@@ -122,7 +122,7 @@ class MY_Controller extends CI_Controller
             'access_type' => $accessType,
             'ip' => $_SERVER["REMOTE_ADDR"],
             'ip2' => $this->input->get_request_header('X-Real-Ip'),
-            'city_id' => $_REQUEST['city_id'],
+            'city_id' => isset($_REQUEST['city_id']) ? $_REQUEST['city_id'] : "",
             'uri' => $this->routerUri,
             'request' => $_REQUEST
         ]);
