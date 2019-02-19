@@ -216,7 +216,7 @@ class RoadService extends BaseService
 
         $maxWaymapVersion = $this->waymap_model->getLastMapVersion();
 
-        if ($params['show_type']){
+        if (isset($params['show_type']) and $params['show_type']){
             $IdsLength = sizeof($junctionIdList);
             if ($IdsLength > 1) {
                 $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[0], 'all', 1);
