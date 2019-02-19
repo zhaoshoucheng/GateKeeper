@@ -131,6 +131,7 @@ class Realtime_model extends CI_Model
      */
     public function avgStopdelay($cityId, $date, $hour, $junctionIds=[])
     {
+
         $data = [
             "source" => "signal_control",
             "cityId" => $cityId,
@@ -150,6 +151,7 @@ class Realtime_model extends CI_Model
             $data['junctionId'] = implode(",",$junctionIds);
             $data["andOperations"]['junctionId'] = 'in';
         }
+
         $esRes = $this->searchQuota($data);
         if (empty($esRes['result']['quotaResults'])) {
             return [];
@@ -296,8 +298,8 @@ class Realtime_model extends CI_Model
         ];
 
         $result = [];
-        // 因为一次性获取全天的数据会影响集群性能，会被禁止，所有要分断进行获取
-        $nowHour = date('i') + 1;
+        // 因为一次性获取全天的数据会影响集群性能，会被禁止，所有要分断进行获取 y m d h i s
+        $nowHour = date('H') + 1;
         for ($i = 0; $i < $nowHour; $i += 3) {
             $sTime = strtotime($i . ':00') * 1000;
             $eTime = strtotime(($i + 3) . ':00') * 1000;

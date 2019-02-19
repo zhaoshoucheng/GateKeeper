@@ -213,8 +213,13 @@ class Realtimewarning extends Inroute_Controller
             'trace_id' => $traceId,
             'uid' => $uid,
         ];
-        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=task_handler doing\n\r";
 
+        //预先计算平均延误数据
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=pre_calculating\n\r";
+        $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId, 1);
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=pre_calculated\n\r";
+
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=task_handler doing\n\r";
         $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params, 600000);
         if (!$res) {
             com_log_warning('realtime_callback_task_handler_error', 0, $res, compact("params"));

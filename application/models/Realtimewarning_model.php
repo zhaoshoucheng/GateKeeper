@@ -220,24 +220,17 @@ class Realtimewarning_model extends CI_Model
     /**
      * 指标计算
      *
-     * @param $cityId
-     * @param $date
-     * @param $hour
-     * @param $traceId
+     * @param $cityId   int     Y   城市Id
+     * @param $date     string  Y   日期    格式y-m-d
+     * @param $hour     string  Y   批次号  格式H:i:s
+     * @param $traceId  string  Y   traceid
+     * @param $type     string  Y   计算类型 0=全部计算 1=只计算平均延误和记录指标批次号
      */
-    public function calculate($cityId, $date, $hour, $traceId)
+    public function calculate($cityId, $date, $hour, $traceId, $ctype=0)
     {
         //验证数据表是否存在?
         $rtwRule = $this->config->item('realtimewarning_rule');
         $rtwRule = empty($rtwRule[$cityId]) ? $rtwRule['default'] : $rtwRule[$cityId];
-        /*
-        $tableName = "real_time_" . $cityId;
-        $isExisted = $this->db->table_exists($tableName);
-        if (!$isExisted) {
-            echo "{$tableName} not exists!\n\r";
-            exit;
-        }
-        */
         $this->load->model('redis_model');
 
         //设置rediskey
@@ -248,7 +241,6 @@ class Realtimewarning_model extends CI_Model
         $lastScheduleKey = "new_its_schedule_lasthour_{$cityId}";
         $realTimeAlarmRedisKey = "new_its_realtime_alarm_{$cityId}";
         $realTimeAlarmBakKey = "new_its_realtime_alarm_{$cityId}_{$date}_{$hour}";
-        $this->redis_model->setEx($lastScheduleKey, $hour, 24 * 3600);  //最新调度hour
 
         //生成平均延误曲线数据
         //因为ES直接查询当天所有批次会影响到集群（真弱鸡！）所有要每次只取一个批次进行追加缓存。
@@ -263,75 +255,82 @@ class Realtimewarning_model extends CI_Model
         }
         $esStopDelay[] = $avgStopDelayList;
 
+        $realtimeJunctionList = $realTimeAlarmsInfoResult = [];
+        if($ctype==0){
+            //获取实时指标数据
+            $realtimeJunctionList = $this->realtime_model->getRealTimeJunctions($cityId, $date, $hour);
+            //计算路口总数
+            //为什么拿原始数据来计算，是因为如果处理后再统计，因为有的路口不在路网，
+            //会导致丢失，这样就和拥堵概览的路口总数匹配不上了
+            $countData = array_column($realtimeJunctionList, 'traj_count', 'logic_junction_id');
+            $junctionTotal = count($countData);
 
-        //获取实时指标数据
-        $realtimeJunctionList = $this->realtime_model->getRealTimeJunctions($cityId, $date, $hour);
-        //计算路口总数
-        //为什么拿原始数据来计算，是因为如果处理后再统计，因为有的路口不在路网，
-        //会导致丢失，这样就和拥堵概览的路口总数匹配不上了
-        $countData = array_column($realtimeJunctionList, 'traj_count', 'logic_junction_id');
-        $junctionTotal = count($countData);
+
+            //获取实时报警表数据
+            $data['date'] = $date;
+            $data['city_id'] = $cityId;
+            $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
+            $realTimeAlarmsInfoResult = [];
+            foreach ($realTimeAlarmsInfoResultOrigal as $item) {
+                $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;
+            }
+            $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
 
 
-        //获取实时报警表数据
-        $data['date'] = $date;
-        $data['city_id'] = $cityId;
-        $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
-        $realTimeAlarmsInfoResult = [];
-        foreach ($realTimeAlarmsInfoResultOrigal as $item) {
-            $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;
+            //聚合路口数据(路网数据、实时指标、报警数据)
+            $realTimeAlarmsInfo = [];
+            foreach ($realTimeAlarmsInfoResult as $item) {
+                $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
+            }
+            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo);
+
+
+            //计算junctionSurvey 数据
+            $jDataList = $junctionList['dataList'] ?? [];
+            $result = [];
+            $result['junction_total'] = $junctionTotal;
+            $result['alarm_total'] = 0;
+            $result['congestion_total'] = 0;
+            $result['amble_total'] = 0;
+            foreach ($jDataList as $datum) {
+                // 报警数
+                $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+                // 拥堵数
+                $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+                // 缓行数
+                $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
+            }
+            $junctionSurvey = $result;
+            //<========计算缓存数据end==========
         }
-        $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
-
-
-        //聚合路口数据(路网数据、实时指标、报警数据)
-        $realTimeAlarmsInfo = [];
-        foreach ($realTimeAlarmsInfoResult as $item) {
-            $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
-        }
-        $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo);
-
-
-        //计算junctionSurvey 数据
-        $jDataList = $junctionList['dataList'] ?? [];
-        $result = [];
-        $result['junction_total'] = $junctionTotal;
-        $result['alarm_total'] = 0;
-        $result['congestion_total'] = 0;
-        $result['amble_total'] = 0;
-        foreach ($jDataList as $datum) {
-            // 报警数
-            $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
-            // 拥堵数
-            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
-            // 缓行数
-            $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
-        }
-        $junctionSurvey = $result;
-        //<========计算缓存数据end==========
 
         //写入分组数据
         $groupIds = $this->userperm_model->getUserPermAllGroupid();
         foreach ($groupIds as $groupId) {
-            $this->dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionList, $realTimeAlarmsInfoResult,$esStopDelay);
+            $this->dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionList, $realTimeAlarmsInfoResult,$esStopDelay,$ctype);
         }
 
         // 写入缓存数据
         // 平均延误数据
-        $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 24 * 3600);
-        // 路口概览数据
-        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
-        // 缓存诊断路口列表数据
-        $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
-        // 缓存最新hour
-        $this->redis_model->setEx($lastHourKey, $hour, 24 * 3600);
-        // 缓存实时报警路口数据
-        $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
-        // 冗余缓存实时报警路口数据,每一个批次一份
-        $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
+        // 最新指标批次的hour
+        if($ctype==1) {
+            $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 24 * 3600);
+            $this->redis_model->setEx($lastScheduleKey, $hour, 24 * 3600);
+        }elseif($ctype==0){
+            // 路口概览数据
+            $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
+            // 缓存诊断路口列表数据
+            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
+            // 缓存实时报警路口数据
+            $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
+            // 冗余缓存实时报警路口数据,每一个批次一份
+            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
+            // 缓存最新hour
+            $this->redis_model->setEx($lastHourKey, $hour, 24 * 3600);
+        }
     }
 
-    public function dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionListOri, $realTimeAlarmsInfoResultOri, $esStopDelayOri)
+    public function dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionListOri, $realTimeAlarmsInfoResultOri, $esStopDelayOri, $ctype=0)
     {
         $cityIds = $this->userperm_model->getCityidByGroup($groupId);
         $junctionIds = $this->userperm_model->getJunctionidByGroup($groupId,$cityId);
@@ -372,63 +371,67 @@ class Realtimewarning_model extends CI_Model
             $esStopDelay = $esStopDelayOri;
         }
 
-        //过滤实时指标数据
-        $realtimeJunctionList = [];
-        foreach ($realtimeJunctionListOri as $k=>$realtimeJunctionItem){
-            if(in_array($realtimeJunctionItem["logic_junction_id"],$junctionIds) || in_array($cityId, $cityIds)){
-                $realtimeJunctionList[$k] = $realtimeJunctionItem;
+        if($ctype==0){
+            //过滤实时指标数据
+            $realtimeJunctionList = [];
+            foreach ($realtimeJunctionListOri as $k=>$realtimeJunctionItem){
+                if(in_array($realtimeJunctionItem["logic_junction_id"],$junctionIds) || in_array($cityId, $cityIds)){
+                    $realtimeJunctionList[$k] = $realtimeJunctionItem;
+                }
             }
-        }
-        $countData = array_column($realtimeJunctionList, 'traj_count', 'logic_junction_id');
-        $junctionTotal = count($countData);
+            $countData = array_column($realtimeJunctionList, 'traj_count', 'logic_junction_id');
+            $junctionTotal = count($countData);
 
 
-        //过滤实时报警表数据
-        $realTimeAlarmsInfoResult = [];
-        foreach ($realTimeAlarmsInfoResultOri as $k=>$rtItem){
-            if(in_array($rtItem["logic_junction_id"],$junctionIds) || in_array($cityId, $cityIds)){
-                $realTimeAlarmsInfoResult[$k] = $rtItem;
+            //过滤实时报警表数据
+            $realTimeAlarmsInfoResult = [];
+            foreach ($realTimeAlarmsInfoResultOri as $k=>$rtItem){
+                if(in_array($rtItem["logic_junction_id"],$junctionIds) || in_array($cityId, $cityIds)){
+                    $realTimeAlarmsInfoResult[$k] = $rtItem;
+                }
             }
+            $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
+
+
+            //聚合路口数据(路网数据、实时指标、报警数据)
+            $realTimeAlarmsInfo = [];
+            foreach ($realTimeAlarmsInfoResult as $item) {
+                $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
+            }
+            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo);
+
+
+            //计算junctionSurvey 数据
+            $jDataList = $junctionList['dataList'] ?? [];
+            $result = [];
+            $result['junction_total'] = $junctionTotal;
+            $result['alarm_total'] = 0;
+            $result['congestion_total'] = 0;
+            $result['amble_total'] = 0;
+            foreach ($jDataList as $datum) {
+                // 报警数
+                $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+                // 拥堵数
+                $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+                // 缓行数
+                $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
+            }
+            $junctionSurvey = $result;
         }
-        $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
-
-
-        //聚合路口数据(路网数据、实时指标、报警数据)
-        $realTimeAlarmsInfo = [];
-        foreach ($realTimeAlarmsInfoResult as $item) {
-            $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
-        }
-        $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo);
-
-
-        //计算junctionSurvey 数据
-        $jDataList = $junctionList['dataList'] ?? [];
-        $result = [];
-        $result['junction_total'] = $junctionTotal;
-        $result['alarm_total'] = 0;
-        $result['congestion_total'] = 0;
-        $result['amble_total'] = 0;
-        foreach ($jDataList as $datum) {
-            // 报警数
-            $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
-            // 拥堵数
-            $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
-            // 缓行数
-            $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
-        }
-        $junctionSurvey = $result;
-
 
         // 平均延误数据
-        $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 24 * 3600);
-        // 路口概览数据
-        $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
-        // 缓存诊断路口列表数据
-        $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
-        // 缓存实时报警路口数据
-        $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
-        // 冗余缓存实时报警路口数据,每一个批次一份
-        $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
+        if($ctype==1) {
+            $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 24 * 3600);
+        }elseif($ctype==0){
+            // 路口概览数据
+            $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
+            // 缓存诊断路口列表数据
+            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
+            // 缓存实时报警路口数据
+            $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
+            // 冗余缓存实时报警路口数据,每一个批次一份
+            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
+        }
     }
 
 
