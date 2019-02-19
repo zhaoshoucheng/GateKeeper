@@ -73,14 +73,12 @@ class RoadService extends BaseService
         $cityId        = $params['city_id'];
         $junctionIds   = $params['junction_ids'];
         $roadName      = $params['road_name'];
-        $roadDirection = $params['road_direction'];
 
         $data = [
             'city_id' => intval($cityId),
             'road_id' => md5(implode(',', $junctionIds) . $roadName),
             'road_name' => strip_tags(trim($roadName)),
             'logic_junction_ids' => implode(',', $junctionIds),
-            'road_direction' => intval($roadDirection),
             'user_id' => 0,
         ];
 
@@ -111,12 +109,10 @@ class RoadService extends BaseService
         $roadId        = $params['road_id'];
         $junctionIds   = $params['junction_ids'];
         $roadName      = $params['road_name'];
-        $roadDirection = $params['road_direction'];
 
         $data = [
             'road_name' => strip_tags(trim($roadName)),
             'logic_junction_ids' => implode(',', $junctionIds),
-            'road_direction' => intval($roadDirection),
         ];
 
         if (!$this->road_model->roadNameIsUnique($roadName, $cityId, $roadId)) {
@@ -168,20 +164,13 @@ class RoadService extends BaseService
 
         $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
         $results = [];
-        echo sizeof($roadList);
-
-        $start = microtime(true);
-        echo "start ". $start."\n";
-
-        $i = 0;
 
         foreach ($roadList as $item)
         {
-            $i++;
             $roadId = $item['road_id'];
-//            $res = $this->redis_model->getData('Road_' . $roadId);
-//            if (!$res)
-            if (1)
+            $res = $this->redis_model->getData('Road_' . $roadId);
+            echo 'Road_' . $roadId;
+            if (!$res)
             {
                 $data = [
                     'city_id' => $cityId,
@@ -189,18 +178,12 @@ class RoadService extends BaseService
                     'show_type' => $params['show_type'],
                 ];
                 try {
-                    $start = microtime(true);
-                    echo "start ". $i . " " . $start."\n";
-
                     $res = $this->getRoadDetail($data);
-
-                    $end = microtime(true);
-                    echo "end ". $i . " " . $end."\n";
                 } catch (\Exception $e) {
                     $res = [];
                 }
                 // 将数据刷新到 Redis
-//                $this->redis_model->setData('Road_' . $roadId, json_encode($res));
+                $this->redis_model->setData('Road_' . $roadId, json_encode($res));
             } else {
                 $res = json_decode($res, true);
             }
