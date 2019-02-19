@@ -47,4 +47,29 @@ class HelperService extends BaseService
 
         return $res;
     }
+
+    /**
+     * 获取最新的hour
+     *
+     * @param $cityId
+     *
+     * @return array|bool|string
+     * @throws \Exception
+     */
+    public function getIndexLastestHour($cityId)
+    {
+        $hour = $this->redis_model->getIndexHour($cityId);
+
+        if($hour) {
+            return $hour;
+        }
+
+        $res = $this->realtime_model->getLastestHour($cityId);
+
+        if(!$res) {
+            throw new \Exception('获取 hour 失败', ERR_DATABASE);
+        }
+
+        return $res;
+    }
 }

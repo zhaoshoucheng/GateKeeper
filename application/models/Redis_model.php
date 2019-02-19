@@ -182,6 +182,20 @@ class Redis_model extends CI_Model
     }
 
     /**
+     * 获取指定城市的最新指标 hour
+     *
+     * @param $cityId
+     *
+     * @return array|bool|string
+     */
+    public function getIndexHour($cityId)
+    {
+        $key = 'new_its_schedule_lasthour_' . $cityId;
+
+        return $this->getData($key);
+    }
+
+    /**
      * 获取数据
      *
      * @param $key  string key
