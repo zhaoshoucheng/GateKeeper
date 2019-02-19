@@ -54,21 +54,24 @@ class MY_Controller extends CI_Controller
         $this->load->config('nconf');
         $this->routerUri = $this->uri->ruri_string();
         $token = isset($_REQUEST['token']) ? $_REQUEST['token'] : "";
+
+        $accessType = 0; // 权限认证通过的类型
+        $accessUser = ""; // 权限认证通过的用户信息
+
         // 有一些机器是不需要进行sso验证的，这里就直接跳过
         if (!in_array($host, $escapeSso)) {
 
             $this->load->model('user/user', 'user');
 
-            com_log_notice('_com_sign', ['ip' => $_SERVER["REMOTE_ADDR"], 'ip2' => $this->input->get_request_header('X-Real-Ip')]);
-
             if (isset($_REQUEST['app_id'])) {
                 // 此处采用appid + appkey的验证, 开放平台
-                com_log_notice('_com_sign', ['uri' => $this->routerUri, 'request' => $_REQUEST]);
-
                 if (!$this->_checkAuthorizedApp()) {
                     $this->_output();
                     exit();
                 }
+
+                $accessType = 1; // 使用开放平台验证通过
+                $accessUser = $_REQUEST['app_id'];
 
             } elseif (in_array($host, ['100.69.238.11:8000'])) {
                 // 通过vip进行的请求
@@ -77,9 +80,15 @@ class MY_Controller extends CI_Controller
                     exit();
                 }
 
+                $accessType = 2; // 使用vip白名单验证通过
+
             } elseif (!empty($escapeClient[$clientIp]) && in_array($token,$escapeClient[$clientIp])) {
                 com_log_notice('_com_sign_escape_client', ['token' => $token, 'escapeClient' => $escapeClient[$clientIp]]);
                 //pass
+
+                $accessType = 3; // 使用白名单+token验证通过
+                $accessUser = $token;
+
             } else {
                 // 检测用户
                 if (!$this->_checkUser()) {
@@ -102,8 +111,21 @@ class MY_Controller extends CI_Controller
                     $this->_output();
                     exit();
                 }
+
+                $accessType = 4; // 使用用户名密码访问
+                $accessUser = $this->username;
             }
         }
+
+        com_log_notice('_com_sign', [
+            'access_user' => $accessUser,
+            'access_type' => $accessType,
+            'ip' => $_SERVER["REMOTE_ADDR"],
+            'ip2' => $this->input->get_request_header('X-Real-Ip'),
+            'city_id' => $_REQUEST['city_id'],
+            'uri' => $this->routerUri,
+            'request' => $_REQUEST
+        ]);
 
         //============>降级开始
         //判断是否符合降级规则,是则直接输出
