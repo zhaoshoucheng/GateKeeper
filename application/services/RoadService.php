@@ -170,10 +170,16 @@ class RoadService extends BaseService
         $results = [];
         echo sizeof($roadList);
 
+        $start = microtime(true);
+        echo "start ". $start."\n";
+
+        $i = 0;
+
         foreach ($roadList as $item)
         {
+            $i++;
             $roadId = $item['road_id'];
-            $res = $this->redis_model->getData('Road_' . $roadId);
+//            $res = $this->redis_model->getData('Road_' . $roadId);
 //            if (!$res)
             if (1)
             {
@@ -183,7 +189,13 @@ class RoadService extends BaseService
                     'show_type' => $params['show_type'],
                 ];
                 try {
+                    $start = microtime(true);
+                    echo "start ". $i . " " . $start."\n";
+
                     $res = $this->getRoadDetail($data);
+
+                    $end = microtime(true);
+                    echo "end ". $i . " " . $end."\n";
                 } catch (\Exception $e) {
                     $res = [];
                 }
@@ -196,6 +208,9 @@ class RoadService extends BaseService
             $res['road_id'] = $item['id'];
             $results[]   = $res;
         }
+
+        $end = microtime(true);
+        echo "end ". $end;
 
         return $results;
     }
