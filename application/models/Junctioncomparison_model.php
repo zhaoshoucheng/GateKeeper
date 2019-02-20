@@ -7,17 +7,12 @@
 
 class Junctioncomparison_model extends CI_Model
 {
-    private $tb = 'flow_duration_v6_';
-    private $db = '';
-
     public function __construct()
     {
         parent::__construct();
-        if (empty($this->db)) {
-            $this->db = $this->load->database('default', true);
-        }
 
         $this->load->model('waymap_model');
+        $this->load->model('flowdurationv6_model');
         $this->load->config('junctioncomparison_conf');
     }
 
@@ -40,8 +35,6 @@ class Junctioncomparison_model extends CI_Model
         if (empty($data)) {
             return (object)[];
         }
-
-        $table = $this->tb . $data['city_id'];
 
         // 获取路口名称
         $junctionsInfo = $this->waymap_model->getJunctionInfo($data['logic_junction_id']);
@@ -74,7 +67,7 @@ class Junctioncomparison_model extends CI_Model
         $baseDateArr = $dateWeek['date'];
         $baseWeekDays = $dateWeek['week'];
         $publicData['date'] = $baseDateArr;
-        $baseQuotaData = $this->getQuotaInfoByDate($table, $publicData);
+        $baseQuotaData = $this->flowdurationv6_model->getQuotaInfoByDate($publicData);
         // 相位->时间->值
         $newBaseQuotaData = [];
         foreach ($baseQuotaData as $val) {
@@ -86,7 +79,7 @@ class Junctioncomparison_model extends CI_Model
         $evaluateDateArr = $dateWeek['date'];
         $evaluateWeekDays = $dateWeek['week'];
         $publicData['date'] = $evaluateDateArr;
-        $evaluateQuotaData = $this->getQuotaInfoByDate($table, $publicData);
+        $evaluateQuotaData = $this->flowdurationv6_model->getQuotaInfoByDate($publicData);
         // 相位->时间->值
         $newEvaluateQuotaData = [];
         foreach ($evaluateQuotaData as $val) {
@@ -469,49 +462,5 @@ class Junctioncomparison_model extends CI_Model
             'date' => $dateArr,
             'week' => $weekDays,
         ];
-    }
-
-    /**
-     * 获取单点路口优化对比
-     * @param $table                     string   Y 数据表
-     * @param $data['logic_junction_id'] string   Y 路口ID
-     * @param $data['date']              array    Y 所需要查询的日期
-     * @param $data['quota_key']         string   Y 指标key
-     * @return array
-     */
-    private function getQuotaInfoByDate($table, $data)
-    {
-        // 判断数据表是否存在
-        if (!$this->isTableExisted($table)) {
-            com_log_warning('_itstool_JuctionCompareReport_table_error', 0, '数据表不存在', compact("table"));
-            return (object)[];
-        }
-
-        $quotaFormula = 'sum(`' . $data['quota_key'] . '` * `traj_count`) / sum(`traj_count`)';
-        $this->db->select("logic_flow_id, hour,  {$quotaFormula} as quota_value");
-        $this->db->from($table);
-        $where = [
-            'logic_junction_id' => $data['logic_junction_id'],
-            'traj_count >='     => 10,
-        ];
-        $this->db->where($where);
-        $this->db->where_in('date', $data['date']);
-        $this->db->where_in('hour', $data['hour']);
-        $this->db->group_by('logic_flow_id, hour');
-        $res = $this->db->get()->result_array();
-        if (!$res) {
-            return (object)[];
-        }
-
-        return $res;
-    }
-
-    /**
-     * 校验数据表是否存在
-     */
-    private function isTableExisted($table)
-    {
-        $isExisted = $this->db->table_exists($table);
-        return $isExisted;
     }
 }

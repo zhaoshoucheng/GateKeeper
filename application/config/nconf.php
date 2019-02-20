@@ -748,3 +748,6 @@ $config['key_junction_list'] = [
 
 //upm权限
 $config['upm_usergroup_prefix'] = "signal_gateway_upm_";
+
+// 搜索引擎
+$config['data_engine'] = 'elastic';

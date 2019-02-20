@@ -26,6 +26,7 @@ class RoadService extends BaseService
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
         $this->load->model('road_model');
+        $this->load->model('flowdurationv6_model');
 
         $this->load->config('evaluate_conf');
     }
@@ -364,6 +365,7 @@ class RoadService extends BaseService
             return $item['logic_flow']['logic_flow_id'] ?? '';
         }, $res[$dataKey]);
 
+        $flowLength = [];
         // 在查找通行时间时，构建 CASE THEN SQL 语句
         if ($quotaKey == 'time') {
 
@@ -375,6 +377,10 @@ class RoadService extends BaseService
 
                     $timeCaseWhen .= 'WHEN logic_flow_id = \'' . $item['logic_flow']['logic_flow_id']
                         . '\' THEN ' . $item['length'] . ' / speed ';
+                    $flowLength[] = [
+                        'flowid' => $item['logic_flow']['logic_flow_id'],
+                        'length' => $item['length'],
+                    ];
                 }
             }
 
@@ -387,7 +393,7 @@ class RoadService extends BaseService
         $dates  = array_merge($baseDates, $evaluateDates);
 
         // 获取数据源集合
-        $result = $this->road_model->getJunctionByCityId($dates, $hours, $junctionIdList, $flowIdList, $cityId, $select);
+        $result = $this->flowdurationv6_model->getJunctionByCityId($dates, $flowIdList, $cityId, $quotaKey, $flowLength, $select);
         if (!$result) {
             return [];
         }
@@ -398,9 +404,9 @@ class RoadService extends BaseService
         };
 
         // 数据分组后，将每组数据进行处理的函数
-        $groupByItemFormatCallback = function ($item) use ($quotaKey, $hours) {
+        $groupByItemFormatCallback = function ($item) use ($hours) {
             $hourToNull  = array_combine($hours, array_fill(0, 48, null));
-            $item        = array_column($item, $quotaKey, 'hour');
+            $item        = array_column($item, 'quota_value', 'hour');
             $hourToValue = array_merge($hourToNull, $item);
 
             $result = [];
