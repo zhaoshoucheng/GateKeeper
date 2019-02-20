@@ -622,6 +622,13 @@ class TimingAdaptionAreaService extends BaseService
     public function getAreaQuotaInfo($data)
     {
         //趋势与平滑曲线
+        $areaQuotaInfoKey = sprintf("itstool_area_quotainfo_%s_%s",$data['area_id'],$data['quota_key']);
+        $redisData = $this->redis_model->getData($areaQuotaInfoKey);
+        if (!empty($redisData)) {
+            $redisData = json_decode($redisData, true);
+            return $redisData;
+        }
+        
         // 获取路口ID串
         $junctions = $this->getAreaJunctions($data);
 
@@ -714,9 +721,11 @@ class TimingAdaptionAreaService extends BaseService
             }
         }
 
-        return [
+        $dataList = [
             'dataList' => !empty($tmpRet) ? $tmpRet : [],
         ];
+        $this->redis_model->setEx($areaQuotaInfoKey,json_encode($dataList),120);
+        return $dataList;
     }
 
     /**
