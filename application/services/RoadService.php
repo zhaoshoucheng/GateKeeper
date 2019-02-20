@@ -165,7 +165,7 @@ class RoadService extends BaseService
     public function getAllRoadDetail($params)
     {
         $cityId = $params['city_id'];
-        $show_type = $params['show_type'];
+        $show_type = (isset($params['show_type']) and $params['show_type']) ? 1 : 0;
         $pre_key = $show_type ? 'Road_extend_' : 'Road_';
 
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
