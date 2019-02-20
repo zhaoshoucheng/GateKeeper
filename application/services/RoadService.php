@@ -165,7 +165,7 @@ class RoadService extends BaseService
     public function getAllRoadDetail($params)
     {
         $cityId = $params['city_id'];
-        $show_type = (isset($params['show_type']) and $params['show_type']) ? 1 : 0;
+        $show_type = $params['show_type'];
         $pre_key = $show_type ? 'Road_extend_' : 'Road_';
 
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
@@ -260,7 +260,7 @@ class RoadService extends BaseService
 
         $res = $this->waymap_model->getConnectPath($cityId, $maxWaymapVersion, $junctionIdList);
 
-        if (!$res || $res['errorCode'] != 0 || empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
+        if (!$res || empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
             throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
         }
 
