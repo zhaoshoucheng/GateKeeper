@@ -773,7 +773,8 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         if (empty($detail['result'])) {
-            throw new \Exception('该方向无轨迹', ERR_DEFAULT);
+            return [];
+            //throw new \Exception('该方向无轨迹', ERR_DEFAULT);
         }
 
         $ret['dataList'] = [];
