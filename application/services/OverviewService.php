@@ -111,19 +111,33 @@ class OverviewService extends BaseService
 
         $formatQuotaRoundHour = function ($v) use ($realTimeQuota) {
             return [
+                //取得配置方法
                 $realTimeQuota['stop_delay']['round']($v['avg_stop_delay']),
                 substr($v['hour'], 0, 5),
             ];
         };
 
         $ext = [];
-
-        $findSkip = function ($carry, $item) use (&$ext) {
+        $skipMap = [];
+        $findSkip = function ($carry, $item) use (&$ext,&$skipMap) {
+            //$carry是上一个元素值
             $now = strtotime($item[1] ?? '00:00');
-            if ($now - $carry >= 30 * 60) {
-                $ext = array_merge($ext, range($carry + 5 * 60, $now - 5 * 60, 5 * 60));
+            $pretime = strtotime($carry[1] ?? '00:00');
+
+            $nowValue = floatval($item[0]);
+            $preValue = floatval($carry[0]);
+            if ($now - $pretime >= 30 * 60) {
+                $rangeHours = range($pretime + 5 * 60, $now - 5 * 60, 5 * 60);
+                $ext = array_merge($ext, $rangeHours);
+
+                $rangemap = array_flip($rangeHours);
+                $rangeavg = ($nowValue-$preValue)/count($rangemap);
+                foreach ($rangemap as $rk=>$rv){
+                    $rangemap[date('H:i', $rk)] = $preValue+$rv*$rangeavg;
+                }
+                $skipMap = array_merge($skipMap, $rangemap);
             }
-            return $now;
+            return $item;
         };
 
         $resultCollection = Collection::make($result)->map($formatQuotaRoundHour);
@@ -133,12 +147,11 @@ class OverviewService extends BaseService
             'unit' => $realTimeQuota['stop_delay']['unit'],
         ];
 
-        $resultCollection->reduce($findSkip, strtotime('00:00'));
+        $resultCollection->reduce($findSkip, [0,'00:00']);
 
-        $result = $resultCollection->merge(array_map(function ($v) {
-            return [null, date('H:i', $v)];
+        $result = $resultCollection->merge(array_map(function ($v) use ($skipMap) {
+            return [$skipMap[date('H:i', $v)], date('H:i', $v)];
         }, $ext))->sortBy(1);
-
         return [
             'dataList' => $result,
             'info' => $info,

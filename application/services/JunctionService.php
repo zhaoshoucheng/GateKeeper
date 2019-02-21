@@ -59,9 +59,9 @@ class JunctionService extends BaseService
             throw new \Exception('时间范围不能为空', ERR_PARAMETERS);
         }
 
-        $select = 'sum(' . $quotaKey . ' * traj_count) / sum(traj_count) as ' . $quotaKey . ', hour, logic_flow_id';
+        $select = 'hour, logic_flow_id';
 
-        $result = $this->flowDurationV6_model->getQuotaByJunction($cityId, $logicJunctionId, $dates, $hours, $select);
+        $result = $this->flowDurationV6_model->getQuotaByJunction($cityId, $logicJunctionId, $dates, $hours, $quotaKey, $select);
 
         if (empty($result)) {
             return [];

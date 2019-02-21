@@ -399,13 +399,13 @@ class EvaluateService extends BaseService
             })->get();
 
         if ($logicFlowId == 9999) {
-            $select  = 'logic_junction_id, date, hour, avg(' . $quotaKey . ') as ' . $quotaKey;
+            $select  = 'logic_junction_id, date, hour';
             $groupBy = 'logic_junction_id, hour, date';
 
-            $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, '', $dates, $groupBy, $select);
+            $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, '', $dates, $groupBy, $quotaKey, $select);
         } else {
             $select = 'logic_junction_id, logic_flow_id, date, hour, ' . $quotaKey;
-            $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, '', $select);
+            $data = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, '', '', $select, 'detail');
         }
 
         if (!$data) {
@@ -599,6 +599,31 @@ class EvaluateService extends BaseService
         ];
     }
 
+    public function getExcelArrayOther($data)
+    {
+        $timeArray = hourRange();
+
+        $table = [];
+
+        $table[] = $timeArray;
+        array_unshift($table[0], "日期-时间");
+
+        $data = array_map(function ($value) {
+            return array_column($value, 0, 1);
+        }, $data);
+
+        foreach ($data as $key => $value) {
+            $column   = [];
+            $column[] = $key;
+            foreach ($timeArray as $item) {
+                $column[] = $value[$item] ?? '-';
+            }
+            $table[] = $column;
+        }
+
+        return $table;
+    }
+
     /**
      * 评估数据下载地址
      *
@@ -648,7 +673,7 @@ class EvaluateService extends BaseService
 
         if (!empty($data['base'])) {
 
-            $table = getExcelArray($data['base']);
+            $table = $this->getExcelArrayOther($data['base']);
 
             $objSheet->fromArray($table, null, 'A' . $line);
 
@@ -666,7 +691,7 @@ class EvaluateService extends BaseService
         if (!empty($data['evaluate'])) {
 
             foreach ($data['evaluate'] as $datum) {
-                $table = getExcelArray($datum);
+                $table = $this->getExcelArrayOther($datum);
 
                 $objSheet->fromArray($table, null, 'A' . $line);
 

@@ -161,6 +161,7 @@ class TimingAdaptionAreaService extends BaseService
             $data[$k]['stop_delay']       = round($stop_delay, 2) . '/s';
             $data[$k]['speed_trend']      = $speed_trend;
             $data[$k]['stop_delay_trend'] = $stop_delay_trend;
+            $data[$k]['last_hour'] = $lastHour;
 
             // unset掉多余字段
             if (isset($v['status'])) {
@@ -620,6 +621,14 @@ class TimingAdaptionAreaService extends BaseService
      */
     public function getAreaQuotaInfo($data)
     {
+        //趋势与平滑曲线
+        $areaQuotaInfoKey = sprintf("itstool_area_quotainfo_%s_%s",$data['area_id'],$data['quota_key']);
+        $redisData = $this->redis_model->getData($areaQuotaInfoKey);
+        if (!empty($redisData)) {
+            $redisData = json_decode($redisData, true);
+            return $redisData;
+        }
+        
         // 获取路口ID串
         $junctions = $this->getAreaJunctions($data);
 
@@ -640,6 +649,7 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         $ret = [];
+        $lastHour = $this->helperService->getLastestHour($data['city_id']);
         foreach ($quotaInfo as $k => $item) {
             $value = $item['value'];
             if ($data['quota_key'] == 'avgSpeed') {
@@ -662,9 +672,16 @@ class TimingAdaptionAreaService extends BaseService
         */
         $tmpRet      = [];
         $lastDayTime = "00:00:00";
+        $endTime = strtotime($lastHour);
         for ($i = 0; $i < count($ret);) {
             $nowTime  = strtotime($ret[$i][0]);
             $lastTime = strtotime($lastDayTime);
+
+            //排除大于当前批次的数据
+            if($nowTime > $endTime){
+                break;
+            }
+
             // 如果两个距离不是顺序的
             if ($lastTime > $nowTime) {
                 $i++;
@@ -687,17 +704,28 @@ class TimingAdaptionAreaService extends BaseService
             }
 
             // 两个距离大于15分钟
-            $lastDayTime = $tmpDayTime = date("H:i:s", $lastTime + 15 * 60);
-            $tmpRet[]    = [
-                $tmpDayTime,
-                null,
-            ];
-            continue;
+            // 构建平滑曲线
+            $preItem = end($tmpRet);
+            if(!empty($preItem)){
+                $preDayTime = strtotime($preItem[0]);
+                $eLen = ($nowTime - $preDayTime)/60/5;
+                $eAvgInc = ($ret[$i][1] - $preItem[1])/$eLen;
+                for($x=0;$x<$eLen;$x++){
+                    $lastDayTime = $tmpDayTime = date("H:i:s",$preItem[0]+$x*5*60);
+                    $tmpRet[]    = [
+                        $tmpDayTime,
+                        round($preItem[1]+$x*$eAvgInc,2),
+                    ];
+                }
+
+            }
         }
 
-        return [
+        $dataList = [
             'dataList' => !empty($tmpRet) ? $tmpRet : [],
         ];
+        $this->redis_model->setEx($areaQuotaInfoKey,json_encode($dataList),120);
+        return $dataList;
     }
 
     /**

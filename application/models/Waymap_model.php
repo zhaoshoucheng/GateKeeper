@@ -515,7 +515,7 @@ class Waymap_model extends CI_Model
      * @return array|mixed
      * @throws \Exception
      */
-    public function getFlowMovement($city_id, $logic_junction_id, $logic_flow_id)
+    public function getFlowMovement($city_id, $logic_junction_id, $logic_flow_id, $juncMovements = 0)
     {
         $data = compact('city_id', 'logic_junction_id', 'logic_flow_id');
 
@@ -523,6 +523,9 @@ class Waymap_model extends CI_Model
 
         $res = $this->get($url, $data);
 
+        if ($juncMovements == 1) {
+            return $res['juncMovements'] ?? [];
+        }
         return $res['movement'] ?? [];
     }
 

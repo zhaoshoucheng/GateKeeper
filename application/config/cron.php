@@ -23,6 +23,7 @@ $config['checkItems'] = [
         'params' => [
             'city_id' => 0,
         ],
+        'checkerInfo' => '$.errno isset and gt 0,$.data.dataList isset',
         'checker' => function($result){
             global $realTimeAlarmListCount;
             $ret = json_decode($result,true);
@@ -43,13 +44,17 @@ $config['checkItems'] = [
             'city_id' => 0,
             'pagesize' => 20,
         ],
+        'checkerInfo' => '$.errno isset and gt 0,$.data isset',
         'checker' => function($result){
             $ret = json_decode($result,true);
             if(!isset($ret['errno']) || $ret['errno']!=0){
                 return false;
             }
-            if(!isset($ret['data']) || count($ret['data'])==0){
-                return false;
+            //避免误报
+            if(intval(date("H"))>=6){
+                if(!isset($ret['data']) || count($ret['data'])==0){
+                    return false;
+                }
             }
             return true;
         },
@@ -61,13 +66,16 @@ $config['checkItems'] = [
             'city_id' => 0,
             'pagesize' => 20,
         ],
+        'checkerInfo' => '$.errno isset and gt 0,$.data isset',
         'checker' => function($result){
             $ret = json_decode($result,true);
             if(!isset($ret['errno']) || $ret['errno']!=0){
                 return false;
             }
-            if(!isset($ret['data']) || count($ret['data'])==0){
-                return false;
+            if(intval(date("H"))>=6){
+                if(!isset($ret['data']) || count($ret['data'])==0){
+                    return false;
+                }
             }
             return true;
         },
@@ -78,6 +86,7 @@ $config['checkItems'] = [
         'params' => [
             'city_id' => 0,
         ],
+        'checkerInfo' => '$.errno isset and gt 0,$.data.dataList isset,count($.data.dataList)>0 when date("H")>0',
         'checker' => function($result){
             $ret = json_decode($result,true);
             if(!isset($ret['errno']) || $ret['errno']!=0){
@@ -98,6 +107,7 @@ $config['checkItems'] = [
         'params' => [
             'city_id' => 0,
         ],
+        'checkerInfo' => '$.errno isset and gt 0,$.data.count isset and count($.data.count)>0',
         'checker' => function($result){
             $ret = json_decode($result,true);
             if(!isset($ret['errno']) || $ret['errno']!=0){
@@ -115,6 +125,7 @@ $config['checkItems'] = [
         'params' => [
             'city_id' => 0,
         ],
+        'checkerInfo' => '$.errno isset and gt 0,$.data.junction_total isset and count($.data.junction_total)>0,$.data.alarm_total isset',
         'checker' => function($result){
             global $junctionSurveyAlarmTotal;
             global $junctionTotal;
@@ -141,6 +152,7 @@ $config['checkItems'] = [
         'params' => [
             'city_id' => 0,
         ],
+        'checkerInfo' => '$.errno isset and gt 0,$.data isset',
         'checker' => function($result){
             $ret = json_decode($result,true);
             if(!isset($ret['errno']) || $ret['errno']!=0){
@@ -158,6 +170,7 @@ $config['checkItems'] = [
         'params' => [
             'city_id' => 0,
         ],
+        'checkerInfo' => '$.errno isset and gt 0,$.data.dataList isset and count($.data.dataList)>0',
         'checker' => function($result){
             $ret = json_decode($result,true);
             if(!isset($ret['errno']) || $ret['errno']!=0){
@@ -175,6 +188,7 @@ $config['checkItems'] = [
         'params' => [
             'city_id' => 0,
         ],
+        'checkerInfo' => '$.errno isset and gt 0,$.data.center.lat isset and $.data.center.lng isset,$.data.dataList isset and count($.data.dataList)>0',
         'checker' => function($result){
             $ret = json_decode($result,true);
             if(!isset($ret['errno']) || $ret['errno']!=0){
@@ -194,6 +208,7 @@ $config['checkItems'] = [
         'url' => 'Feedback/getTypes',
         'params' => [
         ],
+        'checkerInfo' => '$.errno isset and gt 0,$.data isset',
         'checker' => function($result){
             $ret = json_decode($result,true);
             if(!isset($ret['errno']) || $ret['errno']!=0){

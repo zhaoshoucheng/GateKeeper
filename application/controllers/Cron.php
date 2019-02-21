@@ -64,7 +64,7 @@ class Cron extends CI_Controller
                     return;
                 }
             }
-        } 
+        }
     }
 
     public function del_old_realtime_data($cityIdsStr, $days)
@@ -239,7 +239,8 @@ class Cron extends CI_Controller
                     //checker
                     $checker = $item['checker'];
                     if(!$checker($ret)){
-                        throw new Exception(json_encode($item)." checker false", 1);
+                        $message = sprintf("check %s failure. content:%s",json_encode($item),$ret);
+                        throw new Exception($message, 1);
                     }
 
                     //设置缓存时间
@@ -252,7 +253,7 @@ class Cron extends CI_Controller
                         'data' => json_encode($retArr),
                     ];
 
-                    $message = sprintf("get %s success.",json_encode($item));
+                    $message = sprintf("check %s success.",json_encode($item));
                     echo "[INFO] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
                 }
                 if (!file_exists($basedir)) {
@@ -264,18 +265,18 @@ class Cron extends CI_Controller
                 //union checker
                 global $realTimeAlarmListCount,$junctionSurveyAlarmTotal,$junctionTotal;
                 if($realTimeAlarmListCount>0 && $junctionSurveyAlarmTotal==0){
-                    throw new Exception("city_id={$city_id} union checker false", 1);
+                    throw new Exception("city_id={$city_id} realTimeAlarmListCount={$realTimeAlarmListCount} junctionSurveyAlarmTotal={$junctionSurveyAlarmTotal} union checker false", 1);
                 }
                 if($realTimeAlarmListCount==0 && $junctionSurveyAlarmTotal>0){
-                    throw new Exception("city_id={$city_id} union checker false", 1);
+                    throw new Exception("city_id={$city_id} realTimeAlarmListCount={$realTimeAlarmListCount} junctionSurveyAlarmTotal={$junctionSurveyAlarmTotal} union checker false", 1);
                 }
-                //高峰时段数据异常
+                //高峰时段数据异常,放到monitor处理了
                 if(in_array(date("H"), [8,9,10,17,18,19,20])){
                     if($city_id==12 && $junctionTotal<=400){
-                        throw new Exception("city_id={$city_id} junctionTotal={$junctionTotal} [早8-10 晚5-8] checker false", 1);
+                        //throw new Exception("city_id={$city_id} junctionTotal={$junctionTotal} [早8-10 晚5-8] checker false", 1);
                     }
                     if($city_id==1 && $junctionTotal<=3000){
-                        throw new Exception("city_id={$city_id} junctionTotal={$junctionTotal} [早8-10 晚5-8] checker false", 1);
+                        //throw new Exception("city_id={$city_id} junctionTotal={$junctionTotal} [早8-10 晚5-8] checker false", 1);
                     }
                 }
 
@@ -291,9 +292,11 @@ class Cron extends CI_Controller
                 echo "[INFO] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
             } catch (Exception $e) {
                 $message = $e->getMessage();
+                $host = gethostname();
                 echo "[ERROR] " . date("Y-m-d\TH:i:s") . " message={$message}\n\r";
-                $data = array('msgtype' => 'text', 'text' => array('content' => "兜底数据写入报警: ".$message));
-                httpPOST($webhook, $data, 0, 'json');
+                $data = array('msgtype' => 'text', 'text' => array('content' => "兜底数据写入报警: ".$message." host={$host}"));
+                //禁用丁丁报警
+                //httpPOST($webhook, $data, 0, 'json');
                 com_log_warning('downgradeWrite_error', 0, $e->getMessage());
                 continue;
             }

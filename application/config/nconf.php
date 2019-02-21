@@ -77,11 +77,22 @@ if ($development == 2) {
         'flow'     => 'online_its_alarm_movement_month*',
     ];
 
+    // 数据服务
+    $data_service_server = '100.90.163.51';
+    $data_service_prot = '8099';
+    $data_service_ext = '';
+
     //报警数据历史处理
     $realtime_callback = 'http://10.85.128.81:30101';
 
     //需要验证城市权限
     $validateCity = 1;
+
+    //城市自适应配时下发频率配置
+    $city_upsigntime_interval = [
+        "12"=>2,
+        "134"=>2,
+    ];
 } else {
     //测试环境配置
 
@@ -110,10 +121,14 @@ if ($development == 2) {
     $signal_mis_server = '100.90.164.31';
     $signal_mis_port   = '8006';
     $signal_mis_ext    = '/signal-mis';
+    // 线下接口有问题
+    $signal_mis_server = '100.69.238.11';
+    $signal_mis_port   = '8000';
+    $signal_mis_ext    = '/its/signal-mis';
 
     // es
     $es_server = '10.89.236.25';
-    $es_port   = '8087';
+    $es_port   = '8090';
     $es_ext    = '';
 
     // new timing
@@ -140,18 +155,30 @@ if ($development == 2) {
         'flow'     => 'its_alarm_movement_month*',
     ];
 
+    // 数据服务
+    $data_service_server = '100.90.164.31';
+    $data_service_prot = '8093';
+    $data_service_ext = '';
+
     //报警数据历史处理
     $realtime_callback = 'http://100.90.164.31:8033';
 
     //需要验证城市权限
     $validateCity = 0;
+
+    //城市自适应配时下发频率配置
+    $city_upsigntime_interval = [
+        "12"=>2,
+        "134"=>2,
+    ];
 }
 
-$temp_waymap_port = !empty($waymap_port) ? ":" . $waymap_port : "";
-$temp_timing_port = !empty($timing_port) ? ":" . $timing_port : "";
-$signal_mis_port  = !empty($signal_mis_port) ? ":" . $signal_mis_port : "";
-$es_port          = !empty($es_port) ? ":" . $es_port : "";
-$alarm_port       = !empty($alarm_port) ? ":" . $alarm_port : "";
+$temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
+$temp_timing_port  = !empty($timing_port) ? ":" . $timing_port : "";
+$signal_mis_port   = !empty($signal_mis_port) ? ":" . $signal_mis_port : "";
+$es_port           = !empty($es_port) ? ":" . $es_port : "";
+$alarm_port        = !empty($alarm_port) ? ":" . $alarm_port : "";
+$data_service_prot = !empty($data_service_prot) ? ':' . $data_service_prot : '';
 
 // 路网接口地址
 $config['waymap_interface'] = 'http://' . $waymap_server . $temp_waymap_port . $waymap_ext;
@@ -193,6 +220,12 @@ $config['alarm_es_index'] = $alarm_es_index;
 
 // 是否验证城市权限
 $config['validate_city'] = $validateCity;
+
+// 城市自适应配时下发频率配置
+$config['city_upsigntime_interval'] = $city_upsigntime_interval;
+
+// 数据服务
+$config['data_service_interface'] = 'http://' . $data_service_server . $data_service_prot . $data_service_ext;
 
 // 评估置信度阈值
 $confidence_threshold = 0.5;
@@ -767,3 +800,6 @@ $config['timing_junction_list'] = [
 
 //upm权限
 $config['upm_usergroup_prefix'] = "signal_gateway_upm_";
+
+// 搜索引擎
+$config['data_engine'] = 'elastic';

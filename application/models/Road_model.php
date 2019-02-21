@@ -140,30 +140,6 @@ class Road_model extends CI_Model
             ->update($this->tb);
     }
 
-    /**
-     * @param        $dates
-     * @param        $hours
-     * @param        $junctionIds
-     * @param        $flowIds
-     * @param        $cityId
-     * @param string $select
-     *
-     * @return array
-     */
-    public function getJunctionByCityId($dates, $hours, $junctionIds, $flowIds, $cityId, $select = '*')
-    {
-        $res = $this->db->select($select)
-            ->from('flow_duration_v6_' . $cityId)
-            ->where_in('date', $dates)
-            ->where_in('hour', $hours)
-            ->where_in('logic_junction_id', $junctionIds)
-            ->where_in('logic_flow_id', $flowIds)
-            ->group_by('date, hour')
-            ->get();
-
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
-    }
-
     public function roadNameIsUnique($roadName, $cityId, $roadId = null)
     {
         $this->db->limit(1)

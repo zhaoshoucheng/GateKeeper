@@ -12,7 +12,7 @@ use Didi\Cloud\Collection\Collection;
 /**
  * Class RoadService
  * @package Services
- * @property \Road_model           $road_model
+ * @property \Road_model $road_model
  */
 class RoadService extends BaseService
 {
@@ -26,6 +26,7 @@ class RoadService extends BaseService
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
         $this->load->model('road_model');
+        $this->load->model('flowDurationV6_model');
 
         $this->load->config('evaluate_conf');
     }
@@ -70,17 +71,15 @@ class RoadService extends BaseService
      */
     public function addRoad($params)
     {
-        $cityId        = $params['city_id'];
-        $junctionIds   = $params['junction_ids'];
-        $roadName      = $params['road_name'];
-        $roadDirection = $params['road_direction'];
+        $cityId = $params['city_id'];
+        $junctionIds = $params['junction_ids'];
+        $roadName = $params['road_name'];
 
         $data = [
             'city_id' => intval($cityId),
             'road_id' => md5(implode(',', $junctionIds) . $roadName),
             'road_name' => strip_tags(trim($roadName)),
             'logic_junction_ids' => implode(',', $junctionIds),
-            'road_direction' => intval($roadDirection),
             'user_id' => 0,
         ];
 
@@ -107,16 +106,14 @@ class RoadService extends BaseService
      */
     public function updateRoad($params)
     {
-        $cityId        = $params['city_id'];
-        $roadId        = $params['road_id'];
-        $junctionIds   = $params['junction_ids'];
-        $roadName      = $params['road_name'];
-        $roadDirection = $params['road_direction'];
+        $cityId = $params['city_id'];
+        $roadId = $params['road_id'];
+        $junctionIds = $params['junction_ids'];
+        $roadName = $params['road_name'];
 
         $data = [
             'road_name' => strip_tags(trim($roadName)),
             'logic_junction_ids' => implode(',', $junctionIds),
-            'road_direction' => intval($roadDirection),
         ];
 
         if (!$this->road_model->roadNameIsUnique($roadName, $cityId, $roadId)) {
@@ -124,6 +121,9 @@ class RoadService extends BaseService
         }
 
         $res = $this->road_model->updateRoad($roadId, $data);
+
+        $this->redis_model->delList('Road_' . $roadId);
+        $this->redis_model->delList('Road_extend_' . $roadId);
 
         if (!$res) {
             throw new \Exception('更新干线失败', ERR_PARAMETERS);
@@ -146,6 +146,9 @@ class RoadService extends BaseService
 
         $res = $this->road_model->deleteRoad($roadId);
 
+        $this->redis_model->delList('Road_' . $roadId);
+        $this->redis_model->delList('Road_extend_' . $roadId);
+
         if (!$res) {
             throw new \Exception('删除干线失败', ERR_PARAMETERS);
         }
@@ -156,13 +159,15 @@ class RoadService extends BaseService
     /**
      * 获取全城全部路口详情
      *
-     * @param $params['city_id'] int 城市ID
+     * @param $params ['city_id'] int 城市ID
      *
      * @return array
      */
     public function getAllRoadDetail($params)
     {
         $cityId = $params['city_id'];
+        $show_type = $params['show_type'];
+        $pre_key = $show_type ? 'Road_extend_' : 'Road_';
 
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
 
@@ -171,11 +176,12 @@ class RoadService extends BaseService
 
         foreach ($roadList as $item) {
             $roadId = $item['road_id'];
-            $res = $this->redis_model->getData('Road_' . $roadId);
+            $res = $this->redis_model->getData($pre_key . $roadId);
             if (!$res) {
                 $data = [
                     'city_id' => $cityId,
                     'road_id' => $roadId,
+                    'show_type' => $show_type,
                 ];
                 try {
                     $res = $this->getRoadDetail($data);
@@ -183,13 +189,15 @@ class RoadService extends BaseService
                     $res = [];
                 }
                 // 将数据刷新到 Redis
-                $this->redis_model->setData('Road_' . $roadId, json_encode($res));
+                if(!empty($res)){
+                    $this->redis_model->setData($pre_key . $roadId, json_encode($res));
+                }
             } else {
                 $res = json_decode($res, true);
             }
             $res['road'] = $item;
             $res['road_id'] = $item['id'];
-            $results[]   = $res;
+            $results[] = $res;
         }
 
         return $results;
@@ -214,14 +222,51 @@ class RoadService extends BaseService
 
         $maxWaymapVersion = $this->waymap_model->getLastMapVersion();
 
+        if (isset($params['show_type']) and $params['show_type']) {
+            $IdsLength = sizeof($junctionIdList);
+            if ($IdsLength > 1) {
+                $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[0], 'all', 1);
+                $up_road_degree = [];
+                foreach ($juncMovements as $item) {
+                    if ($item['junction_id'] == $junctionIdList[0] and
+                        $item['downstream_junction_id'] == $junctionIdList[1] and
+                        $item['upstream_junction_id'][0] != '-') {
+                        $up_road_degree[$item['upstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                    }
+                }
+                if (!empty($up_road_degree)) {
+                    asort($up_road_degree);
+                    array_unshift($junctionIdList, key($up_road_degree));
+                } else {
+                    throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
+                }
+
+                $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[sizeof($junctionIdList) - 1], 'all', 1);
+                $down_road_degree = [];
+                foreach ($juncMovements as $item) {
+                    if ($item['junction_id'] == $junctionIdList[sizeof($junctionIdList) - 1] and
+                        $item['downstream_junction_id'][0] != '-' and
+                        $item['upstream_junction_id'] == $junctionIdList[sizeof($junctionIdList) - 2]) {
+                        $down_road_degree[$item['downstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                    }
+                }
+                if (!empty($down_road_degree)) {
+                    asort($down_road_degree);
+                    array_push($junctionIdList, key($down_road_degree));
+                } else {
+                    throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
+                }
+            }
+        }
+
         $res = $this->waymap_model->getConnectPath($cityId, $maxWaymapVersion, $junctionIdList);
 
         if (!$res || empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
             throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
         }
 
-        $junctionList      = $res['junctions_info'];
-        $forwardPathFlows  = $res['forward_path_flows'];
+        $junctionList = $res['junctions_info'];
+        $forwardPathFlows = $res['forward_path_flows'];
         $backwardPathFlows = $res['backward_path_flows'];
 
         $getStartEndJunctionIdKeyCallback = function ($item) {
@@ -230,11 +275,11 @@ class RoadService extends BaseService
         $getEndStartJunctionIdKeyCallback = function ($item) {
             return $item['end_junc_id'] . '-' . $item['start_junc_id'];
         };
-        $getFirstItemCallback             = function ($item) {
+        $getFirstItemCallback = function ($item) {
             return is_array($item) ? current($item) : $item;
         };
 
-        $forwardPathFlowsCollection  = Collection::make($forwardPathFlows)->groupBy($getStartEndJunctionIdKeyCallback, $getFirstItemCallback);
+        $forwardPathFlowsCollection = Collection::make($forwardPathFlows)->groupBy($getStartEndJunctionIdKeyCallback, $getFirstItemCallback);
         $backwardPathFlowsCollection = Collection::make($backwardPathFlows)->groupBy($getEndStartJunctionIdKeyCallback, $getFirstItemCallback);
 
         $roadInfo = [];
@@ -298,14 +343,14 @@ class RoadService extends BaseService
      */
     public function comparison($params)
     {
-        $roadId            = $params['road_id'];
-        $cityId            = $params['city_id'];
-        $direction         = $params['direction'];
-        $quotaKey          = $params['quota_key'];
-        $baseStartDate     = $params['base_start_date'];
-        $baseEndDate       = $params['base_end_date'];
+        $roadId = $params['road_id'];
+        $cityId = $params['city_id'];
+        $direction = $params['direction'];
+        $quotaKey = $params['quota_key'];
+        $baseStartDate = $params['base_start_date'];
+        $baseEndDate = $params['base_end_date'];
         $evaluateStartDate = $params['evaluate_start_date'];
-        $evaluateEndDate   = $params['evaluate_end_date'];
+        $evaluateEndDate = $params['evaluate_end_date'];
 
         // 指标算法映射
         $methods = [
@@ -326,7 +371,7 @@ class RoadService extends BaseService
         }
 
         // 获取干线路口数据
-        $select   = 'road_name, logic_junction_ids';
+        $select = 'road_name, logic_junction_ids';
         $roadInfo = $this->road_model->getRoadByRoadId($roadId, $select);
 
         // 获取干线数据失败
@@ -353,7 +398,7 @@ class RoadService extends BaseService
         }
 
         // 生成指定时间范围内的 基准日期集合数组，评估日期集合数组
-        $baseDates     = dateRange($baseStartDate, $baseEndDate);
+        $baseDates = dateRange($baseStartDate, $baseEndDate);
         $evaluateDates = dateRange($evaluateStartDate, $evaluateEndDate);
 
         // 生成 00:00 - 23:30 间的 粒度为 30 分钟的时间集合数组
@@ -363,6 +408,7 @@ class RoadService extends BaseService
             return $item['logic_flow']['logic_flow_id'] ?? '';
         }, $res[$dataKey]);
 
+        $flowLength = [];
         // 在查找通行时间时，构建 CASE THEN SQL 语句
         if ($quotaKey == 'time') {
 
@@ -374,6 +420,10 @@ class RoadService extends BaseService
 
                     $timeCaseWhen .= 'WHEN logic_flow_id = \'' . $item['logic_flow']['logic_flow_id']
                         . '\' THEN ' . $item['length'] . ' / speed ';
+                    $flowLength[] = [
+                        'flowid' => $item['logic_flow']['logic_flow_id'],
+                        'length' => $item['length'],
+                    ];
                 }
             }
 
@@ -383,10 +433,10 @@ class RoadService extends BaseService
         }
 
         $select = 'date, hour, ' . $methods[$quotaKey];
-        $dates  = array_merge($baseDates, $evaluateDates);
+        $dates = array_merge($baseDates, $evaluateDates);
 
         // 获取数据源集合
-        $result = $this->road_model->getJunctionByCityId($dates, $hours, $junctionIdList, $flowIdList, $cityId, $select);
+        $result = $this->flowDurationV6_model->getJunctionByCityId($dates, $flowIdList, $cityId, $quotaKey, $flowLength, $select);
         if (!$result) {
             return [];
         }
@@ -397,9 +447,9 @@ class RoadService extends BaseService
         };
 
         // 数据分组后，将每组数据进行处理的函数
-        $groupByItemFormatCallback = function ($item) use ($quotaKey, $hours) {
+        $groupByItemFormatCallback = function ($item) use ($hours) {
             $hourToNull  = array_combine($hours, array_fill(0, 48, null));
-            $item        = array_column($item, $quotaKey, 'hour');
+            $item        = array_column($item, 'quota_value', 'hour');
             $hourToValue = array_merge($hourToNull, $item);
 
             $result = [];
@@ -481,7 +531,7 @@ class RoadService extends BaseService
         $fileName = "{$data['info']['road_name']}_" . date('Ymd');
 
         $objPHPExcel = new \PHPExcel();
-        $objSheet    = $objPHPExcel->getActiveSheet();
+        $objSheet = $objPHPExcel->getActiveSheet();
         $objSheet->setTitle('数据');
 
         $detailParams = [
@@ -508,8 +558,8 @@ class RoadService extends BaseService
 
             $objSheet->fromArray($table, null, 'A' . $line);
 
-            $rows_cnt   = count($table);
-            $cols_cnt   = count($table[0]) - 1;
+            $rows_cnt = count($table);
+            $cols_cnt = count($table[0]) - 1;
             $rows_index = $rows_cnt + $line - 1;
 
             $objSheet->getStyle("A{$line}:" . intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
@@ -525,8 +575,8 @@ class RoadService extends BaseService
 
             $objSheet->fromArray($table, null, 'A' . $line);
 
-            $rows_cnt   = count($table);
-            $cols_cnt   = count($table[0]) - 1;
+            $rows_cnt = count($table);
+            $cols_cnt = count($table[0]) - 1;
             $rows_index = $rows_cnt + $line - 1;
             $objSheet->getStyle("A{$line}:" . intToChr($cols_cnt) . $rows_index)->applyFromArray($excelStyle['content']);
             $objSheet->getStyle("A{$line}:A{$rows_index}")->applyFromArray($excelStyle['header']);
