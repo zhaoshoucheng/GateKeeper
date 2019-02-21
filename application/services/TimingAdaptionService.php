@@ -397,6 +397,7 @@ class TimingAdaptionService extends BaseService
         }
 
         $currentInfo = json_decode($res['current_info'], true);
+        $optStatus = json_decode($res['opt_status'], true);
 
         // 获取路口配时成功下发时间
         $currentResult = $this->getCurrentUpdateResult($logicJunctionId);
@@ -466,6 +467,7 @@ class TimingAdaptionService extends BaseService
             //预计下次方案下发时间
             'next_upload_time' => $nextUploadTime,
             'status' => $status,
+            'opt_status' => $optStatus,
             'tmp' => $tmp,
             'message' => $messages[$status],
         ];

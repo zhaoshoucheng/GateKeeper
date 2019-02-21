@@ -147,6 +147,27 @@ class Redis_model extends CI_Model
     }
 
     /**
+     * List 取成员
+     *
+     * @param $key
+     *
+     * @return array
+     */
+    public function lrange($key,$start=0,$stop=-1)
+    {
+        if (!$this->redis) {
+            return [];
+        }
+
+        try {
+            $res = $this->redis->lRange($key,$start,$stop);
+        } catch (\RedisException $e) {
+            $res = [];
+        }
+        return $res;
+    }
+
+    /**
      * 删除集合
      *
      * @param $key

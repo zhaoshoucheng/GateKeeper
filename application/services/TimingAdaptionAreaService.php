@@ -906,6 +906,50 @@ class TimingAdaptionAreaService extends BaseService
     }
 
     /**
+     * 获取最新配时数据
+     * @param $data[logic_junction_id] Y 逻辑路口
+     * @param $data[logic_flow_id] Y 逻辑相位
+     * @return array
+     */
+    public function getCurrentTimingCurv($data){
+        //获取最近的缓存数据
+        $currentTimingListRedisKey = sprintf("schedule_junction_current_timing_list_%s",$data["logic_junction_id"]);
+        $currentTimingList = $this->redis_model->lrange($currentTimingListRedisKey);
+        $flowTimingCurve = [];
+        if (!empty($currentTimingList)) {
+            foreach ($currentTimingList as $val){
+                list($ctime,$cdata) = explode("||",$val);
+                //当天数据
+                if(strtotime($ctime)>strtotime(date("Y-m-d"))){
+                    $cjson = json_decode($cdata,true);
+                    $movementTiming = $cjson["data"]["tod"]["0"]["movement_timing"]??[];
+                    $cycle = $cjson["data"]["tod"]["0"]["extra_time"]["cycle"]??0;
+                    $offset = $cjson["data"]["tod"]["0"]["extra_time"]["offset"]??0;
+                    if(!empty($movementTiming)){
+                        foreach ($movementTiming as $flowTiming){
+                            if($flowTiming["flow"]["logic_flow_id"]==$data["logic_flow_id"]){
+                                $green = $flowTiming["timing"][0]["duration"]??0;
+                                $yellow = $flowTiming["yellow"]??0;
+                                if(isset($flowTimingCurve[date("H:i",strtotime($ctime))])){
+                                    $flowTimingCurve[date("H:i",strtotime($ctime))]["green"]+=$green;
+                                }else{
+                                    $flowTimingCurve[date("H:i",strtotime($ctime))] = [
+                                        "yellow"=>$yellow,
+                                        "green"=>$green,
+                                        "cycle"=>$cycle,
+                                        "offset"=>$offset,
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $flowTimingCurve;
+    }
+
+    /**
      * 获取散点图
      *
      * @param $data
@@ -914,6 +958,8 @@ class TimingAdaptionAreaService extends BaseService
      */
     public function getScatterMtraj($data)
     {
+
+        $flowTimingCurve = $this->getCurrentTimingCurv($data);
         $result = ['errno' => -1, 'errmsg' => '', 'data' => ''];
 
         if (empty($data)) {
@@ -996,11 +1042,19 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         // 获取相位配时信息
-        $timingInfo = $this->getFlowTimingInfo($data);
-
-        $ret['signal_info'] = $timingInfo;
-
+        $ret['signal_info'] = $flowTimingCurve;
         return $ret;
+    }
+
+    /**
+     * 获取城市排队阈值
+     * @param $cityId Y
+     * @return float
+     */
+    public function getCityControlParams($cityId){
+        $this->load->config('control_params');
+        $controlParams = $this->config->item('control_params');
+        return $controlParams["city"][$cityId];
     }
 
     /**
@@ -1094,9 +1148,8 @@ class TimingAdaptionAreaService extends BaseService
 
         // 获取相位配时信息
         $timingInfo = $this->getFlowTimingInfo($data);
-
-        $ret['signal_info'] = $timingInfo;
-
+        //$ret['signal_info'] = $timingInfo;
+        $ret['control_params'] = $this->getCityControlParams($data['city_id']);
         return $ret;
     }
 }
