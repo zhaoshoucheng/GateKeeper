@@ -26,7 +26,7 @@ class RoadService extends BaseService
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
         $this->load->model('road_model');
-        $this->load->model('flowdurationv6_model');
+        $this->load->model('flowDurationV6_model');
 
         $this->load->config('evaluate_conf');
     }
@@ -393,7 +393,7 @@ class RoadService extends BaseService
         $dates  = array_merge($baseDates, $evaluateDates);
 
         // 获取数据源集合
-        $result = $this->flowdurationv6_model->getJunctionByCityId($dates, $flowIdList, $cityId, $quotaKey, $flowLength, $select);
+        $result = $this->flowDurationV6_model->getJunctionByCityId($dates, $flowIdList, $cityId, $quotaKey, $flowLength, $select);
         if (!$result) {
             return [];
         }

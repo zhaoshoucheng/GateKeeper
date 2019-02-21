@@ -241,7 +241,7 @@ class FlowDurationV6_model extends CI_Model
                 'city_id'        => intval($cityId),
                 'quota'          => $quotaKey,
                 'date'           => $dates,
-                'logic_flow_id'  => $flowIds,
+                'logic_flow_id'  => array_values(array_filter($flowIds)),
                 'time_case_when' => $flowLength,
                 'engine'         => $this->engine
             ];
