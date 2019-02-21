@@ -10,6 +10,7 @@ class Realtime_model extends CI_Model
 {
     // es interface addr
     private $esUrl = '';
+    private $engine = '';
 
     /**
      * Area_model constructor.
@@ -22,6 +23,7 @@ class Realtime_model extends CI_Model
         // load config
         $this->load->config('nconf');
         $this->esUrl = $this->config->item('es_interface');
+        $this->engine = $this->config->item('data_engine');
 
         // load model
         $this->load->model('redis_model');

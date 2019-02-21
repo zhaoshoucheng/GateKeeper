@@ -9,6 +9,7 @@
 class FlowDurationV6_model extends CI_Model
 {
     protected $tb = 'flow_duration_v6_';
+    protected $engine = '';
 
     /**
      * @var CI_DB_query_builder
@@ -18,6 +19,9 @@ class FlowDurationV6_model extends CI_Model
     public function __construct()
     {
         parent::__construct();
+        $this->load->config("nconf");
+
+        $this->engine = $this->config->item('data_engine');
 
         $this->db = $this->load->database('default', true);
     }
@@ -46,7 +50,7 @@ class FlowDurationV6_model extends CI_Model
                     'logic_junction_id' => $logicJunctionId,
                     'logic_flow_id'     => $logicFlowId,
                     'date'              => $dates,
-                    'engine'            => 'elastic',
+                    'engine'            => $this->engine,
                 ];
                 $res = httpPOST($url . '/getQuotaEvaluateDetail', $data, 0, 'json');
             } else {
@@ -57,7 +61,7 @@ class FlowDurationV6_model extends CI_Model
                     'logic_junction_id' => $logicJunctionId,
                     'group_by'          => 'logic_junction_id, hour, date',
                     'date'              => $dates,
-                    'engine'            => 'elastic',
+                    'engine'            => $this->engine,
                 ];
                 $res =  httpPOST($url . '/getQuotaEvalute', $data, 0, 'json');
             }
@@ -134,7 +138,7 @@ class FlowDurationV6_model extends CI_Model
                 'traj_count_value'  => 10,
                 'date'              => $dates,
                 'hour'              => $hours,
-                'engine'            => 'elastic',
+                'engine'            => $this->engine,
             ];
             $url = $this->config->item('data_service_interface');
 
@@ -186,6 +190,107 @@ class FlowDurationV6_model extends CI_Model
             return false;
         }
         return $res['cnt'];
+    }
+
+    /**
+     * 获取单点路口优化对比
+     * @param $data['logic_junction_id'] string   Y 路口ID
+     * @param $data['city_id']           int      Y 城市ID
+     * @param $data['date']              array    Y 所需要查询的日期
+     * @param $data['hour']              array    Y 所需要查询的时间
+     * @param $data['quota_key']         string   Y 指标key
+     * @return array
+     */
+    private function getQuotaInfoByDate($data)
+    {
+        if ($data['city_id'] == 12) {
+            $data = [
+                'city_id'           => (int)$data['city_id'],
+                'quota'             => $data['quota_key'],
+                'logic_junction_id' => $data['logic_junction_id'],
+                'traj_count_value'  => 10,
+                'date'              => $data['date'],
+                'hour'              => $data['hour'],
+                'engine'            => $this->engine,
+            ];
+
+            $url = $this->config->item('data_service_interface');
+            $res = httpPOST($url . '/getJunctionOptCompare', $data, 0, 'json');
+            if (!$res) {
+                return [];
+            }
+
+            $res = json_decode($res, true);
+            if ($res['errno'] != 0) {
+                return [];
+            }
+            return $res['data'];
+        }
+
+        $this->isExisted($data['city_id']);
+
+        $quotaFormula = 'sum(`' . $data['quota_key'] . '` * `traj_count`) / sum(`traj_count`)';
+        $this->db->select("logic_flow_id, hour,  {$quotaFormula} as quota_value");
+        $this->db->from($this->tb . $data['city_id']);
+        $where = [
+            'logic_junction_id' => $data['logic_junction_id'],
+            'traj_count >='     => 10,
+        ];
+        $this->db->where($where);
+        $this->db->where_in('date', $data['date']);
+        $this->db->where_in('hour', $data['hour']);
+        $this->db->group_by('logic_flow_id, hour');
+        $res = $this->db->get()->result_array();
+        if (!$res) {
+            return [];
+        }
+
+        return $res;
+    }
+
+    /**
+     * 多路口指标计算
+     * @param        $dates
+     * @param        $hours
+     * @param        $junctionIds
+     * @param        $flowIds
+     * @param        $cityId
+     * @param string $select
+     *
+     * @return array
+     */
+    public function getJunctionByCityId($dates, $flowIds, $cityId, $quotaKey, $flowLength = [], $select = '*')
+    {
+        if ($cityId == 12) {
+            $data = [
+                'city_id'        => intval($cityId),
+                'quota'          => $quotaKey,
+                'date'           => $dates,
+                'logic_flow_id'  => array_values(array_filter($flowIds)),
+                'time_case_when' => $flowLength,
+                'engine'         => $this->engine
+            ];
+
+            $url = $this->config->item('data_service_interface');
+            $res = httpPOST($url . '/getJunctionsQuotaEvaluate', $data, 0, 'json');
+            if (!$res) {
+                return [];
+            }
+
+            $res = json_decode($res, true);
+            if ($res['errno'] != 0) {
+                return [];
+            }
+            return $res['data'];
+        }
+        $res = $this->db->select($select)
+            ->from('flow_duration_v6_' . $cityId)
+            ->where_in('date', $dates)
+            ->where_in('logic_flow_id', $flowIds)
+            ->group_by('date, hour')
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
 }

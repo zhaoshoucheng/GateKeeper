@@ -64,7 +64,7 @@ class Cron extends CI_Controller
                     return;
                 }
             }
-        } 
+        }
     }
 
     public function del_old_realtime_data($cityIdsStr, $days)
