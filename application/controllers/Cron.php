@@ -10,7 +10,12 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Didi\Cloud\ItsMap\Task;
+use Services\TimingAdaptionAreaService;
 
+/**
+ * Class Cron
+ * @property \Redis_model          $redis_model
+ */
 class Cron extends CI_Controller
 {
     public function __construct()
@@ -182,6 +187,43 @@ class Cron extends CI_Controller
         log_message('error', "hello failed");
         log_message('notice', "hello failed");
         log_message('debug', "hello failed");
+    }
+
+    /**
+     * 缓存指标数据到redis中
+     * @param int $cityId
+     * @param int $areaId
+     * @param string $quotaKey
+     */
+    public function getAreaQuotaInfo(string $quotaKey)
+    {
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " quota_key=" . $quotaKey . "||message=begin getAreaQuotaInfo\n\r";
+        //读取开城列表
+        $this->config->load('cron', TRUE);
+        $cityIds = $this->config->item('city_ids', 'cron');
+        foreach ($cityIds as $cityId){
+            $taaService = new TimingAdaptionAreaService();
+            $areaList = $taaService->getAreaList(["city_id"=>$cityId]);
+
+            foreach ($areaList as $areaItem){
+                $areaId = $areaItem["id"];
+                // 获取每个区域的路口ID串
+                $jdata = [
+                    'city_id' => $cityId,
+                    'area_id' => $areaId,
+                ];
+                $junctions = $taaService->getAreaJunctionList($jdata);
+                $esJunctionIds = implode(',', array_filter(array_column($junctions["dataList"], 'logic_junction_id')));
+                $helperService = new \Services\HelperService();
+                $lastHour = $helperService->getIndexLastestHour($cityId);
+                $esTime = date('Y-m-d H:i:s', strtotime($lastHour));
+                $quotaInfo = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'avgSpeedUp');
+                $areaQuotaInfoKey = sprintf("itstool_area_quotainfo_%s_%s_%s",date("Y-m-d"),$areaId,$quotaKey);
+                $this->redis_model->rPush($areaQuotaInfoKey,json_encode(current($quotaInfo)));
+                $this->redis_model->setExpire($areaQuotaInfoKey,24*3600);
+            }
+        }
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " quota_key=" . $quotaKey . "||message=end getAreaQuotaInfo\n\r";
     }
 
     public function downgradeWrite()

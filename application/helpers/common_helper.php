@@ -334,3 +334,13 @@ if (!function_exists('getTodayTimeOrFullTime')) {
             : date("Y-m-d H:i:s",$timeStamp);
     }
 }
+
+/**
+ * @param string $dayTime Y H:i:s
+ * @return false|int
+ */
+if (!function_exists('getTodayTimeStamp')) {
+    function getTodayTimeStamp(string $dayTime){
+        return strtotime(sprintf("%s %s",date("Y-m-d"),$dayTime))-strtotime(date("Y-m-d"));
+    }
+}

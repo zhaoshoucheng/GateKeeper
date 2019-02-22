@@ -254,7 +254,6 @@ class Realtime_model extends CI_Model
                 "quotas" => "sum_{$quotaKey}*trailNum, sum_trailNum",
             ],
         ];
-
         $res = $this->searchQuota($esData);
         if (!empty($res['result']['quotaResults'])) {
             list($quotaValueInfo) = $res['result']['quotaResults'];
@@ -267,6 +266,19 @@ class Realtime_model extends CI_Model
             ]
         ];
     }
+
+    public function getRedisAreaQuotaValueCurve($areaId, $quotaKey){
+        $areaQuotaInfoKey = sprintf("itstool_area_quotainfo_%s_%s_%s",date("Y-m-d"),$areaId,$quotaKey);
+        $list = $this->redis_model->lrange($areaQuotaInfoKey);
+        if(!empty($list)){
+            foreach ($list as $key=>$val){
+                $list[$key] = json_decode($val,true);
+            }
+        }
+        return $list;
+    }
+
+
 
     /**
      * 获取区域指标平均值

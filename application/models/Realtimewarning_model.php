@@ -230,14 +230,6 @@ class Realtimewarning_model extends CI_Model
         //验证数据表是否存在?
         $rtwRule = $this->config->item('realtimewarning_rule');
         $rtwRule = empty($rtwRule[$cityId]) ? $rtwRule['default'] : $rtwRule[$cityId];
-        /*
-        $tableName = "real_time_" . $cityId;
-        $isExisted = $this->db->table_exists($tableName);
-        if (!$isExisted) {
-            echo "{$tableName} not exists!\n\r";
-            exit;
-        }
-        */
         $this->load->model('redis_model');
 
         //设置rediskey
