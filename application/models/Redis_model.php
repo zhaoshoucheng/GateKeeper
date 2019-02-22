@@ -147,6 +147,43 @@ class Redis_model extends CI_Model
     }
 
     /**
+     * 尾部插入
+     * @param $key
+     * @param $val
+     * @return bool
+     */
+    public function rPush($key, $val)
+    {
+        if (!$this->redis) {
+            return false;
+        }
+        try {
+            $this->redis->rPush($key, $val);
+        } catch (\RedisException $e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 头部弹出
+     * @param $key
+     * @return array|bool|string
+     */
+    public function lPop($key)
+    {
+        if (!$this->redis) {
+            return false;
+        }
+        try {
+            $res = $this->redis->lPop($key);
+        } catch (\RedisException $e) {
+            $res = [];
+        }
+        return $res;
+    }
+
+    /**
      * List 取成员
      *
      * @param $key
@@ -198,6 +235,20 @@ class Redis_model extends CI_Model
     public function getHour($cityId)
     {
         $key = 'new_its_realtime_lasthour_' . $cityId;
+
+        return $this->getData($key);
+    }
+
+    /**
+     * 获取指定城市的最新指标 hour
+     *
+     * @param $cityId
+     *
+     * @return array|bool|string
+     */
+    public function getIndexHour($cityId)
+    {
+        $key = 'new_its_schedule_lasthour_' . $cityId;
 
         return $this->getData($key);
     }
