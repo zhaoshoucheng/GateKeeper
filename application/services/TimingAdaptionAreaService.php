@@ -1045,7 +1045,6 @@ class TimingAdaptionAreaService extends BaseService
 
         $esUrl = $this->config->item('es_interface') . '/estimate/queue/query';
 
-
         $detail = httpPOST($esUrl, $esData, 0, 'json');
         if (!$detail) {
             throw new \Exception('调用es接口 排队长度图 失败！', ERR_DEFAULT);
