@@ -10,7 +10,9 @@ class Realtime_model extends CI_Model
 {
     // es interface addr
     private $esUrl = '';
+    private $newEsUrl = '';
     private $engine = '';
+    private $quotaCityIds = [];
 
     /**
      * Area_model constructor.
@@ -23,7 +25,9 @@ class Realtime_model extends CI_Model
         // load config
         $this->load->config('nconf');
         $this->esUrl = $this->config->item('es_interface');
+        $this->newEsUrl = $this->config->item('new_es_interface');
         $this->engine = $this->config->item('data_engine');
+        $this->quotaCityIds = $this->config->item('quota_v2_city_ids');
 
         // load model
         $this->load->model('redis_model');
@@ -37,8 +41,12 @@ class Realtime_model extends CI_Model
      */
     public function searchDetail($data, $scroll = true)
     {
+        $baseUrl = $this->esUrl;
+        if(!empty($data["cityId"]) && in_array($data["cityId"],$this->quotaCityIds)){
+            $baseUrl = $this->newEsUrl;
+        }
         $resData = [];
-        $result = httpPOST($this->esUrl . '/estimate/diagnosis/queryIndices', $data, 0, 'json');
+        $result = httpPOST($baseUrl . '/estimate/diagnosis/queryIndices', $data, 0, 'json');
 
         if (!$result) {
             throw new \Exception('调用es接口 queryIndices 失败！', ERR_DEFAULT);
@@ -73,7 +81,11 @@ class Realtime_model extends CI_Model
      */
     public function searchQuota($data)
     {
-        $result = httpPOST($this->esUrl . '/estimate/diagnosis/queryQuota', $data, 9000, 'json');
+        $baseUrl = $this->esUrl;
+        if(!empty($data["cityId"]) && in_array($data["cityId"],$this->quotaCityIds)){
+            $baseUrl = $this->newEsUrl;
+        }
+        $result = httpPOST($baseUrl . '/estimate/diagnosis/queryQuota', $data, 9000, 'json');
         if (!$result) {
             throw new \Exception('调用es接口 queryIndices 失败！', ERR_DEFAULT);
         }
@@ -133,6 +145,7 @@ class Realtime_model extends CI_Model
      */
     public function avgStopdelay($cityId, $date, $hour, $junctionIds=[])
     {
+
         $data = [
             "source" => "signal_control",
             "cityId" => $cityId,
@@ -152,6 +165,7 @@ class Realtime_model extends CI_Model
             $data['junctionId'] = implode(",",$junctionIds);
             $data["andOperations"]['junctionId'] = 'in';
         }
+
         $esRes = $this->searchQuota($data);
         if (empty($esRes['result']['quotaResults'])) {
             return [];
@@ -310,8 +324,8 @@ class Realtime_model extends CI_Model
         ];
 
         $result = [];
-        // 因为一次性获取全天的数据会影响集群性能，会被禁止，所有要分断进行获取
-        $nowHour = date('i') + 1;
+        // 因为一次性获取全天的数据会影响集群性能，会被禁止，所有要分断进行获取 y m d h i s
+        $nowHour = date('H') + 1;
         for ($i = 0; $i < $nowHour; $i += 3) {
             $sTime = strtotime($i . ':00') * 1000;
             $eTime = strtotime(($i + 3) . ':00') * 1000;

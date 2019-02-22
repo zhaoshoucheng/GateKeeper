@@ -50,6 +50,7 @@ class HelperService extends BaseService
 
     /**
      * 获取最新的hour
+     *
      * @param $cityId
      *
      * @return array|bool|string

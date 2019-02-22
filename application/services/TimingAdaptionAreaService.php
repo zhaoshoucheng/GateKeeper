@@ -1057,7 +1057,7 @@ class TimingAdaptionAreaService extends BaseService
 
         if (empty($detail['result'])) {
             $result['errmsg'] = '该方向没有轨迹数据';
-            throw new \Exception('该方向没有轨迹数据', ERR_DEFAULT);
+            return $result;
         }
 
         // 获取某个方向的flow长度
