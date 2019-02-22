@@ -53,6 +53,11 @@ if ($development == 2) {
     $es_port   = '8001';
     $es_ext    = '';
 
+    // new es
+    $quota_v2_es_server = '10.89.234.61';
+    $quota_v2_es_port   = '8090';
+    $quota_v2_es_ext    = '';
+
     // new timing
     $signal_control_server = '10.88.128.149';
     $signal_control_port   = '30516';
@@ -93,9 +98,10 @@ if ($development == 2) {
         "12"=>2,
         "134"=>2,
     ];
-} else {
-    //测试环境配置
 
+    //新版指标开城列表
+    $quota_v2_city_ids = [1, 12, 134];
+} else {
 
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
@@ -121,15 +127,21 @@ if ($development == 2) {
     $signal_mis_server = '100.90.164.31';
     $signal_mis_port   = '8006';
     $signal_mis_ext    = '/signal-mis';
-    // 线下接口有问题
+
+    // 线下接口有问题,直接使用线上的测试
     $signal_mis_server = '100.69.238.11';
     $signal_mis_port   = '8000';
     $signal_mis_ext    = '/its/signal-mis';
 
     // es
     $es_server = '10.89.236.25';
-    $es_port   = '8090';
+    $es_port   = '8087';
     $es_ext    = '';
+
+    // new es
+    $quota_v2_es_server = '10.89.236.25';
+    $quota_v2_es_port   = '8090';
+    $quota_v2_es_ext    = '';
 
     // new timing
     $signal_control_server = '100.90.164.31';
@@ -171,12 +183,16 @@ if ($development == 2) {
         "12"=>2,
         "134"=>2,
     ];
+
+    //新版诊断指标开城列表
+    $quota_v2_city_ids = [1, 12, 134];
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
 $temp_timing_port  = !empty($timing_port) ? ":" . $timing_port : "";
 $signal_mis_port   = !empty($signal_mis_port) ? ":" . $signal_mis_port : "";
 $es_port           = !empty($es_port) ? ":" . $es_port : "";
+$quota_v2_es_port  = !empty($quota_v2_es_port) ? ":" . $quota_v2_es_port : "";
 $alarm_port        = !empty($alarm_port) ? ":" . $alarm_port : "";
 $data_service_prot = !empty($data_service_prot) ? ':' . $data_service_prot : '';
 
@@ -197,8 +213,11 @@ $config['timing_interface'] = 'http://' . $timing_server . $temp_timing_port . $
 // signal-mis接口地址
 $config['signal_mis_interface'] = 'http://' . $signal_mis_server . $signal_mis_port . $signal_mis_ext;
 
-// es接口地址
+// 实时指标接口地址
 $config['es_interface'] = 'http://' . $es_server . $es_port . $es_ext;
+
+// 新指标接口地址
+$config['new_es_interface'] = 'http://' . $quota_v2_es_server . $quota_v2_es_port . $quota_v2_es_ext;
 
 // 新版配时地址
 $config['signal_control_interface'] = 'http://' . $signal_control_server . ":" . $signal_control_port . $signal_control_ext;
@@ -803,3 +822,7 @@ $config['upm_usergroup_prefix'] = "signal_gateway_upm_";
 
 // 搜索引擎
 $config['data_engine'] = 'elastic';
+
+//新版指标开城列表
+$config['quota_v2_city_ids'] = $quota_v2_city_ids;
+

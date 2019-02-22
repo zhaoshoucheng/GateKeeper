@@ -337,7 +337,7 @@ class OverviewService extends BaseService
                 return [];
             }
         }
-        $hour = $this->helperService->getLastestHour($cityId);
+        $hour = $this->helperService->getIndexLastestHour($cityId);
         $esRes = $this->realtime_model->getTopStopDelay($cityId, $date, $hour, $pagesize, $junctionIds);
         $result = array_column($esRes, 'quotaMap');
         if (empty($result)) {

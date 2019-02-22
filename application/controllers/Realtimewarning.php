@@ -158,14 +158,15 @@ class Realtimewarning extends Inroute_Controller
             echo "trace_id 必须为非空字符串! \n";
             exit;
         }
-        if (ENVIRONMENT == 'development') {
-            if (!in_array($uid,["traj_index_pro"])) {
-                echo "uid 非预期! \n";
-                exit;
-            }
+
+        //新开指标城市验证 && uid验证
+        echo "uid 非预期! \n";
+        exit;
+        $quotaCityIds = $this->config->item('quota_v2_city_ids');
+        if(in_array($cityId,$quotaCityIds) && !in_array($uid,["traj_index_pro"])){
         }
 
-        exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}/' | grep '{$hour}' | grep -v \"grep\" | wc -l", $processOut);
+        exec("ps aux | grep \"realtimewarn\" | grep 'prepare/{$cityId}/' | grep -v \"grep\" | wc -l", $processOut);
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
         //执行任务
         $command = "";
@@ -176,7 +177,7 @@ class Realtimewarning extends Inroute_Controller
             if (gethostname() == 'ipd-cloud-server01.gz01') {
                 $phpPath = "php ";
             }
-            $command = "nohup {$phpPath} index.php realtimewarning process/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
+            $command = "nohup {$phpPath} index.php realtimewarning prepare/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
                 "{$logPath}realtimewarning.log  2>&1 &";
             exec($command);
         }
@@ -189,6 +190,42 @@ class Realtimewarning extends Inroute_Controller
         ];
         echo json_encode($output);
         return;
+    }
+
+    public function prepare($cityId = '12', $hour = '00:00', $date = "", $traceId = "", $uid = "")
+    {
+        ini_set('memory_limit', '-1');
+        ob_end_flush();
+        date_default_timezone_set('Asia/Shanghai');
+        if (!is_numeric($cityId)) {
+            echo "cityId 必须为数字! \n";
+            exit;
+        }
+        if (!preg_match('/\d{4,4}-\d{1,2}-\d{1,2}/ims', $date)) {
+            echo "date 必须为日期! \n";
+            exit;
+        }
+        //预先计算平均延误数据
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=pre_calculating\n\r";
+        $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId, 1);
+
+        exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}/' | grep -v \"grep\" | wc -l", $processOut);
+        $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
+        //执行任务
+        if ($processNum == 0) {
+            $logPath = $this->config->item('log_path');
+
+            $phpPath = "/home/xiaoju/php7/bin/php -c /home/xiaoju/php7/etc/php.ini ";
+            if (gethostname() == 'ipd-cloud-server01.gz01') {
+                $phpPath = "php ";
+            }
+            $command = "nohup {$phpPath} index.php realtimewarning process/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
+                "{$logPath}realtimewarning.log  2>&1 &";
+            exec($command);
+            echo $command."\n\r";
+        }
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=pre_calculated\n\r";
+        return true;
     }
 
     public function process($cityId = '12', $hour = '00:00', $date = "", $traceId = "", $uid = "")
@@ -214,7 +251,6 @@ class Realtimewarning extends Inroute_Controller
             'uid' => $uid,
         ];
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=task_handler doing\n\r";
-
         $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params, 600000);
         if (!$res) {
             com_log_warning('realtime_callback_task_handler_error', 0, $res, compact("params"));

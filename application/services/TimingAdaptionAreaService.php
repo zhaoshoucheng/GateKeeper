@@ -1045,7 +1045,6 @@ class TimingAdaptionAreaService extends BaseService
 
         $esUrl = $this->config->item('es_interface') . '/estimate/queue/query';
 
-
         $detail = httpPOST($esUrl, $esData, 0, 'json');
         if (!$detail) {
             throw new \Exception('调用es接口 排队长度图 失败！', ERR_DEFAULT);
@@ -1057,7 +1056,7 @@ class TimingAdaptionAreaService extends BaseService
 
         if (empty($detail['result'])) {
             $result['errmsg'] = '该方向没有轨迹数据';
-            throw new \Exception('该方向没有轨迹数据', ERR_DEFAULT);
+            return $result;
         }
 
         // 获取某个方向的flow长度
