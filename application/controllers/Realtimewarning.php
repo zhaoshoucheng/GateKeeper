@@ -160,10 +160,10 @@ class Realtimewarning extends Inroute_Controller
         }
 
         //新开指标城市验证 && uid验证
-        echo "uid 非预期! \n";
-        exit;
         $quotaCityIds = $this->config->item('quota_v2_city_ids');
         if(in_array($cityId,$quotaCityIds) && !in_array($uid,["traj_index_pro"])){
+            echo "uid 非预期! \n";
+            exit;
         }
 
         exec("ps aux | grep \"realtimewarn\" | grep 'prepare/{$cityId}/' | grep -v \"grep\" | wc -l", $processOut);
