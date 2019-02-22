@@ -166,7 +166,7 @@ class Realtimewarning extends Inroute_Controller
             exit;
         }
 
-        exec("ps aux | grep \"realtimewarn\" | grep 'preprocess/{$cityId}/' | grep -v \"grep\" | wc -l", $processOut);
+        exec("ps aux | grep \"realtimewarn\" | grep 'prepare/{$cityId}/' | grep -v \"grep\" | wc -l", $processOut);
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
         //执行任务
         $command = "";
@@ -177,7 +177,7 @@ class Realtimewarning extends Inroute_Controller
             if (gethostname() == 'ipd-cloud-server01.gz01') {
                 $phpPath = "php ";
             }
-            $command = "nohup {$phpPath} index.php realtimewarning preprocess/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
+            $command = "nohup {$phpPath} index.php realtimewarning prepare/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
                 "{$logPath}realtimewarning.log  2>&1 &";
             exec($command);
         }
