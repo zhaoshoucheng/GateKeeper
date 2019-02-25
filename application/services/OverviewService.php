@@ -392,7 +392,7 @@ class OverviewService extends BaseService
             }
         }
 
-        $hour = $this->helperService->getLastestHour($cityId);
+        $hour = $this->helperService->getIndexLastestHour($cityId);
         $result = $this->realtime_model->getTopCycleTime($cityId, $date, $hour, $pagesize, $junctionIds);
         if (empty($result)) {
             return [];

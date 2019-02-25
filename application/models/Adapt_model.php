@@ -63,4 +63,62 @@ class Adapt_model extends CI_Model
         return $this->db->where('logic_junction_id', $logicJunctionId)
             ->update('adapt_timing_mirror', $data);
     }
+
+    /**
+     * 写入优化日志
+     *
+     * @param $data array Y 字段键值对
+     * @return bool
+     */
+    public function insertAdaptLog($params)
+    {
+        $data = [
+            'created_at' => date("Y-m-d H:i:s"),
+        ];
+        $data = array_merge($params,$data);
+        return $this->db->insert('adapt_timing_log', $data);
+    }
+
+
+    /**
+     * 获取调度数据列表
+     *
+     * @param $data array Y 字段键值对
+     * @return bool
+     */
+    public function pageList($params)
+    {
+        if(!empty($params["trace_id"])){
+            $this->db->where("trace_id",$params["trace_id"]);
+        }
+        if(!empty($params["dltag"])){
+            $this->db->where("dltag",$params["dltag"]);
+        }
+        if(!empty($params["rel_id"])){
+            $this->db->where("rel_id",$params["rel_id"]);
+        }
+        $this->db->where("type",$params["type"]);
+        $this->db->from('adapt_timing_log');
+        $total = $this->db->count_all_results();
+
+        $offset = $params["per_page"] ?? 0;
+        $this->db->where("type",$params["type"]);
+        if(!empty($params["trace_id"])){
+            $this->db->where("trace_id",$params["trace_id"]);
+        }
+        if(!empty($params["dltag"])){
+            $this->db->where("dltag",$params["dltag"]);
+        }
+        if(!empty($params["rel_id"])){
+            $this->db->where("rel_id",$params["rel_id"]);
+        }
+        $this->db->where("type",$params["type"]);
+        $result = $this->db->select('*')
+            ->from('adapt_timing_log')
+            ->limit($params["page_size"], $offset)
+            ->order_by("log_time","desc")
+            ->get()
+            ->result_array();;
+        return [$total,$result];
+    }
 }
