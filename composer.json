@@ -12,11 +12,8 @@
 	},
 	"require": {
 		"php": ">=7.0",
-		"cloud/itsmap" : "1.0.2",
 		"apache/thrift": "0.9.2",
 		"monolog/monolog": "^1.23",
-		"cloud/collection": "1.0.1",
-		"cloud/php_tracelog": "1.0.1",
 		"overtrue/pinyin": "~4.0",
 		"elasticsearch/elasticsearch": "6.0.1",
 		"guzzlehttp/guzzle": "^6.3"
@@ -31,10 +28,14 @@
 	"autoload": {
 		"psr-4" : {
 			"Services\\" : "application/services/",
-			"Test\\" : "tests/"
+			"Test\\" : "tests/",
+			"Didi\\Cloud\\TraceLog\\": "application/libraries/php_tracelog/src/TraceLog/",
+			"Didi\\Cloud\\ItsMap\\": "application/libraries/itsmap/src/",
+			"Didi\\Cloud\\Collection\\" : "application/libraries/collection/src/"
 		},
 		"files": [
-			"application/libraries/SSOSdk.php"
+			"application/libraries/SSOSdk.php",
+			"application/libraries/php_tracelog/src/common_helper.php"
 		]
 	}
 }
