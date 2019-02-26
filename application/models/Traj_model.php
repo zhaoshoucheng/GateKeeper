@@ -75,6 +75,19 @@ class Traj_model extends CI_Model
     }
 
     /**
+     * 获取实时干线协调时空图
+     *
+     * @param array $data 请求的参数
+     * @return array
+     * @throws \Exception
+     */
+    public function getRealtimeClockShiftCorrect($data)
+    {
+        $url = $this->interface . '/Arterialspacetimediagram/getRealtimeClockShiftCorrect';
+        return $this->postRaw($url, $data, 20000, "json");
+    }
+
+    /**
      * 请求绿波图优化接口
      *
      * @param array $data 请求的参数
@@ -129,9 +142,7 @@ class Traj_model extends CI_Model
         if (!$res) {
             throw new \Exception('轨迹数据获取失败', ERR_REQUEST_WAYMAP_API);
         }
-
         $res = json_decode($res, true);
-
         if (!$res) {
             throw new \Exception('轨迹数据格式错误', ERR_REQUEST_WAYMAP_API);
         }

@@ -173,7 +173,6 @@ class RoadService extends BaseService
 
         $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
         $results = [];
-
         foreach ($roadList as $item) {
             $roadId = $item['road_id'];
             $res = $this->redis_model->getData($pre_key . $roadId);
@@ -189,9 +188,7 @@ class RoadService extends BaseService
                     $res = [];
                 }
                 // 将数据刷新到 Redis
-                if(!empty($res)){
-                    $this->redis_model->setData($pre_key . $roadId, json_encode($res));
-                }
+                $this->redis_model->setData($pre_key . $roadId, json_encode($res));
             } else {
                 $res = json_decode($res, true);
             }
@@ -217,11 +214,9 @@ class RoadService extends BaseService
         $roadId = $params['road_id'];
 
         $roadInfo = $this->road_model->getRoadByRoadId($roadId, 'logic_junction_ids');
-
         $junctionIdList = explode(',', $roadInfo['logic_junction_ids']);
 
         $maxWaymapVersion = $this->waymap_model->getLastMapVersion();
-
         if (isset($params['show_type']) and $params['show_type']) {
             $IdsLength = sizeof($junctionIdList);
             if ($IdsLength > 1) {
@@ -260,7 +255,6 @@ class RoadService extends BaseService
         }
 
         $res = $this->waymap_model->getConnectPath($cityId, $maxWaymapVersion, $junctionIdList);
-
         if (!$res || empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
             throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
         }

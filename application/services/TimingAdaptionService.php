@@ -143,7 +143,7 @@ class TimingAdaptionService extends BaseService
      * @return array
      * @throws \Exception
      */
-    private function getAdaptInfo($logicJunctionId)
+    public function getAdaptInfo($logicJunctionId)
     {
         $res = $this->adapt_model->getAdaptByJunctionId($logicJunctionId);
 

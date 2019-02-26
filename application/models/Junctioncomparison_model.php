@@ -12,7 +12,7 @@ class Junctioncomparison_model extends CI_Model
         parent::__construct();
 
         $this->load->model('waymap_model');
-        $this->load->model('flowdurationv6_model');
+        $this->load->model('flowDurationV6_model');
         $this->load->config('junctioncomparison_conf');
     }
 
@@ -67,7 +67,7 @@ class Junctioncomparison_model extends CI_Model
         $baseDateArr = $dateWeek['date'];
         $baseWeekDays = $dateWeek['week'];
         $publicData['date'] = $baseDateArr;
-        $baseQuotaData = $this->flowdurationv6_model->getQuotaInfoByDate($publicData);
+        $baseQuotaData = $this->flowDurationV6_model->getQuotaInfoByDate($publicData);
         // 相位->时间->值
         $newBaseQuotaData = [];
         foreach ($baseQuotaData as $val) {
@@ -79,7 +79,7 @@ class Junctioncomparison_model extends CI_Model
         $evaluateDateArr = $dateWeek['date'];
         $evaluateWeekDays = $dateWeek['week'];
         $publicData['date'] = $evaluateDateArr;
-        $evaluateQuotaData = $this->flowdurationv6_model->getQuotaInfoByDate($publicData);
+        $evaluateQuotaData = $this->flowDurationV6_model->getQuotaInfoByDate($publicData);
         // 相位->时间->值
         $newEvaluateQuotaData = [];
         foreach ($evaluateQuotaData as $val) {

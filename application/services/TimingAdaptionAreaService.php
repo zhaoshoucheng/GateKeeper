@@ -15,7 +15,7 @@ use Overtrue\Pinyin\Pinyin;
  * Class TimingAdaptionAreaService
  * @package Services
  * @property \TimeAlarmRemarks_model $timeAlarmRemarks_model
- * @property \Adapt_model            $adapt_model
+ * @property \Adapt_model $adapt_model
  */
 class TimingAdaptionAreaService extends BaseService
 {
@@ -32,6 +32,7 @@ class TimingAdaptionAreaService extends BaseService
         $this->load->model('waymap_model');
         $this->load->model('adapt_model');
         $this->load->model('alarmanalysis_model');
+        $this->load->model('traj_model');
 
         // load config
         $this->load->config('nconf');
@@ -139,7 +140,7 @@ class TimingAdaptionAreaService extends BaseService
                  */
                 if (!empty($redisData)) {
 
-                    $oldSpeed     = $redisData[$v['id']]['speed'] ?? 0;
+                    $oldSpeed = $redisData[$v['id']]['speed'] ?? 0;
                     $oldStopDelay = $redisData[$v['id']]['stop_delay'] ?? 0;
 
                     // 对平均速度变化趋势进行判断
@@ -162,13 +163,13 @@ class TimingAdaptionAreaService extends BaseService
                 }
             }
             // 更新redis中平均速度与平均延误
-            $redisData[$v['id']]['speed']      = $speed;
+            $redisData[$v['id']]['speed'] = $speed;
             $redisData[$v['id']]['stop_delay'] = $stop_delay;
 
             // 为平均速度、平均延误、平均速度变化趋势、平均延误变化趋势赋值
-            $data[$k]['speed']            = round($speed * 3.6, 2) . 'km/h';
-            $data[$k]['stop_delay']       = round($stop_delay, 2) . '/s';
-            $data[$k]['speed_trend']      = $speed_trend;
+            $data[$k]['speed'] = round($speed * 3.6, 2) . 'km/h';
+            $data[$k]['stop_delay'] = round($stop_delay, 2) . '/s';
+            $data[$k]['speed_trend'] = $speed_trend;
             $data[$k]['stop_delay_trend'] = $stop_delay_trend;
             $data[$k]['last_hour'] = $lastHour;
 
@@ -282,7 +283,7 @@ class TimingAdaptionAreaService extends BaseService
          */
         $alarmData = [];
         foreach ($alarmJunctions as $v) {
-            $flowName     = $flowsInfo[$v['logic_junction_id']][$v['logic_flow_id']] ?? '未知方向';
+            $flowName = $flowsInfo[$v['logic_junction_id']][$v['logic_flow_id']] ?? '未知方向';
             $alarmComment = $alarmCate[$v['type']]['name'] ?? '未知报警';
             $alarmContent = $flowName . '-' . $alarmComment;
             if (empty($alarmData[$v['logic_junction_id']])) {
@@ -313,9 +314,9 @@ class TimingAdaptionAreaService extends BaseService
         // 按照拼音排序
         $pinyin = new Pinyin('Overtrue\Pinyin\MemoryFileDictLoader');
         foreach ($data as $key => $junction) {
-            $name      = $junction['junction_name'];
+            $name = $junction['junction_name'];
             $firstName = mb_substr($name, 0, 1);
-            $pinyins   = $pinyin->convert($firstName, PINYIN_ASCII_TONE);
+            $pinyins = $pinyin->convert($firstName, PINYIN_ASCII_TONE);
             if (!empty($pinyins)) {
                 $data[$key]['pinyin'] = $pinyins[0];
             } else {
@@ -363,10 +364,10 @@ class TimingAdaptionAreaService extends BaseService
 
     /**
      * 获取区域实时报警信息
-     * @param $params['city_id']     int 城市ID
-     * @param $params['area_id']     int 区域ID
-     * @param $params['alarm_type']  int 报警类型 0，全部，1，过饱和，2，溢流。默认0
-     * @param $params['ignore_type'] int 类型：0，全部，1，已忽略，2，未忽略。默认0
+     * @param $params ['city_id']     int 城市ID
+     * @param $params ['area_id']     int 区域ID
+     * @param $params ['alarm_type']  int 报警类型 0，全部，1，过饱和，2，溢流。默认0
+     * @param $params ['ignore_type'] int 类型：0，全部，1，已忽略，2，未忽略。默认0
      * @return array
      * @throws \Exception
      */
@@ -374,9 +375,9 @@ class TimingAdaptionAreaService extends BaseService
     {
         $this->load->model('timeAlarmRemarks_model');
 
-        $cityId     = $params['city_id'];
-        $areaId     = $params['area_id'];
-        $alarmType  = $params['alarm_type'];
+        $cityId = $params['city_id'];
+        $areaId = $params['area_id'];
+        $alarmType = $params['alarm_type'];
         $ignoreType = $params['ignore_type'];
 
         // 获取实时报警路口信息（全城）
@@ -403,7 +404,7 @@ class TimingAdaptionAreaService extends BaseService
 
         // 获取redis中忽略的路口相位
         $areaIgnoreJunctionRedisKey = 'area_ignore_Junction_flow_' . $areaId . '_' . $cityId;
-        $areaIgnoreJunctionFlows    = $this->redis_model->getData($areaIgnoreJunctionRedisKey);
+        $areaIgnoreJunctionFlows = $this->redis_model->getData($areaIgnoreJunctionRedisKey);
         if (!empty($areaIgnoreJunctionFlows)) {
             /**
              * redids中存在的是json格式的,json_decode后格式：
@@ -463,7 +464,7 @@ class TimingAdaptionAreaService extends BaseService
         // 需要获取路口name的路口ID串
         $junctionIds = implode(',', array_unique(array_column($areaAlarmJunctions, 'logic_junction_id')));
         // 获取路口信息
-        $junctionsInfo  = $this->waymap_model->getJunctionInfo($junctionIds);
+        $junctionsInfo = $this->waymap_model->getJunctionInfo($junctionIds);
         $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
         // 获取路口相位信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
@@ -472,7 +473,7 @@ class TimingAdaptionAreaService extends BaseService
         // 路口ID
         $junctionId = array_column($areaAlarmJunctions, 'logic_junction_id');
         // flowID
-        $flowId       = array_column($areaAlarmJunctions, 'logic_flow_id');
+        $flowId = array_column($areaAlarmJunctions, 'logic_flow_id');
         $alarmRemarks = $this->timeAlarmRemarks_model->getAlarmRemarks($cityId, $areaId, $junctionId, $flowId);
         // 人工校验信息 [flowid => type]
         $alarmRemarksFlowKeyTypeValue = [];
@@ -501,7 +502,8 @@ class TimingAdaptionAreaService extends BaseService
             }
 
             if (!empty($junctionIdName[$val['logic_junction_id']])
-                && !empty($flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']])) {
+                && !empty($flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']])
+            ) {
                 $result['data'][$k] = [
                     'start_time' => date('H:i', strtotime($val['start_time'])),
                     'duration_time' => round($durationTime),
@@ -562,7 +564,7 @@ class TimingAdaptionAreaService extends BaseService
     {
         // redis KEY
         $areaIgnoreJunctionRedisKey = 'area_ignore_Junction_flow_' . $data['area_id'] . '_' . $data['city_id'];
-        $areaIgnoreJunctionFlows    = $this->redis_model->getData($areaIgnoreJunctionRedisKey);
+        $areaIgnoreJunctionFlows = $this->redis_model->getData($areaIgnoreJunctionRedisKey);
         if (!empty($areaIgnoreJunctionFlows)) {
             /**
              * redids中存在的是json格式的,json_decode后格式：
@@ -622,9 +624,9 @@ class TimingAdaptionAreaService extends BaseService
 
     /**
      * 获取区域指标折线图
-     * @param $data['city_id']   int    城市ID
-     * @param $data['area_id']   int    区域ID
-     * @param $data['quota_key'] string 指标KEY
+     * @param $data ['city_id']   int    城市ID
+     * @param $data ['area_id']   int    区域ID
+     * @param $data ['quota_key'] string 指标KEY
      * @return mixed
      * @throws \Exception
      */
@@ -636,7 +638,7 @@ class TimingAdaptionAreaService extends BaseService
         if (empty($junctions)) {
             throw new \Exception('此区域没有路口', ERR_DEFAULT);
         }
-        $quotaInfo = $this->realtime_model->getRedisAreaQuotaValueCurve($data['area_id'],$data['quota_key']);
+        $quotaInfo = $this->realtime_model->getRedisAreaQuotaValueCurve($data['area_id'], $data['quota_key']);
         //$avgQuotaKeyConf = $this->config->item('avg_quota_key');
         //$esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
         //$date = date('Y-m-d');
@@ -663,25 +665,25 @@ class TimingAdaptionAreaService extends BaseService
         $tmpRet = [];
         $preDayTime = "";
         $preValue = 0;
-        for($i=0;$i<count($ret);$i++){
+        for ($i = 0; $i < count($ret); $i++) {
             $currentDayTime = $ret[$i][0];
             $currentValue = $ret[$i][1];
 
-            if($i==0){
-                $tmpRet[]    = $ret[$i];
-            }elseif(getTodayTimeStamp($currentDayTime)-getTodayTimeStamp($preDayTime)>15 * 60){
+            if ($i == 0) {
+                $tmpRet[] = $ret[$i];
+            } elseif (getTodayTimeStamp($currentDayTime) - getTodayTimeStamp($preDayTime) > 15 * 60) {
                 //求间隔了多少个5分钟
-                $diffLen = (getTodayTimeStamp($currentDayTime)-getTodayTimeStamp($preDayTime))/60/5;
-                $avgValue = ($currentValue - $preValue)/$diffLen;
+                $diffLen = (getTodayTimeStamp($currentDayTime) - getTodayTimeStamp($preDayTime)) / 60 / 5;
+                $avgValue = ($currentValue - $preValue) / $diffLen;
 
-                for($x=0;$x<$diffLen;$x++){
-                    $tmpDayTime = date("H:i:s",strtotime(date("Y-m-d"))+getTodayTimeStamp($preDayTime)+$x*5*60);
-                    $tmpValue = round($preValue+$x*$avgValue,2);
-                    $tmpRet[]    = [$tmpDayTime, $tmpValue,];
+                for ($x = 0; $x < $diffLen; $x++) {
+                    $tmpDayTime = date("H:i:s", strtotime(date("Y-m-d")) + getTodayTimeStamp($preDayTime) + $x * 5 * 60);
+                    $tmpValue = round($preValue + $x * $avgValue, 2);
+                    $tmpRet[] = [$tmpDayTime, $tmpValue,];
                 }
-                $tmpRet[]    = $ret[$i];
-            }else{
-                $tmpRet[]    = $ret[$i];
+                $tmpRet[] = $ret[$i];
+            } else {
+                $tmpRet[] = $ret[$i];
             }
             $preDayTime = $currentDayTime;
             $preValue = $currentValue;
@@ -702,9 +704,15 @@ class TimingAdaptionAreaService extends BaseService
      */
     public function getSpaceTimeMtraj($data)
     {
-        $endTime   = time();
-        $startTime = $endTime - 30 * 60;
+        // 获取相位配时信息 周期、相位差等
+        // 获取相位配时信息
+        $timingInfo = $this->getFlowTimingInfo($data);
+        if (empty($timingInfo)) {
+            return [];
+        }
 
+        $endTime = time();
+        $startTime = $endTime - 30 * 60;
         $esData = [
             "cityId" => $data['city_id'],
             "endTime" => $endTime,
@@ -715,14 +723,8 @@ class TimingAdaptionAreaService extends BaseService
 
         $esUrl = $this->config->item('es_interface') . '/estimate/space/query';
 
-        // 获取相位配时信息
-        $timingInfo = $this->getFlowTimingInfo($data);
-        if (empty($timingInfo)) {
-            return [];
-        }
-
         $cycleLength = $timingInfo['cycle'];
-        $offset      = $timingInfo['offset'];
+        $offset = $timingInfo['offset'];
         if (empty($cycleLength)) {
             throw new \Exception('路口该方向相位差为空', ERR_DEFAULT);
         }
@@ -738,28 +740,55 @@ class TimingAdaptionAreaService extends BaseService
 
         if (empty($detail['result'])) {
             return [];
-            //throw new \Exception('该方向无轨迹', ERR_DEFAULT);
         }
 
-        $ret['dataList'] = [];
 
+        $trajList = [];
+        //格式化原始轨迹数据
+        foreach ($detail['result'] as $k => $v) {
+            $timestampArr = array_column($v, 'timestamp');
+            array_multisort($timestampArr, SORT_NUMERIC, SORT_DESC, $v);  //类似db里面的order by
+            foreach ($v as $kk => $vv) {
+                $second = $vv['timestamp'];
+                $trajList[$k][$kk] = [
+                    "timestamp" => $second,
+                    "distance" => $vv['distanceToStopBar'] // 值      Y轴  //
+                ];
+            }
+        }
+
+        //获取配时信息
+        $allTimingInfo = $this->getAllFlowTimingInfo($data,$data['logic_flow_id']);
+        $allTimingInfo["movement"][0]["traj"] = $trajList;
+
+        $requestInfo = [
+            "junction_list"=>[$allTimingInfo],
+        ];
+
+        $correctResult = $this->traj_model->getRealtimeClockShiftCorrect(json_encode($requestInfo));
+        $clockShift = $correctResult[0]["clock_shift"] ?? 0;    //纠偏差
+
+        $ret['dataList'] = [];
+        //$v代表一条轨迹
         foreach ($detail['result'] as $k => $v) {
             // 按时间正序排序
             $timestampArr = array_column($v, 'timestamp');
-            sort($timestampArr);
-            array_multisort($timestampArr, SORT_DESC, $v);
-
+            //按照时间倒序排序:越近越靠前 尾-->头
+            array_multisort($timestampArr, SORT_NUMERIC, SORT_DESC, $v);  //类似db里面的order by
+            //$vv代表一个轨迹点
             foreach ($v as $kk => $vv) {
-                // 将时间转为秒数
-                $time                     = date_parse(date("H:i:s", $vv['timestamp']));
-                $second                   = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
+                // 提取天级秒数
+                $time = date_parse(date("H:i:s", $vv['timestamp']));
+                $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
                 $ret['dataList'][$k][$kk] = [
                     $second,                      // 时间秒数 X轴
-                    $vv['distanceToStopBar'] * -1 // 值      Y轴
+                    $vv['distanceToStopBar'] * -1 // 值      Y轴  //
                 ];
             }
-
-            $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k], $cycleLength, $offset);
+            //获取把时空图轨迹压缩在一个周期内
+            $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k]
+                , $cycleLength
+                , ($offset + $clockShift) % $cycleLength);   //纠偏
         }
         $ret['dataList'] = array_filter($ret['dataList']);
 
@@ -778,8 +807,64 @@ class TimingAdaptionAreaService extends BaseService
         ];
 
         $ret['signal_info'] = $timingInfo;
+        $ret['clock_shift'] = $clockShift;
 
         return $ret;
+    }
+
+
+    /**
+     * 获取所有相位的自适应配置信息
+     *
+     * @param $data ['logic_junction_id'] string Y 路口ID
+     *
+     * @return array
+     */
+    private function getAllFlowTimingInfo($data,$flowId="")
+    {
+        $resData = $this->adapt_model->getAdaptByJunctionId($data['logic_junction_id']);
+
+        if (empty($resData['timing_info'])) {
+            return [];
+        }
+
+        $Info = json_decode($resData['timing_info'], true);
+        if (empty($Info['data'])) {
+            return [];
+        }
+
+        list($timingInfo) = $Info['data']['tod'];
+        if (empty($timingInfo)) {
+            return [];
+        }
+
+        // 周期 相位差
+
+        $res = [
+            "junction_id" => $data['logic_junction_id'],
+            "cycle" => $timingInfo["extra_time"]["cycle"],
+            "offset" => $timingInfo["extra_time"]["offset"],
+        ];
+        // 信息灯信息
+        foreach ($timingInfo['movement_timing'] as $k => $v) {
+            if (empty($v['flow']['logic_flow_id'])) {
+                continue;
+            }
+            $tmp['movement_id'] = $v['flow']['logic_flow_id'];
+            if($flowId!="" && $tmp['movement_id']!=$flowId){
+                continue;
+            }
+            foreach ($v['timing'] as $kk => $vv) {
+                $tmp['green'][] = [
+                    'green_start' => $vv['start_time'],
+                    'green_duration' => $vv['duration'],
+                    'yellow' => $v['yellow'],
+                    'red_clean' => $v['all_red'],
+                ];
+            }
+            $res["movement"][] = $tmp;
+        }
+        return $res;
     }
 
     /**
@@ -843,6 +928,7 @@ class TimingAdaptionAreaService extends BaseService
     {
         $trajsCol = Collection::make($trajs);
 
+        //求距离停车线最近距离
         $min = $trajsCol->reduce(function ($a, $b) {
             if ($a == null) {
                 return $b;
@@ -852,11 +938,11 @@ class TimingAdaptionAreaService extends BaseService
             }
             return $b;
         });
-
-        $crossTime = $min[0]; // 过路口时间
-        $shiftTime = $crossTime - (($crossTime - $offset) % $cycleLength);
-        $minTime   = $crossTime - $shiftTime - 2 * $cycleLength;
-        $maxTime   = $crossTime - $shiftTime + 1.5 * $cycleLength;
+        $crossTime = $min[0]; // 该轨迹最小点过路口时间
+        $shiftTime = $crossTime - (($crossTime - $offset) % $cycleLength);  //该轨迹最小点过路口时间,时间偏移量
+        //$crossTime - $shiftTime 相对时间
+        $minTime = $crossTime - $shiftTime - 2 * $cycleLength;    //最小周期设置为2倍周期范围内
+        $maxTime = $crossTime - $shiftTime + 1.5 * $cycleLength;  //最大周期设置为1.5倍周期范围内
 
         $ret = [];
         foreach ($trajs as $traj) {
@@ -872,37 +958,38 @@ class TimingAdaptionAreaService extends BaseService
 
     /**
      * 获取最新配时数据
-     * @param $data[logic_junction_id] Y 逻辑路口
-     * @param $data[logic_flow_id] Y 逻辑相位
+     * @param $data [logic_junction_id] Y 逻辑路口
+     * @param $data [logic_flow_id] Y 逻辑相位
      * @return array
      */
-    public function getCurrentTimingCurv($data){
+    public function getCurrentTimingCurv($data)
+    {
         //获取最近的缓存数据
-        $currentTimingListRedisKey = sprintf("schedule_junction_current_timing_list_%s",$data["logic_junction_id"]);
+        $currentTimingListRedisKey = sprintf("schedule_junction_current_timing_list_%s", $data["logic_junction_id"]);
         $currentTimingList = $this->redis_model->lrange($currentTimingListRedisKey);
         $flowTimingCurve = [];
         if (!empty($currentTimingList)) {
-            foreach ($currentTimingList as $val){
-                list($ctime,$cdata) = explode("||",$val);
+            foreach ($currentTimingList as $val) {
+                list($ctime, $cdata) = explode("||", $val);
                 //当天数据
-                if(strtotime($ctime)>strtotime(date("Y-m-d"))){
-                    $cjson = json_decode($cdata,true);
+                if (strtotime($ctime) > strtotime(date("Y-m-d"))) {
+                    $cjson = json_decode($cdata, true);
                     $movementTiming = $cjson["data"]["tod"]["0"]["movement_timing"]??[];
                     $cycle = $cjson["data"]["tod"]["0"]["extra_time"]["cycle"]??0;
                     $offset = $cjson["data"]["tod"]["0"]["extra_time"]["offset"]??0;
-                    if(!empty($movementTiming)){
-                        foreach ($movementTiming as $flowTiming){
-                            if($flowTiming["flow"]["logic_flow_id"]==$data["logic_flow_id"]){
+                    if (!empty($movementTiming)) {
+                        foreach ($movementTiming as $flowTiming) {
+                            if ($flowTiming["flow"]["logic_flow_id"] == $data["logic_flow_id"]) {
                                 $green = $flowTiming["timing"][0]["duration"]??0;
                                 $yellow = $flowTiming["yellow"]??0;
-                                if(isset($flowTimingCurve[date("H:i",strtotime($ctime))])){
-                                    $flowTimingCurve[date("H:i",strtotime($ctime))]["green"]+=$green;
-                                }else{
-                                    $flowTimingCurve[date("H:i",strtotime($ctime))] = [
-                                        "yellow"=>$yellow,
-                                        "green"=>$green,
-                                        "cycle"=>$cycle,
-                                        "offset"=>$offset,
+                                if (isset($flowTimingCurve[date("H:i", strtotime($ctime))])) {
+                                    $flowTimingCurve[date("H:i", strtotime($ctime))]["green"] += $green;
+                                } else {
+                                    $flowTimingCurve[date("H:i", strtotime($ctime))] = [
+                                        "yellow" => $yellow,
+                                        "green" => $green,
+                                        "cycle" => $cycle,
+                                        "offset" => $offset,
                                     ];
                                 }
                             }
@@ -932,7 +1019,7 @@ class TimingAdaptionAreaService extends BaseService
             return $result;
         }
 
-        $endTime   = time();
+        $endTime = time();
         $startTime = $endTime - 30 * 60;
 
         $esData = [
@@ -969,8 +1056,8 @@ class TimingAdaptionAreaService extends BaseService
 
         foreach ($detail['result'] as $k => $v) {
             // 将时间转为秒数
-            $time                = date_parse(date("H:i:s", $v['timestamp']));
-            $second              = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
+            $time = date_parse(date("H:i:s", $v['timestamp']));
+            $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
             $ret['dataList'][$k] = [
                 $second,                 // 时间秒数 X轴
                 $v['stopDelayBefore'],  // 值      Y轴
@@ -1016,7 +1103,8 @@ class TimingAdaptionAreaService extends BaseService
      * @param $cityId Y
      * @return float
      */
-    public function getCityControlParams($cityId){
+    public function getCityControlParams($cityId)
+    {
         $this->load->config('control_params');
         $controlParams = $this->config->item('control_params');
         return $controlParams["city"][$cityId];
@@ -1032,7 +1120,7 @@ class TimingAdaptionAreaService extends BaseService
      */
     public function getQueueLengthMtraj($data)
     {
-        $endTime   = time();
+        $endTime = time();
         $startTime = $endTime - 30 * 60;
 
         $esData = [
@@ -1075,8 +1163,8 @@ class TimingAdaptionAreaService extends BaseService
         foreach ($detail['result'] as $k => $v) {
             foreach ($v as $kk => $vv) {
                 // 将时间转为秒数
-                $time                              = date_parse(date("H:i:s", $vv['timestamp']));
-                $second                            = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
+                $time = date_parse(date("H:i:s", $vv['timestamp']));
+                $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
                 $ret['dataList'][$vv['timestamp']] = [
                     $second,             // 时间秒数 X轴
                     round($vv['stopDistance'] / $inLinkLength * 100, 2), // 值      Y轴
