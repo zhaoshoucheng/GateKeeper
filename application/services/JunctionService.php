@@ -54,7 +54,6 @@ class JunctionService extends BaseService
         }
 
         $hours = hourRange($scheduleStart, $scheduleEnd);
-
         if (empty($hours)) {
             throw new \Exception('时间范围不能为空', ERR_PARAMETERS);
         }
@@ -176,7 +175,7 @@ class JunctionService extends BaseService
 
         $pretreatResultData = compact('base', 'flow_info', 'base_time_box', 'describe_info', 'summary_info');
 
-        return [
+        $ret = [
             'info' => [
                 'junction_name' => $junctionInfo['junction']['name'] ?? '',
                 'junction_lng' => $junctionInfo['junction']['lng'] ?? '',
@@ -191,5 +190,55 @@ class JunctionService extends BaseService
             ],
             'base' => $pretreatResultData['base'],
         ];
+
+        $ret = $this->filterRules($ret, $params);
+
+        return $ret;
+    }
+
+    // 根据规则进行过滤
+    private function filterRules($ret, $params)
+    {
+        $type = $params['type'];
+
+        // 规则1：路口指标，全天的如果曲线小于10个点就删除
+        $threadHold = 10;
+        if ($type == 1) {
+            $flowInfo = $ret['info']['flow_info'];
+            $base = $ret['base'];
+            foreach ($base as $flowId => $line) {
+                $nonEmptyPointsCount = Collection::make($line)->filter(function($item){
+                    return $item[0] !== null;
+                })->count();
+                if ($nonEmptyPointsCount < $threadHold) {
+                    unset($base[$flowId]);
+                    unset($flowInfo[$flowId]);
+                }
+            }
+            $ret['base'] = $base;
+            $ret['info']['flow_info'] = $flowInfo;
+        }
+
+        // 规则2：时段指标，如果曲线点小于1/4的时段就删除
+        $scheduleStart     = $params['schedule_start'];
+        $scheduleEnd       = $params['schedule_end'];
+        $hours = hourRange($scheduleStart, $scheduleEnd);
+        $threadHold = floor(count($hours) / 4.0);
+        if ($type == 2) {
+            $flowInfo = $ret['info']['flow_info'];
+            $base = $ret['base'];
+            foreach ($base as $flowId => $line) {
+                $nonEmptyPointsCount = Collection::make($line)->filter(function($item){
+                    return $item[0] !== null;
+                })->count();
+                if ($nonEmptyPointsCount < $threadHold) {
+                    unset($base[$flowId]);
+                    unset($flowInfo[$flowId]);
+                }
+            }
+            $ret['base'] = $base;
+            $ret['info']['flow_info'] = $flowInfo;
+        }
+        return $ret;
     }
 }
