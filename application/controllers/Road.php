@@ -154,6 +154,16 @@ class Road extends MY_Controller
         $this->response($data);
     }
 
+    public function getPathHeadTailJunction(){
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'junction_ids' => 'required|min_length[1]',
+            'city_id'=> 'required|min_length[1]',
+        ]);
+        $data = $this->roadService->getPathHeadTailJunction($params);
+        $this->response(["junction_list"=>$data]);
+    }
+
     /**
      * 获取全部的干线信息
      *
