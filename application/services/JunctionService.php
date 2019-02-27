@@ -61,7 +61,6 @@ class JunctionService extends BaseService
         $select = 'hour, logic_flow_id';
 
         $result = $this->flowDurationV6_model->getQuotaByJunction($cityId, $logicJunctionId, $dates, $hours, $quotaKey, $select);
-
         if (empty($result)) {
             return [];
         }
@@ -70,6 +69,9 @@ class JunctionService extends BaseService
         $junctionInfo = array_column($junctionInfo, null, 'logic_junction_id');
 
         $flowsInfo = $this->waymap_model->getFlowsInfo($logicJunctionId);
+
+        // 做清空非信控的flowId的规则
+        list($result, $flowsInfo) = $this->filterResultFlowInfo($result, $flowsInfo);
 
         $junctionInfo = [
             'junction' => $junctionInfo[$logicJunctionId] ?? [],
@@ -104,6 +106,8 @@ class JunctionService extends BaseService
             ->keysOfMaxValue()
             ->reduce($setValueReduce, Collection::make([]))
             ->keysOfMaxValue();
+        // 根据maxFlowIds修改flow名字，后面增加（max）
+
 
         //找出均值最大的方向的最大值最长持续时间区域
         $base_time_box = $maxFlowIds->reduce(function (Collection $carry, $id) use ($dataByFlow, $dataByHour) {
@@ -154,7 +158,9 @@ class JunctionService extends BaseService
             foreach ($value as $k => $v) {
                 $base[$ke][] = [$v === null ? null : $quotas[$quotaKey]['round']($v), $k];
             }
-            $flow_info[$ke] = ['name' => $flowsName[$ke] ?? '', 'highlight' => (int)($maxFlowIds->inArray($ke))];
+            $isMax = $maxFlowIds->inArray($ke);
+
+            $flow_info[$ke] = ['name' => $isMax ? $flowsName[$ke] . "(max)" : $flowsName[$ke], 'highlight' => (int)$isMax];
         });
 
         $base_time_box->each(function ($v, $k) use (&$describes, &$summarys, $quotaKey, $junctionInfo, $quotas) {
@@ -194,6 +200,26 @@ class JunctionService extends BaseService
         $ret = $this->filterRules($ret, $params);
 
         return $ret;
+    }
+
+    // 根据flowsInfo过滤非信控的方向
+    private function filterResultFlowInfo($result, $flowsInfo)
+    {
+        $deletedFlowIds = [];
+        foreach ($flowsInfo as $flowId => $name) {
+            if (!isTrafficPhaseName($name)) {
+                $deletedFlowIds[] = $flowId;
+                unset($flowsInfo[$flowId]);
+            }
+        }
+
+        foreach ($result as $key => $item) {
+            if (in_array($item['logic_flow_id'], $deletedFlowIds)) {
+                unset($result[$key]);
+            }
+        }
+        $result = array_values($result);
+        return [$result, $flowsInfo];
     }
 
     // 根据规则进行过滤

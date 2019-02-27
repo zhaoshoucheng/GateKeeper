@@ -42,8 +42,8 @@ class CommonService extends BaseService
         foreach ($result['junctions'] as $k=>$v) {
             $junctionName = $v['name'];
             $districtName = $v['district_name'];
-            $road1 = $v['road1'] ?? '未知路口';
-            $road2 = $v['road2'] ?? '未知路口';
+            $road1 = $v['road1'];
+            $road2 = $v['road2'];
             $res = [
                 'logic_junction_id' => $v['logic_junction_id'],
                 'junction_name'     => $v['name'],
@@ -53,7 +53,7 @@ class CommonService extends BaseService
         }
         $cityName = $result['city_name'];
 
-        $string = $junctionName . '路口位于';
+        $string = '该路口位于';
         $string .= $cityName . $districtName . '，';
         $string .= '是' . $road1 . '和' . $road2 . '交叉的重要节点路口。';
         $res['desc'] = $string;
