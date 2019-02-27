@@ -15,6 +15,34 @@ class AdaptLog extends MY_Controller{
         $this->adaptionLogService = new AdaptionLogService();
     }
 
+    public function rollback(){
+        $params = $this->input->get();
+        if(empty($params["trace_id"])){
+            echo "trace_id empty";
+            exit;
+        }
+        if(empty($params["junction_id"])){
+            echo "junction_id empty";
+            exit;
+        }
+        $qurl = $this->config->item('signal_light_interface')."/profile/rollback?junctionId=".$params["junction_id"];
+        $ret = httpGET($qurl,[]);
+        $message =  "rollback url=".$qurl."||client_ip=".$_SERVER["REMOTE_ADDR"]."||status=".json_encode($ret);
+        echo $message." <a href='javascript:history.back(-1);'>返回</a>";
+
+        $params = [
+            "type"=>1,
+            "rel_id"=>$params["junction_id"],
+            "log"=>$message,
+            "trace_id"=>$params["trace_id"],
+            "dltag"=>"_didi_Junction.manual.rollback",
+            "log_time"=>date("Y-m-d H:i:s"),
+        ];
+        $this->adaptionLogService->insert($params);
+        exit;
+    }
+
+
     public function index()
     {
         $params = $this->input->get();
@@ -60,6 +88,8 @@ class AdaptLog extends MY_Controller{
         $data = [];
         $data["page"] = $this->pagination->create_links();
         $data["list"] = $rowList;
+        $data["rel_id"] = $params["rel_id"];
+        $data["trace_id"] = $params["trace_id"];
         $this->load->view('adaptlog/junction',$data);
         exit;
     }

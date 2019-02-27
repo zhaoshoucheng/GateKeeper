@@ -65,7 +65,15 @@
 <body>
 
 <div id="container">
-	<h1>POC路口调度日志  <a href="./index">批次日志</a></h1>
+	<h1>POC路口调度日志  <a href="./index">批次日志</a>
+	<?php
+	if(!empty($rel_id)&&!empty($trace_id)){
+	?>
+		<a href="./rollback?junction_id=<?php echo $rel_id;?>&trace_id=<?php echo $trace_id;?>">手动rollback</a>
+	<?php
+	}
+	?>
+	</h1>
 	<table>
 		<tr>
 			<th style="width: 5%">junction_id</th>

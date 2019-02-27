@@ -344,3 +344,14 @@ if (!function_exists('getTodayTimeStamp')) {
         return strtotime(sprintf("%s %s",date("Y-m-d"),$dayTime))-strtotime(date("Y-m-d"));
     }
 }
+
+
+/**
+ * @param string $dayTime Y H:i:s
+ * @return false|int
+ */
+if (!function_exists('ArrGet')) {
+    function ArrGet($data,string $column,$default=""){
+        return $data[$column]??$default;
+    }
+}

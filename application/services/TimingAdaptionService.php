@@ -460,7 +460,7 @@ class TimingAdaptionService extends BaseService
         return [
             //方案获取时间
             'get_current_plan_time' => $planTime,
-            //上次方案下发时间(信号机的成功下发时间)
+            //上次方案下发时间(更新上次调度程序的下发时间为上次方案下发时间) 数据来源是:调度程序
             'last_upload_time' => $lastUploadTime,
             //优化方案保存生成时间 == 优化方案下发时间 (是否下发取决于开关)
             'adapte_time' => $adapteTime,

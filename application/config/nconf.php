@@ -48,6 +48,10 @@ if ($development == 2) {
     $signal_mis_port   = '8000';
     $signal_mis_ext    = '/its/signal-mis';
 
+    // signal_light
+    $signal_light_server = '10.148.28.205';
+    $signal_light_port = '8001';
+
     // es
     $es_server = '100.69.238.158';
     $es_port   = '8001';
@@ -127,6 +131,10 @@ if ($development == 2) {
     $signal_mis_server = '100.90.164.31';
     $signal_mis_port   = '8006';
     $signal_mis_ext    = '/signal-mis';
+
+    // signal_light
+    $signal_light_server = '10.148.28.204';
+    $signal_light_port = '8001';
 
     // 线下接口有问题,直接使用线上的测试
     $signal_mis_server = '100.69.238.11';
@@ -212,6 +220,9 @@ $config['timing_interface'] = 'http://' . $timing_server . $temp_timing_port . $
 
 // signal-mis接口地址
 $config['signal_mis_interface'] = 'http://' . $signal_mis_server . $signal_mis_port . $signal_mis_ext;
+
+// signal-light接口地址
+$config['signal_light_interface'] = 'http://' . $signal_light_server . $signal_light_port;
 
 // 实时指标接口地址
 $config['es_interface'] = 'http://' . $es_server . $es_port . $es_ext;

@@ -65,6 +65,21 @@ class Adapt_model extends CI_Model
     }
 
     /**
+     * 删除优化日志
+     *
+     * @param $data array Y 字段键值对
+     * @return bool
+     */
+    public function deleteAdaptLog($params)
+    {
+        $data = [
+            'created_at' => date("Y-m-d H:i:s"),
+        ];
+        $data = array_merge($params,$data);
+        return $this->db->insert('adapt_timing_log', $data);
+    }
+
+    /**
      * 写入优化日志
      *
      * @param $data array Y 字段键值对
