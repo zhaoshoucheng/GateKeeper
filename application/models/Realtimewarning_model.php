@@ -422,16 +422,16 @@ class Realtimewarning_model extends CI_Model
 
         // 平均延误数据
         if($ctype==1) {
-            $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 24 * 3600);
+            $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 6 * 3600);
         }elseif($ctype==0){
             // 路口概览数据
-            $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 24 * 3600);
+            $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 6 * 3600);
             // 缓存诊断路口列表数据
-            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
+            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 6 * 3600);
             // 缓存实时报警路口数据
-            $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
+            $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600);
             // 冗余缓存实时报警路口数据,每一个批次一份
-            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 24 * 3600);
+            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600);
         }
     }
 
