@@ -355,3 +355,16 @@ if (!function_exists('ArrGet')) {
         return $data[$column]??$default;
     }
 }
+
+if (!function_exists('orderTime')) {
+    function orderTime($time1, $time2) {
+        if ($time1 == "" || $time2 == "") {
+            return [$time1, $time2];
+        }
+        if (strtotime($time1) < strtotime($time2)) {
+            return [$time1, $time2];
+        } else {
+            return [$time2, $time1];
+        }
+    }
+}

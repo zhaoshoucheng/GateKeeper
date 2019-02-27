@@ -142,3 +142,29 @@ if(!function_exists('phase_name')) {
         return $phaseNames[$phaseId] ?? 0;
     }
 }
+
+// 是否是受交通控制的phase
+if(!function_exists('isTrafficPhaseName')) {
+    function isTrafficPhaseName($phaseName)
+    {
+        $phaseNames = [
+            "9" => "东右",
+            "10" => "南右",
+            "11" => "西右",
+            "12" => "北右",
+            "13" => "东掉头",
+            "14" => "南掉头",
+            "15" => "西掉头",
+            "16" => "北掉头",
+            "25" => "东北右",
+            "26" => "东南右",
+            "27" => "西南右",
+            "28" => "西北右",
+            "29" => "东北掉头",
+            "30" => "东南掉头",
+            "31" => "西南掉头",
+            "32" => "西北掉头",
+        ];
+        return array_search($phaseName, $phaseNames) !== null;
+    }
+}
