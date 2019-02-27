@@ -33,7 +33,7 @@ $config['quotas'] = [
         },
         'describe' => function ($a) {
             list($a[2], $a[3]) = orderTime($a[2], $a[3]);
-            if (empty($a[2] || empty($a[3]))) {
+            if (empty($a[2]) || empty($a[3])) {
                 $format = '%s路口在评估日期内%s方向延误时间最高。';
                 return sprintf($format, $a[0] ?? '', $a[1] ?? '');
             }
@@ -61,7 +61,7 @@ $config['quotas'] = [
         },
         'describe' => function ($a) {
             list($a[2], $a[3]) = orderTime($a[2], $a[3]);
-            if (empty($a[2] || empty($a[3]))) {
+            if (empty($a[2]) || empty($a[3])) {
                 $format = '%s路口在评估日期内%s方向停车次数最高。';
                 return sprintf($format, $a[0] ?? '', $a[1] ?? '');
             }
@@ -89,7 +89,7 @@ $config['quotas'] = [
         },
         'describe' => function ($a) {
             list($a[2], $a[3]) = orderTime($a[2], $a[3]);
-            if (empty($a[2] || empty($a[3]))) {
+            if (empty($a[2]) || empty($a[3])) {
                 $format = '%s路口在评估日期内%s方向溢流指数最高。';
                 return sprintf($format, $a[0] ?? '', $a[1] ?? '');
             }
@@ -117,7 +117,7 @@ $config['quotas'] = [
         },
         'describe' => function ($a) {
             list($a[2], $a[3]) = orderTime($a[2], $a[3]);
-            if (empty($a[2] || empty($a[3]))) {
+            if (empty($a[2]) || empty($a[3])) {
                 $format = '%s路口在评估日期内%s方向最大排队长度最长。';
                 return sprintf($format, $a[0] ?? '', $a[1] ?? '');
             }
@@ -145,7 +145,7 @@ $config['quotas'] = [
         },
         'describe' => function ($a) {
             list($a[2], $a[3]) = orderTime($a[2], $a[3]);
-            if (empty($a[2] || empty($a[3]))) {
+            if (empty($a[2]) || empty($a[3])) {
                 $format = '%s路口在评估日期内%s方向停车比率最高。';
                 return sprintf($format, $a[0] ?? '', $a[1] ?? '');
             }
@@ -173,7 +173,7 @@ $config['quotas'] = [
         },
         'describe' => function ($a) {
             list($a[2], $a[3]) = orderTime($a[2], $a[3]);
-            if (empty($a[2] || empty($a[3]))) {
+            if (empty($a[2]) || empty($a[3])) {
                 $format = '%s路口在评估日期内%s方向通过速度最低。';
                 return sprintf($format, $a[0] ?? '', $a[1] ?? '');
             }

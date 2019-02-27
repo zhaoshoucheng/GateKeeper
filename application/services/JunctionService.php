@@ -106,7 +106,6 @@ class JunctionService extends BaseService
             ->keysOfMaxValue()
             ->reduce($setValueReduce, Collection::make([]))
             ->keysOfMaxValue();
-        // 根据maxFlowIds修改flow名字，后面增加（max）
 
 
         //找出均值最大的方向的最大值最长持续时间区域
@@ -174,7 +173,6 @@ class JunctionService extends BaseService
                 $v['end_time'],
                 $junctionInfo['flows'][$k] ?? '']);
         });
-
         $base_time_box = $base_time_box->all();
         $describe_info = implode("\n", $describes);
         $summary_info  = implode("\n", $summarys);
