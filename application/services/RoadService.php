@@ -189,9 +189,6 @@ class RoadService extends BaseService
                 }
                 // 将数据刷新到 Redis
                 $this->redis_model->setData($pre_key . $roadId, json_encode($res));
-                if(!empty($res)){
-                    $this->redis_model->setData($pre_key . $roadId, json_encode($res));
-                }
             } else {
                 $res = json_decode($res, true);
             }

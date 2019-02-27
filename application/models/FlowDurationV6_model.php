@@ -201,7 +201,7 @@ class FlowDurationV6_model extends CI_Model
      * @param $data['quota_key']         string   Y 指标key
      * @return array
      */
-    private function getQuotaInfoByDate($data)
+    public function getQuotaInfoByDate($data)
     {
         if ($data['city_id'] == 12) {
             $data = [

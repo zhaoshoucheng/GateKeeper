@@ -55,6 +55,7 @@ class Welcome extends CI_Controller
             $userPerm = $this->userPerm;
             if(!empty($userPerm["data"])) {
                 foreach ($userPerm["data"] as $cityId => $cityPerm) {
+                    $userPerm["data"][$cityId]["junction_num"] = count(explode(";", $cityPerm["junction_id"]));
                     if (!empty($userPerm["data"][$cityId]["junction_id"])) {
                         $userPerm["data"][$cityId]["junction_num"] = count(explode(";", $cityPerm["junction_id"]));
                     }
