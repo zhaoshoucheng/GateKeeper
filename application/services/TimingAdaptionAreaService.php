@@ -695,6 +695,79 @@ class TimingAdaptionAreaService extends BaseService
     }
 
     /**
+     * 获取纠偏信息
+     *
+     * @param $data['city_id'] Y 请求城市
+     * @param $data['logic_junction_id'] Y 路口id
+     * @return int
+     * @throws \Exception
+     */
+    public function getClockShift($data){
+        //获取最近的缓存数据
+        $clockKey = sprintf("itstool_junction_clockshift_%s", $data["logic_junction_id"]);
+        $clockShift = $this->redis_model->getData($clockKey);
+        if(!empty($clockShift)){
+            return $clockShift;
+        }
+
+        //获取配时信息
+        $allTimingInfo = $this->getAllFlowTimingInfo($data);
+        foreach ($allTimingInfo["movement"] as $key=>$item){
+            $endTime = time();
+            $startTime = $endTime - 30 * 60;
+            $esData = [
+                "cityId" => $data['city_id'],
+                "endTime" => $endTime,
+                "movementId" => $item['movement_id'],
+                "source" => "signal_control",
+                "startTime" => $startTime,
+            ];
+
+            $esUrl = $this->config->item('es_interface') . '/estimate/space/query';
+
+            $cycleLength = $allTimingInfo['cycle'];
+            if (empty($cycleLength)) {
+                throw new \Exception('路口该方向相位差为空', ERR_DEFAULT);
+            }
+
+            $detail = httpPOST($esUrl, $esData, 0, 'json');
+            if (!$detail) {
+                throw new \Exception('调用es接口 获取时空图 失败！', ERR_DEFAULT);
+            }
+            $detail = json_decode($detail, true);
+            if ($detail['code'] != '000000') {
+                throw new \Exception($detail['message'], ERR_DEFAULT);
+            }
+            $trajList = [];
+            //格式化原始轨迹数据
+            foreach ($detail['result'] as $k => $v) {
+                $timestampArr = array_column($v, 'timestamp');
+                array_multisort($timestampArr, SORT_NUMERIC, SORT_ASC, $v);  //类似db里面的order by
+                foreach ($v as $kk => $vv) {
+                    $second = $vv['timestamp'];
+                    $trajList[$k][$kk] = [
+                        "timestamp" => $second,
+                        "distance" => $vv['distanceToStopBar'] // 值      Y轴  //
+                    ];
+                }
+            }
+            $allTimingInfo["movement"][$key]["traj"] = $trajList;
+            if(empty($trajList)){
+                unset($allTimingInfo["movement"][$key]);
+            }
+        }
+        $allTimingInfo["movement"] = array_values($allTimingInfo["movement"]);
+        $requestInfo = [
+            "junction_list"=>[$allTimingInfo],
+        ];
+
+        $correctResult = $this->traj_model->getRealtimeClockShiftCorrect(json_encode($requestInfo));
+        $clockShift = $correctResult[0]["clock_shift"] ?? 0;    //纠偏差
+        $this->redis_model->setEx($clockKey,$clockShift,300);
+        return $clockShift;
+    }
+
+    /**
      * 获取时空图
      *
      * @param $data
@@ -704,13 +777,17 @@ class TimingAdaptionAreaService extends BaseService
      */
     public function getSpaceTimeMtraj($data)
     {
+        //获取配时信息
+        $clockShift = $this->getClockShift($data);
+
         // 获取相位配时信息 周期、相位差等
         // 获取相位配时信息
         $timingInfo = $this->getFlowTimingInfo($data);
-        if (empty($timingInfo)) {
+        if (empty($timingInfo) || empty($timingInfo["green"])) {
             return [];
         }
 
+        //正常逻辑不变
         $endTime = time();
         $startTime = $endTime - 30 * 60;
         $esData = [
@@ -741,32 +818,6 @@ class TimingAdaptionAreaService extends BaseService
         if (empty($detail['result'])) {
             return [];
         }
-
-
-        $trajList = [];
-        //格式化原始轨迹数据
-        foreach ($detail['result'] as $k => $v) {
-            $timestampArr = array_column($v, 'timestamp');
-            array_multisort($timestampArr, SORT_NUMERIC, SORT_DESC, $v);  //类似db里面的order by
-            foreach ($v as $kk => $vv) {
-                $second = $vv['timestamp'];
-                $trajList[$k][$kk] = [
-                    "timestamp" => $second,
-                    "distance" => $vv['distanceToStopBar'] // 值      Y轴  //
-                ];
-            }
-        }
-
-        //获取配时信息
-        $allTimingInfo = $this->getAllFlowTimingInfo($data,$data['logic_flow_id']);
-        $allTimingInfo["movement"][0]["traj"] = $trajList;
-
-        $requestInfo = [
-            "junction_list"=>[$allTimingInfo],
-        ];
-
-        $correctResult = $this->traj_model->getRealtimeClockShiftCorrect(json_encode($requestInfo));
-        $clockShift = $correctResult[0]["clock_shift"] ?? 0;    //纠偏差
 
         $ret['dataList'] = [];
         //$v代表一条轨迹
@@ -850,6 +901,7 @@ class TimingAdaptionAreaService extends BaseService
             if (empty($v['flow']['logic_flow_id'])) {
                 continue;
             }
+            $tmp = [];
             $tmp['movement_id'] = $v['flow']['logic_flow_id'];
             if($flowId!="" && $tmp['movement_id']!=$flowId){
                 continue;
