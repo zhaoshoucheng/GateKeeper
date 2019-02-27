@@ -168,10 +168,10 @@ class Arterialjunction_model extends CI_Model
             $allCityJunctions["reverse_path_geo"] = $mergeLinkGeoInfosByLinks($getDirectionLinks(-1, $qData), $qData['city_id'], $qData['map_version']);   //反向
             $allCityJunctions["map_version"] = $qData['map_version'];   //正向
 
-            $selectedJunc =  \Illuminate\Support\Arr::get($qData, 'selected_path', []);
+            $selectedJunc =  ArrGet($qData, 'selected_path', []);
             $lastSelectedJunc = end($selectedJunc);
-            $lastSelectedJuncLinks = \Illuminate\Support\Arr::get($lastSelectedJunc, 'links', '');
-            $lastSelectedJuncRLinks = \Illuminate\Support\Arr::get($lastSelectedJunc, 'reverse_links', '');
+            $lastSelectedJuncLinks = ArrGet($lastSelectedJunc, 'links', '');
+            $lastSelectedJuncRLinks = ArrGet($lastSelectedJunc, 'reverse_links', '');
             $allCityJunctions["last_geo"] = $mergeLinkGeoInfosByLinks(
                 explode(',', $lastSelectedJuncLinks),
                 $qData['city_id'],
@@ -185,7 +185,7 @@ class Arterialjunction_model extends CI_Model
             if (empty($allCityJunctions['adj_junc_paths'])) {
                 $allCityJunctions['adj_junc_paths'] = [];
             }
-            $connectedJunctions = \Illuminate\Support\Arr::get($allCityJunctions,"adj_junc_paths",[]);
+            $connectedJunctions = ArrGet($allCityJunctions,"adj_junc_paths",[]);
             foreach ($connectedJunctions as $jKey=>$jItem){
                 if(empty($jItem["links"])){
                     $jItem["links"] = "";
