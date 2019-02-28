@@ -70,13 +70,24 @@ class Adapt_model extends CI_Model
      * @param $data array Y 字段键值对
      * @return bool
      */
-    public function deleteAdaptLog($params)
+    /**
+     * 删除优化日志
+     * @param $deleteDay Y 删除几天前
+     * @return bool
+     */
+    public function deleteAdaptLog($deleteDay="-3 day")
     {
-        $data = [
-            'created_at' => date("Y-m-d H:i:s"),
-        ];
-        $data = array_merge($params,$data);
-        return $this->db->insert('adapt_timing_log', $data);
+        //筛选第1000条数据
+        $result = $this->db->select('*')
+            ->from('adapt_timing_log')
+            ->limit(1,999)
+            ->order_by("id asc")
+            ->get()
+            ->result_array();
+        if(strtotime(end($result)["log_time"])<strtotime($deleteDay)){
+            $this->db->where('id<', end($result)["id"])->delete('adapt_timing_log');
+        }
+        return true;
     }
 
     /**
@@ -103,6 +114,7 @@ class Adapt_model extends CI_Model
      */
     public function pageList($params)
     {
+        $this->deleteAdaptLog("-3 day");    //触发删除
         if(!empty($params["trace_id"])){
             $this->db->where("trace_id",$params["trace_id"]);
         }
@@ -133,7 +145,7 @@ class Adapt_model extends CI_Model
             ->limit($params["page_size"], $offset)
             ->order_by("log_time desc,id desc")
             ->get()
-            ->result_array();;
+            ->result_array();
         return [$total,$result];
     }
 }
