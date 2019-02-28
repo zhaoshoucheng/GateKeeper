@@ -25,7 +25,7 @@ $config['quotas'] = [
         'unit' => '秒',
         'summary' => function ($a) {
             list($a[0], $a[1]) = orderTime($a[0], $a[1]);
-            if (empty($a[0] || empty($a[1]))) {
+            if (empty($a[0]) || empty($a[1])) {
                 return "";
             }
             $format = '%s-%s时段%s方向延误时间最高';
@@ -53,7 +53,7 @@ $config['quotas'] = [
         'unit' => '次',
         'summary' => function ($a) {
             list($a[0], $a[1]) = orderTime($a[0], $a[1]);
-            if (empty($a[0] || empty($a[1]))) {
+            if (empty($a[0]) || empty($a[1])) {
                 return "";
             }
             $format = '%s-%s时段%s方向停车次数最高';
@@ -81,7 +81,7 @@ $config['quotas'] = [
         'unit' => '',
         'summary' => function ($a) {
             list($a[0], $a[1]) = orderTime($a[0], $a[1]);
-            if (empty($a[0] || empty($a[1]))) {
+            if (empty($a[0]) || empty($a[1])) {
                 return "";
             }
             $format = '%s-%s时段%s方向溢流指数最高';
@@ -110,7 +110,7 @@ $config['quotas'] = [
         'summary' => function ($a) {
             $format = '%s-%s时段%s方向最大排队长度最长';
             list($a[0], $a[1]) = orderTime($a[0], $a[1]);
-            if (empty($a[0] || empty($a[1]))) {
+            if (empty($a[0]) || empty($a[1])) {
                 return "";
             }
             return sprintf($format, $a[0] ?? '', $a[1] ?? '', $a[2] ?? '');
@@ -138,7 +138,7 @@ $config['quotas'] = [
         'summary' => function ($a) {
             $format = '%s-%s时段%s方向停车比率最高';
             list($a[0], $a[1]) = orderTime($a[0], $a[1]);
-            if (empty($a[0] || empty($a[1]))) {
+            if (empty($a[0]) || empty($a[1])) {
                 return "";
             }
             return sprintf($format, $a[0] ?? '', $a[1] ?? '', $a[2] ?? '');
@@ -166,7 +166,7 @@ $config['quotas'] = [
         'summary' => function ($a) {
             $format = '%s-%s时段%s方向通过速度最低';
             list($a[0], $a[1]) = orderTime($a[0], $a[1]);
-            if (empty($a[0] || empty($a[1]))) {
+            if (empty($a[0]) || empty($a[1])) {
                 return "";
             }
             return sprintf($format, $a[0] ?? '', $a[1] ?? '', $a[2] ?? '');
