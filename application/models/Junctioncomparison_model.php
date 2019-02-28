@@ -250,7 +250,10 @@ class Junctioncomparison_model extends CI_Model
         }
         list($diffMaxFlow, $diffMaxHour) = explode('-', array_search(max($tempHourVal), $tempHourVal));
         $baseDiffValue = $result['dataList'][$diffMaxFlow]['base_list'][$diffMaxHour];
-        $evaluateDiffValue = $result['dataList'][$diffMaxFlow]['evaluate_list'][$diffMaxHour];
+        $evaluateDiffValue = null;
+        if (isset($result['dataList'][$diffMaxFlow]['evaluate_list'][$diffMaxHour])) {
+            $evaluateDiffValue = $result['dataList'][$diffMaxFlow]['evaluate_list'][$diffMaxHour];
+        }
         $result['diff_info'] = [
             'flow_id' => $diffMaxFlow,
             'base' => [

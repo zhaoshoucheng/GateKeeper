@@ -157,6 +157,55 @@ class RoadService extends BaseService
     }
 
     /**
+     * 获取path的上下游路口
+     *
+     * @param $params
+     * @return array
+     * @throws \Exception
+     */
+    public function getPathHeadTailJunction($params)
+    {
+        $cityId = $params["city_id"];
+        $junctionIdList = explode(",",$params['junction_ids']);
+        $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[0], 'all', 1);
+        //上游路口
+        $up_road_degree = [];
+        foreach ($juncMovements as $item) {
+            if ($item['junction_id'] == $junctionIdList[0] and
+                $item['downstream_junction_id'] == $junctionIdList[1] and
+                $item['upstream_junction_id'][0] != '-'
+            ) {
+                $up_road_degree[$item['upstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+            }
+        }
+        if (!empty($up_road_degree)) {
+            asort($up_road_degree);
+            array_unshift($junctionIdList, key($up_road_degree));
+        } else {
+            throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
+        }
+
+        $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[sizeof($junctionIdList) - 1], 'all', 1);
+        //下游路口
+        $down_road_degree = [];
+        foreach ($juncMovements as $item) {
+            if ($item['junction_id'] == $junctionIdList[sizeof($junctionIdList) - 1] and
+                $item['downstream_junction_id'][0] != '-' and
+                $item['upstream_junction_id'] == $junctionIdList[sizeof($junctionIdList) - 2]) {
+                $down_road_degree[$item['downstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+            }
+        }
+        if (!empty($down_road_degree)) {
+            asort($down_road_degree);
+            array_push($junctionIdList, key($down_road_degree));
+        } else {
+            throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
+        }
+
+        return $junctionIdList;
+    }
+
+    /**
      * 获取全城全部路口详情
      *
      * @param $params ['city_id'] int 城市ID

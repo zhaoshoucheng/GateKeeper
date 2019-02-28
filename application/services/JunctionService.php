@@ -54,7 +54,6 @@ class JunctionService extends BaseService
         }
 
         $hours = hourRange($scheduleStart, $scheduleEnd);
-
         if (empty($hours)) {
             throw new \Exception('时间范围不能为空', ERR_PARAMETERS);
         }
@@ -62,7 +61,6 @@ class JunctionService extends BaseService
         $select = 'hour, logic_flow_id';
 
         $result = $this->flowDurationV6_model->getQuotaByJunction($cityId, $logicJunctionId, $dates, $hours, $quotaKey, $select);
-
         if (empty($result)) {
             return [];
         }
@@ -71,6 +69,9 @@ class JunctionService extends BaseService
         $junctionInfo = array_column($junctionInfo, null, 'logic_junction_id');
 
         $flowsInfo = $this->waymap_model->getFlowsInfo($logicJunctionId);
+
+        // 做清空非信控的flowId的规则
+        list($result, $flowsInfo) = $this->filterResultFlowInfo($result, $flowsInfo);
 
         $junctionInfo = [
             'junction' => $junctionInfo[$logicJunctionId] ?? [],
@@ -105,6 +106,7 @@ class JunctionService extends BaseService
             ->keysOfMaxValue()
             ->reduce($setValueReduce, Collection::make([]))
             ->keysOfMaxValue();
+
 
         //找出均值最大的方向的最大值最长持续时间区域
         $base_time_box = $maxFlowIds->reduce(function (Collection $carry, $id) use ($dataByFlow, $dataByHour) {
@@ -155,28 +157,33 @@ class JunctionService extends BaseService
             foreach ($value as $k => $v) {
                 $base[$ke][] = [$v === null ? null : $quotas[$quotaKey]['round']($v), $k];
             }
-            $flow_info[$ke] = ['name' => $flowsName[$ke] ?? '', 'highlight' => (int)($maxFlowIds->inArray($ke))];
+            $isMax = $maxFlowIds->inArray($ke);
+
+            $flow_info[$ke] = ['name' => $isMax ? $flowsName[$ke] . "(max)" : $flowsName[$ke], 'highlight' => (int)$isMax];
         });
 
+        $summarys = [];
         $base_time_box->each(function ($v, $k) use (&$describes, &$summarys, $quotaKey, $junctionInfo, $quotas) {
             $describes[] = $quotas[$quotaKey]['describe']([
                 $junctionInfo['junction']['name'] ?? '',
                 $junctionInfo['flows'][$k] ?? '',
                 $v['start_time'],
                 $v['end_time']]);
-            $summarys[]  = $quotas[$quotaKey]['summary']([
+            $summary = $quotas[$quotaKey]['summary']([
                 $v['start_time'],
                 $v['end_time'],
                 $junctionInfo['flows'][$k] ?? '']);
+            if (!empty($summary)) {
+                $summarys[] = $summary;
+            }
         });
-
         $base_time_box = $base_time_box->all();
         $describe_info = implode("\n", $describes);
         $summary_info  = implode("\n", $summarys);
 
         $pretreatResultData = compact('base', 'flow_info', 'base_time_box', 'describe_info', 'summary_info');
 
-        return [
+        $ret = [
             'info' => [
                 'junction_name' => $junctionInfo['junction']['name'] ?? '',
                 'junction_lng' => $junctionInfo['junction']['lng'] ?? '',
@@ -191,5 +198,75 @@ class JunctionService extends BaseService
             ],
             'base' => $pretreatResultData['base'],
         ];
+
+        $ret = $this->filterRules($ret, $params);
+
+        return $ret;
+    }
+
+    // 根据flowsInfo过滤非信控的方向
+    private function filterResultFlowInfo($result, $flowsInfo)
+    {
+        $deletedFlowIds = [];
+        foreach ($flowsInfo as $flowId => $name) {
+            if (!isTrafficPhaseName($name)) {
+                $deletedFlowIds[] = $flowId;
+                unset($flowsInfo[$flowId]);
+            }
+        }
+
+        foreach ($result as $key => $item) {
+            if (in_array($item['logic_flow_id'], $deletedFlowIds)) {
+                unset($result[$key]);
+            }
+        }
+        $result = array_values($result);
+        return [$result, $flowsInfo];
+    }
+
+    // 根据规则进行过滤
+    private function filterRules($ret, $params)
+    {
+        $type = $params['type'];
+
+        // 规则1：路口指标，全天的如果曲线小于10个点就删除
+        $threadHold = 10;
+        if ($type == 1) {
+            $flowInfo = $ret['info']['flow_info'];
+            $base = $ret['base'];
+            foreach ($base as $flowId => $line) {
+                $nonEmptyPointsCount = Collection::make($line)->filter(function($item){
+                    return $item[0] !== null;
+                })->count();
+                if ($nonEmptyPointsCount < $threadHold) {
+                    unset($base[$flowId]);
+                    unset($flowInfo[$flowId]);
+                }
+            }
+            $ret['base'] = $base;
+            $ret['info']['flow_info'] = $flowInfo;
+        }
+
+        // 规则2：时段指标，如果曲线点小于1/4的时段就删除
+        $scheduleStart     = $params['schedule_start'];
+        $scheduleEnd       = $params['schedule_end'];
+        $hours = hourRange($scheduleStart, $scheduleEnd);
+        $threadHold = floor(count($hours) / 4.0);
+        if ($type == 2) {
+            $flowInfo = $ret['info']['flow_info'];
+            $base = $ret['base'];
+            foreach ($base as $flowId => $line) {
+                $nonEmptyPointsCount = Collection::make($line)->filter(function($item){
+                    return $item[0] !== null;
+                })->count();
+                if ($nonEmptyPointsCount < $threadHold) {
+                    unset($base[$flowId]);
+                    unset($flowInfo[$flowId]);
+                }
+            }
+            $ret['base'] = $base;
+            $ret['info']['flow_info'] = $flowInfo;
+        }
+        return $ret;
     }
 }

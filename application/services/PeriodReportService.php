@@ -77,22 +77,22 @@ class PeriodReportService extends BaseService
         $spillover_freq_MoM      = ($lastData['spillover_freq'] - $prelastData['spillover_freq']) / ($prelastData['spillover_freq'] == 0 ? 1 : $prelastData['spillover_freq']) * 100;
         $oversaturation_freq_MoM = ($lastData['oversaturation_freq'] - $prelastData['oversaturation_freq']) / ($prelastData['oversaturation_freq'] == 0 ? 1 : $prelastData['oversaturation_freq']) * 100;
         if ($type == self::WEEK) {
-            $overviewStr = "本周(" . self::formatTime($lastTime['start_time']) . "-" . self::formatTime($lastTime['end_time']) . ")" . $cityName . "区拥堵程度相对严重,";
+            $overviewStr = "本周" . $cityName . "区拥堵程度相对严重，";
             $change      = $stop_delay_MoM > 0 ? "增长" : "减少";
-            $overviewStr .= "市区整体平均延误" . round($lastData['stop_delay'], 2) . "秒,环比上周" . $change . abs(round($stop_delay_MoM, 2)) . "%。";
+            $overviewStr .= "市区整体平均延误" . round($lastData['stop_delay'], 2) . "秒，环比上周" . $change . abs(round($stop_delay_MoM, 2)) . "%。";
             $change      = $spillover_freq_MoM > 0 ? "增长" : "减少";
-            $overviewStr .= "发生溢流路口共" . $lastData['spillover_freq'] . "路口次,环比上周问题路口" . $change . abs(round($spillover_freq_MoM, 2)) . "%。";
+            $overviewStr .= "溢流路口共" . $lastData['spillover_freq'] . "路口次，环比" . $change . abs(round($spillover_freq_MoM, 2)) . "%。";
             $change      = $oversaturation_freq_MoM > 0 ? "增长" : "减少";
-            $overviewStr .= "过饱和路口" . $lastData['oversaturation_freq'] . "路口次,环比上周问题" . $change . abs(round($oversaturation_freq_MoM, 2)) . "%。";
+            $overviewStr .= "过饱和路口" . $lastData['oversaturation_freq'] . "路口次，环比上周问题" . $change . abs(round($oversaturation_freq_MoM, 2)) . "%。";
 
         } else {
-            $overviewStr = "本月(" . self::formatTime($lastTime['start_time']) . "-" . self::formatTime($lastTime['end_time']) . ")" . $cityName . "区拥堵程度相对严重,";
+            $overviewStr = "本月" . $cityName . "区拥堵程度相对严重，";
             $change      = $stop_delay_MoM > 0 ? "增长" : "减少";
-            $overviewStr .= "市区整体平均延误" . round($lastData['stop_delay'], 2) . "秒,环比上月" . $change . abs(round($stop_delay_MoM, 2)) . "%。";
+            $overviewStr .= "市区整体平均延误" . round($lastData['stop_delay'], 2) . "秒，环比上月" . $change . abs(round($stop_delay_MoM, 2)) . "%。";
             $change      = $spillover_freq_MoM > 0 ? "增长" : "减少";
-            $overviewStr .= "发生溢流路口共" . $lastData['spillover_freq'] . "路口次,环比上月问题路口" . $change . abs(round($spillover_freq_MoM, 2)) . "%。";
+            $overviewStr .= "溢流路口共" . $lastData['spillover_freq'] . "路口次，环比" . $change . abs(round($spillover_freq_MoM, 2)) . "%。";
             $change      = $oversaturation_freq_MoM > 0 ? "增长" : "减少";
-            $overviewStr .= "过饱和路口" . $lastData['oversaturation_freq'] . "路口次,环比上月问题" . $change . abs(round($oversaturation_freq_MoM, 2)) . "%。";
+            $overviewStr .= "过饱和路口" . $lastData['oversaturation_freq'] . "路口次，环比上月问题" . $change . abs(round($oversaturation_freq_MoM, 2)) . "%。";
         }
 
         return [
@@ -256,12 +256,6 @@ class PeriodReportService extends BaseService
         }
         $dateList    = self::getDateFromRange($lastTime['start_time'], $lastTime['end_time']);
         $predateList = self::getDateFromRange($prelastTime['start_time'], $prelastTime['end_time']);
-//        if($type == self::WEEK){
-//
-//            $lastdata = $this->period_model->getDistrictWeekData();
-//        }else{
-//            $lastdata = $this->period_model->getDistrictMonthData();
-//        }
 
         if ($timeType == self::ALLDAY) {
             if ($type == self::WEEK) {
@@ -344,17 +338,17 @@ class PeriodReportService extends BaseService
         }
 
         if ($timeType == self::ALLDAY && $type == self::WEEK) {
-            $summary = "其中" . (($disticts['districts'][$maxDelayId]) ?? '') . "在本周最为拥堵。" . "环比上周";
+            $summary = "其中" . (($disticts['districts'][$maxDelayId]) ?? '') . "在本周最为拥堵。" . "环比上周，";
             if ($preMaxDelay > 0) {
-                $summary .= $disticts['districts'][$preMaxDelayId] . "改善情况最好。";
+                $summary .= $disticts['districts'][$preMaxDelayId] . "拥堵情况改善最好，";
             }
             if ($preMinDelay < 0) {
                 $summary .= $disticts['districts'][$preMinDelayId] . "恶化情况最严重。";
             }
         } elseif ($timeType == self::ALLDAY && $type == self::MONTH) {
-            $summary = "其中" . (($disticts['districts'][$maxDelayId]) ?? '') . "在本月最为拥堵。" . "环比上月";
+            $summary = "其中" . (($disticts['districts'][$maxDelayId]) ?? '') . "在本月最为拥堵。" . "环比上月，";
             if ($preMaxDelay > 0) {
-                $summary .= $disticts['districts'][$preMaxDelayId] . "改善情况最好。";
+                $summary .= $disticts['districts'][$preMaxDelayId] . "拥堵情况改善最好，";
             }
             if ($preMinDelay < 0) {
                 $summary .= $disticts['districts'][$preMinDelayId] . "恶化情况最严重。";
@@ -536,10 +530,10 @@ class PeriodReportService extends BaseService
         }
 
         $summary .= "本" . $period . $timePeriod . $quotaInfo[$quotaKey]['name'] . "最大。";
-        $summary .= "在" . $dayWorstQuota[0]['date'] . $quotaInfo[$quotaKey]['name'] . "最大,达到" . round($dayWorstQuota[0][$quotaKey], 2) . "。";
+        $summary .= "在" . $dayWorstQuota[0]['date'] . $quotaInfo[$quotaKey]['name'] . "最大，达到" . round($dayWorstQuota[0][$quotaKey], 2) . "。";
 
         if ($maxMoMJunction['d'] > 0) {
-            $summary .= "环比上" . $period . $junctionInfos[$maxMoMJunction['logic_junction_id']] . "恶化情况最严重,由上个" . $period . $maxMoMJunction['last_rank'] . "名,变化至本" . $period . $maxMoMJunction['rank'] . "名,";
+            $summary .= "环比上" . $period . $junctionInfos[$maxMoMJunction['logic_junction_id']] . "恶化情况最严重，由上个" . $period . $maxMoMJunction['last_rank'] . "名，变化至本" . $period . $maxMoMJunction['rank'] . "名，";
             $summary .= "下个" . $period . "需要重点关注延误变大原因";
         }
 
@@ -549,7 +543,7 @@ class PeriodReportService extends BaseService
         if ($timeType == self::ALLDAY) {
             $finalData['quota_desc'] = "本" . $period . $quotaInfo[$quotaKey]['name'] . "最大的" . $topNum . "个路口展示";
         } else {
-            $finalData['quota_desc'] = "延误top" . $topNum . ",排队长度top" . $topNum . "路口数据与上" . $period . "排名进行对比,并分析趋势";
+            $finalData['quota_desc'] = "延误top" . $topNum . ",排队长度top" . $topNum . "路口数据与上" . $period . "排名进行对比，并分析趋势";
         }
 
         if ($timeType == self::MORNING) {
@@ -614,16 +608,16 @@ class PeriodReportService extends BaseService
             $lastMoM    = ($lastData[0][1] - $preLastCharMap[$lastData[0][0]]) / $preLastCharMap[$lastData[0][0]] * 100;
             $preLastMoM = ($preLastData[0][1] - $lastCharMap[$preLastData[0][0]]) / $lastCharMap[$preLastData[0][0]] * 100;
             $change     = $lastMoM > 0 ? "增加" : "减少";
-            $summary    = "本周溢流问题在" . $lastData[0][0] . "时段发生最多,为" . $lastData[0][1] . "个。环比上周" . $change . abs(round($lastMoM)) . "%。";
+            $summary    = "本周溢流问题在" . $lastData[0][0] . "时段发生最多，为" . $lastData[0][1] . "个。环比上周" . $change . abs(round($lastMoM)) . "%。";
             $change     = $preLastMoM > 0 ? "增加" : "减少";
-            $summary    .= "上周溢流问题在" . $preLastData[0][0] . "时段发生最多,为" . $preLastData[0][1] . "个。环比本周" . $change . abs(round($preLastMoM)) . "%。";
+            $summary    .= "上周溢流问题在" . $preLastData[0][0] . "时段发生最多，为" . $preLastData[0][1] . "个。环比本周" . $change . abs(round($preLastMoM)) . "%。";
         } else {
             $lastMoM    = ($lastData[0][1] - $preLastCharMap[$lastData[0][0]]) / $preLastCharMap[$lastData[0][0]] * 100;
             $preLastMoM = ($preLastData[0][1] - $lastCharMap[$preLastData[0][0]]) / $lastCharMap[$preLastData[0][0]] * 100;
             $change     = $lastMoM > 0 ? "增加" : "减少";
-            $summary    = "本月溢流问题在" . $lastData[0][0] . "时段发生最多,为" . $lastData[0][1] . "个。环比上月" . $change . abs(round($lastMoM)) . "%。";
+            $summary    = "本月溢流问题在" . $lastData[0][0] . "时段发生最多，为" . $lastData[0][1] . "个。环比上月" . $change . abs(round($lastMoM)) . "%。";
             $change     = $preLastMoM > 0 ? "增加" : "减少";
-            $summary    .= "上月溢流问题在" . $preLastData[0][0] . "时段发生最多,为" . $preLastData[0][1] . "个。环比本月" . $change . abs(round($preLastMoM)) . "%。";
+            $summary    .= "上月溢流问题在" . $preLastData[0][0] . "时段发生最多，为" . $preLastData[0][1] . "个。环比本月" . $change . abs(round($preLastMoM)) . "%。";
         }
 
         return [

@@ -39,7 +39,7 @@ class FlowDurationV6_model extends CI_Model
      */
     public function getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, $groupBy, $quotaKey = '', $select = '*', $type = 'quota')
     {
-        if ($cityId == 12) { // 济南先试行数据服务
+        if (1 || $cityId == 12) { // 济南先试行数据服务
             $url = $this->config->item('data_service_interface');
             $dates = array_values($dates);
             $res = [];
@@ -127,7 +127,7 @@ class FlowDurationV6_model extends CI_Model
      */
     public function getQuotaByJunction($cityId, $logicJunctionId, $dates, $hours, $quotaKey = '', $select = '*')
     {
-        if ($cityId == 12) {
+        if (1 || $cityId == 12) {
             $data = [
                 'city_id'           => (int)$cityId,
                 'select_column'     => $select,
@@ -203,7 +203,7 @@ class FlowDurationV6_model extends CI_Model
      */
     public function getQuotaInfoByDate($data)
     {
-        if ($data['city_id'] == 12) {
+        if (1 || $data['city_id'] == 12) {
             $data = [
                 'city_id'           => (int)$data['city_id'],
                 'quota'             => $data['quota_key'],
@@ -261,7 +261,7 @@ class FlowDurationV6_model extends CI_Model
      */
     public function getJunctionByCityId($dates, $flowIds, $cityId, $quotaKey, $flowLength = [], $select = '*')
     {
-        if ($cityId == 12) {
+        if (1 || $cityId == 12) {
             $data = [
                 'city_id'        => intval($cityId),
                 'quota'          => $quotaKey,

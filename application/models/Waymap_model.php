@@ -226,7 +226,7 @@ class Waymap_model extends CI_Model
 
         $result = [];
 
-        $redis_key = 'all_city_junctions_' . $city_id . '_' . $version . '}';
+        $redis_key = 'all_city_junctions_' . $city_id . '_' . $version;
         $result = $this->redis_model->getData($redis_key);
 
         if (!$result) {

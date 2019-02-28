@@ -140,11 +140,11 @@ class Traj_model extends CI_Model
     {
         $res = httpPOST($url, $data, $timeout, 'raw');
         if (!$res) {
-            throw new \Exception('轨迹数据获取失败', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception('traj数据获取失败', ERR_REQUEST_WAYMAP_API);
         }
         $res = json_decode($res, true);
         if (!$res) {
-            throw new \Exception('轨迹数据格式错误', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception('traj轨迹数据格式错误', ERR_REQUEST_WAYMAP_API);
         }
 
         if ($res['errorCode'] != 0) {
@@ -172,13 +172,13 @@ class Traj_model extends CI_Model
         $res = httpPOST($url, $data, $timeout, $contentType, $header);
 
         if (!$res) {
-            throw new \Exception('轨迹数据获取失败', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception('traj数据获取失败', ERR_REQUEST_WAYMAP_API);
         }
 
         $res = json_decode($res, true);
 
         if (!$res) {
-            throw new \Exception('轨迹数据格式错误', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception('traj数据格式错误', ERR_REQUEST_WAYMAP_API);
         }
 
         if ($res['errorCode'] != 0) {
