@@ -162,16 +162,20 @@ class JunctionService extends BaseService
             $flow_info[$ke] = ['name' => $isMax ? $flowsName[$ke] . "(max)" : $flowsName[$ke], 'highlight' => (int)$isMax];
         });
 
+        $summarys = [];
         $base_time_box->each(function ($v, $k) use (&$describes, &$summarys, $quotaKey, $junctionInfo, $quotas) {
             $describes[] = $quotas[$quotaKey]['describe']([
                 $junctionInfo['junction']['name'] ?? '',
                 $junctionInfo['flows'][$k] ?? '',
                 $v['start_time'],
                 $v['end_time']]);
-            $summarys[]  = $quotas[$quotaKey]['summary']([
+            $summary = $quotas[$quotaKey]['summary']([
                 $v['start_time'],
                 $v['end_time'],
                 $junctionInfo['flows'][$k] ?? '']);
+            if (!empty($summary)) {
+                $summarys[] = $summary;
+            }
         });
         $base_time_box = $base_time_box->all();
         $describe_info = implode("\n", $describes);
