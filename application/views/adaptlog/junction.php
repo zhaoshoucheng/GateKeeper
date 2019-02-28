@@ -90,7 +90,11 @@
 				<td><?php echo $row["rel_id"]?> <br/><a href="./junction?rel_id=<?php echo $row["rel_id"]?>&&dltag=_didi_Junction.Do.Start">路口全批次</a> <a href="./junction?rel_id=<?php echo $row["rel_id"]?>&trace_id=<?php echo $row["trace_id"]?>">单批次详情</a></td>
 				<td><?php echo $row["trace_id"]?></td>
 				<td><?php echo $row["dltag"]?></td>
-				<td style="width: 75%;word-break:break-all;"><?php echo $row["log"]?></td>
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;
+				<textarea style="width: 80%;height: 50px;">
+<?php echo $row["log"]?>
+					</textarea>
+					</td>
 				<td><?php echo $row["log_time"]?></td>
 				<td><?php echo $row["created_at"]?></td>
 			</tr>

@@ -131,7 +131,7 @@ class Adapt_model extends CI_Model
         $result = $this->db->select('*')
             ->from('adapt_timing_log')
             ->limit($params["page_size"], $offset)
-            ->order_by("log_time","desc")
+            ->order_by("log_time desc,id desc")
             ->get()
             ->result_array();;
         return [$total,$result];
