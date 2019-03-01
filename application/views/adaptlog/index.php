@@ -65,7 +65,7 @@
 <body>
 
 <div id="container">
-	<h1>POC区域调度批次日志</h1>
+	<h1>POC区域调度批次日志 <a href="http://odin.xiaojukeji.com/#/monitor/screen/20747?category=cluster&isLeaf=true&nid=281450&ns=hna.its-schedule.its-tool.ipd-cloud.didi.com" target="_blank">监控大盘</a></h1>
 	<table>
 		<tr>
 			<th>area_id</th>

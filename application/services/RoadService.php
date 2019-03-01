@@ -171,11 +171,12 @@ class RoadService extends BaseService
         //上游路口
         $up_road_degree = [];
         foreach ($juncMovements as $item) {
+            $up_road_degree[$item['upstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
             if ($item['junction_id'] == $junctionIdList[0] and
                 $item['downstream_junction_id'] == $junctionIdList[1] and
                 $item['upstream_junction_id'][0] != '-'
             ) {
-                $up_road_degree[$item['upstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                break;
             }
         }
         if (!empty($up_road_degree)) {
@@ -189,10 +190,11 @@ class RoadService extends BaseService
         //下游路口
         $down_road_degree = [];
         foreach ($juncMovements as $item) {
+            $down_road_degree[$item['downstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
             if ($item['junction_id'] == $junctionIdList[sizeof($junctionIdList) - 1] and
                 $item['downstream_junction_id'][0] != '-' and
                 $item['upstream_junction_id'] == $junctionIdList[sizeof($junctionIdList) - 2]) {
-                $down_road_degree[$item['downstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                break;
             }
         }
         if (!empty($down_road_degree)) {
