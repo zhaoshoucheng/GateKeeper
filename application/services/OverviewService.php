@@ -84,6 +84,38 @@ class OverviewService extends BaseService
 
         $data = $this->redis_model->getRealtimePretreatJunctionList($cityId, $date, $hour);
 
+
+        $params['date'] = $params['date'] ?? date('Y-m-d');
+        $params['pagesize'] = $params['pagesize'] ?? 20;
+
+        $delayList = $this->stopDelayTopList($params,$this->userPerm);
+        $newDelayList = [];
+        foreach ($delayList as $item){
+            $newDelayList[$item["logic_junction_id"]] = $item["stop_delay"];
+        }
+
+        $cycleList = $this->stopTimeCycleTopList($params,$this->userPerm);
+        $newCycleList = [];
+        foreach ($cycleList as $item){
+            if(isset($newCycleList[$item["logic_junction_id"]])){
+                if($item["stop_time_cycle"]>$newCycleList[$item["logic_junction_id"]]){
+                    $newCycleList[$item["logic_junction_id"]] = $item["stop_time_cycle"];
+                }
+            }else{
+                $newCycleList[$item["logic_junction_id"]] = $item["stop_time_cycle"];
+            }
+        }
+
+        if(!empty($data)){
+            foreach ($data["dataList"] as $key=>$item){
+                if(isset($newDelayList[$item["jid"]])){
+                    $data["dataList"][$key]["quota"]["stop_delay"]["value"] = $newDelayList[$item["jid"]];
+                }
+                if(isset($newCycleList[$item["jid"]])){
+                    $data["dataList"][$key]["quota"]["stop_time_cycle"]["value"] = $newCycleList[$item["jid"]];
+                }
+            }
+        }
         return $data ? $data : [];
     }
 
