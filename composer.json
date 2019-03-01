@@ -16,7 +16,8 @@
 		"monolog/monolog": "^1.23",
 		"overtrue/pinyin": "~4.0",
 		"elasticsearch/elasticsearch": "6.0.1",
-		"guzzlehttp/guzzle": "^6.3"
+		"guzzlehttp/guzzle": "^6.3",
+		"illuminate/database" : "*"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"
