@@ -1159,7 +1159,9 @@ class TimingAdaptionAreaService extends BaseService
     {
         $this->load->config('control_params');
         $controlParams = $this->config->item('control_params');
-        return $controlParams["city"][$cityId];
+        $cityParams = $controlParams["city"][$cityId];
+        $cityParams["queue_ratio_thresh"] = $cityParams["queue_ratio_thresh"]*100;
+        return $cityParams;
     }
 
     /**

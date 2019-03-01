@@ -15,7 +15,17 @@ class AdaptLog extends MY_Controller{
         $this->adaptionLogService = new AdaptionLogService();
     }
 
+    private function access(){
+        if(gethostname()=="ipd-cloud-preweb00.gz01" || gethostname()=="ipd-cloud-server01.gz01"){
+            return true;
+        }
+        return false;
+    }
+
     public function rollback(){
+        if(!$this->access()){
+            echo "access deny";exit;
+        }
         $params = $this->input->get();
         if(empty($params["trace_id"])){
             echo "trace_id empty";
@@ -45,6 +55,9 @@ class AdaptLog extends MY_Controller{
 
     public function index()
     {
+        if(!$this->access()){
+            echo "access deny";exit;
+        }
         $params = $this->input->get();
         $params["page_size"] = $params["page_size"]??100;
         $params["trace_id"] = $params["trace_id"]??"";
@@ -68,6 +81,12 @@ class AdaptLog extends MY_Controller{
 
     public function junction()
     {
+        if(!$this->access()){
+            echo "access deny";exit;
+        }
+        if(!$this->access()){
+            echo "access deny";exit;
+        }
         $params = $this->input->get();
         $params["page_size"] = $params["page_size"]??100;
         $params["trace_id"] = $params["trace_id"]??"";
