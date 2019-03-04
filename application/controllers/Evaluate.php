@@ -8,16 +8,19 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Services\EvaluateService;
+use Services\DataService;
 
 class Evaluate extends MY_Controller
 {
     protected $evaluateService;
+    protected $dataService;
 
     public function __construct()
     {
         parent::__construct();
 
         $this->evaluateService = new EvaluateService();
+        $this->dataService = new DataService();
     }
 
     /**
@@ -147,6 +150,17 @@ class Evaluate extends MY_Controller
         $data = $this->evaluateService->getJunctionMapData($params);
 
         $this->response($data);
+    }
+
+    // 获取flow的各种详细指标，开放平台使用
+    public function flowDetailQuota()
+    {
+        // 获取flow的指标
+        $params = $this->input->post(null, true);
+
+        $result = $this->dataService->call(DataService::ApiFlowDetailQuota, $params);
+
+        $this->response($result);
     }
 
     /**
