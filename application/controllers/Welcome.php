@@ -48,7 +48,7 @@ class Welcome extends CI_Controller
         $this->userPerm = json_decode($permData,true);
         echo "login INFO:";
         echo "<pre>";
-        print_r($_COOKIE);
+        print_r(htmlspecialchars(print_r($_COOKIE,true)));
         echo "</pre>";
         echo "perm INFO:";
         echo "<pre>";
@@ -61,11 +61,11 @@ class Welcome extends CI_Controller
                     }
                 }
             }
-            print_r($userPerm);
+        print_r(htmlspecialchars(print_r($userPerm)));
         echo "</pre>";
         echo "header INFO:";
         echo "<pre>";
-        print_r($_SERVER);
+        print_r(htmlspecialchars(print_r($_SERVER,true)));
         echo "</pre>";
         exit;
         $jsonStr='{"errno":0,"errmsg":"","data":{}}';
