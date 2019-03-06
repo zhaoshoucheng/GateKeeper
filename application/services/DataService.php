@@ -25,6 +25,9 @@ class DataService extends BaseService
         $this->url = $this->config->item('data_service_interface');
     }
 
+    const METHOD_GET = "GET";
+    const METHOD_POST = "POST";
+
     const ApiFlowDetailQuota = "/quota/flow";
 
     // 通用调用api的服务, 进行远程调用
@@ -35,12 +38,19 @@ class DataService extends BaseService
 
         $url = "{$this->url}{$apiUrl}";
 
-        if ($method == "GET") {
+        if ($method == self::METHOD_GET) {
             $ret = httpGET($url, $params, $timeout);
-        } else {
+        } else if ($method == self::METHOD_POST) {
             $ret = httpPOST("{$this->url}{$apiUrl}", $params, $timeout);
         }
 
-        return $ret;
+        $ret = json_decode($ret, true);
+        // 返回的结构体是['errno', 'errmsg', 'data'];
+        if (!isset($ret['errno']) || (!isset($ret['errmsg'])) || (!isset($ret['data']))) {
+            throw new Exception("调用dataService服务返回错误");
+        }
+
+        extract($ret);
+        return [$errno, $errmsg, $data];
     }
 }

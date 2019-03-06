@@ -152,16 +152,7 @@ class Evaluate extends MY_Controller
         $this->response($data);
     }
 
-    // 获取flow的各种详细指标，开放平台使用
-    public function flowDetailQuota()
-    {
-        // 获取flow的指标
-        $params = $this->input->post(null, true);
 
-        $result = $this->dataService->call(DataService::ApiFlowDetailQuota, $params);
-
-        $this->response($result);
-    }
 
     /**
      * 指标评估对比
