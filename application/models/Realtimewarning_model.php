@@ -271,6 +271,7 @@ class Realtimewarning_model extends CI_Model
             //获取实时报警表数据
             $data['date'] = $date;
             $data['city_id'] = $cityId;
+            sleep(1);   //防止延迟数据读取为0
             $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||message=getRealTimeAlarmsInfoFromEs\n\r";
             $realTimeAlarmsInfoResult = [];
