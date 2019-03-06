@@ -8,16 +8,19 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Services\EvaluateService;
+use Services\DataService;
 
 class Evaluate extends MY_Controller
 {
     protected $evaluateService;
+    protected $dataService;
 
     public function __construct()
     {
         parent::__construct();
 
         $this->evaluateService = new EvaluateService();
+        $this->dataService = new DataService();
     }
 
     /**
@@ -148,6 +151,8 @@ class Evaluate extends MY_Controller
 
         $this->response($data);
     }
+
+
 
     /**
      * 指标评估对比

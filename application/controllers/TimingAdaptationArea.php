@@ -152,6 +152,7 @@ class TimingAdaptationArea extends MY_Controller
             'logic_junction_id' => 'required|trim|min_length[1]',
         ]);
 
+        //xxx开启了路口xxx,自适应下发
         $result = $this->timingAdaptionAreaService->junctionSwitch($params);
 
         $this->response($result);
@@ -172,6 +173,7 @@ class TimingAdaptationArea extends MY_Controller
             'is_upload' => 'required|in_list[0,1]',
         ]);
 
+        //xxx开启了区域xxx,自适应下发
         $result = $this->timingAdaptionAreaService->areaSwitch($params);
 
         $this->response($result);
