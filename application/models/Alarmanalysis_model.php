@@ -30,17 +30,13 @@ class Alarmanalysis_model extends CI_Model
     public function search($body)
     {
         $hosts = $this->config->item('alarm_es_interface');
-        $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
-
         $index = $this->config->item('alarm_es_index');
-
-        $params = [
-            'index' => $index['junction'],
-            'body'  => $body
-        ];
-        $response = $client->search($params);
-        com_log_notice('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_log', compact("params","response"));
-        return $response;
+        $queryUrl = sprintf('http://%s/%s/type/_search?%s',$hosts[0],$index['flow'],$index['flow']);
+        $response = httpPOST($queryUrl, json_decode($body,true), 0, 'json');
+        if (!$response) {
+            return [];
+        }
+        return json_decode($response,true);
     }
 
     /**
@@ -50,19 +46,7 @@ class Alarmanalysis_model extends CI_Model
      */
     public function searchFlowTable($body)
     {
-        $hosts = $this->config->item('alarm_es_interface');
-        $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
-
-        $index = $this->config->item('alarm_es_index');
-
-        $params = [
-            'index' => $index['flow'],
-            'body'  => $body
-        ];
-
-        $response = $client->search($params);
-
-        return $response;
+        return $this->search($body);
     }
 
     /**

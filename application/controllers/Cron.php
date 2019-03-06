@@ -32,6 +32,13 @@ class Cron extends CI_Controller
         $this->load->model('openCity_model');
         $this->load->model('flowDurationV6_model');
         $this->load->model('realtime_model');
+        $this->load->model('adapt_model');
+    }
+
+    public function deleteAdaptLog()
+    {
+        print_r(date("Y-m-d H:i:s")." deleteAdaptLog execute success.\n");
+        $this->adapt_model->deleteAdaptLog("-3 day");
     }
 
     public function scan_custom_task()
