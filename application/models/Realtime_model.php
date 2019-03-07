@@ -285,8 +285,10 @@ class Realtime_model extends CI_Model
         $areaQuotaInfoKey = sprintf("itstool_area_quotainfo_%s_%s_%s",date("Y-m-d"),$areaId,$quotaKey);
         $list = $this->redis_model->lrange($areaQuotaInfoKey);
         if(!empty($list)){
-            array_shift($list);
             foreach ($list as $key=>$val){
+                if($val["hour"]=="08:00:00"){
+                    unset($list[$key]);
+                }
                 $list[$key] = json_decode($val,true);
             }
         }

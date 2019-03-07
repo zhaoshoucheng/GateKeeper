@@ -442,7 +442,7 @@ class TimingAdaptionService extends BaseService
         $uploadInterval = 2;
 
         // 路口方案上次下发时间
-        $lastUploadTime = !empty($res["down_time"]) && $res["down_time"]!="1970-01-01 00:00:00"
+        $lastUploadTime = !empty($res["down_time"]) && $res["down_time"]!="1970-01-01 00:00:00" && $res["down_time"]!="0000-00-00 00:00:00"
             ? getTodayTimeOrFullTime(strtotime($res["down_time"]))
             : "N/A";
 

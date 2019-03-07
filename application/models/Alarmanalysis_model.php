@@ -61,18 +61,15 @@ class Alarmanalysis_model extends CI_Model
         $lastTime  = date('Y-m-d') . ' ' . $hour;
 
         // 组织ES接口所需DSL
-        $json = '{"from":0,"size":200,"query":{"bool":{"must":{"bool":{"must":[';
+        $json = '{"from":0,"size":1000,"query":{"bool":{"must":{"bool":{"must":[';
 
         // where city_id
         $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
 
-        // where date
-        $json .= ',{"match":{"date":{"query":"' . $date . '","type":"phrase"}}}';
-
         // where last_time
         $json .= ',{"match":{"last_time":{"query":"' . $lastTime . '","type":"phrase"}}}';
 
-        $json .= ']}}}},"_source":{"includes":["type","logic_junction_id","count","logic_flow_id","start_time","last_time"],"excludes":[]},"sort":[{"type":{"order":"asc"}},{"count":{"order":"desc"}}]}';
+        $json .= ']}}}}}';
 
         $esRes = $this->searchFlowTable($json);
 
