@@ -741,6 +741,9 @@ class TimingAdaptionAreaService extends BaseService
             $trajList = [];
             //格式化原始轨迹数据
             foreach ($detail['result'] as $k => $v) {
+                if(count($v)<5){
+                    continue;
+                }
                 $timestampArr = array_column($v, 'timestamp');
                 array_multisort($timestampArr, SORT_NUMERIC, SORT_ASC, $v);  //类似db里面的order by
                 foreach ($v as $kk => $vv) {

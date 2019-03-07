@@ -161,7 +161,7 @@ class Waymap_model extends CI_Model
 
         $url = $this->waymap_interface . '/signal-map/map/many';
 
-        return $this->get($url, $data);
+        return $this->post($url, $data);
     }
 
     /**

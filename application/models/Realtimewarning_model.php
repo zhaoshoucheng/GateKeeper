@@ -248,7 +248,7 @@ class Realtimewarning_model extends CI_Model
         //因为ES直接查询当天所有批次会影响到集群（真弱鸡！）所有要每次只取一个批次进行追加缓存。
         $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour);
         if (empty($avgStopDelayList)) {
-            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id={$cityId}||date={$date}||hour={$hour}||traceId={$traceId}||message=生成 avg(stop_delay) group by hour failed!\n\r";
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id={$cityId}||date={$date}||hour={$hour}||traceId={$traceId}||didi_trace_id=".get_traceid()."||message=生成 avg(stop_delay) group by hour failed!\n\r";
             return;
         }
         $esStopDelay = $this->redis_model->getData($avgStopDelayKey);
@@ -267,13 +267,17 @@ class Realtimewarning_model extends CI_Model
             $countData = array_column($realtimeJunctionList, 'traj_count', 'logic_junction_id');
             $junctionTotal = count($countData);
 
-
             //获取实时报警表数据
             $data['date'] = $date;
             $data['city_id'] = $cityId;
+            sleep(5);   //防止延迟数据读取为0
             $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId. "||hour={$hour}"  . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() ."||message=getRealTimeAlarmsInfoFromEs||grep_message=grep '_com_http_success' /home/xiaoju/php7/logs/cloud/itstool/didi.log | grep 'arius' | grep '{$hour}' | grep 'city_id\":{\"query\":{$cityId},'\n\r";
             $realTimeAlarmsInfoResult = [];
             foreach ($realTimeAlarmsInfoResultOrigal as $item) {
+                if($cityId=="12" && strtotime($item["last_time"])-strtotime($item["start_time"])<180){
+                    continue;
+                }
                 $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;
             }
             $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
@@ -326,8 +330,18 @@ class Realtimewarning_model extends CI_Model
             $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600);
             // 冗余缓存实时报警路口数据,每一个批次一份
             $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600);
+
+
             // 缓存最新hour
-            $this->redis_model->setEx($lastHourKey, $hour, 24 * 3600);
+            sleep(0.5);
+            if($this->redis_model->getData($junctionSurveyKey) && $this->redis_model->getData($junctionListKey)
+                && $this->redis_model->getData($realTimeAlarmRedisKey) && $this->redis_model->getData($realTimeAlarmBakKey)
+            ){
+                $this->redis_model->setEx($lastHourKey, $hour, 24 * 3600);
+            }else{
+                sleep(2);
+                $this->redis_model->setEx($lastHourKey, $hour, 24 * 3600);
+            }
         }
     }
 

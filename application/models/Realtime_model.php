@@ -284,12 +284,16 @@ class Realtime_model extends CI_Model
     public function getRedisAreaQuotaValueCurve($areaId, $quotaKey){
         $areaQuotaInfoKey = sprintf("itstool_area_quotainfo_%s_%s_%s",date("Y-m-d"),$areaId,$quotaKey);
         $list = $this->redis_model->lrange($areaQuotaInfoKey);
+        $newList = [];
         if(!empty($list)){
             foreach ($list as $key=>$val){
-                $list[$key] = json_decode($val,true);
+                $tmp = json_decode($val,true);
+                if($tmp["hour"]!="08:00:00"){
+                    $newList[] = $tmp;
+                }
             }
         }
-        return $list;
+        return $newList;
     }
 
 

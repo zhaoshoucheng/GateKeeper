@@ -30,17 +30,13 @@ class Alarmanalysis_model extends CI_Model
     public function search($body)
     {
         $hosts = $this->config->item('alarm_es_interface');
-        $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
-
         $index = $this->config->item('alarm_es_index');
-
-        $params = [
-            'index' => $index['junction'],
-            'body'  => $body
-        ];
-        $response = $client->search($params);
-        com_log_notice('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_log', compact("params","response"));
-        return $response;
+        $queryUrl = sprintf('http://%s/%s/type/_search?%s',$hosts[0],$index['flow'],$index['flow']);
+        $response = httpPOST($queryUrl, json_decode($body,true), 0, 'json');
+        if (!$response) {
+            return [];
+        }
+        return json_decode($response,true);
     }
 
     /**
@@ -50,19 +46,7 @@ class Alarmanalysis_model extends CI_Model
      */
     public function searchFlowTable($body)
     {
-        $hosts = $this->config->item('alarm_es_interface');
-        $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
-
-        $index = $this->config->item('alarm_es_index');
-
-        $params = [
-            'index' => $index['flow'],
-            'body'  => $body
-        ];
-
-        $response = $client->search($params);
-
-        return $response;
+        return $this->search($body);
     }
 
     /**
@@ -77,18 +61,15 @@ class Alarmanalysis_model extends CI_Model
         $lastTime  = date('Y-m-d') . ' ' . $hour;
 
         // 组织ES接口所需DSL
-        $json = '{"from":0,"size":200,"query":{"bool":{"must":{"bool":{"must":[';
+        $json = '{"from":0,"size":1000,"query":{"bool":{"must":{"bool":{"must":[';
 
         // where city_id
         $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
 
-        // where date
-        $json .= ',{"match":{"date":{"query":"' . $date . '","type":"phrase"}}}';
-
         // where last_time
         $json .= ',{"match":{"last_time":{"query":"' . $lastTime . '","type":"phrase"}}}';
 
-        $json .= ']}}}},"_source":{"includes":["type","logic_junction_id","count","logic_flow_id","start_time","last_time"],"excludes":[]},"sort":[{"type":{"order":"asc"}},{"count":{"order":"desc"}}]}';
+        $json .= ']}}}}}';
 
         $esRes = $this->searchFlowTable($json);
 

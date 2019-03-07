@@ -206,7 +206,7 @@ class Realtimewarning extends Inroute_Controller
             exit;
         }
         //预先计算平均延误数据
-        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=pre_calculating\n\r";
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculating\n\r";
         $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId, 1);
 
         exec("ps aux | grep \"realtimewarn\" | grep 'process/{$cityId}/' | grep -v \"grep\" | wc -l", $processOut);
@@ -224,7 +224,7 @@ class Realtimewarning extends Inroute_Controller
             exec($command);
             echo $command."\n\r";
         }
-        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=pre_calculated\n\r";
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculated\n\r";
         return true;
     }
 
@@ -250,7 +250,7 @@ class Realtimewarning extends Inroute_Controller
             'trace_id' => $traceId,
             'uid' => $uid,
         ];
-        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=task_handler doing\n\r";
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=task_handler doing\n\r";
         $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params, 600000);
         if (!$res) {
             com_log_warning('realtime_callback_task_handler_error', 0, $res, compact("params"));
@@ -262,10 +262,10 @@ class Realtimewarning extends Inroute_Controller
             exit;
         }
 
-        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=task_handler done\n\r";
-        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=calculating\n\r";
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=task_handler done\n\r";
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculating\n\r";
         $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId);
-        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||message=calculated\n\r";
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculated\n\r";
         return true;
     }
 }

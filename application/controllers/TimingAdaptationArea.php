@@ -237,7 +237,6 @@ class TimingAdaptationArea extends MY_Controller
         ]);
 
         $result = $this->timingAdaptionAreaService->getScatterMtraj($params);
-
         $this->response($result);
     }
 
