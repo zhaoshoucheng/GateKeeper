@@ -71,7 +71,6 @@ if (!function_exists('httpPOST')) {
             'didi-header-rid: ' . $traceId,
             'didi-header-spanid: ' . $cSpanId,
         ]);
-
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_ENCODING, "UTF-8");
         curl_setopt($ch, CURLOPT_HEADER, 0);

@@ -7,7 +7,6 @@
 
 class Timing_model extends CI_Model
 {
-    private $email_to = 'ningxiangbing@didichuxing.com';
     public function __construct()
     {
         parent::__construct();

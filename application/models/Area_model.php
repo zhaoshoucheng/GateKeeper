@@ -70,25 +70,6 @@ class Area_model extends CI_Model
         return $res instanceof CI_DB_result ? $res->row_array() : $res;
     }
 
-    /**
-     * 根据城市ID和区域名称获取区域信息
-     *
-     * @param $cityId
-     * @param $areaName
-     * @param string $select
-     * @return mixed
-     */
-    public function getAreaByAreaName($cityId, $areaName, $select = '*')
-    {
-        $res = $this->db->select($select)
-            ->from($this->tb)
-            ->where('city_id', $cityId)
-            ->where('area_name', $areaName)
-            ->where('delete_at', '1970-01-01 00:00:00')
-            ->get();
-
-        return $res instanceof CI_DB_result ? $res->row_array() : $res;
-    }
 
     /**
      * 根据区域ID获取路口列表

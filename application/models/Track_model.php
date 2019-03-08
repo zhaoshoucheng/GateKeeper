@@ -10,7 +10,6 @@ use Didi\Cloud\ItsMap\Track_vendor;
 class Track_model extends CI_Model
 {
 
-    private $email_to = 'ningxiangbing@didichuxing.com';
     public function __construct()
     {
         parent::__construct();
@@ -47,7 +46,6 @@ class Track_model extends CI_Model
         $mapversions = $this->taskdateversion_model->select($junction_info['task_id'], explode(',', $junction_info['dates']));
         if (!$mapversions) {
             $content = "form_data = " . json_encode(['task_id'=>$junction_info['task_id'], 'dates'=>$junction_info['dates']]);
-            sendMail($this->email_to, 'logs: 获取时空/散点图（'.$type.'）->获取mapversion为空', $content);
             return [];
         }
 
