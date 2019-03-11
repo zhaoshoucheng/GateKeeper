@@ -285,7 +285,7 @@ class RoadService extends BaseService
                     asort($up_road_degree);
                     array_unshift($junctionIdList, key($up_road_degree));
                 } else {
-                    throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
+                    //throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
                 }
 
                 $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[sizeof($junctionIdList) - 1], 'all', 1);
@@ -302,7 +302,7 @@ class RoadService extends BaseService
                     asort($down_road_degree);
                     array_push($junctionIdList, key($down_road_degree));
                 } else {
-                    throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
+                    //throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
                 }
             }
         }
