@@ -13,6 +13,8 @@ class Database
                 'database' => 'its_trafficflow',
                 'username' => 'root',
                 'password' => '123456',
+                'strict'    => false,
+                'charset'   => 'utf8',
             ],
             'its' => [
                 'driver' => 'mysql',
@@ -21,6 +23,8 @@ class Database
                 'database' => 'its',
                 'username' => 'root',
                 'password' => '123456',
+                'strict'    => false,
+                'charset'   => 'utf8',
             ],
             'traffic_timing_solve' => [
                 'driver' => 'mysql',
@@ -29,6 +33,8 @@ class Database
                 'database' => 'traffic_timing_solve',
                 'username' => 'root',
                 'password' => '123456',
+                'strict'    => false,
+                'charset'   => 'utf8',
             ],
         ],
         ENV::DEBUG => [
@@ -39,6 +45,8 @@ class Database
                 'database' => 'its_trafficflow',
                 'username' => 'root',
                 'password' => 'Znjty@Didi@2017',
+                'strict'    => false,
+                'charset'   => 'utf8',
             ],
             'its' => [
                 'driver' => 'mysql',
@@ -47,6 +55,8 @@ class Database
                 'database' => 'its',
                 'username' => 'root',
                 'password' => 'Znjty@Didi@2017',
+                'strict'    => false,
+                'charset'   => 'utf8',
             ],
             'traffic_timing_solve' => [
                 'driver' => 'mysql',
@@ -55,6 +65,8 @@ class Database
                 'database' => 'traffic_timing_solve',
                 'username' => 'root',
                 'password' => 'Znjty@Didi@2017',
+                'strict'    => false,
+                'charset'   => 'utf8',
             ],
         ],
         ENV::ONLINE => [
@@ -65,6 +77,8 @@ class Database
                 'database' => 'its_mapdata',
                 'username' => 'its_mapdata_its_mapdata_r',
                 'password' => 'txCjmkfIvMX2Fzn',
+                'strict'    => false,
+                'charset'   => 'utf8',
             ],
             'its' => [
                 'driver' => 'mysql',
@@ -73,6 +87,8 @@ class Database
                 'database' => 'its',
                 'username' => 'its_rw',
                 'password' => 'iTsITs_Rw@0912',
+                'strict'    => false,
+                'charset'   => 'utf8',
             ],
             'traffic_timing_solve' => [
                 'driver' => 'mysql',
@@ -81,6 +97,8 @@ class Database
                 'database' => 'traffic_timing_solve',
                 'username' => 'traffic_timing_solve_rw',
                 'password' => 'trAFfIcTs_rW@0912',
+                'strict'    => false,
+                'charset'   => 'utf8',
             ],
         ],
     ];
