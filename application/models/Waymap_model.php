@@ -476,7 +476,7 @@ class Waymap_model extends CI_Model
 
         $url = $this->waymap_interface . '/signal-map/mapJunction/phase';
 
-        $res = $this->get($url, $data);
+        $res = $this->post($url, $data); 
 
         $res = array_map(function ($v) {
             // 纠正这里的 phase_id 和 phase_name

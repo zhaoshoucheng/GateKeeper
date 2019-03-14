@@ -116,6 +116,7 @@ class RoadNet
         $retry = 2;
         $spanId = gen_span_id();
 
+        $timeStart = sprintf("%.2f", microtime(true));
         $response = null;
         while ($retry) {
             try {
@@ -140,10 +141,10 @@ class RoadNet
                 $response = null;
             }
         }
-
         $config = $this->config;
-        com_log_notice("_com_thrift_success", array("cspanid"=>$spanId, "config"=> json_encode($config), 'method' => $method, "args"=> json_encode($args), 'response' => json_encode($response), 'retry' => $retry));
-        //Log::notice(json_encode([compact('config', 'method', 'args', 'response', 'retry')]));
+        $timeEnd = sprintf("%.2f", microtime(true));
+        $totalTime = $timeEnd - $timeStart;
+        com_log_notice("_com_thrift_success", array("cspanid"=>$spanId, 'proc_time' => $totalTime, "config"=> json_encode($config), 'method' => $method, "args"=> json_encode($args), 'response' => json_encode($response), 'retry' => $retry));
         return $response;
     }
 
