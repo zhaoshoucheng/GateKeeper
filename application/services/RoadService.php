@@ -176,14 +176,18 @@ class RoadService extends BaseService
                 $item['upstream_junction_id'][0] != '-' and
                 strpos($item['upstream_junction_id'],"-")!==0
             ) {
-                $up_road_degree[$item['upstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                if($absDiff>180){
+                    $absDiff = 360-$absDiff;
+                }
+                $up_road_degree[$item['upstream_junction_id']] = $absDiff;
             }
         }
         if (!empty($up_road_degree)) {
             asort($up_road_degree);
             array_unshift($junctionIdList, key($up_road_degree));
         } else {
-            throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
+            //throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
         }
 
         $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[sizeof($junctionIdList) - 1], 'all', 1);
@@ -194,14 +198,19 @@ class RoadService extends BaseService
                 $item['downstream_junction_id'][0] != '-' and
                 strpos($item['downstream_junction_id'],"-")!==0 and
                 $item['upstream_junction_id'] == $junctionIdList[sizeof($junctionIdList) - 2]) {
-                $down_road_degree[$item['downstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+
+                $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                if($absDiff>180){
+                    $absDiff = 360-$absDiff;
+                }
+                $down_road_degree[$item['downstream_junction_id']] = $absDiff;
             }
         }
         if (!empty($down_road_degree)) {
             asort($down_road_degree);
             array_push($junctionIdList, key($down_road_degree));
         } else {
-            throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
+            //throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
         }
 
         return $junctionIdList;
@@ -278,9 +287,14 @@ class RoadService extends BaseService
                         $item['downstream_junction_id'] == $junctionIdList[1] and
                         strpos($item['upstream_junction_id'],"-")!==0 and
                         $item['upstream_junction_id'][0] != '-') {
-                        $up_road_degree[$item['upstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                        $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                        if($absDiff>180){
+                            $absDiff = 360-$absDiff;
+                        }
+                        $up_road_degree[$item['upstream_junction_id']] = $absDiff;
                     }
                 }
+
                 if (!empty($up_road_degree)) {
                     asort($up_road_degree);
                     array_unshift($junctionIdList, key($up_road_degree));
@@ -295,7 +309,11 @@ class RoadService extends BaseService
                         $item['downstream_junction_id'][0] != '-' and
                         strpos($item['downstream_junction_id'],"-")!==0 and
                         $item['upstream_junction_id'] == $junctionIdList[sizeof($junctionIdList) - 2]) {
-                        $down_road_degree[$item['downstream_junction_id']] = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                        $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                        if($absDiff>180){
+                            $absDiff = 360-$absDiff;
+                        }
+                        $down_road_degree[$item['downstream_junction_id']] = $absDiff;
                     }
                 }
                 if (!empty($down_road_degree)) {

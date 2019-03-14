@@ -712,6 +712,7 @@ class TimingAdaptionAreaService extends BaseService
 
         //获取配时信息
         $allTimingInfo = $this->getAllFlowTimingInfo($data);
+        $newTimingInfo = $allTimingInfo;
         foreach ($allTimingInfo["movement"] as $key=>$item){
             $endTime = time();
             $startTime = $endTime - 30 * 60;
@@ -754,14 +755,14 @@ class TimingAdaptionAreaService extends BaseService
                     ];
                 }
             }
-            $allTimingInfo["movement"][$key]["traj"] = $trajList;
+            $newTimingInfo["movement"][$key]["traj"] = $trajList;
             if(empty($trajList)){
-                unset($allTimingInfo["movement"][$key]);
+                unset($newTimingInfo["movement"][$key]);
             }
         }
-        $allTimingInfo["movement"] = array_values($allTimingInfo["movement"]);
+        $newTimingInfo["movement"] = array_values($newTimingInfo["movement"]);
         $requestInfo = [
-            "junction_list"=>[$allTimingInfo],
+            "junction_list"=>[$newTimingInfo],
         ];
 
         $correctResult = $this->traj_model->getRealtimeClockShiftCorrect(json_encode($requestInfo));
