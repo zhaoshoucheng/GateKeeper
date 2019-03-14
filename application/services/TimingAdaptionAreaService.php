@@ -713,6 +713,9 @@ class TimingAdaptionAreaService extends BaseService
         //获取配时信息
         $allTimingInfo = $this->getAllFlowTimingInfo($data);
         $newTimingInfo = $allTimingInfo;
+        if(empty($allTimingInfo["movement"])){
+            return 0;
+        }
         foreach ($allTimingInfo["movement"] as $key=>$item){
             $endTime = time();
             $startTime = $endTime - 30 * 60;
@@ -749,13 +752,13 @@ class TimingAdaptionAreaService extends BaseService
                 array_multisort($timestampArr, SORT_NUMERIC, SORT_ASC, $v);  //类似db里面的order by
                 foreach ($v as $kk => $vv) {
                     $second = $vv['timestamp'];
-                    $trajList[$k][$kk] = [
+                    $trajList[$k][] = [
                         "timestamp" => $second,
                         "distance" => $vv['distanceToStopBar'] // 值      Y轴  //
                     ];
                 }
             }
-            $newTimingInfo["movement"][$key]["traj"] = $trajList;
+            $newTimingInfo["movement"][$key]["traj"] = array_values($trajList);
             if(empty($trajList)){
                 unset($newTimingInfo["movement"][$key]);
             }

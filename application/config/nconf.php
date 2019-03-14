@@ -53,7 +53,7 @@ if ($development == 2) {
     $signal_light_port = '8001';
 
     // es
-    $es_server = '100.69.238.158';
+    $es_server = '10.85.128.208';
     $es_port   = '8001';
     $es_ext    = '';
 
@@ -68,7 +68,7 @@ if ($development == 2) {
     $signal_control_ext    = '/signal-timing';
 
     // xmmtrace
-    $xmmtrace_server = '100.69.238.158';
+    $xmmtrace_server = '10.85.128.208';
     $xmmtrace_port   = '8001';
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
