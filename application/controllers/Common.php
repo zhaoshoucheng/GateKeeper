@@ -9,6 +9,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Services\CommonService;
+use Didi\Cloud\Collection\Collection;
 
 class Common extends MY_Controller
 {
@@ -123,5 +124,35 @@ class Common extends MY_Controller
         }
 
         $this->response($result);
+    }
+
+
+    /**
+     * 获取全城报警配置
+     *
+     * @param $params
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getCityAreaAlarmConfig()
+    {
+        $cityId = $this->input->get("city_id",true);
+        $lastTime = $this->input->get("last_time",true);
+        if(empty($cityId)){
+            throw new \Exception('city_id不能为空！', ERR_PARAMETERS);
+        }
+
+        $result = $this->waymap_model->getAllCityJunctions($cityId);
+        $areaList = Collection::make($result)->groupBy('district_code')->get();
+        $newAreaList = [];
+        foreach ($areaList as $districtCode=>$junctionList){
+            if($districtCode==0){
+                $districtCode = $cityId."_".$cityId;
+            }
+            $newAreaList[$districtCode]["junction_list"] = array_column($junctionList,"logic_junction_id");
+            $newAreaList[$districtCode]["config"] = "{\"overSatuTrailNumPara\":10,\"greenSlackTrailNumPara\":5,\"stopDelayPara\":40.0,\"multiStopUpperBound\":0.2,\"multiStopLowerBound\":0.05,\"noneStopUpperBound\":0.5,\"noneStopLowerBound\":0.2,\"queueLengthUpperBound\":120.0,\"queueLengthLowerBound\":70.0,\"queueRatioLowBound\":0.25,\"spilloverTrailNumPara\":8,\"spilloverRatioPara\":0.2,\"downstreamSpeedPara\":3.0}";
+        }
+        $this->response(["data"=>$newAreaList,"last_time"=>date("Y-m-d H:i:s")]);
     }
 }

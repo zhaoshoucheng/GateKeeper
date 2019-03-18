@@ -128,5 +128,6 @@ class AdaptLog extends MY_Controller{
         echo json_encode($ret);
         fastcgi_finish_request();
         $this->adaptionLogService->insert($params);
+        exit;
     }
 }

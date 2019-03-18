@@ -75,7 +75,7 @@ class OverviewService extends BaseService
      * @return array|bool|mixed|string
      * @throws \Exception
      */
-    public function junctionsList($params)
+    public function junctionsList($params,$userPerm=[])
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
@@ -84,6 +84,16 @@ class OverviewService extends BaseService
 
         $data = $this->redis_model->getRealtimePretreatJunctionList($cityId, $date, $hour);
 
+        if(!empty($userPerm)){
+            $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+            $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+            if(in_array($cityId,$cityIds)){
+                $junctionIds = [];
+            }
+            if(!in_array($cityId,$cityIds) && empty($junctionIds)){
+                return [];
+            }
+        }
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['pagesize'] = $params['pagesize'] ?? 20;
@@ -108,6 +118,10 @@ class OverviewService extends BaseService
 
         if(!empty($data)){
             foreach ($data["dataList"] as $key=>$item){
+                if(!empty($junctionIds) && !in_array($item["jid"],$junctionIds)){
+                    unset($data["dataList"][$key]);
+                    continue;
+                }
                 if(isset($newDelayList[$item["jid"]])){
                     $data["dataList"][$key]["quota"]["stop_delay"]["value"] = $newDelayList[$item["jid"]];
                 }
@@ -115,6 +129,11 @@ class OverviewService extends BaseService
                     $data["dataList"][$key]["quota"]["stop_time_cycle"]["value"] = $newCycleList[$item["jid"]];
                 }
             }
+            $data["dataList"] = array_values($data["dataList"]);
+            $lngs = array_filter(array_column($data["dataList"], 'lng'));
+            $lats = array_filter(array_column($data["dataList"], 'lat'));
+            $data['center']['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
+            $data['center']['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
         }
         return $data ? $data : [];
     }
