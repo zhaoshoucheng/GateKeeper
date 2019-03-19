@@ -147,7 +147,7 @@ if ($development == 2) {
     $es_ext    = '';
 
     // new es
-    $quota_v2_es_server = '10.89.236.25';
+    $quota_v2_es_server = '10.89.234.61';
     $quota_v2_es_port   = '8090';
     $quota_v2_es_ext    = '';
 
