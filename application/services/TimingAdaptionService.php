@@ -187,8 +187,15 @@ class TimingAdaptionService extends BaseService
      */
     private function getCurrentInfo($logic_junction_id)
     {
-        $address = $this->config->item('signal_mis_interface') . '/TimingAdaptation/getCurrentTimingInfo';
+        //优先从db中获取数据
+        $res = $this->adapt_model->getAdaptByJunctionId($logic_junction_id);
+        if (!empty($res['current_info']) && $result = json_decode($res['current_info'], true)) {
+            if(!empty($result['data']) && is_array($result['data'])){
+                return $result['data'];
+            }
+        }
 
+        $address = $this->config->item('signal_mis_interface') . '/TimingAdaptation/getCurrentTimingInfo';
         $res = httpGET($address, compact('logic_junction_id'));
 
         if (!$res) {

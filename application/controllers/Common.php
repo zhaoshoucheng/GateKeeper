@@ -126,6 +126,14 @@ class Common extends MY_Controller
         $this->response($result);
     }
 
+    /**
+     * 获取实时开城列表数据
+     */
+    public function getRealtimeV2CityIds(){
+        $this->load->config('nconf');
+        $quotaCityIds = $this->config->item('quota_v2_city_ids');
+        $this->response($quotaCityIds);
+    }
 
     /**
      * 获取全城报警配置
