@@ -109,6 +109,19 @@ class TimingAdaptionService extends BaseService
                 $currentTiming = $current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];
                 $greenCurrents = Collection::make($currentTiming)->where('state', 1)->get();
 
+                // 取得排序后的列表
+                $sortArr = [];
+                foreach ($movement['timing'] as $key => $row) {
+                    $sortArr[$key] = $row['start_time'];
+                }
+                array_multisort($sortArr, SORT_DESC, $movement['timing']);
+
+                $sortArr = [];
+                foreach ($greenCurrents as $key => $row) {
+                    $sortArr[$key] = $row['start_time'];
+                }
+                array_multisort($sortArr, SORT_DESC, $greenCurrents);
+
                 // 自适应和基准配时数据递归合并
                 $greens = arrayMergeRecursive($movement['timing'], $greenCurrents);
 
