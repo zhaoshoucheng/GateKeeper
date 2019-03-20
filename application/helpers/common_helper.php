@@ -54,6 +54,22 @@ if (!function_exists('getSignature')) {
     }
 }
 
+
+if (!function_exists('getOpenSign')) {
+    /**
+     * @param array  $params API调用的请求参数集合的关联数组，不包含sign参数
+     * @param string $secret 申请到的app_id对应秘钥
+     *
+     * @return string
+     */
+    function getOpenSign($params, $secret)
+    {
+        ksort($params);
+        $sortStr = http_build_query($params);
+        return substr(md5($sortStr . "&" . $secret), 7, 16);
+    }
+}
+
 if (!function_exists('getSign')) {
     /**
      * @param array  $params API调用的请求参数集合的关联数组，不包含sign参数
