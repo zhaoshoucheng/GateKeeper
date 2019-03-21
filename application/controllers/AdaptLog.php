@@ -26,7 +26,7 @@ class AdaptLog extends MY_Controller{
         if(!$this->access()){
             echo "access deny";exit;
         }
-        $params = $this->input->get();
+        $params = $this->input->get(NULL,true);
         if(empty($params["trace_id"])){
             echo "trace_id empty";
             exit;
@@ -35,6 +35,8 @@ class AdaptLog extends MY_Controller{
             echo "junction_id empty";
             exit;
         }
+        $params["junction_id"] = $params["junction_id"];
+        $params["trace_id"] = $params["trace_id"];
         $qurl = $this->config->item('signal_light_interface')."/profile/rollback?junctionId=".$params["junction_id"];
         $ret = httpGET($qurl,[]);
         $message =  "rollback url=".$qurl."||client_ip=".$_SERVER["REMOTE_ADDR"]."||status=".json_encode($ret);
@@ -58,7 +60,7 @@ class AdaptLog extends MY_Controller{
         if(!$this->access()){
             echo "access deny";exit;
         }
-        $params = $this->input->get();
+        $params = $this->input->get(NULL,true);
         $params["page_size"] = $params["page_size"]??100;
         $params["trace_id"] = $params["trace_id"]??"";
         $params["type"] = 0;
@@ -84,10 +86,7 @@ class AdaptLog extends MY_Controller{
         if(!$this->access()){
             echo "access deny";exit;
         }
-        if(!$this->access()){
-            echo "access deny";exit;
-        }
-        $params = $this->input->get();
+        $params = $this->input->get(NULL,true);
         $params["page_size"] = $params["page_size"]??100;
         $params["trace_id"] = $params["trace_id"]??"";
         $params["dltag"] = $params["dltag"]??"";
@@ -115,14 +114,14 @@ class AdaptLog extends MY_Controller{
 
     public function insert()
     {
-        $params = $this->input->post();
+        $params = $this->input->post(NULL,true);
         $this->validate([
-            'type' => 'required|min_length[1]',
-            'rel_id' => 'required|min_length[1]',
-            'log' => 'required|min_length[1]',
-            'trace_id' => 'required|min_length[1]',
-            'dltag' => 'required|min_length[1]',
-            'log_time' => 'required|min_length[1]',
+            'type' => 'trim|required|min_length[1]',
+            'rel_id' => 'trim|required|min_length[1]',
+            'log' => 'trim|required|min_length[1]',
+            'trace_id' => 'trim|required|min_length[1]',
+            'dltag' => 'trim|required|min_length[1]',
+            'log_time' => 'trim|required|min_length[1]',
         ]);
         $ret=["errno"=>0,"errmsg"=>"",];
         echo json_encode($ret);
