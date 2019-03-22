@@ -13,7 +13,8 @@ $config['sso_server'] = array(
 );
 
 $config['upm_server'] = array(
-    'remote_host'     => 'http://100.90.164.31:8074',
+    'remote_host'     => 'http://10.169.145.40:8088',
+    //'remote_host'     => 'http://100.90.164.31:8074',
     'timeout'         => 400,
     'connect_timeout' => 200,
     //'retry'           => 1,

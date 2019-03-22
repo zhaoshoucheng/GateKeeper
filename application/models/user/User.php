@@ -29,6 +29,10 @@ class User extends CI_Model{
         return  $this->auth->getLoginUrl();
     }
 
+    public function getUserName(){
+        return  $this->username;
+    }
+
     public function logout(){
         $this->username = 'guest';
         $this->access_token = null;

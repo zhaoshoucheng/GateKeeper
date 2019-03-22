@@ -2,6 +2,8 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use \Services\PermissionService;
+
 class Permission extends MY_Controller
 {
     public function __construct()
@@ -19,4 +21,10 @@ class Permission extends MY_Controller
         $this->response($data);
     }
 
+    public function getPermissionList()
+    {
+        $service = new PermissionService();
+        $result = $service->getUserPermissions();
+        $this->response($result);
+    }
 }
