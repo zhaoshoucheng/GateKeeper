@@ -27,4 +27,9 @@ class PermissionService extends BaseService
         }
         return $result;
     }
+
+    public function hasPermissionByFlag($flag)
+    {
+        return $this->Upm->hasPermissionByFlag($this->user->getUserName(),$flag);
+    }
 }

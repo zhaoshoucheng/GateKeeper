@@ -8,6 +8,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Services\TimingAdaptionAreaService;
+use Services\PermissionService;
 
 /**
  * Class TimingAdaptationArea
@@ -15,12 +16,14 @@ use Services\TimingAdaptionAreaService;
 class TimingAdaptationArea extends MY_Controller
 {
     protected $timingAdaptionAreaService;
+    protected $permissionService;
 
     public function __construct()
     {
         parent::__construct();
 
         $this->timingAdaptionAreaService = new TimingAdaptionAreaService();
+        $this->permissionService = new PermissionService();
     }
 
     /**
@@ -152,6 +155,13 @@ class TimingAdaptationArea extends MY_Controller
             'logic_junction_id' => 'required|trim|min_length[1]',
         ]);
 
+        //todo 后期添加数据权限验证
+        $valid = $this->permissionService->hasPermissionByFlag("adapt_control_switch");
+        if(!$valid){
+            $this->errmsg = "adapt_control_switch invalid";
+            $this->errno = ERR_AUTH_PERMISSION;
+            return;
+        }
         //xxx开启了路口xxx,自适应下发
         $result = $this->timingAdaptionAreaService->junctionSwitch($params);
 
@@ -173,6 +183,13 @@ class TimingAdaptationArea extends MY_Controller
             'is_upload' => 'required|in_list[0,1]',
         ]);
 
+        //todo 后期添加数据权限验证
+        $valid = $this->permissionService->hasPermissionByFlag("adapt_control_switch");
+        if(!$valid){
+            $this->errmsg = "adapt_control_switch invalid";
+            $this->errno = ERR_AUTH_PERMISSION;
+            return;
+        }
         //xxx开启了区域xxx,自适应下发
         $result = $this->timingAdaptionAreaService->areaSwitch($params);
 
