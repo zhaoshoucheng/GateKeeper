@@ -123,8 +123,6 @@ class TimingAdaptionService extends BaseService
 
 
 
-
-
             $tod['extra_time']['tod_end_time']   = date('H:i', strtotime($tod['extra_time']['tod_end_time']));
             $tod['extra_time']['tod_start_time'] = date('H:i', strtotime($tod['extra_time']['tod_start_time']));
 
@@ -345,7 +343,7 @@ class TimingAdaptionService extends BaseService
         ];
 
         $data = [
-            'current_info' => json_encode($data),
+            'base_info' => json_encode($data),
         ];
 
         $result = $this->adapt_model->updateAdapt($logicJunctionId, $data);
@@ -382,7 +380,7 @@ class TimingAdaptionService extends BaseService
             throw new \Exception('该路口配时错误', ERR_DEFAULT);
         }
 
-        $currentInfo = json_decode($res['current_info'], true);
+        $currentInfo = json_decode($res['base_info'], true);
 
         if (!$currentInfo || empty($currentInfo)) {
             throw new \Exception('该路口尚未下发过基准配时方案', ERR_DEFAULT);
@@ -454,9 +452,10 @@ class TimingAdaptionService extends BaseService
             throw new \Exception('该路口配时错误', ERR_DEFAULT);
         }
 
-        $baseInfo = []; //基准配时
+        //$baseInfo = []; //基准配时
+        $baseInfo = json_decode($res['base_info'], true);
         $optStatus = json_decode($res['opt_status'], true);
-
+        
         // 获取路口配时成功下发时间
         $currentResult = $this->getCurrentUpdateResult($logicJunctionId);
 
