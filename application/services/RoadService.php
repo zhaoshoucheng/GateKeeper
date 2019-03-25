@@ -184,8 +184,8 @@ class RoadService extends BaseService
             }
         }
         if (!empty($up_road_degree)) {
-            asort($up_road_degree);
-            array_unshift($junctionIdList, key($up_road_degree));
+            asort($up_road_degree); //按照键值进行升序排序
+            array_unshift($junctionIdList, key($up_road_degree));   //头部插入
         } else {
             //throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
         }
@@ -203,12 +203,15 @@ class RoadService extends BaseService
                 if($absDiff>180){
                     $absDiff = 360-$absDiff;
                 }
+                //print_r($absDiff);
+                //print_r($item['downstream_junction_id']);
                 $down_road_degree[$item['downstream_junction_id']] = $absDiff;
             }
         }
+        //exit;
         if (!empty($down_road_degree)) {
             asort($down_road_degree);
-            array_push($junctionIdList, key($down_road_degree));
+            array_push($junctionIdList, key($down_road_degree));    //尾部插入
         } else {
             //throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
         }
