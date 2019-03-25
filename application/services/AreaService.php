@@ -99,7 +99,6 @@ class AreaService extends BaseService
      */
     public function updateArea($params)
     {
-        $cityId      = $params['city_id'];
         $areaId      = $params['area_id'];
         $areaName    = $params['area_name'];
         $junctionIds = $params['junction_ids'];
@@ -112,6 +111,7 @@ class AreaService extends BaseService
         }
 
         $areaId = $areaInfo['id'];
+        $cityId      = $areaInfo['city_id'];
 
         $data = [
             'area_name' => $areaName,

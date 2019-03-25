@@ -261,7 +261,10 @@ class Area_model extends CI_Model
         if(!is_null($areaId)) {
             $this->db->where('area_id != ', $areaId);
         }
-
-        return $this->db->get()->num_rows() === 0;
+        if(!empty($this->db->get()) && method_exists($this->db->get(),"num_rows")){
+            return $this->db->get()->num_rows() === 0;
+        }else{
+            return true;
+        }
     }
 }

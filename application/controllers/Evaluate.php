@@ -39,7 +39,7 @@ class Evaluate extends MY_Controller
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data = $this->evaluateService->getCityJunctionList($params);
+        $data = $this->evaluateService->getCityJunctionList($params,$this->userPerm);
 
         $this->response($data);
     }

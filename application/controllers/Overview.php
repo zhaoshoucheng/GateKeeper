@@ -41,7 +41,7 @@ class Overview extends MY_Controller
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
 
-        $data = $this->overviewService->junctionsList($params);
+        $data = $this->overviewService->junctionsList($params,$this->userPerm);
 
         $this->response($data);
     }

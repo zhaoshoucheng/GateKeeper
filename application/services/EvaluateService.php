@@ -44,9 +44,20 @@ class EvaluateService extends BaseService
      * @return array
      * @throws \Exception
      */
-    public function getCityJunctionList($params)
+    public function getCityJunctionList($params,$userPerm=[])
     {
         $cityId = $params['city_id'];
+
+        if(!empty($userPerm)){
+            $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+            $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+            if(in_array($cityId,$cityIds)){
+                $junctionIds = [];
+            }
+            if(!in_array($cityId,$cityIds) && empty($junctionIds)){
+                return [];
+            }
+        }
 
         $collectionMap = function ($junction) {
             return [
@@ -60,12 +71,24 @@ class EvaluateService extends BaseService
         $result = $this->waymap_model->getAllCityJunctions($cityId);
 
         $junctionCollection = Collection::make($result)->map($collectionMap);
+        $dataList = $junctionCollection->get();
 
+        foreach ($dataList as $key=>$item){
+            if(!empty($junctionIds) && !in_array($item["logic_junction_id"],$junctionIds)){
+                unset($dataList[$key]);
+                continue;
+            }
+        }
+        $dataList = array_values($dataList);
+        $lngs = array_filter(array_column($dataList, 'lng'));
+        $lats = array_filter(array_column($dataList, 'lat'));
+        $lng = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
+        $lat = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
         return [
             'dataList' => $junctionCollection->get(),
             'center' => [
-                'lng' => $junctionCollection->avg('lng'),
-                'lat' => $junctionCollection->avg('lat'),
+                'lng' => $lng,
+                'lat' => $lat,
             ],
         ];
     }

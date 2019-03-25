@@ -6,6 +6,8 @@
  * Time: 12:00
  */
 
+use \Didi\Cloud\Collection\Collection;
+
 class Upm extends CI_Model
 {
     private $_config_server = null;
@@ -68,6 +70,46 @@ class Upm extends CI_Model
         );
     }
 
+    public function getUserPermissions($userName) {
+        if(ENVIRONMENT=="development"){
+            $userName = "18953101270";
+        }
+        $params = $this->make_sign();
+        $params['userName'] = $userName;
+        $url = $this->_host.$this->_config_uri['upm_getUserAreas'];
+        $ret = httpGET($url, $params);
+        $json = $this->valid_json($ret);
+        if (!$json || $json['code'] != 200) {
+            return FALSE;
+        }
+        return $json['data'];
+    }
+
+    /**
+     * 验证flag权限
+     * @param $userName
+     * @param $flag
+     * @return bool
+     */
+    public function hasPermissionByFlag($userName,$flag) {
+        if(ENVIRONMENT=="development"){
+            $userName = "18953101270";
+        }
+        $params = $this->make_sign();
+        $params['userName'] = $userName;
+        $url = $this->_host.$this->_config_uri['upm_getUserAreas'];
+        $ret = httpGET($url, $params);
+        $json = $this->valid_json($ret);
+        if (!$json || $json['code'] != 200) {
+            return FALSE;
+        }
+        foreach ($json['data']['flags'] as $value){
+            if($value["name"]==$flag){
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * 验证接口响应数据

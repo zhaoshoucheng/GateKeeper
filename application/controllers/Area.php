@@ -54,7 +54,7 @@ class Area extends MY_Controller
         $params = $this->input->post(null, true);
 
         $this->validate([
-            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|is_natural_no_zero',
             'area_name' => 'required|trim|min_length[1]',
             'junction_ids[]' => 'required',
         ]);

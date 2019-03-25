@@ -89,12 +89,44 @@ class TimingAdaptionService extends BaseService
             return [];
         }
 
+
         foreach ($adapt['tod'] as $tk => &$tod) {
+            //因为优化后算法会将结果顺序打算,所以需要重新对数据排序
+            //$adapt['tod'][]['stage'] 基于start_time排序
+            $startTimeSorter = [];
+            foreach ($adapt['tod'][$tk]['stage'] as $key => $row) {
+                $startTimeSorter[$key]  = $row['start_time'];
+            }
+            array_multisort($startTimeSorter, SORT_ASC, $adapt['tod'][$tk]['stage']);
+
+            $startTimeSorter = [];
+            foreach ($current['tod'][$tk]['stage'] as $key => $row) {
+                $startTimeSorter[$key]  = $row['start_time'];
+            }
+            array_multisort($startTimeSorter, SORT_ASC, $current['tod'][$tk]['stage']);
+            //$adapt['tod'][]['movement_timing'] 基于flow.logic_flow_id排序
+            $flowIdSorter = [];
+            $timingStartSorter = [];
+            foreach ($adapt['tod'][$tk]['movement_timing'] as $key => $row) {
+                $flowIdSorter[$key]  = $row['flow']['logic_flow_id'] ?? "";
+                $timingStartSorter[$key]  = $row['timing'][0]['start_time'] ?? "";
+            }
+            array_multisort($flowIdSorter, SORT_ASC, $timingStartSorter, SORT_ASC, $adapt['tod'][$tk]['movement_timing']);
+            $flowIdSorter = [];
+            $timingStartSorter = [];
+            foreach ($current['tod'][$tk]['movement_timing'] as $key => $row) {
+                $flowIdSorter[$key]  = $row['flow']['logic_flow_id'] ?? "";
+                $timingStartSorter[$key]  = $row['timing'][0]['start_time'] ?? "";
+            }
+            array_multisort($flowIdSorter, SORT_ASC, $timingStartSorter, SORT_ASC, $current['tod'][$tk]['movement_timing']);
+            $tod = $adapt['tod'][$tk];
+
+
 
             $tod['extra_time']['tod_end_time']   = date('H:i', strtotime($tod['extra_time']['tod_end_time']));
             $tod['extra_time']['tod_start_time'] = date('H:i', strtotime($tod['extra_time']['tod_start_time']));
 
-            // 获取 该方向 flow Ids
+            // 获取 该方向 flow_Ids
             $logicFlowIds = Collection::make($tod['movement_timing'])->column('flow')->column('logic_flow_id')->filter()->get();
 
             // 根据 flow id 获取 二次停车比率
@@ -102,6 +134,11 @@ class TimingAdaptionService extends BaseService
 
             // 数据处理
             foreach ($tod['movement_timing'] as $mk => &$movement) {
+                //过滤空相位
+                if(empty($movement['flow']['logic_flow_id'])){
+                    unset($tod['movement_timing'][$mk]);
+                    continue;
+                }
 
                 $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '/';
 
@@ -109,7 +146,19 @@ class TimingAdaptionService extends BaseService
                 $currentTiming = $current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];
                 $greenCurrents = Collection::make($currentTiming)->where('state', 1)->get();
 
-                // 自适应和基准配时数据递归合并
+                // 同相位有两个配时的排序
+                // $adapt['tod']['movement_timing'][]['timing']基于start_time排序,取得排序后的列表
+                $sortArr = [];
+                foreach ($movement['timing'] as $key => $row) {
+                    $sortArr[$key] = $row['start_time'];
+                }
+                array_multisort($sortArr, SORT_DESC, $movement['timing']);
+                $sortArr = [];
+                foreach ($greenCurrents as $key => $row) {
+                    $sortArr[$key] = $row['start_time'];
+                }
+                array_multisort($sortArr, SORT_DESC, $greenCurrents);
+
                 $greens = arrayMergeRecursive($movement['timing'], $greenCurrents);
 
                 // 数据处理
@@ -174,8 +223,15 @@ class TimingAdaptionService extends BaseService
      */
     private function getCurrentInfo($logic_junction_id)
     {
-        $address = $this->config->item('signal_mis_interface') . '/TimingAdaptation/getCurrentTimingInfo';
+        //优先从db中获取数据
+        $res = $this->adapt_model->getAdaptByJunctionId($logic_junction_id);
+        if (!empty($res['current_info']) && $result = json_decode($res['current_info'], true)) {
+            if(!empty($result['data']) && is_array($result['data'])){
+                return $result['data'];
+            }
+        }
 
+        $address = $this->config->item('signal_mis_interface') . '/TimingAdaptation/getCurrentTimingInfo';
         $res = httpGET($address, compact('logic_junction_id'));
 
         if (!$res) {
@@ -287,7 +343,7 @@ class TimingAdaptionService extends BaseService
         ];
 
         $data = [
-            'current_info' => json_encode($data),
+            'base_info' => json_encode($data),
         ];
 
         $result = $this->adapt_model->updateAdapt($logicJunctionId, $data);
@@ -324,7 +380,7 @@ class TimingAdaptionService extends BaseService
             throw new \Exception('该路口配时错误', ERR_DEFAULT);
         }
 
-        $currentInfo = json_decode($res['current_info'], true);
+        $currentInfo = json_decode($res['base_info'], true);
 
         if (!$currentInfo || empty($currentInfo)) {
             throw new \Exception('该路口尚未下发过基准配时方案', ERR_DEFAULT);
@@ -396,9 +452,10 @@ class TimingAdaptionService extends BaseService
             throw new \Exception('该路口配时错误', ERR_DEFAULT);
         }
 
-        $currentInfo = json_decode($res['current_info'], true);
+        //$baseInfo = []; //基准配时
+        $baseInfo = json_decode($res['base_info'], true);
         $optStatus = json_decode($res['opt_status'], true);
-
+        
         // 获取路口配时成功下发时间
         $currentResult = $this->getCurrentUpdateResult($logicJunctionId);
 
@@ -413,19 +470,19 @@ class TimingAdaptionService extends BaseService
         if (!$params['is_open']) {
             // 路口下发按钮未开启
             list($status, $tmp) = [1, 'a'];
-        } elseif (!$currentInfo || empty($currentInfo)) {
+        } elseif (!$baseInfo || empty($baseInfo)) {
             // 按钮开启 没有下发基准配时
             list($status, $tmp) = [2, 'b'];
-        } elseif ($currentResult == null || $currentInfo['update_time'] > $currentResult['timestamp']) {
+        } elseif ($currentResult == null || $baseInfo['update_time'] > $currentResult['timestamp']) {
             // 按钮开启 下发基准配时过程中
             list($status, $tmp) = [3, 'e'];
         } elseif (!$currentResult['status']) {
             // 按钮开启 下发基准配时失败
             list($status, $tmp) = [2, 'c'];
-        } elseif (!$currentInfo['changed']) {
+        } elseif (!$baseInfo['changed']) {
             // 按钮开启 下发基准配时成功 方案未修改
             list($status, $tmp) = [2, 'd3'];
-        } elseif (time() - $currentInfo['update_time'] <= 10 * 60) {
+        } elseif (time() - $baseInfo['update_time'] <= 10 * 60) {
             // 按钮开启 下发成功 相位改变 10分钟内
             list($status, $tmp) = [3, 'd1'];
         } else {

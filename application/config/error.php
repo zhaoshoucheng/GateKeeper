@@ -35,6 +35,7 @@ define('ERR_HTTP_FAILED', 1000009);
 define('ERR_AUTH_KEY', 1000010);
 define('ERR_REQUEST_LONG', 1000011);
 define('ERR_DB_QUERY_LONG', 1000012);
+define('ERR_AUTH_PERMISSION',1000013);
 
 //api错误
 //map接口错误
