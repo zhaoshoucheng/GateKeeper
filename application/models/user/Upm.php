@@ -93,6 +93,7 @@ class Upm extends CI_Model
      */
     public function hasPermissionByFlag($userName,$flag) {
         if(ENVIRONMENT=="development"){
+            return false;
             $userName = "18953101270";
         }
         $params = $this->make_sign();
