@@ -106,7 +106,7 @@ class Cron extends CI_Controller
                     return;
                 }
             }
-        } 
+        }
     }
 
     public function start()
@@ -371,12 +371,22 @@ class Cron extends CI_Controller
 		return $client_sign = $client_sign;
 	}
 
-    public function testding()
-    {
+    public function testding() {
         $webhook = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd3a5a4b7758c55f790fd85aef10fb43130be60d2797a3fd6ee80f9403';
         $message = 'Just for testing, please ignore this message.';
         $data = array('msgtype' => 'text', 'text' => array('content' => $message));
         $this->load->helper('http');
         httpPOST($webhook, $data, 0, 'json');
+    }
+
+    public function dailycheck() {
+        $webhook = 'https://oapi.dingtalk.com/robot/send?access_token=8d7a45fd3a5a4b7758c55f790fd85aef10fb43130be60d2797a3fd6ee80f9403';
+
+        $message = $this->task_model->dailycheck();
+        if (!empty($message)) {
+            $data = array('msgtype' => 'text', 'text' => array('content' => $message));
+            $this->load->helper('http');
+            httpPOST($webhook, $data, 0, 'json');
+        }
     }
 }

@@ -284,4 +284,39 @@ class Task_model extends CI_Model
             }
         }
     }
+
+    function dailycheck() {
+        $city_ids = [];
+        $sql = 'select distinct(city_id) as city_id from cycle_task where is_valid = 1';
+        $query = $this->its_tool->query($sql);
+        $result = $query->result_array();
+        var_dump($this->its_tool->last_query());
+        var_dump($result);
+        if (empty($result)) {
+            return;
+        }
+        foreach ($result as $one) {
+            $city_ids[] = $one['city_id'];
+        }
+
+        $failed = [];
+
+        foreach ($city_ids as $city_id) {
+            $sql = 'select * from task_result where city_id = ? and user = "admin" and order by id desc limit 3';
+            $query = $this->its_tool->query($sql, [$city_id]);
+            $result = $query->result_array();
+            var_dump($this->its_tool->last_query());
+            var_dump($result);
+            if (empty($result)) {
+                return;
+            }
+            foreach ($result as $one) {
+                if ($one['status'] != 11 or $one['rate'] != 100) {
+                    $failed[] = $one;
+                }
+            }
+        }
+
+        return $failed;
+    }
 }
