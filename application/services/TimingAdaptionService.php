@@ -140,7 +140,7 @@ class TimingAdaptionService extends BaseService
                     continue;
                 }
 
-                $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '/';
+                $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '0';
 
                 // 获取并过滤出 基准配时中的绿灯
                 $currentTiming = $current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];
@@ -465,7 +465,7 @@ class TimingAdaptionService extends BaseService
         // 获取方案时间
         $planTime = !empty($currentTimingInfo["start_time"])
             ? getTodayTimeOrFullTime($currentTimingInfo["start_time"])
-            : "N/A";
+            : "-";
 
         if (!$params['is_open']) {
             // 路口下发按钮未开启
@@ -512,7 +512,7 @@ class TimingAdaptionService extends BaseService
 
         $adapteTime = isset($res['timing_update_time'])
             ? getTodayTimeOrFullTime(strtotime($res['timing_update_time']))
-            : 'N/A';
+            : '-';
 
         return [
             //方案获取时间
