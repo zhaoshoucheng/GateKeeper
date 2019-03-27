@@ -555,11 +555,11 @@ class EvaluateService extends BaseService
             foreach ($ev as $datek => $datev){
                 foreach ($datev as $dk => $dv){
                     $mvalue = max(array($dv['queue_length'],$dv['twice_stop_rate'],$dv['stop_delay']));
-                    $finalResult['evaluate'][$ek][$datek][$dk] = [
+                    $finalResult['evaluate'][$ek+1][$datek][$dk] = [
                         $mvalue,
                         $dk
                     ];
-                    $avgArr['average']['evaluate'][$ek][$datek][$dk] = [
+                    $avgArr['average']['evaluate'][$ek+1][$datek][$dk] = [
                         'hour' => $dk,
                         'value' => $mvalue,
                     ];
