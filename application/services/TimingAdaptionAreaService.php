@@ -891,13 +891,12 @@ class TimingAdaptionAreaService extends BaseService
             return [];
         }
 
-        list($timingInfo) = $Info['data']['tod'];
+        list($timingInfo) = $Info['data']['tod'] ?? [""];
         if (empty($timingInfo)) {
             return [];
         }
 
         // 周期 相位差
-
         $res = [
             "junction_id" => $data['logic_junction_id'],
             "cycle" => $timingInfo["extra_time"]["cycle"],
@@ -946,7 +945,7 @@ class TimingAdaptionAreaService extends BaseService
             return [];
         }
 
-        list($timingInfo) = $Info['data']['tod'];
+        list($timingInfo) = $Info['data']['tod'] ?? [""];
         if (empty($timingInfo)) {
             return [];
         }

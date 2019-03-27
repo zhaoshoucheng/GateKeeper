@@ -302,7 +302,7 @@ class Task_model extends CI_Model
         $failed = [];
 
         foreach ($city_ids as $city_id) {
-            $sql = 'select * from task_result where city_id = ? and user = "admin" and order by id desc limit 3';
+            $sql = 'select * from task_result where city_id = ? and user = "admin" order by id desc limit 3';
             $query = $this->its_tool->query($sql, [$city_id]);
             $result = $query->result_array();
             var_dump($this->its_tool->last_query());

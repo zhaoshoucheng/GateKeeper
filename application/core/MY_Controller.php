@@ -58,7 +58,7 @@ class MY_Controller extends CI_Controller
         $accessUser = ""; // 权限认证通过的用户信息
 
         // 有一些机器是不需要进行sso验证的，这里就直接跳过
-        if (!in_array($host, $escapeSso) && empty($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'])) {
+        if (!in_array($host, $escapeSso) && empty($_SERVER['HTTP_DIDI_HEADER_GATEWAY'])) {
 
             $this->load->model('user/user', 'user');
 

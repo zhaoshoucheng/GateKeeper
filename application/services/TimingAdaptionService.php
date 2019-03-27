@@ -85,10 +85,9 @@ class TimingAdaptionService extends BaseService
             return $result;
         };
 
-        if (empty($adapt) || empty($current)) {
+        if (empty($adapt) || empty($current) || empty($adapt['tod'])) {
             return [];
         }
-
 
         foreach ($adapt['tod'] as $tk => &$tod) {
             //因为优化后算法会将结果顺序打算,所以需要重新对数据排序
@@ -140,7 +139,11 @@ class TimingAdaptionService extends BaseService
                     continue;
                 }
 
-                $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '/';
+                if(!empty($flows[$movement['flow']['logic_flow_id']])){
+                    $movement['flow']['twice_stop_rate'] = sprintf("%.4f",$flows[$movement['flow']['logic_flow_id']]);
+                }else{
+                    $movement['flow']['twice_stop_rate'] = 0;
+                }
 
                 // 获取并过滤出 基准配时中的绿灯
                 $currentTiming = $current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];
@@ -195,7 +198,6 @@ class TimingAdaptionService extends BaseService
     public function getAdaptInfo($logicJunctionId)
     {
         $res = $this->adapt_model->getAdaptByJunctionId($logicJunctionId);
-
         if (!$res) {
             throw new \Exception('此路口无自适应配时信息', ERR_DATABASE);
         }
@@ -205,7 +207,6 @@ class TimingAdaptionService extends BaseService
         }
 
         $result = json_decode($res['timing_info'], true);
-
         if (!$result) {
             throw new \Exception('数据格式错误', ERR_DATABASE);
         }
@@ -465,7 +466,7 @@ class TimingAdaptionService extends BaseService
         // 获取方案时间
         $planTime = !empty($currentTimingInfo["start_time"])
             ? getTodayTimeOrFullTime($currentTimingInfo["start_time"])
-            : "N/A";
+            : "-";
 
         if (!$params['is_open']) {
             // 路口下发按钮未开启
@@ -512,7 +513,7 @@ class TimingAdaptionService extends BaseService
 
         $adapteTime = isset($res['timing_update_time'])
             ? getTodayTimeOrFullTime(strtotime($res['timing_update_time']))
-            : 'N/A';
+            : '-';
 
         return [
             //方案获取时间
