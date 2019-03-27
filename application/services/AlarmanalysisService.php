@@ -95,7 +95,7 @@ class AlarmanalysisService extends BaseService
             if (!empty($item['type']['buckets'])) {
                 $tempData[$item['key'] . ':00']['list'] = array_map(function($typeData) use ($junctionAlarmType) {
                     return [
-                        'name'  => $junctionAlarmType[$typeData['key']],
+                        'name'  => $junctionAlarmType[$typeData['key']] ?? "",
                         'value' => $typeData['num']['value'],
                         'key'   => $typeData['key'],
                     ];
