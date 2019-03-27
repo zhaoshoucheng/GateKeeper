@@ -136,11 +136,6 @@ if ($development == 2) {
     $signal_light_server = '10.148.28.204';
     $signal_light_port = '8001';
 
-    // 线下接口有问题,直接使用线上的测试
-    $signal_mis_server = '100.69.238.11';
-    $signal_mis_port   = '8000';
-    $signal_mis_ext    = '/its/signal-mis';
-
     // es
     $es_server = '10.89.236.25';
     $es_port   = '8087';
