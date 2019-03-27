@@ -124,9 +124,7 @@ class Realtime_model extends CI_Model
                 "quotas" => "max_timestamp",
             ],
         ];
-
         $res = $this->searchQuota($data);
-
         if (empty($res['result']['quotaResults'][0]['quotaMap'])) {
             throw new \Exception('获取实时数据最新批次hour失败！', ERR_DEFAULT);
         }
@@ -352,6 +350,37 @@ class Realtime_model extends CI_Model
             $result = array_values($result);
         }
         return $result;
+    }
+
+    /**
+     * 获取实时指标路口数据（开放平台）
+     * @param $cityId int    城市ID
+     * @param $date   string 日期 yyyy-mm-dd
+     * @param $hour   string 时间 HH:ii:ss
+     * @param $junctionIds   array 路口数组
+     * @return array
+     */
+    public function getRealTimeJunctionsQuota($cityId, $date, $hour, $junctionIds=[])
+    {
+        $data = [
+            'source' => 'signal_control', // 调用方
+            'cityId' => $cityId,          // 城市ID
+            'requestId' => get_traceid(),    // trace id
+            'trailNum' => 5,
+            'dayTime' => $date . " " . $hour,
+            'andOperations' => [
+                'cityId' => 'eq',  // cityId相等
+                'trailNum' => 'gte', // 轨迹数大于等于5
+                'dayTime' => 'eq',  // 等于hour
+            ],
+            'limit' => 5000,
+        ];
+        if (!empty($junctionIds)) {
+            $data['junctionId'] = implode(",",$junctionIds);
+            $data["andOperations"]['junctionId'] = 'in';
+        }
+        $realTimeEsData = $this->searchDetail($data);
+        return $realTimeEsData;
     }
 
     /**

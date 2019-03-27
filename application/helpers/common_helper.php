@@ -32,7 +32,7 @@ if (!function_exists('checkSign')) {
 
 if (!function_exists('getSignature')) {
     /**
-     * @param array  $params API调用的请求参数集合的关联数组，不包含sign参数
+     * @param array $params API调用的请求参数集合的关联数组，不包含sign参数
      * @param string $secret 申请到的秘钥 123456
      *
      * @return string
@@ -57,7 +57,7 @@ if (!function_exists('getSignature')) {
 
 if (!function_exists('getOpenSign')) {
     /**
-     * @param array  $params API调用的请求参数集合的关联数组，不包含sign参数
+     * @param array $params API调用的请求参数集合的关联数组，不包含sign参数
      * @param string $secret 申请到的app_id对应秘钥
      *
      * @return string
@@ -72,7 +72,7 @@ if (!function_exists('getOpenSign')) {
 
 if (!function_exists('getSign')) {
     /**
-     * @param array  $params API调用的请求参数集合的关联数组，不包含sign参数
+     * @param array $params API调用的请求参数集合的关联数组，不包含sign参数
      * @param string $secret 申请到的app_id对应秘钥
      *
      * @return string
@@ -111,8 +111,8 @@ if (!function_exists('des_encrypt')) {
     function des_encrypt($str, $key)
     {
         $block = @mcrypt_get_block_size('des', 'ecb');
-        $pad   = $block - (strlen($str) % $block);
-        $str   .= str_repeat(chr($pad), $pad);
+        $pad = $block - (strlen($str) % $block);
+        $str .= str_repeat(chr($pad), $pad);
         return safe_b64encode(@mcrypt_encrypt(MCRYPT_DES, $key, $str, MCRYPT_MODE_ECB));
     }
 }
@@ -195,7 +195,7 @@ if (!function_exists('dateRange')) {
      *
      * @param        $start
      * @param        $end
-     * @param int    $skip
+     * @param int $skip
      * @param string $format
      *
      * @return array
@@ -219,7 +219,7 @@ if (!function_exists('hourRange')) {
      *
      * @param string $start
      * @param string $end
-     * @param int    $skip
+     * @param int $skip
      * @param string $format
      *
      * @return array
@@ -227,7 +227,7 @@ if (!function_exists('hourRange')) {
      */
     function hourRange($start = '00:00', $end = '23:30', $skip = 30, $format = 'H:i')
     {
-        if($start > $end) {
+        if ($start > $end) {
             throw new Exception('起始时间必须小于等于结束时间');
         }
 
@@ -284,7 +284,7 @@ if (!function_exists('snakeCompact')) {
 
         $res = [];
         foreach ($var as $item) {
-            $name       = preg_replace_callback('/([A-Z]{1})/', function ($matches) {
+            $name = preg_replace_callback('/([A-Z]{1})/', function ($matches) {
                 return '_' . strtolower($matches[0]);
             }, $item);
             $res[$name] = $GLOBALS[$item];
@@ -297,7 +297,7 @@ if (!function_exists('snakeExtract')) {
     function snakeExtract(array $arr)
     {
         foreach ($arr as $key => $value) {
-            $name           = preg_replace_callback('/([-_]+([a-z]{1}))/i', function ($matches) {
+            $name = preg_replace_callback('/([-_]+([a-z]{1}))/i', function ($matches) {
                 return strtoupper($matches[2]);
             }, $key);
             $GLOBALS[$name] = $value;
@@ -320,7 +320,7 @@ if (!function_exists('getExcelArray')) {
         }, $data);
 
         foreach ($data as $key => $value) {
-            $column   = [];
+            $column = [];
             $column[] = $key;
             foreach ($timeArray as $item) {
                 $column[] = $value[$item] ?? '-';
@@ -344,11 +344,12 @@ if (!function_exists('intToChr')) {
 }
 
 if (!function_exists('getTodayTimeOrFullTime')) {
-    function getTodayTimeOrFullTime(int $timeStamp){
+    function getTodayTimeOrFullTime(int $timeStamp)
+    {
         return ($timeStamp > strtotime(date("Y-m-d")))
-            ? date("H:i:s",$timeStamp)
+            ? date("H:i:s", $timeStamp)
             : "-";
-            //: date("Y-m-d H:i:s",$timeStamp);
+        //: date("Y-m-d H:i:s",$timeStamp);
     }
 }
 
@@ -357,8 +358,9 @@ if (!function_exists('getTodayTimeOrFullTime')) {
  * @return false|int
  */
 if (!function_exists('getTodayTimeStamp')) {
-    function getTodayTimeStamp(string $dayTime){
-        return strtotime(sprintf("%s %s",date("Y-m-d"),$dayTime))-strtotime(date("Y-m-d"));
+    function getTodayTimeStamp(string $dayTime)
+    {
+        return strtotime(sprintf("%s %s", date("Y-m-d"), $dayTime)) - strtotime(date("Y-m-d"));
     }
 }
 
@@ -368,7 +370,23 @@ if (!function_exists('getTodayTimeStamp')) {
  * @return false|int
  */
 if (!function_exists('ArrGet')) {
-    function ArrGet($data,string $column,$default=""){
+    function ArrGet($data, string $column, $default = "")
+    {
         return $data[$column]??$default;
+    }
+}
+
+if (!function_exists('camelize')) {
+    function camelize($uncamelized_words, $separator = '_')
+    {
+        $uncamelized_words = $separator . str_replace($separator, " ", strtolower($uncamelized_words));
+        return ltrim(str_replace(" ", "", ucwords($uncamelized_words)), $separator);
+    }
+}
+
+if (!function_exists('uncamelize')) {
+    function uncamelize($camelCaps, $separator = '_')
+    {
+        return strtolower(preg_replace('/([a-z])([A-Z])/', "$1" . $separator . "$2", $camelCaps));
     }
 }
