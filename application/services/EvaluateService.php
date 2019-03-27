@@ -559,7 +559,7 @@ class EvaluateService extends BaseService
                         $mvalue,
                         $dk
                     ];
-                    $avgArr['average']['evaluate'][$ek+1][$datek][$dk] = [
+                    $avgArr['average']['evaluate'][$ek+1][$dk][$datek] = [
                         'hour' => $dk,
                         'value' => $mvalue,
                     ];
