@@ -623,7 +623,7 @@ class EvaluateService extends BaseService
         if (!empty($avgArr['average']['evaluate'])) {
             foreach ($avgArr['average']['evaluate'] as $k => $v) {
                 ksort($v);
-                $finalResult['average']['evaluate'][$k + 1] = array_map(function ($val) use ($quotaConf, $params) {
+                $finalResult['average']['evaluate'][$k] = array_map(function ($val) use ($quotaConf, $params) {
                     $tempData  = array_column($val, 'value');
                     $tempSum   = array_sum($tempData);
                     $tempCount = count($val);
@@ -635,7 +635,7 @@ class EvaluateService extends BaseService
                         $hour,
                     ];
                 }, $v);
-                $finalResult['average']['evaluate'][$k + 1] = array_values($finalResult['average']['evaluate'][$k + 1]);
+                $finalResult['average']['evaluate'][$k] = array_values($finalResult['average']['evaluate'][$k]);
             }
         }
 
@@ -665,15 +665,15 @@ class EvaluateService extends BaseService
             // 补全评估日期
             foreach ($evaluateDate as $k => $v) {
                 foreach ($v as $vv) {
-                    if (empty($finalResult['evaluate'][$k + 1])) {
-                        $finalResult['evaluate'][$k + 1] = [];
+                    if (empty($finalResult['evaluate'][$k])) {
+                        $finalResult['evaluate'][$k] = [];
                     }
-                    if (!empty($finalResult['evaluate'][$k + 1])
-                        && !array_key_exists($vv, $finalResult['evaluate'][$k + 1])) {
-                        $finalResult['evaluate'][$k + 1][$vv] = [];
+                    if (!empty($finalResult['evaluate'][$k])
+                        && !array_key_exists($vv, $finalResult['evaluate'][$k])) {
+                        $finalResult['evaluate'][$k][$vv] = [];
                     }
-                    if (empty($finalResult['average']['evaluate'][$k + 1])) {
-                        $finalResult['average']['evaluate'][$k + 1] = [];
+                    if (empty($finalResult['average']['evaluate'][$k])) {
+                        $finalResult['average']['evaluate'][$k] = [];
                     }
                 }
             }
