@@ -497,6 +497,13 @@ $config['flow_quota_key'] = [
         },
         'unit' => '千米/时',
     ],
+    'saturation' =>[
+        'name'=>'饱和度',
+        'round'=>function($val){
+            return round($val,4);
+        },
+        'unit'=>'',
+    ],
 ];
 
 // 诊断问题

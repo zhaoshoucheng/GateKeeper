@@ -44,6 +44,14 @@ $config['real_time_quota'] = [
         },
         'escolumn' => 'oneStopRatioUp+multiStopRatioUp',
     ],
+    'saturation' => [
+        'name'     => '饱和度',
+        'unit'     => '',
+        'round'    => function ($val) {
+            return round($val, 4);
+        },
+        'escolumn' => 'multiStopRatioUp+multiStopRatioUp',
+    ],
 ];
 
 // 路口状态
