@@ -11,7 +11,7 @@ namespace Services;
 /**
  * Class HelperService
  * @package Services
- * @property \Realtime_model $real_time
+ * @property \Realtime_model $realtime_model
  */
 class HelperService extends BaseService
 {
@@ -21,6 +21,7 @@ class HelperService extends BaseService
 
         $this->load->model('redis_model');
         $this->load->model('realtime_model');
+        $this->load->helper('http_helper');
     }
 
     /**
@@ -34,7 +35,6 @@ class HelperService extends BaseService
     public function getLastestHour($cityId)
     {
         $hour = $this->redis_model->getHour($cityId);
-
         if($hour) {
             return $hour;
         }

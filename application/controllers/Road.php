@@ -108,8 +108,8 @@ class Road extends MY_Controller
             'junction_ids[]' => 'required',
         ]);
 
-        if (count($params['junction_ids']) < 4) {
-            throw new \Exception('请至少选择4个路口做为干线', ERR_PARAMETERS);
+        if (count($params['junction_ids']) < 2) {
+            throw new \Exception('请至少选择2个路口做为干线', ERR_PARAMETERS);
         }
 
         $data = $this->roadService->updateRoad($params);

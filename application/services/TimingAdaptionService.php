@@ -139,7 +139,11 @@ class TimingAdaptionService extends BaseService
                     continue;
                 }
 
-                $movement['flow']['twice_stop_rate'] = $flows[$movement['flow']['logic_flow_id']] ?? '0';
+                if(!empty($flows[$movement['flow']['logic_flow_id']])){
+                    $movement['flow']['twice_stop_rate'] = sprintf("%.4f",$flows[$movement['flow']['logic_flow_id']]);
+                }else{
+                    $movement['flow']['twice_stop_rate'] = 0;
+                }
 
                 // 获取并过滤出 基准配时中的绿灯
                 $currentTiming = $current['tod'][$tk]['movement_timing'][$mk]['timing'] ?? [];

@@ -224,7 +224,11 @@ class Cron extends CI_Controller
                 $helperService = new \Services\HelperService();
                 $lastHour = $helperService->getIndexLastestHour($cityId);
                 $esTime = date('Y-m-d H:i:s', strtotime($lastHour));
-                $quotaInfo = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, 'avgSpeedUp');
+
+                $avgQuotaKeyConf = $this->config->item('avg_quota_key');
+                $EsquotaKey = $avgQuotaKeyConf[$quotaKey]['esColumn'];
+
+                $quotaInfo = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, $EsquotaKey);
                 $areaQuotaInfoKey = sprintf("itstool_area_quotainfo_%s_%s_%s",date("Y-m-d"),$areaId,$quotaKey);
                 $this->redis_model->rPush($areaQuotaInfoKey,json_encode(current($quotaInfo)));
                 $this->redis_model->setExpire($areaQuotaInfoKey,24*3600);
