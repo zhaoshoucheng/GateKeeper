@@ -491,7 +491,7 @@ class EvaluateService extends BaseService
             foreach ($evaluateDate as $kk => $vv) {
                 if (in_array($date, $vv, true)) {
 //                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])]['queue_length'] =  $quotaConf['queue_length']['round']($v['queue_length']/150);
-                    $result['evaluate'][$kk + 1][$date][$v['hour']]['queue_length'] =  round($v['queue_length']/150,4);
+                    $result['evaluate'][$kk][$date][$v['hour']]['queue_length'] =  round($v['queue_length']/150,4);
 //                    $result['evaluate'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
                 }
             }
@@ -511,7 +511,7 @@ class EvaluateService extends BaseService
             foreach ($evaluateDate as $kk => $vv) {
                 if (in_array($date, $vv, true)) {
 //                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])]['stop_delay'] = $quotaConf['stop_delay']['round']($v['stop_delay']/80);
-                    $result['evaluate'][$kk + 1][$date][$v['hour']]['stop_delay'] = round($v['stop_delay']/80,4);
+                    $result['evaluate'][$kk][$date][$v['hour']]['stop_delay'] = round($v['stop_delay']/80,4);
 //                    $result['evaluate'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
 
                 }
@@ -529,7 +529,7 @@ class EvaluateService extends BaseService
             // 组织评估时间数据
             foreach ($evaluateDate as $kk => $vv) {
                 if (in_array($date, $vv, true)) {
-                    $result['evaluate'][$kk + 1][$date][$v['hour']]['twice_stop_rate'] = round($v['twice_stop_rate'],4);
+                    $result['evaluate'][$kk][$date][$v['hour']]['twice_stop_rate'] = round($v['twice_stop_rate'],4);
 //                    $result['evaluate'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
                 }
             }
@@ -550,16 +550,17 @@ class EvaluateService extends BaseService
             }
 
         }
+
         foreach ($result['evaluate'] as $ek=>$ev){
-            foreach ($ev as $h => $hv){
-                foreach ($hv as $dk => $dv){
+            foreach ($ev as $datek => $datev){
+                foreach ($datev as $dk => $dv){
                     $mvalue = max(array($dv['queue_length'],$dv['twice_stop_rate'],$dv['stop_delay']));
-                    $finalResult['evaluate'][$ek][$h][$dk] = [
+                    $finalResult['evaluate'][$ek][$datek][$dk] = [
                         $mvalue,
-                        $h
+                        $dk
                     ];
-                    $avgArr['average']['evaluate'][$ek][$dk][$h] = [
-                        'hour' => $h,
+                    $avgArr['average']['evaluate'][$ek][$datek][$dk] = [
+                        'hour' => $dk,
                         'value' => $mvalue,
                     ];
                 }
