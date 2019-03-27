@@ -482,7 +482,7 @@ class EvaluateService extends BaseService
             // 组织基准时间数据
             if (in_array($date, $baseDate, true)) {
 //                $result['base'][$date][strtotime($v['hour'])]['queue_length'] = $quotaConf['queue_length']['round']($v['queue_length']/150);
-                $result['base'][$date][strtotime($v['hour'])]['queue_length'] = round($v['queue_length']/150,4);
+                $result['base'][$date][$v['hour']]['queue_length'] = round($v['queue_length']/150,4);
 //                $result['base'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
 
             }
@@ -491,7 +491,7 @@ class EvaluateService extends BaseService
             foreach ($evaluateDate as $kk => $vv) {
                 if (in_array($date, $vv, true)) {
 //                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])]['queue_length'] =  $quotaConf['queue_length']['round']($v['queue_length']/150);
-                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])]['queue_length'] =  round($v['queue_length']/150,4);
+                    $result['evaluate'][$kk + 1][$date][$v['hour']]['queue_length'] =  round($v['queue_length']/150,4);
 //                    $result['evaluate'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
                 }
             }
@@ -502,7 +502,7 @@ class EvaluateService extends BaseService
             // 组织基准时间数据
             if (in_array($date, $baseDate, true)) {
 //                $result['base'][$date][strtotime($v['hour'])]['stop_delay'] = $quotaConf['stop_delay']['round']($v['stop_delay']/80);
-                $result['base'][$date][strtotime($v['hour'])]['stop_delay'] = round($v['stop_delay']/80,4);
+                $result['base'][$date][$v['hour']]['stop_delay'] = round($v['stop_delay']/80,4);
 //                $result['base'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
 
             }
@@ -511,7 +511,7 @@ class EvaluateService extends BaseService
             foreach ($evaluateDate as $kk => $vv) {
                 if (in_array($date, $vv, true)) {
 //                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])]['stop_delay'] = $quotaConf['stop_delay']['round']($v['stop_delay']/80);
-                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])]['stop_delay'] = round($v['stop_delay']/80,4);
+                    $result['evaluate'][$kk + 1][$date][$v['hour']]['stop_delay'] = round($v['stop_delay']/80,4);
 //                    $result['evaluate'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
 
                 }
@@ -522,14 +522,14 @@ class EvaluateService extends BaseService
             $date = date('Y-m-d', strtotime($v['date']));
             // 组织基准时间数据
             if (in_array($date, $baseDate, true)) {
-                $result['base'][$date][strtotime($v['hour'])]['twice_stop_rate'] = round($v['twice_stop_rate'],4);
+                $result['base'][$date][$v['hour']]['twice_stop_rate'] = round($v['twice_stop_rate'],4);
 //                $result['base'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
             }
 
             // 组织评估时间数据
             foreach ($evaluateDate as $kk => $vv) {
                 if (in_array($date, $vv, true)) {
-                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])]['twice_stop_rate'] = round($v['twice_stop_rate'],4);
+                    $result['evaluate'][$kk + 1][$date][$v['hour']]['twice_stop_rate'] = round($v['twice_stop_rate'],4);
 //                    $result['evaluate'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
                 }
             }
