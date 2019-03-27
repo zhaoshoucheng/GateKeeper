@@ -54,12 +54,9 @@ class Evaluate extends MY_Controller
         $params = $this->input->post(null, true);
         $cityId = $params['city_id'];
         $data = $this->evaluateService->getQuotaList();
-        if ($cityId == 2){
-            $data['dataList'][] = array(
-                'key'=>"saturation",
-                'name'=>"饱和度",
-                'unit'=>""
-            );
+        if ($cityId != 2){
+
+            unset($data['dataList'][count($data['dataList'])-1]);
         }
         $this->response($data);
     }
