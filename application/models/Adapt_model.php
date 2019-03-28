@@ -123,6 +123,9 @@ class Adapt_model extends CI_Model
                     )
                 );
             }
+            foreach ($stageMap as $sk => $sv){
+                $oldData['tod'][0]['stage'][] = $sv;
+            }
         }else{//ring
 
         }
