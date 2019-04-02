@@ -510,7 +510,7 @@ $config['diagnose_key'] = [
         },
         'sql_where' => function () {
             return [
-                'spillover_index >' => 0.008,
+                'spillover_index >' => 0.005,
             ];
         },
         'nature_formula' => function ($val) {
