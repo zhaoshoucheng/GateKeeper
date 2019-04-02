@@ -244,24 +244,7 @@ class CommonService extends BaseService
      */
     public function getV5DMPCityID()
     {
-        $table = 'dmp_city_config';
-        $select = 'city_id, city_name';
-        $where = [
-            'sys_id'   => "signal_control_pro",
-            'extra' => "v5",
-            'status' => "1",
-        ];
-
-        $res = $this->common_model->dmpSearch($table, $select, $where);
-        if (!$res) {
-            return [];
-        }
-
-        $result = [];
-        foreach ($res as $k=>$v) {
-            $result[] = (int)$v['city_id'];
-        }
-        return $result;
+        return $this->common_model->getV5DMPCityID();
     }
 
     /**

@@ -85,4 +85,31 @@ class Common_model extends CI_Model
 
         return $this->dmp_db->get()->result_array();
     }
+
+    /**
+     * 获取v5开城列表
+     * @param $cityId long 城市ID
+     * @return mixed
+     */
+    public function getV5DMPCityID()
+    {
+        $table = 'dmp_city_config';
+        $select = 'city_id, city_name';
+        $where = [
+            'sys_id'   => "signal_control_pro",
+            'extra' => "v5",
+            'status' => "1",
+        ];
+
+        $res = $this->dmpSearch($table, $select, $where);
+        if (!$res) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($res as $k=>$v) {
+            $result[] = (int)$v['city_id'];
+        }
+        return $result;
+    }
 }
