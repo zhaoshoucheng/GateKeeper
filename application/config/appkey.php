@@ -95,4 +95,15 @@ $config['authirized_apps'] = array(
         'white_ips' => array(
         )
     ),
+    'jnhaixin' => array(
+        'name'  => 'token',
+        'method'  => 'any',
+        'timeout'  => 100,
+        'secret'=> '2a01e6c56bcce94ee5de073df3d512d5',
+        'open_api'   => array(
+            'signalpro/api/RealtimeQuota/flow',
+        ),
+        'white_ips' => array(
+        )
+    ),
 );

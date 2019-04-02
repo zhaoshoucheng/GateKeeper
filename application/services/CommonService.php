@@ -238,6 +238,33 @@ class CommonService extends BaseService
     }
 
     /**
+     * 获取v5开城列表
+     * @param $cityId long 城市ID
+     * @return mixed
+     */
+    public function getV5DMPCityID()
+    {
+        $table = 'road';
+        $select = 'city_id, city_name';
+        $where = [
+            'sys_id'   => "signal_control_pro",
+            'extra' => "v5",
+            'status' => "1",
+        ];
+
+        $res = $this->common_model->dmpSearch($table, $select, $where);
+        if (!$res) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($res as $k=>$v) {
+            $result[] = $v['city_id'];
+        }
+        return $result;
+    }
+
+    /**
      * 根据城市ID获取所有路口
      * @param $cityId    long 城市ID
      * @param $areaId    int  行政区域ID
