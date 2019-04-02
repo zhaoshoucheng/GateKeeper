@@ -104,7 +104,7 @@ if ($development == 2) {
     ];
 
     //新版指标开城列表
-    $quota_v2_city_ids = [1, 12, 85, 134];
+    $quota_v2_city_ids = [1, 12, 57, 85, 134];
 } else {
 
     // 路网接口服务器地址
@@ -142,12 +142,12 @@ if ($development == 2) {
     $es_ext    = '';
 
     // new es
-//    $quota_v2_es_server = '10.89.236.25';
-//    $quota_v2_es_port   = '8090';
-//    $quota_v2_es_ext    = '';
-    $quota_v2_es_server = '10.89.234.61';
+    $quota_v2_es_server = '10.89.236.25';
     $quota_v2_es_port   = '8090';
     $quota_v2_es_ext    = '';
+//    $quota_v2_es_server = '10.89.234.61';
+//    $quota_v2_es_port   = '8090';
+//    $quota_v2_es_ext    = '';
 
     // new timing
     $signal_control_server = '100.90.164.31';
@@ -191,7 +191,7 @@ if ($development == 2) {
     ];
 
     //新版诊断指标开城列表
-    $quota_v2_city_ids = [1, 12, 85, 134];
+    $quota_v2_city_ids = [1, 12, 57, 85, 134];
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";

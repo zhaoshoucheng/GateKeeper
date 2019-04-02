@@ -11,6 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Didi\Cloud\ItsMap\Task;
 use Services\TimingAdaptionAreaService;
+use Services\RoadService;
 
 /**
  * Class Cron
@@ -18,6 +19,8 @@ use Services\TimingAdaptionAreaService;
  */
 class Cron extends CI_Controller
 {
+    protected $roadService;
+
     public function __construct()
     {
         parent::__construct();
@@ -33,6 +36,8 @@ class Cron extends CI_Controller
         $this->load->model('flowDurationV6_model');
         $this->load->model('realtime_model');
         $this->load->model('adapt_model');
+
+        $this->roadService = new RoadService();
     }
 
     public function deleteAdaptLog()
@@ -194,6 +199,25 @@ class Cron extends CI_Controller
         log_message('error', "hello failed");
         log_message('notice', "hello failed");
         log_message('debug', "hello failed");
+    }
+
+
+    /**
+     * 缓存指标数据到redis中
+     * @param int $cityId
+     * @param int $areaId
+     * @param string $quotaKey
+     */
+    public function getAllRoadDetailCache()
+    {
+        $this->config->load('cron', TRUE);
+        $cityIds = $this->config->item('city_ids', 'cron');
+        foreach ($cityIds as $cityId) {
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||message=begin getAllRoadDetailCache\n\r";
+            $params = ["city_id"=>$cityId,"show_type"=>1];
+            $this->roadService->getAllRoadDetail($params);
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||message=finish getAllRoadDetailCache\n\r";
+        }
     }
 
     /**

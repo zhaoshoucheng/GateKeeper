@@ -132,6 +132,7 @@ class Common extends MY_Controller
     public function getRealtimeV2CityIds(){
         $this->load->config('nconf');
         $quotaCityIds = $this->config->item('quota_v2_city_ids');
+        $result = $this->commonService->getOpenCityList();
         $this->response($quotaCityIds);
     }
 
