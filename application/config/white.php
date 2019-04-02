@@ -34,4 +34,6 @@ $config['white_token_clientip_escape'] = [
     '10.85.112.153' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //realtimealarm
     '10.160.129.193' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //realtimealarm
     '10.161.74.50' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //realtimealarm
+
+    '100.69.176.20' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //diyu
 ];
