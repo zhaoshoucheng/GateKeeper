@@ -15,6 +15,7 @@ class Common_model extends CI_Model
         parent::__construct();
 
         $this->db = $this->load->database('default', true);
+        $this->dmp_db = $this->load->database('dmp_captain', true);
     }
 
     /**
@@ -63,25 +64,25 @@ class Common_model extends CI_Model
      */
     public function dmpSearch($table, $select = '*', $where = [], $groupby = '', $page = 0, $pagesize = 0)
     {
-        $isExisted = $this->db->table_exists($table);
+        $isExisted = $this->dmp_db->table_exists($table);
         if (!$isExisted) {
             throw new \Exception('数据表不存在', ERR_DATABASE);
         }
 
-        $this->db->select($select);
-        $this->db->from($table);
+        $this->dmp_db->select($select);
+        $this->dmp_db->from($table);
         if (!empty($where)) {
-            $this->db->where($where);
+            $this->dmp_db->where($where);
         }
 
         if (!empty($groupby)) {
-            $this->db->group_by($groupby);
+            $this->dmp_db->group_by($groupby);
         }
 
         if ($pagesize >= 1) {
-            $this->db->limit($pagesize, $page);
+            $this->dmp_db->limit($pagesize, $page);
         }
 
-        return $this->db->get()->result_array();
+        return $this->dmp_db->get()->result_array();
     }
 }

@@ -244,7 +244,7 @@ class CommonService extends BaseService
      */
     public function getV5DMPCityID()
     {
-        $table = 'road';
+        $table = 'dmp_city_config';
         $select = 'city_id, city_name';
         $where = [
             'sys_id'   => "signal_control_pro",
@@ -259,7 +259,7 @@ class CommonService extends BaseService
 
         $result = [];
         foreach ($res as $k=>$v) {
-            $result[] = $v['city_id'];
+            $result[] = (int)$v['city_id'];
         }
         return $result;
     }
