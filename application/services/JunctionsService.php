@@ -650,7 +650,7 @@ class JunctionsService extends BaseService
         $diagnoseKeyConf = $this->config->item('diagnose_key');
 
         $select = 'count(DISTINCT junction_id) as count';
-        $where = [
+        $baseWhere = [
             'task_id' => $data['task_id'],
             'type'    => 0,
         ];
@@ -675,7 +675,7 @@ class JunctionsService extends BaseService
             if ($diagnose == 'over_saturation') {
                 $diagnose = 'saturation_index';
             }
-            $where  = array_merge($where, $v['sql_where']());
+            $where  = array_merge($baseWhere, $v['sql_where']());
             if ($data['confidence'] >= 1) {
                 $where  = array_merge($where, $confidenceThreshold[$data['confidence']]['sql_where']($diagnose . '_confidence'));
             }
