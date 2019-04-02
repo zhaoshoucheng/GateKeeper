@@ -47,7 +47,155 @@ class Adapt_model extends CI_Model
             ->where('logic_junction_id', $logicJunctionId)
             ->get();
 
-        return $res instanceof CI_DB_result ? $res->row_array() : $res;
+        $newData = $res instanceof CI_DB_result ? $res->row_array() : $res;
+        $newTiming = $newData["timing_info"];
+        $newTiming = json_decode($newTiming,true);
+        //TODO 改成旧格式
+        $oldData = [];
+        $oldData['tod']=[];
+        $structure = $newTiming['data']['structure'];
+        $stageMap = [];
+        if($structure == 2){//stage
+            //自适应优化只有一个tod
+            $todDetail = $newTiming['data']['schedule'][0]['tod'][0];
+            $extraTime = array(
+                "cycle" => $todDetail['cycle'],
+			    "offset"=> $todDetail['offset'],
+                "tod_end_time"=> $todDetail['start_time'],
+                "tod_start_time"=> $todDetail['end_time']
+            );
+            $oldData['tod'][0]['extra_time'] = $extraTime;
+            $stageLength = [];//记录每个stage的时长
+            foreach ($todDetail['vehicle_phase'] as $k=>$vp){
+                if ($vp['all_green']==1){
+                    $stageLength[$vp['sequence_num']]=$vp['green'];
+                }else{
+                    $stageLength[$vp['sequence_num']]=$vp['green']+$vp['yellow']+$vp['red_clear'];
+                }
+            }
+            ksort($stageLength);
+            foreach ($todDetail['vehicle_phase'] as $k=>$vp){
+                //计算start_time
+                $start_time=0;
+                for($i=1;$i<$vp['sequence_num'];$i++){
+                    $start_time += $stageLength[$i];
+                }
+                $movementTiming =array(
+                    "all_red" => $vp['red_clear'],
+			        "channel"=>$vp["sg_id"],
+                    "movement_id"=>$vp["sg_id"],
+                    "flow"=> array(
+                        "logic_flow_id"=> @$vp["flow_info"][0]["logic_flow_id"],
+                        "type"=>0
+                    ),
+                    "phase_id"=> $vp["phase_num"],
+                    "phase_seq"=> $vp["phase_num"],
+                    "ring_id"=> $vp["ring_index"],
+                    "timing" =>[array(
+                        "duration"=> $vp["green"],
+                        "max"=> $vp["max_green"],
+                        "min"=> $vp["min_green"],
+                        "start_time"=> $start_time,
+                        "state"=> 1
+                    )],
+                    "yellow" => $vp["yellow"],
+                );
+                $oldData['tod'][0]['movement_timing'][] = $movementTiming;
+
+                $stageMap[$vp['sequence_num']] = array(
+                    "allred_length"=> $vp['red_clear'],
+                    "green_length"=> $vp["green"],
+                    "green_max"=> $vp["max_green"],
+                    "green_min"=> $vp["min_green"],
+                    "num"=> $vp['sequence_num'],
+                    "phase_id"=> $vp["phase_num"],
+                    "phase_seq"=> $vp["phase_num"],
+                    "ring_id"=> $vp["ring_index"],
+                    "start_time"=> $start_time,
+                    "yellow" => $vp["yellow"],
+                );
+                $stageMap[$vp['sequence_num']]['channel'][] = $vp["sg_id"];
+                $stageMap[$vp['sequence_num']]['movements'][] = array(
+                    "channel"=>$vp["sg_id"],
+                    "flow"=>array(
+                        "logic_flow_id"=>@$vp["flow_info"][0]["logic_flow_id"],
+                        "type"=>0,
+                    )
+                );
+            }
+            foreach ($stageMap as $sk => $sv){
+                $oldData['tod'][0]['stage'][] = $sv;
+            }
+        }else{//ring
+
+        }
+//        foreach ($newTiming['data']['schedule'][0]['tod'] as $k => $v){
+//            $extraTime = array(
+//                "cycle" => $v['cycle'],
+//			    "offset"=> $v['offset'],
+//                "tod_end_time"=> $v['start_time'],
+//                "tod_start_time"=> $v['end_time']
+//            );
+//            $oldData['tod'][$k]['extra_time'] = $extraTime;
+//            $stageMap = [];
+//            foreach ($v['vehicle_phase'] as $vk=>$vv){
+//                $movementTiming =array(
+//                    "all_red" => $vv['red_clear'],
+//			        "channel"=>$vv["sg_id"],
+//                    "movement_id"=>$vv["sg_id"],
+//                    "flow"=> array(
+//                        "logic_flow_id"=> @$vv["flow_info"][0]["logic_flow_id"],
+//                        "type"=>0
+//                    ),
+//                    "phase_id"=> $vv["phase_num"],
+//                    "phase_seq"=> $vv["phase_num"],
+//                    "ring_id"=> $vv["ring_index"],
+//                    "timing" =>[array(
+//                        "duration"=> $vv["green"],
+//                        "max"=> $vv["max_green"],
+//                        "min"=> $vv["min_green"],
+//                        "start_time"=> 0,
+//                        "state"=> 1
+//                    )],
+//                    "yellow" => $vv["yellow"],
+//                );
+//                $oldData['tod'][$k]['movement_timing'][] = $movementTiming;
+//
+//
+//                $stageMap[$vv['sequence_num']] = array(
+//                    "allred_length"=> $vv['red_clear'],
+//                    "green_length"=> $vv["green"],
+//                    "green_max"=> $vv["max_green"],
+//                    "green_min"=> $vv["min_green"],
+//                    "num"=> $vv['sequence_num'],
+//                    "phase_id"=> $vv["phase_num"],
+//                    "phase_seq"=> $vv["phase_num"],
+//                    "ring_id"=> $vv["ring_index"],
+//                    "start_time"=> 0,
+//                    "yellow" => $vv["yellow"],
+//                );
+//                $stageMap[$vv['sequence_num']]['channel'][] = $vv["sg_id"];
+//                $stageMap[$vv['sequence_num']]['movements'][] = array(
+//                    "channel"=>$vv["sg_id"],
+//                    "flow"=>array(
+//                        "logic_flow_id"=>@$vv["flow_info"][0]["logic_flow_id"],
+//                        "type"=>0,
+//                    )
+//                );
+//            }
+//
+//            foreach ($stageMap as $sk => $sv){
+//                $oldData['tod'][$k]['stage'][] = $sv;
+//            }
+//        }
+        $newRet = array(
+            "timing_info"=>json_encode(array(
+                'data'=>$oldData
+            ))
+        );
+        return $newRet;
+
+//        return $res instanceof CI_DB_result ? $res->row_array() : $res;
     }
 
     /**

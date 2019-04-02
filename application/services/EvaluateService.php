@@ -540,12 +540,12 @@ class EvaluateService extends BaseService
             foreach ($bv as $h => $hv){
                 $mvalue = max(array($hv['queue_length'],$hv['twice_stop_rate'],$hv['stop_delay']));
                 $finalResult['base'][$bk][$h] = [
-                    $mvalue,
+                    round($mvalue,2),
                    $h
                 ];
                 $avgArr['average']['base'][$h][$bk] = [
                     'hour' => $h,
-                    'value' => $mvalue,
+                    'value' => round($mvalue,2),
                 ];
             }
 
@@ -555,13 +555,13 @@ class EvaluateService extends BaseService
             foreach ($ev as $datek => $datev){
                 foreach ($datev as $dk => $dv){
                     $mvalue = max(array($dv['queue_length'],$dv['twice_stop_rate'],$dv['stop_delay']));
-                    $finalResult['evaluate'][$ek][$datek][$dk] = [
-                        $mvalue,
+                    $finalResult['evaluate'][$ek+1][$datek][$dk] = [
+                        round($mvalue,2),
                         $dk
                     ];
-                    $avgArr['average']['evaluate'][$ek][$datek][$dk] = [
+                    $avgArr['average']['evaluate'][$ek+1][$dk][$datek] = [
                         'hour' => $dk,
-                        'value' => $mvalue,
+                        'value' => round($mvalue,2),
                     ];
                 }
 
@@ -569,40 +569,6 @@ class EvaluateService extends BaseService
         }
 
 
-//        foreach ($queueLengthData as $k => $v) {
-//            $date = date('Y-m-d', strtotime($v['date']));
-//            // 组织基准时间数据
-//            if (in_array($date, $baseDate, true)) {
-//                $result['base'][$date][strtotime($v['hour'])] = [
-//                    // 指标值
-//                    $quotaConf['queue_length']['round']($v['queue_length']),
-//                    // 时间
-//                    $v['hour'],
-//                ];
-//
-//                $avgArr['average']['base'][strtotime($v['hour'])][$date] = [
-//                    'hour' => $v['hour'],
-//                    'value' => $v['queue_length'],
-//                ];
-//            }
-//
-//            // 组织评估时间数据
-//            foreach ($evaluateDate as $kk => $vv) {
-//                if (in_array($date, $vv, true)) {
-//                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])]        = [
-//                        // 指标值
-//                        $quotaConf['queue_length']['round']($v['queue_length']),
-//                        // 时间
-//                        $v['hour'],
-//                    ];
-//                    $avgArr['average']['evaluate'][$kk][strtotime($v['hour'])][$date] = [
-//                        'hour' => $v['hour'],
-//                        'value' => $v['queue_length'],
-//                    ];
-//                }
-//            }
-//        }
-//
         // 处理基准平均值
         if (!empty($avgArr['average']['base'])) {
             ksort($avgArr['average']['base']);
@@ -613,7 +579,7 @@ class EvaluateService extends BaseService
                 list($hour) = array_unique(array_column($val, 'hour'));
                 return [
                     // 指标平均值
-                   round($tempSum / $tempCount,4),
+                   round($tempSum / $tempCount,2),
                     // 时间
                     $hour,
                 ];
@@ -631,7 +597,7 @@ class EvaluateService extends BaseService
                     list($hour) = array_unique(array_column($val, 'hour'));
                     return [
                         // 指标平均值
-                        round($tempSum / $tempCount,4),
+                        round($tempSum / $tempCount,2),
                         // 时间
                         $hour,
                     ];

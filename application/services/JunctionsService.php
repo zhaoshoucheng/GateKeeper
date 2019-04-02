@@ -650,14 +650,14 @@ class JunctionsService extends BaseService
         $diagnoseKeyConf = $this->config->item('diagnose_key');
 
         $select = 'count(DISTINCT junction_id) as count';
-        $where = [
+        $baseWhere = [
             'task_id' => $data['task_id'],
             'type'    => 0,
         ];
 
         // 获取此任务路口总数
         $junctionTotal = 0;
-        $allJunction = $this->junction_model->searchDB($select, $where, 'row_array');
+        $allJunction = $this->junction_model->searchDB($select, $baseWhere, 'row_array');
         $junctionTotal = $allJunction['count'];
 
         // 置信度
@@ -675,7 +675,7 @@ class JunctionsService extends BaseService
             if ($diagnose == 'over_saturation') {
                 $diagnose = 'saturation_index';
             }
-            $where  = array_merge($where, $v['sql_where']());
+            $where  = array_merge($baseWhere, $v['sql_where']());
             if ($data['confidence'] >= 1) {
                 $where  = array_merge($where, $confidenceThreshold[$data['confidence']]['sql_where']($diagnose . '_confidence'));
             }

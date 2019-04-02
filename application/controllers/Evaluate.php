@@ -51,8 +51,13 @@ class Evaluate extends MY_Controller
      */
     public function getQuotaList()
     {
+        $params = $this->input->post(null, true);
+        $cityId = $params['city_id'];
         $data = $this->evaluateService->getQuotaList();
+        if ($cityId != 2){
 
+            unset($data['dataList'][count($data['dataList'])-1]);
+        }
         $this->response($data);
     }
 
