@@ -15,7 +15,6 @@ class Common_model extends CI_Model
         parent::__construct();
 
         $this->db = $this->load->database('default', true);
-        $this->dmp_db = $this->load->database('dmp_captain', true);
     }
 
     /**
