@@ -657,7 +657,7 @@ class JunctionsService extends BaseService
 
         // 获取此任务路口总数
         $junctionTotal = 0;
-        $allJunction = $this->junction_model->searchDB($select, $where, 'row_array');
+        $allJunction = $this->junction_model->searchDB($select, $baseWhere, 'row_array');
         $junctionTotal = $allJunction['count'];
 
         // 置信度
