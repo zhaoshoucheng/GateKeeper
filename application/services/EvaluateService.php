@@ -324,6 +324,10 @@ class EvaluateService extends BaseService
             ];
         }, $data);
 
+        // 聚合成1分钟1个点
+        $result['dataList'] = $this->filterSplitPoint($result['dataList']);
+
+
         // 返回数据：指标信息
         $result['quota_info'] = [
             'name' => $quotaConf[$params['quota_key']]['name'],
@@ -332,6 +336,35 @@ class EvaluateService extends BaseService
         ];
 
         return $result;
+    }
+
+    // 1 过滤，一分钟只返回一个点
+    // 2 填充，如果这一分钟没有点，就用0填充
+    // dataList已经按照升序排列了
+    private function filterSplitPoint($dataList)
+    {
+        $minutes = [];
+
+        $start = strtotime(date("Y-m-d 00:00:00", time()));
+        $end = strtotime(date("Y-m-d H:i:s", time()));
+        while ($start < $end) {
+            $minute = date("H:i", $start);
+            $minutes[$minute] = 0;
+            $start = $start + 60;
+        }
+
+        foreach ($dataList as $item) {
+            $minute = substr($item[1], 0, 5);
+            if (isset($minutes[$minute])) {
+                $minutes[$minute] = $item[0];
+            }
+        }
+
+        $ret = [];
+        foreach ($minutes as $minute => $val) {
+            $ret[] = [$val, $minute . ":00"];
+        }
+        return $ret;
     }
 
     /**
