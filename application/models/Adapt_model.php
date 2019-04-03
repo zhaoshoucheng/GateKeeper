@@ -86,6 +86,7 @@ class Adapt_model extends CI_Model
                     "channel"=>$vp["sg_id"],
                     "movement_id"=>$vp["sg_id"],
                     "flow"=> array(
+                        "comment"=>$vp["sg_name"],
                         "logic_flow_id"=> @$vp["flow_info"][0]["logic_flow_id"],
                         "type"=>0
                     ),
@@ -119,6 +120,7 @@ class Adapt_model extends CI_Model
                 $stageMap[$vp['sequence_num']]['movements'][] = array(
                     "channel"=>$vp["sg_id"],
                     "flow"=>array(
+                        "comment"=>$vp["sg_name"],
                         "logic_flow_id"=>@$vp["flow_info"][0]["logic_flow_id"],
                         "type"=>0,
                     )
