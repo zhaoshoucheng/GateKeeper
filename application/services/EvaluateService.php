@@ -669,6 +669,32 @@ class EvaluateService extends BaseService
         return $finalResult;
     }
 
+    // 按照半个小时，每半个小时都需要有值，否则用0进行替换
+    private function fillEmptyToZero($items)
+    {
+        $all = [];
+        for ($i = 0; $i < 48; $i++) {
+            $hour = sprintf('%02d', $i / 2);
+            $minute = sprintf('%02d', $i % 2 * 30);
+            $hour = "{$hour}:{$minute}";
+
+            $isExist = false;
+            foreach ($items as $item) {
+                if ($item[1] == $hour) {
+                    $isExist = true;
+                    $all[] = $item;
+                    break;
+                }
+            }
+
+            if (!$isExist) {
+                $all[] = [0, $hour];
+            }
+        }
+
+        return $all;
+    }
+
     /**
      * 指标评估对比
      *
@@ -825,6 +851,7 @@ class EvaluateService extends BaseService
                 if (!array_key_exists($v, $result['base'])) {
                     $result['base'][$v] = [];
                 }
+
             }
         }
 
@@ -862,6 +889,8 @@ class EvaluateService extends BaseService
         // 将所有方向放入路口相位信息中
         $flowsInfo[$logicJunctionId]['9999'] = '所有方向';
 
+        $result = $this->fillZeroResult($result);
+
         // 基本信息
         $result['info'] = [
             'junction_name' => $junctionIdName[$logicJunctionId] ?? '',
@@ -881,6 +910,27 @@ class EvaluateService extends BaseService
         $this->redis_model->setComparisonDownloadData($downloadId, $result);
 
         return $result;
+    }
+
+
+    // 将result指标空的地方全部填充为0，这个和PM对过了
+    private function fillZeroResult($result)
+    {
+        // 统一将average.base, average.evaluate, base,evaluate做
+        $result['average']['base'] = $this->fillEmptyToZero($result['average']['base']);
+        foreach ($result['average']['evaluate'] as $id => $items) {
+            $result['average']['evaluate'][$id] = $this->fillEmptyToZero($result['average']['evaluate'][$id]);
+        }
+        foreach ($result['base'] as $date => $val) {
+            $result['base'][$date] = $this->fillEmptyToZero($val);
+        }
+        foreach ($result['evaluate'] as $id => $items) {
+            foreach ($result['evaluate'][$id] as $date => $val) {
+                $result['evaluate'][$id][$date] = $this->fillEmptyToZero($val);
+            }
+        }
+        return $result;
+
     }
 
     /**
