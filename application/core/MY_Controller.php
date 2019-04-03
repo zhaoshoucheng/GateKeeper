@@ -49,6 +49,7 @@ class MY_Controller extends CI_Controller
         $this->load->config('white');
         $escapeSso = $this->config->item('white_escape_sso');
         $escapeClient = $this->config->item('white_token_clientip_escape');
+        $escapeToken = $this->config->item('white_token_escape');
 
         $this->load->config('nconf');
         $this->routerUri = $this->uri->ruri_string();
@@ -56,6 +57,17 @@ class MY_Controller extends CI_Controller
 
         $accessType = 0; // 权限认证通过的类型
         $accessUser = ""; // 权限认证通过的用户信息
+
+        com_log_notice('_com_before_sso', [
+            'access_user' => $accessUser,
+            'access_type' => $accessType,
+            'ip' => $_SERVER["REMOTE_ADDR"],
+            'ip2' => $this->input->get_request_header('X-Real-Ip'),
+            'ip3' => $this->input->get_request_header('X-Forwarded-For'),
+            'city_id' => isset($_REQUEST['city_id']) ? $_REQUEST['city_id'] : "",
+            'uri' => $this->routerUri,
+            'request' => $_REQUEST
+        ]);
 
         // 有一些机器是不需要进行sso验证的，这里就直接跳过
         if (!in_array($host, $escapeSso) && empty($_SERVER['HTTP_DIDI_HEADER_GATEWAY'])) {
@@ -88,6 +100,12 @@ class MY_Controller extends CI_Controller
                 $accessType = 3; // 使用白名单+token验证通过
                 $accessUser = $token;
 
+            } elseif (in_array($token, ['02efffde3a9b5a8f8f04f7c00fb92cb0'])) {
+                //diyu白名单
+                com_log_notice('_com_sign_escape_token', ['token' => $token, 'escapeClient' => $escapeClient[$clientIp]]);
+                //pass
+                $accessType = 5; // token验证通过
+                $accessUser = $token;
             } else {
                 // 检测用户
                 if (!$this->_checkUser()) {

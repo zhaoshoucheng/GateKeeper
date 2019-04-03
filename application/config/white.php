@@ -37,3 +37,8 @@ $config['white_token_clientip_escape'] = [
 
     '100.69.176.20' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //diyu
 ];
+
+// diyu内网token就可以登陆,仅限内网访问
+$config['white_token_escape'] = [
+    '02efffde3a9b5a8f8f04f7c00fb92cb0',
+];

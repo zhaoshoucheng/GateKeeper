@@ -32,6 +32,7 @@ class TimingAdaptionAreaService extends BaseService
         $this->load->model('waymap_model');
         $this->load->model('adapt_model');
         $this->load->model('alarmanalysis_model');
+        $this->load->model('timeAlarmRemarks_model');
         $this->load->model('traj_model');
 
         // load config
@@ -541,8 +542,8 @@ class TimingAdaptionAreaService extends BaseService
             'area_id' => $data['area_id'],
             'logic_junction_id' => $data['logic_junction_id'],
             'logic_flow_id' => $data['logic_flow_id'],
-            'flow_alarm_type' => $data['flow_alarm_type'],
-            'junction_alarm_type' => $data['junction_alarm_type'],
+            'flow_alarm_type' => $data['flow_alarm_type']??0,
+            'junction_alarm_type' => $data['junction_alarm_type']??0,
             'type' => $data['is_correct'],
             'comment' => $data['comment'],
             'username' => 0,
