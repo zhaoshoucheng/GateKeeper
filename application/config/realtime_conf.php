@@ -24,7 +24,7 @@ $config['real_time_quota'] = [
         'name'     => '溢流指标',
         'unit'     => '',
         'round'    => function ($val) {
-            return round($val, 5);
+            return round($val, 4);
         },
         'escolumn' => 'spilloverRateDown',
     ],

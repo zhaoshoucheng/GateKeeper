@@ -69,10 +69,10 @@ class TimingAdaptationArea extends MY_Controller
 
     /**
      * 获取区域实时报警信息
-     * @param $params['city_id']     int 城市ID
-     * @param $params['area_id']     int 区域ID
-     * @param $params['alarm_type']  int 报警类型 0，全部; 1：过饱和；2：溢流；3：空放；4：轻度过饱和；。默认0
-     * @param $params['ignore_type'] int 类型：0，全部，1，已忽略，2，未忽略。默认0
+     * @param $params ['city_id']     int 城市ID
+     * @param $params ['area_id']     int 区域ID
+     * @param $params ['alarm_type']  int 报警类型 0，全部; 1：过饱和；2：溢流；3：空放；4：轻度过饱和；。默认0
+     * @param $params ['ignore_type'] int 类型：0，全部，1，已忽略，2，未忽略。默认0
      * @throws Exception
      */
     public function realTimeAlarmList()
@@ -80,13 +80,13 @@ class TimingAdaptationArea extends MY_Controller
         $params = $this->input->post(null, true);
 
         $this->validate([
-            'city_id'     => 'required|is_natural_no_zero',
-            'area_id'     => 'required|is_natural_no_zero',
-            'alarm_type'  => 'in_list[0,1,2,3,4]',
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|is_natural_no_zero',
+            'alarm_type' => 'in_list[0,1,2,3,4]',
             'ignore_type' => 'in_list[0,1,2]',
         ]);
 
-        $params['alarm_type']  = $params['alarm_type'] ?? 0;
+        $params['alarm_type'] = $params['alarm_type'] ?? 0;
         $params['ignore_type'] = $params['ignore_type'] ?? 0;
 
         $result = $this->timingAdaptionAreaService->realTimeAlarmList($params);
@@ -104,6 +104,8 @@ class TimingAdaptationArea extends MY_Controller
         $params = $this->input->post(null, true);
 
         $this->validate([
+            'flow_alarm_type' => 'is_natural_no_zero',
+            'junction_alarm_type' => 'is_natural_no_zero',
             'city_id' => 'required|is_natural_no_zero',
             'area_id' => 'required|is_natural_no_zero',
             'logic_junction_id' => 'required|trim|min_length[1]',
@@ -113,7 +115,6 @@ class TimingAdaptationArea extends MY_Controller
         ]);
 
         $params['comment'] = $params['comment'] ?? '';
-
 
         $data = $this->timingAdaptionAreaService->addAlarmRemark($params);
 
@@ -157,7 +158,7 @@ class TimingAdaptationArea extends MY_Controller
 
         //todo 后期添加数据权限验证
         $valid = $this->permissionService->hasPermissionByFlag("adapt_control_switch");
-        if(!$valid){
+        if (!$valid) {
             $this->errmsg = "adapt_control_switch invalid";
             $this->errno = ERR_AUTH_PERMISSION;
             return;
@@ -185,7 +186,7 @@ class TimingAdaptationArea extends MY_Controller
 
         //todo 后期添加数据权限验证
         $valid = $this->permissionService->hasPermissionByFlag("adapt_control_switch");
-        if(!$valid){
+        if (!$valid) {
             $this->errmsg = "adapt_control_switch invalid";
             $this->errno = ERR_AUTH_PERMISSION;
             return;
@@ -198,9 +199,9 @@ class TimingAdaptationArea extends MY_Controller
 
     /**
      * 获取区域指标折线图
-     * @param $params['city_id']   int    城市ID
-     * @param $params['area_id']   int    区域ID
-     * @param $params['quota_key'] string 指标KEY
+     * @param $params ['city_id']   int    城市ID
+     * @param $params ['area_id']   int    区域ID
+     * @param $params ['quota_key'] string 指标KEY
      * @throws Exception
      */
     public function getAreaQuotaInfo()

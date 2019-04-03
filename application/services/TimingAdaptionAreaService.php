@@ -513,6 +513,8 @@ class TimingAdaptionAreaService extends BaseService
                     'flow_name' => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
                     'alarm_comment' => $flowAlarmCate[$val['type']]['name'] ?? '',
                     'alarm_key' => $val['type'],
+                    'type' => $val['type'],
+                    'junction_type' => $val['junction_type'],
                     'is_ignore' => $is_ignore,
                     'check' => $check,
                 ];
@@ -539,6 +541,8 @@ class TimingAdaptionAreaService extends BaseService
             'area_id' => $data['area_id'],
             'logic_junction_id' => $data['logic_junction_id'],
             'logic_flow_id' => $data['logic_flow_id'],
+            'flow_alarm_type' => $data['flow_alarm_type'],
+            'junction_alarm_type' => $data['junction_alarm_type'],
             'type' => $data['is_correct'],
             'comment' => $data['comment'],
             'username' => 0,
@@ -1113,12 +1117,21 @@ class TimingAdaptionAreaService extends BaseService
         $value = [];
 
         foreach ($detail['result'] as $k => $v) {
+            $dataValueTime = date("H:i",$v['timestamp']);
+            foreach ($flowTimingCurve as $flowtime=>$flowItem){
+                $flowFullTimestamp = strtotime(date("Y-m-d")." ".$flowtime.":00");
+                if($v['timestamp']>($flowFullTimestamp-120) && $v['timestamp']<$flowFullTimestamp){
+                    $dataValueTime = date("H:i",$flowFullTimestamp);
+                }
+            }
+
             // 将时间转为秒数
             $time = date_parse(date("H:i:s", $v['timestamp']));
             $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
             $ret['dataList'][$k] = [
                 $second,                 // 时间秒数 X轴
                 $v['stopDelayBefore'],  // 值      Y轴
+                $dataValueTime
             ];
 
             // 记录所有时间 用于获取最大最小值

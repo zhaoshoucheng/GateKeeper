@@ -467,7 +467,7 @@ $config['flow_quota_key'] = [
     'spillover_rate' => [
         'name' => '溢流比率',
         'round' => function ($val) {
-            return round($val, 5);
+            return round($val, 4);
         },
         'unit' => '',
     ],
