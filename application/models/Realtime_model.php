@@ -27,10 +27,12 @@ class Realtime_model extends CI_Model
         $this->esUrl = $this->config->item('es_interface');
         $this->newEsUrl = $this->config->item('new_es_interface');
         $this->engine = $this->config->item('data_engine');
-        $this->quotaCityIds = $this->config->item('quota_v2_city_ids');
+        //$this->quotaCityIds = $this->config->item('quota_v2_city_ids');
 
         // load model
         $this->load->model('redis_model');
+        $this->load->model('common_model');
+        $this->quotaCityIds = $this->common_model->getV5DMPCityID();
     }
 
     /**

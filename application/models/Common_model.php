@@ -15,6 +15,7 @@ class Common_model extends CI_Model
         parent::__construct();
 
         $this->db = $this->load->database('default', true);
+        $this->dmp_db = $this->load->database('dmp_captain', true);
     }
 
     /**
@@ -63,25 +64,52 @@ class Common_model extends CI_Model
      */
     public function dmpSearch($table, $select = '*', $where = [], $groupby = '', $page = 0, $pagesize = 0)
     {
-        $isExisted = $this->db->table_exists($table);
+        $isExisted = $this->dmp_db->table_exists($table);
         if (!$isExisted) {
             throw new \Exception('数据表不存在', ERR_DATABASE);
         }
 
-        $this->db->select($select);
-        $this->db->from($table);
+        $this->dmp_db->select($select);
+        $this->dmp_db->from($table);
         if (!empty($where)) {
-            $this->db->where($where);
+            $this->dmp_db->where($where);
         }
 
         if (!empty($groupby)) {
-            $this->db->group_by($groupby);
+            $this->dmp_db->group_by($groupby);
         }
 
         if ($pagesize >= 1) {
-            $this->db->limit($pagesize, $page);
+            $this->dmp_db->limit($pagesize, $page);
         }
 
-        return $this->db->get()->result_array();
+        return $this->dmp_db->get()->result_array();
+    }
+
+    /**
+     * 获取v5开城列表
+     * @param $cityId long 城市ID
+     * @return mixed
+     */
+    public function getV5DMPCityID()
+    {
+        $table = 'dmp_city_config';
+        $select = 'city_id, city_name';
+        $where = [
+            'sys_id'   => "signal_control_pro",
+            'extra' => "v5",
+            'status' => "1",
+        ];
+
+        $res = $this->dmpSearch($table, $select, $where);
+        if (!$res) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($res as $k=>$v) {
+            $result[] = (int)$v['city_id'];
+        }
+        return $result;
     }
 }

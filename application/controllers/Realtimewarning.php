@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Realtimewarning extends Inroute_Controller
 {
+    private $quotaCityIds = [];
+
     public function __construct()
     {
         date_default_timezone_set('Asia/Shanghai');
@@ -10,6 +12,8 @@ class Realtimewarning extends Inroute_Controller
         $this->load->model('realtimewarning_model');
         $this->load->config('nconf');
         $this->load->model('redis_model');
+        $this->load->model('common_model');
+        $this->quotaCityIds = $this->common_model->getV5DMPCityID();
     }
 
     public function getNewHour(){
@@ -160,7 +164,7 @@ class Realtimewarning extends Inroute_Controller
         }
 
         //新开指标城市验证 && uid验证
-        $quotaCityIds = $this->config->item('quota_v2_city_ids');
+        $quotaCityIds = $this->quotaCityIds;
         if(in_array($cityId,$quotaCityIds) && !in_array($uid,["traj_index_pro"])){
             echo "uid 非预期! \n";
             exit;
