@@ -1036,7 +1036,27 @@ class TimingAdaptionAreaService extends BaseService
                 list($ctime, $cdata) = explode("||", $val);
                 //当天数据
                 if (strtotime($ctime) > strtotime(date("Y-m-d"))) {
+                    /*$cdata = '{"junction_id":"2017030116_1254666","errorMsg":"","trace_id":"645aa3335ca4724117484a4b65aad1b0","errorCode":0,"ext":{"is_rollback":0},"is_rollback":0,"message_time":"2019-04-03 16:43:46","data":{"signal_id":4293,"schedule":[{"week":[3],"month":[1,2,3,4,5,6,7,8,9,10,11,12],"priority":3,"schedule_num":1,"day":[],"tod":[{"plan_num":1,"split_table":1,"start_time":"09:00:00","sequence_table":1,"end_time":"17:00:00","offset":0,"plan_name":"569_00_平峰.PHE","vehicle_phase":[{"phase_num":1,"phase_name":"","barrier":0,"is_ol":0,"green_flash":0,"max_green2":0,"yellow":3,"ring_index":1,"is_virtual":0,"max_green":49,"min_green":30,"sg_id":44831,"green":35,"end_time":38,"sequence_num":1,"red_clear":0,"red_yellow":0,"all_green":0,"start_time":0,"flow_info":[{"direction":0,"logic_flow_id":"2018092618_i_848528231_2018092618_o_244072491"}]},{"phase_num":2,"phase_name":"","barrier":0,"is_ol":0,"green_flash":0,"max_green2":0,"yellow":3,"ring_index":1,"is_virtual":0,"max_green":49,"min_green":30,"sg_id":44829,"green":35,"end_time":76,"sequence_num":1,"red_clear":0,"red_yellow":0,"all_green":0,"start_time":38,"flow_info":[{"direction":0,"logic_flow_id":"2018092618_i_848528220_2018092618_o_16908640"}]},{"phase_num":3,"phase_name":"","barrier":0,"is_ol":0,"green_flash":0,"max_green2":0,"yellow":3,"ring_index":1,"is_virtual":0,"max_green":49,"min_green":30,"sg_id":54211,"green":35,"end_time":114,"sequence_num":1,"red_clear":0,"red_yellow":0,"all_green":0,"start_time":76,"flow_info":null},{"phase_num":4,"phase_name":"","barrier":0,"is_ol":0,"green_flash":0,"max_green2":0,"yellow":3,"ring_index":1,"is_virtual":0,"max_green":42,"min_green":30,"sg_id":54213,"green":30,"end_time":149,"sequence_num":2,"red_clear":2,"red_yellow":0,"all_green":0,"start_time":114,"flow_info":null},{"phase_num":5,"phase_name":"","barrier":0,"is_ol":0,"green_flash":0,"max_green2":0,"yellow":3,"ring_index":1,"is_virtual":0,"max_green":42,"min_green":30,"sg_id":44825,"green":30,"end_time":184,"sequence_num":2,"red_clear":2,"red_yellow":0,"all_green":0,"start_time":149,"flow_info":[{"direction":0,"logic_flow_id":"2018092618_i_16726050_2018092618_o_16908640"}]},{"phase_num":6,"phase_name":"","barrier":0,"is_ol":0,"green_flash":0,"max_green2":0,"yellow":3,"ring_index":1,"is_virtual":0,"max_green":28,"min_green":22,"sg_id":44827,"green":23,"end_time":210,"sequence_num":3,"red_clear":0,"red_yellow":0,"all_green":0,"start_time":184,"flow_info":[{"direction":0,"logic_flow_id":"2018092618_i_848528220_2018092618_o_16726051"}]}],"cycle":99}]}],"phase_follow":null,"overlap":null,"phase_conflict":null,"source":0,"version_id":2294,"logic_junction_id":"2017030116_1254666","structure":2,"phase_bind":null}}';
+                    $data["logic_flow_id"] = "2018092618_i_848528231_2018092618_o_244072491";*/
                     $cjson = json_decode($cdata, true);
+                    $todo0 = $cjson["data"]["schedule"]["0"]["tod"]["0"];
+                    $cycle = $todo0["cycle"];
+                    $offset = $todo0["offset"];
+                    $green = 0;
+                    $yellow = 0;
+                    foreach ($todo0["vehicle_phase"] as $value){
+                        if($value["flow_info"][0]["logic_flow_id"]==$data["logic_flow_id"]){
+                            $yellow+=$value["yellow"];
+                            $green+=$value["green"];
+                        }
+                    }
+                    $flowTimingCurve[date("H:i", strtotime($ctime))] = [
+                        "yellow" => $yellow,
+                        "green" => $green,
+                        "cycle" => $cycle,
+                        "offset" => $offset,
+                    ];
+                    /*
                     $movementTiming = $cjson["data"]["tod"]["0"]["movement_timing"]??[];
                     $cycle = $cjson["data"]["tod"]["0"]["extra_time"]["cycle"]??0;
                     $offset = $cjson["data"]["tod"]["0"]["extra_time"]["offset"]??0;
@@ -1058,6 +1078,7 @@ class TimingAdaptionAreaService extends BaseService
                             }
                         }
                     }
+                    */
                 }
             }
         }
