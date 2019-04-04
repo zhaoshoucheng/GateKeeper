@@ -834,6 +834,7 @@ class OverviewService extends BaseService
                     'flow_name' => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
                     'alarm_comment' => $alarmCate[$val['type']]['name'] ?? '',
                     'alarm_key' => $val['type'],
+                    'order' => $alarmCate[$val['type']]['order'] ?? 0,
                 ];
             }
         }
@@ -841,6 +842,12 @@ class OverviewService extends BaseService
         if (empty($result['dataList'])) {
             return [];
         }
+        usort($result['dataList'], function($a, $b) {
+            if ($a['order'] != $b['order']) {
+                return ($a['order'] < $b['order']) ? 1 : -1;
+            }
+            return ($a['duration_time'] < $b['duration_time']) ? 1 : -1;
+        });
         $result['dataList'] = array_values($result['dataList']);
 
         return $result;
