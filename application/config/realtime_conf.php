@@ -109,21 +109,25 @@ $config['flow_alarm_category'] = [
         'name' => '过饱和', // 类别名称
         'key' => 1,       // 类别KEY
         'desc' => '',      // 描述
+        'order' => '3',
     ],
     2 => [
         'name' => '溢流',
         'key' => 2,
         'desc' => '',
+        'order' => '4',
     ],
     3 => [
         'name' => '空放',
         'key' => 3,
         'desc' => '',
+        'order' => '1',
     ],
     4 => [
         'name' => '轻度过饱和',
         'key' => 4,
         'desc' => '',
+        'order' => '2',
     ],
 ];
 
