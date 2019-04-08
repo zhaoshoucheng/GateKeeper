@@ -513,6 +513,7 @@ class TimingAdaptionAreaService extends BaseService
                     'logic_flow_id' => $val['logic_flow_id'],
                     'flow_name' => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
                     'alarm_comment' => $flowAlarmCate[$val['type']]['name'] ?? '',
+                    'order' => $flowAlarmCate[$val['type']]['order'] ?? 0,
                     'alarm_key' => $val['type'],
                     'type' => $val['type'],
                     'junction_type' => $val['junction_type'],
@@ -521,6 +522,15 @@ class TimingAdaptionAreaService extends BaseService
                 ];
             }
         }
+        usort($result['data'], function($a, $b) {
+            if ($a['is_ignore'] != $b['is_ignore']) {
+                return ($a['is_ignore'] < $b['is_ignore']) ? 1 : -1;
+            }
+            if ($a['order'] != $b['order']) {
+                return ($a['order'] < $b['order']) ? 1 : -1;
+            }
+            return ($a['duration_time'] < $b['duration_time']) ? 1 : -1;
+        });
 
         return [
             'dataList' => array_values($result['data'] ?? []),
