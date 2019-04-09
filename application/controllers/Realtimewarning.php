@@ -196,6 +196,33 @@ class Realtimewarning extends Inroute_Controller
         return;
     }
 
+    public function esworker($cityId = '12', $hour = '00:00', $date = "", $traceId = "", $uid = "")
+    {
+        ini_set('memory_limit', '-1');
+        ob_end_flush();
+        date_default_timezone_set('Asia/Shanghai');
+        if (!is_numeric($cityId)) {
+            echo "cityId 必须为数字! \n";
+            exit;
+        }
+        if (!preg_match('/\d{4,4}-\d{1,2}-\d{1,2}/ims', $date)) {
+            echo "date 必须为日期! \n";
+            exit;
+        }
+        //预先计算平均延误数据
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculating\n\r";
+        $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId, 1);
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculated\n\r";
+
+        //再计算报警数据
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculating\n\r";
+        $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId);
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculated\n\r";
+        return true;
+    }
+
+
+
     public function prepare($cityId = '12', $hour = '00:00', $date = "", $traceId = "", $uid = "")
     {
         ini_set('memory_limit', '-1');

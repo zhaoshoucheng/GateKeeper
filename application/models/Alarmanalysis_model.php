@@ -84,6 +84,7 @@ class Alarmanalysis_model extends CI_Model
                 'start_time'        => $v['_source']['start_time'],
                 'last_time'         => $v['_source']['last_time'],
                 'type'              => $v['_source']['type'],
+                'junction_type'              => $v['_source']['junction_type'],
             ];
         }
         return $res;
