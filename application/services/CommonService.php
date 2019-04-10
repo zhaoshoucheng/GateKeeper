@@ -9,6 +9,11 @@ namespace Services;
 
 use Didi\Cloud\Collection\Collection;
 
+/**
+ * Class CommonService
+ * @property \Waymap_model $waymap_model
+ * @property \Common_model $common_model
+ */
 class CommonService extends BaseService
 {
     public function __construct()
@@ -22,33 +27,33 @@ class CommonService extends BaseService
 
     /**
      * 获取路口所属行政区域及交叉节点信息
-     * @param $params['city_id']           int    Y 城市ID
-     * @param $params['logic_junction_id'] string Y 路口ID
-     * @param $params['map_version']       string Y 地图版本
+     * @param $params ['city_id']           int    Y 城市ID
+     * @param $params ['logic_junction_id'] string Y 路口ID
+     * @param $params ['map_version']       string Y 地图版本
      * @return mixed
      */
     public function getJunctionAdAndCross($params)
     {
         $mapVersion = $params['map_version'] ?? '';
         $result = $this->waymap_model->gitJunctionDetail($params['logic_junction_id']
-                                                            , $params['city_id']
-                                                            , $mapVersion
-                                                        );
+            , $params['city_id']
+            , $mapVersion
+        );
         if (empty($result['junctions'])) {
             return (object)[];
         }
 
         $res = [];
-        foreach ($result['junctions'] as $k=>$v) {
+        foreach ($result['junctions'] as $k => $v) {
             $junctionName = $v['name'];
             $districtName = $v['district_name'];
             $road1 = $v['road1'];
             $road2 = $v['road2'];
             $res = [
                 'logic_junction_id' => $v['logic_junction_id'],
-                'junction_name'     => $v['name'],
-                'lng'               => $v['lng'],
-                'lat'               => $v['lat'],
+                'junction_name' => $v['name'],
+                'lng' => $v['lng'],
+                'lat' => $v['lat'],
             ];
         }
         $cityName = $result['city_name'];
@@ -63,8 +68,8 @@ class CommonService extends BaseService
 
     /**
      * 获取路口相位信息
-     * @param $params['city_id']           int    Y 城市ID
-     * @param $params['logic_junction_id'] string Y 路口ID
+     * @param $params ['city_id']           int    Y 城市ID
+     * @param $params ['logic_junction_id'] string Y 路口ID
      * @return array
      */
     public function getJunctionMovements($params)
@@ -75,6 +80,12 @@ class CommonService extends BaseService
             $result = $this->sortByNema($flowsInfo[$params['logic_junction_id']]);
         }
 
+        $res = $this->common_model->getTimingMovementNames($params['logic_junction_id']);
+        foreach ($result as $key => $item) {
+            if (!empty($res[$result[$key]["flow_id"]])) {
+                $result[$key]["flow_name"] = $res[$result[$key]["flow_id"]];
+            }
+        }
         return $result;
     }
 
@@ -85,7 +96,7 @@ class CommonService extends BaseService
     public function sortByNema($flowInfos)
     {
         // 过滤有"掉头"字样的
-        $flowInfos = array_filter($flowInfos, function($direction) {
+        $flowInfos = array_filter($flowInfos, function ($direction) {
             return strpos($direction, '掉头') === False;
         });
 
@@ -102,7 +113,7 @@ class CommonService extends BaseService
 
         $ret = [];
         foreach ($flowInfos as $flowId => $direction) {
-            $word2 = mb_substr($direction, 0 , 2);
+            $word2 = mb_substr($direction, 0, 2);
             $order = $scores[$word2] ?? 0;
             $ret[] = [
                 'flow_id' => $flowId,
@@ -111,7 +122,7 @@ class CommonService extends BaseService
             ];
         }
 
-        usort($ret, function($a, $b) {
+        usort($ret, function ($a, $b) {
             if ($a['order'] == $b['order']) {
                 return 0;
             }
@@ -135,12 +146,12 @@ class CommonService extends BaseService
         }
 
         $result = [];
-        foreach ($res as $k=>$v) {
+        foreach ($res as $k => $v) {
             $result[$k] = [
-                'areaId'   => (string)$v['city_id'],
+                'areaId' => (string)$v['city_id'],
                 'areaName' => $v['city_name'],
-                'level'    => 1,
-                'apid'     => '-1',
+                'level' => 1,
+                'apid' => '-1',
             ];
         }
 
@@ -159,12 +170,12 @@ class CommonService extends BaseService
             return [];
         }
 
-        foreach ($res['districts'] as $k=>$v) {
+        foreach ($res['districts'] as $k => $v) {
             $result[$k] = [
-                'areaId'   => (string)$k,
+                'areaId' => (string)$k,
                 'areaName' => $v,
-                'level'    => 2,
-                'apid'     => (string)$cityId,
+                'level' => 2,
+                'apid' => (string)$cityId,
             ];
         }
 
@@ -183,7 +194,7 @@ class CommonService extends BaseService
         $table = 'area';
         $select = 'id, area_name';
         $where = [
-            'city_id'   => $cityId,
+            'city_id' => $cityId,
             'delete_at' => '1970-01-01 00:00:00',
         ];
 
@@ -193,12 +204,12 @@ class CommonService extends BaseService
         }
 
         $result = [];
-        foreach ($res as $k=>$v) {
+        foreach ($res as $k => $v) {
             $result[$k] = [
-                'areaId'   => (string)$v['id'],
+                'areaId' => (string)$v['id'],
                 'areaName' => $v['area_name'],
-                'level'    => 2,
-                'apid'     => (string)$cityId,
+                'level' => 2,
+                'apid' => (string)$cityId,
             ];
         }
 
@@ -215,7 +226,7 @@ class CommonService extends BaseService
         $table = 'road';
         $select = 'id, road_name';
         $where = [
-            'city_id'   => $cityId,
+            'city_id' => $cityId,
             'is_delete' => 0,
         ];
 
@@ -225,12 +236,12 @@ class CommonService extends BaseService
         }
 
         $result = [];
-        foreach ($res as $k=>$v) {
+        foreach ($res as $k => $v) {
             $result[$k] = [
-                'areaId'   => (string)$v['id'],
+                'areaId' => (string)$v['id'],
                 'areaName' => $v['road_name'],
-                'level'    => 2,
-                'apid'     => (string)$cityId,
+                'level' => 2,
+                'apid' => (string)$cityId,
             ];
         }
 
@@ -261,12 +272,12 @@ class CommonService extends BaseService
             return [];
         }
 
-        foreach ($res as $k=>$v) {
+        foreach ($res as $k => $v) {
             $result[$k] = [
-                'areaId'   => (string)$v['logic_junction_id'],
+                'areaId' => (string)$v['logic_junction_id'],
                 'areaName' => $v['name'],
-                'level'    => 3,
-                'apid'     => (string)$areaId,
+                'level' => 3,
+                'apid' => (string)$areaId,
             ];
         }
 
