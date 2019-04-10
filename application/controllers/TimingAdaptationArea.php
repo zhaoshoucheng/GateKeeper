@@ -227,7 +227,7 @@ class TimingAdaptationArea extends MY_Controller
     public function getSpaceTimeMtraj()
     {
         $params = $this->input->post(null, true);
-
+        
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
             'logic_junction_id' => 'required|trim|min_length[1]',
