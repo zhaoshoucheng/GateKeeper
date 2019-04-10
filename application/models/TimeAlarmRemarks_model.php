@@ -59,13 +59,12 @@ class TimeAlarmRemarks_model extends CI_Model
                 ->order_by('create_time', 'DESC')
                 ->limit(1)
                 ->get();
+            $res = $res instanceof CI_DB_result ? $res->result_array() : $res;
             if(isset($res[0])){
                 $result[$flowId] = $res[0];
             }
         }
-
-
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+        return $result;
     }
 
     /**
