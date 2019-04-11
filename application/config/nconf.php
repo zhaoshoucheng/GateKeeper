@@ -52,9 +52,7 @@ if ($development == 2) {
     $signal_light_server = 'http://10.88.128.40:8000/ipd-cloud/signal-platform';
 
     // es
-    $es_server = '10.85.128.208';
-    $es_port   = '8001';
-    $es_ext    = '';
+    $es_server = 'http://10.85.128.208:8001/api/data';
 
     // new es
     $quota_v2_es_server = '10.89.234.61';
@@ -135,9 +133,7 @@ if ($development == 2) {
     $signal_light_server = 'http://10.148.28.204:8001';
 
     // es
-    $es_server = '10.89.236.25';
-    $es_port   = '8087';
-    $es_ext    = '';
+    $es_server = 'http://10.89.236.25:8087';
 
     // new es
     $quota_v2_es_server = '10.89.236.25';
@@ -221,7 +217,7 @@ $config['signal_mis_interface'] = 'http://' . $signal_mis_server . $signal_mis_p
 $config['signal_light_interface'] = $signal_light_server;
 
 // 实时指标接口地址
-$config['es_interface'] = 'http://' . $es_server . $es_port . $es_ext;
+$config['es_interface'] = $es_server;
 
 // 新指标接口地址
 $config['new_es_interface'] = 'http://' . $quota_v2_es_server . $quota_v2_es_port . $quota_v2_es_ext;
