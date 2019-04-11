@@ -51,19 +51,17 @@ if ($development == 2) {
     // signal_light
     $signal_light_server = 'http://10.88.128.40:8000/ipd-cloud/signal-platform';
 
-    // es
-    $es_server = 'http://10.85.128.208:8001/api/data';
+    // es 老实时轨迹、指标数据
+    $es_server = 'http://10.85.128.208:8001';
 
-    // new es
-    $quota_v2_es_server = '10.89.234.61';
-    $quota_v2_es_port   = '8090';
-    $quota_v2_es_ext    = '';
+    // new es 新实时轨迹、指标数据
+    $quota_v2_es_server = 'http://10.85.128.208:8001/api/data';
 
     // new timing
     $signal_control_server = '10.88.128.149';
     $signal_control_port   = '30516';
     $signal_control_ext    = '/signal-timing';
-
+    
     // xmmtrace
     $xmmtrace_server = '10.85.128.208';
     $xmmtrace_port   = '8001';
@@ -136,9 +134,7 @@ if ($development == 2) {
     $es_server = 'http://10.89.236.25:8087';
 
     // new es
-    $quota_v2_es_server = '10.89.236.25';
-    $quota_v2_es_port   = '8090';
-    $quota_v2_es_ext    = '';
+    $quota_v2_es_server = 'http://10.89.236.25:8090';
 //    $quota_v2_es_server = '10.89.234.61';
 //    $quota_v2_es_port   = '8090';
 //    $quota_v2_es_ext    = '';
@@ -220,7 +216,7 @@ $config['signal_light_interface'] = $signal_light_server;
 $config['es_interface'] = $es_server;
 
 // 新指标接口地址
-$config['new_es_interface'] = 'http://' . $quota_v2_es_server . $quota_v2_es_port . $quota_v2_es_ext;
+$config['new_es_interface'] = $quota_v2_es_server;
 
 // 新版配时地址
 $config['signal_control_interface'] = 'http://' . $signal_control_server . ":" . $signal_control_port . $signal_control_ext;

@@ -742,7 +742,7 @@ class TimingAdaptionAreaService extends BaseService
                 "startTime" => $startTime,
             ];
 
-            $esUrl = $this->config->item('es_interface') . '/estimate/space/query';
+            $esUrl = $this->config->item('new_es_interface') . '/estimate/space/query';
 
             $cycleLength = $allTimingInfo['cycle'];
             if (empty($cycleLength)) {
@@ -820,7 +820,7 @@ class TimingAdaptionAreaService extends BaseService
             "startTime" => $startTime,
         ];
 
-        $esUrl = $this->config->item('es_interface') . '/estimate/space/query';
+        $esUrl = $this->config->item('new_es_interface') . '/estimate/space/query';
 
         $cycleLength = $timingInfo['cycle'];
         $offset = $timingInfo['offset'];
@@ -1103,7 +1103,7 @@ class TimingAdaptionAreaService extends BaseService
             "startTime" => $startTime,
         ];
 
-        $esUrl = $this->config->item('es_interface') . '/estimate/scatter/query';
+        $esUrl = $this->config->item('new_es_interface') . '/estimate/scatter/query';
 
         $detail = httpPOST($esUrl, $esData, 0, 'json');
         if (!$detail) {
@@ -1215,7 +1215,7 @@ class TimingAdaptionAreaService extends BaseService
             "startTime" => $startTime,
         ];
 
-        $esUrl = $this->config->item('es_interface') . '/estimate/queue/query';
+        $esUrl = $this->config->item('new_es_interface') . '/estimate/queue/query';
 
         $detail = httpPOST($esUrl, $esData, 0, 'json');
         if (!$detail) {
