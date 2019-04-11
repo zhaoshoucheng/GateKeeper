@@ -49,8 +49,7 @@ if ($development == 2) {
     $signal_mis_ext    = '/its/signal-mis';
 
     // signal_light
-    $signal_light_server = '10.148.28.205';
-    $signal_light_port = '8001';
+    $signal_light_server = 'http://10.88.128.40:8000/ipd-cloud/signal-platform';
 
     // es
     $es_server = '10.85.128.208';
@@ -133,8 +132,7 @@ if ($development == 2) {
     $signal_mis_ext    = '/signal-mis';
 
     // signal_light
-    $signal_light_server = '10.148.28.204';
-    $signal_light_port = '8001';
+    $signal_light_server = 'http://10.148.28.204:8001';
 
     // es
     $es_server = '10.89.236.25';
@@ -220,7 +218,7 @@ $config['timing_interface'] = 'http://' . $timing_server . $temp_timing_port . $
 $config['signal_mis_interface'] = 'http://' . $signal_mis_server . $signal_mis_port . $signal_mis_ext;
 
 // signal-light接口地址
-$config['signal_light_interface'] = 'http://' . $signal_light_server . $signal_light_port;
+$config['signal_light_interface'] = $signal_light_server;
 
 // 实时指标接口地址
 $config['es_interface'] = 'http://' . $es_server . $es_port . $es_ext;
