@@ -36,6 +36,7 @@ $config['white_token_clientip_escape'] = [
     '10.161.74.50' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //realtimealarm
 
     '100.69.176.20' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //diyu
+    '10.88.128.45' => ["05984e73effb5fe2baeeda5e7c10be8e"], // 麒麟提供的内网机器
 ];
 
 // diyu内网token就可以登陆,仅限内网访问
