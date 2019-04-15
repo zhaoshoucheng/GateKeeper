@@ -85,7 +85,7 @@ class EvaluateService extends BaseService
         $lng = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
         $lat = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
         return [
-            'dataList' => $junctionCollection->get(),
+            'dataList' => $dataList,
             'center' => [
                 'lng' => $lng,
                 'lat' => $lat,
