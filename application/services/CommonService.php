@@ -16,6 +16,7 @@ use Didi\Cloud\Collection\Collection;
  */
 class CommonService extends BaseService
 {
+    public $evaluateService;
     public function __construct()
     {
         parent::__construct();
@@ -23,6 +24,7 @@ class CommonService extends BaseService
         // load model
         $this->load->model('waymap_model');
         $this->load->model('common_model');
+        $this->evaluateService = new EvaluateService();
     }
 
     /**
@@ -282,5 +284,66 @@ class CommonService extends BaseService
         }
 
         return $result;
+    }
+
+    /**
+     * 获取全城命中围栏的点
+     * @param $coods
+     */
+    public function getJunctionInPolygon($cityId,$coods)
+    {
+        $junctionList = $this->evaluateService->getCityJunctionList(["city_id"=>$cityId]);
+        $coodsArr = [];
+        foreach (explode(";", $coods) as $cood) {
+            list($lng, $lat) = explode(",", $cood);
+            $coodsArr[] = ["lng" => $lng, "lat" => $lat];
+        }
+        $newJunctionList = [];
+        foreach ($junctionList["dataList"] as $item){
+            if($this->isPointInPolygon($coodsArr, $item)){
+                $newJunctionList[] = $item;
+            }
+        }
+        /*foreach ($newJunctionList as $item){
+            print_r("INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '55', '".$item["logic_junction_id"]."', '0', '2019-04-15 14:23:08', '2019-04-15 14:23:08', '1970-01-01 00:00:00');");
+        }
+        exit;*/
+        return $newJunctionList;
+    }
+
+    /**
+     * 验证区域范围
+     * @param array $coordArray 区域
+     * @param array $point 验证点
+     * @return bool
+     */
+    function isPointInPolygon($coordArray, $point)
+    {
+        if (!is_array($coordArray) || !is_array($point)) return false;
+        $maxY = $maxX = 0;
+        $minY = $minX = 9999;
+        foreach ($coordArray as $item) {
+            if ($item['lng'] > $maxX) $maxX = $item['lng'];
+            if ($item['lng'] < $minX) $minX = $item['lng'];
+            if ($item['lat'] > $maxY) $maxY = $item['lat'];
+            if ($item['lat'] < $minY) $minY = $item['lat'];
+            $vertx[] = $item['lng'];
+            $verty[] = $item['lat'];
+        }
+        if ($point['lng'] < $minX || $point['lng'] > $maxX || $point['lat'] < $minY || $point['lat'] > $maxY) {
+            return false;
+        }
+
+        $c = false;
+        $nvert = count($coordArray);
+        $testx = $point['lng'];
+        $testy = $point['lat'];
+        for ($i = 0, $j = $nvert - 1; $i < $nvert; $j = $i++) {
+            if ((($verty[$i] > $testy) != ($verty[$j] > $testy))
+                && ($testx < ($vertx[$j] - $vertx[$i]) * ($testy - $verty[$i]) / ($verty[$j] - $verty[$i]) + $vertx[$i])
+            )
+                $c = !$c;
+        }
+        return $c;
     }
 }
