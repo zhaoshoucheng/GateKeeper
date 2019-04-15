@@ -949,19 +949,30 @@ class EvaluateService extends BaseService
     // 将result指标空的地方全部填充为0，这个和PM对过了
     private function fillZeroResult($result)
     {
-        // 统一将average.base, average.evaluate, base,evaluate做
-        $result['average']['base'] = $this->fillEmptyToZero($result['average']['base']);
-        foreach ($result['average']['evaluate'] as $id => $items) {
-            $result['average']['evaluate'][$id] = $this->fillEmptyToZero($result['average']['evaluate'][$id]);
+        if (isset($result['average']['base'])) {
+            $result['average']['base'] = $this->fillEmptyToZero($result['average']['base']);
         }
-        foreach ($result['base'] as $date => $val) {
-            $result['base'][$date] = $this->fillEmptyToZero($val);
-        }
-        foreach ($result['evaluate'] as $id => $items) {
-            foreach ($result['evaluate'][$id] as $date => $val) {
-                $result['evaluate'][$id][$date] = $this->fillEmptyToZero($val);
+
+        if (isset($result['average']['evaluate'])) {
+            foreach ($result['average']['evaluate'] as $id => $items) {
+                $result['average']['evaluate'][$id] = $this->fillEmptyToZero($result['average']['evaluate'][$id]);
             }
         }
+
+        if (isset($result['base'])) {
+            foreach ($result['base'] as $date => $val) {
+                $result['base'][$date] = $this->fillEmptyToZero($val);
+            }
+        }
+
+        if (isset($result['evaluate'])) {
+            foreach ($result['evaluate'] as $id => $items) {
+                foreach ($result['evaluate'][$id] as $date => $val) {
+                    $result['evaluate'][$id][$date] = $this->fillEmptyToZero($val);
+                }
+            }
+        }
+
         return $result;
 
     }
