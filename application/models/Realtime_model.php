@@ -32,7 +32,7 @@ class Realtime_model extends CI_Model
         // load model
         $this->load->model('redis_model');
         $this->load->model('common_model');
-        $this->quotaCityIds = $this->common_model->getV5DMPCityID();
+
     }
 
     /**
@@ -43,6 +43,8 @@ class Realtime_model extends CI_Model
      */
     public function searchDetail($data, $scroll = true)
     {
+        $this->quotaCityIds = $this->common_model->getV5DMPCityID();
+
         $baseUrl = $this->esUrl;
         if(!empty($data["cityId"]) && in_array($data["cityId"],$this->quotaCityIds)){
             $baseUrl = $this->newEsUrl;
@@ -83,6 +85,8 @@ class Realtime_model extends CI_Model
      */
     public function searchQuota($data)
     {
+        $this->quotaCityIds = $this->common_model->getV5DMPCityID();
+
         $baseUrl = $this->esUrl;
         if(!empty($data["cityId"]) && in_array($data["cityId"],$this->quotaCityIds)){
             $baseUrl = $this->newEsUrl;

@@ -270,7 +270,7 @@ class Realtimewarning_model extends CI_Model
             //获取实时报警表数据
             $data['date'] = $date;
             $data['city_id'] = $cityId;
-            sleep(5);   //防止延迟数据读取为0
+            sleep(20);   //防止延迟数据读取为0
             $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getRealTimeAlarmsInfoFromEs||grep_message=grep '_com_http_success' /home/xiaoju/php7/logs/cloud/itstool/didi.log | grep 'arius' | grep '{$hour}' | grep 'city_id\":{\"query\":{$cityId},'\n\r";
             $realTimeAlarmsInfoResult = [];

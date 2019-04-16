@@ -116,10 +116,15 @@ if (!function_exists('_exception_handler')) {
         $_error =& load_class('Exceptions', 'core');
         $_error->log_exception('error', 'Exception: ' . $exception->getMessage(), $exception->getFile(), $exception->getLine());
 
+        $traceid = "";
+        if(function_exists("get_traceid")){
+            $traceid = get_traceid();
+        }
         $output = [
             'errno' => $exception->getCode(),
             'errmsg' => $exception->getMessage(),
             'data' => [],
+            'traceid' => $traceid,
         ];
 
         if (ENVIRONMENT == 'development') {

@@ -85,7 +85,7 @@ class EvaluateService extends BaseService
         $lng = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
         $lat = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
         return [
-            'dataList' => $junctionCollection->get(),
+            'dataList' => $dataList,
             'center' => [
                 'lng' => $lng,
                 'lat' => $lat,
@@ -726,6 +726,63 @@ class EvaluateService extends BaseService
         }
 
         return $all;
+    }
+
+
+    public function quotaEvaluate($params)
+    {
+        $cityId          = $params['city_id'];
+        $quotaKey        = $params['quota_key'];
+        $logicJunctionId = $params['logic_junction_id'];
+        $dates        = [$params['date']];
+
+
+        $select = 'logic_junction_id, logic_flow_id, date, hour, ' . $quotaKey;
+        $data = $this->flowDurationV6_model->getQuotaEvaluateCompare(
+            $cityId, $logicJunctionId, "", $dates, '', '', $select, 'detail'
+        );
+
+        if (!$data) {
+            return [];
+        }
+
+        $result = [];
+
+        // 指标配置
+        $quotaConf = $this->config->item('real_time_quota');
+
+        // 平均对比数组
+        $result['data']     = [];
+
+        foreach ($data as $k => $v) {
+            $logicFlowId = $v['logic_flow_id'];
+            if (!isset($result['data'][$logicFlowId])) {
+                $result['data'][$logicFlowId] = [];
+            }
+
+            $result['data'][$logicFlowId][] = [
+                $v[$quotaKey], $v['hour']
+            ];
+        }
+
+        // 获取路口信息
+        $junctionsInfo  = $this->waymap_model->getJunctionInfo($logicJunctionId);
+        $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
+
+        // 获取路口相位信息
+        $flowsInfo = $this->waymap_model->getFlowsInfo($logicJunctionId);
+        $result['flowsInfo'] = $flowsInfo;
+
+        foreach ($result['data'] as $flowId => $vals) {
+            $result['data'][$flowId] = $this->fillEmptyToZero($vals);
+        }
+        // 基本信息
+        $result['info'] = [
+            'junction_name' => $junctionIdName[$logicJunctionId] ?? '',
+            'quota_name' => $quotaConf[$quotaKey]['name'],
+            'quota_unit' => $quotaConf[$quotaKey]['unit'],
+        ];
+        return $result;
     }
 
     /**

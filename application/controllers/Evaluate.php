@@ -157,6 +157,29 @@ class Evaluate extends MY_Controller
         $this->response($data);
     }
 
+    // 指标评估
+    public function quotaEvaluate()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'quota_key' => 'required|in_list[' . implode(',', array_keys($this->config->item('real_time_quota'))) . ']',
+            'logic_junction_id' => 'required|min_length[1]',
+            'date' => 'required|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ]);
+
+        $data = [
+            'city_id'     => intval($params['city_id']),
+            'quota_key'   => strip_tags(trim($params['quota_key'])),
+            'logic_junction_id' => strip_tags(trim($params['logic_junction_id'])),
+            'date' => $params['date']
+        ];
+
+        $result = $this->evaluateService->quotaEvaluate($data);
+        $this->response($result);
+
+    }
 
 
     /**
