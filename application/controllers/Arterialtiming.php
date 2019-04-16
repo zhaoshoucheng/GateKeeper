@@ -41,28 +41,49 @@ class Arterialtiming extends MY_Controller
         $date = $params['dates'];
 //        $date = json_decode($date,true);
         $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,$date[0]);
+
+        //求得flowID对应的junctionID,为的是补起 空路口对应配时
+        $flowJunctionMap = [];
+        foreach ($timingInfo as $junctionID=>$item){
+            $movementTiming = $item['timing_info']['movement_timing'];
+            if(!empty($movementTiming)){
+                foreach ($movementTiming as $flowTiming){
+                    $flowJunctionMap[$flowTiming['logic_flow_id']] = $junctionID;
+                }
+            }
+        }
         $finalTimingInfo=[];
         foreach ($data as $d){
             if(isset($timingInfo[$d['logic_junction_id']])){
                 $finalTimingInfo[$d['logic_junction_id']] = $timingInfo[$d['logic_junction_id']];
             }else{
-                $finalTimingInfo[$d['logic_junction_id']] = array(
-                    array(
-                        'id'=>null,
-                        'logic_junction_id'=>$d['logic_junction_id'],
-                        'date'=>null,
-                        'timing_info'=>array(
-                            'extra_timing'=>array(
-                                'cycle'=>null,
-                                'offset'=>null,
+                //获取关联映射的路口配时信息
+                $relJunctionID = $d['logic_junction_id'];
+                if(!empty($d['flows'])){
+                    foreach ($d['flows'] as $flowID){
+                        $relJunctionID = $flowJunctionMap[$flowID];
+                    }
+                }
+                if(!empty($timingInfo[$relJunctionID])){
+                    $finalTimingInfo[$d['logic_junction_id']] = $timingInfo[$relJunctionID];
+                }else{
+                    $finalTimingInfo[$d['logic_junction_id']] = array(
+                        array(
+                            'id'=>null,
+                            'logic_junction_id'=>$d['logic_junction_id'],
+                            'date'=>null,
+                            'timing_info'=>array(
+                                'extra_timing'=>array(
+                                    'cycle'=>null,
+                                    'offset'=>null,
+                                ),
+                                'movement_timing'=>null
                             ),
-                            'movement_timing'=>array()
-                        ),
-                    )
-                );
+                        )
+                    );
+                }
             }
         }
-
         return $this->response($finalTimingInfo);
     }
 
@@ -89,8 +110,7 @@ class Arterialtiming extends MY_Controller
         if(count($selectJunctions) < 4){
             return $this->response(array(), ERR_PARAMETERS, "路口数不得小于4");
         }
-
-        $ret = $this->arterialtiming_model->getJunctionInfos($cityId,$version,$selectJunctions);
+        $ret = $this->arterialtiming_model->getJunctionFlowInfos($cityId,$version,$selectJunctions);
         if(empty($ret)){
             com_log_warning('_itstool_arterialtiming_queryArterialJunctionInfo_getJunctionInfos_empty', 0, '', compact("params","ret"));
             return $this->response(array(), ERR_REQUEST_WAYMAP_API, "路网服务异常");
@@ -99,7 +119,7 @@ class Arterialtiming extends MY_Controller
         foreach ($selectJunctions as $k){
             foreach ($ret['junctions_info'] as $rk => $rv){
                 if($k == $rk){
-                    $rv['logic_junction_id'] = $rk;
+                    $rv['logic_junction_id'] = (string)$rk;
                     $sortJunctions[]=$rv;
                 }
             }

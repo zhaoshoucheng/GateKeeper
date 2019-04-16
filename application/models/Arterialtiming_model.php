@@ -89,6 +89,175 @@ class Arterialtiming_model extends CI_Model
         return $finalRet;
     }
 
+    //获取选中路口的flowIds
+    public function getJunctionFlowInfos($cityID,$version,$selectJunctions){
+        //去掉首尾路口请求原接口数据
+        $result = $this->getJunctionInfos($cityID,$version,array_slice($selectJunctions,1,count($selectJunctions)-1));
+        //追加flow信息
+        $firstJunctionID = $selectJunctions[0];
+        $secondJunctionID = $selectJunctions[1];
+        $lastPreJunctionID = $selectJunctions[count($selectJunctions)-2];
+        $lastJunctionID = $selectJunctions[count($selectJunctions)-1];
+
+        //正向追加第一个路口
+        $firstForwardFlows = [];
+        $juncMovements = $this->waymap_model->getFlowMovement($cityID, $secondJunctionID, 'all', 1);
+        foreach ($juncMovements as $item) {
+            if ($item['junction_id'] == $secondJunctionID
+                && $item['phase_id'] != "-1"
+                && $item['upstream_junction_id'] == $firstJunctionID) {
+                $firstForwardFlows = $item;
+                break;
+            }
+        }
+        //正向追加最后一个路口
+        $lastForwardFlows = [];
+        try{
+            $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastJunctionID, 'all', 1);
+            foreach ($juncMovements as $item) {
+                if ($item['junction_id'] == $lastJunctionID
+                    && $item['phase_id'] != "-1"
+                    && $item['upstream_junction_id'] == $lastPreJunctionID) {
+                    $lastForwardFlows = $item;
+                    break;
+                }
+            }
+        }catch (\Exception $e){
+            $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastPreJunctionID, 'all', 1);
+            foreach ($juncMovements as $item) {
+                if ($item['junction_id'] == $lastPreJunctionID
+                    && $item['phase_id'] != "-1"
+                    && ($item['downstream_junction_id'] == $lastJunctionID ||
+                        $item['upstream_junction_id'] == $lastJunctionID)) {
+                    $lastForwardFlows = $item;
+                    break;
+                }
+            }
+        }
+        $firstBackwardFlows = [];
+        $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastPreJunctionID, 'all', 1);
+        foreach ($juncMovements as $item) {
+            if ($item['junction_id'] == $lastPreJunctionID
+                && $item['phase_id'] != "-1"
+                && $item['upstream_junction_id'] == $lastJunctionID) {
+                $firstBackwardFlows = $item;
+                break;
+            }
+        }
+
+        $lastBackwardFlows = [];
+        try {
+            $juncMovements = $this->waymap_model->getFlowMovement($cityID, $firstJunctionID, 'all', 1);
+            foreach ($juncMovements as $item) {
+                if ($item['junction_id'] == $firstJunctionID
+                    && $item['phase_id'] != "-1"
+                    && $item['upstream_junction_id'] == $secondJunctionID
+                ) {
+                    $lastBackwardFlows = $item;
+                    break;
+                }
+            }
+        }catch (\Exception $e){
+            $juncMovements = $this->waymap_model->getFlowMovement($cityID, $secondJunctionID, 'all', 1);
+            foreach ($juncMovements as $item) {
+                if ($item['junction_id'] == $secondJunctionID
+                    && $item['phase_id'] != "-1"
+                    && ($item['downstream_junction_id'] == $firstJunctionID
+                        ||$item['upstream_junction_id'] == $firstJunctionID)
+                ) {
+                    $lastBackwardFlows = $item;
+                    break;
+                }
+            }
+        }
+
+        //追加正向首尾路口到$result['forward_path_flows']
+        $newForwardFlow = [];
+        $newForwardFlow[] = [
+            "start_junc_id"=>$firstJunctionID,
+            "end_junc_id"=>$secondJunctionID,
+            "path_links"=>$firstForwardFlows["in_link_ids"],
+            "length"=>(int)$firstForwardFlows["in_link_length"],
+            "logic_flow"=>[
+                "logic_junction_id"=>$secondJunctionID,
+                "logic_flow_id"=>$firstForwardFlows["logic_flow_id"],
+                "inlinks"=>$firstForwardFlows["in_link_ids"],
+                "outlinks"=>$firstForwardFlows["out_link_ids"],
+                "inner_link_ids"=>$firstForwardFlows["inner_link_ids"],
+            ],
+            "ave_length"=>(int)$firstForwardFlows["in_link_length"],
+            "length_warning"=>0,
+        ];
+        foreach ($result['forward_path_flows'] as $item){
+            $newForwardFlow[] = $item;
+        }
+        $newForwardFlow[] = [
+            "start_junc_id"=>$lastPreJunctionID,
+            "end_junc_id"=>$lastJunctionID,
+            "path_links"=>$lastForwardFlows["in_link_ids"],
+            "length"=>(int)$lastForwardFlows["in_link_length"],
+            "logic_flow"=>[
+                "logic_junction_id"=>$lastJunctionID,
+                "logic_flow_id"=>$lastForwardFlows["logic_flow_id"],
+                "inlinks"=>$lastForwardFlows["in_link_ids"],
+                "outlinks"=>$lastForwardFlows["out_link_ids"],
+                "inner_link_ids"=>$lastForwardFlows["inner_link_ids"],
+            ],
+            "ave_length"=>(int)$lastForwardFlows["in_link_length"],
+            "length_warning"=>0,
+
+        ];
+
+        //追加反向首尾路口到$result['backward_path_flows']
+        $newBackwardFlow = [];
+        $newBackwardFlow[] = [
+            "start_junc_id"=>$lastJunctionID,
+            "end_junc_id"=>$lastPreJunctionID,
+            "path_links"=>$firstBackwardFlows["in_link_ids"],
+            "length"=>(int)$firstBackwardFlows["in_link_length"],
+            "logic_flow"=>[
+                "logic_junction_id"=>$lastPreJunctionID,
+                "logic_flow_id"=>$firstBackwardFlows["logic_flow_id"],
+                "inlinks"=>$firstBackwardFlows["in_link_ids"],
+                "outlinks"=>$firstBackwardFlows["out_link_ids"],
+                "inner_link_ids"=>$firstBackwardFlows["inner_link_ids"],
+            ],
+            "ave_length"=>(int)$firstBackwardFlows["in_link_length"],
+            "length_warning"=>0,
+        ];
+        foreach ($result['backward_path_flows'] as $item){
+            $newBackwardFlow[] = $item;
+        }
+        $newBackwardFlow[] = [
+            "start_junc_id"=>$secondJunctionID,
+            "end_junc_id"=>$firstJunctionID,
+            "path_links"=>$lastBackwardFlows["in_link_ids"],
+            "length"=>(int)$lastBackwardFlows["in_link_length"],
+            "logic_flow"=>[
+                "logic_junction_id"=>$firstJunctionID,
+                "logic_flow_id"=>$lastBackwardFlows["logic_flow_id"],
+                "inlinks"=>$lastBackwardFlows["in_link_ids"],
+                "outlinks"=>$lastBackwardFlows["out_link_ids"],
+                "inner_link_ids"=>$lastBackwardFlows["inner_link_ids"],
+            ],
+            "ave_length"=>(int)$lastBackwardFlows["in_link_length"],
+            "length_warning"=>0,
+        ];
+
+        //追加首尾路口到$result['junctions_info']
+        $newJunctionInfo = [];
+        $newJunctionInfo[$selectJunctions[0]] = ["name"=>"未知路口","lng"=>"","lat"=>"","node_ids"=>[],];
+        foreach ($result['junctions_info'] as $junctionID=>$item){
+            $newJunctionInfo[$junctionID] = $item;
+        }
+        $newJunctionInfo[$selectJunctions[count($selectJunctions)-1]] = ["name"=>"未知路口","lng"=>"","lat"=>"","node_ids"=>[],];
+
+        $result['junctions_info'] = $newJunctionInfo;
+        $result['forward_path_flows'] = $newForwardFlow;
+        $result['backward_path_flows'] = $newBackwardFlow;
+        return $result;
+    }
+
     public function getJunctionInfos($cityId,$version,$selectJunctions)
     {
         $ret = $this->waymap_model->getConnectPath($cityId,$version,$selectJunctions);
