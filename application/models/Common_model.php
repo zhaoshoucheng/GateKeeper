@@ -19,14 +19,14 @@ class Common_model extends CI_Model
         parent::__construct();
 
         $this->db = $this->load->database('default', true);
-        $this->dmp_db = $this->load->database('dmp_captain', true);
+
     }
 
     /**
      * 获取路口对应信号机相位信息
      * @param $junctionId
      */
-    public function getTimingMovementNames($junctionId){
+    public function getTimingMovementNames($junctionId) {
         $res = httpGET("http://10.88.128.40:8000/ipd-cloud/signal-platform/profile/base/current?junctionId=".$junctionId, []);
         $ret = json_decode($res,true);
         $flowInfos = $ret[0]["tod_schedule"][0]["tod"][0]["phase_time"][0]["flows"] ?? [];
@@ -87,6 +87,8 @@ class Common_model extends CI_Model
      */
     public function dmpSearch($table, $select = '*', $where = [], $groupby = '', $page = 0, $pagesize = 0)
     {
+        $this->dmp_db = $this->load->database('dmp_captain', true);
+
         $isExisted = $this->dmp_db->table_exists($table);
         if (!$isExisted) {
             throw new \Exception('数据表不存在', ERR_DATABASE);
