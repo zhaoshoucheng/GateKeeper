@@ -771,7 +771,10 @@ class EvaluateService extends BaseService
 
         // 获取路口相位信息
         $flowsInfo = $this->waymap_model->getFlowsInfo($logicJunctionId);
-        $result['flowsInfo'] = $flowsInfo;
+        if (isset($flowsInfo[$logicJunctionId])) {
+            $result['flowsInfo'] = $flowsInfo[$logicJunctionId];
+        }
+
 
         foreach ($result['data'] as $flowId => $vals) {
             $result['data'][$flowId] = $this->fillEmptyToZero($vals);
