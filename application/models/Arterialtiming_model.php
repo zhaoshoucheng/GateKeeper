@@ -142,12 +142,6 @@ class Arterialtiming_model extends CI_Model
                         $absDiff = 360-$absDiff;
                     }
                     $roadDegree[$absDiff] = $item;
-                    //正好匹配上中下三个路口
-                    if($item['downstream_junction_id'] == $lastButTwoJunctionID){
-                        $roadDegree = [];
-                        $roadDegree[] = $item;
-                        break;
-                    }
                 }
             }
             if (!empty($roadDegree)) {
@@ -181,6 +175,7 @@ class Arterialtiming_model extends CI_Model
             }
         }
 
+        //反向追加第一个路口
         $firstBackwardFlows = [];
         $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastPreJunctionID, 'all', 1);
         $roadDegree = [];
@@ -193,12 +188,20 @@ class Arterialtiming_model extends CI_Model
                     $absDiff = 360-$absDiff;
                 }
                 $roadDegree[$absDiff] = $item;
+                //正好匹配上中下三个路口
+                if($item['downstream_junction_id'] == $lastButTwoJunctionID){
+                    $roadDegree = [];
+                    $roadDegree[] = $item;
+                    break;
+                }
             }
         }
         if (!empty($roadDegree)) {
             ksort($roadDegree);
             $firstBackwardFlows = current($roadDegree);
         }
+
+        //反向追加最后一个路口
         $lastBackwardFlows = [];
         try {
             $juncMovements = $this->waymap_model->getFlowMovement($cityID, $firstJunctionID, 'all', 1);
