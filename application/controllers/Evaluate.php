@@ -54,10 +54,7 @@ class Evaluate extends MY_Controller
         $params = $this->input->post(null, true);
         $cityId = $params['city_id'];
         $data = $this->evaluateService->getQuotaList();
-        if ($cityId != 2){
-
-            unset($data['dataList'][count($data['dataList'])-1]);
-        }
+        unset($data['dataList'][count($data['dataList'])-1]);
 
         // 为龙华大脑专门定制的，需要有指标
         if (isset($params['from']) && $params['from'] == 'longhua') {
