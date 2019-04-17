@@ -729,6 +729,7 @@ class EvaluateService extends BaseService
     }
 
 
+    // 评估指标计算
     public function quotaEvaluate($params)
     {
         $cityId          = $params['city_id'];
@@ -736,6 +737,17 @@ class EvaluateService extends BaseService
         $logicJunctionId = $params['logic_junction_id'];
         $dates        = [$params['date']];
 
+        $func = function ($v) use($quotaKey) {
+            return $v[$quotaKey];
+        };
+        
+        // 饱和度计算是几个指标综合计算出来的
+        if ($params['quota_key'] == "saturation") {
+            $quotaKey = "queue_length, stop_delay, twice_stop_rate";
+            $func = function($v) {
+                return max($v['queue_length'] / 150, $v['stop_delay']/ 80, $v['twice_stop_rate']);
+            };
+        }
 
         $select = 'logic_junction_id, logic_flow_id, date, hour, ' . $quotaKey;
         $data = $this->flowDurationV6_model->getQuotaEvaluateCompare(
@@ -760,8 +772,9 @@ class EvaluateService extends BaseService
                 $result['data'][$logicFlowId] = [];
             }
 
+            $val = $func($v);
             $result['data'][$logicFlowId][] = [
-                $v[$quotaKey], $v['hour']
+                $val, $v['hour']
             ];
         }
 
