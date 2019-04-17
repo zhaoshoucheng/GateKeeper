@@ -740,12 +740,15 @@ class EvaluateService extends BaseService
         $func = function ($v) use($quotaKey) {
             return $v[$quotaKey];
         };
+
+        // 指标配置
+        $quotaConf = $this->config->item('real_time_quota');
         
         // 饱和度计算是几个指标综合计算出来的
         if ($params['quota_key'] == "saturation") {
             $quotaKey = "queue_length, stop_delay, twice_stop_rate";
             $func = function($v) {
-                return max($v['queue_length'] / 150, $v['stop_delay']/ 80, $v['twice_stop_rate']);
+                return round(max($v['queue_length'] / 150.0, $v['stop_delay']/ 80.0, $v['twice_stop_rate']),4);
             };
         }
 
@@ -754,14 +757,16 @@ class EvaluateService extends BaseService
             $cityId, $logicJunctionId, "", $dates, '', '', $select, 'detail'
         );
 
+        if ($params['quota_key'] == "saturation") {
+            $quotaKey = "saturation";
+        }
+
         if (!$data) {
             return [];
         }
 
         $result = [];
 
-        // 指标配置
-        $quotaConf = $this->config->item('real_time_quota');
 
         // 平均对比数组
         $result['data']     = [];
@@ -1094,6 +1099,74 @@ class EvaluateService extends BaseService
         }
 
         return $table;
+    }
+
+
+    // 下载评估的指标excel
+    public function downloadQuotaEvaluate($params, $data)
+    {
+        $fileName = "{$data['info']['junction_name']}_{$data['info']['quota_name']}_" . date('Ymd');
+
+        $objPHPExcel = new \PHPExcel();
+        $objSheet    = $objPHPExcel->getActiveSheet();
+        $objSheet->setTitle('数据');
+
+        $detailParams = [
+            ['指标名', $data['info']['quota_name']],
+            ['方向', "所有方向"],
+            ['评估时间', $params['date']],
+        ];
+
+        $detailParams[] = ['指标单位', $data['info']['quota_unit']];
+
+        $objSheet->mergeCells('A1:F1');
+        $objSheet->setCellValue('A1', $fileName);
+        $objSheet->fromArray($detailParams, null, 'A4');
+
+        $styles = $this->config->item('excel_style');
+        $objSheet->getStyle('A1')->applyFromArray($styles['title']);
+        $rows_idx = count($detailParams) + 3;
+        $objSheet->getStyle("A4:A{$rows_idx}")->getFont()->setSize(12)->setBold(true);
+
+        $line = 6 + count($detailParams);
+
+        // 输出头部
+        $table = hourRange();
+        array_unshift($table, "方向");
+        $objSheet->fromArray($table, null, 'A' . $line);
+        $cols_cnt   = count($table) - 1;
+        $objSheet->getStyle("A{$line}:" . intToChr($cols_cnt) . $line)->applyFromArray($styles['header']);
+
+        $line++;
+
+        $flowsInfo = $data['flowsInfo'];
+        // 输出内容
+        foreach ($data['data'] as $flowId => $datum) {
+            $table = [];
+            $table[] = $flowsInfo[$flowId];
+            foreach ($datum as $item) {
+                $table[] = $item[0];
+            }
+
+            $objSheet->fromArray($table, null, 'A' . $line, true);
+            $objSheet->getStyle("A{$line}:A{$line}")->applyFromArray($styles['header']);
+
+            $line++;
+        }
+
+        $objWriter = new \PHPExcel_Writer_Excel5($objPHPExcel);
+
+        header('Content-Type: application/x-xls;');
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename=' . $fileName . '.xls');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: 0'); // Date in the past
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+        ob_end_clean();
+        $objWriter->save('php://output');
+        exit();
     }
 
     /**

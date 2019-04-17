@@ -58,6 +58,17 @@ class Evaluate extends MY_Controller
 
             unset($data['dataList'][count($data['dataList'])-1]);
         }
+
+        // 为龙华大脑专门定制的，需要有指标
+        if (isset($params['from']) && $params['from'] == 'longhua') {
+            $data["dataList"][] = [
+                "name" => "饱和指数",
+                "key" => "saturation",
+                "unit" => "",
+            ];
+            $data["dataList"] = array_values($data["dataList"]);
+        }
+
         $this->response($data);
     }
 
@@ -177,6 +188,11 @@ class Evaluate extends MY_Controller
         ];
 
         $result = $this->evaluateService->quotaEvaluate($data);
+
+        if (isset($params['is_download']) && $params['is_download'] == 1) {
+            $this->evaluateService->downloadQuotaEvaluate($params, $result);
+        }
+
         $this->response($result);
 
     }
