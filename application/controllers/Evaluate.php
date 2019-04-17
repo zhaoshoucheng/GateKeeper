@@ -168,7 +168,7 @@ class Evaluate extends MY_Controller
         $this->response($data);
     }
 
-    // 指标评估
+    // 指标评估, 按照一个路口，所有方向，一天的查询走，目前只有龙华在使用
     public function quotaEvaluate()
     {
         $params = $this->input->post(null, true);
@@ -282,13 +282,7 @@ class Evaluate extends MY_Controller
             ];
         }
 
-        if ($params['quota_key'] == "saturation"){ //饱和度计算
-            $result = $this->evaluateService->saturationEvaluateCompare($data);
-        }else{
-            $result = $this->evaluateService->quotaEvaluateCompare($data);
-        }
-
-
+        $result = $this->evaluateService->quotaEvaluateCompare($data);
 
         $this->response($result);
     }
