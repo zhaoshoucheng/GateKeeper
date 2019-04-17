@@ -102,72 +102,122 @@ class Arterialtiming_model extends CI_Model
         //正向追加第一个路口
         $firstForwardFlows = [];
         $juncMovements = $this->waymap_model->getFlowMovement($cityID, $secondJunctionID, 'all', 1);
+        $roadDegree = [];
         foreach ($juncMovements as $item) {
             if ($item['junction_id'] == $secondJunctionID
                 && $item['phase_id'] != "-1"
                 && $item['upstream_junction_id'] == $firstJunctionID) {
-                $firstForwardFlows = $item;
-                break;
+                $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                if($absDiff>180){
+                    $absDiff = 360-$absDiff;
+                }
+                $roadDegree[$absDiff] = $item;
             }
         }
+        if (!empty($roadDegree)) {
+            ksort($roadDegree);
+            $firstForwardFlows = current($roadDegree);
+        }
+
+
         //正向追加最后一个路口
         $lastForwardFlows = [];
         try{
             $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastJunctionID, 'all', 1);
+            $roadDegree = [];
             foreach ($juncMovements as $item) {
                 if ($item['junction_id'] == $lastJunctionID
                     && $item['phase_id'] != "-1"
                     && $item['upstream_junction_id'] == $lastPreJunctionID) {
-                    $lastForwardFlows = $item;
-                    break;
+                    $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                    if($absDiff>180){
+                        $absDiff = 360-$absDiff;
+                    }
+                    $roadDegree[$absDiff] = $item;
                 }
+            }
+            if (!empty($roadDegree)) {
+                ksort($roadDegree);
+                $lastForwardFlows = current($roadDegree);
             }
         }catch (\Exception $e){
             $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastPreJunctionID, 'all', 1);
+            $roadDegree = [];
             foreach ($juncMovements as $item) {
                 if ($item['junction_id'] == $lastPreJunctionID
                     && $item['phase_id'] != "-1"
                     && ($item['downstream_junction_id'] == $lastJunctionID ||
                         $item['upstream_junction_id'] == $lastJunctionID)) {
-                    $lastForwardFlows = $item;
-                    break;
+                    $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                    if($absDiff>180){
+                        $absDiff = 360-$absDiff;
+                    }
+                    $roadDegree[$absDiff] = $item;
                 }
             }
+            if (!empty($roadDegree)) {
+                ksort($roadDegree);
+                $lastForwardFlows = current($roadDegree);
+            }
         }
+
         $firstBackwardFlows = [];
         $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastPreJunctionID, 'all', 1);
+        $roadDegree = [];
         foreach ($juncMovements as $item) {
             if ($item['junction_id'] == $lastPreJunctionID
                 && $item['phase_id'] != "-1"
                 && $item['upstream_junction_id'] == $lastJunctionID) {
-                $firstBackwardFlows = $item;
-                break;
+                $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                if($absDiff>180){
+                    $absDiff = 360-$absDiff;
+                }
+                $roadDegree[$absDiff] = $item;
             }
         }
-
+        if (!empty($roadDegree)) {
+            ksort($roadDegree);
+            $firstBackwardFlows = current($roadDegree);
+        }
         $lastBackwardFlows = [];
         try {
             $juncMovements = $this->waymap_model->getFlowMovement($cityID, $firstJunctionID, 'all', 1);
+            $roadDegree = [];
             foreach ($juncMovements as $item) {
                 if ($item['junction_id'] == $firstJunctionID
                     && $item['phase_id'] != "-1"
                     && $item['upstream_junction_id'] == $secondJunctionID
                 ) {
-                    $lastBackwardFlows = $item;
-                    break;
+                    $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                    if($absDiff>180){
+                        $absDiff = 360-$absDiff;
+                    }
+                    $roadDegree[$absDiff] = $item;
                 }
+            }
+            if (!empty($roadDegree)) {
+                ksort($roadDegree);
+                $lastBackwardFlows = current($roadDegree);
             }
         }catch (\Exception $e){
             $juncMovements = $this->waymap_model->getFlowMovement($cityID, $secondJunctionID, 'all', 1);
+            $roadDegree = [];
             foreach ($juncMovements as $item) {
                 if ($item['junction_id'] == $secondJunctionID
                     && $item['phase_id'] != "-1"
                     && ($item['downstream_junction_id'] == $firstJunctionID
                         ||$item['upstream_junction_id'] == $firstJunctionID)
                 ) {
-                    $lastBackwardFlows = $item;
-                    break;
+                    $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
+                    if($absDiff>180){
+                        $absDiff = 360-$absDiff;
+                    }
+                    $roadDegree[$absDiff] = $item;
                 }
+            }
+            if (!empty($roadDegree)) {
+                ksort($roadDegree);
+                $lastBackwardFlows = current($roadDegree);
             }
         }
 
