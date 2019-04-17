@@ -54,10 +54,18 @@ class Evaluate extends MY_Controller
         $params = $this->input->post(null, true);
         $cityId = $params['city_id'];
         $data = $this->evaluateService->getQuotaList();
-        if ($cityId != 2){
+        unset($data['dataList'][count($data['dataList'])-1]);
 
-            unset($data['dataList'][count($data['dataList'])-1]);
+        // 为龙华大脑专门定制的，需要有指标
+        if (isset($params['from']) && $params['from'] == 'longhua') {
+            $data["dataList"][] = [
+                "name" => "饱和指数",
+                "key" => "saturation",
+                "unit" => "",
+            ];
+            $data["dataList"] = array_values($data["dataList"]);
         }
+
         $this->response($data);
     }
 
@@ -157,7 +165,7 @@ class Evaluate extends MY_Controller
         $this->response($data);
     }
 
-    // 指标评估
+    // 指标评估, 按照一个路口，所有方向，一天的查询走，目前只有龙华在使用
     public function quotaEvaluate()
     {
         $params = $this->input->post(null, true);
@@ -177,6 +185,11 @@ class Evaluate extends MY_Controller
         ];
 
         $result = $this->evaluateService->quotaEvaluate($data);
+
+        if (isset($params['is_download']) && $params['is_download'] == 1) {
+            $this->evaluateService->downloadQuotaEvaluate($params, $result);
+        }
+
         $this->response($result);
 
     }
@@ -266,13 +279,7 @@ class Evaluate extends MY_Controller
             ];
         }
 
-        if ($params['quota_key'] == "saturation"){ //饱和度计算
-            $result = $this->evaluateService->saturationEvaluateCompare($data);
-        }else{
-            $result = $this->evaluateService->quotaEvaluateCompare($data);
-        }
-
-
+        $result = $this->evaluateService->quotaEvaluateCompare($data);
 
         $this->response($result);
     }
