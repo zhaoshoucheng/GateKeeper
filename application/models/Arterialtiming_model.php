@@ -96,6 +96,8 @@ class Arterialtiming_model extends CI_Model
         //追加flow信息
         $firstJunctionID = $selectJunctions[0];
         $secondJunctionID = $selectJunctions[1];
+        $thirdJunctionID = $selectJunctions[2] ?? "";
+        $lastButTwoJunctionID = $selectJunctions[count($selectJunctions)-3] ?? "";
         $lastPreJunctionID = $selectJunctions[count($selectJunctions)-2];
         $lastJunctionID = $selectJunctions[count($selectJunctions)-1];
 
@@ -112,6 +114,12 @@ class Arterialtiming_model extends CI_Model
                     $absDiff = 360-$absDiff;
                 }
                 $roadDegree[$absDiff] = $item;
+                //正好匹配上中下三个路口
+                if($item['downstream_junction_id'] == $thirdJunctionID){
+                    $roadDegree = [];
+                    $roadDegree[] = $item;
+                    break;
+                }
             }
         }
         if (!empty($roadDegree)) {
@@ -134,6 +142,12 @@ class Arterialtiming_model extends CI_Model
                         $absDiff = 360-$absDiff;
                     }
                     $roadDegree[$absDiff] = $item;
+                    //正好匹配上中下三个路口
+                    if($item['downstream_junction_id'] == $lastButTwoJunctionID){
+                        $roadDegree = [];
+                        $roadDegree[] = $item;
+                        break;
+                    }
                 }
             }
             if (!empty($roadDegree)) {
@@ -153,6 +167,12 @@ class Arterialtiming_model extends CI_Model
                         $absDiff = 360-$absDiff;
                     }
                     $roadDegree[$absDiff] = $item;
+                    //正好匹配上中下三个路口
+                    if($item['downstream_junction_id'] == $lastButTwoJunctionID){
+                        $roadDegree = [];
+                        $roadDegree[] = $item;
+                        break;
+                    }
                 }
             }
             if (!empty($roadDegree)) {
