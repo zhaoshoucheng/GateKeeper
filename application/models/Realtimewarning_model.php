@@ -274,12 +274,7 @@ class Realtimewarning_model extends CI_Model
             $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
 
             //验证自适应城市无指标
-            $this->load->model('common_model');
-            $quotaCityIds = $this->common_model->getV5DMPCityID();
-            if(empty($realTimeAlarmsInfoResultOrigal) && in_array($cityId,$quotaCityIds)){
-                com_log_warning('getRealTimeAlarmsInfoFromEs_empty', 0, "getRealTimeAlarmsInfoFromEs_empty",
-                    ["count"=>count($realTimeAlarmsInfoResultOrigal),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
-            }
+            com_log_notice('getRealTimeAlarmsInfoFromEs_empty', ["count"=>count($realTimeAlarmsInfoResultOrigal),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getRealTimeAlarmsInfoFromEs||grep_message=grep '_com_http_success' /home/xiaoju/php7/logs/cloud/itstool/didi.log | grep 'arius' | grep '{$hour}' | grep 'city_id\":{\"query\":{$cityId},'\n\r";
             $realTimeAlarmsInfoResult = [];
             foreach ($realTimeAlarmsInfoResultOrigal as $item) {
