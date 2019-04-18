@@ -67,7 +67,7 @@ class Alarmanalysis_model extends CI_Model
         $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';
 
         // where last_time
-        $json .= ',{"match":{"last_time":{"query":"' . $lastTime . '","type":"phrase"}}}';
+        $json .= ',{"range":{"last_time":{"from":"'.$lastTime.'","to":null,"include_lower":true,"include_upper":true}}}';
 
         $json .= ']}}}}}';
 

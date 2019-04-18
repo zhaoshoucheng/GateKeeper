@@ -115,6 +115,21 @@ class Realtimewarning extends Inroute_Controller
         return;
     }
 
+    /**
+     * 拦截 特殊城市且非指定ip请求
+     * @param $cityID
+     * @return bool
+     */
+    private function alarmV2Auth($cityID){
+        $cityIDs = $this->config->item('alarm_v2_city_ids');
+        $clientIPs = $this->config->item('alarm_v2_client_ips');
+        $remoteIP = $_SERVER["REMOTE_ADDR"];
+        if(in_array($cityID,$cityIDs) && !in_array($remoteIP,$clientIPs)){
+            return false;
+        }
+        return true;
+    }
+
     public function escallback()
     {
         $params   = array_merge($this->input->get(), $this->input->post());
@@ -138,12 +153,19 @@ class Realtimewarning extends Inroute_Controller
         if (ENVIRONMENT != 'development') {
             $this->authToken($params);
         }
-
         $hour    = $params["hour"];
         $date    = $params["date"];
         $cityId  = $params["city_id"];
         $traceId = $params["trace_id"];
         $uid     = $params["uid"];
+        if(!$this->alarmV2Auth($cityId)){
+            $output = [
+                'errno' => ERR_PARAMETERS,
+                'errmsg' => "alarmV2Auth",
+            ];
+            echo json_encode($output);
+            return;
+        }
 
         //参数强校验
         if (!preg_match('/\d{1,2}:\d{1,2}:\d{1,2}/ims', $hour)) {

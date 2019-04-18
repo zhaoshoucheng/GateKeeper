@@ -101,7 +101,6 @@ if ($development == 2) {
     //新版指标开城列表
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
 } else {
-
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
     // 路网接口服务器端口
@@ -714,7 +713,6 @@ $config['back_timing_roll'] = [
     '13114526633', '15589979969', '15011161396', '15210612210', '15893024010', '18661627981',
 ];
 
-
 // 定义tracelog的action
 $config['action_log_map'] = [
     'adapt_area_switch_edit' => '自适应区域配时开关修改',
@@ -832,3 +830,6 @@ $config['data_engine'] = 'elastic';
 //新版指标开城列表
 $config['quota_v2_city_ids'] = $quota_v2_city_ids;
 
+//新版报警开城列表及ip限制
+$config['alarm_v2_city_ids'] = [];
+$config['alarm_v2_client_ips'] = ["100.90.165.32",];    //默认沙盒触发
