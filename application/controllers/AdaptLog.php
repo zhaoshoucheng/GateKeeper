@@ -81,6 +81,32 @@ class AdaptLog extends MY_Controller{
         exit;
     }
 
+    public function itstool()
+    {
+        if(!$this->access()){
+            echo "access deny";exit;
+        }
+        $params = $this->input->get(NULL,true);
+        $params["page_size"] = $params["page_size"]??100;
+        $params["trace_id"] = $params["trace_id"]??"";
+        $params["type"] = 2;
+        list($totalRow,$rowList)=$this->adaptionLogService->pageList($params);
+        $this->load->library('pagination');
+        $config['base_url'] = '/signalpro/api/AdaptLog/itstool';
+        $config['attributes'] = array('class' => 'myclass');
+        $config['suffix'] = "&trace_id=".$params["trace_id"];
+        $config['total_rows'] = $totalRow;
+        $config['per_page'] = $params["page_size"];   //每页条数
+        $config['page_query_string'] = TRUE;
+        $this->pagination->initialize($config);
+
+        $data = [];
+        $data["page"] = $this->pagination->create_links();
+        $data["list"] = $rowList;
+        $this->load->view('adaptlog/itstool',$data);
+        exit;
+    }
+
     public function junction()
     {
         if(!$this->access()){

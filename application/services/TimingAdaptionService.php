@@ -269,7 +269,7 @@ class TimingAdaptionService extends BaseService
         $hour = $this->helperService->getLastestHour($cityId);
         $res = $this->realtime_model->getFlowsInFlowIds($cityId, $hour, $logicJunctionId, $logicFlowIds);
         if (!$res) {
-            com_log_warning('getTwiceStopRate_getFlowsInFlowIds_error', 0, "数据获取失败", array($cityId, $hour, $logicJunctionId, $logicFlowIds));
+            com_log_notice('getTwiceStopRate_getFlowsInFlowIds_error', array($cityId, $hour, $logicJunctionId, $logicFlowIds));
             return [];
         }
 

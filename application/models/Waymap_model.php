@@ -484,6 +484,11 @@ class Waymap_model extends CI_Model
             return array_column($v, 'phase_name', 'logic_flow_id');
         }, $res);
 
+        // 调用相位接口出错
+        if(count($logic_junction_ids)>0 && count($res)==0){
+            com_log_warning('mapJunction_phase_empty', 0, "mapJunction_phase_empty",
+                ["junctionIds"=>count($logic_junction_ids),"res"=>count($res),]);
+        }
         return $res;
     }
 

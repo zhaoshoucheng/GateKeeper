@@ -404,6 +404,18 @@ if( ! function_exists('com_log_warning'))
      */
     function com_log_warning($dltag,$errno=0,$errmsg='',$extra=[])
     {
+        $params = [
+            "type"=>2,
+            "rel_id"=>"",
+            "log"=>mb_substr(json_encode(["errmsg"=>$errmsg,"extra"=>$extra]),0,2000),
+            "trace_id"=>get_traceid(),
+            "dltag"=>$dltag,
+            "log_time"=>date("Y-m-d H:i:s"),
+        ];
+        $CI =& get_instance();
+        $CI->load->model('adapt_model');
+        $CI->adapt_model->insertAdaptLog($params);
+
         static $_log;
         $_log =& load_class('Log');
         $args = [];
