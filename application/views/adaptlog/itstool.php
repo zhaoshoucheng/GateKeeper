@@ -78,7 +78,7 @@
 		foreach ($list as $row) {
 			?>
 			<tr>
-				<td><?php echo $row["trace_id"]?></td>
+				<td><a target="_blank" href="http://bamai.xiaojukeji.com/search/trace?key=<?php echo $row["trace_id"]?>&index=bamai-biz-zhuanche&tagtype=requesttopo"><?php echo $row["trace_id"]?></a></td>
 				<td><?php echo $row["dltag"]?></td>
 				<td><?php echo $row["log"]?></td>
 				<td><?php echo $row["log_time"]?></td>

@@ -272,7 +272,11 @@ class Realtimewarning_model extends CI_Model
             $data['city_id'] = $cityId;
             sleep(20);   //防止延迟数据读取为0
             $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
-            if(empty($realTimeAlarmsInfoResultOrigal)){
+
+            //验证自适应城市无指标
+            $this->load->model('common_model');
+            $quotaCityIds = $this->common_model->getV5DMPCityID();
+            if(empty($realTimeAlarmsInfoResultOrigal) && in_array($cityId,$quotaCityIds)){
                 com_log_warning('getRealTimeAlarmsInfoFromEs_empty', 0, "getRealTimeAlarmsInfoFromEs_empty",
                     ["count"=>count($realTimeAlarmsInfoResultOrigal),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
             }
