@@ -17,7 +17,6 @@ class Common_model extends CI_Model
     public function __construct()
     {
         parent::__construct();
-
         $this->db = $this->load->database('default', true);
 
     }
@@ -118,6 +117,7 @@ class Common_model extends CI_Model
      */
     public function getV5DMPCityID()
     {
+        //return $this->getAdaptCityIDS();
         $table = 'dmp_city_config';
         $select = 'city_id, city_name';
         $where = [
@@ -127,6 +127,33 @@ class Common_model extends CI_Model
         ];
 
         $res = $this->dmpSearch($table, $select, $where);
+        if (!$res) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($res as $k=>$v) {
+            $result[] = (int)$v['city_id'];
+        }
+        return $result;
+    }
+
+
+    /**
+     * 获取实时配时开城列表
+     * @param $cityId long 城市ID
+     * @return mixed
+     */
+    public function getAdaptCityIDS()
+    {
+        $table = 'open_city';
+        $select = 'city_id, city_name';
+        $where = [
+            'is_deleted'   => "0",
+            'open_real_type1' => "1",
+        ];
+
+        $res = $this->search($table, $select, $where);
         if (!$res) {
             return [];
         }
