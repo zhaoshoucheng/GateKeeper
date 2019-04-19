@@ -64,6 +64,14 @@ class Road_model extends CI_Model
      */
     public function getRoadsByRoadID($roadID, $select = '*')
     {
+        if($roadID=="93c7d896d22fd3e8630600a64d8981af"){
+            return [
+                "forward_in_junctionid"=>"-1103784",
+                "forward_out_junctionid"=>"2017030116_1106883",
+                "backward_in_junctionid"=>"2017030116_1106883",
+                "backward_out_junctionid"=>"-1126362",
+            ];
+        }
         $res = $this->db->select($select)
             ->from($this->tb)
             ->where('road_id', $roadID)
