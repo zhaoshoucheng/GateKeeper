@@ -5,6 +5,10 @@
 # date:    2018-06-29
 ********************************************/
 
+/**
+ * Class Arterialtiming_model
+ * @property \Road_model $road_model
+ */
 class Arterialtiming_model extends CI_Model
 {
     private $tb = '';
@@ -15,6 +19,7 @@ class Arterialtiming_model extends CI_Model
         parent::__construct();
         $this->load->model('timing_model');
         $this->load->model('waymap_model');
+        $this->load->model('road_model');
     }
 
     public function getJunctionTimingInfos($data,$timePoint,$date)
@@ -94,12 +99,28 @@ class Arterialtiming_model extends CI_Model
         //去掉首尾路口请求原接口数据
         $result = $this->getJunctionInfos($cityID,$version,array_slice($selectJunctions,1,count($selectJunctions)-2));
         //追加flow信息
-        $firstJunctionID = $selectJunctions[0];
+        $forwardInJunctionID = $backwardOutJunctionID = $selectJunctions[0];
         $secondJunctionID = $selectJunctions[1];
         $thirdJunctionID = $selectJunctions[2] ?? "";
         $lastButTwoJunctionID = $selectJunctions[count($selectJunctions)-3] ?? "";
         $lastPreJunctionID = $selectJunctions[count($selectJunctions)-2];
-        $lastJunctionID = $selectJunctions[count($selectJunctions)-1];
+        $forwardOutJunctionID = $backwardInJunctionID = $selectJunctions[count($selectJunctions)-1];
+
+        //从db中获取进出路口
+        $forwardInfo = $this->road_model->getRoadsByRoadID(md5(implode(",",array_slice($selectJunctions,1,count($selectJunctions)-2))));
+        if(!empty($forwardInfo["forward_in_junctionid"])){
+            $forwardInJunctionID = $forwardInfo["forward_in_junctionid"];
+            $backwardOutJunctionID = $forwardInfo["backward_out_junctionid"];
+            $forwardOutJunctionID = $forwardInfo["forward_out_junctionid"];
+            $backwardInJunctionID = $forwardInfo["backward_in_junctionid"];
+        }
+        $backwardInfo = $this->road_model->getRoadsByRoadID(md5(implode(",",array_reverse(array_slice($selectJunctions,1,count($selectJunctions)-2)))));
+        if(!empty($backwardInfo["forward_in_junctionid"])){
+            $forwardInJunctionID = $forwardInfo["backward_out_junctionid"];
+            $backwardOutJunctionID = $forwardInfo["forward_in_junctionid"];
+            $forwardOutJunctionID = $forwardInfo["backward_in_junctionid"];
+            $backwardInJunctionID = $forwardInfo["forward_out_junctionid"];
+        }
 
         //正向追加第一个路口
         $firstForwardFlows = [];
@@ -107,7 +128,7 @@ class Arterialtiming_model extends CI_Model
         foreach ($juncMovements as $item) {
             if ($item['junction_id'] == $secondJunctionID
                 && $item['downstream_junction_id'] == $thirdJunctionID
-                && $item['upstream_junction_id'] == $firstJunctionID) {
+                && $item['upstream_junction_id'] == $forwardInJunctionID) {
                 $firstForwardFlows = $item;
                 break;
             }
@@ -118,7 +139,7 @@ class Arterialtiming_model extends CI_Model
         $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastPreJunctionID, 'all', 1);
         foreach ($juncMovements as $item) {
             if ($item['junction_id'] == $lastPreJunctionID
-                && $item['downstream_junction_id'] == $lastJunctionID
+                && $item['downstream_junction_id'] == $forwardOutJunctionID
                 && $item['upstream_junction_id'] == $lastButTwoJunctionID) {
                 $lastForwardFlows = $item;
                 break;
@@ -130,7 +151,7 @@ class Arterialtiming_model extends CI_Model
         $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastPreJunctionID, 'all', 1);
         foreach ($juncMovements as $item) {
             if ($item['junction_id'] == $lastPreJunctionID
-                && $item['upstream_junction_id'] == $lastJunctionID
+                && $item['upstream_junction_id'] == $backwardInJunctionID
                 && $item['downstream_junction_id'] == $lastButTwoJunctionID) {
                 $firstBackwardFlows = $item;
                 break;
@@ -143,7 +164,7 @@ class Arterialtiming_model extends CI_Model
         foreach ($juncMovements as $item) {
             if ($item['junction_id'] == $secondJunctionID
                 && $item['upstream_junction_id'] == $thirdJunctionID
-                && $item['downstream_junction_id'] == $firstJunctionID) {
+                && $item['downstream_junction_id'] == $backwardOutJunctionID) {
                 $lastBackwardFlows = $item;
                 break;
             }
@@ -158,7 +179,7 @@ class Arterialtiming_model extends CI_Model
         //追加正向首尾路口到$result['forward_path_flows']
         $newForwardFlow = [];
         $newForwardFlow[] = [
-            "start_junc_id"=>$firstJunctionID,
+            "start_junc_id"=>$forwardInJunctionID,
             "end_junc_id"=>$secondJunctionID,
             "path_links"=>$firstForwardFlows["in_link_ids"]??"",
             "length"=>$firstFlowLength,
@@ -177,11 +198,11 @@ class Arterialtiming_model extends CI_Model
         }
         $newForwardFlow[] = [
             "start_junc_id"=>$lastPreJunctionID,
-            "end_junc_id"=>$lastJunctionID,
+            "end_junc_id"=>$forwardOutJunctionID,
             "path_links"=>$lastForwardFlows["in_link_ids"]??"",
             "length"=>$lastFlowLength,
             "logic_flow"=>[
-                "logic_junction_id"=>$lastJunctionID,
+                "logic_junction_id"=>$forwardOutJunctionID,
                 "logic_flow_id"=>$lastForwardFlows["logic_flow_id"]??"",
                 "inlinks"=>$lastForwardFlows["in_link_ids"]??"",
                 "outlinks"=>$lastForwardFlows["out_link_ids"]??"",
@@ -195,7 +216,7 @@ class Arterialtiming_model extends CI_Model
         //追加反向首尾路口 到$result['backward_path_flows']
         $newBackwardFlow = [];
         $newBackwardFlow[] = [
-            "start_junc_id"=>$lastJunctionID,
+            "start_junc_id"=>$forwardOutJunctionID,
             "end_junc_id"=>$lastPreJunctionID,
             "path_links"=>$firstBackwardFlows["out_link_ids"]??"",
             "length"=>$lastFlowLength,
@@ -214,11 +235,11 @@ class Arterialtiming_model extends CI_Model
         }
         $newBackwardFlow[] = [
             "start_junc_id"=>$secondJunctionID,
-            "end_junc_id"=>$firstJunctionID,
+            "end_junc_id"=>$forwardInJunctionID,
             "path_links"=>$lastBackwardFlows["out_link_ids"]??"",
             "length"=>$firstFlowLength,
             "logic_flow"=>[
-                "logic_junction_id"=>$firstJunctionID,
+                "logic_junction_id"=>$forwardInJunctionID,
                 "logic_flow_id"=>$lastBackwardFlows["logic_flow_id"]??"",
                 "inlinks"=>$lastBackwardFlows["in_link_ids"]??"",
                 "outlinks"=>$lastBackwardFlows["out_link_ids"]??"",
