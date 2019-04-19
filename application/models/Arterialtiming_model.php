@@ -104,161 +104,72 @@ class Arterialtiming_model extends CI_Model
         //正向追加第一个路口
         $firstForwardFlows = [];
         $juncMovements = $this->waymap_model->getFlowMovement($cityID, $secondJunctionID, 'all', 1);
-        $roadDegree = [];
         foreach ($juncMovements as $item) {
             if ($item['junction_id'] == $secondJunctionID
-                && $item['phase_id'] != "-1"
+                && $item['downstream_junction_id'] == $thirdJunctionID
                 && $item['upstream_junction_id'] == $firstJunctionID) {
-                $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
-                if($absDiff>180){
-                    $absDiff = 360-$absDiff;
-                }
-                $roadDegree[$absDiff] = $item;
-                //正好匹配上中下三个路口
-                if($item['downstream_junction_id'] == $thirdJunctionID){
-                    $roadDegree = [];
-                    $roadDegree[] = $item;
-                    break;
-                }
+                $firstForwardFlows = $item;
+                break;
             }
         }
-        if (!empty($roadDegree)) {
-            ksort($roadDegree);
-            $firstForwardFlows = current($roadDegree);
-        }
-
 
         //正向追加最后一个路口
         $lastForwardFlows = [];
-        try{
-            $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastJunctionID, 'all', 1);
-            $roadDegree = [];
-            foreach ($juncMovements as $item) {
-                if ($item['junction_id'] == $lastJunctionID
-                    && $item['phase_id'] != "-1"
-                    && $item['upstream_junction_id'] == $lastPreJunctionID) {
-                    $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
-                    if($absDiff>180){
-                        $absDiff = 360-$absDiff;
-                    }
-                    $roadDegree[$absDiff] = $item;
-                }
-            }
-            if (!empty($roadDegree)) {
-                ksort($roadDegree);
-                $lastForwardFlows = current($roadDegree);
-            }
-        }catch (\Exception $e){
-            $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastPreJunctionID, 'all', 1);
-            $roadDegree = [];
-            foreach ($juncMovements as $item) {
-                if ($item['junction_id'] == $lastPreJunctionID
-                    && $item['phase_id'] != "-1"
-                    && ($item['downstream_junction_id'] == $lastJunctionID ||
-                        $item['upstream_junction_id'] == $lastJunctionID)) {
-                    $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
-                    if($absDiff>180){
-                        $absDiff = 360-$absDiff;
-                    }
-                    $roadDegree[$absDiff] = $item;
-                    //正好匹配上中下三个路口
-                    if($item['downstream_junction_id'] == $lastButTwoJunctionID){
-                        $roadDegree = [];
-                        $roadDegree[] = $item;
-                        break;
-                    }
-                }
-            }
-            if (!empty($roadDegree)) {
-                ksort($roadDegree);
-                $lastForwardFlows = current($roadDegree);
+        $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastPreJunctionID, 'all', 1);
+        foreach ($juncMovements as $item) {
+            if ($item['junction_id'] == $lastPreJunctionID
+                && $item['downstream_junction_id'] == $lastJunctionID
+                && $item['upstream_junction_id'] == $lastButTwoJunctionID) {
+                $lastForwardFlows = $item;
+                break;
             }
         }
 
         //反向追加第一个路口
         $firstBackwardFlows = [];
         $juncMovements = $this->waymap_model->getFlowMovement($cityID, $lastPreJunctionID, 'all', 1);
-        $roadDegree = [];
         foreach ($juncMovements as $item) {
             if ($item['junction_id'] == $lastPreJunctionID
-                && $item['phase_id'] != "-1"
-                && $item['upstream_junction_id'] == $lastJunctionID) {
-                $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
-                if($absDiff>180){
-                    $absDiff = 360-$absDiff;
-                }
-                $roadDegree[$absDiff] = $item;
-                //正好匹配上中下三个路口
-                if($item['downstream_junction_id'] == $lastButTwoJunctionID){
-                    $roadDegree = [];
-                    $roadDegree[] = $item;
-                    break;
-                }
+                && $item['upstream_junction_id'] == $lastJunctionID
+                && $item['downstream_junction_id'] == $lastButTwoJunctionID) {
+                $firstBackwardFlows = $item;
+                break;
             }
-        }
-        if (!empty($roadDegree)) {
-            ksort($roadDegree);
-            $firstBackwardFlows = current($roadDegree);
         }
 
         //反向追加最后一个路口
         $lastBackwardFlows = [];
-        try {
-            $juncMovements = $this->waymap_model->getFlowMovement($cityID, $firstJunctionID, 'all', 1);
-            $roadDegree = [];
-            foreach ($juncMovements as $item) {
-                if ($item['junction_id'] == $firstJunctionID
-                    && $item['phase_id'] != "-1"
-                    && $item['upstream_junction_id'] == $secondJunctionID
-                ) {
-                    $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
-                    if($absDiff>180){
-                        $absDiff = 360-$absDiff;
-                    }
-                    $roadDegree[$absDiff] = $item;
-                }
-            }
-            if (!empty($roadDegree)) {
-                ksort($roadDegree);
-                $lastBackwardFlows = current($roadDegree);
-            }
-        }catch (\Exception $e){
-            $juncMovements = $this->waymap_model->getFlowMovement($cityID, $secondJunctionID, 'all', 1);
-            $roadDegree = [];
-            foreach ($juncMovements as $item) {
-                if ($item['junction_id'] == $secondJunctionID
-                    && $item['phase_id'] != "-1"
-                    && ($item['downstream_junction_id'] == $firstJunctionID
-                        ||$item['upstream_junction_id'] == $firstJunctionID)
-                ) {
-                    $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
-                    if($absDiff>180){
-                        $absDiff = 360-$absDiff;
-                    }
-                    $roadDegree[$absDiff] = $item;
-                }
-            }
-            if (!empty($roadDegree)) {
-                ksort($roadDegree);
-                $lastBackwardFlows = current($roadDegree);
+        $juncMovements = $this->waymap_model->getFlowMovement($cityID, $secondJunctionID, 'all', 1);
+        foreach ($juncMovements as $item) {
+            if ($item['junction_id'] == $secondJunctionID
+                && $item['upstream_junction_id'] == $thirdJunctionID
+                && $item['downstream_junction_id'] == $firstJunctionID) {
+                $lastBackwardFlows = $item;
+                break;
             }
         }
+
+        //求ave_length平均值
+        $firstFlowLength = (ArrGet($firstForwardFlows,"in_link_length",0)
+            +ArrGet($lastBackwardFlows,"out_link_length",0))/2;
+        $lastFlowLength = (ArrGet($lastForwardFlows,"in_link_length",0)
+                +ArrGet($firstBackwardFlows,"out_link_length",0))/2;
 
         //追加正向首尾路口到$result['forward_path_flows']
         $newForwardFlow = [];
         $newForwardFlow[] = [
             "start_junc_id"=>$firstJunctionID,
             "end_junc_id"=>$secondJunctionID,
-            "path_links"=>$firstForwardFlows["in_link_ids"],
-            "length"=>(int)$firstForwardFlows["in_link_length"],
+            "path_links"=>$firstForwardFlows["in_link_ids"]??"",
+            "length"=>$firstFlowLength,
             "logic_flow"=>[
                 "logic_junction_id"=>$secondJunctionID,
-                "logic_flow_id"=>$firstForwardFlows["logic_flow_id"],
-                "inlinks"=>$firstForwardFlows["in_link_ids"],
-                "outlinks"=>$firstForwardFlows["out_link_ids"],
-                "inner_link_ids"=>$firstForwardFlows["inner_link_ids"],
+                "logic_flow_id"=>$firstForwardFlows["logic_flow_id"]??"",
+                "inlinks"=>$firstForwardFlows["in_link_ids"]??"",
+                "outlinks"=>$firstForwardFlows["out_link_ids"]??"",
+                "inner_link_ids"=>$firstForwardFlows["inner_link_ids"]??"",
             ],
-            "ave_length"=>(int)$firstForwardFlows["in_link_length"],
+            "ave_length"=>$firstFlowLength,
             "length_warning"=>0,
         ];
         foreach ($result['forward_path_flows'] as $item){
@@ -267,35 +178,35 @@ class Arterialtiming_model extends CI_Model
         $newForwardFlow[] = [
             "start_junc_id"=>$lastPreJunctionID,
             "end_junc_id"=>$lastJunctionID,
-            "path_links"=>$lastForwardFlows["in_link_ids"],
-            "length"=>(int)$lastForwardFlows["in_link_length"],
+            "path_links"=>$lastForwardFlows["in_link_ids"]??"",
+            "length"=>$lastFlowLength,
             "logic_flow"=>[
                 "logic_junction_id"=>$lastJunctionID,
-                "logic_flow_id"=>$lastForwardFlows["logic_flow_id"],
-                "inlinks"=>$lastForwardFlows["in_link_ids"],
-                "outlinks"=>$lastForwardFlows["out_link_ids"],
-                "inner_link_ids"=>$lastForwardFlows["inner_link_ids"],
+                "logic_flow_id"=>$lastForwardFlows["logic_flow_id"]??"",
+                "inlinks"=>$lastForwardFlows["in_link_ids"]??"",
+                "outlinks"=>$lastForwardFlows["out_link_ids"]??"",
+                "inner_link_ids"=>$lastForwardFlows["inner_link_ids"]??"",
             ],
-            "ave_length"=>(int)$lastForwardFlows["in_link_length"],
+            "ave_length"=>$lastFlowLength,
             "length_warning"=>0,
 
         ];
 
-        //追加反向首尾路口到$result['backward_path_flows']
+        //追加反向首尾路口 到$result['backward_path_flows']
         $newBackwardFlow = [];
         $newBackwardFlow[] = [
             "start_junc_id"=>$lastJunctionID,
             "end_junc_id"=>$lastPreJunctionID,
-            "path_links"=>$firstBackwardFlows["in_link_ids"],
-            "length"=>(int)$firstBackwardFlows["in_link_length"],
+            "path_links"=>$firstBackwardFlows["out_link_ids"]??"",
+            "length"=>$lastFlowLength,
             "logic_flow"=>[
                 "logic_junction_id"=>$lastPreJunctionID,
-                "logic_flow_id"=>$firstBackwardFlows["logic_flow_id"],
-                "inlinks"=>$firstBackwardFlows["in_link_ids"],
-                "outlinks"=>$firstBackwardFlows["out_link_ids"],
-                "inner_link_ids"=>$firstBackwardFlows["inner_link_ids"],
+                "logic_flow_id"=>$firstBackwardFlows["logic_flow_id"]??"",
+                "inlinks"=>$firstBackwardFlows["in_link_ids"]??"",
+                "outlinks"=>$firstBackwardFlows["out_link_ids"]??"",
+                "inner_link_ids"=>$firstBackwardFlows["inner_link_ids"]??"",
             ],
-            "ave_length"=>(int)$firstBackwardFlows["in_link_length"],
+            "ave_length"=>$lastFlowLength,
             "length_warning"=>0,
         ];
         foreach ($result['backward_path_flows'] as $item){
@@ -304,16 +215,16 @@ class Arterialtiming_model extends CI_Model
         $newBackwardFlow[] = [
             "start_junc_id"=>$secondJunctionID,
             "end_junc_id"=>$firstJunctionID,
-            "path_links"=>$lastBackwardFlows["in_link_ids"],
-            "length"=>(int)$lastBackwardFlows["in_link_length"],
+            "path_links"=>$lastBackwardFlows["out_link_ids"]??"",
+            "length"=>$firstFlowLength,
             "logic_flow"=>[
                 "logic_junction_id"=>$firstJunctionID,
-                "logic_flow_id"=>$lastBackwardFlows["logic_flow_id"],
-                "inlinks"=>$lastBackwardFlows["in_link_ids"],
-                "outlinks"=>$lastBackwardFlows["out_link_ids"],
-                "inner_link_ids"=>$lastBackwardFlows["inner_link_ids"],
+                "logic_flow_id"=>$lastBackwardFlows["logic_flow_id"]??"",
+                "inlinks"=>$lastBackwardFlows["in_link_ids"]??"",
+                "outlinks"=>$lastBackwardFlows["out_link_ids"]??"",
+                "inner_link_ids"=>$lastBackwardFlows["inner_link_ids"]??"",
             ],
-            "ave_length"=>(int)$lastBackwardFlows["in_link_length"],
+            "ave_length"=>$firstFlowLength,
             "length_warning"=>0,
         ];
 

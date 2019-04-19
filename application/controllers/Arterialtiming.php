@@ -7,6 +7,11 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Class Arterialtiming
+ *
+ * @property \Arterialtiming_model $arterialtiming_model
+ */
 class Arterialtiming extends MY_Controller
 {
     public function __construct()
