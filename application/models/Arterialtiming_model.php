@@ -92,7 +92,7 @@ class Arterialtiming_model extends CI_Model
     //获取选中路口的flowIds
     public function getJunctionFlowInfos($cityID,$version,$selectJunctions){
         //去掉首尾路口请求原接口数据
-        $result = $this->getJunctionInfos($cityID,$version,array_slice($selectJunctions,1,count($selectJunctions)-1));
+        $result = $this->getJunctionInfos($cityID,$version,array_slice($selectJunctions,1,count($selectJunctions)-2));
         //追加flow信息
         $firstJunctionID = $selectJunctions[0];
         $secondJunctionID = $selectJunctions[1];
