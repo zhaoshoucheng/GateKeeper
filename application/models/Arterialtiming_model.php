@@ -116,10 +116,10 @@ class Arterialtiming_model extends CI_Model
         }
         $backwardInfo = $this->road_model->getRoadsByRoadID(md5(implode(",",array_reverse(array_slice($selectJunctions,1,count($selectJunctions)-2)))));
         if(!empty($backwardInfo["forward_in_junctionid"])){
-            $forwardInJunctionID = $forwardInfo["backward_out_junctionid"];
-            $backwardOutJunctionID = $forwardInfo["forward_in_junctionid"];
-            $forwardOutJunctionID = $forwardInfo["backward_in_junctionid"];
-            $backwardInJunctionID = $forwardInfo["forward_out_junctionid"];
+            $forwardInJunctionID = $backwardInfo["backward_in_junctionid"];
+            $backwardOutJunctionID = $backwardInfo["forward_out_junctionid"];
+            $forwardOutJunctionID = $backwardInfo["backward_out_junctionid"];
+            $backwardInJunctionID = $backwardInfo["forward_in_junctionid"];
         }
 
         //正向追加第一个路口
