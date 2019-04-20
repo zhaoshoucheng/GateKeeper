@@ -64,6 +64,7 @@ class Road_model extends CI_Model
      */
     public function getRoadsByRoadID($roadID, $select = '*')
     {
+        //在table字段没有创建前先手动调整
         if($roadID=="8e7f9d4d751720ae3f65ebd2accaddd3"){
             return [
                 "forward_in_junctionid"=>"-1103784",
