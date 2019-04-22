@@ -39,29 +39,35 @@ class Arterialtiming extends MY_Controller
 
         $timePoint = $params['time_point'];
         $date = $params['dates'];
-//        $date = json_decode($date,true);
-        $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,$date[0]);
-        $finalTimingInfo=[];
-        foreach ($data as $d){
-            if(isset($timingInfo[$d['logic_junction_id']])){
-                $finalTimingInfo[$d['logic_junction_id']] = $timingInfo[$d['logic_junction_id']];
-            }else{
-                $finalTimingInfo[$d['logic_junction_id']] = array(
-                    array(
-                        'id'=>null,
-                        'logic_junction_id'=>$d['logic_junction_id'],
-                        'date'=>null,
-                        'timing_info'=>array(
-                            'extra_timing'=>array(
-                                'cycle'=>null,
-                                'offset'=>null,
+        if (isset($params['source_type']) && $params['source_type']==2){
+            $finalTimingInfo = $this->arterialtiming_model->tmpGetNewJunctionTimingInfos($data,$timePoint,$date[0]);
+//            $finalTimingInfo=[];
+        }else{
+
+            $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,$date[0]);
+            $finalTimingInfo=[];
+            foreach ($data as $d){
+                if(isset($timingInfo[$d['logic_junction_id']])){
+                    $finalTimingInfo[$d['logic_junction_id']] = $timingInfo[$d['logic_junction_id']];
+                }else{
+                    $finalTimingInfo[$d['logic_junction_id']] = array(
+                        array(
+                            'id'=>null,
+                            'logic_junction_id'=>$d['logic_junction_id'],
+                            'date'=>null,
+                            'timing_info'=>array(
+                                'extra_timing'=>array(
+                                    'cycle'=>null,
+                                    'offset'=>null,
+                                ),
+                                'movement_timing'=>array()
                             ),
-                            'movement_timing'=>array()
-                        ),
-                    )
-                );
+                        )
+                    );
+                }
             }
         }
+
 
         return $this->response($finalTimingInfo);
     }
@@ -121,7 +127,8 @@ class Arterialtiming extends MY_Controller
         $junctionList = $params['junction_infos'];
 
         $date = $params['dates'];
-        $badjunc = [];
+        $reqJuncs=[];
+
         foreach ($junctionList as $j ){
             $ret = $this->timing_model->getTimingDataBatch(array(
                 'junction_ids'      => $j['logic_junction_id'],
@@ -131,13 +138,11 @@ class Arterialtiming extends MY_Controller
                 'source'            => 1
             ));
             $r = self::formatNewCycle($ret[$j['logic_junction_id']][0],$j['cycle'],$j['offset']);
-            $resp = $this->timing_model->uploadTimingData($r);
-            if($resp == False){
-                $badjunc[] = $j['logic_junction_id'];
-            }
+            $reqJuncs[] = $r;
         }
-        if(!empty($badjunc)){
-            return $this->response(array(), ERR_UNKNOWN, $badjunc);
+        $resp = $this->timing_model->uploadTimingData($reqJuncs);
+        if(empty($resp)){
+            return $this->response(array(), ERR_UNKNOWN, "下发失败");
         }
 
         return $this->response("success");

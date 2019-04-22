@@ -17,6 +17,133 @@ class Arterialtiming_model extends CI_Model
         $this->load->model('waymap_model');
     }
 
+    public function tmpGetNewJunctionTimingInfos($data,$timePoint,$date)
+    {
+
+        $finalRet = [];
+
+        foreach ($data as $dk=>$dv){
+
+            $versionStr = $date."000000";
+
+            $ret  = $this->timing_model->getNewTimngData(array(
+                "logic_junction_id"=>$dv['logic_junction_id'],
+                'start_time'=>$timePoint,
+                'end_time'=>$timePoint,
+                'date'=>$date,
+                'version'=>$versionStr,
+            ));
+
+            if(empty($ret)){
+                continue;
+            }
+            $tod = $ret['schedule'][0]['tod'][0];
+            //构造旧格式
+            $finalRet[$dv['logic_junction_id']][] = array(
+                'date'=>$date,
+                'id'=>$ret['signal_id'],
+                'timing_info'=>array(
+                    'extra_timing'=>array(
+                        'cycle'=>$tod['cycle'],
+                        'offset'=>$tod['offset'],
+                    ),
+                    'tod_start_time'=>$tod['start_time'],
+                    'tod_end_time'=>$tod['end_time'],
+                    'movement_timing'=>[],
+                ),
+            );
+            if ($ret['structure'] == 2){ //stage类型
+                $stageLenMap = []; //每个阶段的长度
+                $phaseStageMap = [];//记录每个相位所在的阶段
+                foreach ($tod['vehicle_phase'] as $tk => $tv){
+                    $phaseStageMap[$tv['phase_num']][] = $tv['sequence_num'];
+                    $stageLenMap[$tv['sequence_num']] = $tv['end_time']-$tv['start_time'];
+                }
+                ksort($stageLenMap);
+
+                foreach ($tod['vehicle_phase'] as $tk => $tv){
+                    if($tv['flow_info'] == null){
+                        continue;
+                    }
+
+                   foreach ($tv['flow_info'] as $fk=>$fv){
+                       if(!in_array($fv['logic_flow_id'],$dv['flows'])){//过滤无用的flow
+                            continue;
+                       }
+                       //找到目标flow
+                       if(count($phaseStageMap[$tv['phase_num']])>1 && $phaseStageMap[$tv['phase_num']][1] = $phaseStageMap[$tv['phase_num']][0]+1 ){ //跨阶段
+                           //跨阶段的第一段先不用计算
+                            if($phaseStageMap[$tv['phase_num']][0] == $tv['sequence_num']){
+                                continue;
+                            }
+                            //跨阶段的第二阶段
+                           $startTime=0;
+                           foreach ($stageLenMap as $k => $v){
+                               if ($k == $tv['sequence_num']-1){
+                                   break;
+                               }else{
+                                   $startTime += $v;
+                               }
+                           }
+                           $tmpMovementTiming = array(
+                               'comment'=>$tv['sg_name'],
+                               'logic_flow_id'=>$fv['logic_flow_id'],
+                               'start_time'=>$startTime,
+                               'duration'=>$stageLenMap[$tv['sequence_num']]+$stageLenMap[$tv['sequence_num']-1],
+                           );
+                           $finalRet[$dv['logic_junction_id']][0]['timing_info']['movement_timing'][] = $tmpMovementTiming;
+
+                       }else{
+                           $startTime=0;
+                           foreach ($stageLenMap as $k => $v){
+                               if ($k == $tv['sequence_num']){
+                                   break;
+                               }else{
+                                   $startTime += $v;
+                               }
+                           }
+                           $tmpMovementTiming = array(
+                               'comment'=>$tv['sg_name'],
+                               'logic_flow_id'=>$fv['logic_flow_id'],
+                               'start_time'=>$startTime,
+                               'duration'=>$stageLenMap[$tv['sequence_num']],
+                           );
+                           $finalRet[$dv['logic_junction_id']][0]['timing_info']['movement_timing'][] = $tmpMovementTiming;
+                       }
+
+
+                   }
+                }
+
+            }else{
+                foreach ($tod['vehicle_phase'] as $tk => $tv){
+                    if (count($tv['flow_info']) == 0){
+                        continue;
+                    }
+                    foreach ($tv['flow_info'] as $fk=>$fv){
+                        if(!in_array($fv['logic_flow_id'],$dv['flows'])){//过滤无用的flow
+                            continue;
+                        }
+                        //找到目标flow
+                        $tmpMovementTiming = array(
+                            'comment'=>$tv['sg_name'],
+                            'logic_flow_id'=>$fv['logic_flow_id'],
+                            'start_time'=>$tv['start_time'],
+                            'duration'=>$tv['end_time']-$tv['start_time'],
+                        );
+                        $finalRet[$dv['logic_junction_id']][0]['movement_timing'][] = $tmpMovementTiming;
+
+                    }
+                }
+            }
+
+
+
+        }
+
+        return $finalRet;
+    }
+
     public function getJunctionTimingInfos($data,$timePoint,$date)
     {
         //TODO source
@@ -47,10 +174,11 @@ class Arterialtiming_model extends CI_Model
             unset($ret[$j][0]['junction_logic_id']);
             unset($ret[$j][0]['comment']);
             $ret[$j][0]['timing_info'] = self::matchFlow($j,$timePlan,$data);
-
         }
         return $ret;
     }
+
+
 
 
     private function matchFlow($logicJunctionId,$oriFlows,$nedFlows)

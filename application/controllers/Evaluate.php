@@ -243,7 +243,7 @@ class Evaluate extends MY_Controller
             ];
         }
 
-        if ($params['quota_key'] == "saturation"){ //饱和度计算
+        if ($params['quota_key'] == "saturation"){ //伪饱和度计算
             $result = $this->evaluateService->saturationEvaluateCompare($data);
         }else{
             $result = $this->evaluateService->quotaEvaluateCompare($data);
