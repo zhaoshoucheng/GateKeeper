@@ -42,6 +42,8 @@ class Arterialtiming_model extends CI_Model
             $finalRet[$dv['logic_junction_id']][] = array(
                 'date'=>$date,
                 'id'=>$ret['signal_id'],
+                'junction_id'=>$dv['logic_junction_id'],
+                'logic_junction_id'=>$dv['logic_junction_id'],
                 'timing_info'=>array(
                     'extra_timing'=>array(
                         'cycle'=>$tod['cycle'],
