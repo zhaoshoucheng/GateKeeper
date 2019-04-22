@@ -556,7 +556,7 @@ class TimingAdaptionAreaService extends BaseService
             'junction_alarm_type' => $data['junction_alarm_type']??0,
             'type' => $data['is_correct'],
             'comment' => $data['comment'],
-            'username' => 0,
+            'username' => $_COOKIE['username'] ?? "",
         ];
 
         $res = $this->timeAlarmRemarks_model->insertAlarmRemark($data);

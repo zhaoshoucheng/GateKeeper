@@ -7,6 +7,11 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Class Arterialtiming
+ *
+ * @property \Arterialtiming_model $arterialtiming_model
+ */
 class Arterialtiming extends MY_Controller
 {
     public function __construct()
@@ -95,8 +100,7 @@ class Arterialtiming extends MY_Controller
         if(count($selectJunctions) < 4){
             return $this->response(array(), ERR_PARAMETERS, "路口数不得小于4");
         }
-
-        $ret = $this->arterialtiming_model->getJunctionInfos($cityId,$version,$selectJunctions);
+        $ret = $this->arterialtiming_model->getJunctionFlowInfos($cityId,$version,$selectJunctions);
         if(empty($ret)){
             com_log_warning('_itstool_arterialtiming_queryArterialJunctionInfo_getJunctionInfos_empty', 0, '', compact("params","ret"));
             return $this->response(array(), ERR_REQUEST_WAYMAP_API, "路网服务异常");
@@ -105,7 +109,7 @@ class Arterialtiming extends MY_Controller
         foreach ($selectJunctions as $k){
             foreach ($ret['junctions_info'] as $rk => $rv){
                 if($k == $rk){
-                    $rv['logic_junction_id'] = $rk;
+                    $rv['logic_junction_id'] = (string)$rk;
                     $sortJunctions[]=$rv;
                 }
             }
