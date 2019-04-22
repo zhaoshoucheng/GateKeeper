@@ -39,32 +39,30 @@ class Arterialtiming extends MY_Controller
 
         $timePoint = $params['time_point'];
         $date = $params['dates'];
+        $finalTimingInfo=[];
         if (isset($params['source_type']) && $params['source_type']==2){
-            $finalTimingInfo = $this->arterialtiming_model->tmpGetNewJunctionTimingInfos($data,$timePoint,$date[0]);
-//            $finalTimingInfo=[];
+            $timingInfo = $this->arterialtiming_model->tmpGetNewJunctionTimingInfos($data,$timePoint,$date[0]);
         }else{
-
             $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,$date[0]);
-            $finalTimingInfo=[];
-            foreach ($data as $d){
-                if(isset($timingInfo[$d['logic_junction_id']])){
-                    $finalTimingInfo[$d['logic_junction_id']] = $timingInfo[$d['logic_junction_id']];
-                }else{
-                    $finalTimingInfo[$d['logic_junction_id']] = array(
-                        array(
-                            'id'=>null,
-                            'logic_junction_id'=>$d['logic_junction_id'],
-                            'date'=>null,
-                            'timing_info'=>array(
-                                'extra_timing'=>array(
-                                    'cycle'=>null,
-                                    'offset'=>null,
-                                ),
-                                'movement_timing'=>array()
+        }
+        foreach ($data as $d){
+            if(isset($timingInfo[$d['logic_junction_id']])){
+                $finalTimingInfo[$d['logic_junction_id']] = $timingInfo[$d['logic_junction_id']];
+            }else{
+                $finalTimingInfo[$d['logic_junction_id']] = array(
+                    array(
+                        'id'=>null,
+                        'logic_junction_id'=>$d['logic_junction_id'],
+                        'date'=>null,
+                        'timing_info'=>array(
+                            'extra_timing'=>array(
+                                'cycle'=>null,
+                                'offset'=>null,
                             ),
-                        )
-                    );
-                }
+                            'movement_timing'=>array()
+                        ),
+                    )
+                );
             }
         }
 
