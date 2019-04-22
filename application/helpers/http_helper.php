@@ -40,9 +40,14 @@ if (!function_exists('httpGET')) {
         $totalTime = $timeEnd - $timeStart;
         if($errno = curl_errno($ch)){
             $errmsg = curl_error($ch);
+            curl_close($ch);
+            //临时自适应接口不报警
+            $ignoreUrl = '100.70.160.62:8000';
+            if(strpos($url, $ignoreUrl)!==false){
+                return false;
+            }
             //记录报警
             com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query)));
-            curl_close($ch);
             return false;
         }
         $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -102,10 +107,13 @@ if (!function_exists('httpPOST')) {
 
         if($errno = curl_errno($ch)){
             $errmsg = curl_error($ch);
-
-            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data));
-
             curl_close($ch);
+            //临时自适应接口不报警
+            $ignoreUrl = '100.70.160.62:8000';
+            if(strpos($url, $ignoreUrl)!==false){
+                return false;
+            }
+            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data));
             return false;
         }
         $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);

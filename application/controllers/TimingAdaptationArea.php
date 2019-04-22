@@ -104,8 +104,8 @@ class TimingAdaptationArea extends MY_Controller
         $params = $this->input->post(null, true);
 
         $this->validate([
-            'flow_alarm_type' => 'is_natural_no_zero',
-            'junction_alarm_type' => 'is_natural_no_zero',
+            'flow_alarm_type' => 'required|greater_than[0]',
+            'junction_alarm_type' => 'required|greater_than[0]',
             'city_id' => 'required|is_natural_no_zero',
             'area_id' => 'required|is_natural_no_zero',
             'logic_junction_id' => 'required|trim|min_length[1]',
@@ -227,7 +227,7 @@ class TimingAdaptationArea extends MY_Controller
     public function getSpaceTimeMtraj()
     {
         $params = $this->input->post(null, true);
-
+        
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
             'logic_junction_id' => 'required|trim|min_length[1]',

@@ -85,7 +85,7 @@ class EvaluateService extends BaseService
         $lng = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
         $lat = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
         return [
-            'dataList' => $junctionCollection->get(),
+            'dataList' => $dataList,
             'center' => [
                 'lng' => $lng,
                 'lat' => $lat,
@@ -421,286 +421,6 @@ class EvaluateService extends BaseService
         return $result;
     }
 
-    /**
-     * 饱和度指标评估对比
-     *
-     * 饱和度计算=max(排队长度/150,延误/80,二次停车比例)
-     * @param $params $params['city_id']         interger Y 城市ID
-     *                $params['junction_id']     string   Y 路口ID
-     *                $params['quota_key']       string   Y 指标KEY
-     *                $params['flow_id']         string   Y 相位ID
-     *                $params['base_time']       array    Y 基准时间 [1532880000, 1532966400, 1533052800] 日期时间戳
-     *                $params['evaluate_time']   array    Y 评估时间 有可能会有多个评估时间段 [[1532880000, 1532880000]]
-     *                $params['base_time_start_end']       array Y 基准时间 开始、结束时间 用于返回数据
-     *                $params['evaluate_time_start_end']   array Y 评估时间 开始、结束时间 用于返回数据
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public function saturationEvaluateCompare($params)
-    {
-        $cityId          = $params['city_id'];
-        $quotaKey        = $params['quota_key'];
-        $logicJunctionId = $params['junction_id'];
-        $logicFlowId     = $params['flow_id'];
-        $evaluateTime    = $params['evaluate_time'];
-        $baseTime        = $params['base_time'];
-
-        // 合并所有需要查询的日期
-        $dates = Collection::make($evaluateTime)
-            ->collapse()
-            ->merge($baseTime)
-            ->unique()
-            ->map(function ($item) {
-                return date('Y-m-d', $item);
-            })->get();
-
-        // 获取路口信息
-        $junctionsInfo  = $this->waymap_model->getJunctionInfo($logicJunctionId);
-        $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
-
-        // 获取路口相位信息
-        $flowsInfo = $this->waymap_model->getFlowsInfo($logicJunctionId);
-        // 将所有方向放入路口相位信息中
-        $flowsInfo[$logicJunctionId]['9999'] = '所有方向';
-        if ($logicFlowId == 9999) {
-            $select  = 'logic_junction_id, date, hour';
-            $groupBy = 'logic_junction_id, hour, date';
-            $queueLengthData = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, '', $dates, $groupBy, 'queue_length', $select);
-            $stopDelayData = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, '', $dates, $groupBy, 'stop_delay', $select);
-            $twiceStopRateData = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, '', $dates, $groupBy, 'twice_stop_rate', $select);
-        } else {
-            $queueLengthSelect = 'logic_junction_id, logic_flow_id, date, hour, ' . 'queue_length';
-            $queueLengthData = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, '', '', $queueLengthSelect, 'detail');
-            $stopDelaySelect = 'logic_junction_id, logic_flow_id, date, hour, ' . 'stop_delay';
-            $stopDelayData = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, '', '', $stopDelaySelect, 'detail');
-            $twiceStopRateSelect = 'logic_junction_id, logic_flow_id, date, hour, ' . 'twice_stop_rate';
-            $twiceStopRateData = $this->flowDurationV6_model->getQuotaEvaluateCompare($cityId, $logicJunctionId, $logicFlowId, $dates, '', '', $twiceStopRateSelect, 'detail');
-        }
-//
-//        if (!$data) {
-//            return [];
-//        }
-//
-        $result = [];
-//
-        // 基准日期
-        $baseDate = array_map(function ($val) {
-            return date('Y-m-d', $val);
-        }, $baseTime);
-
-        // 评估日期
-        $evaluateDate = [];
-        foreach ($params['evaluate_time'] as $k => $v) {
-            $evaluateDate[$k] = array_map(function ($val) {
-                return date('Y-m-d', $val);
-            }, $v);
-        }
-//
-        // 指标配置
-        $quotaConf = $this->config->item('real_time_quota');
-
-        // 平均对比数组
-        $avgArr             = [];
-        $result['base']     = [];
-        $result['evaluate'] = [];
-        $result['average']  = [];
-        $finalResult['base']     = [];
-        $finalResult['evaluate'] = [];
-        $finalResult['average']  = [];
-        $finalAvgArr             = [];
-        //先分别处理三种指标
-        foreach ($queueLengthData as $k => $v){
-            $date = date('Y-m-d', strtotime($v['date']));
-            // 组织基准时间数据
-            if (in_array($date, $baseDate, true)) {
-//                $result['base'][$date][strtotime($v['hour'])]['queue_length'] = $quotaConf['queue_length']['round']($v['queue_length']/150);
-                $result['base'][$date][$v['hour']]['queue_length'] = round($v['queue_length']/150,4);
-//                $result['base'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
-
-            }
-
-            // 组织评估时间数据
-            foreach ($evaluateDate as $kk => $vv) {
-                if (in_array($date, $vv, true)) {
-//                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])]['queue_length'] =  $quotaConf['queue_length']['round']($v['queue_length']/150);
-                    $result['evaluate'][$kk][$date][$v['hour']]['queue_length'] =  round($v['queue_length']/150,4);
-//                    $result['evaluate'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
-                }
-            }
-        }
-
-        foreach ($stopDelayData as $k=>$v){
-            $date = date('Y-m-d', strtotime($v['date']));
-            // 组织基准时间数据
-            if (in_array($date, $baseDate, true)) {
-//                $result['base'][$date][strtotime($v['hour'])]['stop_delay'] = $quotaConf['stop_delay']['round']($v['stop_delay']/80);
-                $result['base'][$date][$v['hour']]['stop_delay'] = round($v['stop_delay']/80,4);
-//                $result['base'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
-
-            }
-
-            // 组织评估时间数据
-            foreach ($evaluateDate as $kk => $vv) {
-                if (in_array($date, $vv, true)) {
-//                    $result['evaluate'][$kk + 1][$date][strtotime($v['hour'])]['stop_delay'] = $quotaConf['stop_delay']['round']($v['stop_delay']/80);
-                    $result['evaluate'][$kk][$date][$v['hour']]['stop_delay'] = round($v['stop_delay']/80,4);
-//                    $result['evaluate'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
-
-                }
-            }
-        }
-
-        foreach ($twiceStopRateData as $k=>$v){
-            $date = date('Y-m-d', strtotime($v['date']));
-            // 组织基准时间数据
-            if (in_array($date, $baseDate, true)) {
-                $result['base'][$date][$v['hour']]['twice_stop_rate'] = round($v['twice_stop_rate'],4);
-//                $result['base'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
-            }
-
-            // 组织评估时间数据
-            foreach ($evaluateDate as $kk => $vv) {
-                if (in_array($date, $vv, true)) {
-                    $result['evaluate'][$kk][$date][$v['hour']]['twice_stop_rate'] = round($v['twice_stop_rate'],4);
-//                    $result['evaluate'][$date][strtotime($v['hour'])]['hour'] =  strtotime($v['hour']);
-                }
-            }
-        }
-
-
-        foreach ($result['base'] as $bk=>$bv){
-            foreach ($bv as $h => $hv){
-                $mvalue = max(array($hv['queue_length'],$hv['twice_stop_rate'],$hv['stop_delay']));
-                $finalResult['base'][$bk][$h] = [
-                    round($mvalue,2),
-                   $h
-                ];
-                $avgArr['average']['base'][$h][$bk] = [
-                    'hour' => $h,
-                    'value' => round($mvalue,2),
-                ];
-            }
-
-        }
-
-        foreach ($result['evaluate'] as $ek=>$ev){
-            foreach ($ev as $datek => $datev){
-                foreach ($datev as $dk => $dv){
-                    $mvalue = max(array($dv['queue_length'],$dv['twice_stop_rate'],$dv['stop_delay']));
-                    $finalResult['evaluate'][$ek+1][$datek][$dk] = [
-                        round($mvalue,2),
-                        $dk
-                    ];
-                    $avgArr['average']['evaluate'][$ek+1][$dk][$datek] = [
-                        'hour' => $dk,
-                        'value' => round($mvalue,2),
-                    ];
-                }
-
-            }
-        }
-
-
-        // 处理基准平均值
-        if (!empty($avgArr['average']['base'])) {
-            ksort($avgArr['average']['base']);
-            $finalResult['average']['base'] = array_map(function ($val) use ($quotaConf, $params) {
-                $tempData  = array_column($val, 'value');
-                $tempSum   = array_sum($tempData);
-                $tempCount = count($val);
-                list($hour) = array_unique(array_column($val, 'hour'));
-                return [
-                    // 指标平均值
-                   round($tempSum / $tempCount,2),
-                    // 时间
-                    $hour,
-                ];
-            }, $avgArr['average']['base']);
-            $finalResult['average']['base'] = array_values($finalResult['average']['base']);
-        }
-        // 处理评估平均值
-        if (!empty($avgArr['average']['evaluate'])) {
-            foreach ($avgArr['average']['evaluate'] as $k => $v) {
-                ksort($v);
-                $finalResult['average']['evaluate'][$k] = array_map(function ($val) use ($quotaConf, $params) {
-                    $tempData  = array_column($val, 'value');
-                    $tempSum   = array_sum($tempData);
-                    $tempCount = count($val);
-                    list($hour) = array_unique(array_column($val, 'hour'));
-                    return [
-                        // 指标平均值
-                        round($tempSum / $tempCount,2),
-                        // 时间
-                        $hour,
-                    ];
-                }, $v);
-                $finalResult['average']['evaluate'][$k] = array_values($finalResult['average']['evaluate'][$k]);
-            }
-        }
-
-        // 排序、去除key
-        if (!empty($finalResult['base'])) {
-            foreach ($finalResult['base'] as $k => $v) {
-                ksort($finalResult['base'][$k]);
-                $finalResult['base'][$k] = array_values($finalResult['base'][$k]);
-            }
-
-            // 补全基准日期
-            foreach ($baseDate as $v) {
-                if (!array_key_exists($v, $finalResult['base'])) {
-                    $finalResult['base'][$v] = [];
-                }
-            }
-        }
-
-        if (!empty($finalResult['evaluate'])) {
-            foreach ($finalResult['evaluate'] as $k => $v) {
-                foreach ($v as $kk => $vv) {
-                    ksort($finalResult['evaluate'][$k][$kk]);
-                    $finalResult['evaluate'][$k][$kk] = array_values($finalResult['evaluate'][$k][$kk]);
-                }
-            }
-
-            // 补全评估日期
-            foreach ($evaluateDate as $k => $v) {
-                foreach ($v as $vv) {
-                    if (empty($finalResult['evaluate'][$k])) {
-                        $finalResult['evaluate'][$k] = [];
-                    }
-                    if (!empty($finalResult['evaluate'][$k])
-                        && !array_key_exists($vv, $finalResult['evaluate'][$k])) {
-                        $finalResult['evaluate'][$k][$vv] = [];
-                    }
-                    if (empty($finalResult['average']['evaluate'][$k])) {
-                        $finalResult['average']['evaluate'][$k] = [];
-                    }
-                }
-            }
-        }
-
-
-
-        // 基本信息
-        $finalResult['info'] = [
-            'junction_name' => $junctionIdName[$logicJunctionId] ?? '',
-            'quota_name' => $quotaConf[$quotaKey]['name'],
-            'quota_unit' => $quotaConf[$quotaKey]['unit'],
-            'base_time' => $params['base_time_start_end'],
-            'evaluate_time' => $params['evaluate_time_start_end'],
-            'direction' => $flowsInfo[$logicJunctionId][$logicFlowId] ?? '',
-        ];
-
-        $downloadId = md5(json_encode($finalResult));
-
-        // 将ID返回前端以供下载使用
-        $finalResult['info']['download_id'] = $downloadId;
-
-        // 缓存数据
-        $this->redis_model->setComparisonDownloadData($downloadId, $finalResult);
-
-        return $finalResult;
-    }
 
     // 按照半个小时，每半个小时都需要有值，否则用0进行替换
     private function fillEmptyToZero($items)
@@ -726,6 +446,84 @@ class EvaluateService extends BaseService
         }
 
         return $all;
+    }
+
+
+    // 评估指标计算
+    public function quotaEvaluate($params)
+    {
+        $cityId          = $params['city_id'];
+        $quotaKey        = $params['quota_key'];
+        $logicJunctionId = $params['logic_junction_id'];
+        $dates        = [$params['date']];
+
+        $func = function ($v) use($quotaKey) {
+            return $v[$quotaKey];
+        };
+
+        // 指标配置
+        $quotaConf = $this->config->item('real_time_quota');
+        
+        // 饱和度计算是几个指标综合计算出来的
+        if ($params['quota_key'] == "saturation") {
+            $quotaKey = "queue_length, stop_delay, twice_stop_rate";
+            $func = function($v) {
+                return round(max($v['queue_length'] / 150.0, $v['stop_delay']/ 80.0, $v['twice_stop_rate']),4);
+            };
+        }
+
+        $select = 'logic_junction_id, logic_flow_id, date, hour, ' . $quotaKey;
+        $data = $this->flowDurationV6_model->getQuotaEvaluateCompare(
+            $cityId, $logicJunctionId, "", $dates, '', '', $select, 'detail'
+        );
+
+        if ($params['quota_key'] == "saturation") {
+            $quotaKey = "saturation";
+        }
+
+        if (!$data) {
+            return [];
+        }
+
+        $result = [];
+
+
+        // 平均对比数组
+        $result['data']     = [];
+
+        foreach ($data as $k => $v) {
+            $logicFlowId = $v['logic_flow_id'];
+            if (!isset($result['data'][$logicFlowId])) {
+                $result['data'][$logicFlowId] = [];
+            }
+
+            $val = $func($v);
+            $result['data'][$logicFlowId][] = [
+                $val, $v['hour']
+            ];
+        }
+
+        // 获取路口信息
+        $junctionsInfo  = $this->waymap_model->getJunctionInfo($logicJunctionId);
+        $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
+
+        // 获取路口相位信息
+        $flowsInfo = $this->waymap_model->getFlowsInfo($logicJunctionId);
+        if (isset($flowsInfo[$logicJunctionId])) {
+            $result['flowsInfo'] = $flowsInfo[$logicJunctionId];
+        }
+
+
+        foreach ($result['data'] as $flowId => $vals) {
+            $result['data'][$flowId] = $this->fillEmptyToZero($vals);
+        }
+        // 基本信息
+        $result['info'] = [
+            'junction_name' => $junctionIdName[$logicJunctionId] ?? '',
+            'quota_name' => $quotaConf[$quotaKey]['name'],
+            'quota_unit' => $quotaConf[$quotaKey]['unit'],
+        ];
+        return $result;
     }
 
     /**
@@ -949,19 +747,30 @@ class EvaluateService extends BaseService
     // 将result指标空的地方全部填充为0，这个和PM对过了
     private function fillZeroResult($result)
     {
-        // 统一将average.base, average.evaluate, base,evaluate做
-        $result['average']['base'] = $this->fillEmptyToZero($result['average']['base']);
-        foreach ($result['average']['evaluate'] as $id => $items) {
-            $result['average']['evaluate'][$id] = $this->fillEmptyToZero($result['average']['evaluate'][$id]);
+        if (isset($result['average']['base'])) {
+            $result['average']['base'] = $this->fillEmptyToZero($result['average']['base']);
         }
-        foreach ($result['base'] as $date => $val) {
-            $result['base'][$date] = $this->fillEmptyToZero($val);
-        }
-        foreach ($result['evaluate'] as $id => $items) {
-            foreach ($result['evaluate'][$id] as $date => $val) {
-                $result['evaluate'][$id][$date] = $this->fillEmptyToZero($val);
+
+        if (isset($result['average']['evaluate'])) {
+            foreach ($result['average']['evaluate'] as $id => $items) {
+                $result['average']['evaluate'][$id] = $this->fillEmptyToZero($result['average']['evaluate'][$id]);
             }
         }
+
+        if (isset($result['base'])) {
+            foreach ($result['base'] as $date => $val) {
+                $result['base'][$date] = $this->fillEmptyToZero($val);
+            }
+        }
+
+        if (isset($result['evaluate'])) {
+            foreach ($result['evaluate'] as $id => $items) {
+                foreach ($result['evaluate'][$id] as $date => $val) {
+                    $result['evaluate'][$id][$date] = $this->fillEmptyToZero($val);
+                }
+            }
+        }
+
         return $result;
 
     }
@@ -1010,6 +819,74 @@ class EvaluateService extends BaseService
         }
 
         return $table;
+    }
+
+
+    // 下载评估的指标excel
+    public function downloadQuotaEvaluate($params, $data)
+    {
+        $fileName = "{$data['info']['junction_name']}_{$data['info']['quota_name']}_" . date('Ymd');
+
+        $objPHPExcel = new \PHPExcel();
+        $objSheet    = $objPHPExcel->getActiveSheet();
+        $objSheet->setTitle('数据');
+
+        $detailParams = [
+            ['指标名', $data['info']['quota_name']],
+            ['方向', "所有方向"],
+            ['评估时间', $params['date']],
+        ];
+
+        $detailParams[] = ['指标单位', $data['info']['quota_unit']];
+
+        $objSheet->mergeCells('A1:F1');
+        $objSheet->setCellValue('A1', $fileName);
+        $objSheet->fromArray($detailParams, null, 'A4');
+
+        $styles = $this->config->item('excel_style');
+        $objSheet->getStyle('A1')->applyFromArray($styles['title']);
+        $rows_idx = count($detailParams) + 3;
+        $objSheet->getStyle("A4:A{$rows_idx}")->getFont()->setSize(12)->setBold(true);
+
+        $line = 6 + count($detailParams);
+
+        // 输出头部
+        $table = hourRange();
+        array_unshift($table, "方向");
+        $objSheet->fromArray($table, null, 'A' . $line);
+        $cols_cnt   = count($table) - 1;
+        $objSheet->getStyle("A{$line}:" . intToChr($cols_cnt) . $line)->applyFromArray($styles['header']);
+
+        $line++;
+
+        $flowsInfo = $data['flowsInfo'];
+        // 输出内容
+        foreach ($data['data'] as $flowId => $datum) {
+            $table = [];
+            $table[] = $flowsInfo[$flowId];
+            foreach ($datum as $item) {
+                $table[] = $item[0];
+            }
+
+            $objSheet->fromArray($table, null, 'A' . $line, true);
+            $objSheet->getStyle("A{$line}:A{$line}")->applyFromArray($styles['header']);
+
+            $line++;
+        }
+
+        $objWriter = new \PHPExcel_Writer_Excel5($objPHPExcel);
+
+        header('Content-Type: application/x-xls;');
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename=' . $fileName . '.xls');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: 0'); // Date in the past
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+        ob_end_clean();
+        $objWriter->save('php://output');
+        exit();
     }
 
     /**

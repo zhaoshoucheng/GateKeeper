@@ -49,18 +49,13 @@ if ($development == 2) {
     $signal_mis_ext    = '/its/signal-mis';
 
     // signal_light
-    $signal_light_server = '10.148.28.205';
-    $signal_light_port = '8001';
+    $signal_light_server = 'http://10.88.128.40:8000/ipd-cloud/signal-platform';
 
-    // es
-    $es_server = '10.85.128.208';
-    $es_port   = '8001';
-    $es_ext    = '';
+    // es 老实时轨迹、指标数据
+    $es_server = 'http://10.85.128.208:8001';
 
-    // new es
-    $quota_v2_es_server = '10.89.234.61';
-    $quota_v2_es_port   = '8090';
-    $quota_v2_es_ext    = '';
+    // new es 新实时轨迹、指标数据
+    $quota_v2_es_server = 'http://10.85.128.208:8001/api/data';
 
     // new timing
     $signal_control_server = '10.88.128.149';
@@ -106,7 +101,6 @@ if ($development == 2) {
     //新版指标开城列表
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
 } else {
-
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
     // 路网接口服务器端口
@@ -133,18 +127,13 @@ if ($development == 2) {
     $signal_mis_ext    = '/signal-mis';
 
     // signal_light
-    $signal_light_server = '10.148.28.204';
-    $signal_light_port = '8001';
+    $signal_light_server = 'http://10.148.28.204:8001';
 
     // es
-    $es_server = '10.89.236.25';
-    $es_port   = '8087';
-    $es_ext    = '';
+    $es_server = 'http://10.89.236.25:8087';
 
     // new es
-    $quota_v2_es_server = '10.89.236.25';
-    $quota_v2_es_port   = '8090';
-    $quota_v2_es_ext    = '';
+    $quota_v2_es_server = 'http://10.89.236.25:8090';
 //    $quota_v2_es_server = '10.89.234.61';
 //    $quota_v2_es_port   = '8090';
 //    $quota_v2_es_ext    = '';
@@ -220,13 +209,13 @@ $config['timing_interface'] = 'http://' . $timing_server . $temp_timing_port . $
 $config['signal_mis_interface'] = 'http://' . $signal_mis_server . $signal_mis_port . $signal_mis_ext;
 
 // signal-light接口地址
-$config['signal_light_interface'] = 'http://' . $signal_light_server . $signal_light_port;
+$config['signal_light_interface'] = $signal_light_server;
 
 // 实时指标接口地址
-$config['es_interface'] = 'http://' . $es_server . $es_port . $es_ext;
+$config['es_interface'] = $es_server;
 
 // 新指标接口地址
-$config['new_es_interface'] = 'http://' . $quota_v2_es_server . $quota_v2_es_port . $quota_v2_es_ext;
+$config['new_es_interface'] = $quota_v2_es_server;
 
 // 新版配时地址
 $config['signal_control_interface'] = 'http://' . $signal_control_server . ":" . $signal_control_port . $signal_control_ext;
@@ -724,7 +713,6 @@ $config['back_timing_roll'] = [
     '13114526633', '15589979969', '15011161396', '15210612210', '15893024010', '18661627981',
 ];
 
-
 // 定义tracelog的action
 $config['action_log_map'] = [
     'adapt_area_switch_edit' => '自适应区域配时开关修改',
@@ -842,3 +830,6 @@ $config['data_engine'] = 'elastic';
 //新版指标开城列表
 $config['quota_v2_city_ids'] = $quota_v2_city_ids;
 
+//新版报警开城列表及ip限制
+$config['alarm_v2_city_ids'] = [];
+$config['alarm_v2_client_ips'] = ["100.90.165.32",];    //默认沙盒触发

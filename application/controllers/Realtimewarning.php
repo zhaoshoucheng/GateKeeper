@@ -115,6 +115,21 @@ class Realtimewarning extends Inroute_Controller
         return;
     }
 
+    /**
+     * 拦截 特殊城市且非指定ip请求
+     * @param $cityID
+     * @return bool
+     */
+    private function alarmV2Auth($cityID){
+        $cityIDs = $this->config->item('alarm_v2_city_ids');
+        $clientIPs = $this->config->item('alarm_v2_client_ips');
+        $remoteIP = $_SERVER["REMOTE_ADDR"];
+        if(in_array($cityID,$cityIDs) && !in_array($remoteIP,$clientIPs)){
+            return false;
+        }
+        return true;
+    }
+
     public function escallback()
     {
         $params   = array_merge($this->input->get(), $this->input->post());
@@ -138,12 +153,19 @@ class Realtimewarning extends Inroute_Controller
         if (ENVIRONMENT != 'development') {
             $this->authToken($params);
         }
-
         $hour    = $params["hour"];
         $date    = $params["date"];
         $cityId  = $params["city_id"];
         $traceId = $params["trace_id"];
         $uid     = $params["uid"];
+        if(!$this->alarmV2Auth($cityId)){
+            $output = [
+                'errno' => ERR_PARAMETERS,
+                'errmsg' => "alarmV2Auth",
+            ];
+            echo json_encode($output);
+            return;
+        }
 
         //参数强校验
         if (!preg_match('/\d{1,2}:\d{1,2}:\d{1,2}/ims', $hour)) {
@@ -165,7 +187,7 @@ class Realtimewarning extends Inroute_Controller
 
         //新开指标城市验证 && uid验证
         $quotaCityIds = $this->quotaCityIds;
-        if(in_array($cityId,$quotaCityIds) && !in_array($uid,["traj_index_pro"])){
+        if(in_array($cityId,$quotaCityIds) && !in_array($uid,["traj_index_pro","traffic_realtime_alarm"])){
             echo "uid 非预期! \n";
             exit;
         }
@@ -195,6 +217,33 @@ class Realtimewarning extends Inroute_Controller
         echo json_encode($output);
         return;
     }
+
+    public function esworker($cityId = '12', $hour = '00:00', $date = "", $traceId = "", $uid = "")
+    {
+        ini_set('memory_limit', '-1');
+        ob_end_flush();
+        date_default_timezone_set('Asia/Shanghai');
+        if (!is_numeric($cityId)) {
+            echo "cityId 必须为数字! \n";
+            exit;
+        }
+        if (!preg_match('/\d{4,4}-\d{1,2}-\d{1,2}/ims', $date)) {
+            echo "date 必须为日期! \n";
+            exit;
+        }
+        //预先计算平均延误数据
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculating\n\r";
+        $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId, 1);
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculated\n\r";
+
+        //再计算报警数据
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculating\n\r";
+        $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId);
+        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculated\n\r";
+        return true;
+    }
+
+
 
     public function prepare($cityId = '12', $hour = '00:00', $date = "", $traceId = "", $uid = "")
     {

@@ -34,6 +34,8 @@ class Welcome extends CI_Controller
      */
     public function index()
     {
+        com_log_warning('_asynctask_index_error', 0, '1123123', []);
+        exit;
         var_dump((new AreaService())->index());
         die();
         print_r($_SERVER);

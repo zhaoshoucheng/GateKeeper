@@ -102,3 +102,4 @@
 * /Area/getAreaJunctionList
 * /Feedback/getTypes
 * /Feedback/addFeedback
+* /Evaluate/quotaEvaluate

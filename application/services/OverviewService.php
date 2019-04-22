@@ -601,28 +601,37 @@ class OverviewService extends BaseService
             return [];
         }
 
+        // 报警类别配置
+        $alarmCate = $this->config->item('alarm_category');
+
         $res = [];
         $total = 0;
         // 格式
         foreach ($esRes['aggregations']['type']['buckets'] as $k=>$v) {
+            if (!in_array($v['key'], array_keys($alarmCate))) {
+                continue;
+            }
             $res[$v['key']] = $v['num']['value'];
             $total += $v['num']['value'];
         }
 
-        // 报警类别配置
-        $alarmCate = $this->config->item('alarm_category');
-
         $result = [];
+        $totalRatio = 0;
         foreach ($alarmCate as $k=>$v) {
             $num = $res[$v['key']] ?? 0;
             $result['count'][$k] = [
                 'cate' => $v['name'],
                 'num'  => $num,
             ];
-
+            $ratio = ($total >= 1) ? round(($num / $total) * 100) : 0;
+            // 保证加起来正好等于100%
+            if ($k == 3) {
+                $ratio = 100 - $totalRatio;
+            }
+            $totalRatio += $ratio;
             $result['ratio'][$k] = [
                 'cate' => $v['name'],
-                'ratio' => ($total >= 1) ? round(($num / $total) * 100) . '%' : '0%',
+                'ratio' => $ratio . '%',
             ];
         }
 
@@ -834,6 +843,7 @@ class OverviewService extends BaseService
                     'flow_name' => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
                     'alarm_comment' => $alarmCate[$val['type']]['name'] ?? '',
                     'alarm_key' => $val['type'],
+                    'order' => $alarmCate[$val['type']]['order'] ?? 0,
                 ];
             }
         }
@@ -841,6 +851,12 @@ class OverviewService extends BaseService
         if (empty($result['dataList'])) {
             return [];
         }
+        usort($result['dataList'], function($a, $b) {
+            if ($a['order'] != $b['order']) {
+                return ($a['order'] < $b['order']) ? 1 : -1;
+            }
+            return ($a['duration_time'] < $b['duration_time']) ? 1 : -1;
+        });
         $result['dataList'] = array_values($result['dataList']);
 
         return $result;

@@ -5,6 +5,7 @@
  * User: didi
  * Date: 2019/1/4
  * Time: 下午1:51
+ * @property \Redis_model          $redis_model
  */
 class Userperm_model extends CI_Model
 {

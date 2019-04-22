@@ -164,4 +164,18 @@ class Common extends MY_Controller
         }
         $this->response(["data"=>$newAreaList,"last_time"=>date("Y-m-d H:i:s")]);
     }
+
+    public function getJunctionInPolygon(){
+        $params = $this->input->post(null, true);
+        // 校验参数
+        $this->validate([
+            'coords' => 'required|trim|min_length[8]',
+        ]);
+//        $params["coords"]='116.994696,36.653685;116.992035,36.668281;117.020788,36.680328;117.051258,36.683632;117.042761,36.657885';
+        $result = $this->commonService->getJunctionInPolygon($params["city_id"],$params["coords"]);
+
+        $this->response(["list"=>$result]);
+    }
+
+
 }
