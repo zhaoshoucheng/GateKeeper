@@ -171,10 +171,8 @@ class RoadService extends BaseService
         //上游路口
         $up_road_degree = [];
         foreach ($juncMovements as $item) {
-            if ($item['junction_id'] == $junctionIdList[0] and
-                $item['downstream_junction_id'] == $junctionIdList[1] and
-                $item['upstream_junction_id'][0] != '-' and
-                strpos($item['upstream_junction_id'],"-")!==0
+            if ($item['junction_id'] == $junctionIdList[0] &&
+                $item['downstream_junction_id'] == $junctionIdList[1]
             ) {
                 $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
                 if($absDiff>180){
@@ -194,9 +192,7 @@ class RoadService extends BaseService
         //下游路口
         $down_road_degree = [];
         foreach ($juncMovements as $item) {
-            if ($item['junction_id'] == $junctionIdList[sizeof($junctionIdList) - 1] and
-                $item['downstream_junction_id'][0] != '-' and
-                strpos($item['downstream_junction_id'],"-")!==0 and
+            if ($item['junction_id'] == $junctionIdList[sizeof($junctionIdList) - 1] &&
                 $item['upstream_junction_id'] == $junctionIdList[sizeof($junctionIdList) - 2]) {
 
                 $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
@@ -237,6 +233,9 @@ class RoadService extends BaseService
         $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
         $results = [];
         foreach ($roadList as $item) {
+            /*if($item['id']!="159"){
+                continue;
+            }*/
             $roadId = $item['road_id'];
             $res = $this->redis_model->getData($pre_key . $roadId);
             if (!$res) {
