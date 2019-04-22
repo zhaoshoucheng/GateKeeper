@@ -544,9 +544,74 @@ class Timing_model extends CI_Model
      * @param $data['source']
      * @return array
      */
-    public function getTimingDataBatch($data)
+    public function getTimingDataBatchBak($data)
     {
 
+        $this->load->helper('http');
+
+        // 获取配时详情
+        $timing_data = [
+            'junction_ids'      => trim($data['junction_ids']),
+            'days'              => trim($data['days']),
+            'start_time'        => $data['start_time'],
+            'end_time'          => $data['end_time'],
+            'source'            => $data['source']
+        ];
+        try {
+            $timing = httpGET(
+                $this->config->item('timing_interface') . '/TimingService/queryTimingVersionBatch',
+                $timing_data
+            );
+            $timing = json_decode($timing, true);
+            if (isset($timing['errorCode']) && $timing['errorCode'] != 0) {
+                return [];
+            }
+        } catch (Exception $e) {
+            return [];
+        }
+
+        return $timing['data'];
+    }
+
+    //临时方案,先不考虑批量查询
+    public function getNewTimingData($data){
+
+
+    }
+
+    //新版本配时
+    public function getNewTimngData($data)
+    {
+        $this->load->helper('http');
+        // 获取配时详情
+        $timing_data = [
+            'logic_junction_id'      => $data['logic_junction_id'],
+            'source'              => 2,
+            'start_time'        => $data['start_time'],
+            'end_time'          => $data['end_time'],
+            'date'            => $data['date'],
+            'version'            => $data['version'],
+        ];
+        try {
+            $timing = httpGET(
+                "http://10.160.96.160:8072/signal-control/signalopt/querybasetiming",
+                $timing_data
+            );
+            $timing = json_decode($timing, true);
+            if (isset($timing['errno']) && $timing['errno'] != 0) {
+                return [];
+            }
+        } catch (Exception $e) {
+            return [];
+        }
+
+        return $timing['data'];
+
+
+    }
+
+    public function getTimingDataBatch($data)
+    {
         $this->load->helper('http');
 
         // 获取配时详情
