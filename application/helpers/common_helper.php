@@ -390,3 +390,21 @@ if (!function_exists('uncamelize')) {
         return strtolower(preg_replace('/([a-z])([A-Z])/', "$1" . $separator . "$2", $camelCaps));
     }
 }
+
+if (!function_exists('splitTimeDurationToPoints')) {
+    function splitTimeDurationToPoints($timeDuration, $separator = '-')
+    {
+        $timeSplit = explode($separator,$timeDuration);
+        if(count($timeSplit)!=2){
+            return [$timeDuration];
+        }
+        $startTime = strtotime(date("Y-m-d")." ".$timeSplit[0]);
+        $endTime = strtotime(date("Y-m-d")." ".$timeSplit[1]);
+
+        $timePoints = [];
+        for($i = $startTime; $i<=$endTime; $i+=30*60){
+            $timePoints[] = date("H:i",$i);
+        }
+        return $timePoints;
+    }
+}

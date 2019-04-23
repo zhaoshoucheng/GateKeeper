@@ -1,145 +1,58 @@
 <?php
-/**
- * 路口相关接口数据处理
- * user:ningxiangbing@didichuxing.com
- * date:2018-11-01
- */
-
 namespace Services;
 
-class JunctionsService extends BaseService
+/**
+ * Class DiagnosisNoTimingService
+ * @package Services
+ * @property \DiagnosisNoTiming_model $diagnosisNoTiming_model
+ */
+class DiagnosisNoTimingService extends BaseService
 {
     public function __construct()
     {
         parent::__construct();
-
-        $this->load->config('nconf');
-
-        $this->load->model('waymap_model');
-        $this->load->model('junction_model');
-        $this->load->model('timing_model');
-    }
-
-    /**
-     * 获取全城路口信息
-     * @param $params['task_id']    int      任务ID
-     * @param $params['type']       int      计算指数类型 1：统合 0：时间点
-     * @param $params['city_id']    int      城市ID
-     * @param $params['time_point'] string   评估时间点 指标计算类型为1时非空
-     * @param $params['confidence'] int      置信度
-     * @param $params['quota_key']  string   指标key
-     * @return mixed
-     * @throws \Exception
-     */
-    public function getAllCityJunctionInfo($params)
-    {
-        // 获取全城路口模板 没有模板就没有lng、lat = 画不了地图
-        $allCityJunctions = $this->waymap_model->getAllCityJunctions($params['city_id']);
-        if (!$allCityJunctions) {
-            throw new \Exception('没有获取到全城路口！', ERR_REQUEST_WAYMAP_API);
-        }
-
-        // 查询字段定义
-        $select = 'id, junction_id';
-        // where条件
-        $where = ['task_id' => $params['task_id']];
-        // group_by
-        $groupBy = '';
-        // limit
-        $limit = '';
-
-        // 指标key 指标KEY与数据表字段相同
-        $quotaKey = $params['quota_key'];
-
-        // 按查询方式组织select
-        if ($params['type'] == 1) { // 综合查询
-            $select .= ", max({$quotaKey}) as {$quotaKey}";
-        } else {
-            $select .= ',' . $quotaKey;
-        }
-
-        // where条件组织
-        if ($params['type'] == 0) { // 按时间点查询
-            $where = array_merge($where, [
-                'type'       => $params['type'],
-                'time_point' => $params['time_point'],
-            ]);
-        }
-
-        // 是否选择置信度
-        if ((int)$params['confidence'] >= 1) { // 选择了置信度条件
-            $confidenceConf = $this->config->item('confidence');
-            $where = array_merge($where, $confidenceConf[$params['confidence']]['sql_where']($params['quotaKey'] . '_confidence'));
-        }
-
-        // 判断是否是综合查询
-        if ($params['type'] == 1) {
-            $groupBy = 'junction_id';
-        }
-
-
-        // 获取数据
-        $data = $this->junction_model->searchDB($select, $where, 'result_array', $groupBy, $limit);
-        if (empty($data)) {
-            return [];
-        }
-
-        // 路口指标配置
-        $quotaKeyConf = $this->config->item('junction_quota_key');
-
-        $tempQuotaData = [];
-        foreach ($data as &$v) {
-            // 指标状态 1：高 2：中 3：低
-            $v['quota_status'] = $quotaKeyConf[$quotaKey]['status_formula']($v[$quotaKey]);
-
-            $v[$quotaKey] = $quotaKeyConf[$quotaKey]['round']($v[$quotaKey]);
-            $tempQuotaData[$v['junction_id']]['list'][$quotaKey] = $v[$quotaKey];
-            $tempQuotaData[$v['junction_id']]['list']['quota_status'] = $v['quota_status'];
-        }
-
-        // 与全城路口合并
-        $resultData = $this->mergeAllJunctions($allCityJunctions, $tempQuotaData, 'quota_detail');
-
-        return $resultData;
+        $this->load->config('disgnosisnotiming_conf');
+        $this->load->model('diagnosisNoTiming_model');
     }
 
     /**
      * 获取路口指标详情
-     * @param $params['task_id']         int      任务ID
-     * @param $params['junction_id']     string   逻辑路口ID
-     * @param $params['dates']           array    评估/诊断日期
-     * @param $params['search_type']     int      查询类型 1：按方案查询 0：按时间点查询
-     * @param $params['time_point']      string   时间点 当search_type = 0 时 必传
-     * @param $params['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
-     * @param $params['type']            int      详情类型 1：指标详情页 2：诊断详情页
-     * @param $params['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-     * @param $params['timingType']      int      配时来源 1：人工 2：反推
+     * @param $params ['city_id']     string   城市ID
+     * @param $params ['junction_id']     string   逻辑路口ID
+     * @param $params ['time_point']      string   时间点      必传
+     * @param $params ['dates']           string   日期范围     必传
      * @return array
      */
     public function getFlowQuotas($params)
     {
-        if ((int)$params['type'] == 2) { // 诊断详情页
-            $res = $this->getDiagnoseJunctionDetail($params);
-        } else { // 指标详情页
-            $res = $this->getQuotaJunctionDetail($params);
-        }
+        $timePoints = splitTimeDurationToPoints($params['time_range']);
+        $result = [];
 
-        if (!$res) {
-            return [];
-        }
+        //定义路口问题阈值规则
+        $result["junction_question"] = $this->diagnosisNoTiming_model->getJunctionAlarmList(
+            $params['junction_id'], $timePoints, $params['dates']);
 
-        return $res;
+        //定义指标名称及注释
+        $quotaKey = $this->config->item('flow_quota_key');
+        $result["flow_quota_all"] = $quotaKey;
+
+        //movements从路网获取方向信息
+        $result["movements"] = $this->diagnosisNoTiming_model->getMovementQuota(
+            $params['city_id'], $params['junction_id'], $timePoints, $params['dates']);
+
+        $result["junction_id"] = $params["junction_id"];
+        return $result;
     }
 
     /**
      * 获取诊断列表页简易路口详情
-     * @param $params['task_id']         int      任务ID
-     * @param $params['junction_id']     string   逻辑路口ID
-     * @param $params['dates']           array    评估/诊断日期
-     * @param $params['time_point']      string   时间点
-     * @param $params['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-     * @param $params['diagnose_key']    array    诊断问题KEY
-     * @param $params['timingType']      int      配时来源 1：人工 2：反推
+     * @param $params ['task_id']         int      任务ID
+     * @param $params ['junction_id']     string   逻辑路口ID
+     * @param $params ['dates']           array    评估/诊断日期
+     * @param $params ['time_point']      string   时间点
+     * @param $params ['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+     * @param $params ['diagnose_key']    array    诊断问题KEY
+     * @param $params ['timingType']      int      配时来源 1：人工 2：反推
      * @return array
      */
     public function getDiagnosePageSimpleJunctionDetail($params)
@@ -149,7 +62,7 @@ class JunctionsService extends BaseService
          * 所以可以把过饱和问题的KEY忽略
          */
         $tempDiagnoseKey = [];
-        foreach ($params['diagnose_key'] as $k=>$v) {
+        foreach ($params['diagnose_key'] as $k => $v) {
             $tempDiagnoseKey[$k] = $v;
             if ($v == 'over_saturation') {
                 $tempDiagnoseKey[$k] = 'saturation_index';
@@ -161,10 +74,10 @@ class JunctionsService extends BaseService
 
         // 组织where条件
         $where = [
-            'task_id'     => $params['task_id'],
+            'task_id' => $params['task_id'],
             'junction_id' => $params['junction_id'],
-            'type'        => 0,
-            'time_point'  => $params['time_point'],
+            'type' => 0,
+            'time_point' => $params['time_point'],
         ];
 
         $data = $this->junction_model->searchDB($select, $where, 'row_array');
@@ -188,9 +101,9 @@ class JunctionsService extends BaseService
         // 获取flow_id=>name数组
         $timingData = [
             'junction_id' => trim($data['junction_id']),
-            'dates'       => $dates,
-            'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60),
-            'timingType'  => $timingType
+            'dates' => $dates,
+            'time_range' => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60),
+            'timingType' => $timingType
         ];
         $flowIdName = $this->timing_model->getFlowIdToName($timingData);
 
@@ -205,11 +118,11 @@ class JunctionsService extends BaseService
             $resultData['flow_quota'][$k]['unit'] = $flowQuotaKeyConf[$k]['unit'];
         }
 
-        $tempArr = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'confidence'=>'', 'comment'=>'']);
-        foreach ($data['movements'] as $k=>$v) {
+        $tempArr = array_merge($flowQuotaKeyConf, ['movement_id' => '', 'confidence' => '', 'comment' => '']);
+        foreach ($data['movements'] as $k => $v) {
             $v['comment'] = $flowIdName[$v['movement_id']] ?? '';
             $v['confidence'] = $confidenceConf[$v['confidence']]['name'];
-            foreach ($flowQuotaKeyConf as $kk=>$vv) {
+            foreach ($flowQuotaKeyConf as $kk => $vv) {
                 if (isset($v[$kk])) {
                     $v[$kk] = $vv['round']($v[$kk]);
                 }
@@ -221,13 +134,13 @@ class JunctionsService extends BaseService
         $diagnoseConf = $this->config->item('diagnose_key');
 
         /*********************************************
-            循环诊断问题配置
-            判断此路口有哪个问题
-            匹配movement中文名称
-            匹配置信度中文名称
-            匹配此路口有问题的movement并放入此问题集合中
-        *********************************************/
-        foreach ($diagnoseConf as $k=>$v) {
+         * 循环诊断问题配置
+         * 判断此路口有哪个问题
+         * 匹配movement中文名称
+         * 匹配置信度中文名称
+         * 匹配此路口有问题的movement并放入此问题集合中
+         *********************************************/
+        foreach ($diagnoseConf as $k => $v) {
             /*
              * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
              * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
@@ -246,28 +159,28 @@ class JunctionsService extends BaseService
                 // 组织有此问题的movement集合
                 $resultData['diagnose_detail'][$k]['movements'] = [];
 
-                foreach ($data['movements'] as $kk=>$vv) {
+                foreach ($data['movements'] as $kk => $vv) {
                     // 问题对应的指标
                     $diagnoseQuota = $v['flow_diagnose']['quota'];
                     if ($v['flow_diagnose']['formula']($vv[$diagnoseQuota])) {
                         // movement_id
                         $resultData['diagnose_detail'][$k]['movements'][$kk]['movement_id']
-                        = $vv['movement_id'];
+                            = $vv['movement_id'];
                         // movement中文名称-相位名称
                         $resultData['diagnose_detail'][$k]['movements'][$kk]['comment']
-                        = $flowIdName[$vv['movement_id']] ?? '未知相位';
+                            = $flowIdName[$vv['movement_id']] ?? '未知相位';
                         // 此问题对应指标值
                         $resultData['diagnose_detail'][$k]['movements'][$kk][$diagnoseQuota]
-                        = $flowQuotaKeyConf[$diagnoseQuota]['round']($vv[$diagnoseQuota]);
+                            = $flowQuotaKeyConf[$diagnoseQuota]['round']($vv[$diagnoseQuota]);
                         // 置信度
                         $resultData['diagnose_detail'][$k]['movements'][$kk]['confidence']
-                        = $confidenceConf[$vv['confidence']]['name'];
+                            = $confidenceConf[$vv['confidence']]['name'];
                     }
                 }
 
                 if (!empty($resultData['diagnose_detail'][$k]['movements'])) {
                     $resultData['diagnose_detail'][$k]['movements']
-                    = array_values($resultData['diagnose_detail'][$k]['movements']);
+                        = array_values($resultData['diagnose_detail'][$k]['movements']);
                 }
             }
         }
@@ -278,11 +191,11 @@ class JunctionsService extends BaseService
     /**
      * 获取路口问题趋势图
      * 路口无问题属于正常状态时，返回路口级指标平均延误的趋势图
-     * @param $params['task_id']         int      任务ID
-     * @param $params['junction_id']     string   逻辑路口ID
-     * @param $params['time_point']      string   时间点
-     * @param $params['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-     * @param $params['diagnose_key']    array    诊断问题KEY
+     * @param $params ['task_id']         int      任务ID
+     * @param $params ['junction_id']     string   逻辑路口ID
+     * @param $params ['time_point']      string   时间点
+     * @param $params ['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+     * @param $params ['diagnose_key']    array    诊断问题KEY
      * @return array
      */
     public function getJunctionQuestionTrend($params)
@@ -293,7 +206,7 @@ class JunctionsService extends BaseService
              * 所以可以把过饱和问题的KEY忽略
              */
             $tempDiagnoseKey = [];
-            foreach ($params['diagnose_key'] as $k=>$v) {
+            foreach ($params['diagnose_key'] as $k => $v) {
                 $tempDiagnoseKey[$k] = $v;
                 if ($v == 'over_saturation') {
                     $tempDiagnoseKey[$k] = 'saturation_index';
@@ -309,9 +222,9 @@ class JunctionsService extends BaseService
 
         // 组织where条件
         $where = [
-            'task_id'     => $params['task_id'],
+            'task_id' => $params['task_id'],
             'junction_id' => $params['junction_id'],
-            'type'        => 0,
+            'type' => 0,
         ];
 
         $data = $this->junction_model->searchDB($select, $where);
@@ -335,7 +248,7 @@ class JunctionsService extends BaseService
             $tempData[$i]['stop_delay'] = 0;
             $tempData[$i]['time_point'] = date('H:i', $i);
         }
-        foreach ($data as $k=>$v) {
+        foreach ($data as $k => $v) {
             $tempData[strtotime($v['time_point'])] = $v;
         }
         ksort($tempData);
@@ -349,7 +262,7 @@ class JunctionsService extends BaseService
 
         $diagnose = $params['diagnose_key'];
         if (!empty($diagnose)) { // 有问题的路口
-            foreach ($diagnoseConf as $k=>$v) {
+            foreach ($diagnoseConf as $k => $v) {
                 if (!in_array($k, $diagnose, true)) {
                     continue;
                 }
@@ -400,10 +313,10 @@ class JunctionsService extends BaseService
                     }
                 }
 
-                $newData[$k]['info']['continuous_start'] = date('H:i',$continuouStart);
+                $newData[$k]['info']['continuous_start'] = date('H:i', $continuouStart);
                 $newData[$k]['info']['continuous_end'] = date('H:i', $continuouEnd);
 
-                foreach ($tempData as $kk=>$vv) {
+                foreach ($tempData as $kk => $vv) {
                     $newData[$k]['list'][$kk]['value'] = $junctionQuotaKeyConf[$diagnoseKey]['round']($vv[$diagnoseKey]);
                     $newData[$k]['list'][$kk]['time'] = $vv['time_point'];
                 }
@@ -416,9 +329,9 @@ class JunctionsService extends BaseService
             $newData[$normalQuota]['info']['quota_name'] = $junctionQuotaKeyConf[$normalQuota]['name'];
             $newData[$normalQuota]['info']['continuous_start'] = '00:00';
             $newData[$normalQuota]['info']['continuous_end'] = '00:00';
-            foreach ($tempData as $k=>$v) {
+            foreach ($tempData as $k => $v) {
                 $newData[$normalQuota]['list'][$k]['value']
-                = $junctionQuotaKeyConf[$normalQuota]['round']($v[$normalQuota]);
+                    = $junctionQuotaKeyConf[$normalQuota]['round']($v[$normalQuota]);
                 $newData[$normalQuota]['list'][$k]['time'] = $v['time_point'];
             }
             if (!empty($newData[$normalQuota]['list'])) {
@@ -431,10 +344,10 @@ class JunctionsService extends BaseService
 
     /**
      * 获取路口配时信息
-     * @param $params['junction_id'] string   逻辑路口ID
-     * @param $params['dates']       array    评估/诊断日期
-     * @param $params['time_range']  string   时间段 00:00-00:30
-     * @param $params['timingType']  int      配时数据源 0，全部；1，人工；2，配时反推；3，信号机上报
+     * @param $params ['junction_id'] string   逻辑路口ID
+     * @param $params ['dates']       array    评估/诊断日期
+     * @param $params ['time_range']  string   时间段 00:00-00:30
+     * @param $params ['timingType']  int      配时数据源 0，全部；1，人工；2，配时反推；3，信号机上报
      * @return array
      */
     public function getJunctionsTimingInfo($params)
@@ -459,7 +372,7 @@ class JunctionsService extends BaseService
         // 方案总数
         $result['total_plan'] = $data['total_plan'];
 
-        foreach ($data['latest_plan']['time_plan'] as $k=>$v) {
+        foreach ($data['latest_plan']['time_plan'] as $k => $v) {
             // 方案列表
             $tod_start_time = $v['tod_start_time'];
             if (strtotime($task_start_time) > strtotime($tod_start_time)) {
@@ -482,25 +395,25 @@ class JunctionsService extends BaseService
             }
 
             if (!empty($v['plan_detail']['movement_timing'])) {
-                foreach ($v['plan_detail']['movement_timing'] as $k1=>$v1) {
-                    foreach ($v1 as $key=>$val) {
+                foreach ($v['plan_detail']['movement_timing'] as $k1 => $v1) {
+                    foreach ($v1 as $key => $val) {
                         // 信号灯状态 1=绿灯
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['state']
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1 + $key]['state']
                             = isset($val['state']) ? $val['state'] : 0;
                         // 绿灯开始时间
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['start_time']
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1 + $key]['start_time']
                             = isset($val['start_time']) ? $val['start_time'] : 0;
                         // 绿灯持续时间
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['duration']
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1 + $key]['duration']
                             = isset($val['duration']) ? $val['duration'] : 0;
                         // 绿灯结束时间
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['end_time']
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1 + $key]['end_time']
                             = $val['start_time'] + $val['duration'];
                         // 逻辑flow id
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['logic_flow_id']
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1 + $key]['logic_flow_id']
                             = isset($val['flow_logic']['logic_flow_id']) ? $val['flow_logic']['logic_flow_id'] : 0;
                         // flow 描述
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['comment']
+                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1 + $key]['comment']
                             = isset($val['flow_logic']['comment']) ? $val['flow_logic']['comment'] : '';
                     }
                 }
@@ -523,12 +436,12 @@ class JunctionsService extends BaseService
 
     /**
      * 获取全城路口诊断问题列表
-     * @param $data['task_id']      int      任务ID
-     * @param $data['city_id']      int      城市ID
-     * @param $data['time_point']   string   时间点
-     * @param $data['type']         int      计算类型
-     * @param $data['confidence']   int      置信度
-     * @param $data['diagnose_key'] array    诊断问题KEY
+     * @param $data ['task_id']      int      任务ID
+     * @param $data ['city_id']      int      城市ID
+     * @param $data ['time_point']   string   时间点
+     * @param $data ['type']         int      计算类型
+     * @param $data ['confidence']   int      置信度
+     * @param $data ['diagnose_key'] array    诊断问题KEY
      * @return array
      */
     public function getJunctionsDiagnoseList($data)
@@ -553,7 +466,7 @@ class JunctionsService extends BaseService
         $select = 'count(DISTINCT junction_id) as count';
         $where = [
             'task_id' => $data['task_id'],
-            'type'    => 0,
+            'type' => 0,
         ];
         $junctionTotal = 0;
         $allJunction = $this->junction_model->searchDB($select, $where, 'row_array');
@@ -581,7 +494,7 @@ class JunctionsService extends BaseService
             $tempDiagnoseData['count'][$val] = 0;
 
             // 循环任务结果数据，进行问题判断及统计等
-            foreach ($res as $k=>$v) {
+            foreach ($res as $k => $v) {
                 // 统计停车(平均)延误总数
                 $countStopDelay += $v['stop_delay'];
                 // 统计平均速度总数
@@ -592,17 +505,17 @@ class JunctionsService extends BaseService
                  */
                 // 格式化指标数据
                 $tempDiagnoseData[$v['junction_id']]['info']['quota']['stop_delay']['value']
-                = $junctionQuotaKeyConf['stop_delay']['round']($v['stop_delay']);
+                    = $junctionQuotaKeyConf['stop_delay']['round']($v['stop_delay']);
                 // 指标名称
                 $tempDiagnoseData[$v['junction_id']]['info']['quota']['stop_delay']['name']
-                = $junctionQuotaKeyConf['stop_delay']['name'];
+                    = $junctionQuotaKeyConf['stop_delay']['name'];
                 // 指标单位
                 $tempDiagnoseData[$v['junction_id']]['info']['quota']['stop_delay']['unit']
-                = $junctionQuotaKeyConf['stop_delay']['unit'];
+                    = $junctionQuotaKeyConf['stop_delay']['unit'];
 
                 // 对问题对应的指标数据进行格式化
                 $tempDiagnoseData[$v['junction_id']]['list'][$val]
-                = $junctionQuotaKeyConf[$diagnose]['round']($v[$diagnose]);
+                    = $junctionQuotaKeyConf[$diagnose]['round']($v[$diagnose]);
 
                 // 路口是否有问题标记
                 $isDiagnose = 0;
@@ -612,7 +525,7 @@ class JunctionsService extends BaseService
                     $tempDiagnoseData['count'][$val] += 1;
                     // hover:路口存在的问题名称
                     $tempDiagnoseData[$v['junction_id']]['info']['question'][$val]
-                    = $diagnoseKeyConf[$val]['name'];
+                        = $diagnoseKeyConf[$val]['name'];
                 }
 
                 $tempDiagnoseData[$v['junction_id']]['list'][$val . '_diagnose'] = $isDiagnose;
@@ -636,8 +549,8 @@ class JunctionsService extends BaseService
 
     /**
      * 获取问题趋势
-     * @param $data['task_id']    int      Y 任务ID
-     * @param $data['confidence'] int      Y 置信度
+     * @param $data ['task_id']    int      Y 任务ID
+     * @param $data ['confidence'] int      Y 置信度
      * @return array
      */
     public function getQuestionTrend($data)
@@ -652,7 +565,7 @@ class JunctionsService extends BaseService
         $select = 'count(DISTINCT junction_id) as count';
         $baseWhere = [
             'task_id' => $data['task_id'],
-            'type'    => 0,
+            'type' => 0,
         ];
 
         // 获取此任务路口总数
@@ -666,7 +579,7 @@ class JunctionsService extends BaseService
         // 循环获取每种问题各时间点路口总数
         $diagnoseSelect = 'count(id) as num , time_point as hour';
         $groupBy = 'time_point';
-        foreach ($diagnoseKeyConf as $k=>$v) {
+        foreach ($diagnoseKeyConf as $k => $v) {
             /*
              * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
              * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
@@ -675,9 +588,9 @@ class JunctionsService extends BaseService
             if ($diagnose == 'over_saturation') {
                 $diagnose = 'saturation_index';
             }
-            $where  = array_merge($baseWhere, $v['sql_where']());
+            $where = array_merge($baseWhere, $v['sql_where']());
             if ($data['confidence'] >= 1) {
-                $where  = array_merge($where, $confidenceThreshold[$data['confidence']]['sql_where']($diagnose . '_confidence'));
+                $where = array_merge($where, $confidenceThreshold[$data['confidence']]['sql_where']($diagnose . '_confidence'));
             }
 
             $res[$k] = $this->junction_model->searchDB($diagnoseSelect, $where, 'result_array', $groupBy);
@@ -695,13 +608,13 @@ class JunctionsService extends BaseService
             return [];
         }
 
-        foreach ($res as $k=>$v) {
+        foreach ($res as $k => $v) {
             foreach ($timeRange as $hour) {
                 $result[$k]['name'] = $diagnoseKeyConf[$k]['name'];
                 $result[$k]['list'][$hour]['hour'] = $hour;
                 $result[$k]['list'][$hour]['num'] = 0;
                 $result[$k]['list'][$hour]['percent'] = 0 . '%';
-                foreach ($v as $kk=>$vv) {
+                foreach ($v as $kk => $vv) {
                     if ($vv['hour'] == $hour) {
                         $result[$k]['list'][$hour]['hour'] = $vv['hour'];
                         $result[$k]['list'][$hour]['num'] = $vv['num'];
@@ -716,11 +629,11 @@ class JunctionsService extends BaseService
 
     /**
      * 诊断-诊断问题排序列表
-     * @param $data['task_id']      int      任务ID
-     * @param $data['time_point']   string   时间点
-     * @param $data['diagnose_key'] array    诊断问题KEY
-     * @param $data['confidence']   int      置信度
-     * @param $data['orderby']      int      诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
+     * @param $data ['task_id']      int      任务ID
+     * @param $data ['time_point']   string   时间点
+     * @param $data ['diagnose_key'] array    诊断问题KEY
+     * @param $data ['confidence']   int      置信度
+     * @param $data ['orderby']      int      诊断问题排序 1：按指标值正序 2：按指标值倒序 默认2
      * @return array
      */
     public function getDiagnoseRankList($data)
@@ -743,8 +656,8 @@ class JunctionsService extends BaseService
         $result = [];
         // 路口ID串 用逗号隔开
         $logicJunctionIds = '';
-        foreach ($res as $k=>$v) {
-            foreach ($data['diagnose_key'] as $k1=>$v1) {
+        foreach ($res as $k => $v) {
+            foreach ($data['diagnose_key'] as $k1 => $v1) {
                 /*
                  * 因为过饱和问题与空放问题同用一个指标，现定义空放问题的KEY与指标相同
                  * 所以当问题是过饱和时，需要进行问题KEY与指标保持一致处理
@@ -796,8 +709,8 @@ class JunctionsService extends BaseService
 
         // 组织最终返回数据结构 ['quota_key'=>['junction_id'=>'xx','junction_label'=>'xxx', 'value'=>0], ......]
         $resultData = [];
-        foreach ($result as $k=>$v) {
-            foreach ($v as $k1=>$v1) {
+        foreach ($result as $k => $v) {
+            foreach ($v as $k1 => $v1) {
                 $resultData[$k][$k1]['junction_id'] = $k1;
                 $resultData[$k][$k1]['junction_label'] = $junctionIdName[$k1] ?? '';
                 $resultData[$k][$k1]['value'] = $v1;
@@ -813,17 +726,17 @@ class JunctionsService extends BaseService
 
     /**
      * 查询综合类型全城路口诊断问题列表
-     * @param $data['task_id']      int      任务ID
-     * @param $data['city_id']      int      城市ID
-     * @param $data['time_point']   string   时间点
-     * @param $data['type']         int      计算类型
-     * @param $data['confidence']   int      置信度
-     * @param $data['diagnose_key'] array    诊断问题KEY
+     * @param $data ['task_id']      int      任务ID
+     * @param $data ['city_id']      int      城市ID
+     * @param $data ['time_point']   string   时间点
+     * @param $data ['type']         int      计算类型
+     * @param $data ['confidence']   int      置信度
+     * @param $data ['diagnose_key'] array    诊断问题KEY
      * @return array
      */
     private function getJunctionsDiagnoseBySynthesize($data)
     {
-        $sql_data = array_map(function($diagnose_key) use ($data) {
+        $sql_data = array_map(function ($diagnose_key) use ($data) {
             /*
              * 过饱和问题与空放问题都是基于路口级指标：饱和指数（saturation_index）算出来的
              * 所以把过饱和的KEY转为相应的指标KEY进行SQL组合
@@ -843,7 +756,7 @@ class JunctionsService extends BaseService
 
             $where = [
                 'task_id' => $data['task_id'],
-                'type'    => 1,
+                'type' => 1,
             ];
             $temp_data = $this->junction_model->searchDB($selectstr, $where);
             $new_data = [];
@@ -862,8 +775,8 @@ class JunctionsService extends BaseService
         $flag = [];
         if (count($sql_data) >= 1) {
             $flag = $sql_data[0];
-            foreach ($flag as $k=>&$v) {
-                $v = array_reduce($sql_data, function($carry, $item) use ($k) {
+            foreach ($flag as $k => &$v) {
+                $v = array_reduce($sql_data, function ($carry, $item) use ($k) {
                     return array_merge($carry, $item[$k]);
                 }, []);
                 if ((int)$data['confidence'] != 0) {
@@ -875,7 +788,7 @@ class JunctionsService extends BaseService
                     if ($data['confidence'] == 1) { // 置信度：高 unset低的
                         if ($total / $count <= $diagnose_confidence_threshold) unset($flag[$k]);
                     } elseif ($data['confidence'] == 2) { // 置信度：低 unset高的
-                        if($total / $count > $diagnose_confidence_threshold) unset($flag[$k]);
+                        if ($total / $count > $diagnose_confidence_threshold) unset($flag[$k]);
                     }
                 }
             }
@@ -885,16 +798,16 @@ class JunctionsService extends BaseService
     }
 
     /**
-    * 获取路口地图底图数据
-    * @param $data['junction_id']     string   Y 逻辑路口ID
-    * @param $data['dates']           string   Y 评估/诊断任务日期 ['20180102','20180103']
-    * @param $data['search_type']     int      Y 查询类型 1：按方案查询 0：按时间点查询
-    * @param $data['time_point']      string   N 时间点 格式 00:00 PS:当search_type = 0 时 必传
-    * @param $data['time_range']      string   N 方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传 时间段
-    * @param $data['task_time_range'] string   Y 评估/诊断任务开始结束时间 格式 00:00-24:00
-    * @param $data['timingType']      int      Y 配时来源 1：人工 2：反推
-    * @return array
-    */
+     * 获取路口地图底图数据
+     * @param $data ['junction_id']     string   Y 逻辑路口ID
+     * @param $data ['dates']           string   Y 评估/诊断任务日期 ['20180102','20180103']
+     * @param $data ['search_type']     int      Y 查询类型 1：按方案查询 0：按时间点查询
+     * @param $data ['time_point']      string   N 时间点 格式 00:00 PS:当search_type = 0 时 必传
+     * @param $data ['time_range']      string   N 方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传 时间段
+     * @param $data ['task_time_range'] string   Y 评估/诊断任务开始结束时间 格式 00:00-24:00
+     * @param $data ['timingType']      int      Y 配时来源 1：人工 2：反推
+     * @return array
+     */
     public function getJunctionMapData($data)
     {
         $logicJunctionId = $data['junction_id'];
@@ -907,8 +820,8 @@ class JunctionsService extends BaseService
         // 获取配时数据 地图底图数据源用配时的
         $timing_data = [
             'junction_id' => $logicJunctionId,
-            'dates'       => $data['dates'],
-            'timingType'  => $data['timingType']
+            'dates' => $data['dates'],
+            'timingType' => $data['timingType']
         ];
         if ((int)$data['search_type'] == 1) { // 按方案查询
             $time_range = array_filter(explode('-', $data['time_range']));
@@ -934,11 +847,11 @@ class JunctionsService extends BaseService
             }
         }
         // 获取路口中心坐标
-        $result['center']       = '';
+        $result['center'] = '';
         $centerData['logic_id'] = $logicJunctionId;
-        $center                 = $this->waymap_model->getJunctionCenterCoords($logicJunctionId);
+        $center = $this->waymap_model->getJunctionCenterCoords($logicJunctionId);
 
-        $result['center']      = $center;
+        $result['center'] = $center;
         $result['map_version'] = $newMapVersion;
 
         if (!empty($result['dataList'])) {
@@ -950,17 +863,17 @@ class JunctionsService extends BaseService
 
     /**
      * 根据时间点查询全城路口诊断问题列表
-     * @param $data['task_id']      int      任务ID
-     * @param $data['time_point']   string   时间点
-     * @param $data['confidence']   int      置信度
-     * @param $data['diagnose_key'] array    诊断问题KEY
+     * @param $data ['task_id']      int      任务ID
+     * @param $data ['time_point']   string   时间点
+     * @param $data ['confidence']   int      置信度
+     * @param $data ['diagnose_key'] array    诊断问题KEY
      * @return array
      */
     private function getJunctionsDiagnoseByTimePoint($data)
     {
         $diagnoseKeyConf = $this->config->item('diagnose_key');
         $selectQuotaKey = [];
-        foreach ($diagnoseKeyConf as $k=>$v) {
+        foreach ($diagnoseKeyConf as $k => $v) {
             // 过饱和与空放问题都是根据指标饱和指数计算
             if ($k != 'over_saturation') {
                 $selectQuotaKey[] = $k;
@@ -970,9 +883,9 @@ class JunctionsService extends BaseService
         $selectstr = empty($this->selectColumns($selectQuotaKey)) ? '' : ',' . $this->selectColumns($selectQuotaKey);
         $select = 'id, junction_id, stop_delay, avg_speed' . $selectstr;
         $where = [
-            'task_id'    => $data['task_id'],
+            'task_id' => $data['task_id'],
             'time_point' => $data['time_point'],
-            'type'       => 0,
+            'type' => 0,
         ];
 
         // 诊断问题总数
@@ -990,7 +903,7 @@ class JunctionsService extends BaseService
 
         $confidenceExpression = [
             1 => ['(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '>=' => $confidenceThreshold],
-            2 => ['(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '<'  => $confidenceThreshold],
+            2 => ['(' . $confidenceWhere . ') / ' . $diagnoseKeyCount . '<' => $confidenceThreshold],
         ];
 
         $confidenceConf = $this->config->item('confidence');
@@ -1010,15 +923,15 @@ class JunctionsService extends BaseService
 
     /**
      * 获取诊断详情页数据
-     * @param $data['task_id']         int      任务ID
-     * @param $data['junction_id']     string   逻辑路口ID
-     * @param $data['dates']           array    评估/诊断日期
-     * @param $data['search_type']     int      查询类型 1：按方案查询 0：按时间点查询
-     * @param $data['time_point']      string   时间点 当search_type = 0 时 必传
-     * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
-     * @param $data['type']            int      详情类型 1：指标详情页 2：诊断详情页
-     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-     * @param $data['timingType']      int      配时来源 1：人工 2：反推
+     * @param $data ['task_id']         int      任务ID
+     * @param $data ['junction_id']     string   逻辑路口ID
+     * @param $data ['dates']           array    评估/诊断日期
+     * @param $data ['search_type']     int      查询类型 1：按方案查询 0：按时间点查询
+     * @param $data ['time_point']      string   时间点 当search_type = 0 时 必传
+     * @param $data ['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
+     * @param $data ['type']            int      详情类型 1：指标详情页 2：诊断详情页
+     * @param $data ['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+     * @param $data ['timingType']      int      配时来源 1：人工 2：反推
      * @return array
      */
     private function getDiagnoseJunctionDetail($data)
@@ -1028,7 +941,7 @@ class JunctionsService extends BaseService
 
         // 组织select 所需字段
         $selectQuota = '';
-        foreach ($diagnoseKeyConf as $k=>$v) {
+        foreach ($diagnoseKeyConf as $k => $v) {
             /*
              * 因为过饱和问题与空放都是根据同一指标计算的，现空放问题的KEY与指标相同
              * 所以只不需要再拼接过饱和问题的select column
@@ -1041,7 +954,7 @@ class JunctionsService extends BaseService
 
         // 组织where条件
         $where = [
-            'task_id'     => (int)$data['task_id'],
+            'task_id' => (int)$data['task_id'],
             'junction_id' => trim($data['junction_id']),
         ];
 
@@ -1049,14 +962,14 @@ class JunctionsService extends BaseService
             // 综合查询
             $time_range = array_filter(explode('-', $data['time_range']));
             $where = array_merge($where, [
-                'type'       => 1,
+                'type' => 1,
                 'start_time' => trim($time_range[0]),
-                'end_time'   => trim($time_range[1]),
+                'end_time' => trim($time_range[1]),
             ]);
         } else { // 按时间点查询
             $select .= ', time_point';
             $where = array_merge($where, [
-                'type'       => 0,
+                'type' => 0,
                 'time_point' => trim($data['time_point']),
             ]);
         }
@@ -1073,15 +986,15 @@ class JunctionsService extends BaseService
 
     /**
      * 获取指标详情页数据
-     * @param $data['task_id']         int      任务ID
-     * @param $data['junction_id']     string   逻辑路口ID
-     * @param $data['dates']           array    评估/诊断日期
-     * @param $data['search_type']     int      查询类型 1：按方案查询 0：按时间点查询
-     * @param $data['time_point']      string   时间点 当search_type = 0 时 必传
-     * @param $data['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
-     * @param $data['type']            int      详情类型 1：指标详情页 2：诊断详情页
-     * @param $data['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
-     * @param $data['timingType']      int      配时来源 1：人工 2：反推
+     * @param $data ['task_id']         int      任务ID
+     * @param $data ['junction_id']     string   逻辑路口ID
+     * @param $data ['dates']           array    评估/诊断日期
+     * @param $data ['search_type']     int      查询类型 1：按方案查询 0：按时间点查询
+     * @param $data ['time_point']      string   时间点 当search_type = 0 时 必传
+     * @param $data ['time_range']      string   方案的开始结束时间 (07:00-09:15) 当search_type = 1 时 必传
+     * @param $data ['type']            int      详情类型 1：指标详情页 2：诊断详情页
+     * @param $data ['task_time_range'] string   评估/诊断任务开始结束时间 格式："06:00-09:00"
+     * @param $data ['timingType']      int      配时来源 1：人工 2：反推
      * @return array
      */
     private function getQuotaJunctionDetail($data)
@@ -1091,7 +1004,7 @@ class JunctionsService extends BaseService
 
         // 组织where条件
         $where = [
-            'task_id'     => (int)$data['task_id'],
+            'task_id' => (int)$data['task_id'],
             'junction_id' => trim($data['junction_id']),
         ];
 
@@ -1103,13 +1016,13 @@ class JunctionsService extends BaseService
             // 综合查询
             $time_range = array_filter(explode('-', $data['time_range']));
             $where = array_merge($where, [
-                'type'       => 1,
+                'type' => 1,
                 'start_time' => trim($time_range[0]),
-                'end_time'   => trim($time_range[1]),
+                'end_time' => trim($time_range[1]),
             ]);
         } else { // 按时间点查询
             $where = array_merge($where, [
-                'type'       => 0,
+                'type' => 0,
                 'time_point' => trim($data['time_point']),
             ]);
         }
@@ -1151,9 +1064,9 @@ class JunctionsService extends BaseService
         // 获取flow_id=>name数组
         $timing_data = [
             'junction_id' => trim($data['junction_id']),
-            'dates'       => $dates,
-            'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60),
-            'timingType'  => $timingType
+            'dates' => $dates,
+            'time_range' => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60),
+            'timingType' => $timingType
         ];
         $flowIdName = $this->timing_model->getFlowIdToName($timing_data);
 
@@ -1161,7 +1074,7 @@ class JunctionsService extends BaseService
         $flowQuotaKeyConf = $this->config->item('flow_quota_key');
 
         // 需要返回的全部movements所需字段
-        $movementsAll = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'comment'=>'', 'confidence'=>'']);
+        $movementsAll = array_merge($flowQuotaKeyConf, ['movement_id' => '', 'comment' => '', 'confidence' => '']);
 
         // 置信度配置
         $confidenceConf = $this->config->item('confidence');
@@ -1179,7 +1092,7 @@ class JunctionsService extends BaseService
         ];
 
         $tempMovements = [];
-        foreach ($data['movements'] as $k=>&$v) {
+        foreach ($data['movements'] as $k => &$v) {
             // 相位名称
             $v['comment'] = $flowIdName[$v['movement_id']] ?? '';
 
@@ -1191,7 +1104,7 @@ class JunctionsService extends BaseService
             }
 
             // 组织flow级指标对应相位集合及格式化指标数据
-            foreach ($flowQuotaKeyConf as $key=>$val) {
+            foreach ($flowQuotaKeyConf as $key => $val) {
                 // 指标名称
                 $data['flow_quota_all'][$key]['name'] = $val['name'];
                 // 指标单位
@@ -1222,7 +1135,7 @@ class JunctionsService extends BaseService
         if ($resultType == 2) { // 诊断详情页
             // 组织问题集合
             $diagnoseKeyConf = $this->config->item('diagnose_key');
-            foreach ($diagnoseKeyConf as $k=>$v) {
+            foreach ($diagnoseKeyConf as $k => $v) {
                 /*
                  * 因为过饱和问题与空放问题同用一个指标进行计算
                  * 所以过饱和问题要单独处理一下
@@ -1241,18 +1154,18 @@ class JunctionsService extends BaseService
                     $data['diagnose_detail'][$k]['nature'] = $v['nature_formula']($data[$diagnose]);
 
                     // 匹配每个问题指标
-                    $tempArr = ['movement_id'=>'logic_flow_id', 'comment'=>'name', 'confidence'=>'置信度'];
+                    $tempArr = ['movement_id' => 'logic_flow_id', 'comment' => 'name', 'confidence' => '置信度'];
                     $tempMerge = array_merge($v['flow_quota'], $tempArr);
-                    foreach ($data['movements'] as $kk=>$vv) {
+                    foreach ($data['movements'] as $kk => $vv) {
                         $data['diagnose_detail'][$k]['movements'][$kk] = array_intersect_key($vv, $tempMerge);
-                        foreach ($v['flow_quota'] as $key=>$val) {
+                        foreach ($v['flow_quota'] as $key => $val) {
                             if (isset($vv[$key])) {
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['name'] = $val['name'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['unit'] = $val['unit'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['id']
-                                = $vv['movement_id'];
+                                    = $vv['movement_id'];
                                 $data['diagnose_detail'][$k]['flow_quota'][$key]['movements'][$kk]['value']
-                                = $flowQuotaKeyConf[$key]['round']($vv[$key]);
+                                    = $flowQuotaKeyConf[$key]['round']($vv[$key]);
                             }
                         }
                     }
@@ -1286,7 +1199,7 @@ class JunctionsService extends BaseService
         $countLat = 0;
 
         // 循环全城路口
-        foreach ($allData as $k=>$v) {
+        foreach ($allData as $k => $v) {
             // 路口存在于任务结果数据中
             if (isset($data[$v['logic_junction_id']])) {
                 // 经纬度相加 用于最后计算中心经纬度用
@@ -1341,7 +1254,7 @@ class JunctionsService extends BaseService
 
             // 统计指标（平均延误、平均速度）平均值
             if (isset($data['quotaCount'])) {
-                foreach ($data['quotaCount'] as $k=>$v) {
+                foreach ($data['quotaCount'] as $k => $v) {
                     $resultData['quotaCount'][$k]['name'] = $junctionQuotaKeyConf[$k]['name'];
                     $resultData['quotaCount'][$k]['value'] = round(($v / $count), 2);
                     $resultData['quotaCount'][$k]['unit'] = $junctionQuotaKeyConf[$k]['unit'];
@@ -1349,12 +1262,12 @@ class JunctionsService extends BaseService
             }
 
             // 计算地图中心坐标
-            $centerLng = $qcount>0 ? round($countLng / $qcount, 6): "";
-            $centerLat = $qcount>0 ? round($countLat / $qcount, 6): "";
+            $centerLng = round($countLng / $qcount, 6);
+            $centerLat = round($countLat / $qcount, 6);
 
             // 柱状图
             if (!empty($data['count']) && $count >= 1) {
-                foreach ($data['count'] as $k=>$v) {
+                foreach ($data['count'] as $k => $v) {
                     // 此问题的路口个数
                     $resultData['count'][$k]['num'] = $v;
                     // 问题中文名称
