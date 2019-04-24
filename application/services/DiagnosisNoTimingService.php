@@ -1,10 +1,13 @@
 <?php
 namespace Services;
+use Didi\Cloud\Collection\Collection;
 
 /**
  * Class DiagnosisNoTimingService
  * @package Services
  * @property \DiagnosisNoTiming_model $diagnosisNoTiming_model
+ * @property \Traj_model $traj_model
+ * @property \Arterialtiming_model $arterialtiming_model
  */
 class DiagnosisNoTimingService extends BaseService
 {
@@ -12,8 +15,21 @@ class DiagnosisNoTimingService extends BaseService
     {
         parent::__construct();
         $this->load->config('disgnosisnotiming_conf');
+        $this->load->config('nconf');
         $this->load->model('diagnosisNoTiming_model');
+        $this->load->model('traj_model');
+        $this->load->model('arterialtiming_model');
     }
+
+    public function getJunctionQuotaTrend($params)
+    {
+        $result = [];
+        $timePoints = splitTimeDurationToPoints("00:00-23:30");
+        $result["junction_question"] = $this->diagnosisNoTiming_model->getJunctionQuotaTrend(
+            $params['junction_id'], $timePoints, $params['dates']);
+        return $result;
+    }
+
 
     /**
      * 获取路口指标详情
@@ -42,5 +58,294 @@ class DiagnosisNoTimingService extends BaseService
 
         $result["junction_id"] = $params["junction_id"];
         return $result;
+    }
+
+    /**
+     * 获取路口地图底图数据
+     * @param $data
+     * @return array
+     */
+    public function getJunctionMapData($params)
+    {
+        $result = $this->diagnosisNoTiming_model->getJunctionMapData($params);
+        return $result;
+    }
+
+    public function getSpaceTimeDiagram($params)
+    {
+        $startTime = $params['time_point'].":00";
+        $endTime = date("H:i:s", strtotime(date("Y-m-d")." ".$params['time_point'].":00")+30*60);
+        $formatDate = date("Ymd",strtotime($params['date']));
+
+        //获取配时信息:兼容老格式的传参
+        $juncData = [[
+            "logic_junction_id"=>$params['junction_id'],    //只传一个junc
+            "flows"=>[$params['flow_id'],],                 //只传一个flow
+        ]];
+        $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($juncData,$endTime,$formatDate);
+        //$timingInfo = $this->arterialtiming_model->tmpGetNewJunctionTimingInfos($data,$timePoint,$date[0]);
+
+        //获取当前时段配时信息
+        $juncTiming = $timingInfo[$params['junction_id']][0] ?? [];
+        if(empty($juncTiming['timing_info']['extra_timing'])){
+            return [];
+        }
+        $cycle = $juncTiming['timing_info']['extra_timing']['cycle'];
+        $offset = $juncTiming['timing_info']['extra_timing']['offset'];
+        $yellow = 3;
+        $formatGreen = [];
+        foreach ($juncTiming['timing_info']['movement_timing'] as $item){
+            $formatGreen[] = [
+                "green_start"=>$item['start_time'],
+                "green_duration"=>$item['duration'],
+                "yellow"=>0,
+                "red_clean"=>0,
+            ];
+        }
+        $formatGreen2 = [];
+        foreach ($juncTiming['timing_info']['movement_timing'] as $item){
+            $formatGreen2[] = [
+                "start_time"=>$item['start_time'],
+                "duration"=>$item['duration'],
+            ];
+        }
+
+        //获取纠偏offset
+        $clockParam = [
+            "dates"=>[$formatDate],
+            "junction_list"=>[
+                [
+                    "junction_id"=>$params['junction_id'],
+                    "start_time"=>$startTime,
+                    "end_time"=>$endTime,
+                    "movement"=>[
+                        [
+                            "movement_id"=>$params['flow_id'],
+                            "green"=>$formatGreen,
+                        ]
+                    ],
+                    "cycle"=>$cycle,
+                    "offset"=>$offset,
+                ],
+            ]
+        ];
+        $clockShiftInfo = $this->traj_model->getClockShiftCorrect(json_encode($clockParam));
+        if(empty($clockShiftInfo)){
+            return [];
+        }
+        $clockShift = $clockShiftInfo[0]['clock_shift'] ?? 0;
+
+        //获取相位信息
+        $flowMovement = $this->waymap_model->getFlowMovement($params['city_id'], $params['junction_id'], $params['flow_id']);
+        if(empty($flowMovement)){
+            return [];
+        }
+        $trajParam = [
+            "junctions"=>[
+                [
+                    "junction_id"=>$flowMovement['junction_id'],
+                    "forward_flow_id"=>$flowMovement['logic_flow_id'],
+                    "reverse_flow_id"=>"",
+                    "forward_in_links"=>$flowMovement['in_link_ids'],
+                    "forward_out_links"=>$flowMovement['out_link_ids'],
+                    "reverse_in_links"=>"",
+                    "reverse_out_links"=>"",
+                    "junction_inner_links"=>$flowMovement['inner_link_ids'],
+                    "tod_start_time"=>$startTime,
+                    "tod_end_time"=>$endTime,
+                    "cycle"=>(string) $cycle,
+                    "offset"=>(string) $offset,
+                ],
+            ],
+            "task_id"=>"1", //不能为空
+            "time_point"=>$params['time_point'],
+            "method"=>"1",
+            "map_version"=>"1",//不能为空
+            "token"=>"1",//不能为空
+            "dates"=>[$formatDate],
+        ];
+        $trajInfo = $this->traj_model->getSpaceTimeDiagram($trajParam);
+        $trajList = $trajInfo['dataList'][0]['forward_traj'] ?? [];
+        foreach ($trajList as $key=>$item){
+            foreach ($item as $k=>$value){
+                $trajList[$key][$k] = [
+                    $value[0],                      // 时间秒数         X轴
+                    $value[1] * -1                  // 停车线距离值      Y轴
+                ];
+            }
+            //获取把时空图轨迹压缩在一个周期内
+            $trajList[$key] = $this->getTrajsInOneCycle($trajList[$key]
+                , $cycle
+                , ($offset + $clockShift) % $cycle);   //纠偏
+        }
+
+        $result = [];
+        $result['dataList'] = $trajList;
+        $trajs = Collection::make($trajList);
+        $result['info'] = [
+            "x" => [
+                "max" => $trajs->collapse()->column(0)->max(),
+                "min" => $trajs->collapse()->column(0)->min(),
+            ],
+            "y" => [
+                "max" => $trajs->collapse()->column(1)->max(),
+                "min" => $trajs->collapse()->column(1)->min(),
+            ],
+        ];
+        $result['signal_info'] = [
+            'cycle'=>$cycle,
+            'offset'=>$offset,
+            'tod_end_time'=>$startTime,
+            'tod_start_time'=>$endTime,
+            'yellow'=>$yellow,
+            'green'=>$formatGreen2,
+        ];
+        return $result;
+    }
+
+    public function getScatterDiagram($params)
+    {
+        $startTime = $params['time_point'].":00";
+        $endTime = date("H:i:s", strtotime(date("Y-m-d")." ".$params['time_point'].":00")+30*60);
+        $formatDate = date("Ymd",strtotime($params['date']));
+
+        //获取配时信息:兼容老格式的传参
+        $juncData = [[
+            "logic_junction_id"=>$params['junction_id'],    //只传一个junc
+            "flows"=>[$params['flow_id'],],                 //只传一个flow
+        ]];
+        $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($juncData,$endTime,$formatDate);
+        //$timingInfo = $this->arterialtiming_model->tmpGetNewJunctionTimingInfos($data,$timePoint,$date[0]);
+
+        //获取当前时段配时信息
+        $juncTiming = $timingInfo[$params['junction_id']][0] ?? [];
+        if(empty($juncTiming['timing_info']['movement_timing'])){
+            return [];
+        }
+        $cycle = $juncTiming['timing_info']['extra_timing']['cycle'];
+        $offset = $juncTiming['timing_info']['extra_timing']['offset'];
+        $yellow = 3;
+        $formatGreen = [];
+        foreach ($juncTiming['timing_info']['movement_timing'] as $item){
+            $formatGreen[] = [
+                "green_start"=>$item['start_time'],
+                "green_duration"=>$item['duration'],
+                "yellow"=>0,
+                "red_clean"=>0,
+            ];
+        }
+        $formatGreen2 = [];
+        foreach ($juncTiming['timing_info']['movement_timing'] as $item){
+            $formatGreen2[] = [
+                "start_time"=>$item['start_time'],
+                "duration"=>$item['duration'],
+            ];
+        }
+
+        //获取纠偏offset
+        $clockParam = [
+            "dates"=>[$formatDate],
+            "junction_list"=>[
+                [
+                    "junction_id"=>$params['junction_id'],
+                    "start_time"=>$startTime,
+                    "end_time"=>$endTime,
+                    "movement"=>[
+                        [
+                            "movement_id"=>$params['flow_id'],
+                            "green"=>$formatGreen,
+                        ]
+                    ],
+                    "cycle"=>$cycle,
+                    "offset"=>$offset,
+                ],
+            ]
+        ];
+
+        //获取相位信息
+        $flowMovement = $this->waymap_model->getFlowMovement($params['city_id'], $params['junction_id'], $params['flow_id']);
+        if(empty($flowMovement)){
+            return [];
+        }
+        $trajParam = [
+            "junctions"=>[
+                [
+                    "junction_id"=>$flowMovement['junction_id'],
+                    "forward_flow_id"=>$flowMovement['logic_flow_id'],
+                    "reverse_flow_id"=>"",
+                    "forward_in_links"=>$flowMovement['in_link_ids'],
+                    "forward_out_links"=>$flowMovement['out_link_ids'],
+                    "reverse_in_links"=>"",
+                    "reverse_out_links"=>"",
+                    "junction_inner_links"=>$flowMovement['inner_link_ids'],
+                    "tod_start_time"=>$startTime,
+                    "tod_end_time"=>$endTime,
+                    "cycle"=>(string) $cycle,
+                    "offset"=>(string) $offset,
+                ],
+            ],
+            "task_id"=>"1", //不能为空
+            "time_point"=>$params['time_point'],
+            "method"=>"1",
+            "map_version"=>"1",//不能为空
+            "token"=>"1",//不能为空
+            "dates"=>[$formatDate],
+        ];
+        $trajInfo = $this->traj_model->getSpaceTimeDiagram($trajParam);
+        $trajList = $trajInfo['dataList'][0]['forward_stop_delay'] ?? [];
+        $result = [];
+        $result['dataList'] = $trajList;
+        $trajs = Collection::make($trajList);
+        $result['info'] = [
+            "x" => [
+                "max" => $trajs->column(1)->max(),
+                "min" => $trajs->column(1)->min(),
+            ],
+            "y" => [
+                "max" => $trajs->column(0)->max(),
+                "min" => $trajs->column(0)->min(),
+            ],
+        ];
+        $result['signal_info'] = [
+            'cycle'=>$cycle,
+            'offset'=>$offset,
+            'tod_end_time'=>$startTime,
+            'tod_start_time'=>$endTime,
+            'yellow'=>$yellow,
+            'green'=>$formatGreen2,
+        ];
+        return $result;
+    }
+
+    private function getTrajsInOneCycle(array $trajs, int $cycleLength, int $offset)
+    {
+        $trajsCol = Collection::make($trajs);
+
+        //求距离停车线最近距离
+        $min = $trajsCol->reduce(function ($a, $b) {
+            if ($a == null) {
+                return $b;
+            }
+            if (abs($a[1]) < abs($b[1])) {
+                return $a;
+            }
+            return $b;
+        });
+        $crossTime = $min[0]; // 该轨迹最小点过路口时间
+        $shiftTime = $crossTime - (($crossTime - $offset) % $cycleLength);  //该轨迹最小点过路口时间,时间偏移量
+        //$crossTime - $shiftTime 相对时间
+        $minTime = $crossTime - $shiftTime - 2 * $cycleLength;    //最小周期设置为2倍周期范围内
+        $maxTime = $crossTime - $shiftTime + 1.5 * $cycleLength;  //最大周期设置为1.5倍周期范围内
+
+        $ret = [];
+        foreach ($trajs as $traj) {
+            $time = $traj[0] - $shiftTime;
+            if ($time < $minTime || $time > $maxTime) {
+                continue;
+            }
+
+            $ret[] = [$time, $traj[1]];
+        }
+        return $ret;
     }
 }

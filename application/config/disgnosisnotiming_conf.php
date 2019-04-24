@@ -37,12 +37,22 @@ $config['flow_quota_key'] = [
 
 // 诊断详情flow指标
 $config['flow_quota_round'] = [
+    'queue_length' => [
+        'round' => function ($val) {
+            return round($val, 2);
+        },  // 格式化数据
+    ],
     'route_length' => [
         'round' => function ($val) {
-            return round($val);
+            return round($val, 2);
         },  // 格式化数据
     ],
     'queue_position' => [
+        'round' => function ($val) {
+            return round($val);
+        },
+    ],
+    'traj_count' => [
         'round' => function ($val) {
             return round($val);
         },
@@ -94,11 +104,14 @@ $config['conf_rule'] = [
 $config['junction_question'] = [
     'is_oversaturation' => [
         "name"=>"过饱和",
+        "quota_name"=>"过饱和问题趋势",
     ],
     'is_spillover' => [
         "name"=>"溢流",
+        "quota_name"=>"溢流问题趋势",
     ],
     'is_imbalance' => [
         "name"=>"失衡",
+        "quota_name"=>"失衡问题趋势",
     ],
 ];

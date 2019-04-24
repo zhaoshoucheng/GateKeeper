@@ -25,11 +25,7 @@ class DiagnosisNoTiming extends MY_Controller
      */
     public function getJunctionQuotaDetail()
     {
-        //json格式转换为post格式
-        $params = file_get_contents("php://input");
-        if(!empty(json_decode($params,true))){
-            $_POST = json_decode($params,true);
-        }
+        $this->convertJsonToPost();
 
         // 校验参数
         $this->validate([
@@ -53,4 +49,89 @@ class DiagnosisNoTiming extends MY_Controller
         $this->response($res);
     }
 
+
+    public function getJunctionQuestionTrend()
+    {
+        $this->convertJsonToPost();
+
+        // 校验参数
+        $this->validate([
+            'junction_id' => 'required|min_length[4]',
+            'dates' => 'is_array',
+        ],[
+            'dates' => array(
+                'is_array' => '%s 必须是一个数组',
+            ),
+        ]);
+        $params = [];
+        $params["junction_id"] = $this->input->post("junction_id",true);
+        $params["dates"] = $this->input->post("dates",true);
+
+        // 获取路口指标详情
+        $res = $this->dianosisService->getJunctionQuotaTrend($params);
+        $this->response($res);
+    }
+
+    public function getJunctionMapData()
+    {
+        $this->convertJsonToPost();
+        // 校验参数
+        $this->validate([
+            'city_id'     => 'required|min_length[1]',
+            'junction_id'     => 'required|min_length[4]',
+        ]);
+
+        $data = [];
+        $data['city_id'] = $this->input->post("city_id", TRUE);
+        $data['junction_id'] = $this->input->post("junction_id", TRUE);
+        $result = $this->dianosisService->getJunctionMapData($data);
+        $this->response($result);
+    }
+
+
+    public function getSpaceTimeDiagram()
+    {
+        $this->convertJsonToPost();
+        $params = $this->input->post(NULL, TRUE);
+        // 校验参数
+        $this->validate([
+            'city_id'     => 'required|min_length[1]',
+            'flow_id'     => 'required|min_length[1]',
+            'time_point'     => 'required|min_length[1]',
+            'junction_id'     => 'required|min_length[4]',
+            'date'     => 'required|min_length[1]',
+        ]);
+        $params = [
+            'city_id'     => $this->input->post("city_id", TRUE),
+            'flow_id'     => $this->input->post("flow_id", TRUE),
+            'time_point'     => $this->input->post("time_point", TRUE),
+            'junction_id'     => $this->input->post("junction_id", TRUE),
+            'date'     => $this->input->post("date", TRUE),
+        ];
+        $result_data = $this->dianosisService->getSpaceTimeDiagram($params);
+        return $this->response($result_data);
+    }
+
+    public function getScatterDiagram()
+    {
+        $this->convertJsonToPost();
+        $params = $this->input->post(NULL, TRUE);
+        // 校验参数
+        $this->validate([
+            'city_id'     => 'required|min_length[1]',
+            'flow_id'     => 'required|min_length[1]',
+            'time_point'     => 'required|min_length[1]',
+            'junction_id'     => 'required|min_length[4]',
+            'date'     => 'required|min_length[1]',
+        ]);
+        $params = [
+            'city_id'     => $this->input->post("city_id", TRUE),
+            'flow_id'     => $this->input->post("flow_id", TRUE),
+            'time_point'     => $this->input->post("time_point", TRUE),
+            'junction_id'     => $this->input->post("junction_id", TRUE),
+            'date'     => $this->input->post("date", TRUE),
+        ];
+        $result_data = $this->dianosisService->getScatterDiagram($params);
+        return $this->response($result_data);
+    }
 }

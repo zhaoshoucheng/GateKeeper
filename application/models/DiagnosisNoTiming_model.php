@@ -3,6 +3,7 @@
 /**
  * Class DiagnosisNoTiming_model
  * @property Waymap_model $waymap_model
+ * @property \Traj_model $traj_model
  */
 class DiagnosisNoTiming_model extends CI_Model
 {
@@ -12,10 +13,66 @@ class DiagnosisNoTiming_model extends CI_Model
         parent::__construct();
         $this->load->model('waymap_model');
         $this->load->helper('phase');
+        $this->load->model('traj_model');
     }
 
     /**
-     * 获取单个路口指标统计
+     * 获取单个路口时段粒度指标问题统计
+     */
+    public function getJunctionQuotaTrend($logicJunctionId, $timePoint, $dates)
+    {
+        $list = $this->getJunctionQuotaPointCountStat($logicJunctionId, $timePoint, $dates);
+        $confRule = $this->config->item('conf_rule');
+        $fThreshold = $confRule['frequency_threshold'];
+
+        $alarmResult = [];
+        $juncQuestion = $this->config->item('junction_question');
+        foreach ($list as $quota=>$quotaCount){
+            foreach ($quotaCount as $hour => $count) {
+                //添加报警配置信息
+                if(!isset($alarmResult[$quota]['list'][$hour])){
+                    $alarmResult[$quota]['info'] = $juncQuestion[$quota];
+                }
+                //报警规则过滤
+                if ($count / count($dates) > $fThreshold) {
+                    $alarmResult[$quota]['list'][$hour] = 1;
+                }else{
+                    $alarmResult[$quota]['list'][$hour] = 0;
+                }
+            }
+        }
+        return $alarmResult;
+    }
+
+    /**
+     * 获取单个路口时段粒度指标问题统计
+     *
+     * 返回格式:
+     * ["spillover_index"]["15:30"] = 1
+     * ["spillover_index"]["16:00"] = 1
+     * ["spillover_index"]["16:30"] = 2
+     *
+     */
+    public function getJunctionQuotaPointCountStat($logicJunctionId, $timePoint, $dates)
+    {
+        $list = $this->getJunctionQuotaList($logicJunctionId, $timePoint, $dates);
+        $juncQuestion = $this->config->item('junction_question');
+        $quotaCount = [];
+        foreach ($list as $item) {
+            foreach (array_keys($juncQuestion) as $alarmField) {
+                if (!isset($quotaCount[$alarmField][$item["hour"]])) {
+                    $quotaCount[$alarmField][$item["hour"]] = $item[$alarmField];
+                } else {
+                    $quotaCount[$alarmField][$item["hour"]] += $item[$alarmField];
+                }
+            }
+        }
+        return $quotaCount;
+    }
+
+
+    /**
+     * 获取单个路口全部时段问题统计
      */
     public function getJunctionQuotaCountStat($logicJunctionId, $timePoint, $dates)
     {
@@ -91,11 +148,27 @@ class DiagnosisNoTiming_model extends CI_Model
         return $flow;
     }
 
+    /**
+     * 获取相位指标数据
+     * @param $cityID
+     * @param $logicJunctionID
+     * @param $timePoint
+     * @param $dates
+     * @return array
+     */
     public function getMovementQuota($cityID, $logicJunctionID, $timePoint, $dates)
     {
         $flowList = $this->getFlowQuotaList($logicJunctionID, $timePoint, $dates);
-
         //加权指标计算
+        //计算权重值数据
+        //queue_length权重为traj_count*stop_time_cycle
+        //其他指标权重为traj_count
+        //权重使用说明:
+        // traj_count   |   stop_time_cycle |   flow_id |   hour    |   queue_weight        |   weight
+        //  10          |   1               |   512     |   15:00   |   10/(10*1+20*1+25*1) |   10/(10+20+25)
+        //  20          |   1               |   512     |   15:30   |   20/(10*1+20*1+25*1) |   20/(10+20+25)
+        //  25          |   1               |   512     |   16:00   |   25/(10*1+20*1+25*1) |   25/(10+20+25)
+        //  10          |   2               |   555     |   15:00   |   10/(10*2)           |   10/(20)
         $flowTrajSum = [];
         $flowTrajStoptimeSum = [];
         foreach ($flowList as $item) {
@@ -159,6 +232,43 @@ class DiagnosisNoTiming_model extends CI_Model
         return $movements;
     }
 
+    public function getJunctionMapData($data)
+    {
+        $logicJunctionID = $data['junction_id'];
+        $cityID = $data['city_id'];
+        $result = [];
+        $newMapVersion = $this->waymap_model->getLastMapVersion();
+        $flowsMovement = $this->waymap_model->getFlowMovement($cityID, $logicJunctionID, "all", 1);
+        $flowsMovement = array_map(function ($v) {
+            $v = $this->adjustPhase($v);
+            return $v;
+        }, $flowsMovement);
+        $flowPhases = array_column($flowsMovement,"phase_name","logic_flow_id");
+
+        // 路网相位信息
+        $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionID, array_keys($flowPhases));
+        foreach ($ret as $k => $v) {
+            if (!empty($flowPhases[$v['logic_flow_id']])) {
+                $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
+                $result['dataList'][$k]['flow_label'] = $flowPhases[$v['logic_flow_id']];
+                $result['dataList'][$k]['lng'] = $v['flows'][0][0];
+                $result['dataList'][$k]['lat'] = $v['flows'][0][1];
+            }
+        }
+        // 获取路口中心坐标
+        $result['center']       = '';
+        $centerData['logic_id'] = $logicJunctionID;
+        $center                 = $this->waymap_model->getJunctionCenterCoords($logicJunctionID);
+
+        $result['center']      = $center;
+        $result['map_version'] = $newMapVersion;
+
+        if (!empty($result['dataList'])) {
+            $result['dataList'] = array_values($result['dataList']);
+        }
+        return $result;
+    }
+
     /**
      * 获取某路口对应的报警信息
      *
@@ -171,10 +281,10 @@ class DiagnosisNoTiming_model extends CI_Model
     {
         $confRule = $this->config->item('conf_rule');
         $juncQuestion = $this->config->item('junction_question');
-        $fThreshold = $confRule['frequency_threshold'];
         $totalCount = count($timePoint) * count($dates);
         $quotaCount = $this->getJunctionQuotaCountStat($logicJunctionId, $timePoint, $dates);
         $alarmResult = [];
+        $fThreshold = $confRule['frequency_threshold'];
         foreach ($quotaCount as $quota => $count) {
             if ($count / $totalCount > $fThreshold) {
                 $alarmResult[$quota] = $juncQuestion[$quota];
@@ -182,4 +292,15 @@ class DiagnosisNoTiming_model extends CI_Model
         }
         return $alarmResult;
     }
+
+    /**
+     *
+     * @param $params
+     * @return array
+     */
+    /*public function getSpaceTimeDiagram($params)
+    {
+        $result = $this->traj_model->getSpaceTimeDiagram($params);
+        return $result;
+    }*/
 }
