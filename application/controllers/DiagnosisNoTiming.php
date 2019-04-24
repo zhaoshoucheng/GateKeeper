@@ -141,7 +141,7 @@ class DiagnosisNoTiming extends MY_Controller
      * @param $params ['dates']         array    Y 评估/诊断日期 [20180102,20180103,....]
      * @return json
      */
-    public function getCityJunctionQuestionTrend()
+    public function getQuestionTrend()
     {
         //json格式转换为post格式
         $params = file_get_contents("php://input");
@@ -158,7 +158,7 @@ class DiagnosisNoTiming extends MY_Controller
         $params["city_id"] = $this->input->post("city_id", true);
         $params["dates"] = $this->input->post("dates", true);
 
-        $res = $this->dianosisService->getFlowQuotas($params);
+        $res = $this->dianosisService->getJunctionAlarmDataByHour($params);
         $this->response($res);
     }
 

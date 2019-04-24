@@ -14,6 +14,7 @@ class DiagnosisNoTiming_model extends CI_Model
         $this->load->model('waymap_model');
         $this->load->helper('phase');
         $this->load->model('traj_model');
+        $this->load->config("nconf");
     }
 
     /**
@@ -303,4 +304,44 @@ class DiagnosisNoTiming_model extends CI_Model
         $result = $this->traj_model->getSpaceTimeDiagram($params);
         return $result;
     }*/
+
+
+    public function getJunctionAlarmDataByHour($city_id, $dates) {
+        $alarm_types = [
+            "all",
+            "is_oversaturation",
+            "is_spillover",
+            "is_imbalance",
+        ];
+        $req = [
+            'city_id' => $city_id,
+            'dates' => $dates,
+            'alarm_types' => $alarm_types,
+        ];
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetJunctionAlarmDataByHour', $data, 0, 'json');
+        return json_decode($res, true);
+    }
+
+    public function getJunctionAlarmDataByJunction($city_id, $dates, $hour) {
+        $req = [
+            'city_id' => $city_id,
+            'dates' => $dates,
+            'hour' => $hour,
+        ];
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetJunctionAlarmDataByJunction', $data, 0, 'json');
+        return json_decode($res, true);
+    }
+
+    public function GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour) {
+        $req = [
+            'city_id' => $city_id,
+            'dates' => $dates,
+            'hour' => $hour,
+        ];
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetJunctionAlarmDataByJunctionAVG', $data, 0, 'json');
+        return json_decode($res, true);
+    }
 }

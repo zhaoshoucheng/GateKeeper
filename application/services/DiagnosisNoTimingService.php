@@ -348,4 +348,45 @@ class DiagnosisNoTimingService extends BaseService
         }
         return $ret;
     }
+
+    public function getJunctionAlarmDataByHour($params) {
+        $city_id = $params['city_id'];
+        $dates = $params['dates'];
+        $res = $this->diagnosisNoTiming_model->getJunctionAlarmDataByHour($city_id, $dates);
+        if (isset($res['data'])) {
+            $res = $res['data'];
+        } else {
+            return [];
+        }
+        $alarm_types = [
+            "is_oversaturation",
+            "is_spillover",
+            "is_imbalance",
+        ];
+        $ret = [];
+        foreach ($alarm_types as $alarm_type) {
+            if ($alarm_type == "is_oversaturation") {
+                $key = 'over_saturation';
+                $name = '过饱和';
+            } elseif ($alarm_type == "is_spillover") {
+                $key = 'spillover_index';
+                $name = '溢流';
+            } elseif ($alarm_type == "is_imbalance") {
+                $key = 'imbalance_index';
+                $name = '失衡';
+            }
+            $ret[$key]['name'] = $name;
+            foreach ($dates as $date) {
+                $ret[$key]['index'][$date] = [];
+                if (isset($res['all'][$date])) {
+                    foreach ($res['all'][$date] as $k => $v) {
+                        if($res[$alarm_type][$date][$k] != 0) {
+                            $ret[$key]['index'][$date][$k] = round($res[$alarm_type][$date][$k] / $res['all'][$date][$k]) .  '%';
+                        }
+                    }
+                }
+            }
+        }
+        return $ret;
+    }
 }
