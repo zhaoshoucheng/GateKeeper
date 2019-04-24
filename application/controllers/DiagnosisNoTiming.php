@@ -53,4 +53,90 @@ class DiagnosisNoTiming extends MY_Controller
         $this->response($res);
     }
 
+    /**
+     * 获取诊断路口问题趋势
+     * @param $params ['city_id']       string   Y 城市ID
+     * @param $params ['dates']         array    Y 评估/诊断日期 [20180102,20180103,....]
+     * @return json
+     */
+    public function getJunctionQuestionTrend()
+    {
+        //json格式转换为post格式
+        $params = file_get_contents("php://input");
+        if(!empty(json_decode($params,true))){
+            $_POST = json_decode($params,true);
+        }
+
+        // 校验参数
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'dates' => 'required',
+        ]);
+        $params = [];
+        $params["city_id"] = $this->input->post("city_id",true);
+        $params["dates"] = $this->input->post("dates",true);
+
+        $res = $this->dianosisService->getFlowQuotas($params);
+        $this->response($res);
+    }
+
+    /**
+     * 诊断路口问题top20
+     * @param $params ['city_id']       string   Y 城市ID
+     * @param $params ['dates']         array    Y 评估/诊断日期 [20180102,20180103,....]
+     * @param $params ['hour']          array    Y 评估/诊断日期 [09:30]
+     * @return json
+     */
+    public function getDiagnoseRankList()
+    {
+        //json格式转换为post格式
+        $params = file_get_contents("php://input");
+        if(!empty(json_decode($params,true))){
+            $_POST = json_decode($params,true);
+        }
+
+        // 校验参数
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'dates' => 'required|trim',
+            'hour' => 'required|trim|regex_match[/\d{2}:\d{2}/]',
+        ]);
+        $params = [];
+        $params["city_id"] = $this->input->post("city_id",true);
+        $params["dates"] = $this->input->post("dates",true);
+        $params["hour"] = $this->input->post("hour",true);
+
+        $res = $this->dianosisService->getFlowQuotas($params);
+        $this->response($res);
+    }
+
+    /**
+     * 诊断路口问题详情
+     * @param $params ['city_id']       string   Y 城市ID
+     * @param $params ['dates']         array    Y 评估/诊断日期 [20180102,20180103,....]
+     * @param $params ['hour']          array    Y 评估/诊断日期 [09:30]
+     * @return json
+     */
+    public function getAllCityJunctionsDiagnoseList()
+    {
+        //json格式转换为post格式
+        $params = file_get_contents("php://input");
+        if(!empty(json_decode($params,true))){
+            $_POST = json_decode($params,true);
+        }
+
+        // 校验参数
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'dates' => 'required|trim',
+            'hour' => 'required|trim|regex_match[/\d{2}:\d{2}/]',
+        ]);
+        $params = [];
+        $params["city_id"] = $this->input->post("city_id",true);
+        $params["dates"] = $this->input->post("dates",true);
+        $params["hour"] = $this->input->post("hour",true);
+
+        $res = $this->dianosisService->getFlowQuotas($params);
+        $this->response($res);
+    }
 }
