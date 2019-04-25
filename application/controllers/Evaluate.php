@@ -165,6 +165,34 @@ class Evaluate extends MY_Controller
         $this->response($data);
     }
 
+    // 指标评估, 按照一个路口，所有方向，一天的查询走，目前只有龙华在使用
+    public function quotaEvaluate()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'quota_key' => 'required|in_list[' . implode(',', array_keys($this->config->item('real_time_quota'))) . ']',
+            'logic_junction_id' => 'required|min_length[1]',
+            'date' => 'required|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ]);
+
+        $data = [
+            'city_id'     => intval($params['city_id']),
+            'quota_key'   => strip_tags(trim($params['quota_key'])),
+            'logic_junction_id' => strip_tags(trim($params['logic_junction_id'])),
+            'date' => $params['date']
+        ];
+
+        $result = $this->evaluateService->quotaEvaluate($data);
+
+        if (isset($params['is_download']) && $params['is_download'] == 1) {
+            $this->evaluateService->downloadQuotaEvaluate($params, $result);
+        }
+
+        $this->response($result);
+
+    }
 
 
     /**
@@ -251,13 +279,7 @@ class Evaluate extends MY_Controller
             ];
         }
 
-        if ($params['quota_key'] == "saturation"){ //饱和度计算
-            $result = $this->evaluateService->saturationEvaluateCompare($data);
-        }else{
-            $result = $this->evaluateService->quotaEvaluateCompare($data);
-        }
-
-
+        $result = $this->evaluateService->quotaEvaluateCompare($data);
 
         $this->response($result);
     }
