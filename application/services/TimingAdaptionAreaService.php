@@ -556,7 +556,7 @@ class TimingAdaptionAreaService extends BaseService
             'junction_alarm_type' => $data['junction_alarm_type']??0,
             'type' => $data['is_correct'],
             'comment' => $data['comment'],
-            'username' => 0,
+            'username' => $_COOKIE['username'] ?? "",
         ];
 
         $res = $this->timeAlarmRemarks_model->insertAlarmRemark($data);
@@ -653,15 +653,19 @@ class TimingAdaptionAreaService extends BaseService
         if (empty($junctions)) {
             throw new \Exception('此区域没有路口', ERR_DEFAULT);
         }
-        $quotaInfo = $this->realtime_model->getRedisAreaQuotaValueCurve($data['area_id'], $data['quota_key']);
-        //$avgQuotaKeyConf = $this->config->item('avg_quota_key');
-        //$esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
-        //$date = date('Y-m-d');
-        //$quotaKey = $avgQuotaKeyConf[$data['quota_key']]['esColumn'];
-        //$quotaInfo = $this->realtime_model->getEsAreaQuotaValueCurve($data['city_id'], $esJunctionIds, $date, $quotaKey);
-        if (empty($quotaInfo)) {
+        $quotaInfoTmp = $this->realtime_model->getRedisAreaQuotaValueCurve($data['area_id'], $data['quota_key']);
+        if (empty($quotaInfoTmp)) {
             return [];
         }
+        $quotaInfo = [];
+        foreach ($quotaInfoTmp as $key=>$item){
+            if(!empty($item['value']) && $item['value']>0){
+                $quotaInfo[] = $item;
+            }
+        }
+
+
+
         $ret = [];
         $lastHour = $this->helperService->getLastestHour($data['city_id']);
         foreach ($quotaInfo as $k => $item) {

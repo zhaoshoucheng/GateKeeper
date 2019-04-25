@@ -187,7 +187,7 @@ class Realtimewarning extends Inroute_Controller
 
         //新开指标城市验证 && uid验证
         $quotaCityIds = $this->quotaCityIds;
-        if(in_array($cityId,$quotaCityIds) && !in_array($uid,["traj_index_pro"])){
+        if(in_array($cityId,$quotaCityIds) && !in_array($uid,["traj_index_pro","traffic_realtime_alarm"])){
             echo "uid 非预期! \n";
             exit;
         }

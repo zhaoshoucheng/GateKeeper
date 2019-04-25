@@ -7,6 +7,11 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Class Arterialtiming
+ *
+ * @property \Arterialtiming_model $arterialtiming_model
+ */
 class Arterialtiming extends MY_Controller
 {
     public function __construct()
@@ -39,9 +44,12 @@ class Arterialtiming extends MY_Controller
 
         $timePoint = $params['time_point'];
         $date = $params['dates'];
-//        $date = json_decode($date,true);
-        $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,$date[0]);
         $finalTimingInfo=[];
+        if (isset($params['source_type']) && $params['source_type']==2){
+            $timingInfo = $this->arterialtiming_model->tmpGetNewJunctionTimingInfos($data,$timePoint,$date[0]);
+        }else{
+            $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,$date[0]);
+        }
         foreach ($data as $d){
             if(isset($timingInfo[$d['logic_junction_id']])){
                 $finalTimingInfo[$d['logic_junction_id']] = $timingInfo[$d['logic_junction_id']];
@@ -62,6 +70,7 @@ class Arterialtiming extends MY_Controller
                 );
             }
         }
+
 
         return $this->response($finalTimingInfo);
     }
@@ -89,8 +98,7 @@ class Arterialtiming extends MY_Controller
         if(count($selectJunctions) < 4){
             return $this->response(array(), ERR_PARAMETERS, "路口数不得小于4");
         }
-
-        $ret = $this->arterialtiming_model->getJunctionInfos($cityId,$version,$selectJunctions);
+        $ret = $this->arterialtiming_model->getJunctionFlowInfos($cityId,$version,$selectJunctions);
         if(empty($ret)){
             com_log_warning('_itstool_arterialtiming_queryArterialJunctionInfo_getJunctionInfos_empty', 0, '', compact("params","ret"));
             return $this->response(array(), ERR_REQUEST_WAYMAP_API, "路网服务异常");
@@ -99,7 +107,7 @@ class Arterialtiming extends MY_Controller
         foreach ($selectJunctions as $k){
             foreach ($ret['junctions_info'] as $rk => $rv){
                 if($k == $rk){
-                    $rv['logic_junction_id'] = $rk;
+                    $rv['logic_junction_id'] = (string)$rk;
                     $sortJunctions[]=$rv;
                 }
             }
@@ -121,7 +129,8 @@ class Arterialtiming extends MY_Controller
         $junctionList = $params['junction_infos'];
 
         $date = $params['dates'];
-        $badjunc = [];
+        $reqJuncs=[];
+
         foreach ($junctionList as $j ){
             $ret = $this->timing_model->getTimingDataBatch(array(
                 'junction_ids'      => $j['logic_junction_id'],
@@ -131,13 +140,11 @@ class Arterialtiming extends MY_Controller
                 'source'            => 1
             ));
             $r = self::formatNewCycle($ret[$j['logic_junction_id']][0],$j['cycle'],$j['offset']);
-            $resp = $this->timing_model->uploadTimingData($r);
-            if($resp == False){
-                $badjunc[] = $j['logic_junction_id'];
-            }
+            $reqJuncs[] = $r;
         }
-        if(!empty($badjunc)){
-            return $this->response(array(), ERR_UNKNOWN, $badjunc);
+        $resp = $this->timing_model->uploadTimingData($reqJuncs);
+        if(empty($resp)){
+            return $this->response(array(), ERR_UNKNOWN, "下发失败");
         }
 
         return $this->response("success");
