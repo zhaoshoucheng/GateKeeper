@@ -433,7 +433,7 @@ class DiagnosisNoTimingService extends BaseService
             foreach ($alarm_types as $alarm_type => $detail) {
                 if (1.0 * $v[$alarm_type] / $v['count'] > $frequency_threshold) {
                     $v[$alarm_type] = 1;
-                    $ret['rankList'][$alarm_map[$alarm_type]['index']][] = [
+                    $ret['rankList'][$alarm_types[$alarm_type]['index']][] = [
                         "junction_id"=> $k,
                         "junction_label"=> $v['name'],
                         "value"=> $v['delay'],

@@ -102,13 +102,13 @@ $config['conf_rule'] = [
         'is_spillover' =>
             [
                 'name' => '溢流',
-                'index' => 'oversaturation_index',
+                'index' => 'spillover_index',
                 'cnt' => 'is_spillover_cnt',
             ],
         'is_imbalance' =>
             [
                 'name' => '失衡',
-                'index' => 'spillover_index',
+                'index' => 'imbalance_index',
                 'cnt' => 'is_imbalance_cnt',
             ],
         'is_oversaturation' =>
