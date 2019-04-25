@@ -94,21 +94,24 @@ class DiagnosisNoTiming extends MY_Controller
     public function getSpaceTimeDiagram()
     {
         $this->convertJsonToPost();
-        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $this->validate([
             'city_id' => 'required|min_length[1]',
             'flow_id' => 'required|min_length[1]',
-            'time_point' => 'required|min_length[1]',
+            'time_range' => 'required|min_length[1]',
             'junction_id' => 'required|min_length[4]',
-            'date' => 'required|min_length[1]',
+            'dates' => 'is_array',
+        ], [
+            'dates' => array(
+                'is_array' => '%s 必须是一个数组',
+            ),
         ]);
         $params = [
             'city_id' => $this->input->post("city_id", TRUE),
             'flow_id' => $this->input->post("flow_id", TRUE),
-            'time_point' => $this->input->post("time_point", TRUE),
+            'time_range' => $this->input->post("time_range", TRUE),
             'junction_id' => $this->input->post("junction_id", TRUE),
-            'date' => $this->input->post("date", TRUE),
+            'dates' => $this->input->post("dates", TRUE),
         ];
         $result_data = $this->dianosisService->getSpaceTimeDiagram($params);
         return $this->response($result_data);
@@ -117,21 +120,24 @@ class DiagnosisNoTiming extends MY_Controller
     public function getScatterDiagram()
     {
         $this->convertJsonToPost();
-        $params = $this->input->post(NULL, TRUE);
         // 校验参数
         $this->validate([
             'city_id' => 'required|min_length[1]',
             'flow_id' => 'required|min_length[1]',
-            'time_point' => 'required|min_length[1]',
+            'time_range' => 'required|min_length[1]',
             'junction_id' => 'required|min_length[4]',
-            'date' => 'required|min_length[1]',
+            'dates' => 'is_array',
+        ], [
+            'dates' => array(
+                'is_array' => '%s 必须是一个数组',
+            ),
         ]);
         $params = [
             'city_id' => $this->input->post("city_id", TRUE),
             'flow_id' => $this->input->post("flow_id", TRUE),
-            'time_point' => $this->input->post("time_point", TRUE),
+            'time_range' => $this->input->post("time_range", TRUE),
             'junction_id' => $this->input->post("junction_id", TRUE),
-            'date' => $this->input->post("date", TRUE),
+            'dates' => $this->input->post("dates", TRUE),
         ];
         $result_data = $this->dianosisService->getScatterDiagram($params);
         return $this->response($result_data);

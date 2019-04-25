@@ -42,6 +42,17 @@ class DiagnosisNoTiming_model extends CI_Model
                 }
             }
         }
+
+        //数据排序
+        foreach ($alarmResult as $k1=>$v1){
+            $list = $v1['list'];
+            $timeSorter = [];
+            foreach ($v1['list'] as $k2=>$v2){
+                $timeSorter[$k2] = strtotime(date("Y-m-d")." ".$k2.":00");
+            }
+            array_multisort($timeSorter, SORT_NUMERIC, SORT_ASC, $list);
+            $alarmResult[$k1]['list'] = $list;
+        }
         return $alarmResult;
     }
 

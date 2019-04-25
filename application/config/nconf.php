@@ -115,6 +115,13 @@ if ($development == 2) {
     // 配时接口前缀
     $timing_ext = '/signal-timing';
 
+    // 配时接口服务器地址
+    $timing_server = '100.69.238.11';
+    // 配时接口服务器端口
+    $timing_port = '8000';
+    // 配时接口前缀
+    $timing_ext = '/its/signal-mis';
+
     $config['redis'] = [
         'host' => '127.0.0.1',
         'port' => '6379',
@@ -141,6 +148,12 @@ if ($development == 2) {
     // new timing
     $signal_control_server = '100.90.164.31';
     $signal_control_port   = '8031';
+    $signal_control_ext    = '/signal-timing';
+
+    //临时用线上接口
+    // new timing
+    $signal_control_server = '10.88.128.149';
+    $signal_control_port   = '30516';
     $signal_control_ext    = '/signal-timing';
 
     // xmmtrace
