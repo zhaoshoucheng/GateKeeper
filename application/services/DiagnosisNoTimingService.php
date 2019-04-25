@@ -452,9 +452,11 @@ class DiagnosisNoTimingService extends BaseService
                 'diagnose_detail' => [],
                 'info' => [
                     'quota' => [
-                        'value' => $v['delay'],
-                        "name"=> "平均延误",
-                        "unit"=> "秒",
+                        [
+                            'value' => $v['delay'],
+                            "name"=> "平均延误",
+                            "unit"=> "秒",
+                        ],
                     ],
                     'question' => $this->getQuestions($v, $alarm_types),
                 ],
@@ -471,7 +473,7 @@ class DiagnosisNoTimingService extends BaseService
         foreach ($alarm_quotas as $key => $value) {
             $ret['quotaCount'][] = [
                 'name' => $value['name'],
-                'value' => $rest[$key],
+                'value' => round($rest[$key], 2),
                 'unit' => $value['unit'],
             ];
         }
