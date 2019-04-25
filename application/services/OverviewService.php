@@ -156,7 +156,13 @@ class OverviewService extends BaseService
         if (empty($result)) {
             return (object)[];
         }
-        $result = array_values($result);
+        $resultTmp = array_values($result);
+        $result = [];
+        foreach ($resultTmp as $key=>$item){
+            if(!empty($item['avg_stop_delay']) && $item['avg_stop_delay']>0){
+                $result[] = $item;
+            }
+        }
 
         $realTimeQuota = $this->config->item('real_time_quota');
 
