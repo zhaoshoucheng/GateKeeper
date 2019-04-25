@@ -951,11 +951,12 @@ class TimingAdaptionAreaService extends BaseService
      *
      * @return array
      */
-    private function getFlowTimingInfo($data)
+    public function getFlowTimingInfo($data)
     {
         $resData = $this->adapt_model->getAdaptByJunctionId($data['logic_junction_id']);
-
         if (empty($resData['timing_info'])) {
+            //从实时接口读取配置信息
+
             return [];
         }
 
