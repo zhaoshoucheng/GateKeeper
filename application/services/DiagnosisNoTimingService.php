@@ -353,11 +353,6 @@ class DiagnosisNoTimingService extends BaseService
         $city_id = $params['city_id'];
         $dates = $params['dates'];
         $res = $this->diagnosisNoTiming_model->getJunctionAlarmDataByHour($city_id, $dates);
-        if (isset($res['data'])) {
-            $res = $res['data'];
-        } else {
-            return [];
-        }
         $alarm_types = [
             "is_oversaturation",
             "is_spillover",
@@ -386,6 +381,143 @@ class DiagnosisNoTimingService extends BaseService
                     }
                 }
             }
+        }
+        return $ret;
+    }
+
+    public function getAllCityJunctionsDiagnoseList($params) {
+        $city_id = $params['city_id'];
+        $dates = $params['dates'];
+        $hour = $params['hour'];
+        // es alarm
+        $res = $this->diagnosisNoTiming_model->getJunctionAlarmDataByJunction($city_id, $dates, $hour);
+        // avg speed and delay
+        $rest = $this->diagnosisNoTiming_model->GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour);
+        // city junctions
+        $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
+        $junctionsPos = [];
+        foreach ($allCityJunctions as $v) {
+            $junctionsPos[$v['logic_junction_id']] = $v;
+        }
+
+        $ret = [];
+        $conf_rule = $this->config->item('conf_rule');
+        $frequency_threshold = $conf_rule['frequency_threshold'];
+
+        $lngs = 0.0;
+        $lats = 0.0;
+        $cnt = count($res);
+        $is_oversaturation_cnt = 0;
+        $is_imbalance_cnt = 0;
+        $is_spillover_cnt = 0;
+        $ret['dataList'] = [];
+        $ret['rankList'] = [];
+        foreach ($res as $k => $v) {
+            $v['lng'] = $junctionsPos[$k]['lng'];
+            $v['lat'] = $junctionsPos[$k]['lat'];
+            $v['name'] = $junctionsPos[$k]['name'];
+            $lngs += $v['lng'];
+            $lats += $v['lat'];
+            if (1.0 * $res['oversaturation'] / $res['count'] > $frequency_threshold) {
+                $v['is_oversaturation'] = 1;
+                $ret['rankList']['over_saturation'][] = [
+                    "junction_id"=> $k,
+                    "junction_label"=> $v['name'],
+                    "value"=> $v['delay'],
+                ];
+                $is_oversaturation_cnt++;
+            } else {
+                $v['is_oversaturation'] = 0;
+            }
+            if (1.0 * $res['imbalance'] / $res['count'] > $frequency_threshold) {
+                $v['is_imbalance'] = 1;
+                 $ret['rankList']['imbalance_index'][] = [
+                    "junction_id"=> $k,
+                    "junction_label"=> $v['name'],
+                    "value"=> $v['delay'],
+                ];
+                $is_imbalance ++;
+            } else {
+                $v['is_imbalance'] = 0;
+            }
+            if (1.0 * $res['spillover'] / $res['count'] > $frequency_threshold) {
+                $v['is_spillover'] = 1;
+                 $ret['rankList']['spillover_index'][] = [
+                    "junction_id"=> $k,
+                    "junction_label"=> $v['name'],
+                    "value"=> $v['delay'],
+                ];
+                $is_spillover ++;
+            } else {
+                $v['is_spillover'] = 0;
+            }
+            $ret['dataList'][] = [
+                'logic_junction_id' => $k,
+                'name' => $v['name'],
+                'lng' => $v['lng'],
+                'lat' => $v['lat'],
+                'diagnose_detail' => [],
+                'info' => [
+                    'quota' => [
+                        'value' => $v['delay'],
+                        "name"=> "平均延误",
+                        "unit"=> "秒",
+                    ],
+                    'question' => $this->getQuestions($v),
+                ],
+            ];
+        }
+        $ret['junctionTotal'] = $cnt;
+        $ret['center'] = [
+            'lng' => $lngs / $cnt,
+            'lat' => $lats / $cnt,
+        ];
+        $ret['quotaCount'] = [
+            [
+                'name' => '平均延误',
+                'value' => $rest['delay'],
+                'unit' => '秒',
+            ],
+            [
+                'name' => '平均速度',
+                'value' => $rest['speed'],
+                'unit' => '千米/时',
+            ],
+        ];
+        $ret['count']['over_saturation'] = [
+            "num" => $is_oversaturation_cnt,
+            "name" => "过饱和",
+            "percent" => rount($is_oversaturation_cnt / $cnt * 100, 2) . '%',
+            "other" => rount(100 - $is_oversaturation_cnt / $cnt * 100, 2) . '%',
+        ];
+        $ret['count']['spillover_index'] = [
+            "num" => $is_spillover_cnt,
+            "name" => "溢流",
+            "percent" => rount($is_spillover_cnt / $cnt * 100, 2) . '%',
+            "other" => rount(100 - $is_spillover_cnt / $cnt * 100, 2) . '%',
+        ];
+        $ret['count']['imbalance_index'] = [
+            "num" => $is_imbalance_cnt,
+            "name" => "失衡",
+            "percent" => rount($is_imbalance_cnt / $cnt * 100, 2) . '%',
+            "other" => rount(100 - $is_imbalance_cnt / $cnt * 100, 2) . '%',
+        ];
+        return $ret;
+    }
+
+    private function getQuestions($v) {
+        $ret = [];
+        if ($v['is_oversaturation_cnt'] == 1) {
+            $ret[] = '过饱和';
+        }
+        if ($v['is_imbalance'] == 1) {
+            $ret[] = '失衡';
+        }
+        if ($v['is_spillover'] == 1) {
+            $ret[] = '溢流';
+        }
+        if (emtpy($ret)) {
+            $ret[] = '无';
         }
         return $ret;
     }

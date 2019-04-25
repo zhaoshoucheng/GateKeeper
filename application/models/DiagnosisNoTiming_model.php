@@ -320,7 +320,12 @@ class DiagnosisNoTiming_model extends CI_Model
         ];
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByHour', $data, 0, 'json');
-        return json_decode($res, true);
+        if (!isset($res)) {
+            $res = json_decode($res, true);
+            return $res['data'];
+        } else {
+            return [];
+        }
     }
 
     public function getJunctionAlarmDataByJunction($city_id, $dates, $hour) {
@@ -331,7 +336,12 @@ class DiagnosisNoTiming_model extends CI_Model
         ];
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByJunction', $data, 0, 'json');
-        return json_decode($res, true);
+        if (!isset($res)) {
+            $res = json_decode($res, true);
+            return $res['data'];
+        } else {
+            return [];
+        }
     }
 
     public function GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour) {
@@ -342,6 +352,11 @@ class DiagnosisNoTiming_model extends CI_Model
         ];
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByJunctionAVG', $data, 0, 'json');
-        return json_decode($res, true);
+        if (!isset($res)) {
+            $res = json_decode($res, true);
+            return $res['data'];
+        } else {
+            return [];
+        }
     }
 }
