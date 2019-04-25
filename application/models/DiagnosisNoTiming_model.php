@@ -105,28 +105,23 @@ class DiagnosisNoTiming_model extends CI_Model
         if(count($timePoint)==2){
             unset($timePoint[1]);
         }
-        $newDates = [];
-        foreach ($dates as $item){
-            if(strlen($item)!=8){
-                continue;
-            }
-            $newDates[] = substr($item, 0, 4)."-".substr($item, 4, 2)."-".substr($item, 6, 2);
-        }
         $req = [
             'city_id' => $cityID,
             'logic_junction_id' => $logicJunctionID,
             'time_points' => $timePoint,
-            'dates' => $newDates,
+            'dates' => $dates,
         ];
-        print_r($newDates);exit;
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionQuotaList', $req, 0, 'json');
-        echo $url . '/GetJunctionQuotaList';exit;
-        echo json_encode($req);exit;
-        print_r($req);exit;
         if (!empty($res)) {
             $res = json_decode($res, true);
-            return $res['data'];
+            $result = [];
+            if (!empty($res['data']['hits'])) {
+                foreach ($res['data']['hits'] as $item) {
+                    $result[] = $item['_source']??[];
+                }
+            }
+            return $result;
         } else {
             return [];
         }
@@ -149,8 +144,33 @@ class DiagnosisNoTiming_model extends CI_Model
      * @param $dates
      * @return mixed
      */
-    public function getFlowQuotaList($logicJunctionId, $timePoint, $dates)
+    public function getFlowQuotaList($cityID, $logicJunctionID, $timePoint, $dates)
     {
+        if(count($timePoint)==2){
+            unset($timePoint[1]);
+        }
+        $req = [
+            'city_id' => $cityID,
+            'logic_junction_id' => $logicJunctionID,
+            'time_points' => $timePoint,
+            'dates' => $dates,
+        ];
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetFlowQuotaList', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            $result = [];
+            if (!empty($res['data']['hits'])) {
+                foreach ($res['data']['hits'] as $item) {
+                    $result[] = $item['_source']??[];
+                }
+            }
+            return $result;
+        } else {
+            return [];
+        }
+
+
         $qData = file_get_contents("flow_duration_v6.json");
         $list = json_decode($qData, true);
         $result = [];
@@ -188,7 +208,7 @@ class DiagnosisNoTiming_model extends CI_Model
      */
     public function getMovementQuota($cityID, $logicJunctionID, $timePoint, $dates)
     {
-        $flowList = $this->getFlowQuotaList($logicJunctionID, $timePoint, $dates);
+        $flowList = $this->getFlowQuotaList($cityID, $logicJunctionID, $timePoint, $dates);
         //加权指标计算
         //计算权重值数据
         //queue_length权重为traj_count*stop_time_cycle
@@ -220,10 +240,12 @@ class DiagnosisNoTiming_model extends CI_Model
                 if (in_array($quotaKey, ["logic_flow_id", "city_id", "dt", "logic_junction_id"])) {
                     continue;
                 }
-                if ($quotaKey == "queue_length") {
-                    $quotaValue = (($item["traj_count"] * $item["stop_time_cycle"]) / $flowTrajStoptimeSum[$item["logic_flow_id"]]) * $quotaValue;
-                } else {
-                    $quotaValue = ($item["traj_count"] / $flowTrajSum[$item["logic_flow_id"]]) * $quotaValue;
+                if($quotaValue>0){
+                    if ($quotaKey == "queue_length") {
+                        $quotaValue = (($item["traj_count"] * $item["stop_time_cycle"]) / $flowTrajStoptimeSum[$item["logic_flow_id"]]) * $quotaValue;
+                    } else {
+                        $quotaValue = ($item["traj_count"] / $flowTrajSum[$item["logic_flow_id"]]) * $quotaValue;
+                    }
                 }
                 $quotaValue = isset($quotaRound[$quotaKey]['round'])
                     ? $quotaRound[$quotaKey]['round']($quotaValue) : $quotaValue;
@@ -311,7 +333,7 @@ class DiagnosisNoTiming_model extends CI_Model
     {
         $confRule = $this->config->item('conf_rule');
         $juncQuestion = $this->config->item('junction_question');
-        $totalCount = count($timePoint) * count($dates);
+        $totalCount = (count($timePoint)-1) * count($dates);
         $quotaCount = $this->getJunctionQuotaCountStat($cityID, $logicJunctionID, $timePoint, $dates);
         $alarmResult = [];
         $fThreshold = $confRule['frequency_threshold'];
