@@ -307,16 +307,9 @@ class DiagnosisNoTiming_model extends CI_Model
 
 
     public function getJunctionAlarmDataByHour($city_id, $dates) {
-        $alarm_types = [
-            "all",
-            "is_oversaturation",
-            "is_spillover",
-            "is_imbalance",
-        ];
         $req = [
             'city_id' => $city_id,
             'dates' => $dates,
-            'alarm_types' => $alarm_types,
         ];
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByHour', $req, 0, 'json');
