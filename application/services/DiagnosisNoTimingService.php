@@ -458,6 +458,7 @@ class DiagnosisNoTimingService extends BaseService
                     ],
                     'question' => $this->getQuestions($v, $alarm_types),
                 ],
+                'diagnose_detail' => $this->getDiagnoses($v, $alarm_types),
             ];
         }
 
@@ -497,6 +498,18 @@ class DiagnosisNoTimingService extends BaseService
         }
         if (empty($ret)) {
             $ret[] = '无';
+        }
+        return $ret;
+    }
+
+    private function getDiagnoses($v, $alarm_types) {
+        $ret = [];
+        foreach ($alarm_types as $alarm_type => $detail) {
+            if ($v[$alarm_type] == 1) {
+                $ret[$detail['diagnose']] = 1;
+            } else {
+                $ret[$detail['diagnose']] = 0;
+            }
         }
         return $ret;
     }
