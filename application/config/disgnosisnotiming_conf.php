@@ -99,24 +99,24 @@ $config['conf_rule'] = [
     'frequency_threshold' => 0.7, //报警问题,常偶发阈值
     'alarm_field' => ['is_oversaturation', 'is_spillover', 'is_imbalance'], //报警类型对应字段
     'alarm_types' => [
-        'is_spillover',
-        [
-            'name' => '溢流',
-            'key' => 'oversaturation_index',
-            'cnt' => 'is_spillover_cnt',
-        ],
-        'is_imbalance',
-        [
-            'name' => '失衡',
-            'key' => 'spillover_index',
-            'cnt' => 'is_imbalance_cnt',
-        ],
+        'is_spillover' =>
+            [
+                'name' => '溢流',
+                'key' => 'oversaturation_index',
+                'cnt' => 'is_spillover_cnt',
+            ],
+        'is_imbalance' =>
+            [
+                'name' => '失衡',
+                'key' => 'spillover_index',
+                'cnt' => 'is_imbalance_cnt',
+            ],
         'is_oversaturation' =>
-        [
-            'name' => '过饱和',
-            'key' => 'oversaturation_index',
-            'cnt' => 'is_oversaturation_cnt',
-        ],
+            [
+                'name' => '过饱和',
+                'key' => 'oversaturation_index',
+                'cnt' => 'is_oversaturation_cnt',
+            ],
     ],
 ];
 
