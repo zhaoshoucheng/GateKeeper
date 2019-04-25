@@ -118,6 +118,16 @@ $config['conf_rule'] = [
                 'cnt' => 'is_oversaturation_cnt',
             ],
     ],
+    'alarm_quota' => [
+        'speed' => [
+            'name' => '平均延误',
+            "unit" =>  "秒",
+        ],
+        'delay' => [
+            'name' => '平均速度',
+            "unit" =>  "千米/时",
+        ],
+    ],
 ];
 
 // 定义诊断报警规则
