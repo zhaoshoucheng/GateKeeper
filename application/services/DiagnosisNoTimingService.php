@@ -394,7 +394,7 @@ class DiagnosisNoTimingService extends BaseService
         // avg speed and delay
         $rest = $this->diagnosisNoTiming_model->GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour);
         // city junctions
-        $allCityJunctions = $this->waymap_model->getAllCityJunctions($data['city_id']);
+        $allCityJunctions = $this->waymap_model->getAllCityJunctions($city_id);
         $junctionsPos = [];
         foreach ($allCityJunctions as $v) {
             $junctionsPos[$v['logic_junction_id']] = $v;
@@ -418,7 +418,7 @@ class DiagnosisNoTimingService extends BaseService
             $v['name'] = $junctionsPos[$k]['name'];
             $lngs += $v['lng'];
             $lats += $v['lat'];
-            if (1.0 * $res['oversaturation'] / $res['count'] > $frequency_threshold) {
+            if (1.0 * $v['oversaturation'] / $v['count'] > $frequency_threshold) {
                 $v['is_oversaturation'] = 1;
                 $ret['rankList']['over_saturation'][] = [
                     "junction_id"=> $k,
@@ -429,25 +429,25 @@ class DiagnosisNoTimingService extends BaseService
             } else {
                 $v['is_oversaturation'] = 0;
             }
-            if (1.0 * $res['imbalance'] / $res['count'] > $frequency_threshold) {
+            if (1.0 * $v['imbalance'] / $v['count'] > $frequency_threshold) {
                 $v['is_imbalance'] = 1;
                  $ret['rankList']['imbalance_index'][] = [
                     "junction_id"=> $k,
                     "junction_label"=> $v['name'],
                     "value"=> $v['delay'],
                 ];
-                $is_imbalance ++;
+                $is_imbalance_cnt ++;
             } else {
                 $v['is_imbalance'] = 0;
             }
-            if (1.0 * $res['spillover'] / $res['count'] > $frequency_threshold) {
+            if (1.0 * $v['spillover'] / $v['count'] > $frequency_threshold) {
                 $v['is_spillover'] = 1;
                  $ret['rankList']['spillover_index'][] = [
                     "junction_id"=> $k,
                     "junction_label"=> $v['name'],
                     "value"=> $v['delay'],
                 ];
-                $is_spillover ++;
+                $is_spillover_cnt ++;
             } else {
                 $v['is_spillover'] = 0;
             }
@@ -487,27 +487,27 @@ class DiagnosisNoTimingService extends BaseService
         $ret['count']['over_saturation'] = [
             "num" => $is_oversaturation_cnt,
             "name" => "过饱和",
-            "percent" => rount($is_oversaturation_cnt / $cnt * 100, 2) . '%',
-            "other" => rount(100 - $is_oversaturation_cnt / $cnt * 100, 2) . '%',
+            "percent" => round($is_oversaturation_cnt / $cnt * 100, 2) . '%',
+            "other" => round(100 - $is_oversaturation_cnt / $cnt * 100, 2) . '%',
         ];
         $ret['count']['spillover_index'] = [
             "num" => $is_spillover_cnt,
             "name" => "溢流",
-            "percent" => rount($is_spillover_cnt / $cnt * 100, 2) . '%',
-            "other" => rount(100 - $is_spillover_cnt / $cnt * 100, 2) . '%',
+            "percent" => round($is_spillover_cnt / $cnt * 100, 2) . '%',
+            "other" => round(100 - $is_spillover_cnt / $cnt * 100, 2) . '%',
         ];
         $ret['count']['imbalance_index'] = [
             "num" => $is_imbalance_cnt,
             "name" => "失衡",
-            "percent" => rount($is_imbalance_cnt / $cnt * 100, 2) . '%',
-            "other" => rount(100 - $is_imbalance_cnt / $cnt * 100, 2) . '%',
+            "percent" => round($is_imbalance_cnt / $cnt * 100, 2) . '%',
+            "other" => round(100 - $is_imbalance_cnt / $cnt * 100, 2) . '%',
         ];
         return $ret;
     }
 
     private function getQuestions($v) {
         $ret = [];
-        if ($v['is_oversaturation_cnt'] == 1) {
+        if ($v['is_oversaturation'] == 1) {
             $ret[] = '过饱和';
         }
         if ($v['is_imbalance'] == 1) {
@@ -516,7 +516,7 @@ class DiagnosisNoTimingService extends BaseService
         if ($v['is_spillover'] == 1) {
             $ret[] = '溢流';
         }
-        if (emtpy($ret)) {
+        if (empty($ret)) {
             $ret[] = '无';
         }
         return $ret;
