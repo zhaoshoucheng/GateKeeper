@@ -475,9 +475,7 @@ class Waymap_model extends CI_Model
         $data = compact('logic_junction_ids', 'version');
 
         $url = $this->waymap_interface . '/signal-map/mapJunction/phase';
-
-        $res = $this->post($url, $data); 
-
+        $res = $this->post($url, $data);
         $res = array_map(function ($v) {
             // 纠正这里的 phase_id 和 phase_name
             $v = $this->adjustPhase($v);
@@ -520,7 +518,7 @@ class Waymap_model extends CI_Model
      * @return array|mixed
      * @throws \Exception
      */
-    public function getFlowMovement($city_id, $logic_junction_id, $logic_flow_id, $juncMovements = 0)
+    public function getFlowMovement($city_id, $logic_junction_id, $logic_flow_id="all", $juncMovements = 0)
     {
         $data = compact('city_id', 'logic_junction_id', 'logic_flow_id');
 

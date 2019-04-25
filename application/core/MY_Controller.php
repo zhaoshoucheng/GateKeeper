@@ -430,4 +430,12 @@ class MY_Controller extends CI_Controller
         }
         return true;
     }
+
+    protected function convertJsonToPost(){
+        //json格式转换为post格式
+        $params = file_get_contents("php://input");
+        if(!empty(json_decode($params,true))){
+            $_POST = json_decode($params,true);
+        }
+    }
 }
