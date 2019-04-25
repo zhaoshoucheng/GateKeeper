@@ -353,13 +353,13 @@ class DiagnosisNoTimingService extends BaseService
         $city_id = $params['city_id'];
         $dates = $params['dates'];
         $res = $this->diagnosisNoTiming_model->getJunctionAlarmDataByHour($city_id, $dates);
-        $alarm_types = [
-            "is_oversaturation",
-            "is_spillover",
-            "is_imbalance",
-        ];
+
+        $conf_rule = $this->config->item('conf_rule');
+        $frequency_threshold = $conf_rule['frequency_threshold'];
+        $alarm_types = $conf_rule['alarm_types'];
+
         $ret = [];
-        foreach ($alarm_types as $alarm_type) {
+        foreach ($alarm_types as $alarm_type => $value) {
             if ($alarm_type == "is_oversaturation") {
                 $key = 'oversaturation_index';
                 $name = '过饱和';
@@ -403,6 +403,7 @@ class DiagnosisNoTimingService extends BaseService
         $ret = [];
         $conf_rule = $this->config->item('conf_rule');
         $frequency_threshold = $conf_rule['frequency_threshold'];
+        $alarm_types = $conf_rule['alarm_types'];
 
         $lngs = 0.0;
         $lats = 0.0;
@@ -418,7 +419,7 @@ class DiagnosisNoTimingService extends BaseService
             $v['name'] = $junctionsPos[$k]['name'];
             $lngs += $v['lng'];
             $lats += $v['lat'];
-            if (1.0 * $v['oversaturation'] / $v['count'] > $frequency_threshold) {
+            if (1.0 * $v['is_oversaturation'] / $v['count'] > $frequency_threshold) {
                 $v['is_oversaturation'] = 1;
                 $ret['rankList']['oversaturation_index'][] = [
                     "junction_id"=> $k,
@@ -429,7 +430,7 @@ class DiagnosisNoTimingService extends BaseService
             } else {
                 $v['is_oversaturation'] = 0;
             }
-            if (1.0 * $v['imbalance'] / $v['count'] > $frequency_threshold) {
+            if (1.0 * $v['is_imbalance'] / $v['count'] > $frequency_threshold) {
                 $v['is_imbalance'] = 1;
                  $ret['rankList']['imbalance_index'][] = [
                     "junction_id"=> $k,
@@ -440,7 +441,7 @@ class DiagnosisNoTimingService extends BaseService
             } else {
                 $v['is_imbalance'] = 0;
             }
-            if (1.0 * $v['spillover'] / $v['count'] > $frequency_threshold) {
+            if (1.0 * $v['is_spillover'] / $v['count'] > $frequency_threshold) {
                 $v['is_spillover'] = 1;
                  $ret['rankList']['spillover_index'][] = [
                     "junction_id"=> $k,
