@@ -436,7 +436,7 @@ class DiagnosisNoTimingService extends BaseService
                     $ret['rankList'][$alarm_types[$alarm_type]['index']][] = [
                         "junction_id"=> $k,
                         "junction_label"=> $v['name'],
-                        "value"=> $v['delay'],
+                        "value"=> round($v['delay'], 2),
                     ];
                    ${$detail['cnt']} ++;
                 } else {
@@ -453,7 +453,7 @@ class DiagnosisNoTimingService extends BaseService
                 'info' => [
                     'quota' => [
                         [
-                            'value' => $v['delay'],
+                            'value' => round($v['delay'], 2),
                             "name"=> "平均延误",
                             "unit"=> "秒",
                         ],
