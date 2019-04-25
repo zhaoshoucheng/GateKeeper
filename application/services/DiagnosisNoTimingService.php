@@ -415,7 +415,7 @@ class DiagnosisNoTimingService extends BaseService
 
         $lngs = 0.0;
         $lats = 0.0;
-        $cnt = count($res);
+        $cnt = 0;
         $is_oversaturation_cnt = 0;
         $is_imbalance_cnt = 0;
         $is_spillover_cnt = 0;
@@ -431,6 +431,7 @@ class DiagnosisNoTimingService extends BaseService
             if (!isset($junctionsPos[$k])) {
                 continue;
             }
+            $cnt ++;
             $v['lng'] = $junctionsPos[$k]['lng'];
             $v['lat'] = $junctionsPos[$k]['lat'];
             $v['name'] = $junctionsPos[$k]['name'];
