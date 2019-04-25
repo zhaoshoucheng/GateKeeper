@@ -26,7 +26,7 @@ class DiagnosisNoTimingService extends BaseService
         $result = [];
         $timePoints = splitTimeDurationToPoints("00:00-23:30");
         $result["junction_question"] = $this->diagnosisNoTiming_model->getJunctionQuotaTrend(
-            $params['junction_id'], $timePoints, $params['dates']);
+            $params['city_id'], $params['junction_id'], $timePoints, $params['dates']);
         return $result;
     }
 
@@ -46,7 +46,7 @@ class DiagnosisNoTimingService extends BaseService
 
         //定义路口问题阈值规则
         $result["junction_question"] = $this->diagnosisNoTiming_model->getJunctionAlarmList(
-            $params['junction_id'], $timePoints, $params['dates']);
+            $params['city_id'], $params['junction_id'], $timePoints, $params['dates']);
 
         //定义指标名称及注释
         $quotaKey = $this->config->item('flow_quota_key');

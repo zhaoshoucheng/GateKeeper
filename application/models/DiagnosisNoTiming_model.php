@@ -20,9 +20,9 @@ class DiagnosisNoTiming_model extends CI_Model
     /**
      * 获取单个路口时段粒度指标问题统计
      */
-    public function getJunctionQuotaTrend($logicJunctionId, $timePoint, $dates)
+    public function getJunctionQuotaTrend($cityID, $logicJunctionID, $timePoint, $dates)
     {
-        $list = $this->getJunctionQuotaPointCountStat($logicJunctionId, $timePoint, $dates);
+        $list = $this->getJunctionQuotaPointCountStat($cityID, $logicJunctionID, $timePoint, $dates);
         $confRule = $this->config->item('conf_rule');
         $fThreshold = $confRule['frequency_threshold'];
 
@@ -54,9 +54,9 @@ class DiagnosisNoTiming_model extends CI_Model
      * ["spillover_index"]["16:30"] = 2
      *
      */
-    public function getJunctionQuotaPointCountStat($logicJunctionId, $timePoint, $dates)
+    public function getJunctionQuotaPointCountStat($cityID, $logicJunctionID, $timePoint, $dates)
     {
-        $list = $this->getJunctionQuotaList($logicJunctionId, $timePoint, $dates);
+        $list = $this->getJunctionQuotaList($cityID, $logicJunctionID, $timePoint, $dates);
         $juncQuestion = $this->config->item('junction_question');
         $quotaCount = [];
         foreach ($list as $item) {
@@ -75,9 +75,9 @@ class DiagnosisNoTiming_model extends CI_Model
     /**
      * 获取单个路口全部时段问题统计
      */
-    public function getJunctionQuotaCountStat($logicJunctionId, $timePoint, $dates)
+    public function getJunctionQuotaCountStat($cityID, $logicJunctionID, $timePoint, $dates)
     {
-        $list = $this->getJunctionQuotaList($logicJunctionId, $timePoint, $dates);
+        $list = $this->getJunctionQuotaList($cityID, $logicJunctionID, $timePoint, $dates);
         //聚合每个问题次数
         $juncQuestion = $this->config->item('junction_question');
         $quotaCount = [];
@@ -100,8 +100,37 @@ class DiagnosisNoTiming_model extends CI_Model
      * @param $dates
      * @return mixed
      */
-    public function getJunctionQuotaList($logicJunctionId, $timePoint, $dates)
+    public function getJunctionQuotaList($cityID, $logicJunctionID, $timePoint, $dates)
     {
+        if(count($timePoint)==2){
+            unset($timePoint[1]);
+        }
+        $newDates = [];
+        foreach ($dates as $item){
+            if(strlen($item)!=8){
+                continue;
+            }
+            $newDates[] = substr($item, 0, 4)."-".substr($item, 4, 2)."-".substr($item, 6, 2);
+        }
+        $req = [
+            'city_id' => $cityID,
+            'logic_junction_id' => $logicJunctionID,
+            'time_points' => $timePoint,
+            'dates' => $newDates,
+        ];
+        print_r($newDates);exit;
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetJunctionQuotaList', $req, 0, 'json');
+        echo $url . '/GetJunctionQuotaList';exit;
+        echo json_encode($req);exit;
+        print_r($req);exit;
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            return $res['data'];
+        } else {
+            return [];
+        }
+
         $qData = file_get_contents("junction_duration_v6.json");
         $list = json_decode($qData, true);
         $result = [];
@@ -278,12 +307,12 @@ class DiagnosisNoTiming_model extends CI_Model
      * @param array $dates
      * @return array
      */
-    public function getJunctionAlarmList($logicJunctionId, $timePoint, $dates)
+    public function getJunctionAlarmList($cityID, $logicJunctionID, $timePoint, $dates)
     {
         $confRule = $this->config->item('conf_rule');
         $juncQuestion = $this->config->item('junction_question');
         $totalCount = count($timePoint) * count($dates);
-        $quotaCount = $this->getJunctionQuotaCountStat($logicJunctionId, $timePoint, $dates);
+        $quotaCount = $this->getJunctionQuotaCountStat($cityID, $logicJunctionID, $timePoint, $dates);
         $alarmResult = [];
         $fThreshold = $confRule['frequency_threshold'];
         foreach ($quotaCount as $quota => $count) {

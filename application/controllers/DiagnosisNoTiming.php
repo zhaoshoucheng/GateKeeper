@@ -56,6 +56,7 @@ class DiagnosisNoTiming extends MY_Controller
 
         // 校验参数
         $this->validate([
+            'city_id' => 'required|min_length[1]',
             'junction_id' => 'required|min_length[4]',
             'dates' => 'is_array',
         ], [
@@ -64,6 +65,7 @@ class DiagnosisNoTiming extends MY_Controller
             ),
         ]);
         $params = [];
+        $params["city_id"] = $this->input->post("city_id", true);
         $params["junction_id"] = $this->input->post("junction_id", true);
         $params["dates"] = $this->input->post("dates", true);
 
