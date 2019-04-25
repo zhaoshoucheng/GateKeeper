@@ -376,7 +376,11 @@ class DiagnosisNoTimingService extends BaseService
                 if (isset($res['all'][$date])) {
                     foreach ($res['all'][$date] as $k => $v) {
                         if($res[$alarm_type][$date][$k] != 0) {
-                            $ret[$key]['index'][$date][$k] = round($res[$alarm_type][$date][$k] / $res['all'][$date][$k] * 100, 2) .  '%';
+                            $ret[$key]['index'][$date][$k] = [
+                                'hour' => $k,
+                                'num' => $res[$alarm_type][$date][$k],
+                                'percent' => round($res[$alarm_type][$date][$k] / $res['all'][$date][$k] * 100, 2) .  '%',
+                            ];
                         }
                     }
                 }
@@ -391,6 +395,9 @@ class DiagnosisNoTimingService extends BaseService
         $hour = $params['hour'];
         // es alarm
         $res = $this->diagnosisNoTiming_model->getJunctionAlarmDataByJunction($city_id, $dates, $hour);
+        if (empty($res)) {
+            return [];
+        }
         // avg speed and delay
         $rest = $this->diagnosisNoTiming_model->GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour);
         // city junctions
