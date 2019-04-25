@@ -320,7 +320,7 @@ class DiagnosisNoTiming_model extends CI_Model
         ];
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByHour', $req, 0, 'json');
-        if (!isset($res)) {
+        if (!empty($res)) {
             $res = json_decode($res, true);
             return $res['data'];
         } else {
@@ -336,7 +336,7 @@ class DiagnosisNoTiming_model extends CI_Model
         ];
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByJunction', $req, 0, 'json');
-        if (!isset($res)) {
+        if (!empty($res)) {
             $res = json_decode($res, true);
             return $res['data'];
         } else {
@@ -352,7 +352,7 @@ class DiagnosisNoTiming_model extends CI_Model
         ];
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByJunctionAVG', $req, 0, 'json');
-        if (!isset($res)) {
+        if (!empty($res)) {
             $res = json_decode($res, true);
             return $res['data'];
         } else {
