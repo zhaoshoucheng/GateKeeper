@@ -376,7 +376,7 @@ class DiagnosisNoTimingService extends BaseService
                 if (isset($res['all'][$date])) {
                     foreach ($res['all'][$date] as $k => $v) {
                         if($res[$alarm_type][$date][$k] != 0) {
-                            $ret[$key]['index'][$date][$k] = round($res[$key][$date][$k] / $res['all'][$date][$k] * 100, 2) .  '%';
+                            $ret[$key]['index'][$date][$k] = round($res[$alarm_type][$date][$k] / $res['all'][$date][$k] * 100, 2) .  '%';
                         }
                     }
                 }
