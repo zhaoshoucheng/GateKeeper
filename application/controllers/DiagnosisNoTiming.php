@@ -156,7 +156,7 @@ class DiagnosisNoTiming extends MY_Controller
         ]);
         $params = [];
         $params["city_id"] = $this->input->post("city_id", true);
-        $params["dates"] = explode(',', $this->input->post("dates", true));
+        $params["dates"] = $this->input->post("dates", true);
 
         $res = $this->dianosisService->getJunctionAlarmDataByHour($params);
         $this->response($res);
@@ -215,7 +215,7 @@ class DiagnosisNoTiming extends MY_Controller
         ]);
         $params = [];
         $params["city_id"] = $this->input->post("city_id", true);
-        $params["dates"] = explode(',', $this->input->post("dates", true));
+        $params["dates"] = $this->input->post("dates", true);
         $params["hour"] = $this->input->post("hour", true);
 
         $res = $this->dianosisService->getAllCityJunctionsDiagnoseList($params);
