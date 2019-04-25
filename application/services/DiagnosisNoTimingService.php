@@ -361,7 +361,7 @@ class DiagnosisNoTimingService extends BaseService
         $ret = [];
         foreach ($alarm_types as $alarm_type) {
             if ($alarm_type == "is_oversaturation") {
-                $key = 'over_saturation';
+                $key = 'oversaturation_index';
                 $name = '过饱和';
             } elseif ($alarm_type == "is_spillover") {
                 $key = 'spillover_index';
@@ -420,7 +420,7 @@ class DiagnosisNoTimingService extends BaseService
             $lats += $v['lat'];
             if (1.0 * $v['oversaturation'] / $v['count'] > $frequency_threshold) {
                 $v['is_oversaturation'] = 1;
-                $ret['rankList']['over_saturation'][] = [
+                $ret['rankList']['oversaturation_index'][] = [
                     "junction_id"=> $k,
                     "junction_label"=> $v['name'],
                     "value"=> $v['delay'],
@@ -484,7 +484,7 @@ class DiagnosisNoTimingService extends BaseService
                 'unit' => '千米/时',
             ],
         ];
-        $ret['count']['over_saturation'] = [
+        $ret['count']['oversaturation_index'] = [
             "num" => $is_oversaturation_cnt,
             "name" => "过饱和",
             "percent" => round($is_oversaturation_cnt / $cnt * 100, 2) . '%',
