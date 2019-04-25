@@ -187,7 +187,7 @@ class DiagnosisNoTiming extends MY_Controller
         $params["city_id"] = intval($this->input->post("city_id", true));
         $params["dates"] = $this->input->post("dates", true);
         $params["hour"] = $this->input->post("hour", true);
-        if (len($params["hour"]) == 7) {
+        if (strlen($params["hour"]) == 7) {
             $params["hour"] = '0' . $params["hour"];
         }
 
