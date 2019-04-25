@@ -102,23 +102,23 @@ $config['conf_rule'] = [
         'is_spillover' =>
             [
                 'name' => '溢流',
-                'key' => 'oversaturation_index',
+                'index' => 'oversaturation_index',
                 'cnt' => 'is_spillover_cnt',
             ],
         'is_imbalance' =>
             [
                 'name' => '失衡',
-                'key' => 'spillover_index',
+                'index' => 'spillover_index',
                 'cnt' => 'is_imbalance_cnt',
             ],
         'is_oversaturation' =>
             [
                 'name' => '过饱和',
-                'key' => 'oversaturation_index',
+                'index' => 'oversaturation_index',
                 'cnt' => 'is_oversaturation_cnt',
             ],
     ],
-    'alarm_quota' => [
+    'alarm_quotas' => [
         'speed' => [
             'name' => '平均延误',
             "unit" =>  "秒",

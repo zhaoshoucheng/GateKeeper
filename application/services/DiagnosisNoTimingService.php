@@ -359,7 +359,7 @@ class DiagnosisNoTimingService extends BaseService
         $alarm_types = $conf_rule['alarm_types'];
 
         $ret = [];
-        foreach ($alarm_types as $alarm_type => $value) {
+        foreach (array_keys($alarm_types) as $alarm_type) {
             if ($alarm_type == "is_oversaturation") {
                 $key = 'oversaturation_index';
                 $name = '过饱和';
@@ -404,6 +404,7 @@ class DiagnosisNoTimingService extends BaseService
         $conf_rule = $this->config->item('conf_rule');
         $frequency_threshold = $conf_rule['frequency_threshold'];
         $alarm_types = $conf_rule['alarm_types'];
+        $alarm_quotas = $conf_rule['alarm_quotas'];
 
         $lngs = 0.0;
         $lats = 0.0;
@@ -411,8 +412,14 @@ class DiagnosisNoTimingService extends BaseService
         $is_oversaturation_cnt = 0;
         $is_imbalance_cnt = 0;
         $is_spillover_cnt = 0;
+
+        foreach ($alarm_types as $alarm_type => $detail) {
+            ${$detail['cnt']} = 0;
+        }
+
         $ret['dataList'] = [];
         $ret['rankList'] = [];
+        $ret['junctionTotal'] = $cnt;
         foreach ($res as $k => $v) {
             if (!isset($junctionsPos[$k])) {
                 continue;
@@ -422,39 +429,21 @@ class DiagnosisNoTimingService extends BaseService
             $v['name'] = $junctionsPos[$k]['name'];
             $lngs += $v['lng'];
             $lats += $v['lat'];
-            if (1.0 * $v['is_oversaturation'] / $v['count'] > $frequency_threshold) {
-                $v['is_oversaturation'] = 1;
-                $ret['rankList']['oversaturation_index'][] = [
-                    "junction_id"=> $k,
-                    "junction_label"=> $v['name'],
-                    "value"=> $v['delay'],
-                ];
-                $is_oversaturation_cnt++;
-            } else {
-                $v['is_oversaturation'] = 0;
+
+            foreach ($alarm_types as $alarm_type => $detail) {
+                if (1.0 * $v[$alarm_type] / $v['count'] > $frequency_threshold) {
+                    $v[$alarm_type] = 1;
+                    $ret['rankList'][$alarm_map[$alarm_type]['index']][] = [
+                        "junction_id"=> $k,
+                        "junction_label"=> $v['name'],
+                        "value"=> $v['delay'],
+                    ];
+                   ${$detail['cnt']} ++;
+                } else {
+                    $v[$alarm_type] = 0;
+                }
             }
-            if (1.0 * $v['is_imbalance'] / $v['count'] > $frequency_threshold) {
-                $v['is_imbalance'] = 1;
-                 $ret['rankList']['imbalance_index'][] = [
-                    "junction_id"=> $k,
-                    "junction_label"=> $v['name'],
-                    "value"=> $v['delay'],
-                ];
-                $is_imbalance_cnt ++;
-            } else {
-                $v['is_imbalance'] = 0;
-            }
-            if (1.0 * $v['is_spillover'] / $v['count'] > $frequency_threshold) {
-                $v['is_spillover'] = 1;
-                 $ret['rankList']['spillover_index'][] = [
-                    "junction_id"=> $k,
-                    "junction_label"=> $v['name'],
-                    "value"=> $v['delay'],
-                ];
-                $is_spillover_cnt ++;
-            } else {
-                $v['is_spillover'] = 0;
-            }
+
             $ret['dataList'][] = [
                 'logic_junction_id' => $k,
                 'name' => $v['name'],
@@ -467,58 +456,44 @@ class DiagnosisNoTimingService extends BaseService
                         "name"=> "平均延误",
                         "unit"=> "秒",
                     ],
-                    'question' => $this->getQuestions($v),
+                    'question' => $this->getQuestions($v, $alarm_types),
                 ],
             ];
         }
-        $ret['junctionTotal'] = $cnt;
+
         $ret['center'] = [
             'lng' => $lngs / $cnt,
             'lat' => $lats / $cnt,
         ];
-        $ret['quotaCount'] = [
-            [
-                'name' => '平均延误',
-                'value' => $rest['delay'],
-                'unit' => '秒',
-            ],
-            [
-                'name' => '平均速度',
-                'value' => $rest['speed'],
-                'unit' => '千米/时',
-            ],
-        ];
-        $ret['count']['oversaturation_index'] = [
-            "num" => $is_oversaturation_cnt,
-            "name" => "过饱和",
-            "percent" => round($is_oversaturation_cnt / $cnt * 100, 2) . '%',
-            "other" => round(100 - $is_oversaturation_cnt / $cnt * 100, 2) . '%',
-        ];
-        $ret['count']['spillover_index'] = [
-            "num" => $is_spillover_cnt,
-            "name" => "溢流",
-            "percent" => round($is_spillover_cnt / $cnt * 100, 2) . '%',
-            "other" => round(100 - $is_spillover_cnt / $cnt * 100, 2) . '%',
-        ];
-        $ret['count']['imbalance_index'] = [
-            "num" => $is_imbalance_cnt,
-            "name" => "失衡",
-            "percent" => round($is_imbalance_cnt / $cnt * 100, 2) . '%',
-            "other" => round(100 - $is_imbalance_cnt / $cnt * 100, 2) . '%',
-        ];
+
+        $ret['quotaCount'] = [];
+        foreach ($alarm_quotas as $key => $value) {
+            $ret['quotaCount'][] = [
+                'name' => $value['name'],
+                'value' => $rest[$key],
+                'unit' => $value['unit'],
+            ];
+        }
+
+        $ret['count'] = [];
+        foreach ($alarm_types as $alarm_type => $detail) {
+            $ret['count'][$detail['index']] = [
+                "num" => ${$detail['cnt']},
+                "name" => $detail['name'],
+                "percent" => round(${$detail['cnt']} / $cnt * 100, 2) . '%',
+                "other" => round(100 - ${$detail['cnt']} / $cnt * 100, 2) . '%',
+            ];
+        }
+
         return $ret;
     }
 
-    private function getQuestions($v) {
+    private function getQuestions($v, $alarm_types) {
         $ret = [];
-        if ($v['is_oversaturation'] == 1) {
-            $ret[] = '过饱和';
-        }
-        if ($v['is_imbalance'] == 1) {
-            $ret[] = '失衡';
-        }
-        if ($v['is_spillover'] == 1) {
-            $ret[] = '溢流';
+        foreach ($alarm_types as $alarm_type => $detail) {
+            if ($v[$alarm_type] == 1) {
+                $ret[] = $detail['name'];
+            }
         }
         if (empty($ret)) {
             $ret[] = '无';
