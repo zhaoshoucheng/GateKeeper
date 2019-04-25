@@ -56,6 +56,33 @@ class Road_model extends CI_Model
     }
 
     /**
+     * 根据 md5 获取干线信息
+     *
+     * @param $cityId
+     * @param string $select
+     * @return array
+     */
+    public function getRoadsByRoadID($roadID, $select = '*')
+    {
+        //在table字段没有创建前先手动调整
+        if($roadID=="8e7f9d4d751720ae3f65ebd2accaddd3"){
+            return [
+                "forward_in_junctionid"=>"-1103784",
+                "forward_out_junctionid"=>"2017030116_1106883",
+                "backward_in_junctionid"=>"2017030116_1106883",
+                "backward_out_junctionid"=>"-1126362",
+            ];
+        }
+        $res = $this->db->select($select)
+            ->from($this->tb)
+            ->where('road_id', $roadID)
+            ->where('is_delete', 0)
+            ->order_by('created_at desc')
+            ->get();
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
+
+    /**
      * 根据 城市ID 获取干线列表
      *
      * @param $cityId
