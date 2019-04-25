@@ -414,6 +414,9 @@ class DiagnosisNoTimingService extends BaseService
         $ret['dataList'] = [];
         $ret['rankList'] = [];
         foreach ($res as $k => $v) {
+            if (!isset($junctionsPos[$k])) {
+                continue;
+            }
             $v['lng'] = $junctionsPos[$k]['lng'];
             $v['lat'] = $junctionsPos[$k]['lat'];
             $v['name'] = $junctionsPos[$k]['name'];
