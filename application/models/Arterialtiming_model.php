@@ -8,6 +8,7 @@
 /**
  * Class Arterialtiming_model
  * @property \Road_model $road_model
+ * @property \Timing_model $timing_model
  */
 class Arterialtiming_model extends CI_Model
 {
@@ -146,11 +147,7 @@ class Arterialtiming_model extends CI_Model
                     }
                 }
             }
-
-
-
         }
-
         return $finalRet;
     }
 

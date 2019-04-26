@@ -1349,8 +1349,8 @@ class JunctionsService extends BaseService
             }
 
             // 计算地图中心坐标
-            $centerLng = round($countLng / $qcount, 6);
-            $centerLat = round($countLat / $qcount, 6);
+            $centerLng = $qcount>0 ? round($countLng / $qcount, 6): "";
+            $centerLat = $qcount>0 ? round($countLat / $qcount, 6): "";
 
             // 柱状图
             if (!empty($data['count']) && $count >= 1) {

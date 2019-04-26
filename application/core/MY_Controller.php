@@ -6,6 +6,7 @@
  **********************************************/
 
 include_once "Inroute_Controller.php";
+include_once "AsyncTask_Controller.php";
 
 /**
  * Class MY_Controller
@@ -429,5 +430,13 @@ class MY_Controller extends CI_Controller
             return false;
         }
         return true;
+    }
+
+    protected function convertJsonToPost(){
+        //json格式转换为post格式
+        $params = file_get_contents("php://input");
+        if(!empty(json_decode($params,true))){
+            $_POST = json_decode($params,true);
+        }
     }
 }
