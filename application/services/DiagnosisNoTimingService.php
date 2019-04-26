@@ -77,6 +77,14 @@ class DiagnosisNoTimingService extends BaseService
         $endTime = date("H:i:s", strtotime(date("Y-m-d")." ".end($timePoints).":00"));
         $dates = $params['dates'];
         //获取相位信息
+        $flowLabel = "";
+        if(!empty($mapData['dataList'])){
+            foreach ($mapData['dataList'] as $item){
+                if($item['logic_flow_id'] == $params['flow_id']){
+                    $flowLabel = $item['flow_label'];
+                }
+            }
+        }
         $flowMovement = $this->waymap_model->getFlowMovement($params['city_id'], $params['junction_id'], $params['flow_id']);
         if(empty($flowMovement)){
             return [];
@@ -134,6 +142,7 @@ class DiagnosisNoTimingService extends BaseService
                     "min" => $trajs->collapse()->column(1)->min(),
                 ],
             ];
+            $result['flow_label'] = $flowLabel;
             $outResult[$tempDate] = $result;
         }
         return $outResult;
@@ -146,6 +155,15 @@ class DiagnosisNoTimingService extends BaseService
         $endTime = date("H:i:s", strtotime(date("Y-m-d")." ".end($timePoints).":00"));
         $dates = $params['dates'];
         //获取相位信息
+        $mapData = $this->getJunctionMapData($params);
+        $flowLabel = "";
+        if(!empty($mapData['dataList'])){
+            foreach ($mapData['dataList'] as $item){
+                if($item['logic_flow_id'] == $params['flow_id']){
+                    $flowLabel = $item['flow_label'];
+                }
+            }
+        }
         $flowMovement = $this->waymap_model->getFlowMovement($params['city_id'], $params['junction_id'], $params['flow_id']);
         if(empty($flowMovement)){
             return [];
@@ -185,14 +203,15 @@ class DiagnosisNoTimingService extends BaseService
             $trajs = Collection::make($trajList);
             $result['info'] = [
                 "x" => [
-                    "max" => $trajs->column(1)->max(),
-                    "min" => $trajs->column(1)->min(),
-                ],
-                "y" => [
                     "max" => $trajs->column(0)->max(),
                     "min" => $trajs->column(0)->min(),
                 ],
+                "y" => [
+                    "max" => $trajs->column(1)->max(),
+                    "min" => $trajs->column(1)->min(),
+                ],
             ];
+            $result['flow_label'] = $flowLabel;
             $outResult[$tempDate] = $result;
         }
         return $outResult;
