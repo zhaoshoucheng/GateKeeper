@@ -30,12 +30,12 @@ class Arterialtiming_model extends CI_Model
         foreach ($data as $dk=>$dv){
 
             $versionStr = $date."000000";
-
+            $reqdate = substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2);
             $ret  = $this->timing_model->getNewTimngData(array(
                 "logic_junction_id"=>$dv['logic_junction_id'],
-                'start_time'=>$timePoint,
-                'end_time'=>$timePoint,
-                'date'=>$date,
+                'start_time'=>$timePoint.":00",
+                'end_time'=>$timePoint.":00",
+                'date'=>$reqdate,
                 'version'=>$versionStr,
             ));
 
@@ -59,6 +59,9 @@ class Arterialtiming_model extends CI_Model
                     'movement_timing'=>[],
                 ),
             );
+            if(empty($tod)){
+                return $finalRet;
+            }
             if ($ret['structure'] == 2){ //stage类型
                 $stageLenMap = []; //每个阶段的长度
                 $phaseStageMap = [];//记录每个相位所在的阶段
