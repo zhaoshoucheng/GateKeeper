@@ -146,6 +146,7 @@ class AdaptLog extends MY_Controller{
 
     public function insert()
     {
+        return $this->insertMq();
         $params = $this->input->post(NULL,true);
         $this->validate([
             'type' => 'trim|required|min_length[1]',
