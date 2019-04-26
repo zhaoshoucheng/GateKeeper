@@ -268,6 +268,7 @@ class DiagnosisNoTimingService extends BaseService
             foreach ($dates as $date) {
                 $ret[$key]['index'][$date] = [];
                 if (isset($data['all'][$date])) {
+                    $cnt ++;
                     foreach ($data['all'][$date] as $k => $v) {
                         if($data[$alarm_type][$date][$k] != 0) {
                             $ret[$key]['index'][$date][$k] = [
