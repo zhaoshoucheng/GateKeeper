@@ -162,7 +162,6 @@ class AdaptLog extends MY_Controller{
         exit;
     }
 
-
     public function insertMq()
     {
         $params = $this->input->post(NULL,true);
@@ -174,17 +173,6 @@ class AdaptLog extends MY_Controller{
             'dltag' => 'trim|required|min_length[1]',
             'log_time' => 'trim|required|min_length[1]',
         ]);
-        /*$sqldata = [
-            'city_id'       => !empty($data['city_id']) ? $data['city_id'] : '',
-            'from_id'       => !empty($data['from']) ? $data['from'] : '',
-            'junction_id'   => !empty($data['junction_id']) ? $data['junction_id'] : '',
-            'quota_keys'    => !empty($data['quota_keys']) ? $data['quota_keys'] : '',
-            'api_name'      => !empty($data['api_name']) ? $data['api_name'] : '',
-            'body'          => !empty($data['body']) ? $data['body'] : '',
-            'result_status' => !empty($data['result_status']) ? $data['result_status'] : '',
-            'errmsg'        => !empty($data['errmsg']) ? $data['errmsg'] : '',
-            'create_time'   => time(),
-        ];*/
         //$result = $this->adapt_model->insertAdaptLog($params);
         $result = asyncCallFunc("adapt_model","insertAdaptLog",[$params]);
         return $this->response($result);
