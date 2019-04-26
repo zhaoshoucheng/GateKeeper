@@ -198,7 +198,7 @@ class JunctionsService extends BaseService
         $confidenceConf = $this->config->item('confidence');
 
         // flow 所有指标配置
-        $flowQuotaKeyConf = $this->config->item('flow_quota_key');
+        $flowQuotaKeyConf = $this->config->item('diagnosis_flow_quota_key');
         // 指标集合
         foreach ($flowQuotaKeyConf as $k => $v) {
             $resultData['flow_quota'][$k]['name'] = $flowQuotaKeyConf[$k]['name'];
@@ -1158,7 +1158,7 @@ class JunctionsService extends BaseService
         $flowIdName = $this->timing_model->getFlowIdToName($timing_data);
 
         // flow级指标配置
-        $flowQuotaKeyConf = $this->config->item('flow_quota_key');
+        $flowQuotaKeyConf = $this->config->item('diagnosis_flow_quota_key');
 
         // 需要返回的全部movements所需字段
         $movementsAll = array_merge($flowQuotaKeyConf, ['movement_id'=>'', 'comment'=>'', 'confidence'=>'']);
