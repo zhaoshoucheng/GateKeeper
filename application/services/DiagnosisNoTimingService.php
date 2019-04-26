@@ -233,39 +233,50 @@ class DiagnosisNoTimingService extends BaseService
     public function getJunctionAlarmDataByHour($params) {
         $city_id = $params['city_id'];
         $dates = $params['dates'];
-        $res = $this->diagnosisNoTiming_model->getJunctionAlarmDataByHour($city_id, $dates);
+        $data = $this->diagnosisNoTiming_model->getJunctionAlarmDataByHour($city_id, $dates);
 
         $conf_rule = $this->config->item('conf_rule');
         $frequency_threshold = $conf_rule['frequency_threshold'];
         $alarm_types = $conf_rule['alarm_types'];
 
         $ret = [];
-        foreach (array_keys($alarm_types) as $alarm_type) {
-            if ($alarm_type == "is_oversaturation") {
-                $key = 'oversaturation_index';
-                $name = '过饱和';
-            } elseif ($alarm_type == "is_spillover") {
-                $key = 'spillover_index';
-                $name = '溢流';
-            } elseif ($alarm_type == "is_imbalance") {
-                $key = 'imbalance_index';
-                $name = '失衡';
-            }
+        foreach ($alarm_types as $alarm_type => $detail) {
+            $key = $detail['index'];
+            $name = $detail['name'];
             $ret[$key]['name'] = $name;
+            $sum = [];
+            $cnt = 0;
             foreach ($dates as $date) {
                 $ret[$key]['index'][$date] = [];
-                if (isset($res['all'][$date])) {
-                    foreach ($res['all'][$date] as $k => $v) {
-                        if($res[$alarm_type][$date][$k] != 0) {
+                if (isset($data['all'][$date])) {
+                    foreach ($data['all'][$date] as $k => $v) {
+                        if($data[$alarm_type][$date][$k] != 0) {
                             $ret[$key]['index'][$date][$k] = [
                                 'hour' => $k,
-                                'num' => $res[$alarm_type][$date][$k],
-                                'percent' => round($res[$alarm_type][$date][$k] / $res['all'][$date][$k] * 100, 2) .  '%',
+                                'num' => $data[$alarm_type][$date][$k],
+                                'percent' => round($data[$alarm_type][$date][$k] / $data['all'][$date][$k] * 100, 2) .  '%',
                             ];
+                            if (isset($sum[$k])) {
+                                $sum[$k] += $data[$alarm_type][$date][$k] / $data['all'][$date][$k] * 100;
+                            } else {
+                                $sum[$k] = $data[$alarm_type][$date][$k] / $data['all'][$date][$k] * 100;
+                            }
                         }
                     }
                 }
             }
+            if ($cnt == 1) {
+                continue;
+            }
+            $avg = [];
+            foreach ($sum as $k => $v) {
+                $avg[$k] = [
+                    'hour' => $k,
+                    'num' => 0,
+                    'percent' => round($v / $cnt, 2) .  '%',
+                ];
+            }
+            $ret[$key]['index']['avg'] = $avg;
         }
         return $ret;
     }
@@ -275,8 +286,8 @@ class DiagnosisNoTimingService extends BaseService
         $dates = $params['dates'];
         $hour = $params['hour'];
         // es alarm
-        $res = $this->diagnosisNoTiming_model->getJunctionAlarmDataByJunction($city_id, $dates, $hour);
-        if (empty($res)) {
+        $data = $this->diagnosisNoTiming_model->getJunctionAlarmDataByJunction($city_id, $dates, $hour);
+        if (empty($data)) {
             return [];
         }
         // avg speed and delay
@@ -307,8 +318,7 @@ class DiagnosisNoTimingService extends BaseService
 
         $ret['dataList'] = [];
         $ret['rankList'] = [];
-        $ret['junctionTotal'] = $cnt;
-        foreach ($res as $k => $v) {
+        foreach ($data as $k => $v) {
             if (!isset($junctionsPos[$k])) {
                 continue;
             }
@@ -352,6 +362,7 @@ class DiagnosisNoTimingService extends BaseService
                 'diagnose_detail' => $this->getDiagnoses($v, $alarm_types),
             ];
         }
+        $ret['junctionTotal'] = $cnt;
 
         $ret['center'] = [
             'lng' => $lngs / $cnt,
