@@ -117,7 +117,11 @@ class DiagnosisNoTimingService extends BaseService
                 "dates"=>[$eachDate],
             ];
             //print_r($trajParam);
-            $trajInfo = $this->traj_model->getSpaceTimeDiagram($trajParam);
+            try{
+                $trajInfo = $this->traj_model->getSpaceTimeDiagram($trajParam);
+            }catch (\Exception $e){
+                continue;
+            }
             //print_r($trajInfo);exit;
             $trajList = $trajInfo['dataList'][0]['forward_traj'] ?? [];
             foreach ($trajList as $key=>$item){
@@ -196,7 +200,11 @@ class DiagnosisNoTimingService extends BaseService
                 "dates"=>[$eachDate],
             ];
             //print_r($trajParam);
-            $trajInfo = $this->traj_model->getSpaceTimeDiagram($trajParam);
+            try{
+                $trajInfo = $this->traj_model->getSpaceTimeDiagram($trajParam);
+            }catch (\Exception $e){
+                continue;
+            }
             $trajList = $trajInfo['dataList'][0]['forward_stop_delay'] ?? [];
             $result = [];
             $result['dataList'] = $trajList;
@@ -270,7 +278,7 @@ class DiagnosisNoTimingService extends BaseService
                 if (isset($data['all'][$date])) {
                     $cnt ++;
                     foreach ($data['all'][$date] as $k => $v) {
-                        if($data[$alarm_type][$date][$k] != 0) {
+                        if(isset($data[$alarm_type][$date][$k]) && $data[$alarm_type][$date][$k] != 0) {
                             $ret[$key]['index'][$date][$k] = [
                                 'hour' => $k,
                                 'num' => $data[$alarm_type][$date][$k],

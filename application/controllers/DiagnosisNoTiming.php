@@ -151,11 +151,7 @@ class DiagnosisNoTiming extends MY_Controller
      */
     public function getQuestionTrend()
     {
-        //json格式转换为post格式
-        $params = file_get_contents("php://input");
-        if (!empty(json_decode($params, true))) {
-            $_POST = json_decode($params, true);
-        }
+        $this->convertJsonToPost();
 
         // 校验参数
         $this->validate([
@@ -179,11 +175,7 @@ class DiagnosisNoTiming extends MY_Controller
      */
     public function getAllCityJunctionsDiagnoseList()
     {
-        //json格式转换为post格式
-        $params = file_get_contents("php://input");
-        if (!empty(json_decode($params, true))) {
-            $_POST = json_decode($params, true);
-        }
+        $this->convertJsonToPost();
 
         // 校验参数
         $this->validate([
