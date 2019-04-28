@@ -209,6 +209,9 @@ class DiagnosisNoTimingService extends BaseService
                 continue;
             }
             $trajList = $trajInfo['dataList'][0]['forward_stop_delay'] ?? [];
+            if(empty($trajList)){
+                continue;
+            }
             $result = [];
             $result['dataList'] = $trajList;
             $trajs = Collection::make($trajList);
