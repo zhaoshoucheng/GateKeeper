@@ -134,6 +134,9 @@ class DiagnosisNoTimingService extends BaseService
             }
 
             $result = [];
+            if(empty($trajList)){
+                continue;
+            }
             $result['dataList'] = $trajList;
             $trajs = Collection::make($trajList);
             $result['info'] = [
