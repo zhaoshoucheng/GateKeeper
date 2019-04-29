@@ -60,13 +60,14 @@ class DiagnosisNoTimingService extends BaseService
     }
 
     /**
-     * 获取路口地图底图数据
-     * @param $data
+     * 获取路口所有方向信息(相位、方向、坐标)
+     * @param array $data 请求参数
+     * @param int   $uniqueDirection 是否唯一方向,只获取一段方向
      * @return array
      */
-    public function getJunctionMapData($params)
+    public function getJunctionMapData($params,$uniqueDirection=0)
     {
-        $result = $this->diagnosisNoTiming_model->getJunctionMapData($params);
+        $result = $this->diagnosisNoTiming_model->getJunctionMapData($params,$uniqueDirection);
         return $result;
     }
 
@@ -77,6 +78,7 @@ class DiagnosisNoTimingService extends BaseService
         $endTime = date("H:i:s", strtotime(date("Y-m-d")." ".end($timePoints).":00"));
         $dates = $params['dates'];
         //获取相位信息
+        $mapData = $this->getJunctionMapData($params);
         $flowLabel = "";
         if(!empty($mapData['dataList'])){
             foreach ($mapData['dataList'] as $item){

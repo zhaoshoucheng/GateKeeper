@@ -295,7 +295,13 @@ class DiagnosisNoTiming_model extends CI_Model
         return $movements;
     }
 
-    public function getJunctionMapData($data)
+    /**
+     * 获取路口所有方向信息(相位、方向、坐标)
+     * @param array $data 请求参数
+     * @param int   $uniqueDirection 是否唯一方向,只获取一段方向
+     * @return array
+     */
+    public function getJunctionMapData($data,$uniqueDirection)
     {
         $logicJunctionID = $data['junction_id'];
         $cityID = $data['city_id'];
@@ -309,11 +315,19 @@ class DiagnosisNoTiming_model extends CI_Model
         $flowPhases = array_column($flowsMovement,"phase_name","logic_flow_id");
 
         // 路网相位信息
+        $uniqueDirections = [];
         $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionID, array_keys($flowPhases));
         foreach ($ret as $k => $v) {
             if (!empty($flowPhases[$v['logic_flow_id']])) {
+                $phaseWord = mb_substr($flowPhases[$v['logic_flow_id']],0,1);
+                if($uniqueDirection){
+                    if(in_array($phaseWord,$uniqueDirections)){
+                        continue;
+                    }
+                }
+                $uniqueDirections[] = $phaseWord;
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
-                $result['dataList'][$k]['flow_label'] = $flowPhases[$v['logic_flow_id']];
+                $result['dataList'][$k]['flow_label'] = $phaseWord;
                 $result['dataList'][$k]['lng'] = $v['flows'][0][0];
                 $result['dataList'][$k]['lat'] = $v['flows'][0][1];
             }

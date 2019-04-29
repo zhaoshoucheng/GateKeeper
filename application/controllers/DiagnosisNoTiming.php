@@ -86,7 +86,7 @@ class DiagnosisNoTiming extends MY_Controller
         $data = [];
         $data['city_id'] = $this->input->post("city_id", TRUE);
         $data['junction_id'] = $this->input->post("junction_id", TRUE);
-        $result = $this->dianosisService->getJunctionMapData($data);
+        $result = $this->dianosisService->getJunctionMapData($data,1);
         $this->response($result);
     }
 
