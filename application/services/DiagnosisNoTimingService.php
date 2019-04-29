@@ -283,22 +283,23 @@ class DiagnosisNoTimingService extends BaseService
                 $ret[$key]['index'][$date] = [];
                 if (isset($data['all'][$date])) {
                     $cnt ++;
-                    foreach ($data['all'][$date] as $k => $v) {
-                        if(isset($data[$alarm_type][$date][$k]) && $data['all'][$date][$k] != 0) {
-                            $ret[$key]['index'][$date][$k] = [
-                                'hour' => $k,
-                                'num' => $data[$alarm_type][$date][$k],
-                                'percent' => round($data[$alarm_type][$date][$k] / $data['all'][$date][$k] * 100, 2) .  '%',
+                    foreach ($data['all'][$date] as $hour => $v) {
+                        if(isset($data[$alarm_type][$date][$hour]) && $data['all'][$date][$hour] != 0) {
+                            $ret[$key]['index'][$date][$hour] = [
+                                'hour' => $hour,
+                                'num' => $data[$alarm_type][$date][$hour],
+                                'percent' => round($data[$alarm_type][$date][$hour] / $data['all'][$date][$hour] * 100, 2) .  '%',
                             ];
-                            if (isset($sum[$k])) {
-                                $sum[$k] += $data[$alarm_type][$date][$k] / $data['all'][$date][$k] * 100;
+                            if (isset($sum[$hour])) {
+                                $sum[$hour] += $data[$alarm_type][$date][$hour] / $data['all'][$date][$hour] * 100;
                             } else {
-                                $sum[$k] = $data[$alarm_type][$date][$k] / $data['all'][$date][$k] * 100;
+                                $sum[$hour] = $data[$alarm_type][$date][$hour] / $data['all'][$date][$hour] * 100;
                             }
                         }
                     }
                 }
             }
+            // 如果只有一天的数据，就不计算avg了
             if ($cnt == 1) {
                 continue;
             }

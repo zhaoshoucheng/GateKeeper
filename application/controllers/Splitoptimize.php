@@ -17,6 +17,7 @@ class Splitoptimize extends MY_Controller
         parent::__construct();
         $this->load->model('timing_model');
         $this->load->model('splitoptimize_model');
+        $this->load->model('traj_model');
         $this->setTimingType();
     }
 
@@ -74,6 +75,51 @@ class Splitoptimize extends MY_Controller
     * @return json
     */
     public function getSplitOptimizePlan()
+    {
+        $params = $this->input->post(NULL, TRUE);
+        // 校验参数
+        $validate = Validate::make($params,
+            [
+                'junction_id'      => 'nullunable',
+                'time_range'       => 'nullunable',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        if (!is_array($params['dates']) || empty($params['dates'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数dates必须为数组且不可为空！';
+            return;
+        }
+
+        $params['time_range'] = explode('-', trim($params['time_range']));
+
+        $data = [
+            'logic_junction_id'     => strip_tags(trim($params['junction_id'])),
+            'dates'                 => implode(',', $params['dates']),
+            'start_time'            => $params['time_range'][0],
+            'end_time'              => $params['time_range'][1],
+        ];
+
+        $result = $this->traj_model->getSplitOptimizePlan($data);
+
+        return $this->response($result);
+    }
+
+    /**
+    * 获取绿信比优化方案
+    * @param task_id         interger Y 任务ID
+    * @param junction_id     string   Y 路口ID
+    * @param time_range      string   Y 方案开始结束时间 00:00-09:00
+    * @param task_time_range string   Y 任务时段 例：00:00-24:00
+    * @param dates           array    Y 评估/诊断日期
+    * @return json
+    */
+    public function getSplitOptimizePlanOld()
     {
         $params = $this->input->post(NULL, TRUE);
         // 校验参数

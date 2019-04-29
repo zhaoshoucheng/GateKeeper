@@ -114,6 +114,19 @@ class Traj_model extends CI_Model
     }
 
     /**
+     * 单点绿信比优化
+     *
+     * @param array $data 请求的参数
+     * @return array
+     * @throws \Exception
+     */
+    public function getSplitOptimizePlan($data)
+    {
+        $url = $this->interface . '/greensplit/greenSplitOpt';
+        return $this->post($url, $data, 20000, "json");
+    }
+
+    /**
      * 填充绿波图优化接口数据
      *
      * @param array $data 请求的参数
