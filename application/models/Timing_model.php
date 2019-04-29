@@ -623,12 +623,10 @@ class Timing_model extends CI_Model
             'source'            => $data['source']
         ];
         try {
-            echo $this->config->item('timing_interface') . '/TimingService/queryTimingVersionBatch';exit;
             $timing = httpGET(
                 $this->config->item('timing_interface') . '/TimingService/queryTimingVersionBatch',
                 $timing_data
             );
-            print_r($timing);exit;
             $timing = json_decode($timing, true);
             if (isset($timing['errorCode']) && $timing['errorCode'] != 0) {
                 return [];
