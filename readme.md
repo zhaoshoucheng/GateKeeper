@@ -59,6 +59,14 @@
 * /TimingService/queryMovementByFlow
 * /TimingService/queryTimingByTimePoint
 * /TimingService/queryTimingVersionBatch
+* /diagnosisNoTiming/getQuestionTrend
+* /diagnosisNoTiming/getAllCityJunctionsDiagnoseList
+* /diagnosisNoTiming/getSpaceTimeDiagram
+* /diagnosisNoTiming/getJunctionQuotaDetail
+* /diagnosisNoTiming/getScatterDiagram
+* /diagnosisNoTiming/getJunctionQuestionTrend
+* /diagnosisNoTiming/getJunctionMapData
+
 
 ## 牛玉富
 * /Road/addRoad

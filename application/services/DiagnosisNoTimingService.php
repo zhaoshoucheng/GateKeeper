@@ -284,7 +284,7 @@ class DiagnosisNoTimingService extends BaseService
                 if (isset($data['all'][$date])) {
                     $cnt ++;
                     foreach ($data['all'][$date] as $k => $v) {
-                        if(isset($data[$alarm_type][$date][$k]) && $data[$alarm_type][$date][$k] != 0) {
+                        if(isset($data[$alarm_type][$date][$k]) && $data['all'][$date][$k] != 0) {
                             $ret[$key]['index'][$date][$k] = [
                                 'hour' => $k,
                                 'num' => $data[$alarm_type][$date][$k],
@@ -311,6 +311,13 @@ class DiagnosisNoTimingService extends BaseService
                 ];
             }
             $ret[$key]['index']['avg'] = $avg;
+        }
+        foreach ($ret as $k1 => $v1) {
+            foreach ($v1['index'] as $k2 => $v2) {
+                foreach ($v2 as $key => $value) {
+                    ksort($ret[$k1]['index'][$k2]);
+                }
+            }
         }
         return $ret;
     }
