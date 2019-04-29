@@ -313,7 +313,7 @@ class DiagnosisNoTimingService extends BaseService
                     'percent' => round($v / $cnt, 2) .  '%',
                 ];
             }
-            $ret[$key]['index']['avg'] = $avg;
+            $ret[$key]['index']['AVG'] = $avg;
         }
         foreach ($ret as $k1 => $v1) {
             foreach ($v1['index'] as $k2 => $v2) {
