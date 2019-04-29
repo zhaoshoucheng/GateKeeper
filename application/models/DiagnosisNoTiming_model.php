@@ -296,7 +296,16 @@ class DiagnosisNoTiming_model extends CI_Model
             if (!empty($flowPhases[$v['logic_flow_id']])) {
                 $phaseWord = $flowPhases[$v['logic_flow_id']];
                 if($uniqueDirection){
-                    $phaseWord = mb_substr($flowPhases[$v['logic_flow_id']],0,1);
+                    $firstWord = mb_substr($flowPhases[$v['logic_flow_id']],0,1);
+                    if(in_array($firstWord,["东","西","南","北"])){
+                        $phaseWord = $firstWord;
+                    }
+                    if(mb_strlen($flowPhases[$v['logic_flow_id']])>1){
+                        $secondWord = mb_substr($flowPhases[$v['logic_flow_id']],1,1);
+                        if(in_array($secondWord,["东","西","南","北"])){
+                            $phaseWord = $secondWord;
+                        }
+                    }
                     if(in_array($phaseWord,$uniqueDirections)){
                         continue;
                     }
