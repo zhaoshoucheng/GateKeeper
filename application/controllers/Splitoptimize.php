@@ -82,7 +82,6 @@ class Splitoptimize extends MY_Controller
             [
                 'junction_id'      => 'nullunable',
                 'time_range'       => 'nullunable',
-                'dates'            => 'nullunable',
             ]
         );
         if (!$validate['status']) {
@@ -101,12 +100,12 @@ class Splitoptimize extends MY_Controller
 
         $data = [
             'logic_junction_id'     => strip_tags(trim($params['junction_id'])),
-            'dates'                 => $params['dates'],
+            'dates'                 => implode(',', $params['dates']),
             'start_time'            => $params['time_range'][0],
             'end_time'              => $params['time_range'][1],
         ];
 
-        $result = $this->traj_model->getSplitOptimizePlan(json_encode($data));
+        $result = $this->traj_model->getSplitOptimizePlan($data);
 
         return $this->response($result);
     }
