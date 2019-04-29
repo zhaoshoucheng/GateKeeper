@@ -156,7 +156,7 @@ class DiagnosisNoTiming extends MY_Controller
         // 校验参数
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
-            // 'dates' => 'required|is_array',
+            'dates' => 'is_array',
         ]);
         $params = [];
         $params["city_id"] = intval($this->input->post("city_id", true));
@@ -180,7 +180,7 @@ class DiagnosisNoTiming extends MY_Controller
         // 校验参数
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
-            // 'dates' => 'required|is_array',
+            'dates' => 'is_array',
             'hour' => 'required|trim|regex_match[/\d{1,2}:\d{2}/]',
         ]);
         $params = [];
