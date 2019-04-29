@@ -426,7 +426,7 @@ class RoadNet
             $req->roadVersion = $version;
             $roadVersionRuntime[] = $req;
         }
-        print_r($roadVersionRuntime);
+        //print_r($roadVersionRuntime);
 
         $this->start('caculator');
 
