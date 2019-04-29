@@ -44,10 +44,29 @@ class DiagnosisNoTiming extends MY_Controller
         $params["city_id"] = $this->input->post("city_id", true);
         $params["junction_id"] = $this->input->post("junction_id", true);
         $params["dates"] = $this->input->post("dates", true);
+        $params["time_range"] = $this->correntTimeRange($params["time_range"]);
+        if(empty($params["dates"])){
+            throw new \Exception("datas 不能为空");
+        }
+        foreach ($params["dates"] as $key=>$date){
+            if (!preg_match('/\d{4,4}-\d{1,2}-\d{1,2}/ims',$date)){
+                throw new \Exception("datas参数格式错误");
+            }
+        }
 
         // 获取路口指标详情
         $res = $this->dianosisService->getFlowQuotas($params);
         $this->response($res);
+    }
+
+    //纠正时间范围
+    private function correntTimeRange($timeRange){
+        $timeArr = explode("-",$timeRange);
+        if($timeArr[0]==$timeArr[1]){
+            $timeArr[1] = date("H:i",strtotime(date("Y-m-d")." ".$timeArr[1].":00")+30*60);
+            return $timeArr[0]."-".$timeArr[1];
+        }
+        return $timeRange;
     }
 
     public function getJunctionQuestionTrend()
@@ -68,6 +87,14 @@ class DiagnosisNoTiming extends MY_Controller
         $params["city_id"] = $this->input->post("city_id", true);
         $params["junction_id"] = $this->input->post("junction_id", true);
         $params["dates"] = $this->input->post("dates", true);
+        if(empty($params["dates"])){
+            throw new \Exception("datas 不能为空");
+        }
+        foreach ($params["dates"] as $key=>$date){
+            if (!preg_match('/\d{4,4}-\d{1,2}-\d{1,2}/ims',$date)){
+                throw new \Exception("datas参数格式错误");
+            }
+        }
 
         // 获取路口指标详情
         $res = $this->dianosisService->getJunctionQuotaTrend($params);
@@ -113,6 +140,15 @@ class DiagnosisNoTiming extends MY_Controller
             'junction_id' => $this->input->post("junction_id", TRUE),
             'dates' => $this->input->post("dates", TRUE),
         ];
+        $params["time_range"] = $this->correntTimeRange($params["time_range"]);
+        if(empty($params["dates"])){
+            throw new \Exception("datas 不能为空");
+        }
+        foreach ($params["dates"] as $key=>$date){
+            if (!preg_match('/\d{4,4}-\d{1,2}-\d{1,2}/ims',$date)){
+                throw new \Exception("datas参数格式错误");
+            }
+        }
         $result_data = $this->dianosisService->getSpaceTimeDiagram($params);
         return $this->response($result_data);
     }
@@ -139,6 +175,15 @@ class DiagnosisNoTiming extends MY_Controller
             'junction_id' => $this->input->post("junction_id", TRUE),
             'dates' => $this->input->post("dates", TRUE),
         ];
+        $params["time_range"] = $this->correntTimeRange($params["time_range"]);
+        if(empty($params["dates"])){
+            throw new \Exception("datas 不能为空");
+        }
+        foreach ($params["dates"] as $key=>$date){
+            if (!preg_match('/\d{4,4}-\d{1,2}-\d{1,2}/ims',$date)){
+                throw new \Exception("datas参数格式错误");
+            }
+        }
         $result_data = $this->dianosisService->getScatterDiagram($params);
         return $this->response($result_data);
     }
@@ -161,7 +206,14 @@ class DiagnosisNoTiming extends MY_Controller
         $params = [];
         $params["city_id"] = intval($this->input->post("city_id", true));
         $params["dates"] = $this->input->post("dates", true);
-
+        if(empty($params["dates"])){
+            throw new \Exception("datas 不能为空");
+        }
+        foreach ($params["dates"] as $key=>$date){
+            if (!preg_match('/\d{4,4}-\d{1,2}-\d{1,2}/ims',$date)){
+                throw new \Exception("datas参数格式错误");
+            }
+        }
         $res = $this->dianosisService->getJunctionAlarmDataByHour($params);
         $this->response($res);
     }
@@ -189,6 +241,14 @@ class DiagnosisNoTiming extends MY_Controller
         $params["hour"] = $this->input->post("hour", true);
         if (strlen($params["hour"]) == 4) {
             $params["hour"] = '0' . $params["hour"];
+        }
+        if(empty($params["dates"])){
+            throw new \Exception("datas 不能为空");
+        }
+        foreach ($params["dates"] as $key=>$date){
+            if (!preg_match('/\d{4,4}-\d{1,2}-\d{1,2}/ims',$date)){
+                throw new \Exception("datas参数格式错误");
+            }
         }
 
         $res = $this->dianosisService->getAllCityJunctionsDiagnoseList($params);

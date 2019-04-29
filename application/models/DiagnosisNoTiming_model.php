@@ -74,9 +74,8 @@ class DiagnosisNoTiming_model extends CI_Model
             foreach (array_keys($juncQuestion) as $alarmField) {
                 if (!isset($quotaCount[$alarmField][$item["hour"]])) {
                     $quotaCount[$alarmField][$item["hour"]] = $item[$alarmField];
-                } else {
-                    $quotaCount[$alarmField][$item["hour"]] += $item[$alarmField];
                 }
+                $quotaCount[$alarmField][$item["hour"]] += $item[$alarmField];
             }
         }
         return $quotaCount;
@@ -96,9 +95,8 @@ class DiagnosisNoTiming_model extends CI_Model
             foreach (array_keys($juncQuestion) as $alarmField) {
                 if (!isset($quotaCount[$alarmField])) {
                     $quotaCount[$alarmField] = $item[$alarmField];
-                } else {
-                    $quotaCount[$alarmField] += $item[$alarmField];
                 }
+                $quotaCount[$alarmField] += $item[$alarmField];
             }
         }
         return $quotaCount;
@@ -136,16 +134,6 @@ class DiagnosisNoTiming_model extends CI_Model
         } else {
             return [];
         }
-
-        $qData = file_get_contents("junction_duration_v6.json");
-        $list = json_decode($qData, true);
-        $result = [];
-        if (!empty($list['hits'])) {
-            foreach ($list['hits'] as $item) {
-                $result[] = $item['_source']??[];
-            }
-        }
-        return $result;
     }
 
     /**
@@ -180,17 +168,6 @@ class DiagnosisNoTiming_model extends CI_Model
         } else {
             return [];
         }
-
-
-        $qData = file_get_contents("flow_duration_v6.json");
-        $list = json_decode($qData, true);
-        $result = [];
-        if (!empty($list['hits'])) {
-            foreach ($list['hits'] as $item) {
-                $result[] = $item['_source']??[];
-            }
-        }
-        return $result;
     }
 
     /**
@@ -235,14 +212,12 @@ class DiagnosisNoTiming_model extends CI_Model
         foreach ($flowList as $item) {
             if (!isset($flowTrajSum[$item['logic_flow_id']])) {
                 $flowTrajSum[$item['logic_flow_id']] = $item["traj_count"];
-            } else {
-                $flowTrajSum[$item['logic_flow_id']] += $item["traj_count"];
             }
             if (!isset($flowTrajStoptimeSum[$item['logic_flow_id']])) {
                 $flowTrajStoptimeSum[$item['logic_flow_id']] = $item["traj_count"] * $item["stop_time_cycle"];
-            } else {
-                $flowTrajStoptimeSum[$item['logic_flow_id']] += $item["traj_count"] * $item["stop_time_cycle"];
             }
+            $flowTrajSum[$item['logic_flow_id']] += $item["traj_count"];
+            $flowTrajStoptimeSum[$item['logic_flow_id']] += $item["traj_count"] * $item["stop_time_cycle"];
         }
         $result = [];
         $quotaRound = $this->config->item('flow_quota_round');
@@ -363,7 +338,7 @@ class DiagnosisNoTiming_model extends CI_Model
         $alarmResult = [];
         $fThreshold = $confRule['frequency_threshold'];
         foreach ($quotaCount as $quota => $count) {
-            if ($count / $totalCount > $fThreshold) {
+            if ($totalCount>0 && $count>0 && ($count/$totalCount>$fThreshold)) {
                 $alarmResult[$quota] = $juncQuestion[$quota];
             }
         }
