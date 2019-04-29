@@ -294,8 +294,9 @@ class DiagnosisNoTiming_model extends CI_Model
         $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionID, array_keys($flowPhases));
         foreach ($ret as $k => $v) {
             if (!empty($flowPhases[$v['logic_flow_id']])) {
-                $phaseWord = mb_substr($flowPhases[$v['logic_flow_id']],0,1);
+                $phaseWord = $flowPhases[$v['logic_flow_id']];
                 if($uniqueDirection){
+                    $phaseWord = mb_substr($flowPhases[$v['logic_flow_id']],0,1);
                     if(in_array($phaseWord,$uniqueDirections)){
                         continue;
                     }
