@@ -159,7 +159,6 @@ class Arterialtiming_model extends CI_Model
             'end_time'          => $timePoint,
             'source'            => 1
         ));
-        print_r($ret);exit;
         if(empty($ret)){
             return [];
         }
