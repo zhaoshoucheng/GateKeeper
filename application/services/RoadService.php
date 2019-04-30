@@ -367,7 +367,8 @@ class RoadService extends BaseService
             $reverseGeo = $this->waymap_model->getLinksGeoInfos($item['path_links'], $maxWaymapVersion);
 
             if (isset($roadInfo[$key])) {
-                $roadInfo[$key]['reverse_geo'] = $reverseGeo;
+                //$roadInfo[$key]['reverse_geo'] = $reverseGeo;
+                $roadInfo[$key]['reverse_geo'] = [];
             }
         }
 

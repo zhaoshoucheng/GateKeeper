@@ -6,6 +6,7 @@
  **********************************************/
 
 include_once "Inroute_Controller.php";
+include_once "AsyncTask_Controller.php";
 
 /**
  * Class MY_Controller

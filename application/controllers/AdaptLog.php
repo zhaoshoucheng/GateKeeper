@@ -5,6 +5,10 @@
 use \Services\AdaptionLogService;
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Class AdaptLog
+ * @property \Adapt_model $adapt_model
+ */
 class AdaptLog extends MY_Controller{
     protected $adaptionLogService;
     public function __construct()
@@ -12,6 +16,8 @@ class AdaptLog extends MY_Controller{
         parent::__construct();
         $this->load->config('nconf');
         $this->load->helper('http');
+        $this->load->helper('async');
+        $this->load->model('adapt_model');
         $this->adaptionLogService = new AdaptionLogService();
     }
 
@@ -140,6 +146,7 @@ class AdaptLog extends MY_Controller{
 
     public function insert()
     {
+        return $this->insertMq();
         $params = $this->input->post(NULL,true);
         $this->validate([
             'type' => 'trim|required|min_length[1]',
@@ -154,5 +161,21 @@ class AdaptLog extends MY_Controller{
         fastcgi_finish_request();
         $this->adaptionLogService->insert($params);
         exit;
+    }
+
+    public function insertMq()
+    {
+        $params = $this->input->post(NULL,true);
+        $this->validate([
+            'type' => 'trim|required|min_length[1]',
+            'rel_id' => 'trim|required|min_length[1]',
+            'log' => 'trim|required|min_length[1]',
+            'trace_id' => 'trim|required|min_length[1]',
+            'dltag' => 'trim|required|min_length[1]',
+            'log_time' => 'trim|required|min_length[1]',
+        ]);
+        //$result = $this->adapt_model->insertAdaptLog($params);
+        $result = asyncCallFunc("adapt_model","insertAdaptLog",[$params]);
+        return $this->response($result);
     }
 }

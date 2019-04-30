@@ -391,6 +391,12 @@ if (!function_exists('uncamelize')) {
     }
 }
 
+/**
+ * 将字符串数据 格式为时间点数组
+ * @param $timeDuration     string "00:00-23:30"
+ * @param string $separator string
+ * @return array ["00:00","00:30"]
+ */
 if (!function_exists('splitTimeDurationToPoints')) {
     function splitTimeDurationToPoints($timeDuration, $separator = '-')
     {
