@@ -107,6 +107,12 @@ if ($development == 2) {
     $waymap_port = '8001';
     // 路网接口前缀
     $waymap_ext = '';
+    // 路网接口服务器地址
+    $waymap_server = '100.69.238.11';
+    // 路网接口服务器端口
+    $waymap_port = '8000';
+    // 路网接口前缀
+    $waymap_ext = '/its';
 
     // 配时接口服务器地址
     $timing_server = '100.90.164.31';

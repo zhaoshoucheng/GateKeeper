@@ -73,7 +73,7 @@ class DiagnosisNoTiming_model extends CI_Model
         foreach ($list as $item) {
             foreach (array_keys($juncQuestion) as $alarmField) {
                 if (!isset($quotaCount[$alarmField][$item["hour"]])) {
-                    $quotaCount[$alarmField][$item["hour"]] = $item[$alarmField];
+                    $quotaCount[$alarmField][$item["hour"]] = 0;
                 }
                 $quotaCount[$alarmField][$item["hour"]] += $item[$alarmField];
             }
@@ -94,7 +94,7 @@ class DiagnosisNoTiming_model extends CI_Model
         foreach ($list as $item) {
             foreach (array_keys($juncQuestion) as $alarmField) {
                 if (!isset($quotaCount[$alarmField])) {
-                    $quotaCount[$alarmField] = $item[$alarmField];
+                    $quotaCount[$alarmField] = 0;
                 }
                 $quotaCount[$alarmField] += $item[$alarmField];
             }
@@ -206,15 +206,15 @@ class DiagnosisNoTiming_model extends CI_Model
         //  10          |   1               |   512     |   15:00   |   10/(10*1+20*1+25*1) |   10/(10+20+25)
         //  20          |   1               |   512     |   15:30   |   20/(10*1+20*1+25*1) |   20/(10+20+25)
         //  25          |   1               |   512     |   16:00   |   25/(10*1+20*1+25*1) |   25/(10+20+25)
-        //  10          |   2               |   555     |   15:00   |   10/(10*2)           |   10/(20)
+        //  10          |   2               |   555     |   15:00   |   10/(10*2)           |   10/(10)
         $flowTrajSum = [];
         $flowTrajStoptimeSum = [];
         foreach ($flowList as $item) {
             if (!isset($flowTrajSum[$item['logic_flow_id']])) {
-                $flowTrajSum[$item['logic_flow_id']] = $item["traj_count"];
+                $flowTrajSum[$item['logic_flow_id']] = 0;
             }
             if (!isset($flowTrajStoptimeSum[$item['logic_flow_id']])) {
-                $flowTrajStoptimeSum[$item['logic_flow_id']] = $item["traj_count"] * $item["stop_time_cycle"];
+                $flowTrajStoptimeSum[$item['logic_flow_id']] = 0;
             }
             $flowTrajSum[$item['logic_flow_id']] += $item["traj_count"];
             $flowTrajStoptimeSum[$item['logic_flow_id']] += $item["traj_count"] * $item["stop_time_cycle"];
@@ -236,7 +236,7 @@ class DiagnosisNoTiming_model extends CI_Model
                 $quotaValue = isset($quotaRound[$quotaKey]['round'])
                     ? $quotaRound[$quotaKey]['round']($quotaValue) : $quotaValue;
                 if (!isset($result['logic_flow_id'][$quotaKey])) {
-                    $result[$item['logic_flow_id']][$quotaKey] = $quotaValue;
+                    $result[$item['logic_flow_id']][$quotaKey] = 0;
                 } else {
                     $result[$item['logic_flow_id']][$quotaKey] += $quotaValue;
                 }
