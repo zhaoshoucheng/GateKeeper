@@ -305,6 +305,8 @@ class Arterialtiming_model extends CI_Model
             +ArrGet($lastBackwardFlows,"out_link_length",0))/2;
         $lastFlowLength = (ArrGet($lastForwardFlows,"in_link_length",0)
                 +ArrGet($firstBackwardFlows,"out_link_length",0))/2;
+        $firstFlowLength = intval($firstFlowLength);
+        $lastFlowLength = intval($lastFlowLength);
 
         //追加正向首尾路口到$result['forward_path_flows']
         $newForwardFlow = [];

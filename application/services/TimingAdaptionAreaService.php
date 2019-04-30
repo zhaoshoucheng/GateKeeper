@@ -1209,6 +1209,11 @@ class TimingAdaptionAreaService extends BaseService
      */
     public function getQueueLengthMtraj($data)
     {
+        $timingInfo = $this->getFlowTimingInfo($data);
+        if (empty($timingInfo) || empty($timingInfo["green"])) {
+            return [];
+        }
+
         $endTime = time();
         $startTime = $endTime - 30 * 60;
 
