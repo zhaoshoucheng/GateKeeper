@@ -78,6 +78,9 @@ class Arterialtiming_model extends CI_Model
                     }
 
                    foreach ($tv['flow_info'] as $fk=>$fv){
+                       if(empty($dv['flows'])){
+                           continue;
+                       }
                        if(!in_array($fv['logic_flow_id'],$dv['flows'])){//过滤无用的flow
                             continue;
                        }
