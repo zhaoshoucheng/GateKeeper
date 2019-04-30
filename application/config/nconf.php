@@ -416,6 +416,72 @@ $config['junction_quota_key'] = [
     ],
 ];
 
+//flow诊断指标
+$config['diagnosis_flow_quota_key'] = [
+    'route_length' => [
+        'name' => '路段长度', // 中文名称
+        'round' => function ($val) {
+            return round($val);
+        },  // 格式化数据
+        'unit' => '米'       // 单位
+    ],
+    'queue_position' => [
+        'name' => '排队长度',
+        'round' => function ($val) {
+            return round($val);
+        },
+        'unit' => '米',
+    ],
+    'saturation_degree' => [
+        'name' => '饱和度',
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '',
+    ],
+    'stop_delay' => [
+        'name' => '停车延误',
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '秒',
+    ],
+    'stop_time_cycle' => [
+        'name' => '停车次数',
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '',
+    ],
+    'spillover_rate' => [
+        'name' => '溢流比率',
+        'round' => function ($val) {
+            return round($val, 4);
+        },
+        'unit' => '',
+    ],
+    'stop_rate' => [
+        'name' => '停车比率',
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '',
+    ],
+    'flow_num' => [
+        'name' => '流量',
+        'round' => function ($val) {
+            return round($val);
+        },
+        'unit' => '每小时/车道',
+    ],
+    'free_flow_speed' => [
+        'name' => '自由流',
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+        'unit' => '千米/时',
+    ],
+];
 // flow指标
 $config['flow_quota_key'] = [
     'route_length' => [
