@@ -73,7 +73,7 @@ class DiagnosisNoTiming_model extends CI_Model
         foreach ($list as $item) {
             foreach (array_keys($juncQuestion) as $alarmField) {
                 if (!isset($quotaCount[$alarmField][$item["hour"]])) {
-                    $quotaCount[$alarmField][$item["hour"]] = $item[$alarmField];
+                    $quotaCount[$alarmField][$item["hour"]] = 0;
                 }
                 $quotaCount[$alarmField][$item["hour"]] += $item[$alarmField];
             }
@@ -94,7 +94,7 @@ class DiagnosisNoTiming_model extends CI_Model
         foreach ($list as $item) {
             foreach (array_keys($juncQuestion) as $alarmField) {
                 if (!isset($quotaCount[$alarmField])) {
-                    $quotaCount[$alarmField] = $item[$alarmField];
+                    $quotaCount[$alarmField] = 0;
                 }
                 $quotaCount[$alarmField] += $item[$alarmField];
             }
@@ -211,10 +211,10 @@ class DiagnosisNoTiming_model extends CI_Model
         $flowTrajStoptimeSum = [];
         foreach ($flowList as $item) {
             if (!isset($flowTrajSum[$item['logic_flow_id']])) {
-                $flowTrajSum[$item['logic_flow_id']] = $item["traj_count"];
+                $flowTrajSum[$item['logic_flow_id']] = 0;
             }
             if (!isset($flowTrajStoptimeSum[$item['logic_flow_id']])) {
-                $flowTrajStoptimeSum[$item['logic_flow_id']] = $item["traj_count"] * $item["stop_time_cycle"];
+                $flowTrajStoptimeSum[$item['logic_flow_id']] = 0;
             }
             $flowTrajSum[$item['logic_flow_id']] += $item["traj_count"];
             $flowTrajStoptimeSum[$item['logic_flow_id']] += $item["traj_count"] * $item["stop_time_cycle"];
@@ -236,10 +236,9 @@ class DiagnosisNoTiming_model extends CI_Model
                 $quotaValue = isset($quotaRound[$quotaKey]['round'])
                     ? $quotaRound[$quotaKey]['round']($quotaValue) : $quotaValue;
                 if (!isset($result['logic_flow_id'][$quotaKey])) {
-                    $result[$item['logic_flow_id']][$quotaKey] = $quotaValue;
-                } else {
-                    $result[$item['logic_flow_id']][$quotaKey] += $quotaValue;
+                    $result[$item['logic_flow_id']][$quotaKey] = 0;
                 }
+                $result[$item['logic_flow_id']][$quotaKey] += $quotaValue;
             }
         }
 
