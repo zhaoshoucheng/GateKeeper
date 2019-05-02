@@ -55,7 +55,7 @@ if (!function_exists('asyncCallFunc')) {
         //发送实时消息
         //print_r($mqdata);
         com_log_notice('_asyncCallFunc_msg',['mqdata'=>json_encode($mqdata),]);
-        $retJson = httpPOST("http://10.88.128.149:30796/produce/v1/sendMessage",$mqdata,0,"json");
+        $retJson = httpPOST("http://10.88.128.149:30796/produce/v1/sendMessage",$mqdata,10000,"json");
         $result = json_decode($retJson,true);
         com_log_notice('_asyncCallFunc_result',['result'=>$result,]);
         if(!isset($result["code"]) || $result["code"]!=0){
