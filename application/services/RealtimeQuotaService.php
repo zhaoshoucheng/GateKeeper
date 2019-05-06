@@ -63,6 +63,7 @@ class RealtimeQuotaService extends BaseService
                 }
             }
             $newFlowList[$key]["phase_name"] = $phaseName;
+            $newFlowList[$key]["logic_flow_id"] = $value["movementId"];
         }
         return ["list"=>$newFlowList,"batch_time"=>$date." ".$hour];
     }
