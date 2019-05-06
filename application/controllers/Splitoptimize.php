@@ -74,7 +74,7 @@ class Splitoptimize extends MY_Controller
     * @param dates           array    Y 评估/诊断日期
     * @return json
     */
-    public function getNewSplitOptimizePlan()
+    public function getSplitOptimizePlan()
     {
         $params = $this->input->post(NULL, TRUE);
         // 校验参数
@@ -119,7 +119,7 @@ class Splitoptimize extends MY_Controller
     * @param dates           array    Y 评估/诊断日期
     * @return json
     */
-    public function getSplitOptimizePlan()
+    public function getSplitOptimizePlanOld()
     {
         $params = $this->input->post(NULL, TRUE);
         // 校验参数
