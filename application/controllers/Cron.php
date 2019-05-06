@@ -43,7 +43,7 @@ class Cron extends CI_Controller
     public function deleteAdaptLog()
     {
         print_r(date("Y-m-d H:i:s")." deleteAdaptLog execute success.\n");
-        $this->adapt_model->deleteAdaptLog("-3 day");
+        $this->adapt_model->deleteAdaptLog("-1 day");
     }
 
     public function scan_custom_task()

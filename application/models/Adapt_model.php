@@ -114,7 +114,6 @@ class Adapt_model extends CI_Model
      */
     public function pageList($params)
     {
-        $this->deleteAdaptLog("-3 day");    //触发删除
         if(!empty($params["trace_id"])){
             $this->db->where("trace_id",$params["trace_id"]);
         }
@@ -143,6 +142,7 @@ class Adapt_model extends CI_Model
         $result = $this->db->select('*')
             ->from('adapt_timing_log')
             ->limit($params["page_size"], $offset)
+            ->forceMaster()
             ->order_by("log_time desc,id desc")
             ->get()
             ->result_array();

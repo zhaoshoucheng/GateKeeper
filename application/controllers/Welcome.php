@@ -34,6 +34,12 @@ class Welcome extends CI_Controller
      */
     public function index()
     {
+        $this->load->helper('async');
+        $paramsJson='{"class":"adapt_model","current_time":"1557142365","function":"insertAdaptLog","params":"{\"dltag\":\"new_dltag\",\"log\":\"map[test:test_value dltag:new_dltag traceid:ac182a215cd01b5db9f02375104dc7b0 cspanid: spanid:f0c8317c380704bb]\",\"log_time\":\"2019-05-06 19:32:45\",\"rel_id\":\"abc_123\",\"trace_id\":\"new_dltag\",\"type\":1}","sig":"16c47d877c474957919fef5023e47338"}';
+        $params=json_decode($paramsJson,true);
+        $checkResult = checkSign($params,"#!*****%&");
+        print_r($checkResult);exit;
+
         com_log_warning('_asynctask_index_error', 0, '1123123', []);
         exit;
         var_dump((new AreaService())->index());
