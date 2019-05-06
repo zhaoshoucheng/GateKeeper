@@ -88,6 +88,7 @@ class Waymap_model extends CI_Model
                     'user_id'   => $this->config->item('waymap_userid'),
                 ];
         $res = httpPOST($this->config->item('waymap_interface') . '/signal-map/map/getDateVersion', $data);
+        $res = json_decode($res, true);
         if (isset($res['data'])) {
             return $res['data'];
         }
