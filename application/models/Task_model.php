@@ -100,6 +100,11 @@ class Task_model extends CI_Model
         return $aRet;
     }
 
+    function getCycleTaskConf($city_id, $cols = '*') {
+        $aRet = $this->its_tool->select($cols)->from("cycle_task")->where('city_id', $city_id)->where('type', self::TASK_TYPE_CYCLE)->get()->result_array();
+        return $aRet;
+    }
+
     function getSuccTask($user, $city_id, $type, $kind, $task_type, $cols = '*') {
         $aRet  = $this->its_tool->select('task_result.id as task_id, task_result.dates as dates')->from($this->_table)->join('cycle_task', 'task_result.conf_id = cycle_task.id')->where('task_result.user', $user)->where('task_result.city_id', $city_id)->where('task_result.kind', $kind)->where('task_result.type', $type)->where('task_result.rate', 100)->where('task_result.status', $this->completed_status)->where('cycle_task.type', $task_type)->order_by('task_result.id', 'DESC')->limit(1)->get()->result_array();
         // var_dump($this->its_tool->last_query());

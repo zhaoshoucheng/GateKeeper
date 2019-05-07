@@ -164,7 +164,7 @@ class Task extends MY_Controller
 
         $city_id = intval($params['city_id']);
         $cycle_task = $this->task_model->getSuccCycleTask('admin', $city_id);
-        $this->output_data = $this->formatTaskList($cycle_task);
+        $this->output_data = $this->formatTaskList($city_id, $cycle_task);
     }
 
     /**
@@ -172,7 +172,13 @@ class Task extends MY_Controller
      * @param $taskList 二纬数组 格式为task_result表result_array后的结果
      * return array
      */
-    private function formatTaskList($taskList){
+    private function formatTaskList($city_id, $taskList){
+    	$tmp = $this->task_model->getCycleTaskConf($city_id);
+    	$confs = [];
+    	foreach ($tmp as $conf) {
+    		$confs[$conf['id']] = $conf;
+    	}
+
         $formatList = [];
         foreach ($taskList as $task) {
             $reason = '';
@@ -187,14 +193,56 @@ class Task extends MY_Controller
                     }
                 }
             }
+            $dates = explode(',', $task['dates']);
+            $comment = "";
+            if (isset($confs[$task['conf_id']])) {
+            	if ($confs[$task['conf_id']]['type'] == 1) {
+            		$comment = '单天';
+            	} elseif ($confs[$task['conf_id']]['type'] == 2) {
+            		if (date('N', strtotime($dates[0])) <= 5) {
+            			$comment = "前5个工作日";
+            		} else {
+            			$comment = "前2个非工作日";
+            		}
+            	} elseif ($confs[$task['conf_id']]['type'] == 3) {
+            		$ji = "";
+            		switch (date('N', strtotime($dates[0]))) {
+            			case '1':
+            				$ji = '一';
+            				break;
+            			case '2':
+            				$ji = '二';
+            				break;
+            			case '3':
+            				$ji = '三';
+            				break;
+            			case '4':
+            				$ji = '四';
+            				break;
+            			case '5':
+            				$ji = '五';
+            				break;
+            			case '6':
+            				$ji = '六';
+            				break;
+            			case '7':
+            				$ji = '日';
+            				break;
+            			default:
+            				break;
+            		}
+            		$comment = "前4个周" . $ji;
+            	}
+            }
             $formatList[] = array(
                 'task_id' => $task['id'],
-                'dates' => explode(',', $task['dates']),
+                'dates' => $dates,
                 'time_range' => $task['start_time'] . '-' . $task['end_time'],
                 'junctions' => ($task['junctions'] === '' or $task['junctions'] === null) ? '全城' : '路口',
                 'status' => (in_array($task['status'], $this->task_model->getRunStatus())) ? $task['rate'] . '%' : '失败',
                 'exec_date' => date('m.d', $task['task_start_time']),
                 'reason' => $reason,
+                'comment' => $comment,
             );
         }
         return $formatList;
