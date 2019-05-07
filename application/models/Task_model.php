@@ -101,7 +101,7 @@ class Task_model extends CI_Model
     }
 
     function getCycleTaskConf($city_id, $cols = '*') {
-        $aRet = $this->its_tool->select($cols)->from("cycle_task")->where('city_id', $city_id)->where('type', self::TASK_TYPE_CYCLE)->get()->result_array();
+        $aRet = $this->its_tool->select($cols)->from("cycle_task")->where('city_id', $city_id)->get()->result_array();
         return $aRet;
     }
 
