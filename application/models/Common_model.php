@@ -28,13 +28,16 @@ class Common_model extends CI_Model
     public function getTimingMovementNames($junctionId) {
         $res = httpGET("http://10.88.128.40:8000/ipd-cloud/signal-platform/profile/base/current?junctionId=".$junctionId, []);
         $ret = json_decode($res,true);
-        $flowInfos = $ret[0]["tod_schedule"][0]["tod"][0]["phase_time"][0]["flows"] ?? [];
-
         $result = [];
-        foreach ($flowInfos as $flowInfo){
-            preg_match("/@(.*)@(.*)/ims",$flowInfo,$matches);
-            if(count($matches)==3 && !empty($matches[2])){
-                $result[$matches[1]] = $matches[2];
+
+        $phaseTimeCount = count($ret[0]["tod_schedule"][0]["tod"][0]["phase_time"]);
+        for($i=0;$i<$phaseTimeCount;$i++){
+            $flowInfos = $ret[0]["tod_schedule"][0]["tod"][0]["phase_time"][$i]["flows"] ?? [];
+            foreach ($flowInfos as $flowInfo){
+                preg_match("/@(.*)@(.*)/ims",$flowInfo,$matches);
+                if(count($matches)==3 && !empty($matches[2])){
+                    $result[$matches[1]] = $matches[2];
+                }
             }
         }
         return $result;

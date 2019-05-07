@@ -272,7 +272,9 @@ class TimingAdaptionService extends BaseService
             com_log_notice('getTwiceStopRate_getFlowsInFlowIds_error', array($cityId, $hour, $logicJunctionId, $logicFlowIds));
             return [];
         }
-
+        foreach ($res as $key=>$value){
+            $res[$key]['multiStopRatioUp'] = $res[$key]['multiStopRatioUp']>0 ? $res[$key]['multiStopRatioUp'] : 0;
+        }
         return array_column($res, 'multiStopRatioUp', 'movementId');
     }
 
