@@ -61,10 +61,9 @@ class AdpArea_model extends CI_Model
      */
     public function getAreaByAreaId($areaId, $select = '*')
     {
-        $res = $this->db->select($select)
+        $res = $this->signalcontrol->select($select)
             ->from($this->tb)
             ->where('id', $areaId)
-            ->where('delete_at', '1970-01-01')
             ->get();
 
         return $res instanceof CI_DB_result ? $res->row_array() : $res;
@@ -195,9 +194,8 @@ class AdpArea_model extends CI_Model
     public function getAreaJunctions($areaId, $select = '*')
     {
         $res = $this->db->select($select)
-            ->from('area_junction_relation')
+            ->from('area_junction_relate')
             ->where('area_id', $areaId)
-            ->where('delete_at', '1970-01-01 00:00:00')
             ->get();
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;

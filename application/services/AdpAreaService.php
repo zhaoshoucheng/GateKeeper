@@ -174,13 +174,13 @@ class AdpAreaService extends BaseService
         //$cityId = $params['city_id'];
         $areaId = $params['area_id'];
 
-        $areaInfo = $this->area_model->getAreaByAreaId($areaId);
+        $areaInfo = $this->adpArea_model->getAreaByAreaId($areaId);
 
         if (!$areaInfo) {
             throw new \Exception(' 目标区域不存在', ERR_PARAMETERS);
         }
 
-        $areaJunctionList = $this->area_model->getAreaJunctions($areaId);
+        $areaJunctionList = $this->adpArea_model->getAreaJunctions($areaId);
 
         $areaJunctionCollection = Collection::make($areaJunctionList);
 
