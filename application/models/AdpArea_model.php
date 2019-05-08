@@ -211,7 +211,7 @@ class AdpArea_model extends CI_Model
      */
     public function deleteArea($areaId)
     {
-        return $this->db->where('id', $areaId)
+        return $this->signalcontrol->where('id', $areaId)
             ->delete();
     }
 
