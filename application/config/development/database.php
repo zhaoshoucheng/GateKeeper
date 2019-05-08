@@ -130,3 +130,27 @@ $db['dmp_captain'] = array(
     'query_flag' => '0',         //查询标记
     'force_master' => FALSE,    //强制从主库查询
 );
+
+$area_junction_db = 'signal_control';
+$db['signal_control'] = array(
+    'dsn'   => '',
+    'username' => $username,
+    'hostname' => $hostname,
+    'password' => $password,
+    'database' => $area_junction_db,
+    'port'     => $port,
+    'dbdriver' => 'mysqli',
+    'dbprefix' => '',
+    'pconnect' => FALSE,
+    'db_debug' => (ENVIRONMENT !== 'production'),
+    'cache_on' => FALSE,
+    'cachedir' => '',
+    'char_set' => 'utf8',
+    'dbcollat' => 'utf8_general_ci',
+    'swap_pre' => '',
+    'encrypt' => FALSE,
+    'compress' => FALSE,
+    'stricton' => FALSE,
+    'failover' => array(),
+    'save_queries' => TRUE
+);

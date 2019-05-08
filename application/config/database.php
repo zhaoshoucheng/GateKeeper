@@ -129,3 +129,26 @@ $db['dmp_captain'] = array(
     'query_flag' => '0',         //查询标记
     'force_master' => FALSE,    //强制从主库查询
 );
+
+$db['signal_control'] = array(
+    'dsn'   => '',
+    'username' => 'signal_control_sig_con_rw',
+    'hostname' => '100.69.238.28',
+    'port' => 4050,
+    'password' => 'E52cMGSkiWsgK6T',
+    'database' => 'signal_control',
+    'dbdriver' => 'mysqli',
+    'dbprefix' => '',
+    'pconnect' => FALSE,
+    'db_debug' => (ENVIRONMENT !== 'production'),
+    'cache_on' => FALSE,
+    'cachedir' => '',
+    'char_set' => 'utf8',
+    'dbcollat' => 'utf8_general_ci',
+    'swap_pre' => '',
+    'encrypt' => FALSE,
+    'compress' => FALSE,
+    // 'stricton' => FALSE,
+    'failover' => array(),
+    'save_queries' => TRUE
+);
