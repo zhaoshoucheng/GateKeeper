@@ -45,6 +45,7 @@ class AdpArea_model extends CI_Model
         $res = $this->signalcontrol->select($select)
             ->from($this->tb)
             ->where('city_id', $cityId)
+            ->where('adaptive', 1)
             ->order_by('id', 'DESC')
             ->get();
 
