@@ -45,6 +45,13 @@ class AdpAreaService extends BaseService
         $cityId = $params['city_id'];
 
         $areaList = $this->adpArea_model->getAreasByCityId($cityId);
+        $areaList = array_map(function($item){
+            return [
+                'city_id' => $item['city_id'],
+                'id' => $item['id'],
+                'area_name' => $item['name'],
+            ];
+        }, $areaList);
 
         return [
             'list' => $areaList,
