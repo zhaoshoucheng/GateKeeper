@@ -24,6 +24,7 @@ class AsyncTask_Controller extends CI_Controller
             $this->_output();
             exit;
         }
+        $this->load->helper('async');
     }
 
     public function response($data, $errno = 0, $errmsg = '')
