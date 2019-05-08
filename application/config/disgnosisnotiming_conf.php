@@ -29,7 +29,7 @@ $config['flow_quota_key'] = [
         'name' => '自由流速度',
         'unit' => '千米/时',
     ],
-    'confidence_level' => [
+    'confidence' => [
         'name' => '置信度',
         'unit' => '',
     ],

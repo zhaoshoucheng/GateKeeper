@@ -174,7 +174,6 @@ trait ArrayRawMethod
 
     public function arrayMultisort($arraySortOrder = SORT_ASC, $arraySortFlags = SORT_REGULAR, ...$_)
     {
-        print_r($arraySortOrder);die();
         array_multisort($this->data, $arraySortOrder, $arraySortFlags, ...$_);
         return $this;
     }
