@@ -20,9 +20,9 @@ class DiagnosisNoTiming_model extends CI_Model
     /**
      * 获取单个路口时段粒度指标问题统计
      */
-    public function getJunctionQuotaTrend($logicJunctionId, $timePoint, $dates)
+    public function getJunctionQuotaTrend($cityID, $logicJunctionID, $timePoint, $dates)
     {
-        $list = $this->getJunctionQuotaPointCountStat($logicJunctionId, $timePoint, $dates);
+        $list = $this->getJunctionQuotaPointCountStat($cityID, $logicJunctionID, $timePoint, $dates);
         $confRule = $this->config->item('conf_rule');
         $fThreshold = $confRule['frequency_threshold'];
 
@@ -42,6 +42,17 @@ class DiagnosisNoTiming_model extends CI_Model
                 }
             }
         }
+
+        //数据排序
+        foreach ($alarmResult as $k1=>$v1){
+            $list = $v1['list'];
+            $timeSorter = [];
+            foreach ($v1['list'] as $k2=>$v2){
+                $timeSorter[$k2] = strtotime(date("Y-m-d")." ".$k2.":00");
+            }
+            array_multisort($timeSorter, SORT_NUMERIC, SORT_ASC, $list);
+            $alarmResult[$k1]['list'] = $list;
+        }
         return $alarmResult;
     }
 
@@ -54,18 +65,17 @@ class DiagnosisNoTiming_model extends CI_Model
      * ["spillover_index"]["16:30"] = 2
      *
      */
-    public function getJunctionQuotaPointCountStat($logicJunctionId, $timePoint, $dates)
+    public function getJunctionQuotaPointCountStat($cityID, $logicJunctionID, $timePoint, $dates)
     {
-        $list = $this->getJunctionQuotaList($logicJunctionId, $timePoint, $dates);
+        $list = $this->getJunctionQuotaList($cityID, $logicJunctionID, $timePoint, $dates);
         $juncQuestion = $this->config->item('junction_question');
         $quotaCount = [];
         foreach ($list as $item) {
             foreach (array_keys($juncQuestion) as $alarmField) {
                 if (!isset($quotaCount[$alarmField][$item["hour"]])) {
-                    $quotaCount[$alarmField][$item["hour"]] = $item[$alarmField];
-                } else {
-                    $quotaCount[$alarmField][$item["hour"]] += $item[$alarmField];
+                    $quotaCount[$alarmField][$item["hour"]] = 0;
                 }
+                $quotaCount[$alarmField][$item["hour"]] += $item[$alarmField];
             }
         }
         return $quotaCount;
@@ -75,19 +85,18 @@ class DiagnosisNoTiming_model extends CI_Model
     /**
      * 获取单个路口全部时段问题统计
      */
-    public function getJunctionQuotaCountStat($logicJunctionId, $timePoint, $dates)
+    public function getJunctionQuotaCountStat($cityID, $logicJunctionID, $timePoint, $dates)
     {
-        $list = $this->getJunctionQuotaList($logicJunctionId, $timePoint, $dates);
+        $list = $this->getJunctionQuotaList($cityID, $logicJunctionID, $timePoint, $dates);
         //聚合每个问题次数
         $juncQuestion = $this->config->item('junction_question');
         $quotaCount = [];
         foreach ($list as $item) {
             foreach (array_keys($juncQuestion) as $alarmField) {
                 if (!isset($quotaCount[$alarmField])) {
-                    $quotaCount[$alarmField] = $item[$alarmField];
-                } else {
-                    $quotaCount[$alarmField] += $item[$alarmField];
+                    $quotaCount[$alarmField] = 0;
                 }
+                $quotaCount[$alarmField] += $item[$alarmField];
             }
         }
         return $quotaCount;
@@ -100,17 +109,31 @@ class DiagnosisNoTiming_model extends CI_Model
      * @param $dates
      * @return mixed
      */
-    public function getJunctionQuotaList($logicJunctionId, $timePoint, $dates)
+    public function getJunctionQuotaList($cityID, $logicJunctionID, $timePoint, $dates)
     {
-        $qData = file_get_contents("junction_duration_v6.json");
-        $list = json_decode($qData, true);
-        $result = [];
-        if (!empty($list['hits'])) {
-            foreach ($list['hits'] as $item) {
-                $result[] = $item['_source']??[];
-            }
+        if(count($timePoint)==2){
+            unset($timePoint[1]);
         }
-        return $result;
+        $req = [
+            'city_id' => $cityID,
+            'logic_junction_id' => $logicJunctionID,
+            'time_points' => $timePoint,
+            'dates' => $dates,
+        ];
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetJunctionQuotaList', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            $result = [];
+            if (!empty($res['data']['hits'])) {
+                foreach ($res['data']['hits'] as $item) {
+                    $result[] = $item['_source']??[];
+                }
+            }
+            return $result;
+        } else {
+            return [];
+        }
     }
 
     /**
@@ -120,17 +143,31 @@ class DiagnosisNoTiming_model extends CI_Model
      * @param $dates
      * @return mixed
      */
-    public function getFlowQuotaList($logicJunctionId, $timePoint, $dates)
+    public function getFlowQuotaList($cityID, $logicJunctionID, $timePoint, $dates)
     {
-        $qData = file_get_contents("flow_duration_v6.json");
-        $list = json_decode($qData, true);
-        $result = [];
-        if (!empty($list['hits'])) {
-            foreach ($list['hits'] as $item) {
-                $result[] = $item['_source']??[];
-            }
+        if(count($timePoint)==2){
+            unset($timePoint[1]);
         }
-        return $result;
+        $req = [
+            'city_id' => $cityID,
+            'logic_junction_id' => $logicJunctionID,
+            'time_points' => $timePoint,
+            'dates' => $dates,
+        ];
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetFlowQuotaList', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            $result = [];
+            if (!empty($res['data']['hits'])) {
+                foreach ($res['data']['hits'] as $item) {
+                    $result[] = $item['_source']??[];
+                }
+            }
+            return $result;
+        } else {
+            return [];
+        }
     }
 
     /**
@@ -159,7 +196,7 @@ class DiagnosisNoTiming_model extends CI_Model
      */
     public function getMovementQuota($cityID, $logicJunctionID, $timePoint, $dates)
     {
-        $flowList = $this->getFlowQuotaList($logicJunctionID, $timePoint, $dates);
+        $flowList = $this->getFlowQuotaList($cityID, $logicJunctionID, $timePoint, $dates);
         //加权指标计算
         //计算权重值数据
         //queue_length权重为traj_count*stop_time_cycle
@@ -169,20 +206,18 @@ class DiagnosisNoTiming_model extends CI_Model
         //  10          |   1               |   512     |   15:00   |   10/(10*1+20*1+25*1) |   10/(10+20+25)
         //  20          |   1               |   512     |   15:30   |   20/(10*1+20*1+25*1) |   20/(10+20+25)
         //  25          |   1               |   512     |   16:00   |   25/(10*1+20*1+25*1) |   25/(10+20+25)
-        //  10          |   2               |   555     |   15:00   |   10/(10*2)           |   10/(20)
+        //  10          |   2               |   555     |   15:00   |   10/(10*2)           |   10/(10)
         $flowTrajSum = [];
         $flowTrajStoptimeSum = [];
         foreach ($flowList as $item) {
             if (!isset($flowTrajSum[$item['logic_flow_id']])) {
-                $flowTrajSum[$item['logic_flow_id']] = $item["traj_count"];
-            } else {
-                $flowTrajSum[$item['logic_flow_id']] += $item["traj_count"];
+                $flowTrajSum[$item['logic_flow_id']] = 0;
             }
             if (!isset($flowTrajStoptimeSum[$item['logic_flow_id']])) {
-                $flowTrajStoptimeSum[$item['logic_flow_id']] = $item["traj_count"] * $item["stop_time_cycle"];
-            } else {
-                $flowTrajStoptimeSum[$item['logic_flow_id']] += $item["traj_count"] * $item["stop_time_cycle"];
+                $flowTrajStoptimeSum[$item['logic_flow_id']] = 0;
             }
+            $flowTrajSum[$item['logic_flow_id']] += $item["traj_count"];
+            $flowTrajStoptimeSum[$item['logic_flow_id']] += $item["traj_count"] * $item["stop_time_cycle"];
         }
         $result = [];
         $quotaRound = $this->config->item('flow_quota_round');
@@ -191,18 +226,19 @@ class DiagnosisNoTiming_model extends CI_Model
                 if (in_array($quotaKey, ["logic_flow_id", "city_id", "dt", "logic_junction_id"])) {
                     continue;
                 }
-                if ($quotaKey == "queue_length") {
-                    $quotaValue = (($item["traj_count"] * $item["stop_time_cycle"]) / $flowTrajStoptimeSum[$item["logic_flow_id"]]) * $quotaValue;
-                } else {
-                    $quotaValue = ($item["traj_count"] / $flowTrajSum[$item["logic_flow_id"]]) * $quotaValue;
+                if($quotaValue>0){
+                    if ($quotaKey == "queue_length") {
+                        $quotaValue = (($item["traj_count"] * $item["stop_time_cycle"]) / $flowTrajStoptimeSum[$item["logic_flow_id"]]) * $quotaValue;
+                    } else {
+                        $quotaValue = ($item["traj_count"] / $flowTrajSum[$item["logic_flow_id"]]) * $quotaValue;
+                    }
                 }
                 $quotaValue = isset($quotaRound[$quotaKey]['round'])
                     ? $quotaRound[$quotaKey]['round']($quotaValue) : $quotaValue;
                 if (!isset($result['logic_flow_id'][$quotaKey])) {
-                    $result[$item['logic_flow_id']][$quotaKey] = $quotaValue;
-                } else {
-                    $result[$item['logic_flow_id']][$quotaKey] += $quotaValue;
+                    $result[$item['logic_flow_id']][$quotaKey] = 0;
                 }
+                $result[$item['logic_flow_id']][$quotaKey] += $quotaValue;
             }
         }
 
@@ -233,7 +269,13 @@ class DiagnosisNoTiming_model extends CI_Model
         return $movements;
     }
 
-    public function getJunctionMapData($data)
+    /**
+     * 获取路口所有方向信息(相位、方向、坐标)
+     * @param array $data 请求参数
+     * @param int   $uniqueDirection 是否唯一方向,只获取一段方向
+     * @return array
+     */
+    public function getJunctionMapData($data,$uniqueDirection)
     {
         $logicJunctionID = $data['junction_id'];
         $cityID = $data['city_id'];
@@ -247,11 +289,29 @@ class DiagnosisNoTiming_model extends CI_Model
         $flowPhases = array_column($flowsMovement,"phase_name","logic_flow_id");
 
         // 路网相位信息
+        $uniqueDirections = [];
         $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionID, array_keys($flowPhases));
         foreach ($ret as $k => $v) {
             if (!empty($flowPhases[$v['logic_flow_id']])) {
+                $phaseWord = $flowPhases[$v['logic_flow_id']];
+                if($uniqueDirection){
+                    $firstWord = mb_substr($flowPhases[$v['logic_flow_id']],0,1);
+                    if(in_array($firstWord,["东","西","南","北"])){
+                        $phaseWord = $firstWord;
+                    }
+                    if(mb_strlen($flowPhases[$v['logic_flow_id']])>1){
+                        $secondWord = mb_substr($flowPhases[$v['logic_flow_id']],1,1);
+                        if(in_array($secondWord,["东","西","南","北"]) && !in_array($secondWord,$uniqueDirections)){
+                            $phaseWord = $secondWord;
+                        }
+                    }
+                    if(in_array($phaseWord,$uniqueDirections)){
+                        continue;
+                    }
+                }
+                $uniqueDirections[] = $phaseWord;
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
-                $result['dataList'][$k]['flow_label'] = $flowPhases[$v['logic_flow_id']];
+                $result['dataList'][$k]['flow_label'] = $phaseWord;
                 $result['dataList'][$k]['lng'] = $v['flows'][0][0];
                 $result['dataList'][$k]['lat'] = $v['flows'][0][1];
             }
@@ -278,16 +338,16 @@ class DiagnosisNoTiming_model extends CI_Model
      * @param array $dates
      * @return array
      */
-    public function getJunctionAlarmList($logicJunctionId, $timePoint, $dates)
+    public function getJunctionAlarmList($cityID, $logicJunctionID, $timePoint, $dates)
     {
         $confRule = $this->config->item('conf_rule');
         $juncQuestion = $this->config->item('junction_question');
-        $totalCount = count($timePoint) * count($dates);
-        $quotaCount = $this->getJunctionQuotaCountStat($logicJunctionId, $timePoint, $dates);
+        $totalCount = (count($timePoint)-1) * count($dates);
+        $quotaCount = $this->getJunctionQuotaCountStat($cityID, $logicJunctionID, $timePoint, $dates);
         $alarmResult = [];
         $fThreshold = $confRule['frequency_threshold'];
         foreach ($quotaCount as $quota => $count) {
-            if ($count / $totalCount > $fThreshold) {
+            if ($totalCount>0 && $count>0 && ($count/$totalCount>$fThreshold)) {
                 $alarmResult[$quota] = $juncQuestion[$quota];
             }
         }

@@ -76,6 +76,26 @@ class Waymap_model extends CI_Model
     }
 
     /**
+     * 根据日期获取路网版本
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getDateVersion($dates) {
+        $data = [
+                    'date' => implode(',', $dates),
+                    'token'     => $this->config->item('waymap_token'),
+                    'user_id'   => $this->config->item('waymap_userid'),
+                ];
+        $res = httpPOST($this->config->item('waymap_interface') . '/signal-map/map/getDateVersion', $data);
+        $res = json_decode($res, true);
+        if (isset($res['data'])) {
+            return $res['data'];
+        }
+        return [];
+    }
+
+    /**
      * 路网数据接口统一调用 Get
      *
      * @param string $url     请求的地址
