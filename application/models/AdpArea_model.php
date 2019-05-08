@@ -193,8 +193,8 @@ class AdpArea_model extends CI_Model
      */
     public function getAreaJunctions($areaId, $select = '*')
     {
-        $res = $this->db->select($select)
-            ->from('area_junction_relate')
+        $res = $this->signalcontrol->select($select)
+            ->from('junction_area_relate')
             ->where('area_id', $areaId)
             ->get();
 
