@@ -107,12 +107,6 @@ if ($development == 2) {
     $waymap_port = '8001';
     // 路网接口前缀
     $waymap_ext = '';
-    // 路网接口服务器地址
-    $waymap_server = '100.69.238.11';
-    // 路网接口服务器端口
-    $waymap_port = '8000';
-    // 路网接口前缀
-    $waymap_ext = '/its';
 
     // 配时接口服务器地址
     $timing_server = '100.90.164.31';
@@ -120,13 +114,6 @@ if ($development == 2) {
     $timing_port = '8031';
     // 配时接口前缀
     $timing_ext = '/signal-timing';
-
-    // 配时接口服务器地址
-    $timing_server = '100.69.238.11';
-    // 配时接口服务器端口
-    $timing_port = '8000';
-    // 配时接口前缀
-    $timing_ext = '/its/signal-mis';
 
     $config['redis'] = [
         'host' => '127.0.0.1',
@@ -154,12 +141,6 @@ if ($development == 2) {
     // new timing
     $signal_control_server = '100.90.164.31';
     $signal_control_port   = '8031';
-    $signal_control_ext    = '/signal-timing';
-
-    //临时用线上接口
-    // new timing
-    $signal_control_server = '10.88.128.149';
-    $signal_control_port   = '30516';
     $signal_control_ext    = '/signal-timing';
 
     // xmmtrace
