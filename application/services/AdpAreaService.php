@@ -158,7 +158,7 @@ class AdpAreaService extends BaseService
     {
         $areaId = $params['area_id'];
 
-        return $this->area_model->deleteArea($areaId);
+        return $this->adpArea_model->deleteArea($areaId);
     }
 
     /**

@@ -212,8 +212,7 @@ class AdpArea_model extends CI_Model
     public function deleteArea($areaId)
     {
         return $this->db->where('id', $areaId)
-            ->set('delete_at', date('Y-m-d H:i:s'))
-            ->update($this->tb);
+            ->delete();
     }
 
     /**
