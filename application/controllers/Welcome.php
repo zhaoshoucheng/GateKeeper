@@ -93,7 +93,7 @@ class Welcome extends CI_Controller
     {
         $scroll_id = isset($_GET['scroll_id']) ? $_GET['scroll_id'] : "";
         $hosts = [
-            '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',         // IP + Port
+            '1819:v19NJfhpxfL0pit@10.88.128.149:30963',         // IP + Port
         ];
         $client = Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
         $json = '{"from":0,"size":1,"query":{"bool":{"must":{"bool":{"must":[{"match":{"city_id":{"query":12,"type":"phrase"}}},{"match":{"date":{"query":"2018-11-25","type":"phrase"}}}]}}}},"sort":[{"timestamp":{"order":"desc"}}]}';

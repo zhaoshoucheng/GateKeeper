@@ -85,6 +85,13 @@ class Arterialgreenwave extends MY_Controller
             //return $this->getGreenWaveOptPlanOld();
         }
         $result = $this->traj_model->getGreenWaveOptPlan($params);
+        if(!empty($result['dataList'])){
+            foreach ($result['dataList'] as $key=>$item){
+                $result['dataList'][$key]["backward_green"] =
+                    !empty($result['dataList'][$key]["backward_green"]) ?
+                        $result['dataList'][$key]["backward_green"] : [];
+            }
+        }
         return $this->response($result);
     }
 

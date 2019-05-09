@@ -13,6 +13,7 @@ class AsyncTask_Controller extends CI_Controller
 
     public function __construct(){
         parent::__construct();
+        $this->load->helper('async');
         try{
             $this->authToken();
         }catch (\Exception $e){
@@ -24,7 +25,6 @@ class AsyncTask_Controller extends CI_Controller
             $this->_output();
             exit;
         }
-        $this->load->helper('async');
     }
 
     public function response($data, $errno = 0, $errmsg = '')
@@ -128,6 +128,7 @@ class AsyncTask_Controller extends CI_Controller
         //优先验证签名==>其次验证白名单
         if(!empty($params['current_time']) && !empty($params['sig'])){
             $salt_token = $salt_token;
+            $this->load->helper('async');
             if(!checkSign($params,$salt_token)){
                 throw new \Exception('no_permission_checkSign');
             }

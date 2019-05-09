@@ -73,7 +73,7 @@ if ($development == 2) {
 
     // 报警es接口
     $alarm_es_interface = [
-        '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
+        '1819:v19NJfhpxfL0pit@10.88.128.149:30963',
     ];
     // 报警ES索引
     $alarm_es_index = [
@@ -154,7 +154,7 @@ if ($development == 2) {
 
     // 报警es
     $alarm_es_interface = [
-        '1819:v19NJfhpxfL0pit@100.69.238.11:8000/arius',
+        '1819:v19NJfhpxfL0pit@10.88.128.149:30963',
     ];
     // 报警ES索引
     $alarm_es_index = [
