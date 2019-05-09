@@ -198,8 +198,8 @@ class AdpAreaService extends BaseService
             return round($item, 6);
         };
 
-        $centerLat = round(array_sum($lngs) / count($lngs));
-        $centerLng = round(array_sum($lats) / count($lats));
+        $centerLat = round(array_sum($lngs) / count($lngs), 6);
+        $centerLng = round(array_sum($lats) / count($lats), 6);
 
         return [
             'center_lat' => $centerLat,
