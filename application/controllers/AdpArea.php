@@ -118,21 +118,22 @@ class AdpArea extends MY_Controller
         $this->response($data);
     }
 
-    /**
-     * 获取城市全部区域的详细信息
-     * @param $params['city_id'] int 城市ID
-     * @throws Exception
-     */
-    public function getAllAreaJunctionList()
-    {
-        $params = $this->input->post(null, true);
+    // 不知道干嘛用的，先不做
+    // /**
+    //  * 获取城市全部区域的详细信息
+    //  * @param $params['city_id'] int 城市ID
+    //  * @throws Exception
+    //  */
+    // public function getAllAreaJunctionList()
+    // {
+    //     $params = $this->input->post(null, true);
 
-        $this->validate([
-            'city_id' => 'required|is_natural_no_zero',
-        ]);
+    //     $this->validate([
+    //         'city_id' => 'required|is_natural_no_zero',
+    //     ]);
 
-        $data = $this->areaService->getCityAreaDetail($params);
+    //     $data = $this->areaService->getCityAreaDetail($params);
 
-        $this->response($data);
-    }
+    //     $this->response($data);
+    // }
 }

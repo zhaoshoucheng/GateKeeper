@@ -202,6 +202,23 @@ class AdpArea_model extends CI_Model
     }
 
     /**
+     * 从junction_ids获取junction信息
+     *
+     * @param $junction_ids
+     * @param string $select
+     * @return mixed
+     */
+    public function getJunctions($areaId, $select = '*')
+    {
+        $res = $this->signalcontrol->select($select)
+            ->from('junction')
+            ->where_in('id', $junction_ids)
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
+
+    /**
      * 删除区域
      *
      * @param $areaId
