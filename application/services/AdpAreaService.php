@@ -171,7 +171,6 @@ class AdpAreaService extends BaseService
      */
     public function getAreaDetail($params)
     {
-        //$cityId = $params['city_id'];
         $areaId = $params['area_id'];
 
         $areaInfo = $this->adpArea_model->getAreaByAreaId($areaId);
@@ -181,28 +180,32 @@ class AdpAreaService extends BaseService
         }
 
         $areaJunctionList = $this->adpArea_model->getAreaJunctions($areaId);
+        $junction_ids = array_column($areaJunctionList, 'junction_id');
 
-        $areaJunctionCollection = Collection::make($areaJunctionList);
+        $areaJunctionList = $this->adpArea_model->getJunctions($junction_ids);
+        $logic_junction_ids = array_map(function($item){
+            return $item['logic_id'];
+        },$areaJunctionList);
+
+        $junctionInfoList = $this->waymap_model->getJunctionInfo($logic_junction_ids);
+
+
+        $lngs = array_column($junctionInfoList, 'lng');
+        $lats = array_column($junctionInfoList, 'lat');
 
         // 取小数后6位
         $round = function ($item) {
             return round($item, 6);
         };
 
-        $junctionIds = $areaJunctionCollection->implode('junction_id', ',');
-
-        $junctionInfoList = $this->waymap_model->getJunctionInfo($junctionIds);
-
-        $junctionInfoCollection = Collection::make($junctionInfoList);
-
-        $centerLat = $junctionInfoCollection->avg('lat', $round);
-        $centerLng = $junctionInfoCollection->avg('lng', $round);
+        $centerLat = round(array_sum($lngs) / count($lngs));
+        $centerLng = round(array_sum($lats) / count($lats));
 
         return [
             'center_lat' => $centerLat,
             'center_lng' => $centerLng,
             'area_id' => $areaId,
-            'area_name' => $areaInfo['area_name'] ?? '',
+            'area_name' => $areaInfo['name'] ?? '',
             'junction_list' => $junctionInfoList,
         ];
     }
