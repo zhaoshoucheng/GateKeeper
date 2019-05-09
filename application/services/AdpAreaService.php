@@ -187,7 +187,7 @@ class AdpAreaService extends BaseService
             return $item['logic_id'];
         },$areaJunctionList);
 
-        $junctionInfoList = $this->waymap_model->getJunctionInfo($logic_junction_ids);
+        $junctionInfoList = $this->waymap_model->getJunctionInfo(implode(',', $logic_junction_ids));
 
 
         $lngs = array_column($junctionInfoList, 'lng');
