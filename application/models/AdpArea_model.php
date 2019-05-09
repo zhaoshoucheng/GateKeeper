@@ -208,7 +208,7 @@ class AdpArea_model extends CI_Model
      * @param string $select
      * @return mixed
      */
-    public function getJunctions($areaId, $select = '*')
+    public function getJunctions($junction_ids, $select = '*')
     {
         $res = $this->signalcontrol->select($select)
             ->from('junction')
