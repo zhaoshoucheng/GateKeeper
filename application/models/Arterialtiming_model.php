@@ -229,31 +229,63 @@ class Arterialtiming_model extends CI_Model
 
     //获取选中路口的flowIds
     public function getJunctionFlowInfos($cityID,$version,$selectJunctions){
-        //去掉首尾路口请求原接口数据
-        $result = $this->getJunctionInfos($cityID,$version,array_slice($selectJunctions,1,count($selectJunctions)-2));
-        //追加flow信息
-        $forwardInJunctionID = $backwardOutJunctionID = $selectJunctions[0];
-        $secondJunctionID = $selectJunctions[1];
-        $thirdJunctionID = $selectJunctions[2] ?? "";
-        $lastButTwoJunctionID = $selectJunctions[count($selectJunctions)-3] ?? "";
-        $lastPreJunctionID = $selectJunctions[count($selectJunctions)-2];
-        $forwardOutJunctionID = $backwardInJunctionID = $selectJunctions[count($selectJunctions)-1];
-
         //从db中获取进出路口
-        $forwardInfo = $this->road_model->getRoadsByRoadID(md5(implode(",",array_slice($selectJunctions,1,count($selectJunctions)-2))));
+        $forwardJunctions = $selectJunctions;
+        $backwardJunctions = array_reverse($selectJunctions);
+        $forwardInfo = $this->road_model->getRoadsByJunctionIDs(implode(",",$forwardJunctions));
         if(!empty($forwardInfo["forward_in_junctionid"])){
-            $forwardInJunctionID = $forwardInfo["forward_in_junctionid"];
-            $backwardOutJunctionID = $forwardInfo["backward_out_junctionid"];
-            $forwardOutJunctionID = $forwardInfo["forward_out_junctionid"];
-            $backwardInJunctionID = $forwardInfo["backward_in_junctionid"];
+            $forwardJunctions[0] = $forwardInfo["forward_in_junctionid"];
+            $backwardJunctions[count($selectJunctions)-1] = $forwardInfo["backward_out_junctionid"];
+            $forwardJunctions[count($selectJunctions)-1] = $forwardInfo["forward_out_junctionid"];
+            $backwardJunctions[0] = $forwardInfo["backward_in_junctionid"];
         }
-        $backwardInfo = $this->road_model->getRoadsByRoadID(md5(implode(",",array_reverse(array_slice($selectJunctions,1,count($selectJunctions)-2)))));
+        $backwardInfo = $this->road_model->getRoadsByJunctionIDs(implode(",",$backwardJunctions));
         if(!empty($backwardInfo["forward_in_junctionid"])){
-            $forwardInJunctionID = $backwardInfo["backward_in_junctionid"];
-            $backwardOutJunctionID = $backwardInfo["forward_out_junctionid"];
-            $forwardOutJunctionID = $backwardInfo["backward_out_junctionid"];
-            $backwardInJunctionID = $backwardInfo["forward_in_junctionid"];
+            $forwardJunctions[0] = $forwardInfo["backward_in_junctionid"];
+            $backwardJunctions[count($selectJunctions)-1] = $forwardInfo["forward_out_junctionid"];
+            $forwardJunctions[count($selectJunctions)-1] = $forwardInfo["backward_out_junctionid"];
+            $backwardJunctions[0] = $forwardInfo["forward_in_junctionid"];
         }
+
+        //去掉首尾路口请求原接口数据
+        $forwardResult = $this->getJunctionInfos($cityID,$version,$forwardJunctions);
+        $junctionsInfo = [];
+        $forwardPathFlows = [];
+        $backwardPathFlows = [];
+        if(!empty($forwardResult['junctions_info'])){
+            $junctionsInfo = $forwardResult['junctions_info'];
+        }
+        if(!empty($forwardResult['forward_path_flows'])){
+            $forwardPathFlows = $forwardResult['forward_path_flows'];
+        }
+        if(!empty($forwardResult['backward_path_flows'])){
+            $backwardPathFlows = $forwardResult['backward_path_flows'];
+        }
+        //正向路口 和 反向路口 不相同 时
+        if($forwardJunctions!=array_reverse($backwardJunctions)){
+            $backwardResult = $this->getJunctionInfos($cityID,$version,$backwardJunctions);
+            if(!empty($backwardResult['forward_path_flows'])){
+                $backwardPathFlows = $forwardResult['forward_path_flows'];
+            }
+
+            //反向第一个路口对应正向最后一个路口
+            $backwardPathFlows[0]['start_junc_id'] = $forwardJunctions[count($forwardJunctions)-1];
+
+            //反向最后一个路口对应正向第一个路口
+            $backwardPathFlows[count($forwardJunctions)-1]['end_junc_id'] = $forwardJunctions[0];
+            $backwardPathFlows[count($forwardJunctions)-1]['logic_flow']['logic_junction_id'] = $forwardJunctions[0];
+
+            //直接使用正向路径长度
+            $backwardPathFlows[0]['length'] = $forwardPathFlows[count($forwardJunctions)-1]['length'];
+            $backwardPathFlows[count($forwardJunctions)-1]['length'] = $forwardPathFlows[0]['length'];
+        }
+
+        $result['junctions_info'] = $junctionsInfo;
+        $result['forward_path_flows'] = $forwardPathFlows;
+        $result['backward_path_flows'] = $backwardPathFlows;
+        return $result;
+
+
 
         //正向追加第一个路口
         $firstForwardFlows = [];
