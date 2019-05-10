@@ -81,7 +81,7 @@ class AdpAreaService extends BaseService
             'name' => $areaName,
             'city_id' => $cityId,
             'status' => 0,
-            'adpArea_model' => 1,
+            'adaptive' => 1,
             'is_upload' => 0,
         ];
         $areaId = $this->adpArea_model->insertArea($data);
