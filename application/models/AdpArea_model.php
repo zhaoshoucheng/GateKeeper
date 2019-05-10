@@ -277,11 +277,8 @@ class AdpArea_model extends CI_Model
         if(!is_null($areaId)) {
             $this->signalcontrol->where('id != ', $areaId);
         }
-        if(!empty($this->signalcontrol->get()) && method_exists($this->signalcontrol->get(),"num_rows")){
-            return $this->signalcontrol->get()->num_rows() === 0;
-        }else{
-            return true;
-        }
+
+        return $this->signalcontrol->get()->num_rows() === 0;
     }
 
     public function getJunctionByLogicId($logic_junction_id) {
