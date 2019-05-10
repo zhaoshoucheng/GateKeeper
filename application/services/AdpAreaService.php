@@ -222,9 +222,14 @@ class AdpAreaService extends BaseService
         $shouldCreated = array_diff($newJunctionIds, $oldJunctionIds);
 
         // only delete map
-        $this->adpArea_model->deleteAreaJunctions($area_id, $shouldDeleted);
+        if (!empty($shouldDeleted)) {
+            $this->adpArea_model->deleteAreaJunctions($area_id, $shouldDeleted);
+        }
         // insert map junction flow
-        return $this->insertAreaJunctions($area_id, $shouldCreated);
+        if (!empty($shouldCreated)) {
+            return $this->insertAreaJunctions($area_id, $shouldCreated);
+        }
+        return true;
     }
 
     private function insertAreaJunctions($area_id, $shouldCreated) {
