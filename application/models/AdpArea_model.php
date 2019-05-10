@@ -235,19 +235,19 @@ class AdpArea_model extends CI_Model
             ->delete($this->tb);
     }
 
-    // /**
-    //  * 删除区域路口关联
-    //  *
-    //  * @param $areaId
-    //  * @param $junctionIds
-    //  * @return null
-    //  */
-    // public function deleteAreaJunctions($areaId, $junctionIds)
-    // {
-    //     return $this->db->where('area_id', $areaId)
-    //         ->where_in('junction_id', $junctionIds)
-    //         ->delete('junction_area_relate');
-    // }
+    /**
+     * 删除区域路口关联
+     *
+     * @param $areaId
+     * @param $junctionIds
+     * @return null
+     */
+    public function deleteAreaJunctions($areaId, $junctionIds)
+    {
+        return $this->db->where('area_id', $areaId)
+            ->where_in('junction_id', $junctionIds)
+            ->delete('junction_area_relate');
+    }
 
     // /**
     //  * 根据区域ID集合获取
