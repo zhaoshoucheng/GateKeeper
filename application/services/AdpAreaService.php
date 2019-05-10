@@ -271,7 +271,9 @@ class AdpAreaService extends BaseService
                 }
             }
             $this->adpArea_model->insertRelates($relates);
-            $this->adpArea_model->insertFlows($flows);
+            if (!empty($flows)) {
+                $this->adpArea_model->insertFlows($flows);
+            }
         } catch (Exception $e) {
             return false;
         }
