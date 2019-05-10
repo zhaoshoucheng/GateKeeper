@@ -244,7 +244,7 @@ class AdpArea_model extends CI_Model
      */
     public function deleteAreaJunctions($areaId, $junctionIds)
     {
-        return $this->db->where('area_id', $areaId)
+        return $this->signalcontrol->where('area_id', $areaId)
             ->where_in('junction_id', $junctionIds)
             ->delete('junction_area_relate');
     }
