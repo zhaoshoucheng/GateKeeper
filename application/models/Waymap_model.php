@@ -624,7 +624,7 @@ class Waymap_model extends CI_Model
         return $res['simple_main_node_id'] ?? '';
     }
 
-    public function flowsByJunction($logic_junction_id,$version){
+    public function flowsByJunction($logic_junction_id, $version){
         $data = [
             'logic_junction_id'   => $logic_junction_id,
             'version' => $version,
