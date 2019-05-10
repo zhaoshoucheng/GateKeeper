@@ -84,7 +84,7 @@ class AdpAreaService extends BaseService
             'adaptive' => 1,
             'is_upload' => 0,
         ];
-        $areaId = $this->adpArea_model->insertArea($data);
+        $area_id = $this->adpArea_model->insertArea($data);
 
         // 创建区域路口关联
         $bRet = $this->updateAreaJunction($area_id, $junctionIds);
@@ -92,7 +92,7 @@ class AdpAreaService extends BaseService
             throw new \Exception('插入区域路口失败', ERR_PARAMETERS);
         }
 
-        return $areaId;
+        return $area_id;
     }
 
     /**
