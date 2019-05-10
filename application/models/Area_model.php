@@ -256,7 +256,7 @@ class Area_model extends CI_Model
             ->from($this->tb)
             ->where('area_name', $areaName)
             ->where('city_id', $cityId)
-            ->where('delete_at != ', '1970-01-01 00:00:00');
+            ->where('delete_at = ', '1970-01-01 00:00:00');
 
         if(!is_null($areaId)) {
             $this->db->where('area_id != ', $areaId);
