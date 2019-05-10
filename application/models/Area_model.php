@@ -259,7 +259,7 @@ class Area_model extends CI_Model
             ->where('delete_at = ', '1970-01-01 00:00:00');
 
         if(!is_null($areaId)) {
-            $this->db->where('area_id != ', $areaId);
+            $this->db->where('id != ', $areaId);
         }
         return $this->db->get()->num_rows() === 0;
     }
