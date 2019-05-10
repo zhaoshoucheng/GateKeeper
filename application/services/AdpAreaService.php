@@ -200,13 +200,13 @@ class AdpAreaService extends BaseService
     }
 
     private function updateAreaJunction($area_id, $newJunctionIds) {
-        $areaInfo = $this->adpArea_model->getAreaByAreaId($areaId);
+        $areaInfo = $this->adpArea_model->getAreaByAreaId($area_id);
 
         if (!$areaInfo) {
             throw new \Exception(' 目标区域不存在', ERR_PARAMETERS);
         }
 
-        $areaJunctionList = $this->adpArea_model->getAreaJunctions($areaId);
+        $areaJunctionList = $this->adpArea_model->getAreaJunctions($area_id);
         $junction_ids = array_column($areaJunctionList, 'junction_id');
 
         $areaJunctionList = $this->adpArea_model->getJunctions($junction_ids);
@@ -218,9 +218,9 @@ class AdpAreaService extends BaseService
         $shouldCreated = array_diff($newJunctionIds, $oldJunctionIds);
 
         // only delete map
-        $this->adpArea_model->deleteAreaJunctions($areaId, $shouldDeleted);
+        $this->adpArea_model->deleteAreaJunctions($area_id, $shouldDeleted);
         // insert map junction flow
-        return $this->insertAreaJunctions($areaId, $shouldCreated);
+        return $this->insertAreaJunctions($area_id, $shouldCreated);
     }
 
     private function insertAreaJunctions($area_id, $shouldCreated) {
