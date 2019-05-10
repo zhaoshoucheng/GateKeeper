@@ -14,7 +14,7 @@ class AdpArea_model extends CI_Model
     /**
      * @var \CI_DB_query_builder
      */
-    protected $db;
+    // protected $db;
 
     /**
      * Area_model constructor.
@@ -32,6 +32,17 @@ class AdpArea_model extends CI_Model
             throw new \Exception('数据表不存在', ERR_DATABASE);
         }
     }
+
+    // 事务
+    // public function begin() {
+    //     $this->signalcontrol->trans_begin()
+    // }
+    // public function commit() {
+    //     $this->signalcontrol->trans_commit()
+    // }
+    // public function rollback() {
+    //     $this->signalcontrol->trans_rollback()
+    // }
 
     /**
      * 根据城市ID获取区域列表
@@ -120,12 +131,9 @@ class AdpArea_model extends CI_Model
      */
     public function insertArea($data)
     {
-        $data['create_at'] = $data['create_at'] ?? date('Y-m-d H:i:s');
-        $data['update_at'] = $data['update_at'] ?? date('Y-m-d H:i:s');
+        $this->signalcontrol->insert($this->tb, $data);
 
-        $this->db->insert($this->tb, $data);
-
-        return $this->db->insert_id();
+        return $this->signalcontrol->insert_id();
     }
 
     /**
@@ -177,10 +185,7 @@ class AdpArea_model extends CI_Model
      */
     public function updateArea($areaId, $data)
     {
-        $data['update_at'] = $data['update_at'] ?? date('Y-m-d H:i:s');
-
         return $this->db->where('id', $areaId)
-            ->where('delete_at', '1970-01-01 00:00:00')
             ->update($this->tb, $data);
     }
 
@@ -241,9 +246,7 @@ class AdpArea_model extends CI_Model
     {
         return $this->db->where('area_id', $areaId)
             ->where_in('junction_id', $junctionIds)
-            ->where('delete_at', '1970-01-01 00:00:00')
-            ->set('delete_at', date('Y-m-d H:i:s'))
-            ->update('area_junction_relation');
+            ->delete('junction_area_relate');
     }
 
     /**
@@ -266,19 +269,58 @@ class AdpArea_model extends CI_Model
 
     public function areaNameIsUnique($areaName, $cityId, $areaId = null)
     {
-        $this->db->limit(1)
+        $this->signalcontrol->limit(1)
             ->from($this->tb)
-            ->where('area_name', $areaName)
-            ->where('city_id', $cityId)
-            ->where('delete_at != ', '1970-01-01 00:00:00');
+            ->where('name', $areaName)
+            ->where('city_id', $cityId);
 
         if(!is_null($areaId)) {
-            $this->db->where('area_id != ', $areaId);
+            $this->db->where('id != ', $areaId);
         }
         if(!empty($this->db->get()) && method_exists($this->db->get(),"num_rows")){
             return $this->db->get()->num_rows() === 0;
         }else{
             return true;
         }
+    }
+
+    public function getJunctionByLogicId($logic_junction_id) {
+        $query = $this->signalcontrol->select('*')->from('junction')->where('logic_junction_id', $logic_junction_id)->get();
+        return $query->result_array();
+    }
+
+    /**
+     * 插入路口
+     *
+     * @param $data
+     * @return mixed 插入的ID
+     */
+    public function insertJunction($data)
+    {
+        $this->signalcontrol->insert('junction', $data);
+
+        return $this->signalcontrol->insert_id();
+    }
+
+    /**
+     * 批量插入relate
+     *
+     * @param $data
+     * @return mixed 插入的ID
+     */
+    public function insertRelates($data)
+    {
+        return $this->signalcontrol->insert_batch('junction_area_relate', $data);
+    }
+
+    /**
+     * 批量插入flow
+     *
+     * @param $data
+     * @return mixed 插入的ID
+     */
+    public function insertFlows($data)
+    {
+        return $this->signalcontrol->insert_batch('flow', $data);
     }
 }
