@@ -264,7 +264,7 @@ class AdpAreaService extends BaseService
                         'area_id' => $area_id,
                     ];
                     $junctionFlows = $this->waymap_model->flowsByJunction($logic_junction_id, $version);
-                    $junctionFlows = array_map(function($item){
+                    $junctionFlows = array_map(function($item) use($id, $version, $logic_junction_id){
                         return [
                             'junction_id' => $id,
                             'map_version' => $version,
