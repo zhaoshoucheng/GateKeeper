@@ -120,7 +120,7 @@ class AdpAreaService extends BaseService
         $cityId      = $areaInfo['city_id'];
 
         $data = [
-            'area_name' => $areaName,
+            'name' => $areaName,
         ];
 
         if (!$this->adpArea_model->areaNameIsUnique($areaName, $cityId, $areaId)) {
