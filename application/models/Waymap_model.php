@@ -558,4 +558,62 @@ class Waymap_model extends CI_Model
 
         return $this->get($url, $data);
     }
+
+    // 单个路口详情
+    public function getJunctionDetail($logic_junction_id){
+        $data = [
+                    'logic_id'   => $logic_junction_id,
+                    // 'token'     => $this->config->item('waymap_token'),
+                    // 'user_id'   => $this->config->item('waymap_userid'),
+                ];
+
+
+        $url   = $this->waymap_interface . '/signal-map/map/detail';
+        $res = $this->get($url, $data);
+        return $res;
+    }
+
+    // 单个路口flag version
+    public function getJunctionVersion($logic_junction_id){
+        $data = [
+                    'logic_junction_ids'   => $logic_junction_id,
+                    // 'token'     => $this->config->item('waymap_token'),
+                    // 'user_id'   => $this->config->item('waymap_userid'),
+                ];
+
+        $url   = $this->waymap_interface . '/signal-map/map/getFlagVersions';
+        $res = $this->get($url, $data);
+        return $res[$logic_junction_id]['default_flag_version'] ?? '';
+    }
+
+    // 单个路口main node id
+    public function getLogicMaps(array $logic_ids, $version){
+        $data = [
+            'logic_junction_ids' => implode(",", $logic_ids),
+            'version' => $version,
+            // 'token' => $this->config->item('waymap_token'),
+            // 'user_id'   => $this->config->item('waymap_userid'),
+        ];
+
+        $url   = $this->waymap_interface . '/signal-map/map/getLogicMaps';
+        $res = $this->get($url, $data);
+        if (count($res) != 1) {
+            return '';
+        }
+        $res = $res[0];
+        return $res['simple_main_node_id'] ?? '';
+    }
+
+    public function flowsByJunction($logic_junction_id,$version){
+        $data = [
+            'logic_junction_id'   => $logic_junction_id,
+            'version' => $version,
+            // 'token'     => $this->config->item('waymap_token'),
+            // 'user_id'   => $this->config->item('waymap_userid'),
+        ];
+
+        $url   = $this->waymap_interface . '/signal-map/mapFlow/flowsByJunction';
+        $res = $this->get($url, $data);
+        return $res;
+    }
 }
