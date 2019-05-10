@@ -128,6 +128,13 @@ class AdpAreaService extends BaseService
         }
 
         // 更新区域信息
+        $res = $this->area_model->updateArea($areaId, $data);
+
+        if (!$res) {
+            throw new \Exception('更新区域失败', ERR_PARAMETERS);
+        }
+
+        // 更新区域路口
         $bRet = $this->updateAreaJunction($areaId, $junctionIds);
         if ($bRet === false) {
             throw new \Exception('插入区域路口失败', ERR_PARAMETERS);
