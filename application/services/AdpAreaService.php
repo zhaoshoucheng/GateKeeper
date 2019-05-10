@@ -223,7 +223,8 @@ class AdpAreaService extends BaseService
 
         // only delete map
         if (!empty($shouldDeleted)) {
-            $this->adpArea_model->deleteAreaJunctions($area_id, $shouldDeleted);
+            $t = $this->adpArea_model->getJunctionsByLogic($shouldDeleted);
+            $this->adpArea_model->deleteAreaJunctions($area_id, $t);
         }
         // insert map junction flow
         if (!empty($shouldCreated)) {
