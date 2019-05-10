@@ -240,7 +240,7 @@ class AdpAreaService extends BaseService
                 $junction_info = $this->adpArea_model->getJunctionByLogicId($logic_junction_id);
                 if (! empty($junction_info)) {
                     // 已存在，只更新relate
-                    $id = $junction_info['id'];
+                    $id = $junction_info[0]['id'];
                     $relates[] = [
                         'junction_id' => $id,
                         'area_id' => $area_id,
