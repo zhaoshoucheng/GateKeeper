@@ -128,7 +128,7 @@ class AdpAreaService extends BaseService
         }
 
         // 更新区域信息
-        $bRet = $this->updateAreaJunction($area_id, $junctionIds);
+        $bRet = $this->updateAreaJunction($areaId, $junctionIds);
         if ($bRet === false) {
             throw new \Exception('插入区域路口失败', ERR_PARAMETERS);
         }
