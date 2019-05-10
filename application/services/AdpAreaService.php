@@ -209,10 +209,14 @@ class AdpAreaService extends BaseService
         $areaJunctionList = $this->adpArea_model->getAreaJunctions($area_id);
         $junction_ids = array_column($areaJunctionList, 'junction_id');
 
-        $areaJunctionList = $this->adpArea_model->getJunctions($junction_ids);
-        $oldJunctionIds = array_map(function($item){
-            return $item['logic_id'];
-        },$areaJunctionList);
+        if (empty($junction_ids)) {
+            $oldJunctionIds = [];
+        } else {
+            $areaJunctionList = $this->adpArea_model->getJunctions($junction_ids);
+            $oldJunctionIds = array_map(function($item){
+                return $item['logic_id'];
+            },$areaJunctionList);
+        }
 
         $shouldDeleted = array_diff($oldJunctionIds, $newJunctionIds);
         $shouldCreated = array_diff($newJunctionIds, $oldJunctionIds);
