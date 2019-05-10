@@ -128,7 +128,7 @@ class AdpAreaService extends BaseService
         }
 
         // 更新区域信息
-        $res = $this->area_model->updateArea($areaId, $data);
+        $res = $this->adpArea_model->updateArea($areaId, $data);
 
         if (!$res) {
             throw new \Exception('更新区域失败', ERR_PARAMETERS);
