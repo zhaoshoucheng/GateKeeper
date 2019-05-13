@@ -225,6 +225,9 @@ class Area_model extends CI_Model
      */
     public function deleteAreaJunctions($areaId, $junctionIds)
     {
+        if(empty($junctionIds)) {
+            return null;
+        }
         return $this->db->where('area_id', $areaId)
             ->where_in('junction_id', $junctionIds)
             ->where('delete_at', '1970-01-01 00:00:00')
@@ -256,15 +259,11 @@ class Area_model extends CI_Model
             ->from($this->tb)
             ->where('area_name', $areaName)
             ->where('city_id', $cityId)
-            ->where('delete_at != ', '1970-01-01 00:00:00');
+            ->where('delete_at = ', '1970-01-01 00:00:00');
 
         if(!is_null($areaId)) {
-            $this->db->where('area_id != ', $areaId);
+            $this->db->where('id != ', $areaId);
         }
-        if(!empty($this->db->get()) && method_exists($this->db->get(),"num_rows")){
-            return $this->db->get()->num_rows() === 0;
-        }else{
-            return true;
-        }
+        return $this->db->get()->num_rows() === 0;
     }
 }

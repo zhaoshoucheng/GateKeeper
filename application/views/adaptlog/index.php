@@ -82,7 +82,10 @@
 				<td><?php echo $row["rel_id"]?></td>
 				<td><a href="./junction?trace_id=<?php echo $row["trace_id"]?>&dltag=_didi_Junction.Do.Start"><?php echo $row["trace_id"]?></a></td>
 				<td><?php echo $row["dltag"]?></td>
-				<td><?php echo $row["log"]?></td>
+				<td>
+					<textarea style="width: 600px;height: 50px;">
+<?php echo $row["log"]?>
+					</textarea></td>
 				<td><?php echo $row["log_time"]?></td>
 				<td><?php echo $row["created_at"]?></td>
 			</tr>

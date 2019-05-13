@@ -104,7 +104,7 @@ class AreaService extends BaseService
         $junctionIds = $params['junction_ids'];
 
         // 获取区域信息
-        $areaInfo = $this->area_model->getAreaByAreaId($areaId, 'id');
+        $areaInfo = $this->area_model->getAreaByAreaId($areaId);
 
         if (!$areaInfo || empty($areaInfo)) {
             throw new \Exception('目标区域不存在', ERR_PARAMETERS);

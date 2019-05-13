@@ -248,7 +248,7 @@ class Realtimewarning_model extends CI_Model
         //因为ES直接查询当天所有批次会影响到集群（真弱鸡！）所有要每次只取一个批次进行追加缓存。
         $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour);
         if (empty($avgStopDelayList)) {
-            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id={$cityId}||date={$date}||hour={$hour}||traceId={$traceId}||didi_trace_id=" . get_traceid() . "||message=生成 avg(stop_delay) group by hour failed!\n\r";
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id={$cityId}||date={$date}||hour={$hour}||traceId={$traceId}||didi_trace_id=" . get_traceid() . "||message=生成平均延误曲线数据 avg(stop_delay) group by hour failed!\n\r";
             return;
         }
         $esStopDelay = $this->redis_model->getData($avgStopDelayKey);
@@ -261,6 +261,7 @@ class Realtimewarning_model extends CI_Model
         if ($ctype == 0) {
             //获取实时指标数据
             $realtimeJunctionList = $this->realtime_model->getRealTimeJunctions($cityId, $date, $hour);
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realtimeJunctionCount=" . count($realtimeJunctionList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getRealTimeJunctions\n\r";
             //计算路口总数
             //为什么拿原始数据来计算，是因为如果处理后再统计，因为有的路口不在路网，
             //会导致丢失，这样就和拥堵概览的路口总数匹配不上了
@@ -292,10 +293,11 @@ class Realtimewarning_model extends CI_Model
                 $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
             }
             $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo);
+            $jDataList = $junctionList['dataList'] ?? [];
 
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getJunctionListResult\n\r";
 
             //计算junctionSurvey 数据
-            $jDataList = $junctionList['dataList'] ?? [];
             $result = [];
             $result['junction_total'] = $junctionTotal;
             $result['alarm_total'] = 0;
