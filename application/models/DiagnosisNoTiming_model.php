@@ -187,6 +187,59 @@ class DiagnosisNoTiming_model extends CI_Model
     }
 
     /**
+     * 通过指标数据获取某天的指标权重
+     * @param $flowList
+     * @return array
+     */
+    private function getMovementDtWeightByFlowList($flowList){
+        //加权指标计算 == start ==
+        //queue_length权重为traj_count*stop_time_cycle
+        //其他指标权重为traj_count
+        //权重使用说明:
+// traj_count| stop_time_cycle | flow_id | dt           | queue_weight        | weight       | speed
+//  10       | 4               | 512     | 2019-05-13   | 40/(10*4+20*5+10*2) | 10/(10+20+25)| 5
+//  20       | 5               | 512     | 2019-05-14   | 100/(10*4+20*5+10*2)| 20/(10+20+25)| 4
+//  10       | 2               | 512     | 2019-05-15   | 20/(10*4+20*5+10*2) | 10/(10+20+25)| 3
+//  10       | 2               | 513     | 2019-05-13   | 20/(10*2)           | 10/(10)      | 3
+        //求flow_id=512三天的speed平均值: (5+4+3)/3
+        //求flow_id=512三天的speed加权平均: 5*(10/55)+4*(10/55)+3*(10/55)
+
+        $flowTrajSum = [];  //相位轨迹统计
+        $flowTrajStoptimeSum = [];  //相位停车轨迹统计
+        $allTrajSum=[]; //全部轨迹统计
+        $allTrajStoptimeSum=[];  //全部停车轨迹统计
+        $flowWeight = []; //相位权重
+        $flowStoptimeWeight = []; //相位停车权重
+        foreach ($flowList as $item) {
+            if (!isset($flowTrajSum[$item['logic_flow_id']][$item['dt']])) {
+                $flowTrajSum[$item['logic_flow_id']][$item['dt']] = 0;
+            }
+            if (!isset($flowTrajStoptimeSum[$item['logic_flow_id']][$item['dt']])) {
+                $flowTrajStoptimeSum[$item['logic_flow_id']][$item['dt']] = 0;
+            }
+            if (!isset($allTrajSum[$item['logic_flow_id']])) {
+                $allTrajSum[$item['logic_flow_id']] = 0;
+            }
+            if (!isset($allTrajStoptimeSum[$item['logic_flow_id']])) {
+                $allTrajStoptimeSum[$item['logic_flow_id']] = 0;
+            }
+            $flowTrajSum[$item['logic_flow_id']][$item['dt']] += $item["traj_count"];
+            $flowTrajStoptimeSum[$item['logic_flow_id']][$item['dt']] += $item["traj_count"] * $item["stop_time_cycle"];
+            $allTrajSum[$item['logic_flow_id']]+=$item["traj_count"];
+            $allTrajStoptimeSum[$item['logic_flow_id']]+=$item["traj_count"] * $item["stop_time_cycle"];
+        }
+        foreach ($flowTrajSum as $flowID=>$flowList){
+            foreach ($flowList as $dt=>$item){
+                $flowWeight[$flowID][$dt] =
+                    $allTrajSum[$flowID]>0 ? $flowTrajSum[$flowID][$dt]/$allTrajSum[$flowID] : 0;
+                $flowStoptimeWeight[$flowID][$dt] =
+                    $allTrajStoptimeSum[$dt]>0 ? $flowTrajSum[$flowID][$dt]/$allTrajStoptimeSum[$flowID]:0;
+            }
+        }
+        return [$flowWeight,$flowStoptimeWeight];
+    }
+
+    /**
      * 获取相位指标数据
      * @param $cityID
      * @param $logicJunctionID
@@ -197,28 +250,9 @@ class DiagnosisNoTiming_model extends CI_Model
     public function getMovementQuota($cityID, $logicJunctionID, $timePoint, $dates)
     {
         $flowList = $this->getFlowQuotaList($cityID, $logicJunctionID, $timePoint, $dates);
-        //加权指标计算
-        //计算权重值数据
-        //queue_length权重为traj_count*stop_time_cycle
-        //其他指标权重为traj_count
-        //权重使用说明:
-        // traj_count   |   stop_time_cycle |   flow_id |   hour    |   queue_weight        |   weight
-        //  10          |   1               |   512     |   15:00   |   10/(10*1+20*1+25*1) |   10/(10+20+25)
-        //  20          |   1               |   512     |   15:30   |   20/(10*1+20*1+25*1) |   20/(10+20+25)
-        //  25          |   1               |   512     |   16:00   |   25/(10*1+20*1+25*1) |   25/(10+20+25)
-        //  10          |   2               |   555     |   15:00   |   10/(10*2)           |   10/(10)
-        $flowTrajSum = [];
-        $flowTrajStoptimeSum = [];
-        foreach ($flowList as $item) {
-            if (!isset($flowTrajSum[$item['logic_flow_id']])) {
-                $flowTrajSum[$item['logic_flow_id']] = 0;
-            }
-            if (!isset($flowTrajStoptimeSum[$item['logic_flow_id']])) {
-                $flowTrajStoptimeSum[$item['logic_flow_id']] = 0;
-            }
-            $flowTrajSum[$item['logic_flow_id']] += $item["traj_count"];
-            $flowTrajStoptimeSum[$item['logic_flow_id']] += $item["traj_count"] * $item["stop_time_cycle"];
-        }
+        $flowWeight = []; //天级别相位权重
+        $flowStoptimeWeight = []; //天级别相位停车权重
+        list($flowWeight,$flowStoptimeWeight) = $this->getMovementDtWeightByFlowList($flowList);
         $result = [];
         $quotaRound = $this->config->item('flow_quota_round');
         foreach ($flowList as $item) {
@@ -228,14 +262,15 @@ class DiagnosisNoTiming_model extends CI_Model
                 }
                 if($quotaValue>0){
                     if ($quotaKey == "queue_length") {
-                        $quotaValue = (($item["traj_count"] * $item["stop_time_cycle"]) / $flowTrajStoptimeSum[$item["logic_flow_id"]]) * $quotaValue;
+                        $quotaValue = $flowStoptimeWeight[$item["logic_flow_id"]][$item["dt"]] * $quotaValue;
                     } else {
-                        $quotaValue = ($item["traj_count"] / $flowTrajSum[$item["logic_flow_id"]]) * $quotaValue;
+                        $quotaValue = $flowWeight[$item["logic_flow_id"]][$item["dt"]] * $quotaValue;
                     }
                 }
+
                 $quotaValue = isset($quotaRound[$quotaKey]['round'])
                     ? $quotaRound[$quotaKey]['round']($quotaValue) : $quotaValue;
-                if (!isset($result['logic_flow_id'][$quotaKey])) {
+                if (empty($result[$item['logic_flow_id']][$quotaKey])) {
                     $result[$item['logic_flow_id']][$quotaKey] = 0;
                 }
                 $result[$item['logic_flow_id']][$quotaKey] += $quotaValue;

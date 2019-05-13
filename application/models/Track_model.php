@@ -138,7 +138,6 @@ class Track_model extends CI_Model
             'rtimeVec'   => $rtimeVec,
             'filterData' => $sample_data
         ];
-
         $result_data = $this->$type($vals, $timing, $junction_info);
 
         return $result_data;
@@ -266,6 +265,27 @@ class Track_model extends CI_Model
         $result_data['info']['id'] = trim($junction_info['flow_id']);
         $result_data['info']['comment'] = $timing['comment'];
 
+        //附加信息
+        $green = [];
+        if (!empty($result_data['signal_range'])) {
+            foreach ($result_data['signal_range'] as $item){
+                if($item["type"]==1) {
+                    $green[] = [
+                        "start_time" => $item["from"],
+                        "duration" => $item["to"] - $item["from"],
+                    ];
+                }
+            }
+        }
+        $signalInfo = [
+            "cycle"=>intval($timing["cycle"]),
+            "green"=>$green,
+            "offset"=>intval($timing["offset"]),
+            "tod_end_time"=>"",
+            "tod_start_time"=>"",
+            "yellow"=>3,
+        ];
+        $result_data["signal_info"] = $signalInfo;
         return $result_data;
     }
 
