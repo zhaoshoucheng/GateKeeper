@@ -7,6 +7,7 @@ namespace Services;
  *
  * @property \Realtime_model $realtime_model
  * @property \waymap_model $waymap_model
+ * @property \Common_model $common_model
  * @package Services
  */
 class RealtimeQuotaService extends BaseService
@@ -19,6 +20,7 @@ class RealtimeQuotaService extends BaseService
         $this->load->model('realtime_model');
         $this->load->model('waymap_model');
         $this->load->helper('http_helper');
+        $this->load->model('common_model');
         $this->helperService = new HelperService();
     }
 
@@ -53,6 +55,8 @@ class RealtimeQuotaService extends BaseService
         $hour = $this->helperService->getLastestHour($cityId);
         $flowList = $this->realtime_model->getRealTimeJunctionsQuota($cityId, $date, $hour, $inputJunctionIds);
         $flowInfo = $this->waymap_model->getFlowsInfo(implode(",", $inputJunctionIds));
+
+
         $newFlowList = [];
         foreach ($flowList as $key => $value) {
             $phaseName = $flowInfo[$value["junctionId"]][$value["movementId"]];
@@ -64,6 +68,19 @@ class RealtimeQuotaService extends BaseService
             }
             $newFlowList[$key]["phase_name"] = $phaseName;
             $newFlowList[$key]["logic_flow_id"] = $value["movementId"];
+        }
+
+        $junctionMovements = [];
+        foreach ($inputJunctionIds as $junctionId){
+            $junctionMovements[$junctionId] = $this->common_model->getTimingMovementNames($junctionId);
+        }
+
+        foreach ($newFlowList as $key => $item) {
+            if (!empty($junctionMovements[$junctionId][$item["logic_flow_id"]])) {
+                $newFlowList[$key]["movement_name"] = $junctionMovements[$junctionId][$item["logic_flow_id"]];
+            }else{
+                $newFlowList[$key]["movement_name"] = $newFlowList[$key]["phase_name"];
+            }
         }
         return ["list"=>$newFlowList,"batch_time"=>$date." ".$hour];
     }
