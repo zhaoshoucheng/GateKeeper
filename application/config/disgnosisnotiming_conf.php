@@ -96,7 +96,7 @@ $config['flow_quota_round'] = [
 
 // 定义诊断报警规则
 $config['conf_rule'] = [
-    'frequency_threshold' => 0.7, //报警问题,常偶发阈值
+    'frequency_threshold' => 0.6, //报警问题,常偶发阈值
     'alarm_field' => ['is_oversaturation', 'is_spillover', 'is_imbalance'], //报警类型对应字段
     'alarm_types' => [
         'is_spillover' =>
