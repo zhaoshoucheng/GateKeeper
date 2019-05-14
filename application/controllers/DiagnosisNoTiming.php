@@ -142,7 +142,7 @@ class DiagnosisNoTiming extends MY_Controller
         ];
         $params["time_range"] = $this->correntTimeRange($params["time_range"]);
         if(empty($params["dates"])){
-            throw new \Exception("datas 不能为空");
+            throw new \Exception("dates 不能为空");
         }
         foreach ($params["dates"] as $key=>$date){
             if (!preg_match('/\d{4,4}-\d{1,2}-\d{1,2}/ims',$date)){

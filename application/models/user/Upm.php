@@ -18,10 +18,10 @@ class Upm extends CI_Model
     {
         $this->load->helper('http');
         $this->load->config('backend/userauth', true);
-        $this->_config_server = $this->config->item('upm_server', 'backend/userauth');
-        $this->_config_uri = $this->config->item('uri', 'backend/userauth');
-        $this->_appid = $this->config->item('appid', 'backend/userauth');
-        $this->_appkey = $this->config->item('appkey', 'backend/userauth');
+        $this->_config_server = $this->config->item('upm_server');
+        $this->_config_uri = $this->config->item('uri');
+        $this->_appid = $this->config->item('appid');
+        $this->_appkey = $this->config->item('appkey');
         $this->_host = $this->_config_server['remote_host'];
     }
 
@@ -64,10 +64,25 @@ class Upm extends CI_Model
         if (!$json || $json['code'] != 200) {
             return FALSE;
         }
-
         return array(
             'citys' => $json['data']['areas']
         );
+    }
+
+
+    public function getUserMenus($userName) {
+        if(ENVIRONMENT=="development"){
+            $userName = "18953101270";
+        }
+        $params = $this->make_sign();
+        $params['userName'] = $userName;
+        $url = $this->_host.$this->_config_uri['upm_getMenuList'];
+        $ret = httpGET($url, $params);
+        $json = $this->valid_json($ret);
+        if (!$json || $json['code'] != 200) {
+            return FALSE;
+        }
+        return $json['data'];
     }
 
     public function getUserPermissions($userName) {

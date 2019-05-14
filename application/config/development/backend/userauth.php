@@ -40,5 +40,6 @@ $config['uri'] = array(
 );
 
 $config['appid'] = '789';
+$config['menuid'] = '437272';
 $config['appkey'] = '428ffe82b8f7048aa446a58bc988719e';
 
