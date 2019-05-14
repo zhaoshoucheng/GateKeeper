@@ -231,11 +231,14 @@ class DiagnosisNoTiming_model extends CI_Model
         foreach ($flowTrajSum as $flowID=>$flowList){
             foreach ($flowList as $dt=>$item){
                 $flowWeight[$flowID][$dt] =
-                    $allTrajSum[$flowID]>0 ? $flowTrajSum[$flowID][$dt]/$allTrajSum[$flowID] : 0;
+                    $allTrajSum[$flowID]>0
+                        ? $flowTrajSum[$flowID][$dt]/$allTrajSum[$flowID] : 0;
                 $flowStoptimeWeight[$flowID][$dt] =
-                    $allTrajStoptimeSum[$dt]>0 ? $flowTrajSum[$flowID][$dt]/$allTrajStoptimeSum[$flowID]:0;
+                    $allTrajStoptimeSum[$flowID]>0
+                        ? $flowTrajStoptimeSum[$flowID][$dt]/$allTrajStoptimeSum[$flowID]:0;
             }
         }
+//        print_r($flowStoptimeWeight);exit;
         return [$flowWeight,$flowStoptimeWeight];
     }
 
