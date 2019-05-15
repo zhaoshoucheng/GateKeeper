@@ -252,7 +252,7 @@ class Waymap_model extends CI_Model
         if (!$result) {
 
             $offset = 0;
-            $count  = 10000;
+            $count  = 20000;
 
             $data = compact('offset', 'count', 'version', 'city_id');
 
@@ -292,7 +292,7 @@ class Waymap_model extends CI_Model
         if (!$result) {
 
             $offset = 0;
-            $count  = 10000;
+            $count  = 20000;
 
             $data = compact('offset', 'count', 'version', 'city_id', 'districts');
 
