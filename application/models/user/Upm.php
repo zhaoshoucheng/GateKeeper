@@ -71,7 +71,8 @@ class Upm extends CI_Model
 
 
     public function getUserMenus($userName) {
-        if(ENVIRONMENT=="development"){
+        //测试和预发走默认账号菜单
+        if(ENVIRONMENT=="development" || gethostname()=="ipd-cloud-preweb00.gz01"){
             $userName = "18953101270";
         }
         $params = $this->make_sign();
@@ -82,6 +83,11 @@ class Upm extends CI_Model
         if (!$json || $json['code'] != 200) {
             return FALSE;
         }
+        $sortValArr = [];
+        foreach ($json['data'] as $key=>$item){
+            $sortValArr[$key] = $item;
+        }
+        array_multisort($sortValArr, SORT_ASC, $json['data']);
         return $json['data'];
     }
 
