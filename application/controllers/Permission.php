@@ -29,6 +29,10 @@ class Permission extends MY_Controller
         }else{
             $service = new PermissionService();
             $data = $service->getUserMenus();
+            //无权限时读取配置文件
+            if(empty($data)){
+                $data = $menu['menuList'][1];
+            }
         }
         $this->response($data);
     }

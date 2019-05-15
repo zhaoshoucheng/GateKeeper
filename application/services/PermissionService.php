@@ -22,14 +22,15 @@ class PermissionService extends BaseService
     public function getUserMenus()
     {
         $menuid = $this->config->item('menuid');
+        //$result = $this->Upm->getUserMenus($this->user->getUserName());
         $result = $this->Upm->getUserMenus(18953101270);    //todo临时测试用
         if (!$result) {
-            throw new \Exception('获取用户权限失败', ERR_AUTH_PERMISSION);
+            //throw new \Exception('获取用户权限失败', ERR_AUTH_PERMISSION);
+            return [];
         }
         $menuList = $this->getSubUserMenus($menuid,$result,"signal");
         return $menuList;
     }
-
 
     private function getSubUserMenus($pid,$menuList,$remark=""){
         $currentMenuList = [];
