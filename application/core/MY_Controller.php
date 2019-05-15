@@ -135,6 +135,16 @@ class MY_Controller extends CI_Controller
             }
         }
 
+        //客户端ip与city_id绑定校验:联通定制版
+        if($_SERVER["REMOTE_ADDR"]=="123.124.255.72"
+            && isset($_REQUEST['city_id'])
+            && !in_array($_REQUEST['city_id'],["1","4"])){
+            $this->errno  = ERR_AUTH_KEY;
+            $this->errmsg = "当前城市无权限";
+            $this->_output();
+            exit();
+        }
+
         com_log_notice('_com_sign', [
             'access_user' => $accessUser,
             'access_type' => $accessType,

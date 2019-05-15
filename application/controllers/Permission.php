@@ -10,14 +10,30 @@ class Permission extends MY_Controller
     {
         parent::__construct();
         $this->load->config('permission/menu_conf');
+        $this->load->config('backend/userauth');
+    }
+
+    public function getMenuListOld()
+    {
+        $menu = $this->config->item('menu');
+        $data = $menu['menuList'][$menu['check']($this->username)] ?? [];
+        $this->response($data);
     }
 
     public function getMenuList()
     {
         $menu = $this->config->item('menu');
-
-        $data = $menu['menuList'][$menu['check']($this->username)] ?? [];
-
+        $menuType = $menu['check']($this->username);
+        if($menuType!=1){
+            $data = $menu['menuList'][$menuType];
+        }else{
+            $service = new PermissionService();
+            $data = $service->getUserMenus();
+            //无权限时读取配置文件
+            if(empty($data)){
+                $data = $menu['menuList'][1];
+            }
+        }
         $this->response($data);
     }
 
