@@ -66,6 +66,18 @@ class RealtimeQuotaService extends BaseService
                     $newFlowList[$key][$uncamelKey] = $vv;
                 }
             }
+
+            $value["trailNum"] = $value["trailNum"]??0;
+            switch ($value["trailNum"]){
+                case ($value["trailNum"]>=30):
+                    $newFlowList[$key]["confidence"] = "高";
+                    break;
+                case ($value["trailNum"]<=10):
+                    $newFlowList[$key]["confidence"] = "低";
+                    break;
+                default:
+                    $newFlowList[$key]["confidence"] = "中";
+            }
             $newFlowList[$key]["phase_name"] = $phaseName;
             $newFlowList[$key]["logic_flow_id"] = $value["movementId"];
         }
