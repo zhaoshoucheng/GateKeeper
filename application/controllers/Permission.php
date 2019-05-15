@@ -13,14 +13,14 @@ class Permission extends MY_Controller
         $this->load->config('backend/userauth');
     }
 
-    public function getMenuList()
+    public function getMenuListOld()
     {
         $menu = $this->config->item('menu');
         $data = $menu['menuList'][$menu['check']($this->username)] ?? [];
         $this->response($data);
     }
 
-    public function getMenuListNew()
+    public function getMenuList()
     {
         $menu = $this->config->item('menu');
         $menuType = $menu['check']($this->username);
