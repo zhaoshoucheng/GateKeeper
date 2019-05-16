@@ -27,6 +27,9 @@ class PermissionService extends BaseService
             return [];
         }
         $menuList = $this->getSubUserMenus($menuid,$result,"signal");
+        if(!empty($menuList[0]['son'])){
+            return $menuList[0]['son'];
+        }
         return $menuList;
     }
 
@@ -37,7 +40,7 @@ class PermissionService extends BaseService
                 $formatItem = [
                     "name"=>$item["name"],
                     "url"=>$item["url"],
-                    "remark"=>$remark,
+                    "remark"=>$item["remark"],
                 ];
                 $subList = $this->getSubUserMenus($item["id"],$menuList);
                 if(!empty($subList)){
