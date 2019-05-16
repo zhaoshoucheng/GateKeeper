@@ -10,7 +10,6 @@ class Permission extends MY_Controller
     {
         parent::__construct();
         $this->load->config('permission/menu_conf');
-        $this->load->config('backend/userauth');
     }
 
     public function getMenuList()

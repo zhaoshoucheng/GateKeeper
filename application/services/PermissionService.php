@@ -24,7 +24,6 @@ class PermissionService extends BaseService
         $menuid = $this->config->item('menuid');
         $result = $this->Upm->getUserMenus($this->user->getUserName());
         if (!$result) {
-            //throw new \Exception('获取用户权限失败', ERR_AUTH_PERMISSION);
             return [];
         }
         $menuList = $this->getSubUserMenus($menuid,$result,"signal");

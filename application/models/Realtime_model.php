@@ -91,13 +91,16 @@ class Realtime_model extends CI_Model
         if(!empty($data["cityId"]) && in_array($data["cityId"],$this->quotaCityIds)){
             $baseUrl = $this->newEsUrl;
         }
-        $result = httpPOST($baseUrl . '/estimate/diagnosis/queryQuota', $data, 9000, 'json');
+        $queryUrl = $baseUrl . '/estimate/diagnosis/queryQuota';
+        $result = httpPOST($queryUrl, $data, 9000, 'json');
         if (!$result) {
+            com_log_warning('searchQuota_result_invalid', 0, "", compact("queryUrl","data","result"));
             throw new \Exception('调用es接口 queryIndices 失败！', ERR_DEFAULT);
         }
         $result = json_decode($result, true);
 
         if ($result['code'] != '000000' && $result['code'] != '400001') {
+            com_log_warning('searchQuota_result_errcode', 0, "", compact("queryUrl","data","result"));
             throw new \Exception($result['message'], ERR_DEFAULT);
         }
         return $result;
@@ -215,6 +218,9 @@ class Realtime_model extends CI_Model
             ];
             $data['junctionId'] = implode(",",$ids);
             $data["andOperations"]['junctionId'] = 'in';
+            if(count($ids)!=0){
+                return [];
+            }
             $esRes = $this->searchQuota($data);
             if (empty($esRes['result']['quotaResults'])) {
                 return [];
