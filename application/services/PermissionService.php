@@ -17,14 +17,15 @@ class PermissionService extends BaseService
         parent::__construct();
         $this->load->model('user/Upm');
         $this->load->model('user/user', 'user');
+        $this->load->config('backend/userauth', true);
     }
 
     public function getUserMenus()
     {
-        $menuid = $this->config->item('menuid');
+        $menuid = $this->config->item('menuid','backend/userauth');
         $result = $this->Upm->getUserMenus($this->user->getUserName());
         if (!$result) {
-            return [];
+            return []; 
         }
         $menuList = $this->getSubUserMenus($menuid,$result,"signal");
         if(!empty($menuList[0]['son'])){
