@@ -37,6 +37,21 @@ $config['white_token_clientip_escape'] = [
     '10.161.74.50' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //realtimealarm
 
     '100.69.176.20' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //diyu
+
+
+    '10.169.238.102' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.169.250.206' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.169.205.165' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.168.196.64' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.169.14.86' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.169.26.135' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.168.117.127' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.167.81.59' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.169.5.78' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.168.232.111' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.160.76.67' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.161.164.116' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
+    '10.169.250.201' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
     '10.88.128.45' => ["05984e73effb5fe2baeeda5e7c10be8e"], // 麒麟提供的内网机器
 ];
 
