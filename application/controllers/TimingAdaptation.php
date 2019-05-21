@@ -28,8 +28,12 @@ class TimingAdaptation extends MY_Controller
             'city_id' => 'required|is_natural_no_zero'
         ]);
 
-        $data = $this->timingAdaptService->getAdaptTimingInfo($params);
-
+        try{
+            $data = $this->timingAdaptService->getAdaptTimingInfo($params);
+        }catch (\Exception $e){
+            $this->response([],1000008,"暂时无法获取自适应配时详情");
+            return;
+        }
         $this->response($data);
     }
 
@@ -101,8 +105,12 @@ class TimingAdaptation extends MY_Controller
             'is_open' => 'required|in_list[0,1]'
         ]);
 
-        $data = $this->timingAdaptService->getAdapteStatus($params);
-
+        try{
+            $data = $this->timingAdaptService->getAdapteStatus($params);
+        }catch (\Exception $e){
+            $this->response([],1000008,"暂时无法获取自适应配时状态");
+            return;
+        }
         $this->response($data);
     }
 }

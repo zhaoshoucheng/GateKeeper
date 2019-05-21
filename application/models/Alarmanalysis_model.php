@@ -73,7 +73,11 @@ class Alarmanalysis_model extends CI_Model
 
         $esRes = $this->searchFlowTable($json);
 
-        if (empty($esRes) || empty($esRes['hits']['hits'])) {
+        if (!isset($esRes['hits']['hits'])) {
+            com_log_warning('getRealTimeAlarmsInfoFromEs_error', 0, $esRes, compact("json","esRes"));
+            throw new \Exception("获取实时报警数据异常");
+        }
+        if (empty($esRes['hits']['hits'])) {
             return [];
         }
 

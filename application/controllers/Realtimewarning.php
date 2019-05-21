@@ -1,10 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Class Realtimewarning
+ * @property \Realtimewarning_model $realtimewarning_model
+ * @property \Common_model $common_model
+ */
 class Realtimewarning extends Inroute_Controller
 {
     private $quotaCityIds = [];
-
     public function __construct()
     {
         date_default_timezone_set('Asia/Shanghai');

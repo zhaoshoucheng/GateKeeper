@@ -5,6 +5,15 @@
  * # author:  niuyufu@didichuxing.com
  * # date:    2018-07-30
  ********************************************/
+
+/**
+ * Class Realtimewarning_model
+ *
+ * @property \Realtime_model $realtime_model
+ * @property \Waymap_model   $waymap_model
+ * @property \Alarmanalysis_model $alarmanalysis_model
+ * @property \Userperm_model $userperm_model
+ */
 class Realtimewarning_model extends CI_Model
 {
     protected $token;
@@ -271,7 +280,7 @@ class Realtimewarning_model extends CI_Model
             //获取实时报警表数据
             $data['date'] = $date;
             $data['city_id'] = $cityId;
-            sleep(20);   //防止延迟数据读取为0
+            sleep(10);   //防止延迟数据读取为0
             $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
 
             //验证自适应城市无指标
@@ -279,6 +288,7 @@ class Realtimewarning_model extends CI_Model
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getRealTimeAlarmsInfoFromEs||grep_message=grep '_com_http_success' /home/xiaoju/php7/logs/cloud/itstool/didi.log | grep 'arius' | grep '{$hour}' | grep 'city_id\":{\"query\":{$cityId},'\n\r";
             $realTimeAlarmsInfoResult = [];
             foreach ($realTimeAlarmsInfoResultOrigal as $item) {
+                //济南屏蔽持续时间小于3分钟的报警
                 if ($cityId == "12" && strtotime($item["last_time"]) - strtotime($item["start_time"]) < 180) {
                     continue;
                 }
