@@ -100,6 +100,9 @@ if ($development == 2) {
 
     //新版指标开城列表
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
+
+    //新版报警开城列表
+    $alarm_v2_city_ids = [12,23];
 } else {
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
@@ -181,6 +184,9 @@ if ($development == 2) {
 
     //新版诊断指标开城列表
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
+
+    //新版报警开城列表
+    $alarm_v2_city_ids = [12,134,23];
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -897,5 +903,5 @@ $config['data_engine'] = 'elastic';
 $config['quota_v2_city_ids'] = $quota_v2_city_ids;
 
 //新版报警开城列表及ip限制
-$config['alarm_v2_city_ids'] = ["12",];
+$config['alarm_v2_city_ids'] = $alarm_v2_city_ids;
 $config['alarm_v2_client_ips'] = ["100.90.165.32","100.90.164.31",];    //默认沙盒触发

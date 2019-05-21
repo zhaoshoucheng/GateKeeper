@@ -46,6 +46,12 @@ if (!function_exists('httpGET')) {
             if(strpos($url, $ignoreUrl)!==false){
                 return false;
             }
+            //特殊请求的url不报警
+            $ignoreRequest = 'RealtimeQuota/flow';
+            if(strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
+                return false;
+            }
+
             //记录报警
             com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query)));
             return false;
@@ -56,6 +62,11 @@ if (!function_exists('httpGET')) {
             //临时自适应接口不报警
             $ignoreUrl = '100.70.160.62:8000';
             if(strpos($url, $ignoreUrl)!==false){
+                return false;
+            }
+            //特殊请求的url不报警
+            $ignoreRequest = 'RealtimeQuota/flow';
+            if(strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
                 return false;
             }
             com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query)));
@@ -113,6 +124,11 @@ if (!function_exists('httpPOST')) {
             if(strpos($url, $ignoreUrl)!==false){
                 return false;
             }
+            //特殊请求的url不报警
+            $ignoreRequest = 'RealtimeQuota/flow';
+            if(strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
+                return false;
+            }
             com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data));
             return false;
         }
@@ -123,6 +139,11 @@ if (!function_exists('httpPOST')) {
             //临时自适应接口不报警
             $ignoreUrl = '100.70.160.62:8000';
             if(strpos($url, $ignoreUrl)!==false){
+                return false;
+            }
+            //特殊请求的url不报警
+            $ignoreRequest = 'RealtimeQuota/flow';
+            if(strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
                 return false;
             }
             com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data));

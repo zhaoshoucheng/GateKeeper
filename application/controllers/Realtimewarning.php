@@ -1,10 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Class Realtimewarning
+ * @property \Realtimewarning_model $realtimewarning_model
+ * @property \Common_model $common_model
+ */
 class Realtimewarning extends Inroute_Controller
 {
     private $quotaCityIds = [];
-
     public function __construct()
     {
         date_default_timezone_set('Asia/Shanghai');
@@ -130,6 +134,20 @@ class Realtimewarning extends Inroute_Controller
         return true;
     }
 
+    /**
+     * 根据城市返回 报警处理方法
+     * @param $cityID
+     * @return string
+     */
+    private function getAlarmFuncName($cityID){
+        $cityIDs = $this->config->item('alarm_v2_city_ids');
+        if(in_array($cityID,$cityIDs)){
+            return "esworker";
+        }else{
+            return "prepare";
+        }
+    }
+
     public function escallback()
     {
         $params   = array_merge($this->input->get(), $this->input->post());
@@ -158,6 +176,8 @@ class Realtimewarning extends Inroute_Controller
         $cityId  = $params["city_id"];
         $traceId = $params["trace_id"];
         $uid     = $params["uid"];
+
+        //新版报警通知限定指定ip
         if(!$this->alarmV2Auth($cityId)){
             $output = [
                 'errno' => ERR_PARAMETERS,
@@ -185,14 +205,15 @@ class Realtimewarning extends Inroute_Controller
             exit;
         }
 
-        //新开指标城市验证 && uid验证
+        // 实时报警城市验证
         $quotaCityIds = $this->quotaCityIds;
         if(in_array($cityId,$quotaCityIds) && !in_array($uid,["traj_index_pro","traffic_realtime_alarm"])){
             echo "uid 非预期! \n";
             exit;
         }
 
-        exec("ps aux | grep \"realtimewarn\" | grep 'prepare/{$cityId}/' | grep -v \"grep\" | wc -l", $processOut);
+        $alarmFunction = $this->getAlarmFuncName($cityId);
+        exec("ps aux | grep \"realtimewarn\" | grep '{$alarmFunction}/{$cityId}/' | grep -v \"grep\" | wc -l", $processOut);
         $processNum = !empty($processOut[0]) ? $processOut[0] : 0;
         //执行任务
         $command = "";
@@ -203,7 +224,7 @@ class Realtimewarning extends Inroute_Controller
             if (gethostname() == 'ipd-cloud-server01.gz01') {
                 $phpPath = "php ";
             }
-            $command = "nohup {$phpPath} index.php realtimewarning prepare/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
+            $command = "nohup {$phpPath} index.php realtimewarning {$alarmFunction}/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
                 "{$logPath}realtimewarning.log  2>&1 &";
             exec($command);
         }
