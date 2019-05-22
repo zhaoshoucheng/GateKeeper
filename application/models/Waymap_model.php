@@ -487,7 +487,7 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function getFlowsInfo($logic_junction_ids,$cached)
+    public function getFlowsInfo($logic_junction_ids,$cached=false)
     {
         $this->load->helper('phase');
 
