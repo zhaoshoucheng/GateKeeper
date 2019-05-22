@@ -286,6 +286,7 @@ class Realtimewarning_model extends CI_Model
             //验证自适应城市无指标
             com_log_notice('getRealTimeAlarmsInfoFromEs_empty', ["count"=>count($realTimeAlarmsInfoResultOrigal),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getRealTimeAlarmsInfoFromEs||grep_message=grep '_com_http_success' /home/xiaoju/php7/logs/cloud/itstool/didi.log | grep 'arius' | grep '{$hour}' | grep 'city_id\":{\"query\":{$cityId},'\n\r";
+            //实时报警信息 - flow粒度
             $realTimeAlarmsInfoResult = [];
             foreach ($realTimeAlarmsInfoResultOrigal as $item) {
                 //济南屏蔽持续时间小于3分钟的报警
@@ -302,12 +303,13 @@ class Realtimewarning_model extends CI_Model
             foreach ($realTimeAlarmsInfoResult as $item) {
                 $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
             }
+            //路口列表合并报警信息
             $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo);
             $jDataList = $junctionList['dataList'] ?? [];
 
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getJunctionListResult\n\r";
 
-            //计算junctionSurvey 数据
+            //路口概览 确认和路口列表数据一致
             $result = [];
             $result['junction_total'] = $junctionTotal;
             $result['alarm_total'] = 0;
@@ -489,11 +491,12 @@ class Realtimewarning_model extends CI_Model
 
         //获取需要报警的全部路口ID
         $alarmJunctonIdArr = array_unique(array_column($realTimeAlarmsInfo, 'logic_junction_id'));
+        asort($alarmJunctonIdArr);
         $ids = implode(',', $alarmJunctonIdArr);
 
         //获取需要报警的全部路口的全部方向的信息
         try {
-            $flowsInfo = $this->waymap_model->getFlowsInfo($ids);
+            $flowsInfo = $this->waymap_model->getFlowsInfo($ids,true);
         } catch (\Exception $e) {
             $flowsInfo = [];
         }

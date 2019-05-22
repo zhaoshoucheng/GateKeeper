@@ -819,14 +819,20 @@ class OverviewService extends BaseService
         $result = [];
 
         // 需要获取路口name的路口ID串
-        $junctionIds = implode(',', array_unique(array_column($res, 'logic_junction_id')));
-
-        // 获取路口信息
-        $junctionsInfo  = $this->waymap_model->getJunctionInfo($junctionIds);
-        $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
+        $alarmJunctonIdArr = array_unique(array_column($res, 'logic_junction_id'));
+        asort($alarmJunctonIdArr);
+        $ids = implode(',', $alarmJunctonIdArr);
 
         // 获取路口相位信息
-        $flowsInfo = $this->waymap_model->getFlowsInfo($junctionIds);
+        try {
+            $flowsInfo = $this->waymap_model->getFlowsInfo($ids,true);
+        } catch (\Exception $e) {
+            $flowsInfo = [];
+        }
+
+        // 获取路口信息
+        $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0);
+        $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
 
         // 报警类别
         $alarmCate = $this->config->item('flow_alarm_category');

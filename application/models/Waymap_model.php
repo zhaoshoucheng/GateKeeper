@@ -482,32 +482,46 @@ class Waymap_model extends CI_Model
      * 获取路口相位信息
      *
      * @param $logic_junction_ids
+     * @param $cached 是否缓存数据
      *
      * @return array
      * @throws \Exception
      */
-    public function getFlowsInfo($logic_junction_ids)
+    public function getFlowsInfo($logic_junction_ids,$cached=false)
     {
         $this->load->helper('phase');
 
+        $this->load->model('redis_model');
         $version = self::$lastMapVersion;
 
-        $data = compact('logic_junction_ids', 'version');
 
-        $url = $this->waymap_interface . '/signal-map/mapJunction/phase';
-        $res = $this->post($url, $data);
-        $res = array_map(function ($v) {
-            // 纠正这里的 phase_id 和 phase_name
-            $v = $this->adjustPhase($v);
-            return array_column($v, 'phase_name', 'logic_flow_id');
-        }, $res);
+        $redis_key = 'getFlowsInfo_cache_' . $version . '_' . md5($logic_junction_ids);
 
-        // 调用相位接口出错
-        if(count($logic_junction_ids)>0 && count($res)==0){
-            com_log_warning('mapJunction_phase_empty', 0, "mapJunction_phase_empty",
-                ["junctionIds"=>$logic_junction_ids,"res"=>count($res),]);
+        $result = $cached ? $this->redis_model->getData($redis_key) : [];
+
+        if (!$result) {
+            $data = compact('logic_junction_ids', 'version');
+
+            $url = $this->waymap_interface . '/signal-map/mapJunction/phase';
+            $res = $this->post($url, $data);
+            $res = array_map(function ($v) {
+                // 纠正这里的 phase_id 和 phase_name
+                $v = $this->adjustPhase($v);
+                return array_column($v, 'phase_name', 'logic_flow_id');
+            }, $res);
+
+            // 调用相位接口出错
+            if (count($logic_junction_ids) > 0 && count($res) == 0) {
+                com_log_warning('mapJunction_phase_empty', 0, "mapJunction_phase_empty",
+                    ["junctionIds" => $logic_junction_ids, "res" => count($res),]);
+            }
+
+            if($cached){
+                $this->redis_model->setEx($redis_key, json_encode($res), 60);
+            }
+            return $res;
         }
-        return $res;
+        return json_decode($result, true);
     }
 
     /**
