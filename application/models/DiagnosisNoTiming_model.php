@@ -35,7 +35,7 @@ class DiagnosisNoTiming_model extends CI_Model
                     $alarmResult[$quota]['info'] = $juncQuestion[$quota];
                 }
                 //报警规则过滤
-                if ($count / count($dates) > $fThreshold) {
+                if ($count / count($dates) >= $fThreshold) {
                     $alarmResult[$quota]['list'][$hour] = 1;
                 }else{
                     $alarmResult[$quota]['list'][$hour] = 0;
@@ -385,7 +385,7 @@ class DiagnosisNoTiming_model extends CI_Model
         $alarmResult = [];
         $fThreshold = $confRule['frequency_threshold'];
         foreach ($quotaCount as $quota => $count) {
-            if ($totalCount>0 && $count>0 && ($count/$totalCount>$fThreshold)) {
+            if ($totalCount>0 && $count>0 && ($count/$totalCount>=$fThreshold)) {
                 $alarmResult[$quota] = $juncQuestion[$quota];
             }
         }
