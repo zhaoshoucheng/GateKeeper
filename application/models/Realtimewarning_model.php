@@ -209,7 +209,6 @@ class Realtimewarning_model extends CI_Model
         if (in_array($cityId, $cityIds)) {
             $junctionIds = [];
         }
-
         $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour, $junctionIds);
         if (empty($avgStopDelayList)) {
             echo "生成 usergroup avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
