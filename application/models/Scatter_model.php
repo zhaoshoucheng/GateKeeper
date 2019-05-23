@@ -7,6 +7,10 @@
 
 use Didi\Cloud\ItsMap\Track_vendor;
 
+/**
+ * Class Scatter_model
+ * @property \Timing_model $timing_model
+ */
 class Scatter_model extends CI_Model
 {
 

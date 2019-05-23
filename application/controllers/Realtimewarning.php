@@ -205,7 +205,7 @@ class Realtimewarning extends Inroute_Controller
             exit;
         }
 
-        // 实时报警城市验证
+        // 实时报警城市必须传递的uid
         $quotaCityIds = $this->quotaCityIds;
         if(in_array($cityId,$quotaCityIds) && !in_array($uid,["traj_index_pro","traffic_realtime_alarm"])){
             echo "uid 非预期! \n";
