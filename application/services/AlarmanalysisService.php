@@ -297,6 +297,7 @@ class AlarmanalysisService extends BaseService
         }
 
         /* 找出连续三小时报警最的大的TOP2 */
+        $countData = [];
         for ($i = 0; $i < $nowHour; $i++) {
             $value0 = $tempResData[$i] ?? 0;
             $value1 = $tempResData[($i+1)] ?? 0;
