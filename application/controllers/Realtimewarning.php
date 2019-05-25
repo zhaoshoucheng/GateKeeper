@@ -347,9 +347,9 @@ class Realtimewarning extends Inroute_Controller
             'trace_id' => $traceId,
             'uid' => $uid,
         ];
-        $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=task_handler doing\n\r";
+        $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=task_handler_doing\n\r";
         $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"pre_calculating", "log_time"=>date("Y-m-d H:i:s"),]);
+            "dltag"=>"task_handler_doing", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
         $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params, 600000);
         if (!$res) {
@@ -362,18 +362,18 @@ class Realtimewarning extends Inroute_Controller
             exit;
         }
 
-        $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=task_handler done\n\r";
+        $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=task_handler_done\n\r";
         $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"pre_calculating", "log_time"=>date("Y-m-d H:i:s"),]);
+            "dltag"=>"task_handler_done", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculating\n\r";
         $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"pre_calculating", "log_time"=>date("Y-m-d H:i:s"),]);
+            "dltag"=>"calculating", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
         $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId);
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculated\n\r";
         $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"pre_calculating", "log_time"=>date("Y-m-d H:i:s"),]);
+            "dltag"=>"calculated", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
         return true;
     }
