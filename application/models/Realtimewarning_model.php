@@ -288,13 +288,27 @@ class Realtimewarning_model extends CI_Model
              * 聚合路口数据
              * (路网数据、实时指标、报警数据) 路口列表合并报警信息,轨迹数大于5的报警路口
              */
-            $rfts = [];
-            foreach ($realTimeAlarmsInfoResult as $item) {
-                $rfts[$item['logic_flow_id'] . $item['type']] = $item;
-            }
-            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $rfts);
+            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal);
             $jDataList = $junctionList['dataList'] ?? [];
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getJunctionListResult\n\r";
+
+            /**
+             * 路口概览 确认和路口列表数据一致
+             */
+            $result = [];
+            $result['junction_total'] = $junctionTotal;
+            $result['alarm_total'] = 0;
+            $result['congestion_total'] = 0;
+            $result['amble_total'] = 0;
+            foreach ($jDataList as $datum) {
+                // 报警数
+                $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
+                // 拥堵数
+                $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
+                // 缓行数
+                $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
+            }
+            $junctionSurvey = $result;
 
             /**
              * 实时报警数据计算
@@ -314,22 +328,8 @@ class Realtimewarning_model extends CI_Model
             }
             $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realTimeAlarmsInfoResultCount=" . count($realTimeAlarmsInfoResult) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=realTimeAlarmsInfoResult_Count\n\r";
-            
-            //路口概览 确认和路口列表数据一致
-            $result = [];
-            $result['junction_total'] = $junctionTotal;
-            $result['alarm_total'] = 0;
-            $result['congestion_total'] = 0;
-            $result['amble_total'] = 0;
-            foreach ($jDataList as $datum) {
-                // 报警数
-                $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
-                // 拥堵数
-                $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
-                // 缓行数
-                $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
-            }
-            $junctionSurvey = $result;
+
+
             //<========计算缓存数据end==========
         }
 
@@ -486,23 +486,25 @@ class Realtimewarning_model extends CI_Model
      *
      * @return array
      */
-    private function getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo)
+    private function getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal)
     {
-        //获取全部路口 ID
-        //$ids = implode(',', array_unique(array_column($realtimeJunctionList, 'logic_junction_id')));
+        $realTimeAlarmsInfo = [];
+        foreach ($realTimeAlarmsInfoResultOrigal as $item) {
+            $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
+        }
 
         //获取路口信息的自定义返回格式
         $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0);
         $junctionsInfo = array_column($junctionsInfo, null, 'logic_junction_id');
 
         //获取需要报警的全部路口ID
-        $alarmJunctonIdArr = array_unique(array_column($realTimeAlarmsInfo, 'logic_junction_id'));
-        asort($alarmJunctonIdArr);
-        $ids = implode(',', $alarmJunctonIdArr);
+        $alarmJunctionIdArr = array_unique(array_column($realTimeAlarmsInfo, 'logic_junction_id'));
+        asort($alarmJunctionIdArr);
+        $alarmJunctionIDs = implode(',', $alarmJunctionIdArr);
 
         //获取需要报警的全部路口的全部方向的信息
         try {
-            $flowsInfo = $this->waymap_model->getFlowsInfo($ids,true);
+            $flowsInfo = $this->waymap_model->getFlowsInfo($alarmJunctionIDs,true);
         } catch (\Exception $e) {
             $flowsInfo = [];
         }
