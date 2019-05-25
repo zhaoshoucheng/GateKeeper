@@ -259,7 +259,7 @@ class Realtimewarning_model extends CI_Model
         $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour);
         if (empty($avgStopDelayList)) {
             $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id={$cityId}||date={$date}||hour={$hour}||traceId={$traceId}||didi_trace_id=" . get_traceid() . "||message=生成平均延误曲线数据 avg(stop_delay) group by hour failed!\n\r";
-            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"avgStopdelay", "log_time"=>date("Y-m-d H:i:s"),]);
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.avgStopdelay", "log_time"=>date("Y-m-d H:i:s"),]);
             echo $message;
             return;
         }
@@ -273,8 +273,8 @@ class Realtimewarning_model extends CI_Model
         if ($ctype == 0) {
             //获取实时指标数据
             $realtimeJunctionList = $this->realtime_model->getRealTimeJunctions($cityId, $date, $hour);
-            $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realtimeJunctionCount=" . count($realtimeJunctionList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getRealTimeJunctions\n\r";
-            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"getRealTimeJunctions", "log_time"=>date("Y-m-d H:i:s"),]);
+            $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realtimeJunctionCount=" . count($realtimeJunctionList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.getRealTimeIndex\n\r";
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.getRealTimeIndex", "log_time"=>date("Y-m-d H:i:s"),]);
             echo $message;
 
             /**
@@ -289,8 +289,8 @@ class Realtimewarning_model extends CI_Model
             sleep(20);
             $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
             com_log_notice('getRealTimeAlarmsInfoFromEs_Count', ["count"=>count($realTimeAlarmsInfoResultOrigal),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
-            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getRealTimeAlarmsInfoFromEs||grep_message=grep '_com_http_success' /home/xiaoju/php7/logs/cloud/itstool/didi.log | grep '_search' | grep '{$hour}' | grep 'city_id\":{\"query\":{$cityId},'\n\r";
-            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"getRealTimeAlarmsInfoFromEs", "log_time"=>date("Y-m-d H:i:s"),]);
+            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.getRealTimeAlarms||grep_message=grep '_com_http_success' /home/xiaoju/php7/logs/cloud/itstool/didi.log | grep '_search' | grep '{$hour}' | grep 'city_id\":{\"query\":{$cityId},'\n\r";
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.getRealTimeAlarms", "log_time"=>date("Y-m-d H:i:s"),]);
             echo $message;
 
             /**
@@ -299,8 +299,8 @@ class Realtimewarning_model extends CI_Model
              */
             $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal);
             $jDataList = $junctionList['dataList'] ?? [];
-            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getJunctionListResult\n\r";
-            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"getJunctionListResult", "log_time"=>date("Y-m-d H:i:s"),]);
+            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.getJunctionAggResult\n\r";
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.getJunctionAggResult", "log_time"=>date("Y-m-d H:i:s"),]);
             echo $message;
 
             /**
@@ -338,8 +338,8 @@ class Realtimewarning_model extends CI_Model
                 $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;
             }
             $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
-            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realTimeAlarmsInfoResultCount=" . count($realTimeAlarmsInfoResult) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=realTimeAlarmsInfoResult_Count\n\r";
-            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"realTimeAlarmsInfoResult_Count", "log_time"=>date("Y-m-d H:i:s"),]);
+            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realTimeAlarmsInfoResultCount=" . count($realTimeAlarmsInfoResult) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.realTimeAlarmsResult_Count\n\r";
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.realTimeAlarmsResult_Count", "log_time"=>date("Y-m-d H:i:s"),]);
             echo $message;
             //<========计算缓存数据end==========
         }
@@ -387,8 +387,8 @@ class Realtimewarning_model extends CI_Model
         $cityIds = $this->userperm_model->getCityidByGroup($groupId);
         $junctionIds = $this->userperm_model->getJunctionidByGroup($groupId, $cityId);
 
-        $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",", $cityIds) . "||group_id=" . $groupId . "||junctionIdNum=" . count($junctionIds) . "||trace_id=" . $traceId . "||message=dealGroupData\n\r";
-        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"dealGroupData", "log_time"=>date("Y-m-d H:i:s"),]);
+        $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",", $cityIds) . "||group_id=" . $groupId . "||junctionIdNum=" . count($junctionIds) . "||trace_id=" . $traceId . "||message=dealGroupData.start\n\r";
+        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"dealGroupData.start", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
 
         //有城市权限则路口数据为空
@@ -408,7 +408,7 @@ class Realtimewarning_model extends CI_Model
         $avgStopDelayList = $this->realtime_model->avgStopdelayByJunctionId($cityId, $date, $hour, $junctionIds);
         if (empty($avgStopDelayList)) {
             $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",", $cityIds) . "||group_id=" . $groupId . "||junctionIdNum=" . count($junctionIds) . "||trace_id=" . $traceId . "||message=生成 usergroup avg(stop_delay) group by hour failed!\n\r";
-            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"avgStopdelayByJunctionId", "log_time"=>date("Y-m-d H:i:s"),]);
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"dealGroupData.avgStopdelayByJunctionId", "log_time"=>date("Y-m-d H:i:s"),]);
             echo $message;
             $avgStopDelayList = [];
         }
