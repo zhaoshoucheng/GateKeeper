@@ -113,6 +113,36 @@ class AdaptLog extends MY_Controller{
         exit;
     }
 
+    public function junction()
+    {
+        if(!$this->access()){
+            echo "access deny";exit;
+        }
+        $params = $this->input->get(NULL,true);
+        $params["page_size"] = $params["page_size"]??100;
+        $params["trace_id"] = $params["trace_id"]??"";
+        $params["dltag"] = $params["dltag"]??"";
+        $params["rel_id"] = $params["rel_id"]??"";
+
+        $params["type"] = 1;
+        list($totalRow,$rowList)=$this->adaptionLogService->pageList($params);
+        $this->load->library('pagination');
+        $config['base_url'] = '/signalpro/api/AdaptLog/junction';
+        $config['attributes'] = array('class' => 'myclass');
+        $config['suffix'] = "&trace_id=".$params["trace_id"]."&dltag=".$params["dltag"]."&rel_id=".$params["rel_id"];
+        $config['total_rows'] = $totalRow;
+        $config['per_page'] = $params["page_size"];   //每页条数
+        $config['page_query_string'] = TRUE;
+        $this->pagination->initialize($config);
+
+        $data = [];
+        $data["page"] = $this->pagination->create_links();
+        $data["list"] = $rowList;
+        $data["rel_id"] = $params["rel_id"];
+        $data["trace_id"] = $params["trace_id"];
+        $this->load->view('adaptlog/junction',$data);
+        exit;
+    }
 
     public function timingReport()
     {
@@ -145,7 +175,7 @@ class AdaptLog extends MY_Controller{
         exit;
     }
 
-    public function junction()
+    public function alarmDetail()
     {
         if(!$this->access()){
             echo "access deny";exit;
@@ -159,7 +189,7 @@ class AdaptLog extends MY_Controller{
         $params["type"] = 1;
         list($totalRow,$rowList)=$this->adaptionLogService->pageList($params);
         $this->load->library('pagination');
-        $config['base_url'] = '/signalpro/api/AdaptLog/junction';
+        $config['base_url'] = '/signalpro/api/AdaptLog/alarmDetail';
         $config['attributes'] = array('class' => 'myclass');
         $config['suffix'] = "&trace_id=".$params["trace_id"]."&dltag=".$params["dltag"]."&rel_id=".$params["rel_id"];
         $config['total_rows'] = $totalRow;
@@ -172,7 +202,7 @@ class AdaptLog extends MY_Controller{
         $data["list"] = $rowList;
         $data["rel_id"] = $params["rel_id"];
         $data["trace_id"] = $params["trace_id"];
-        $this->load->view('adaptlog/junction',$data);
+        $this->load->view('adaptlog/alarmDetail',$data);
         exit;
     }
 

@@ -328,8 +328,6 @@ class Realtimewarning_model extends CI_Model
             }
             $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realTimeAlarmsInfoResultCount=" . count($realTimeAlarmsInfoResult) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=realTimeAlarmsInfoResult_Count\n\r";
-
-
             //<========计算缓存数据end==========
         }
 

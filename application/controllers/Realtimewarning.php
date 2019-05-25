@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Class Realtimewarning
  * @property \Realtimewarning_model $realtimewarning_model
+ * @property \Adapt_model $adapt_model
  * @property \Common_model $common_model
  */
 class Realtimewarning extends Inroute_Controller
@@ -17,6 +18,7 @@ class Realtimewarning extends Inroute_Controller
         $this->load->config('nconf');
         $this->load->model('redis_model');
         $this->load->model('common_model');
+        $this->load->model('adapt_model');
         $this->quotaCityIds = $this->common_model->getV5DMPCityID();
     }
 
@@ -252,8 +254,15 @@ class Realtimewarning extends Inroute_Controller
             echo "date 必须为日期! \n";
             exit;
         }
+
+
+
         //预先计算平均延误数据
-        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculating\n\r";
+        $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculating\n\r";
+        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
+            "dltag"=>"realtimewarning.Start", "log_time"=>date("Y-m-d H:i:s"),]);
+        echo $message;
+
         $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId, 1);
         echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculated\n\r";
 
