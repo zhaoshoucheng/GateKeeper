@@ -281,9 +281,7 @@ class Realtimewarning_model extends CI_Model
             //获取实时报警表数据
             sleep(20);
             $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
-
-            //验证自适应城市无指标
-            com_log_notice('getRealTimeAlarmsInfoFromEs_empty', ["count"=>count($realTimeAlarmsInfoResultOrigal),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
+            com_log_notice('getRealTimeAlarmsInfoFromEs_Count', ["count"=>count($realTimeAlarmsInfoResultOrigal),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getRealTimeAlarmsInfoFromEs||grep_message=grep '_com_http_success' /home/xiaoju/php7/logs/cloud/itstool/didi.log | grep '_search' | grep '{$hour}' | grep 'city_id\":{\"query\":{$cityId},'\n\r";
 
             /**
@@ -296,12 +294,13 @@ class Realtimewarning_model extends CI_Model
             }
             $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $rfts);
             $jDataList = $junctionList['dataList'] ?? [];
-            $junctionIDS = $junctionList['dataList'] ? array_column($junctionList['dataList'],"jid") : [];
-
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getJunctionListResult\n\r";
+            
             /**
              * 实时报警数据计算
              * 可能轨迹数小于5-所以里的逻辑应该后置
              */
+            $junctionIDS = $junctionList['dataList'] ? array_column($junctionList['dataList'],"jid") : [];
             $realTimeAlarmsInfoResult = [];
             foreach ($realTimeAlarmsInfoResultOrigal as $item) {
                 //济南屏蔽持续时间小于3分钟的报警
@@ -314,7 +313,7 @@ class Realtimewarning_model extends CI_Model
                 $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;
             }
             $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
-            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getJunctionListResult\n\r";
+            com_log_notice('$realTimeAlarmsInfoResult_Count', ["count"=>count($realTimeAlarmsInfoResult),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
 
             //路口概览 确认和路口列表数据一致
             $result = [];
