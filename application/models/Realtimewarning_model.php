@@ -295,7 +295,7 @@ class Realtimewarning_model extends CI_Model
             $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $rfts);
             $jDataList = $junctionList['dataList'] ?? [];
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getJunctionListResult\n\r";
-            
+
             /**
              * 实时报警数据计算
              * 可能轨迹数小于5-所以里的逻辑应该后置
@@ -313,8 +313,8 @@ class Realtimewarning_model extends CI_Model
                 $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;
             }
             $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
-            com_log_notice('$realTimeAlarmsInfoResult_Count', ["count"=>count($realTimeAlarmsInfoResult),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
-
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realTimeAlarmsInfoResultCount=" . count($realTimeAlarmsInfoResult) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=realTimeAlarmsInfoResult_Count\n\r";
+            
             //路口概览 确认和路口列表数据一致
             $result = [];
             $result['junction_total'] = $junctionTotal;
