@@ -186,7 +186,7 @@ class AdaptLog extends MY_Controller{
         $params["dltag"] = $params["dltag"]??"";
         $params["rel_id"] = $params["rel_id"]??"";
 
-        $params["type"] = 1;
+        $params["type"] = 4;
         list($totalRow,$rowList)=$this->adaptionLogService->pageList($params);
         $this->load->library('pagination');
         $config['base_url'] = '/signalpro/api/AdaptLog/alarmDetail';
