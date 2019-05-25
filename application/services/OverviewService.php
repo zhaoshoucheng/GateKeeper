@@ -817,7 +817,6 @@ class OverviewService extends BaseService
             return [];
         }
         $result = [];
-
         // 需要获取路口name的路口ID串
         $alarmJunctonIdArr = array_unique(array_column($res, 'logic_junction_id'));
         asort($alarmJunctonIdArr);
