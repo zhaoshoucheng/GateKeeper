@@ -80,7 +80,7 @@ class Adapt_model extends CI_Model
         //筛选第1000条数据
         $result = $this->db->select('*')
             ->from('adapt_timing_log')
-            ->limit(1,999)
+            ->limit(1,19999)
             ->order_by("id asc")
             ->get()
             ->result_array();

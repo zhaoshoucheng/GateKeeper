@@ -1118,7 +1118,7 @@ class TimingAdaptionAreaService extends BaseService
         if(ENVIRONMENT=="development"){
             $esUrl = 'http://10.85.128.208:8001/api/data/estimate/scatter/query';
         }
-        
+
         $detail = httpPOST($esUrl, $esData, 0, 'json');
         if (!$detail) {
             $result['errmsg'] = '调用es接口 获取散点图 失败！';
