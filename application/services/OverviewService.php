@@ -11,8 +11,9 @@ namespace Services;
 use Didi\Cloud\Collection\Collection;
 
 /**
- * Class OverviewService
+ * Class OverviewService  alarmanalysis_model
  * @package Services
+ * @property \Alarmanalysis_model   $alarmanalysis_model
  * @property \Realtime_model      $realtime_model
  */
 class OverviewService extends BaseService
