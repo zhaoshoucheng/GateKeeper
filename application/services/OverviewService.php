@@ -136,13 +136,6 @@ class OverviewService extends BaseService
             $data['center']['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
             $data['center']['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
         }
-
-        $alarmCount = 0;
-        foreach ($data["dataList"] as $item){
-            if($item["alarm"]["is"]){
-                $alarmCount++;
-            }
-        }
         return $data ? $data : [];
     }
 

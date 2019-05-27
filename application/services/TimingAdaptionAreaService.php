@@ -747,6 +747,9 @@ class TimingAdaptionAreaService extends BaseService
             ];
 
             $esUrl = $this->config->item('new_es_interface') . '/estimate/space/query';
+            if(ENVIRONMENT=="development"){
+                $esUrl = 'http://10.85.128.208:8001/api/data/estimate/space/query';
+            }
 
             $cycleLength = $allTimingInfo['cycle'];
             if (empty($cycleLength)) {
@@ -825,6 +828,9 @@ class TimingAdaptionAreaService extends BaseService
         ];
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/space/query';
+        if(ENVIRONMENT=="development"){
+            $esUrl = 'http://10.85.128.208:8001/api/data/estimate/space/query';
+        }
 
         $cycleLength = $timingInfo['cycle'];
         $offset = $timingInfo['offset'];
@@ -1109,7 +1115,10 @@ class TimingAdaptionAreaService extends BaseService
         ];
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/scatter/query';
-
+        if(ENVIRONMENT=="development"){
+            $esUrl = 'http://10.85.128.208:8001/api/data/estimate/scatter/query';
+        }
+        
         $detail = httpPOST($esUrl, $esData, 0, 'json');
         if (!$detail) {
             $result['errmsg'] = '调用es接口 获取散点图 失败！';
@@ -1226,6 +1235,9 @@ class TimingAdaptionAreaService extends BaseService
         ];
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/queue/query';
+        if(ENVIRONMENT=="development"){
+            $esUrl = 'http://10.85.128.208:8001/api/data/estimate/queue/query';
+        }
 
         $detail = httpPOST($esUrl, $esData, 0, 'json');
         if (!$detail) {
