@@ -305,12 +305,15 @@ class Realtimewarning_model extends CI_Model
 
             /**
              * 路口概览 确认和路口列表数据一致
+             *
+             * 此处获取轨迹数>5的报警路口
              */
             $result = [];
             $result['junction_total'] = $junctionTotal;
             $result['alarm_total'] = 0;
             $result['congestion_total'] = 0;
             $result['amble_total'] = 0;
+            $alarmJunctionIDS = [];
             foreach ($jDataList as $datum) {
                 // 报警数
                 $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
@@ -318,6 +321,10 @@ class Realtimewarning_model extends CI_Model
                 $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
                 // 缓行数
                 $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
+
+                if(isset($datum['alarm']['is']) && $datum['alarm']['is']){
+                    $alarmJunctionIDS[] = $datum["jid"];
+                }
             }
             $junctionSurvey = $result;
 
@@ -325,14 +332,13 @@ class Realtimewarning_model extends CI_Model
              * 实时报警数据计算
              * 可能轨迹数小于5-所以里的逻辑应该后置
              */
-            $junctionIDS = $junctionList['dataList'] ? array_column($junctionList['dataList'],"jid") : [];
             $realTimeAlarmsInfoResult = [];
             foreach ($realTimeAlarmsInfoResultOrigal as $item) {
                 //济南屏蔽持续时间小于3分钟的报警
                 if ($cityId == "12" && strtotime($item["last_time"]) - strtotime($item["start_time"]) < 180) {
                     continue;
                 }
-                if (!in_array($item["logic_junction_id"],$junctionIDS)){
+                if (!in_array($item["logic_junction_id"],$alarmJunctionIDS)){
                     continue;
                 }
                 $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;

@@ -135,6 +135,13 @@ class OverviewService extends BaseService
             $data['center']['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
             $data['center']['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
         }
+
+        $alarmCount = 0;
+        foreach ($data["dataList"] as $item){
+            if($item["alarm"]["is"]){
+                $alarmCount++;
+            }
+        }
         return $data ? $data : [];
     }
 
@@ -807,16 +814,28 @@ class OverviewService extends BaseService
      * @return array
      * @throws \Exception
      */
-    public function realTimeAlarmList($params)
+    public function realTimeAlarmList($params,$userPerm=[])
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
+
+        if(!empty($userPerm)){
+            $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+            $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+            if(in_array($cityId,$cityIds)){
+                $junctionIds = [];
+            }
+            if(!in_array($cityId,$cityIds) && empty($junctionIds)){
+                return [];
+            }
+        }
 
         $res = $this->alarmanalysis_model->getRealTimeAlarmsInfo($cityId, $date);
         if (!$res || empty($res)) {
             return [];
         }
         $result = [];
+
         // 需要获取路口name的路口ID串
         $alarmJunctonIdArr = array_unique(array_column($res, 'logic_junction_id'));
         asort($alarmJunctonIdArr);
@@ -832,17 +851,18 @@ class OverviewService extends BaseService
         // 获取路口信息
         $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0);
         $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
-
-        // 报警类别
         $alarmCate = $this->config->item('flow_alarm_category');
 
         foreach ($res as $k => $val) {
-            // 持续时间
             $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
             if ($durationTime < 1) {
                 $durationTime = 2;
             }
 
+            //无权限路口数据跳过
+            if(!empty($junctionIds) && !in_array($val["logic_junction_id"],$junctionIds)){
+                continue;
+            }
             if (!empty($junctionIdName[$val['logic_junction_id']])
                 && !empty($flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']])) {
                 $result['dataList'][$k] = [

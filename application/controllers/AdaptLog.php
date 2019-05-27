@@ -43,8 +43,8 @@ class AdaptLog extends MY_Controller{
         }
         $params["junction_id"] = $params["junction_id"];
         $params["trace_id"] = $params["trace_id"];
-        $qurl = $this->config->item('signal_light_interface')."/profile/rollback?junctionId=".$params["junction_id"];
-        $ret = httpGET($qurl,[],2000);
+        $qurl = $this->config->item('signal_rollback_url');
+        $ret = httpPOST($qurl,["logic_junction_id"=>$params["junction_id"]],2000,"json");
         $message =  "rollback url=".$qurl."||client_ip=".$_SERVER["REMOTE_ADDR"]."||status=".json_encode($ret);
         echo $message." <a href='javascript:history.back(-1);'>返回</a>";
 
@@ -208,7 +208,7 @@ class AdaptLog extends MY_Controller{
 
     public function insert()
     {
-        return $this->insertMq();
+        //return $this->insertMq();
         $params = $this->input->post(NULL,true);
         $this->validate([
             'type' => 'trim|required|min_length[1]',

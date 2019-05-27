@@ -51,6 +51,8 @@ if ($development == 2) {
     // signal_light
     $signal_light_server = 'http://10.88.128.40:8000/ipd-cloud/signal-platform';
 
+    $signal_rollback_url = "http://10.85.128.81:30357/signal-control/signalprofile/rollback";
+
     // es 老实时轨迹、指标数据
     $es_server = 'http://10.85.128.208:8001';
 
@@ -131,6 +133,9 @@ if ($development == 2) {
 
     // signal_light
     $signal_light_server = 'http://10.148.28.204:8001';
+
+    // signal_rollback
+    $signal_rollback_url = "http://100.90.164.31:8016/signal-control/signalprofile/rollback";
 
     // es
     $es_server = 'http://10.89.236.25:8087';
@@ -216,6 +221,9 @@ $config['signal_mis_interface'] = 'http://' . $signal_mis_server . $signal_mis_p
 
 // signal-light接口地址
 $config['signal_light_interface'] = $signal_light_server;
+
+// signal_rollback
+$config['signal_rollback_url'] = $signal_rollback_url;
 
 // 实时指标接口地址
 $config['es_interface'] = $es_server;
