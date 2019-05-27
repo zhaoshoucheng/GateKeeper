@@ -221,7 +221,7 @@ class AdpAreaService extends BaseService
         } else {
             $areaJunctionList = $this->adpArea_model->getJunctions($junction_ids);
             $oldJunctionIds = array_map(function($item){
-                return $item['logic_id'];
+                return $item['logic_junction_id'];
             },$areaJunctionList);
         }
 
