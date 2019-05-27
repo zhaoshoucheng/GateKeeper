@@ -23,7 +23,7 @@ class Adapt_model extends CI_Model
     {
         parent::__construct();
 
-        $this->db = $this->load->database('default', true);
+        $this->db = $this->load->database('its_trace_log', true);
 
         $isExisted = $this->db->table_exists($this->tb);
 
@@ -77,10 +77,10 @@ class Adapt_model extends CI_Model
      */
     public function deleteAdaptLog($deleteDay="-3 day")
     {
-        //筛选第1000条数据
+        //筛选第100000条数据
         $result = $this->db->select('*')
             ->from('adapt_timing_log')
-            ->limit(1,19999)
+            ->limit(1,99999)
             ->order_by("id asc")
             ->get()
             ->result_array();
