@@ -148,3 +148,11 @@ $config['junction_question'] = [
         "quota_name"=>"失衡问题趋势",
     ],
 ];
+
+// 定义指标标签阈值
+$config['movement_quota_flag'] = [
+    'stop_delay'     => 40, // 延误时间40s
+    'queue_length'   => 140, // 排队长度140m
+    'spillover_rate' => 0.2,
+    'stop_rate'      => 0.9,
+];
