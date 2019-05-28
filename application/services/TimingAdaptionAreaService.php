@@ -1022,7 +1022,7 @@ class TimingAdaptionAreaService extends BaseService
                             'start_time'=>$startTime,
                             'duration'=>$stageLenMap[$tv['sequence_num']]+$stageLenMap[$tv['sequence_num']-1],
                         );
-                        $res['movement_timing'][] = $tmpMovementTiming;
+                        $res['green'][] = $tmpMovementTiming;
 
                     }else{
                         $startTime=0;
@@ -1039,7 +1039,7 @@ class TimingAdaptionAreaService extends BaseService
                             'start_time'=>$startTime,
                             'duration'=>$stageLenMap[$tv['sequence_num']],
                         );
-                        $res['movement_timing'][] = $tmpMovementTiming;
+                        $res['green'][] = $tmpMovementTiming;
                     }
 
 
@@ -1129,36 +1129,54 @@ class TimingAdaptionAreaService extends BaseService
         $currentTimingListRedisKey = sprintf("schedule_junction_current_timing_list_%s", $data["logic_junction_id"]);
         $currentTimingList = $this->redis_model->lrange($currentTimingListRedisKey);
         $flowTimingCurve = [];
+        $phaseMap = [];
         if (!empty($currentTimingList)) {
             foreach ($currentTimingList as $val) {
                 list($ctime, $cdata) = explode("||", $val);
                 //当天数据
                 if (strtotime($ctime) > strtotime(date("Y-m-d"))) {
                     $cjson = json_decode($cdata, true);
-                    $movementTiming = $cjson["data"]["tod"]["0"]["movement_timing"]??[];
-                    $cycle = $cjson["data"]["tod"]["0"]["extra_time"]["cycle"]??0;
-                    $offset = $cjson["data"]["tod"]["0"]["extra_time"]["offset"]??0;
-                    if (!empty($movementTiming)) {
-                        foreach ($movementTiming as $flowTiming) {
-                            if ($flowTiming["flow"]["logic_flow_id"] == $data["logic_flow_id"]) {
-                                $green = $flowTiming["timing"][0]["duration"]??0;
-                                $yellow = $flowTiming["yellow"]??0;
-                                if (isset($flowTimingCurve[date("H:i", strtotime($ctime))])) {
-                                    $flowTimingCurve[date("H:i", strtotime($ctime))]["green"] += $green;
-                                } else {
-                                    $flowTimingCurve[date("H:i", strtotime($ctime))] = [
-                                        "yellow" => $yellow,
-                                        "green" => $green,
-                                        "cycle" => $cycle,
-                                        "offset" => $offset,
-                                    ];
+                    list($timingInfo) = $cjson['data']['schedule'][0]["tod"] ?? [""];
+                    if (empty($timingInfo)) {
+                        return [];
+                    }
+
+
+                    $cycle = $timingInfo["cycle"]??0;
+                    $offset = $timingInfo["offset"]??0;
+                    foreach ($timingInfo['vehicle_phase'] as $tk=>$tv){
+                        if (empty($tv['flow_info'])) {
+                            continue;
+                        }
+
+                        foreach ($tv['flow_info'] as $fk=>$fv){
+                                if($fv['logic_flow_id'] == $data['logic_flow_id'] ){
+
+                                    $green = $tv['end_time']-$tv['start_time']-3;
+                                     if (isset($flowTimingCurve[date("H:i", strtotime($ctime))]) && !isset($phaseMap[$tv['phase_num']."_".$tv['sequence_num']."_".date("H:i", strtotime($ctime))])) {
+
+                                        $flowTimingCurve[date("H:i", strtotime($ctime))]["green"] += $green;
+
+
+                                     } else {
+                                        $flowTimingCurve[date("H:i", strtotime($ctime))] = [
+                                            "yellow" => 3,
+                                            "green" => $green,
+                                            "cycle" => $cycle,
+                                            "offset" => $offset,
+                                        ];
+                                    }
+                                    $phaseMap[$tv['phase_num']."_".$tv['sequence_num']."_".date("H:i", strtotime($ctime))] = 1;
+
+
                                 }
                             }
                         }
                     }
+
                 }
-            }
         }
+
         return $flowTimingCurve;
     }
 
