@@ -1129,6 +1129,7 @@ class TimingAdaptionAreaService extends BaseService
         $currentTimingListRedisKey = sprintf("schedule_junction_current_timing_list_%s", $data["logic_junction_id"]);
         $currentTimingList = $this->redis_model->lrange($currentTimingListRedisKey);
         $flowTimingCurve = [];
+        $phaseMap = [];
         if (!empty($currentTimingList)) {
             foreach ($currentTimingList as $val) {
                 list($ctime, $cdata) = explode("||", $val);
@@ -1149,18 +1150,20 @@ class TimingAdaptionAreaService extends BaseService
                         }
 
                         foreach ($tv['flow_info'] as $fk=>$fv){
-                                if($fv['logic_flow_id'] == $data['logic_flow_id']){
-                                    $green = $tv['end_time']-$tv['start_time'];
+                                if($fv['logic_flow_id'] == $data['logic_flow_id'] && !isset($phaseMap[$tv['phase_num']+"_"+$tv['sequence_num']])){
+
+                                    $green = $tv['end_time']-$tv['start_time']-$tv['yellow'];
                                      if (isset($flowTimingCurve[date("H:i", strtotime($ctime))])) {
                                         $flowTimingCurve[date("H:i", strtotime($ctime))]["green"] += $green;
                                     } else {
                                         $flowTimingCurve[date("H:i", strtotime($ctime))] = [
-                                            "yellow" => 3,
+                                            "yellow" => $tv['yellow'],
                                             "green" => $green,
                                             "cycle" => $cycle,
                                             "offset" => $offset,
                                         ];
                                     }
+                                    $phaseMap[$tv['phase_num']+"_"+$tv['sequence_num']] = 1;
 
                                 }
                             }
