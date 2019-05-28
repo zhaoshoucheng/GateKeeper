@@ -237,7 +237,7 @@ class AdaptLog extends MY_Controller{
             'log_time' => 'trim|required|min_length[1]',
         ]);
         //$result = $this->adapt_model->insertAdaptLog($params);
-        $result = asyncCallFunc("adapt_model","insertAdaptLog",[$params]);
+        $result = asyncCallFunc("adaptlog","insertAdaptLog",[$params]);
         return $this->response($result);
     }
 }

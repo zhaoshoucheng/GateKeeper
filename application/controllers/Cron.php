@@ -16,6 +16,7 @@ use Services\RoadService;
 /**
  * Class Cron
  * @property \Redis_model          $redis_model
+ * @property \Adapt_model          $adapt_model
  */
 class Cron extends CI_Controller
 {
