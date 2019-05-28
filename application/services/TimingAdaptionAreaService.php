@@ -1150,7 +1150,7 @@ class TimingAdaptionAreaService extends BaseService
                         }
 
                         foreach ($tv['flow_info'] as $fk=>$fv){
-                                if($fv['logic_flow_id'] == $data['logic_flow_id'] && !isset($phaseMap[$tv['phase_num']+"_"+$tv['sequence_num']])){
+                                if($fv['logic_flow_id'] == $data['logic_flow_id'] && !isset( $phaseMap[$tv['phase_num']+"_"+$tv['sequence_num']+"_"+date("H:i", strtotime($ctime))])){
 
                                     $green = $tv['end_time']-$tv['start_time']-$tv['yellow'];
                                      if (isset($flowTimingCurve[date("H:i", strtotime($ctime))])) {
@@ -1163,7 +1163,7 @@ class TimingAdaptionAreaService extends BaseService
                                             "offset" => $offset,
                                         ];
                                     }
-                                    $phaseMap[$tv['phase_num']+"_"+$tv['sequence_num']] = 1;
+                                    $phaseMap[$tv['phase_num']+"_"+$tv['sequence_num']+"_"+date("H:i", strtotime($ctime))] = 1;
 
                                 }
                             }
