@@ -1150,7 +1150,7 @@ class TimingAdaptionAreaService extends BaseService
 
                         foreach ($tv['flow_info'] as $fk=>$fv){
                                 if($fv['logic_flow_id'] == $data['logic_flow_id']){
-                                    $green = $fv['end_time']-$fv['start_time'];
+                                    $green = $tv['end_time']-$tv['start_time'];
                                      if (isset($flowTimingCurve[date("H:i", strtotime($ctime))])) {
                                         $flowTimingCurve[date("H:i", strtotime($ctime))]["green"] += $green;
                                     } else {
