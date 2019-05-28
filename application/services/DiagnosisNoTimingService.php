@@ -54,6 +54,17 @@ class DiagnosisNoTimingService extends BaseService
         //movements从路网获取方向信息
         $result["movements"] = $this->diagnosisNoTiming_model->getMovementQuota(
             $params['city_id'], $params['junction_id'], $timePoints, $params['dates']);
+        $quotaFlagThreshold = $this->config->item('movement_quota_flag');
+        foreach ($result["movements"] as &$movQuota) {
+            foreach ($quotaFlagThreshold as $quota => $threshold) {
+                $tag = $quota . "_flag";
+                if (isset($movQuota[$quota]) && $movQuota[$quota] > $threshold) {
+                    $movQuota[$tag] = 1;
+                } else {
+                    $movQuota[$tag] = 0;
+                }
+            }
+        }
 
         $result["junction_id"] = $params["junction_id"];
         return $result;
