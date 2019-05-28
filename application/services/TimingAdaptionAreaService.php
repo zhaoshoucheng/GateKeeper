@@ -1226,8 +1226,8 @@ class TimingAdaptionAreaService extends BaseService
                     }
                     $cycle = $timingInfo["cycle"]??0;
                     $offset = $timingInfo["offset"]??0;
-                    foreach ($res as $rk=>$rv){
-                        $green = $rv['green'];
+                    foreach ($res['green'] as $rk=>$rv){
+                        $green = $rv['duration'];
                         if (isset($flowTimingCurve[date("H:i", strtotime($ctime))])) {
                                     $flowTimingCurve[date("H:i", strtotime($ctime))]["green"] += $green;
                                 } else {
@@ -1238,7 +1238,7 @@ class TimingAdaptionAreaService extends BaseService
                                         "offset" => $offset,
                                     ];
                                 }
-                        $flowTimingCurve[date("H:i", strtotime($ctime))]["green"] += $rv['green'];
+                        $flowTimingCurve[date("H:i", strtotime($ctime))]["green"] += $rv['duration'];
                     }
 
                 }
