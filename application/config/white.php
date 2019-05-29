@@ -58,6 +58,9 @@ $config['white_token_clientip_escape'] = [
     '10.160.96.161' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"], // 配时服务
     '10.160.131.159' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"], // 配时服务
     '10.160.96.160' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"], // 配时服务
+
+    '100.70.160.62' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"], // 安全中心
+    '100.90.165.32' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"], // 安全中心
 ];
 
 // diyu内网token就可以登陆,仅限内网访问
