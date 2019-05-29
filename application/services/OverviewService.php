@@ -11,8 +11,9 @@ namespace Services;
 use Didi\Cloud\Collection\Collection;
 
 /**
- * Class OverviewService
+ * Class OverviewService  alarmanalysis_model
  * @package Services
+ * @property \Alarmanalysis_model   $alarmanalysis_model
  * @property \Realtime_model      $realtime_model
  */
 class OverviewService extends BaseService
@@ -807,10 +808,21 @@ class OverviewService extends BaseService
      * @return array
      * @throws \Exception
      */
-    public function realTimeAlarmList($params)
+    public function realTimeAlarmList($params,$userPerm=[])
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
+
+        if(!empty($userPerm)){
+            $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+            $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+            if(in_array($cityId,$cityIds)){
+                $junctionIds = [];
+            }
+            if(!in_array($cityId,$cityIds) && empty($junctionIds)){
+                return [];
+            }
+        }
 
         $res = $this->alarmanalysis_model->getRealTimeAlarmsInfo($cityId, $date);
         if (!$res || empty($res)) {
@@ -833,17 +845,18 @@ class OverviewService extends BaseService
         // 获取路口信息
         $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0);
         $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
-
-        // 报警类别
         $alarmCate = $this->config->item('flow_alarm_category');
 
         foreach ($res as $k => $val) {
-            // 持续时间
             $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
             if ($durationTime < 1) {
                 $durationTime = 2;
             }
 
+            //无权限路口数据跳过
+            if(!empty($junctionIds) && !in_array($val["logic_junction_id"],$junctionIds)){
+                continue;
+            }
             if (!empty($junctionIdName[$val['logic_junction_id']])
                 && !empty($flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']])) {
                 $result['dataList'][$k] = [

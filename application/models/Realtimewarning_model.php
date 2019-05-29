@@ -13,6 +13,7 @@
  * @property \Waymap_model   $waymap_model
  * @property \Alarmanalysis_model $alarmanalysis_model
  * @property \Userperm_model $userperm_model
+ * @property \Adapt_model $adapt_model
  */
 class Realtimewarning_model extends CI_Model
 {
@@ -41,6 +42,7 @@ class Realtimewarning_model extends CI_Model
         $this->load->model('alarmanalysis_model');
         $this->load->model('realtime_model');
         $this->load->model('userperm_model');
+        $this->load->model('adapt_model');
     }
 
     public function process($cityId, $date, $hour, $traceId)
@@ -209,7 +211,6 @@ class Realtimewarning_model extends CI_Model
         if (in_array($cityId, $cityIds)) {
             $junctionIds = [];
         }
-
         $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour, $junctionIds);
         if (empty($avgStopDelayList)) {
             echo "生成 usergroup avg(stop_delay) group by hour failed!\n\r{$cityId} {$date} {$hour}\n\r";
@@ -253,11 +254,13 @@ class Realtimewarning_model extends CI_Model
         //高优先级设置
         $this->redis_model->setEx($lastScheduleKey, $hour, 24 * 3600);
 
-        //生成平均延误曲线数据
-        //因为ES直接查询当天所有批次会影响到集群（真弱鸡！）所有要每次只取一个批次进行追加缓存。
+        //平均延误曲线数据
+        //每次只取一个批次进行追加缓存。
         $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour);
         if (empty($avgStopDelayList)) {
-            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id={$cityId}||date={$date}||hour={$hour}||traceId={$traceId}||didi_trace_id=" . get_traceid() . "||message=生成平均延误曲线数据 avg(stop_delay) group by hour failed!\n\r";
+            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id={$cityId}||date={$date}||hour={$hour}||traceId={$traceId}||didi_trace_id=" . get_traceid() . "||message=生成平均延误曲线数据 avg(stop_delay) group by hour failed!\n\r";
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.avgStopdelay", "log_time"=>date("Y-m-d H:i:s"),]);
+            echo $message;
             return;
         }
         $esStopDelay = $this->redis_model->getData($avgStopDelayKey);
@@ -270,51 +273,48 @@ class Realtimewarning_model extends CI_Model
         if ($ctype == 0) {
             //获取实时指标数据
             $realtimeJunctionList = $this->realtime_model->getRealTimeJunctions($cityId, $date, $hour);
-            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realtimeJunctionCount=" . count($realtimeJunctionList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getRealTimeJunctions\n\r";
-            //计算路口总数
-            //为什么拿原始数据来计算，是因为如果处理后再统计，因为有的路口不在路网，
-            //会导致丢失，这样就和拥堵概览的路口总数匹配不上了
+            $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realtimeJunctionCount=" . count($realtimeJunctionList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.getRealTimeIndex\n\r";
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.getRealTimeIndex", "log_time"=>date("Y-m-d H:i:s"),]);
+            echo $message;
+
+            /**
+             * 计算路口总数
+             * 为什么拿原始数据来计算，是因为如果处理后再统计，因为有的路口不在路网，
+             * 会导致丢失，这样就和拥堵概览的路口总数匹配不上了
+             */
             $countData = array_column($realtimeJunctionList, 'traj_count', 'logic_junction_id');
             $junctionTotal = count($countData);
 
             //获取实时报警表数据
-            $data['date'] = $date;
-            $data['city_id'] = $cityId;
-            sleep(10);   //防止延迟数据读取为0
+            sleep(20);
             $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
+            com_log_notice('getRealTimeAlarmsInfoFromEs_Count', ["count"=>count($realTimeAlarmsInfoResultOrigal),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
+            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.getRealTimeAlarms||grep_message=grep '_com_http_success' /home/xiaoju/php7/logs/cloud/itstool/didi.log | grep '_search' | grep '{$hour}' | grep 'city_id\":{\"query\":{$cityId},'\n\r";
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.getRealTimeAlarms", "log_time"=>date("Y-m-d H:i:s"),]);
+            echo $message;
 
-            //验证自适应城市无指标
-            com_log_notice('getRealTimeAlarmsInfoFromEs_empty', ["count"=>count($realTimeAlarmsInfoResultOrigal),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
-            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getRealTimeAlarmsInfoFromEs||grep_message=grep '_com_http_success' /home/xiaoju/php7/logs/cloud/itstool/didi.log | grep 'arius' | grep '{$hour}' | grep 'city_id\":{\"query\":{$cityId},'\n\r";
-            //实时报警信息 - flow粒度
-            $realTimeAlarmsInfoResult = [];
-            foreach ($realTimeAlarmsInfoResultOrigal as $item) {
-                //济南屏蔽持续时间小于3分钟的报警
-                if ($cityId == "12" && strtotime($item["last_time"]) - strtotime($item["start_time"]) < 180) {
-                    continue;
-                }
-                $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;
-            }
-            $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
-
-
-            //聚合路口数据(路网数据、实时指标、报警数据)
-            $realTimeAlarmsInfo = [];
-            foreach ($realTimeAlarmsInfoResult as $item) {
-                $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
-            }
-            //路口列表合并报警信息
-            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo);
+            /**
+             * 聚合路口数据
+             * (路网数据、实时指标、报警数据) 路口列表合并报警信息
+             *
+             * 轨迹数大于5的报警路口
+             * 过滤济南持续时间<3分钟数据
+             */
+            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal);
             $jDataList = $junctionList['dataList'] ?? [];
+            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.getJunctionAggResult\n\r";
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.getJunctionAggResult", "log_time"=>date("Y-m-d H:i:s"),]);
+            echo $message;
 
-            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=getJunctionListResult\n\r";
-
-            //路口概览 确认和路口列表数据一致
+            /**
+             * 路口概览 确认和路口列表数据一致
+             */
             $result = [];
             $result['junction_total'] = $junctionTotal;
             $result['alarm_total'] = 0;
             $result['congestion_total'] = 0;
             $result['amble_total'] = 0;
+            $alarmJunctionIDS = [];
             foreach ($jDataList as $datum) {
                 // 报警数
                 $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
@@ -322,8 +322,27 @@ class Realtimewarning_model extends CI_Model
                 $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
                 // 缓行数
                 $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
+
+                if(isset($datum['alarm']['is']) && $datum['alarm']['is']){
+                    $alarmJunctionIDS[] = $datum["jid"];
+                }
             }
             $junctionSurvey = $result;
+
+            /**
+             * 实时报警数据计算
+             */
+            $realTimeAlarmsInfoResult = [];
+            foreach ($realTimeAlarmsInfoResultOrigal as $item) {
+                if (!in_array($item["logic_junction_id"],$alarmJunctionIDS)){
+                    continue;
+                }
+                $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;
+            }
+            $realTimeAlarmsInfoResult = array_values($realTimeAlarmsInfoResult);
+            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realTimeAlarmsInfoResultCount=" . count($realTimeAlarmsInfoResult) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.realTimeAlarmsResult_Count\n\r";
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.realTimeAlarmsResult_Count", "log_time"=>date("Y-m-d H:i:s"),]);
+            echo $message;
             //<========计算缓存数据end==========
         }
 
@@ -370,7 +389,9 @@ class Realtimewarning_model extends CI_Model
         $cityIds = $this->userperm_model->getCityidByGroup($groupId);
         $junctionIds = $this->userperm_model->getJunctionidByGroup($groupId, $cityId);
 
-        echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",", $cityIds) . "||group_id=" . $groupId . "||junctionIdNum=" . count($junctionIds) . "||trace_id=" . $traceId . "||message=dealGroupData\n\r";
+        $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",", $cityIds) . "||group_id=" . $groupId . "||junctionIdNum=" . count($junctionIds) . "||trace_id=" . $traceId . "||message=dealGroupData.start\n\r";
+        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"dealGroupData.start", "log_time"=>date("Y-m-d H:i:s"),]);
+        echo $message;
 
         //有城市权限则路口数据为空
         if (in_array($cityId, $cityIds)) {
@@ -388,7 +409,9 @@ class Realtimewarning_model extends CI_Model
         //因为ES直接查询当天所有批次会影响到集群（真弱鸡！）所有要每次只取一个批次进行追加缓存。
         $avgStopDelayList = $this->realtime_model->avgStopdelayByJunctionId($cityId, $date, $hour, $junctionIds);
         if (empty($avgStopDelayList)) {
-            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",", $cityIds) . "||group_id=" . $groupId . "||junctionIdNum=" . count($junctionIds) . "||trace_id=" . $traceId . "||message=生成 usergroup avg(stop_delay) group by hour failed!\n\r";
+            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||cityIds=" . implode(",", $cityIds) . "||group_id=" . $groupId . "||junctionIdNum=" . count($junctionIds) . "||trace_id=" . $traceId . "||message=生成 usergroup avg(stop_delay) group by hour failed!\n\r";
+            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"dealGroupData.avgStopdelayByJunctionId", "log_time"=>date("Y-m-d H:i:s"),]);
+            echo $message;
             $avgStopDelayList = [];
         }
         $esStopDelay = $this->redis_model->getData($avgStopDelayKey);
@@ -480,23 +503,29 @@ class Realtimewarning_model extends CI_Model
      *
      * @return array
      */
-    private function getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo)
+    private function getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal)
     {
-        //获取全部路口 ID
-        //$ids = implode(',', array_unique(array_column($realtimeJunctionList, 'logic_junction_id')));
+        $realTimeAlarmsInfo = [];
+        foreach ($realTimeAlarmsInfoResultOrigal as $item) {
+            //过滤济南<3分钟数据
+            if ($cityId == "12" && strtotime($item["last_time"]) - strtotime($item["start_time"]) < 180) {
+                continue;
+            }
+            $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
+        }
 
         //获取路口信息的自定义返回格式
         $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0);
         $junctionsInfo = array_column($junctionsInfo, null, 'logic_junction_id');
 
         //获取需要报警的全部路口ID
-        $alarmJunctonIdArr = array_unique(array_column($realTimeAlarmsInfo, 'logic_junction_id'));
-        asort($alarmJunctonIdArr);
-        $ids = implode(',', $alarmJunctonIdArr);
+        $alarmJunctionIdArr = array_unique(array_column($realTimeAlarmsInfo, 'logic_junction_id'));
+        asort($alarmJunctionIdArr);
+        $alarmJunctionIDs = implode(',', $alarmJunctionIdArr);
 
         //获取需要报警的全部路口的全部方向的信息
         try {
-            $flowsInfo = $this->waymap_model->getFlowsInfo($ids,true);
+            $flowsInfo = $this->waymap_model->getFlowsInfo($alarmJunctionIDs,true);
         } catch (\Exception $e) {
             $flowsInfo = [];
         }

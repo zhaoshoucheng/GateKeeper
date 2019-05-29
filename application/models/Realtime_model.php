@@ -218,7 +218,7 @@ class Realtime_model extends CI_Model
             ];
             $data['junctionId'] = implode(",",$ids);
             $data["andOperations"]['junctionId'] = 'in';
-            if(count($ids)!=0){
+            if(count($ids)==0){
                 return [];
             }
             $esRes = $this->searchQuota($data);

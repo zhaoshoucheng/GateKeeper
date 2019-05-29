@@ -9,11 +9,13 @@
 class Adapt_model extends CI_Model
 {
     private $tb = 'adapt_timing_mirror';
+    private $logTb = 'adapt_timing_log';
 
     /**
      * @var \CI_DB_query_builder
      */
     protected $db;
+    protected $logDb;
 
     /**
      * Area_model constructor.
@@ -24,9 +26,13 @@ class Adapt_model extends CI_Model
         parent::__construct();
 
         $this->db = $this->load->database('default', true);
+        $this->logDb = $this->load->database('its_trace_log', true);
 
         $isExisted = $this->db->table_exists($this->tb);
-
+        if (!$isExisted) {
+            throw new \Exception('数据表不存在', ERR_DATABASE);
+        }
+        $isExisted = $this->logDb->table_exists($this->logTb);
         if (!$isExisted) {
             throw new \Exception('数据表不存在', ERR_DATABASE);
         }
@@ -77,15 +83,15 @@ class Adapt_model extends CI_Model
      */
     public function deleteAdaptLog($deleteDay="-3 day")
     {
-        //筛选第1000条数据
-        $result = $this->db->select('*')
+        //筛选第100000条数据
+        $result = $this->logDb->select('*')
             ->from('adapt_timing_log')
-            ->limit(1,999)
+            ->limit(1,99999)
             ->order_by("id asc")
             ->get()
             ->result_array();
         if(strtotime(end($result)["log_time"])<strtotime($deleteDay)){
-            $this->db->where('id<', end($result)["id"])->delete('adapt_timing_log');
+            $this->logDb->where('id<', end($result)["id"])->delete('adapt_timing_log');
         }
         return true;
     }
@@ -102,7 +108,7 @@ class Adapt_model extends CI_Model
             'created_at' => date("Y-m-d H:i:s"),
         ];
         $data = array_merge($params,$data);
-        return $this->db->insert('adapt_timing_log', $data);
+        return $this->logDb->insert('adapt_timing_log', $data);
     }
 
 
@@ -115,31 +121,31 @@ class Adapt_model extends CI_Model
     public function pageList($params)
     {
         if(!empty($params["trace_id"])){
-            $this->db->where("trace_id",$params["trace_id"]);
+            $this->logDb->where("trace_id",$params["trace_id"]);
         }
         if(!empty($params["dltag"])){
-            $this->db->where("dltag",$params["dltag"]);
+            $this->logDb->where("dltag",$params["dltag"]);
         }
         if(!empty($params["rel_id"])){
-            $this->db->where("rel_id",$params["rel_id"]);
+            $this->logDb->where("rel_id",$params["rel_id"]);
         }
-        $this->db->where("type",$params["type"]);
-        $this->db->from('adapt_timing_log');
-        $total = $this->db->count_all_results();
+        $this->logDb->where("type",$params["type"]);
+        $this->logDb->from('adapt_timing_log');
+        $total = $this->logDb->count_all_results();
 
         $offset = $params["per_page"] ?? 0;
-        $this->db->where("type",$params["type"]);
+        $this->logDb->where("type",$params["type"]);
         if(!empty($params["trace_id"])){
-            $this->db->where("trace_id",$params["trace_id"]);
+            $this->logDb->where("trace_id",$params["trace_id"]);
         }
         if(!empty($params["dltag"])){
-            $this->db->where("dltag",$params["dltag"]);
+            $this->logDb->where("dltag",$params["dltag"]);
         }
         if(!empty($params["rel_id"])){
-            $this->db->where("rel_id",$params["rel_id"]);
+            $this->logDb->where("rel_id",$params["rel_id"]);
         }
-        $this->db->where("type",$params["type"]);
-        $result = $this->db->select('*')
+        $this->logDb->where("type",$params["type"]);
+        $result = $this->logDb->select('*')
             ->from('adapt_timing_log')
             ->limit($params["page_size"], $offset)
             ->forceMaster()

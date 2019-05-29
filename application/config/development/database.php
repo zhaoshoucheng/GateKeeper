@@ -154,3 +154,27 @@ $db['signal_control'] = array(
     'failover' => array(),
     'save_queries' => TRUE
 );
+
+
+$db['its_trace_log'] = array(
+    'dsn'   => '',
+    'username' => 'root',
+    'hostname' => '100.90.164.31',
+    'port' => 3306,
+    'password' => 'Znjty@Didi@2017',
+    'database' => 'its_tool',
+    'dbdriver' => 'mysqli',
+    'dbprefix' => '',
+    'pconnect' => FALSE,
+    'db_debug' => (ENVIRONMENT !== 'production'),
+    'cache_on' => FALSE,
+    'cachedir' => '',
+    'char_set' => 'utf8',
+    'dbcollat' => 'utf8_general_ci',
+    'swap_pre' => '',
+    'encrypt' => FALSE,
+    'compress' => FALSE,
+    // 'stricton' => FALSE,
+    'failover' => array(),
+    'save_queries' => TRUE
+);

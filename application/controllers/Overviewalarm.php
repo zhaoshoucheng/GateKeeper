@@ -97,7 +97,7 @@ class Overviewalarm extends MY_Controller
         $params['date']       = $params['date'] ?? date('Y-m-d');
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
-        $result = $this->overviewService->realTimeAlarmList($params);
+        $result = $this->overviewService->realTimeAlarmList($params,$this->userPerm);
 
         return $this->response($result);
     }

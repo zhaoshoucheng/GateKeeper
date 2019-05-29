@@ -7,6 +7,10 @@
 
 use \Services\HelperService;
 
+/**
+ * Class Alarmanalysis_model
+ * @property \Redis_model $redis_model
+ */
 class Alarmanalysis_model extends CI_Model
 {
     protected $helperService;

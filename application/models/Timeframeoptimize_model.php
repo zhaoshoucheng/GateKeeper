@@ -79,7 +79,6 @@ class Timeframeoptimize_model extends CI_Model
 
     /**
     * 获取路口相位集合 按nema排序
-    * @param $data['task_id']     interger Y 任务ID
     * @param $data['junction_id'] string   Y 路口ID
     * @param $data['dates']       array    Y 评估/诊断日期
     * @param $data['time_range']  string   Y 任务时间段

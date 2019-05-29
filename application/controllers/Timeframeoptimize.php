@@ -62,7 +62,6 @@ class Timeframeoptimize extends MY_Controller
         // 校验参数
         $validate = Validate::make($params,
             [
-                'task_id'      => 'min:1',
                 'city_id'      => 'min:1',
                 'junction_id'  => 'nullunable'
             ]
@@ -80,7 +79,6 @@ class Timeframeoptimize extends MY_Controller
         }
 
         $data = [
-            'task_id'     => intval($params['task_id']),
             'junction_id' => trim($params['junction_id']),
             'dates'       => $params['dates'],
             'time_range'  => trim($params['task_time_range']),
@@ -135,7 +133,6 @@ class Timeframeoptimize extends MY_Controller
 
     /**
     * 获取时段划分方案
-    * @param task_id     interger Y 任务ID
     * @param junction_id string   Y 路口ID
     * @param dates       array    Y 评估/诊断日期
     * @param movements   array    Y 路口相位集合

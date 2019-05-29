@@ -35,7 +35,7 @@ class DiagnosisNoTiming_model extends CI_Model
                     $alarmResult[$quota]['info'] = $juncQuestion[$quota];
                 }
                 //报警规则过滤
-                if ($count / count($dates) > $fThreshold) {
+                if ($count / count($dates) >= $fThreshold) {
                     $alarmResult[$quota]['list'][$hour] = 1;
                 }else{
                     $alarmResult[$quota]['list'][$hour] = 0;
@@ -187,62 +187,6 @@ class DiagnosisNoTiming_model extends CI_Model
     }
 
     /**
-     * 通过指标数据获取某天的指标权重
-     * @param $flowList
-     * @return array
-     */
-    private function getMovementDtWeightByFlowList($flowList){
-        //加权指标计算 == start ==
-        //queue_length权重为traj_count*stop_time_cycle
-        //其他指标权重为traj_count
-        //权重使用说明:
-// traj_count| stop_time_cycle | flow_id | dt           | queue_weight        | weight       | speed
-//  10       | 4               | 512     | 2019-05-13   | 40/(10*4+20*5+10*2) | 10/(10+20+25)| 5
-//  20       | 5               | 512     | 2019-05-14   | 100/(10*4+20*5+10*2)| 20/(10+20+25)| 4
-//  10       | 2               | 512     | 2019-05-15   | 20/(10*4+20*5+10*2) | 10/(10+20+25)| 3
-//  10       | 2               | 513     | 2019-05-13   | 20/(10*2)           | 10/(10)      | 3
-        //求flow_id=512三天的speed平均值: (5+4+3)/3
-        //求flow_id=512三天的speed加权平均: 5*(10/55)+4*(10/55)+3*(10/55)
-
-        $flowTrajSum = [];  //相位轨迹统计
-        $flowTrajStoptimeSum = [];  //相位停车轨迹统计
-        $allTrajSum=[]; //全部轨迹统计
-        $allTrajStoptimeSum=[];  //全部停车轨迹统计
-        $flowWeight = []; //相位权重
-        $flowStoptimeWeight = []; //相位停车权重
-        foreach ($flowList as $item) {
-            if (!isset($flowTrajSum[$item['logic_flow_id']][$item['dt']])) {
-                $flowTrajSum[$item['logic_flow_id']][$item['dt']] = 0;
-            }
-            if (!isset($flowTrajStoptimeSum[$item['logic_flow_id']][$item['dt']])) {
-                $flowTrajStoptimeSum[$item['logic_flow_id']][$item['dt']] = 0;
-            }
-            if (!isset($allTrajSum[$item['logic_flow_id']])) {
-                $allTrajSum[$item['logic_flow_id']] = 0;
-            }
-            if (!isset($allTrajStoptimeSum[$item['logic_flow_id']])) {
-                $allTrajStoptimeSum[$item['logic_flow_id']] = 0;
-            }
-            $flowTrajSum[$item['logic_flow_id']][$item['dt']] += $item["traj_count"];
-            $flowTrajStoptimeSum[$item['logic_flow_id']][$item['dt']] += $item["traj_count"] * $item["stop_time_cycle"];
-            $allTrajSum[$item['logic_flow_id']]+=$item["traj_count"];
-            $allTrajStoptimeSum[$item['logic_flow_id']]+=$item["traj_count"] * $item["stop_time_cycle"];
-        }
-        foreach ($flowTrajSum as $flowID=>$flowList){
-            foreach ($flowList as $dt=>$item){
-                $flowWeight[$flowID][$dt] =
-                    $allTrajSum[$flowID]>0
-                        ? $flowTrajSum[$flowID][$dt]/$allTrajSum[$flowID] : 0;
-                $flowStoptimeWeight[$flowID][$dt] =
-                    $allTrajStoptimeSum[$flowID]>0
-                        ? $flowTrajStoptimeSum[$flowID][$dt]/$allTrajStoptimeSum[$flowID]:0;
-            }
-        }
-//        print_r($flowStoptimeWeight);exit;
-        return [$flowWeight,$flowStoptimeWeight];
-    }
-
-    /**
      * 获取相位指标数据
      * @param $cityID
      * @param $logicJunctionID
@@ -253,30 +197,46 @@ class DiagnosisNoTiming_model extends CI_Model
     public function getMovementQuota($cityID, $logicJunctionID, $timePoint, $dates)
     {
         $flowList = $this->getFlowQuotaList($cityID, $logicJunctionID, $timePoint, $dates);
-        $flowWeight = []; //天级别相位权重
-        $flowStoptimeWeight = []; //天级别相位停车权重
-        list($flowWeight,$flowStoptimeWeight) = $this->getMovementDtWeightByFlowList($flowList);
-        $result = [];
-        $quotaRound = $this->config->item('flow_quota_round');
-        foreach ($flowList as $item) {
+        $itemTrajSum = [];
+        foreach ($flowList as $item){
+            if(!isset($quotaWeightSum[$item['logic_flow_id']]["flowStopWeight"])){
+                $quotaWeightSum[$item['logic_flow_id']]["flowStopWeight"] = 0;
+            }
+            if(!isset($quotaWeightSum[$item['logic_flow_id']]["flowWeight"])){
+                $quotaWeightSum[$item['logic_flow_id']]["flowWeight"] = 0;
+            }
+            $quotaWeightSum[$item['logic_flow_id']]["flowStopWeight"]+=$item["traj_count"]*$item["stop_time_cycle"];
+            $quotaWeightSum[$item['logic_flow_id']]["flowWeight"]+=$item["traj_count"];
+
             foreach ($item as $quotaKey => $quotaValue) {
-                if (in_array($quotaKey, ["logic_flow_id", "city_id", "dt", "logic_junction_id"])) {
+                if (in_array($quotaKey, ["logic_flow_id", "city_id", "dt", "hour", "logic_junction_id"])) {
                     continue;
                 }
-                if($quotaValue>0){
-                    if ($quotaKey == "queue_length") {
-                        $quotaValue = $flowStoptimeWeight[$item["logic_flow_id"]][$item["dt"]] * $quotaValue;
-                    } else {
-                        $quotaValue = $flowWeight[$item["logic_flow_id"]][$item["dt"]] * $quotaValue;
-                    }
+                if(!isset($itemTrajSum[$item['logic_flow_id']][$quotaKey])){
+                    $itemTrajSum[$item['logic_flow_id']][$quotaKey] = 0;
                 }
+                if ($quotaKey == "queue_length") {
+                    $itemTrajSum[$item['logic_flow_id']][$quotaKey] += $quotaValue*$item["traj_count"]*$item["stop_time_cycle"];
+                }else{
+                    $itemTrajSum[$item['logic_flow_id']][$quotaKey] += $quotaValue*$item["traj_count"];
+                }
+            }
+        }
 
-                $quotaValue = isset($quotaRound[$quotaKey]['round'])
-                    ? $quotaRound[$quotaKey]['round']($quotaValue) : $quotaValue;
-                if (empty($result[$item['logic_flow_id']][$quotaKey])) {
-                    $result[$item['logic_flow_id']][$quotaKey] = 0;
+        //计算运算
+        $result = [];
+        $quotaRound = $this->config->item('flow_quota_round');
+        foreach ($itemTrajSum as $flowID=>$itemSum){
+            foreach ($itemSum as $quotaKey => $quotaValue){
+                if($quotaKey=="queue_length"){
+                    $avgValue = $quotaWeightSum[$flowID]["flowStopWeight"]>0?
+                    ($quotaValue/$quotaWeightSum[$flowID]["flowStopWeight"]):0;
+                }else{
+                    $avgValue = $quotaWeightSum[$flowID]["flowWeight"]>0 ?
+                    $quotaValue/$quotaWeightSum[$flowID]["flowWeight"] : 0;
                 }
-                $result[$item['logic_flow_id']][$quotaKey] += $quotaValue;
+                $result[$flowID][$quotaKey] = isset($quotaRound[$quotaKey]['round'])
+                    ? $quotaRound[$quotaKey]['round']($avgValue) : $avgValue;
             }
         }
 
@@ -302,6 +262,20 @@ class DiagnosisNoTiming_model extends CI_Model
                 $movementInfo = array_merge($movementInfo, $result[$flowId]);
                 $movementInfo["confidence"] = $quotaRound["confidence"]['round']($result[$flowId]["traj_count"]);
                 $movements[] = $movementInfo;
+            }
+
+            //防御性代码处理
+            if(intval($movementInfo["queue_length"])>intval($movementInfo["queue_length"])){
+                $movementInfo["queue_length"] = $movementInfo["queue_length"];
+            }
+            if($movementInfo["spillover_rate"]>1){
+                $movementInfo["spillover_rate"] = 1;
+            }
+            if($movementInfo["stop_rate"]>1){
+                $movementInfo["stop_rate"] = 1;
+            }
+            if($movementInfo["free_flow_speed"]>80){
+                $movementInfo["free_flow_speed"] = 80;
             }
         }
         return $movements;
@@ -385,7 +359,7 @@ class DiagnosisNoTiming_model extends CI_Model
         $alarmResult = [];
         $fThreshold = $confRule['frequency_threshold'];
         foreach ($quotaCount as $quota => $count) {
-            if ($totalCount>0 && $count>0 && ($count/$totalCount>$fThreshold)) {
+            if ($totalCount>0 && $count>0 && ($count/$totalCount>=$fThreshold)) {
                 $alarmResult[$quota] = $juncQuestion[$quota];
             }
         }
