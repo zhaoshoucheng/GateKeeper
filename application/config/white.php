@@ -53,6 +53,11 @@ $config['white_token_clientip_escape'] = [
     '10.161.164.116' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
     '10.169.250.201' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"],  //信号机
     '10.88.128.45' => ["05984e73effb5fe2baeeda5e7c10be8e"], // 麒麟提供的内网机器
+
+    '10.160.92.91' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"], // 配时服务
+    '10.160.96.161' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"], // 配时服务
+    '10.160.131.159' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"], // 配时服务
+    '10.160.96.160' => ["01beffde3a9b5a8f8f04f7c00fb92cb0"], // 配时服务
 ];
 
 // diyu内网token就可以登陆,仅限内网访问
