@@ -905,48 +905,25 @@ class TimingAdaptionAreaService extends BaseService
      */
     private function getAllFlowTimingInfo($data,$flowId="")
     {
-        $resData = $this->adapt_model->getAdaptByJunctionId($data['logic_junction_id']);
-
-        if (empty($resData['timing_info'])) {
-            return [];
-        }
-
-        $Info = json_decode($resData['timing_info'], true);
-        if (empty($Info['data'])) {
-            return [];
-        }
-
-        list($timingInfo) = $Info['data']['tod'] ?? [""];
-        if (empty($timingInfo)) {
-            return [];
-        }
-
+        $resData = $this->getFlowTimingInfo($data);
         // 周期 相位差
         $res = [
-            "junction_id" => $data['logic_junction_id'],
-            "cycle" => $timingInfo["extra_time"]["cycle"],
-            "offset" => $timingInfo["extra_time"]["offset"],
+            'cycle' => $resData['cycle'],
+            'offset' => $resData['offset'],
+            'junction_id' => $data['logic_junction_id'],
+
         ];
-        // 信息灯信息
-        foreach ($timingInfo['movement_timing'] as $k => $v) {
-            if (empty($v['flow']['logic_flow_id'])) {
-                continue;
-            }
-            $tmp = [];
-            $tmp['movement_id'] = $v['flow']['logic_flow_id'];
-            if($flowId!="" && $tmp['movement_id']!=$flowId){
-                continue;
-            }
-            foreach ($v['timing'] as $kk => $vv) {
-                $tmp['green'][] = [
-                    'green_start' => $vv['start_time'],
-                    'green_duration' => $vv['duration'],
-                    'yellow' => $v['yellow'],
-                    'red_clean' => $v['all_red'],
+        $tmp = [];
+        foreach ($resData['green'] as $k=>$v){
+            $tmp['green'][] = [
+                    'green_start' => $v['start_time'],
+                    'green_duration' => $v['duration'],
+                    'yellow' => 3,
+                    'red_clean' => 0,
                 ];
-            }
-            $res["movement"][] = $tmp;
         }
+        $res['movement'][] = $tmp;
+
         return $res;
     }
 
