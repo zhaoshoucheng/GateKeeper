@@ -914,14 +914,18 @@ class TimingAdaptionAreaService extends BaseService
 
         ];
         $tmp = [];
-        foreach ($resData['green'] as $k=>$v){
-            $tmp['green'][] = [
+        $tmp['movement_id'] = $data['logic_flow_id'];
+        if (isset($resData['green'])){
+            foreach ($resData['green'] as $k=>$v){
+                $tmp['green'][] = [
                     'green_start' => $v['start_time'],
                     'green_duration' => $v['duration'],
                     'yellow' => 3,
                     'red_clean' => 0,
                 ];
+            }
         }
+
         $res['movement'][] = $tmp;
 
         return $res;
