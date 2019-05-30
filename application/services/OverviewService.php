@@ -99,7 +99,7 @@ class OverviewService extends BaseService
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['pagesize'] = $params['pagesize'] ?? 20;
 
-        $delayList = $this->stopDelayTopList($params,$this->userPerm);
+        /*$delayList = $this->stopDelayTopList($params,$this->userPerm);
         $newDelayList = [];
         foreach ($delayList as $item){
             $newDelayList[$item["logic_junction_id"]] = $item["stop_delay"];
@@ -115,7 +115,7 @@ class OverviewService extends BaseService
             }else{
                 $newCycleList[$item["logic_junction_id"]] = $item["stop_time_cycle"];
             }
-        }
+        }*/
 
         if(!empty($data)){
             foreach ($data["dataList"] as $key=>$item){

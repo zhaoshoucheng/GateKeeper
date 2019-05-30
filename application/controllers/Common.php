@@ -11,6 +11,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 use Services\CommonService;
 use Didi\Cloud\Collection\Collection;
 
+/**
+ * Class Common
+ * @property \Waymap_model         $waymap_model
+ */
 class Common extends MY_Controller
 {
     protected $commonService;
@@ -19,6 +23,7 @@ class Common extends MY_Controller
     {
         parent::__construct();
 
+        $this->load->model('waymap_model');
         $this->commonService = new commonService();
     }
 
@@ -134,6 +139,22 @@ class Common extends MY_Controller
         //$quotaCityIds = $this->config->item('quota_v2_city_ids');
         $quotaCityIds = $this->commonService->getV5DMPCityID();
         $this->response($quotaCityIds);
+    }
+
+    /**
+     * 获取经纬度附近路口
+     * @throws Exception
+     */
+    public function nearestJuncByCoordinate()
+    {
+        $cityId = $this->input->get("city_id",true);
+        $lng = $this->input->get("lng",true);
+        $lat = $this->input->get("lat",true);
+        if(empty($cityId)||empty($lng)||empty($lat)){
+            throw new \Exception('参数不能为空！', ERR_PARAMETERS);
+        }
+        $data = $this->waymap_model->nearestJuncByCoordinate($cityId,$lng,$lat);
+        $this->response($data);
     }
 
     /**

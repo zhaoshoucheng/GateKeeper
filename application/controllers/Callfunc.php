@@ -25,6 +25,7 @@ class Callfunc extends AsyncTask_Controller
             $this->load->model($params['class']);
             $instance = $this->$className;
             $ret = call_user_func_array(array($instance,$params['function']), $params['params']);
+            //写入到 itstool_adapt_log kafka
             return $this->response($ret);
         } catch (\Exception $e) {
             com_log_warning('_asynctask_index_error', 0, $e->getMessage(), []);
