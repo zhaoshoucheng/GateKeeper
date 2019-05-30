@@ -567,6 +567,22 @@ class Waymap_model extends CI_Model
     }
 
     /**
+     * 获取最近的逻辑路口
+     * @param $city_id
+     * @param $lng
+     * @param $lat
+     * @return array
+     */
+    public function nearestJuncByCoordinate($city_id, $lng, $lat)
+    {
+        $data = compact('city_id', 'lng', 'lat');
+
+        $url   = $this->waymap_interface . '/signal-map/map/nearestJuncByCoordinate';
+        return $this->get($url, $data);
+    }
+
+
+    /**
      * 获取路口详情 经纬度、所属城市、行政区、某某交汇口等
      *
      * @param      $logic_junction_id
