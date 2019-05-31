@@ -265,17 +265,24 @@ class DiagnosisNoTiming_model extends CI_Model
             }
 
             //防御性代码处理
-            if(intval($movementInfo["queue_length"])>intval($movementInfo["queue_length"])){
-                $movementInfo["queue_length"] = $movementInfo["queue_length"];
-            }
-            if($movementInfo["spillover_rate"]>1){
-                $movementInfo["spillover_rate"] = 1;
-            }
-            if($movementInfo["stop_rate"]>1){
-                $movementInfo["stop_rate"] = 1;
-            }
-            if($movementInfo["free_flow_speed"]>80){
-                $movementInfo["free_flow_speed"] = 80;
+            if(isset($movementInfo["queue_length"])
+                && isset($movementInfo["route_length"])
+                && isset($movementInfo["spillover_rate"])
+                && isset($movementInfo["stop_rate"])
+                && isset($movementInfo["free_flow_speed"])
+            ){
+                if(intval($movementInfo["queue_length"])>intval($movementInfo["route_length"])){
+                    $movementInfo["queue_length"] = $movementInfo["route_length"];
+                }
+                if($movementInfo["spillover_rate"]>1){
+                    $movementInfo["spillover_rate"] = 1;
+                }
+                if($movementInfo["stop_rate"]>1){
+                    $movementInfo["stop_rate"] = 1;
+                }
+                if($movementInfo["free_flow_speed"]>80){
+                    $movementInfo["free_flow_speed"] = 80;
+                }
             }
         }
         return $movements;
