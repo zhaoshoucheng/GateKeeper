@@ -180,7 +180,7 @@ class AdpAreaService extends BaseService
 
         $areaJunctionList = $this->adpArea_model->getJunctions($junction_ids);
         $logic_junction_ids = array_map(function($item){
-            return $item['logic_id'];
+            return $item['logic_junction_id'];
         },$areaJunctionList);
 
         $junctionInfoList = $this->waymap_model->getJunctionInfo(implode(',', $logic_junction_ids));

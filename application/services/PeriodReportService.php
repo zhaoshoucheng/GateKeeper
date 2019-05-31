@@ -605,15 +605,15 @@ class PeriodReportService extends BaseService
         usort($lastData, ["PeriodReport", "quotasort"]);
         usort($preLastData, ["PeriodReport", "quotasort"]);
         if ($type == self::WEEK) {
-            $lastMoM    = ($lastData[0][1] - $preLastCharMap[$lastData[0][0]]) / $preLastCharMap[$lastData[0][0]] * 100;
-            $preLastMoM = ($preLastData[0][1] - $lastCharMap[$preLastData[0][0]]) / $lastCharMap[$preLastData[0][0]] * 100;
+            $lastMoM    = $preLastCharMap[$lastData[0][0]]>0 ? ($lastData[0][1] - $preLastCharMap[$lastData[0][0]]) / $preLastCharMap[$lastData[0][0]] * 100 : 0;
+            $preLastMoM = $lastCharMap[$preLastData[0][0]]>0 ? ($preLastData[0][1] - $lastCharMap[$preLastData[0][0]]) / $lastCharMap[$preLastData[0][0]] * 100 : 0;
             $change     = $lastMoM > 0 ? "增加" : "减少";
             $summary    = "本周溢流问题在" . $lastData[0][0] . "时段发生最多，为" . $lastData[0][1] . "个。环比上周" . $change . abs(round($lastMoM)) . "%。";
             $change     = $preLastMoM > 0 ? "增加" : "减少";
             $summary    .= "上周溢流问题在" . $preLastData[0][0] . "时段发生最多，为" . $preLastData[0][1] . "个。环比本周" . $change . abs(round($preLastMoM)) . "%。";
         } else {
-            $lastMoM    = ($lastData[0][1] - $preLastCharMap[$lastData[0][0]]) / $preLastCharMap[$lastData[0][0]] * 100;
-            $preLastMoM = ($preLastData[0][1] - $lastCharMap[$preLastData[0][0]]) / $lastCharMap[$preLastData[0][0]] * 100;
+            $lastMoM    = $preLastCharMap[$lastData[0][0]]>0 ? ($lastData[0][1] - $preLastCharMap[$lastData[0][0]]) / $preLastCharMap[$lastData[0][0]] * 100 : 0;
+            $preLastMoM = $lastCharMap[$preLastData[0][0]]>0 ? ($preLastData[0][1] - $lastCharMap[$preLastData[0][0]]) / $lastCharMap[$preLastData[0][0]] * 100 : 0;
             $change     = $lastMoM > 0 ? "增加" : "减少";
             $summary    = "本月溢流问题在" . $lastData[0][0] . "时段发生最多，为" . $lastData[0][1] . "个。环比上月" . $change . abs(round($lastMoM)) . "%。";
             $change     = $preLastMoM > 0 ? "增加" : "减少";
