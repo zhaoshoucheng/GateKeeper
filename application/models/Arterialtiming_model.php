@@ -248,6 +248,7 @@ class Arterialtiming_model extends CI_Model
         }
 
         //去掉首尾路口请求原接口数据
+//        print_r($forwardJunctions);exit;
         $forwardResult = $this->getJunctionInfos($cityID,$version,$forwardJunctions);
         $junctionsInfo = [];
         $forwardPathFlows = [];
@@ -436,6 +437,7 @@ class Arterialtiming_model extends CI_Model
         if(empty($ret)){
             return [];
         }
+//        print_r($ret);exit;
         //forwardMap[start][end] = length
         $forwardMap=[];
         $backMap=[];
