@@ -81,7 +81,7 @@ class TimeframescatterService extends BaseService
         array_multisort(array_column($scatterList, 0), SORT_ASC, $scatterList);
         foreach ($scatterList as $key=>$item){
             $key = date("H:i:s",strtotime(date("Y-m-d"))+$item[0]);
-            $resultList[$key] = $item;
+            $resultList[] = [$key,$item[1]];
         }
         $result = [
             "info"=>$info,
