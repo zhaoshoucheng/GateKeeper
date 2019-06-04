@@ -58,6 +58,9 @@ class TimeframescatterService extends BaseService
         foreach ($result_data as $item){
             $scatterList = array_merge($scatterList,$item['dataList']);
         }
+        if(count($scatterList) ==0){
+            return [];
+        }
         $resultList = [];
         $timeArr = explode("-",$data['time_range']);
         $scatterValues = array_column($scatterList, 1);
