@@ -113,7 +113,11 @@ class Timeframeoptimize_model extends CI_Model
 
         $newRes = [];
         foreach ($result as $k=>$v) {
+            if($k == ""){
+                continue;
+            }
             if (array_key_exists($v, $phase) && !array_key_exists($phase[$v], $newRes)) {
+
                 $newRes[$phase[$v]]['logic_flow_id'] = $k;
                 $newRes[$phase[$v]]['name'] = $v;
             } else {
