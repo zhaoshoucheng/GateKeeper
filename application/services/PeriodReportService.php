@@ -323,7 +323,11 @@ class PeriodReportService extends BaseService
                     'speed' => $v['speed'],
                 ];
 
-                $MoM = ($final_data[$v['district_id']]['stop_delay'] - $v['stop_delay']) / $v['stop_delay'];
+                if($v['stop_delay']>0){
+                    $MoM = ($final_data[$v['district_id']]['stop_delay'] - $v['stop_delay']) / $v['stop_delay'];
+                }else{
+                    $MoM = 0;
+                }
 
                 if ($MoM > $preMaxDelay) {
                     $preMaxDelayId = $v['district_id'];
