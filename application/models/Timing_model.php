@@ -553,7 +553,7 @@ class Timing_model extends CI_Model
         // 获取配时详情
         $timing_data = [
             'logic_junction_id' => trim($data['junction_id']),
-            'days'              => trim(implode(',', $data['dates'])),
+//            'days'              => trim(implode(',', $data['dates'])),
             'start_time'        => trim($time_range[0]).":00",
             'end_time'          => date('H:i', strtotime(trim($time_range[1])) - 60).":00",
             'source'            => 2,
@@ -580,6 +580,9 @@ class Timing_model extends CI_Model
         ];
 
         foreach ($timing['data']['schedules'][0]['tods'] as $tk=>$tv){
+            if($tv['end_time']=="00:00:00"){
+                $tv['end_time']="24:00:00";
+            }
             $plan = [
                 'tod_end_time'=> $tv['end_time'],
                 'tod_start_time'=> $tv['start_time'],
