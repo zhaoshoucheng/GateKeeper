@@ -35,7 +35,7 @@ class Splitoptimize extends MY_Controller
         // 校验参数
         $validate = Validate::make($params,
             [
-                'task_id'          => 'min:1',
+//                'task_id'          => 'min:1',
                 'junction_id'      => 'nullunable',
                 'task_time_range'  => 'nullunable'
             ]
