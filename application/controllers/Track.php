@@ -79,13 +79,26 @@ class Track extends MY_Controller
             'city_id' => strip_tags(trim($params['city_id'])),
             'junction_id' => strip_tags(trim($params['junction_id'])),
             'dates' => $params['dates'],
-            'time_range' => strip_tags(trim($params['task_time_range'])),
+            'time_range' => strip_tags(trim($params['time_range'])),
             'flow_id' => strip_tags(trim($params['flow_id'])),
             'timingType' => $this->timingType
         ];
 
 //        $result_data = $this->track_model->getTrackData($data, 'getScatterMtraj');
         $result_data = $this->timeframescatterService->getTrackDataNoTaskId($data);
+        $result_data['signal_detail']=[];
+        foreach ($result_data['planList'] as $k => $v){
+
+                $result_data['signal_detail']['cycle']=$v['plan']['cycle'];
+                $greenLength = 0;
+                foreach ($v['list'] as $lk =>$lv){
+                    $greenLength += $lv['duration'];
+                }
+                $result_data['signal_detail']['green_duration']=$greenLength;
+                $result_data['signal_detail']['red_duration']=$v['plan']['cycle']-$greenLength;
+                break;
+
+        }
 
         return $this->response($result_data);
     }
