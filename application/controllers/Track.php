@@ -6,6 +6,7 @@
 ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
+use Services\TimeframescatterService;
 
 class Track extends MY_Controller
 {
@@ -14,6 +15,7 @@ class Track extends MY_Controller
         parent::__construct();
         $this->load->model('track_model');
         $this->setTimingType();
+        $this->timeframescatterService = new TimeframescatterService();
     }
 
     /**
@@ -64,17 +66,26 @@ class Track extends MY_Controller
             }
         }
 
+//        $data = [
+////            'task_id'         => intval($params['task_id']),
+//            'junction_id'     => strip_tags(trim($params['junction_id'])),
+//            'flow_id'         => strip_tags(trim($params['flow_id'])),
+//            'search_type'     => intval($params['search_type']),
+//            'time_point'      => strip_tags(trim($params['time_point'])),
+//            'time_range'      => strip_tags(trim($params['time_range'])),
+//            'timingType'      => $this->timingType
+//        ];
         $data = [
-            'task_id'         => intval($params['task_id']),
-            'junction_id'     => strip_tags(trim($params['junction_id'])),
-            'flow_id'         => strip_tags(trim($params['flow_id'])),
-            'search_type'     => intval($params['search_type']),
-            'time_point'      => strip_tags(trim($params['time_point'])),
-            'time_range'      => strip_tags(trim($params['time_range'])),
-            'timingType'      => $this->timingType
+            'city_id' => strip_tags(trim($params['city_id'])),
+            'junction_id' => strip_tags(trim($params['junction_id'])),
+            'dates' => $params['dates'],
+            'time_range' => strip_tags(trim($params['task_time_range'])),
+            'flow_id' => strip_tags(trim($params['flow_id'])),
+            'timingType' => $this->timingType
         ];
 
-        $result_data = $this->track_model->getTrackData($data, 'getScatterMtraj');
+//        $result_data = $this->track_model->getTrackData($data, 'getScatterMtraj');
+        $result_data = $this->timeframescatterService->getTrackDataNoTaskId($data);
 
         return $this->response($result_data);
     }
@@ -128,7 +139,7 @@ class Track extends MY_Controller
         }
 
         $data = [
-            'task_id'         => intval($params['task_id']),
+//            'task_id'         => intval($params['task_id']),
             'junction_id'     => strip_tags(trim($params['junction_id'])),
             'flow_id'         => strip_tags(trim($params['flow_id'])),
             'search_type'     => intval($params['search_type']),
