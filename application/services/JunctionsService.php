@@ -1133,7 +1133,7 @@ class JunctionsService extends BaseService
      * @param $timingType  配时数据来源 1：人工 2：反推
      * @return array
      */
-    private function formatJunctionDetailData($data, $dates, $resultType, $timingType)
+    public function formatJunctionDetailData($data, $dates, $resultType, $timingType)
     {
         if (empty($data) || empty($dates) || (int)$resultType < 1) {
             return [];
@@ -1143,7 +1143,7 @@ class JunctionsService extends BaseService
         $data['extend_flow_quota']['confidence'] = '置信度';
 
         // movement级指标数据在数据表中以json格式的存储，需要json_decode
-        $data['movements'] = json_decode($data['movements'], true);
+//        $data['movements'] = json_decode($data['movements'], true);
         if (empty($data['movements'])) {
             return [];
         }
