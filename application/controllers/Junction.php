@@ -88,7 +88,7 @@ class Junction extends MY_Controller
 
         // 校验参数
         $this->validate([
-            'task_id'         => 'required|is_natural_no_zero',
+//            'task_id'         => 'required|is_natural_no_zero',
             'type'            => 'required|is_natural_no_zero',
             'junction_id'     => 'required|min_length[4]',
             'task_time_range' => 'required|exact_length[11]|regex_match[/\d{2}:\d{2}-\d{2}:\d{2}/]',

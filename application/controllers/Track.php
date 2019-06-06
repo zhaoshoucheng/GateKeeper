@@ -32,7 +32,7 @@ class Track extends MY_Controller
         // 校验参数
         $validate = Validate::make($params,
             [
-                'task_id'     => 'min:1',
+//                'task_id'     => 'min:1',
                 'junction_id' => 'nullunable',
                 'search_type' => 'min:0',
                 'flow_id'     => 'nullunable'
@@ -95,7 +95,7 @@ class Track extends MY_Controller
         // 校验参数
         $validate = Validate::make($params,
             [
-                'task_id'     => 'min:1',
+//                'task_id'     => 'min:1',
                 'junction_id' => 'nullunable',
                 'search_type' => 'min:0',
                 'flow_id'     => 'nullunable'
