@@ -523,7 +523,7 @@ class TimingAdaptionAreaService extends BaseService
             }
         }
 
-        if (empty($result['dataList'])) {
+        if (empty($result['data'])) {
             return [
                 'dataList' => [],
             ];
