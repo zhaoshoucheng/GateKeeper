@@ -440,7 +440,7 @@ class JunctionsService extends BaseService
     public function getJunctionsTimingInfo($params)
     {
         // 获取配时数据
-        $data = $this->timing_model->getTimingData($params);
+        $data = $this->timing_model->getNewTimingInfo($params);
         if (!$data) {
             return [];
         }
@@ -469,7 +469,7 @@ class JunctionsService extends BaseService
             if (strtotime($tod_end_time) > strtotime($task_end_time)) {
                 $tod_end_time = date("H:i:s", strtotime($task_end_time));
             }
-            $result['plan_list'][strtotime($tod_start_time)]['id'] = $v['time_plan_id'];
+            $result['plan_list'][strtotime($tod_start_time)]['id'] = $v['plan_id'];
             $result['plan_list'][strtotime($tod_start_time)]['start_time'] = $tod_start_time;
             $result['plan_list'][strtotime($tod_start_time)]['end_time'] = $tod_end_time;
 
@@ -477,38 +477,41 @@ class JunctionsService extends BaseService
             if (isset($v['plan_detail']['extra_timing']['cycle'])
                 && isset($v['plan_detail']['extra_timing']['offset'])
             ) {
-                $result['timing_detail'][$v['time_plan_id']]['cycle'] = $v['plan_detail']['extra_timing']['cycle'];
-                $result['timing_detail'][$v['time_plan_id']]['offset'] = $v['plan_detail']['extra_timing']['offset'];
+                $result['timing_detail'][$v['plan_id']]['cycle'] = $v['plan_detail']['extra_timing']['cycle'];
+                $result['timing_detail'][$v['plan_id']]['offset'] = $v['plan_detail']['extra_timing']['offset'];
             }
 
             if (!empty($v['plan_detail']['movement_timing'])) {
                 foreach ($v['plan_detail']['movement_timing'] as $k1=>$v1) {
                     foreach ($v1 as $key=>$val) {
+                        if(!isset($val['flow_logic']['logic_flow_id']) || $val['flow_logic']['logic_flow_id']==''){
+                            continue;
+                        }
                         // 信号灯状态 1=绿灯
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['state']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['state']
                             = isset($val['state']) ? $val['state'] : 0;
                         // 绿灯开始时间
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['start_time']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['start_time']
                             = isset($val['start_time']) ? $val['start_time'] : 0;
                         // 绿灯持续时间
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['duration']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['duration']
                             = isset($val['duration']) ? $val['duration'] : 0;
                         // 绿灯结束时间
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['end_time']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['end_time']
                             = $val['start_time'] + $val['duration'];
                         // 逻辑flow id
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['logic_flow_id']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['logic_flow_id']
                             = isset($val['flow_logic']['logic_flow_id']) ? $val['flow_logic']['logic_flow_id'] : 0;
                         // flow 描述
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['comment']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['comment']
                             = isset($val['flow_logic']['comment']) ? $val['flow_logic']['comment'] : '';
                     }
                 }
             }
 
-            if (!empty($result['timing_detail'][$v['time_plan_id']]['timing'])) {
-                $result['timing_detail'][$v['time_plan_id']]['timing']
-                    = array_values($result['timing_detail'][$v['time_plan_id']]['timing']);
+            if (!empty($result['timing_detail'][$v['plan_id']]['timing'])) {
+                $result['timing_detail'][$v['plan_id']]['timing']
+                    = array_values($result['timing_detail'][$v['plan_id']]['timing']);
             }
         }
 
