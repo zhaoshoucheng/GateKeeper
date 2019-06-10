@@ -130,7 +130,7 @@ class Junction extends MY_Controller
         $data['junction_id'] = strip_tags(trim($params['junction_id']));
         $data['search_type'] = intval($params['search_type']);
         $data['type'] = intval($params['type']);
-        $data['time_range'] = strip_tags(trim($params['time_range']));
+        $data['time_range'] = strip_tags(trim($params['task_time_range']));
         $data['city_id'] = intval($params['city_id']);
         $data['timingType'] = $this->timingType;
 
@@ -138,6 +138,7 @@ class Junction extends MY_Controller
         // 获取路口指标详情
 //        $res = $this->junctionsService->getFlowQuotas($data);
         $res = $this->dianosisService->getFlowQuotas($data);
+        $res['time_range'] = $data['time_range'];
         $res = $this->junctionsService->formatJunctionDetailData($res, $data['dates'], 1, $data['timingType']);
 
 

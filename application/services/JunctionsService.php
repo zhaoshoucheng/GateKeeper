@@ -1142,6 +1142,9 @@ class JunctionsService extends BaseService
             return [];
         }
 
+        $timeList = explode("-",$data['time_range']);
+        $startTime = $timeList[0];
+        $endTime = $timeList[1];
         // 因为详情页地图下方列表所有相位都有 置信度字段，而置信度不属于指标，固将此放到扩展指标集合中
         $data['extend_flow_quota']['confidence'] = '置信度';
 
@@ -1155,7 +1158,7 @@ class JunctionsService extends BaseService
         $timing_data = [
             'junction_id' => trim($data['junction_id']),
             'dates'       => $dates,
-            'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60),
+            'time_range'  => $startTime . '-' . date("H:i", strtotime($endTime) - 60),
             'timingType'  => $timingType
         ];
         $flowIdName = $this->timing_model->getFlowIdToName($timing_data);
@@ -1264,7 +1267,9 @@ class JunctionsService extends BaseService
         }
 
         $resultCommentConf = $this->config->item('result_comment');
-        $data['result_comment'] = $resultCommentConf[$data['result_comment']] ?? '';
+        if(isset($data['result_comment'])){
+            $data['result_comment'] = $resultCommentConf[$data['result_comment']] ?? '';
+        }
         return $data;
     }
 
