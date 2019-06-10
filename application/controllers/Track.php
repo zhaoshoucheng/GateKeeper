@@ -89,6 +89,9 @@ class Track extends MY_Controller
 
 //        $result_data = $this->track_model->getTrackData($data, 'getScatterMtraj');
         $result_data = $this->timeframescatterService->getTrackDataNoTaskId($data);
+        if(empty($result_data)){
+            return $this->response($result_data);
+        }
         $result_data['signal_detail']=[];
         foreach ($result_data['planList'] as $k => $v){
 
