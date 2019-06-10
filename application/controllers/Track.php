@@ -167,7 +167,7 @@ class Track extends MY_Controller
         $params = [
             'city_id' => $this->input->post("city_id", TRUE),
             'flow_id' => $this->input->post("flow_id", TRUE),
-            'time_range' => $this->input->post("time_range", TRUE),
+            'time_range' => $this->input->post("task_time_range", TRUE),
             'junction_id' => $this->input->post("junction_id", TRUE),
             'dates' => $this->input->post("dates", TRUE),
         ];
