@@ -94,6 +94,7 @@ class Junction extends MY_Controller
             'junction_id'     => 'required|min_length[4]',
             'task_time_range' => 'required|exact_length[11]|regex_match[/\d{2}:\d{2}-\d{2}:\d{2}/]',
             'search_type'     => 'required|is_natural',
+            'city_id'     => 'required|is_natural',
         ]);
 
         $data['time_range'] = '';
