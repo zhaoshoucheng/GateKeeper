@@ -1034,7 +1034,7 @@ class TimingAdaptionAreaService extends BaseService
 
         }else{
             foreach ($timingInfo['vehicle_phase'] as $tk => $tv){
-                if (count($tv['flow_info']) == 0){
+                if (empty($tv['flow_info']) || count($tv['flow_info']) == 0){
                     continue;
                 }
                 foreach ($tv['flow_info'] as $fk=>$fv){
