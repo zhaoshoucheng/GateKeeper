@@ -66,7 +66,7 @@ class Arterialjunction_model extends CI_Model
             ]
         );
         $hasTiming = [];
-        foreach ($timing as $value) {
+        foreach ($timing as $one) {
             if ($one['status'] == 1) {
                 $hasTiming[] = $one['logic_junction_id'];
             }
