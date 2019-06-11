@@ -731,4 +731,18 @@ class Timing_model extends CI_Model
 
     }
 
+    // 查询路口配时状态
+    public function queryTimingStatus($data)
+    {
+        // $authorization = "Authorization: Basic ".base64_encode("test:1234");
+        $timing = httpPOST($this->config->item('signal_timing_status_url'), $data, 0, 'json');
+        $timing = json_decode($timing, true);
+        if (isset($timing['errno']) && $timing['errno'] != 0) {
+            return [];
+        }
+        if (empty($timing['data'])) {
+            return [];
+        }
+        return $timing['data'];
+    }
 }
