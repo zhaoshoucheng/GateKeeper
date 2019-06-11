@@ -28,7 +28,7 @@ class RealtimeQuota extends MY_Controller
             'quota_keys' => 'required|min_length[1]'
         ]);
         $quotaKey = $params["quota_keys"];
-        $allKeys = ["stop_delay_up","queue_length_up","avg_stop_num_up","stop_delay_down","queue_length_down","avg_stop_num_down","avg_speed_up"];
+        $allKeys = ["stop_delay_up","queue_length_up","avg_stop_num_up","stop_delay_down","queue_length_down","avg_stop_num_down","avg_speed_up","free_flow_speed_up"];
         foreach (explode(",",$quotaKey) as $value){
             if(!in_array($value,$allKeys)){
                 $this->errno = 30001;
