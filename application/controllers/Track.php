@@ -6,7 +6,9 @@
 ***************************************************************/
 
 defined('BASEPATH') OR exit('No direct script access allowed');
-
+use Services\TimeframescatterService;
+use Services\DiagnosisNoTimingService;
+use Services\TimingAdaptionAreaService;
 class Track extends MY_Controller
 {
     public function __construct()
@@ -14,6 +16,9 @@ class Track extends MY_Controller
         parent::__construct();
         $this->load->model('track_model');
         $this->setTimingType();
+        $this->timeframescatterService = new TimeframescatterService();
+        $this->dianosisService = new DiagnosisNoTimingService();
+        $this->timingAdaptionAreaService = new TimingAdaptionAreaService();
     }
 
     /**
@@ -32,7 +37,7 @@ class Track extends MY_Controller
         // 校验参数
         $validate = Validate::make($params,
             [
-                'task_id'     => 'min:1',
+//                'task_id'     => 'min:1',
                 'junction_id' => 'nullunable',
                 'search_type' => 'min:0',
                 'flow_id'     => 'nullunable'
@@ -64,17 +69,42 @@ class Track extends MY_Controller
             }
         }
 
+//        $data = [
+////            'task_id'         => intval($params['task_id']),
+//            'junction_id'     => strip_tags(trim($params['junction_id'])),
+//            'flow_id'         => strip_tags(trim($params['flow_id'])),
+//            'search_type'     => intval($params['search_type']),
+//            'time_point'      => strip_tags(trim($params['time_point'])),
+//            'time_range'      => strip_tags(trim($params['time_range'])),
+//            'timingType'      => $this->timingType
+//        ];
         $data = [
-            'task_id'         => intval($params['task_id']),
-            'junction_id'     => strip_tags(trim($params['junction_id'])),
-            'flow_id'         => strip_tags(trim($params['flow_id'])),
-            'search_type'     => intval($params['search_type']),
-            'time_point'      => strip_tags(trim($params['time_point'])),
-            'time_range'      => strip_tags(trim($params['time_range'])),
-            'timingType'      => $this->timingType
+            'city_id' => strip_tags(trim($params['city_id'])),
+            'junction_id' => strip_tags(trim($params['junction_id'])),
+            'dates' => $params['dates'],
+            'time_range' => strip_tags(trim($params['time_range'])),
+            'flow_id' => strip_tags(trim($params['flow_id'])),
+            'timingType' => $this->timingType
         ];
 
-        $result_data = $this->track_model->getTrackData($data, 'getScatterMtraj');
+//        $result_data = $this->track_model->getTrackData($data, 'getScatterMtraj');
+        $result_data = $this->timeframescatterService->getTrackDataNoTaskId($data);
+        if(empty($result_data)){
+            return $this->response($result_data);
+        }
+        $result_data['signal_detail']=[];
+        foreach ($result_data['planList'] as $k => $v){
+
+                $result_data['signal_detail']['cycle']=$v['plan']['cycle'];
+                $greenLength = 0;
+                foreach ($v['list'] as $lk =>$lv){
+                    $greenLength += $lv['duration'];
+                }
+                $result_data['signal_detail']['green_duration']=$greenLength;
+                $result_data['signal_detail']['red_duration']=$v['plan']['cycle']-$greenLength;
+                break;
+
+        }
 
         return $this->response($result_data);
     }
@@ -95,7 +125,7 @@ class Track extends MY_Controller
         // 校验参数
         $validate = Validate::make($params,
             [
-                'task_id'     => 'min:1',
+//                'task_id'     => 'min:1',
                 'junction_id' => 'nullunable',
                 'search_type' => 'min:0',
                 'flow_id'     => 'nullunable'
@@ -127,17 +157,170 @@ class Track extends MY_Controller
             }
         }
 
-        $data = [
-            'task_id'         => intval($params['task_id']),
-            'junction_id'     => strip_tags(trim($params['junction_id'])),
-            'flow_id'         => strip_tags(trim($params['flow_id'])),
-            'search_type'     => intval($params['search_type']),
-            'time_point'      => strip_tags(trim($params['time_point'])),
-            'time_range'      => strip_tags(trim($params['time_range'])),
-            'timingType'      => $this->timingType
+//        $data = [
+////            'task_id'         => intval($params['task_id']),
+//            'junction_id'     => strip_tags(trim($params['junction_id'])),
+//            'flow_id'         => strip_tags(trim($params['flow_id'])),
+//            'search_type'     => intval($params['search_type']),
+//            'time_point'      => strip_tags(trim($params['time_point'])),
+//            'time_range'      => strip_tags(trim($params['time_range'])),
+//            'timingType'      => $this->timingType
+//        ];
+//        $result_data = $this->track_model->getTrackData($data, 'getSpaceTimeMtraj');
+        $params = [
+            'city_id' => $this->input->post("city_id", TRUE),
+            'flow_id' => $this->input->post("flow_id", TRUE),
+            'time_range' => $this->input->post("task_time_range", TRUE),
+            'junction_id' => $this->input->post("junction_id", TRUE),
+            'dates' => $this->input->post("dates", TRUE),
         ];
-        $result_data = $this->track_model->getTrackData($data, 'getSpaceTimeMtraj');
+        $params["time_range"] = $this->correntTimeRange($params["time_range"]);
+        if(empty($params["dates"])){
+            throw new \Exception("dates 不能为空");
+        }
+        foreach ($params["dates"] as $key=>$date){
 
-        return $this->response($result_data);
+            if (!preg_match('/\d{4,4}\d{1,2}\d{1,2}/ims',$date)){
+                throw new \Exception("dates参数格式错误");
+            }
+
+            $params["dates"][$key] = substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2);
+        }
+        $result_data = $this->dianosisService->getSpaceTimeDiagram($params);
+        $dataList = []; // 轨迹集合
+        $info = []; //轨迹描述数据
+        $signalInfo = []; //配时数据
+        $signalRange = []; //配时描述数据
+
+        //数据合并
+        foreach ($result_data as $rk=>$rv){
+            $info['comment'] = $rv['flow_label'];
+            $dataList = array_merge($dataList,$rv['dataList']);
+        }
+        //轨迹抽样,考虑前端性能问题,暂时上限200
+        if (count($dataList) >200){
+            $dataList = array_rand($dataList,200);
+        }
+        $info['id'] = $params['flow_id'];
+        $info['x']=[
+            'max'=>-999999,
+            'min'=>9999999
+        ];
+        $info['y']=[
+            'max'=>-999999,
+            'min'=>9999999
+        ];
+        foreach ($dataList as $dk=>$dv){
+            foreach ($dv as $k => $v){
+                if($v[0]>$info['x']['max']){
+                    $info['x']['max']=$v[0];
+                }
+                if($v[0]<$info['x']['min']){
+                    $info['x']['min']=$v[0];
+                }
+                if($v[1]>$info['y']['max']){
+                    $info['y']['max']=$v[1];
+                }
+                if($v[1]<$info['y']['min']){
+                    $info['y']['min']=$v[1];
+                }
+            }
+        }
+        //构造配时数据
+        // 获取 配时信息 周期 相位差 绿灯开始结束时间
+        $timing_data = [
+            'junction_id' => $params['junction_id'],
+            'dates'       => $this->input->post("dates", TRUE),
+            'time_range'  => $params['time_range'],
+            'flow_id'     => trim($params['flow_id']),
+            'timingType'  => 1
+        ];
+        $data = [
+            'city_id'=>$params['city_id'],
+            'logic_junction_id'=>$params['junction_id'],
+            'logic_flow_id'=>$params['flow_id'],
+        ];
+        $timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
+        //重构配时相关内容
+        if(!empty($timing)){
+            $clockShift = $this->timingAdaptionAreaService->getClockShift($data);
+            $signalInfo['cycle'] = $timing['cycle'];
+            $signalInfo['offset'] = $timing['offset'];
+            $signalInfo['yellow'] = 3;
+            foreach ($timing['signal'] as $sk => $sv){
+                $signalInfo['green'][] = $sv;
+            }
+            $new_offset = ($timing['offset'] + $clockShift) % $timing['cycle'];
+            $cycle_start_time = $new_offset;
+            $cycle_end_time = $timing['cycle'] + $new_offset;
+            $bf_green_end = $cycle_start_time;
+            // 剩余时间 默认整个周期
+            $surplus_time = $cycle_end_time;
+
+            foreach ($timing['signal'] as $k=>$v) {
+                if ($v['state'] == 1) { // 绿灯
+                    $green_start = $v['start_time'] + $cycle_start_time;
+                    // 当绿灯开始时间 == 周期开始时间
+                    if ($green_start == $cycle_start_time) {
+                        // 信号灯状态 0 红灯 1绿灯
+                        $signalRange[$green_start]['type'] = 1;
+                        // 本次绿灯开始时间
+                        $signalRange[$green_start]['from'] = $green_start;
+                        // 本次绿灯结束时间
+                        $signalRange[$green_start]['to'] = $green_start + $v['duration'];
+                        // 与上次绿灯结束时间比较 如果大于且小于周期结束时间，则标记红灯 PS:$timing['signal']已按时间正序排列
+                    } elseif ($green_start > $bf_green_end && $green_start < $cycle_end_time) {
+                        // 信号灯状态 0 红灯 1绿灯
+                        $signalRange[$bf_green_end]['type'] = 0;
+                        // 红灯开始时间 上次绿灯结束时间
+                        $signalRange[$bf_green_end]['from'] = $bf_green_end;
+                        // 红灯结束时间 本次绿灯开始时间
+                        $signalRange[$bf_green_end]['to'] = $green_start;
+
+                        // 信号灯状态 0 红灯 1绿灯
+                        $signalRange[$green_start]['type'] = 1;
+                        // 本次绿灯开始时间
+                        $signalRange[$green_start]['from'] = $green_start;
+                        // 本次绿灯结束时间
+                        $signalRange[$green_start]['to'] = $green_start + $v['duration'];
+                    }
+                    // 更新上一次绿灯结束时间
+                    $bf_green_end = $green_start + $v['duration'];
+
+                    // 更新剩余时间
+                    $surplus_time = $cycle_end_time - ($green_start + $v['duration']);
+                }
+            }
+            if ($surplus_time > 0) {
+                // 信号灯状态 0 红灯 1绿灯
+                $signalRange[$bf_green_end]['type'] = 0;
+                // 红灯开始时间 上次绿灯结束时间
+                $signalRange[$bf_green_end]['from'] = $bf_green_end;
+                // 红灯结束时间 本次绿灯开始时间
+                $signalRange[$bf_green_end]['to'] = $bf_green_end + $surplus_time;
+            }
+
+            if (!empty($signalRange)) {
+                $signalRange = array_values($signalRange);
+            }
+
+        }
+        $finalRet = [];
+        $finalRet['dataList'] = $dataList;
+        $finalRet['info'] = $info;
+        $finalRet['signal_info'] = $signalInfo;
+        $finalRet['signal_range'] = $signalRange;
+
+
+        return $this->response($finalRet);
+    }
+    //纠正时间范围
+    private function correntTimeRange($timeRange){
+        $timeArr = explode("-",$timeRange);
+        if($timeArr[0]==$timeArr[1]){
+            $timeArr[1] = date("H:i",strtotime(date("Y-m-d")." ".$timeArr[1].":00")+30*60);
+            return $timeArr[0]."-".$timeArr[1];
+        }
+        return $timeRange;
     }
 }

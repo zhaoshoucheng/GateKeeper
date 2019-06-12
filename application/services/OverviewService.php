@@ -191,7 +191,7 @@ class OverviewService extends BaseService
                 $rangemap = array_flip($rangeHours);
                 $rangeavg = ($nowValue-$preValue)/count($rangemap);
                 foreach ($rangemap as $rk=>$rv){
-                    $rangemap[date('H:i', $rk)] = $preValue+$rv*$rangeavg;
+                    $rangemap[date('H:i', $rk)] = round($preValue+$rv*$rangeavg, 2);
                 }
                 $skipMap = array_merge($skipMap, $rangemap);
             }
@@ -210,8 +210,16 @@ class OverviewService extends BaseService
         $result = $resultCollection->merge(array_map(function ($v) use ($skipMap) {
             return [$skipMap[date('H:i', $v)], date('H:i', $v)];
         }, $ext))->sortBy(1);
+
+        //过滤重复数据
+        $newResult = [];
+        foreach ($result as $item){
+            if(!isset($newResult[$item[1]])){
+                $newResult[$item[1]] = $item;
+            }
+        }
         return [
-            'dataList' => $result,
+            'dataList' => array_values($newResult),
             'info' => $info,
         ];
     }
@@ -861,6 +869,7 @@ class OverviewService extends BaseService
                 && !empty($flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']])) {
                 $result['dataList'][$k] = [
                     'start_time' => date('H:i', strtotime($val['start_time'])),
+                    'full_time' => date('Y-m-d H:i:s', strtotime($val['start_time'])),
                     'duration_time' => $durationTime,
                     'logic_junction_id' => $val['logic_junction_id'],
                     'junction_name' => $junctionIdName[$val['logic_junction_id']] ?? '',

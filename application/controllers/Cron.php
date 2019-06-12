@@ -236,7 +236,6 @@ class Cron extends CI_Controller
         foreach ($cityIds as $cityId){
             $taaService = new TimingAdaptionAreaService();
             $areaList = $taaService->getAreaList(["city_id"=>$cityId]);
-
             foreach ($areaList as $areaItem){
                 $areaId = $areaItem["id"];
                 // 获取每个区域的路口ID串
@@ -244,16 +243,20 @@ class Cron extends CI_Controller
                     'city_id' => $cityId,
                     'area_id' => $areaId,
                 ];
-                $junctions = $taaService->getAreaJunctionList($jdata);
-                $esJunctionIds = implode(',', array_filter(array_column($junctions["dataList"], 'logic_junction_id')));
-                $helperService = new \Services\HelperService();
-                $lastHour = $helperService->getIndexLastestHour($cityId);
-                $esTime = date('Y-m-d H:i:s', strtotime($lastHour));
-
-                $avgQuotaKeyConf = $this->config->item('avg_quota_key');
-                $EsquotaKey = $avgQuotaKeyConf[$quotaKey]['esColumn'];
-
-                $quotaInfo = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, $EsquotaKey);
+                try {
+                    $junctions = $taaService->getAreaJunctionList($jdata);
+                    $esJunctionIds = implode(',', array_filter(array_column($junctions["dataList"], 'logic_junction_id')));
+                    $helperService = new \Services\HelperService();
+                    $lastHour = $helperService->getIndexLastestHour($cityId);
+                    $esTime = date('Y-m-d H:i:s', strtotime($lastHour));
+                    $avgQuotaKeyConf = $this->config->item('avg_quota_key');
+                    $EsquotaKey = $avgQuotaKeyConf[$quotaKey]['esColumn'];
+                    $quotaInfo = $this->realtime_model->getEsAreaQuotaValue($cityId, $esJunctionIds, $esTime, $EsquotaKey);
+                }catch(\Exception $e) {
+                    com_log_warning('_itstool_getAreaQuotaInfo_error', 0, $e->getMessage(), compact("cityId","areaId", "quotaKey"));
+                    echo "[WARNING] " . date("Y-m-d\TH:i:s") . " quota_key=" . $quotaKey . "||city_id={$cityId}||area_id={$areaId}||message={$e->getMessage()}\n\r";
+                    continue;
+                }
                 $areaQuotaInfoKey = sprintf("itstool_area_quotainfo_%s_%s_%s",date("Y-m-d"),$areaId,$quotaKey);
                 $this->redis_model->rPush($areaQuotaInfoKey,json_encode(current($quotaInfo)));
                 $this->redis_model->setExpire($areaQuotaInfoKey,24*3600);

@@ -8,7 +8,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Services\JunctionsService;
-
+use Services\DiagnosisNoTimingService;
 class Junction extends MY_Controller
 {
     protected $junctionsService;
@@ -23,6 +23,7 @@ class Junction extends MY_Controller
         $this->load->model('timing_model');
         $this->load->config('nconf');
         $this->setTimingType();
+        $this->dianosisService = new DiagnosisNoTimingService();
     }
 
     /**
@@ -88,11 +89,12 @@ class Junction extends MY_Controller
 
         // 校验参数
         $this->validate([
-            'task_id'         => 'required|is_natural_no_zero',
+//            'task_id'         => 'required|is_natural_no_zero',
             'type'            => 'required|is_natural_no_zero',
             'junction_id'     => 'required|min_length[4]',
             'task_time_range' => 'required|exact_length[11]|regex_match[/\d{2}:\d{2}-\d{2}:\d{2}/]',
             'search_type'     => 'required|is_natural',
+            'city_id'     => 'required|is_natural',
         ]);
 
         $data['time_range'] = '';
@@ -117,16 +119,28 @@ class Junction extends MY_Controller
             throw new \Exception('参数dates不为空且为数组格式！', ERR_PARAMETERS);
         }
 
-        $data['task_id'] = intval($params['task_id']);
-        $data['dates'] = $params['dates'];
+//        $data['task_id'] = intval($params['task_id']);
+//        $data['dates'] = $params['dates'];
+        foreach ($params["dates"] as $key=>$date){
+            if (!preg_match('/\d{4,4}\d{1,2}\d{1,2}/ims',$date)){
+                throw new \Exception("dates参数格式错误");
+            }
+            $data['dates'][$key] = substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2);
+        }
         $data['junction_id'] = strip_tags(trim($params['junction_id']));
         $data['search_type'] = intval($params['search_type']);
         $data['type'] = intval($params['type']);
-        $data['task_time_range'] = strip_tags(trim($params['task_time_range']));
+        $data['time_range'] = strip_tags(trim($params['task_time_range']));
+        $data['city_id'] = intval($params['city_id']);
         $data['timingType'] = $this->timingType;
 
+
         // 获取路口指标详情
-        $res = $this->junctionsService->getFlowQuotas($data);
+//        $res = $this->junctionsService->getFlowQuotas($data);
+        $res = $this->dianosisService->getFlowQuotas($data);
+        $res['time_range'] = $data['time_range'];
+        $res = $this->junctionsService->formatJunctionDetailData($res, $data['dates'], 1, $data['timingType']);
+
 
         $this->response($res);
     }

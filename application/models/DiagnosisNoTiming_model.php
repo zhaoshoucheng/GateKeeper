@@ -115,7 +115,7 @@ class DiagnosisNoTiming_model extends CI_Model
             unset($timePoint[1]);
         }
         $req = [
-            'city_id' => $cityID,
+            'city_id' => (string)$cityID,
             'logic_junction_id' => $logicJunctionID,
             'time_points' => $timePoint,
             'dates' => $dates,
@@ -149,7 +149,7 @@ class DiagnosisNoTiming_model extends CI_Model
             unset($timePoint[1]);
         }
         $req = [
-            'city_id' => $cityID,
+            'city_id' => (string)$cityID,
             'logic_junction_id' => $logicJunctionID,
             'time_points' => $timePoint,
             'dates' => $dates,
