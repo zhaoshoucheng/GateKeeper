@@ -336,17 +336,17 @@ class DiagnosisNoTimingService extends BaseService
         return $ret;
     }
 
-    public function getAllCityJunctionsDiagnoseList($params) {
+    public function getAllCityJunctionsDiagnoseList($params, $userPerm = []) {
         $city_id = $params['city_id'];
         $dates = $params['dates'];
         $hour = $params['hour'];
         // es alarm
-        $data = $this->diagnosisNoTiming_model->getJunctionAlarmDataByJunction($city_id, $dates, $hour);
+        $data = $this->diagnosisNoTiming_model->getJunctionAlarmDataByJunction($city_id, $dates, $hour, $userPerm);
         if (empty($data)) {
             return [];
         }
         // avg speed and delay
-        $rest = $this->diagnosisNoTiming_model->GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour);
+        $rest = $this->diagnosisNoTiming_model->GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour, $userPerm);
         // city junctions
         $versions = $this->waymap_model->getDateVersion($dates);
         $version = max(array_values($versions));
@@ -368,9 +368,6 @@ class DiagnosisNoTimingService extends BaseService
         $lngs = 0.0;
         $lats = 0.0;
         $cnt = 0;
-        $is_oversaturation_cnt = 0;
-        $is_imbalance_cnt = 0;
-        $is_spillover_cnt = 0;
 
         foreach ($alarm_types as $alarm_type => $detail) {
             ${$detail['cnt']} = 0;
@@ -447,6 +444,8 @@ class DiagnosisNoTimingService extends BaseService
                 "other" => round(100 - ${$detail['cnt']} / $cnt * 100, 2) . '%',
             ];
         }
+
+        // TODO: 结果这里做个权限过滤
 
         return $ret;
     }
