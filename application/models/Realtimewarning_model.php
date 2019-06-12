@@ -258,7 +258,7 @@ class Realtimewarning_model extends CI_Model
         //每次只取一个批次进行追加缓存。
         $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour);
         if (empty($avgStopDelayList)) {
-            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id={$cityId}||date={$date}||hour={$hour}||traceId={$traceId}||didi_trace_id=" . get_traceid() . "||message=生成平均延误曲线数据 avg(stop_delay) group by hour failed!\n\r";
+            $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id={$cityId}||date={$date}||hour={$hour}||traceId={$traceId}||didi_trace_id=" . get_traceid() . "||message=生成平均延误曲线数据异常退出 avg(stop_delay) group by hour failed!\n\r";
             $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.avgStopdelay", "log_time"=>date("Y-m-d H:i:s"),]);
             echo $message;
             return;
