@@ -290,11 +290,14 @@ class Track extends MY_Controller
             $cycle = $timing['cycle'];
         }
         foreach ($dataList as $dk=>$dv){
+
+            $step= intval($dv[0][0]/$cycle);
             foreach ($dv as $k=>$v){
                 if($v[0]<$cycle){
                     continue;
                 }
-                $dataList[$dk][$k][0] = $v[0]%$cycle;
+                $tmpStep = intval($v[0]/$cycle);
+                $dataList[$dk][$k][0] = $v[0]%$cycle + $cycle*($tmpStep-$step);
             }
 
         }
@@ -313,7 +316,7 @@ class Track extends MY_Controller
         foreach ($dataList as $dk=>$dv){
             foreach ($dv as $k => $v){
                 if($v[0]>$info['x']['max']){
-                    $info['x']['max']=$v[0]+100;
+                    $info['x']['max']=$v[0]+400;
                 }
                 if($v[0]<$info['x']['min']){
                     $info['x']['min']=$v[0]-100;
