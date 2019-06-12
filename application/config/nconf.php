@@ -107,7 +107,7 @@ if ($development == 2) {
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
 
     //新版报警开城列表
-    $alarm_v2_city_ids = [];
+    $alarm_v2_city_ids = [23];
 } else {
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
