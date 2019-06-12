@@ -313,10 +313,10 @@ class Track extends MY_Controller
         foreach ($dataList as $dk=>$dv){
             foreach ($dv as $k => $v){
                 if($v[0]>$info['x']['max']){
-                    $info['x']['max']=$v[0];
+                    $info['x']['max']=$v[0]+100;
                 }
                 if($v[0]<$info['x']['min']){
-                    $info['x']['min']=$v[0];
+                    $info['x']['min']=$v[0]-100;
                 }
                 if($v[1]>$info['y']['max']){
                     $info['y']['max']=$v[1];
