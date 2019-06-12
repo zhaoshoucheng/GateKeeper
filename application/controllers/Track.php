@@ -186,46 +186,7 @@ class Track extends MY_Controller
 
             $params["dates"][$key] = substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2);
         }
-        $result_data = $this->dianosisService->getSpaceTimeDiagram($params);
-        $dataList = []; // 轨迹集合
-        $info = []; //轨迹描述数据
-        $signalInfo = []; //配时数据
-        $signalRange = []; //配时描述数据
 
-        //数据合并
-        foreach ($result_data as $rk=>$rv){
-            $info['comment'] = $rv['flow_label'];
-            $dataList = array_merge($dataList,$rv['dataList']);
-        }
-        //轨迹抽样,考虑前端性能问题,暂时上限200
-        if (count($dataList) >200){
-            $dataList = array_rand($dataList,200);
-        }
-        $info['id'] = $params['flow_id'];
-        $info['x']=[
-            'max'=>-999999,
-            'min'=>9999999
-        ];
-        $info['y']=[
-            'max'=>-999999,
-            'min'=>9999999
-        ];
-        foreach ($dataList as $dk=>$dv){
-            foreach ($dv as $k => $v){
-                if($v[0]>$info['x']['max']){
-                    $info['x']['max']=$v[0];
-                }
-                if($v[0]<$info['x']['min']){
-                    $info['x']['min']=$v[0];
-                }
-                if($v[1]>$info['y']['max']){
-                    $info['y']['max']=$v[1];
-                }
-                if($v[1]<$info['y']['min']){
-                    $info['y']['min']=$v[1];
-                }
-            }
-        }
         //构造配时数据
         // 获取 配时信息 周期 相位差 绿灯开始结束时间
         $timing_data = [
@@ -235,11 +196,13 @@ class Track extends MY_Controller
             'flow_id'     => trim($params['flow_id']),
             'timingType'  => 1
         ];
+
         $data = [
             'city_id'=>$params['city_id'],
             'logic_junction_id'=>$params['junction_id'],
             'logic_flow_id'=>$params['flow_id'],
         ];
+        //配时查询
         $timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
         //重构配时相关内容
         if(!empty($timing)){
@@ -305,6 +268,66 @@ class Track extends MY_Controller
             }
 
         }
+        //轨迹查询
+        $result_data = $this->dianosisService->getSpaceTimeDiagram($params);
+        $dataList = []; // 轨迹集合
+        $info = []; //轨迹描述数据
+        $signalInfo = []; //配时数据
+        $signalRange = []; //配时描述数据
+
+        //数据合并
+        foreach ($result_data as $rk=>$rv){
+            $info['comment'] = $rv['flow_label'];
+            $dataList = array_merge($dataList,$rv['dataList']);
+        }
+        //轨迹抽样,考虑前端性能问题,暂时上限200
+        if (count($dataList) >200){
+            $dataList = array_rand($dataList,200);
+        }
+        //基于周期数据融合
+        $cycle=300;
+        if(isset($timing['cycle'])){
+            $cycle = $timing['cycle'];
+        }
+        foreach ($dataList as $dk=>$dv){
+            foreach ($dv as $k=>$v){
+                if($v[0]<$cycle){
+                    continue;
+                }
+                $dataList[$dk][$k][0] = $v[0]%$cycle;
+            }
+
+        }
+
+
+
+        $info['id'] = $params['flow_id'];
+        $info['x']=[
+            'max'=>-999999,
+            'min'=>9999999
+        ];
+        $info['y']=[
+            'max'=>-999999,
+            'min'=>9999999
+        ];
+        foreach ($dataList as $dk=>$dv){
+            foreach ($dv as $k => $v){
+                if($v[0]>$info['x']['max']){
+                    $info['x']['max']=$v[0];
+                }
+                if($v[0]<$info['x']['min']){
+                    $info['x']['min']=$v[0];
+                }
+                if($v[1]>$info['y']['max']){
+                    $info['y']['max']=$v[1];
+                }
+                if($v[1]<$info['y']['min']){
+                    $info['y']['min']=$v[1];
+                }
+            }
+        }
+
+
         $finalRet = [];
         $finalRet['dataList'] = $dataList;
         $finalRet['info'] = $info;

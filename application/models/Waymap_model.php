@@ -666,4 +666,14 @@ class Waymap_model extends CI_Model
         $res = $this->get($url, $data);
         return $res;
     }
+
+    public function flowsByJunctionOnline($logic_junction_id){
+        $data = [
+            'logic_junction_id'   => $logic_junction_id,
+        ];
+
+        $url   = 'http://100.69.238.11:8000/its//signal-map/mapFlow/flowsByJunction';
+        $res = $this->get($url, $data);
+        return $res;
+    }
 }
