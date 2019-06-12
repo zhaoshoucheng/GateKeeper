@@ -29,10 +29,15 @@ class City extends MY_Controller {
             $point = explode(",", $center);
             $name = $info['city_name'];
             $pinyins = $pinyinService->convert($name, PINYIN_NO_TONE);
+            $letter = "";
+            if (!empty($pinyins)) {
+                $letter = strtoupper(substr($pinyins[0], 0, 1));
+            }
             $data[] = [
                 "code"   => $info['city_id'],
                 "obj_id" => $info['city_id'],
                 "city"   => $name,
+                "letter" => $letter,
                 "pinyin" => implode(" ", $pinyins),
                 "zoom"   => 11,
                 "center" => [
