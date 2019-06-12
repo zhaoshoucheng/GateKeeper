@@ -202,6 +202,8 @@ class Track extends MY_Controller
             'logic_junction_id'=>$params['junction_id'],
             'logic_flow_id'=>$params['flow_id'],
         ];
+        $signalInfo = []; //配时数据
+        $signalRange = []; //配时描述数据
         //配时查询
         $timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
         //重构配时相关内容
@@ -272,8 +274,7 @@ class Track extends MY_Controller
         $result_data = $this->dianosisService->getSpaceTimeDiagram($params);
         $dataList = []; // 轨迹集合
         $info = []; //轨迹描述数据
-        $signalInfo = []; //配时数据
-        $signalRange = []; //配时描述数据
+
 
         //数据合并
         foreach ($result_data as $rk=>$rv){
