@@ -610,7 +610,7 @@ class Timing_model extends CI_Model
                 foreach ($mv['sub_phases'] as $sk => $sv){
                     $plan['comment']=$tv['plan']['id'];
                     $comment = $mv['name'];
-                    if(isset($flowMap[$mv['id']])){
+                    if(isset($flowMap[$mv['id']]) && $flowMap[$mv['id']] !=''){
                         $comment = $flowMap[$mv['id']];
                     }
                     $plan['plan_detail']['movement_timing'][$mk][] = [
