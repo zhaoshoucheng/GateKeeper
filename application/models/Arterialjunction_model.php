@@ -58,6 +58,20 @@ class Arterialjunction_model extends CI_Model
             $task['dates'] = implode(",",$tDates);
         }
 
+        // 获取配时信息
+        $timing = $this->timing_model->queryTimingStatus(
+            [
+                'city_id' => $data['city_id'],
+                'source' => 2,
+            ]
+        );
+        $hasTiming = [];
+        foreach ($timing as $one) {
+            if ($one['status'] == 1) {
+                $hasTiming[] = $one['logic_junction_id'];
+            }
+        }
+
         // 获取地图版本
         $version = $this->waymap_model->getLastMapVersion();
         if (empty($version)) {
@@ -70,7 +84,7 @@ class Arterialjunction_model extends CI_Model
             return [];
         }
         $resultData = [];
-        $resultData['dataList'] = array_reduce($allCityJunctions, function ($v, $w) {
+        $resultData['dataList'] = array_reduce($allCityJunctions, function ($v, $w) use($hasTiming) {
             if (empty($v)) {
                 $v = [];
             }
@@ -79,6 +93,7 @@ class Arterialjunction_model extends CI_Model
                 "lng" => $w["lng"],
                 "lat" => $w["lat"],
                 "name" => $w["name"],
+                "timing_status" => in_array($w['logic_junction_id'], $hasTiming) ? 1 : 0,
             );
             return $v;
         });

@@ -400,12 +400,15 @@ class DiagnosisNoTiming_model extends CI_Model
         }
     }
 
-    public function getJunctionAlarmDataByJunction($city_id, $dates, $hour) {
+    public function getJunctionAlarmDataByJunction($city_id, $dates, $hour, $userPerm = []) {
         $req = [
             'city_id' => $city_id,
             'dates' => $dates,
             'hour' => $hour,
         ];
+        if (!empty($userPerm['junction_id'])) {
+            $req['junction_ids'] = $userPerm['junction_id'];
+        }
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByJunction', $req, 0, 'json');
         if (!empty($res)) {
@@ -416,12 +419,15 @@ class DiagnosisNoTiming_model extends CI_Model
         }
     }
 
-    public function GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour) {
+    public function GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour, $userPerm = []) {
         $req = [
             'city_id' => $city_id,
             'dates' => $dates,
             'hour' => $hour,
         ];
+        if (!empty($userPerm['junction_id'])) {
+            $req['junction_ids'] = $userPerm['junction_id'];
+        }
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByJunctionAVG', $req, 0, 'json');
         if (!empty($res)) {

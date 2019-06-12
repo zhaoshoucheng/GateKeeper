@@ -191,7 +191,7 @@ class OverviewService extends BaseService
                 $rangemap = array_flip($rangeHours);
                 $rangeavg = ($nowValue-$preValue)/count($rangemap);
                 foreach ($rangemap as $rk=>$rv){
-                    $rangemap[date('H:i', $rk)] = $preValue+$rv*$rangeavg;
+                    $rangemap[date('H:i', $rk)] = round($preValue+$rv*$rangeavg, 2);
                 }
                 $skipMap = array_merge($skipMap, $rangemap);
             }

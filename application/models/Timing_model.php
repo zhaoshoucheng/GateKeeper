@@ -12,6 +12,7 @@ class Timing_model extends CI_Model
         parent::__construct();
 
         $this->load->config('nconf');
+        $this->load->model("waymap_model");
     }
 
     /**
@@ -546,6 +547,14 @@ class Timing_model extends CI_Model
 
     //获取新版本配时并格式化成旧版本格式
     public function getNewTimingInfo($data){
+        $flowInfos = $this->waymap_model->flowsByJunctionOnline(trim($data['junction_id']));
+        $flowMap = [];
+        if(!empty($flowInfos)){
+            foreach ($flowInfos as $fk=> $fv){
+                $flowMap[$fv['logic_flow_id']] = $fv["desc"];
+            }
+        }
+        //flow信息替换
         $time_range = array_filter(explode('-', trim($data['time_range'])));
         $this->load->helper('http');
         $date = $data['dates'][0];
@@ -600,13 +609,17 @@ class Timing_model extends CI_Model
             foreach ($tv['plan']['movements'] as $mk => $mv){
                 foreach ($mv['sub_phases'] as $sk => $sv){
                     $plan['comment']=$tv['plan']['id'];
+                    $comment = $mv['name'];
+                    if(isset($flowMap[$mv['id']])){
+                        $comment = $flowMap[$mv['id']];
+                    }
                     $plan['plan_detail']['movement_timing'][$mk][] = [
                         "movement_id"=>$mk,
                         'start_time'=>$sv['start_time'],
                         'duration'=>$sv['green']+$sv['yellow'],
                         'state'=>1,
                         'flow_logic'=>[
-                            'comment'=>$mv['name'],
+                            'comment'=>$comment,
                             'logic_flow_id'=>$mv['id']
                         ]
                     ];
@@ -685,6 +698,8 @@ class Timing_model extends CI_Model
         } catch (Exception $e) {
             return [];
         }
+        //使用路网的flow信息完善数据
+//        $flowInfo = $this->waymap_model->flowsByJunctionOnline($data['logic_junction_id']);
 
         return $timing['data'];
 
@@ -731,4 +746,18 @@ class Timing_model extends CI_Model
 
     }
 
+    // 查询路口配时状态
+    public function queryTimingStatus($data)
+    {
+        // $authorization = "Authorization: Basic ".base64_encode("test:1234");
+        $timing = httpPOST($this->config->item('signal_timing_status_url'), $data, 0, 'json');
+        $timing = json_decode($timing, true);
+        if (isset($timing['errno']) && $timing['errno'] != 0) {
+            return [];
+        }
+        if (empty($timing['data'])) {
+            return [];
+        }
+        return $timing['data'];
+    }
 }
