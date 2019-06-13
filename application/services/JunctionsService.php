@@ -1187,14 +1187,14 @@ class JunctionsService extends BaseService
         $tempMovements = [];
         foreach ($data['movements'] as $k=>&$v) {
             // 相位名称
-            $v['comment'] = $flowIdName[$v['movement_id']] ?? '';
+//            $v['comment'] = $flowIdName[$v['movement_id']] ?? '';
 
             // 加这个判断是旧的任务结果数据中没有此字段
-            if (isset($v['confidence'])) {
-                $v['confidence'] = $confidenceConf[$v['confidence']]['name'] ?? '';
-            } else {
-                $v['confidence'] = '';
-            }
+//            if (isset($v['confidence'])) {
+//                $v['confidence'] = $confidenceConf[$v['confidence']]['name'] ?? '';
+//            } else {
+//                $v['confidence'] = '';
+//            }
 
             // 组织flow级指标对应相位集合及格式化指标数据
             foreach ($flowQuotaKeyConf as $key=>$val) {
@@ -1218,11 +1218,11 @@ class JunctionsService extends BaseService
         }
         // 因为foreach 使用了引用&$v，所以foreach完成后要销毁$v
         unset($v);
-
+//TODO 相位排序
         if (!empty($tempMovements)) {
-            unset($data['movements']);
+//            unset($data['movements']);
             ksort($tempMovements);
-            $data['movements'] = array_values($tempMovements);
+//            $data['movements'] = array_values($tempMovements);
         }
 
         if ($resultType == 2) { // 诊断详情页
