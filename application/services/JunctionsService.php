@@ -1146,7 +1146,7 @@ class JunctionsService extends BaseService
         $startTime = $timeList[0];
         $endTime = $timeList[1];
         // 因为详情页地图下方列表所有相位都有 置信度字段，而置信度不属于指标，固将此放到扩展指标集合中
-        $data['extend_flow_quota']['confidence'] = '置信度';
+//        $data['extend_flow_quota']['confidence'] = '置信度';
 
         // movement级指标数据在数据表中以json格式的存储，需要json_decode
 //        $data['movements'] = json_decode($data['movements'], true);

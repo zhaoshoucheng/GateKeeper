@@ -463,13 +463,13 @@ $config['diagnosis_flow_quota_key'] = [
         },
         'unit' => '米',
     ],
-    'saturation_degree' => [
-        'name' => '饱和度',
-        'round' => function ($val) {
-            return round($val, 2);
-        },
-        'unit' => '',
-    ],
+//    'saturation_degree' => [
+//        'name' => '饱和度',
+//        'round' => function ($val) {
+//            return round($val, 2);
+//        },
+//        'unit' => '',
+//    ],
     'stop_delay' => [
         'name' => '停车延误',
         'round' => function ($val) {
