@@ -219,7 +219,7 @@ class DiagnosisNoTiming extends MY_Controller
     }
 
     /**
-     * 诊断路口问题详情
+     * 诊断路口问题列表
      * @param $params ['city_id']       string   Y 城市ID
      * @param $params ['dates']         array    Y 评估/诊断日期 [20180102,20180103,....]
      * @param $params ['hour']          string   Y 评估/诊断日期 [09:30]
@@ -251,7 +251,7 @@ class DiagnosisNoTiming extends MY_Controller
             }
         }
 
-        $res = $this->dianosisService->getAllCityJunctionsDiagnoseList($params);
+        $res = $this->dianosisService->getAllCityJunctionsDiagnoseList($params, $this->userPerm);
         $this->response($res);
     }
 }

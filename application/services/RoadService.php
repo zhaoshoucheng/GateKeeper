@@ -226,6 +226,7 @@ class RoadService extends BaseService
     {
         $cityId = $params['city_id'];
         $show_type = $params['show_type'];
+        $force = $params['force'] ?? 0 ;
         $pre_key = $show_type ? 'Road_extend_' : 'Road_';
 
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
@@ -233,11 +234,14 @@ class RoadService extends BaseService
         $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
         $results = [];
         foreach ($roadList as $item) {
-            /*if($item['id']!="159"){
-                continue;
-            }*/
+//            if($item['id']!="303"){
+//                continue;
+//            }
             $roadId = $item['road_id'];
             $res = $this->redis_model->getData($pre_key . $roadId);
+            if ($force) {
+                $res = [];
+            }
             if (!$res) {
                 $data = [
                     'city_id' => $cityId,
@@ -274,59 +278,17 @@ class RoadService extends BaseService
     {
         $cityId = $params['city_id'];
         $roadId = $params['road_id'];
-
+        $showType = $params['show_type'];
         $roadInfo = $this->road_model->getRoadByRoadId($roadId, 'logic_junction_ids');
-        $junctionIdList = explode(',', $roadInfo['logic_junction_ids']);
-
-        $maxWaymapVersion = $this->waymap_model->getLastMapVersion();
-        if (isset($params['show_type']) and $params['show_type']) {
-            $IdsLength = sizeof($junctionIdList);
-            if ($IdsLength > 1) {
-                $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[0], 'all', 1);
-                $up_road_degree = [];
-                foreach ($juncMovements as $item) {
-                    if ($item['junction_id'] == $junctionIdList[0] and
-                        $item['downstream_junction_id'] == $junctionIdList[1] and
-                        strpos($item['upstream_junction_id'],"-")!==0 and
-                        $item['upstream_junction_id'][0] != '-') {
-                        $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
-                        if($absDiff>180){
-                            $absDiff = 360-$absDiff;
-                        }
-                        $up_road_degree[$item['upstream_junction_id']] = $absDiff;
-                    }
-                }
-
-                if (!empty($up_road_degree)) {
-                    asort($up_road_degree);
-                    array_unshift($junctionIdList, key($up_road_degree));
-                } else {
-                    //throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
-                }
-
-                $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[sizeof($junctionIdList) - 1], 'all', 1);
-                $down_road_degree = [];
-                foreach ($juncMovements as $item) {
-                    if ($item['junction_id'] == $junctionIdList[sizeof($junctionIdList) - 1] and
-                        $item['downstream_junction_id'][0] != '-' and
-                        strpos($item['downstream_junction_id'],"-")!==0 and
-                        $item['upstream_junction_id'] == $junctionIdList[sizeof($junctionIdList) - 2]) {
-                        $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
-                        if($absDiff>180){
-                            $absDiff = 360-$absDiff;
-                        }
-                        $down_road_degree[$item['downstream_junction_id']] = $absDiff;
-                    }
-                }
-                if (!empty($down_road_degree)) {
-                    asort($down_road_degree);
-                    array_push($junctionIdList, key($down_road_degree));
-                } else {
-                    //throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);
-                }
-            }
+//        print_r($roadInfo);exit;
+        if($showType){
+            $junctionIdList = $this->getPathHeadTailJunction(["city_id"=>$cityId,
+                "junction_ids"=>$roadInfo['logic_junction_ids']]);
+        }else{
+            $junctionIdList = explode(",",$roadInfo['logic_junction_ids']);
         }
-
+//        print_r($junctionIdList);exit;
+        $maxWaymapVersion = $this->waymap_model->getLastMapVersion();
         $res = $this->waymap_model->getConnectPath($cityId, $maxWaymapVersion, $junctionIdList);
         if (!$res || empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
             throw new \Exception('路网数据有误', ERR_ROAD_MAPINFO_FAILED);

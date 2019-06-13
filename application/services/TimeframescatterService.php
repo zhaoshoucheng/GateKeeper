@@ -58,6 +58,9 @@ class TimeframescatterService extends BaseService
         foreach ($result_data as $item){
             $scatterList = array_merge($scatterList,$item['dataList']);
         }
+        if(count($scatterList) ==0){
+            return [];
+        }
         $resultList = [];
         $timeArr = explode("-",$data['time_range']);
         $scatterValues = array_column($scatterList, 1);
@@ -78,7 +81,7 @@ class TimeframescatterService extends BaseService
         array_multisort(array_column($scatterList, 0), SORT_ASC, $scatterList);
         foreach ($scatterList as $key=>$item){
             $key = date("H:i:s",strtotime(date("Y-m-d"))+$item[0]);
-            $resultList[$key] = $item;
+            $resultList[] = [$key,$item[1]];
         }
         $result = [
             "info"=>$info,

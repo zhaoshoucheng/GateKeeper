@@ -115,7 +115,7 @@ class DiagnosisNoTiming_model extends CI_Model
             unset($timePoint[1]);
         }
         $req = [
-            'city_id' => $cityID,
+            'city_id' => (string)$cityID,
             'logic_junction_id' => $logicJunctionID,
             'time_points' => $timePoint,
             'dates' => $dates,
@@ -149,7 +149,7 @@ class DiagnosisNoTiming_model extends CI_Model
             unset($timePoint[1]);
         }
         $req = [
-            'city_id' => $cityID,
+            'city_id' => (string)$cityID,
             'logic_junction_id' => $logicJunctionID,
             'time_points' => $timePoint,
             'dates' => $dates,
@@ -250,12 +250,26 @@ class DiagnosisNoTiming_model extends CI_Model
         if (empty($flows)) {
             return [];
         }
+        //使用flow备注名称统一处理名称
+        $flowInfos = $this->waymap_model->flowsByJunctionOnline($logicJunctionID);
+        $flowMap = [];
+        if(!empty($flowInfos)){
+            foreach ($flowInfos as $fk=> $fv){
+                if($fv["desc"]!=""){
+                    $flowMap[$fv['logic_flow_id']] = $fv["desc"];
+                }
+            }
+        }
         foreach ($flows as $item) {
             $flowId = $item["logic_flow_id"];
+            $comment = $item["phase_name"];
+            if(isset($flowMap[$flowId])){
+                $comment=$flowMap[$flowId];
+            }
             $movementInfo = [
                 "confidence" => $flowId,
                 "movement_id" => $flowId,
-                "comment" => $item["phase_name"],
+                "comment" => $comment,
                 "route_length" => $item["in_link_length"],
             ];
             if (isset($result[$flowId])) {
@@ -400,12 +414,15 @@ class DiagnosisNoTiming_model extends CI_Model
         }
     }
 
-    public function getJunctionAlarmDataByJunction($city_id, $dates, $hour) {
+    public function getJunctionAlarmDataByJunction($city_id, $dates, $hour, $userPerm = []) {
         $req = [
             'city_id' => $city_id,
             'dates' => $dates,
             'hour' => $hour,
         ];
+        if (!empty($userPerm['junction_id'])) {
+            $req['junction_ids'] = $userPerm['junction_id'];
+        }
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByJunction', $req, 0, 'json');
         if (!empty($res)) {
@@ -416,12 +433,15 @@ class DiagnosisNoTiming_model extends CI_Model
         }
     }
 
-    public function GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour) {
+    public function GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour, $userPerm = []) {
         $req = [
             'city_id' => $city_id,
             'dates' => $dates,
             'hour' => $hour,
         ];
+        if (!empty($userPerm['junction_id'])) {
+            $req['junction_ids'] = $userPerm['junction_id'];
+        }
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByJunctionAVG', $req, 0, 'json');
         if (!empty($res)) {

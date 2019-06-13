@@ -52,7 +52,10 @@ if ($development == 2) {
     $signal_light_server = 'http://10.88.128.40:8000/ipd-cloud/signal-platform';
 
     $signal_rollback_url = "http://10.85.128.81:30357/signal-control/signalprofile/rollback";
+    $signal_base_url = "http://10.85.128.81:30357/signal-control/signalopt/querybasetiming";
 
+    // 路口配时状态
+    $signal_timing_status_url = "http://10.85.128.81:30357/signal-control/signalprofile/timingstatusbatch";
     // es 老实时轨迹、指标数据
     $es_server = 'http://10.85.128.208:8001';
 
@@ -104,7 +107,7 @@ if ($development == 2) {
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
 
     //新版报警开城列表
-    $alarm_v2_city_ids = [12,23];
+    $alarm_v2_city_ids = [23];
 } else {
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
@@ -136,6 +139,10 @@ if ($development == 2) {
 
     // signal_rollback
     $signal_rollback_url = "http://100.90.164.31:8016/signal-control/signalprofile/rollback";
+    $signal_base_url = "http://100.90.164.31:8016/signal-control/signalopt/querybasetiming";
+
+    // 路口配时状态
+    $signal_timing_status_url = "http://100.90.164.31:8016/signal-control/signalprofile/timingstatusbatch";
 
     // es
     $es_server = 'http://10.89.236.25:8087';
@@ -191,7 +198,7 @@ if ($development == 2) {
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
 
     //新版报警开城列表
-    $alarm_v2_city_ids = [12,134,23];
+    $alarm_v2_city_ids = [];
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -224,6 +231,9 @@ $config['signal_light_interface'] = $signal_light_server;
 
 // signal_rollback
 $config['signal_rollback_url'] = $signal_rollback_url;
+$config['signal_base_url'] = $signal_base_url;
+
+$config['signal_timing_status_url'] = $signal_timing_status_url;
 
 // 实时指标接口地址
 $config['es_interface'] = $es_server;
@@ -439,20 +449,27 @@ $config['diagnosis_flow_quota_key'] = [
         },  // 格式化数据
         'unit' => '米'       // 单位
     ],
-    'queue_position' => [
+    'confidence'=>[
+        'name'=>'置信度',
+        'unit'=>'',
+        'round'=>function($val){
+            return $val;
+        },
+    ],//置信度
+    'queue_length' => [
         'name' => '排队长度',
         'round' => function ($val) {
             return round($val);
         },
         'unit' => '米',
     ],
-    'saturation_degree' => [
-        'name' => '饱和度',
-        'round' => function ($val) {
-            return round($val, 2);
-        },
-        'unit' => '',
-    ],
+//    'saturation_degree' => [
+//        'name' => '饱和度',
+//        'round' => function ($val) {
+//            return round($val, 2);
+//        },
+//        'unit' => '',
+//    ],
     'stop_delay' => [
         'name' => '停车延误',
         'round' => function ($val) {
@@ -481,13 +498,13 @@ $config['diagnosis_flow_quota_key'] = [
         },
         'unit' => '',
     ],
-    'flow_num' => [
-        'name' => '流量',
-        'round' => function ($val) {
-            return round($val);
-        },
-        'unit' => '每小时/车道',
-    ],
+//    'flow_num' => [
+//        'name' => '流量',
+//        'round' => function ($val) {
+//            return round($val);
+//        },
+//        'unit' => '每小时/车道',
+//    ],
     'free_flow_speed' => [
         'name' => '自由流',
         'round' => function ($val) {

@@ -64,9 +64,11 @@ class ReportService extends BaseService
         $keyword = $params['keyword'];
 
         $topNum = 15; //限制返回前端数量
-
-        $junctions = $this->waymap_model->getSuggestJunction($cityId, $keyword);
-
+        try{
+            $junctions = $this->waymap_model->getSuggestJunction($cityId, $keyword);
+        }catch (\Exception $e){
+            return [];
+        }
         $final_data = [];
 
         $count = 0;

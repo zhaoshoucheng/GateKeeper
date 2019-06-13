@@ -12,6 +12,7 @@ class Timing_model extends CI_Model
         parent::__construct();
 
         $this->load->config('nconf');
+        $this->load->model("waymap_model");
     }
 
     /**
@@ -29,10 +30,12 @@ class Timing_model extends CI_Model
         }
 
         // 获取配时数据
-        $timing = $this->getTimingData($data);
+//        $timing = $this->getTimingData($data);
+        $timing = $this->getNewTimingInfo($data);
+
 
         // 对返回数据格式化,返回需要的格式
-        if (count($timing >= 1)) {
+        if (count($timing) >= 1) {
             $timing = $this->formatTimingDataByOptimize($timing, $data['time_range']);
         } else {
             return [];
@@ -55,10 +58,10 @@ class Timing_model extends CI_Model
         }
 
         // 获取配时数据
-        $timing = $this->getTimingData($data);
-
+//        $timing = $this->getTimingData($data);
+        $timing = $this->getNewTimingInfo($data);
         // 对返回数据格式化,返回需要的格式
-        if (count($timing >= 1)) {
+        if (count($timing) >= 1) {
             $timing = $this->formatTimingIdToName($timing);
         } else {
             return [];
@@ -82,7 +85,9 @@ class Timing_model extends CI_Model
             return [];
         }
         // 获取配时数据
-        $timing = $this->getTimingData($data);
+//        $timing = $this->getTimingData($data);
+
+        $timing = $this->getNewTimingInfo($data);
         if (!$timing) {
             return [];
         }
@@ -119,7 +124,8 @@ class Timing_model extends CI_Model
 
         $result = [];
         // 获取配时数据
-        $timing = $this->getTimingData($data);
+//        $timing = $this->getTimingData($data);
+        $timing = $this->getNewTimingInfo($data);
         if (!$timing || empty($timing['latest_plan']['time_plan'][0]['plan_detail'])) {
             return [];
         }
@@ -146,7 +152,8 @@ class Timing_model extends CI_Model
 
         $result = [];
         // 获取配时数据
-        $timing = $this->getTimingData($data);
+//        $timing = $this->getTimingData($data);
+        $timing = $this->getNewTimingInfo($data);
         if (!empty($timing)) {
             $result = $this->formatTimingDataByOptimizeScatter($timing, $data['flow_id']);
         }
@@ -169,7 +176,8 @@ class Timing_model extends CI_Model
 
         $result = [];
         // 获取配时数据
-        $timing = $this->getTimingData($data);
+//        $timing = $this->getTimingData($data);
+        $timing = $this->getNewTimingInfo($data);
         if (!empty($timing)) {
             $result = $this->formatTimingDataByOptimizeSplit($timing, $data['yellowLight']);
         }
@@ -430,6 +438,7 @@ class Timing_model extends CI_Model
         // 从data中抽取方案
         $tempTiming = [];
         foreach ($data['latest_plan']['time_plan'] as $v) {
+
             $tempTiming[strtotime($v['tod_start_time'])]['start'] = $v['tod_start_time'];
             $tempTiming[strtotime($v['tod_start_time'])]['end'] = $v['tod_end_time'];
             $tempTiming[strtotime($v['tod_start_time'])]['name'] = str_replace('方案', '', $v['comment']);
@@ -510,7 +519,9 @@ class Timing_model extends CI_Model
     {
         $time_range = array_filter(explode('-', trim($data['time_range'])));
         $this->load->helper('http');
-
+        if ($time_range[1]=="24:00"){
+            $time_range[1]="23:59";
+        }
         // 获取配时详情
         $timing_data = [
                         'logic_junction_id' => trim($data['junction_id']),
@@ -533,6 +544,98 @@ class Timing_model extends CI_Model
             return [];
         }
     }
+
+    //获取新版本配时并格式化成旧版本格式
+    public function getNewTimingInfo($data){
+        $flowInfos = $this->waymap_model->flowsByJunctionOnline(trim($data['junction_id']));
+        $flowMap = [];
+        if(!empty($flowInfos)){
+            foreach ($flowInfos as $fk=> $fv){
+                $flowMap[$fv['logic_flow_id']] = $fv["desc"];
+            }
+        }
+        //flow信息替换
+        $time_range = array_filter(explode('-', trim($data['time_range'])));
+        $this->load->helper('http');
+        $date = $data['dates'][0];
+        $reqdate = substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2);
+        // 获取配时详情
+        $timing_data = [
+            'logic_junction_id' => trim($data['junction_id']),
+//            'days'              => trim(implode(',', $data['dates'])),
+            'start_time'        => trim($time_range[0]).":00",
+            'end_time'          => date('H:i', strtotime(trim($time_range[1])) - 60).":00",
+            'source'            => 2,
+            'version'           => $date."000000",
+            'date'              => $reqdate,
+            'new_type'          => 1,
+
+        ];
+        $timing = httpGET(
+            $this->config->item('signal_base_url') ,
+            $timing_data
+        );
+        $timing = json_decode($timing, true);
+        if ($timing['errno'] !=0){
+            return [];
+        }
+        //格式化为新接口格式
+        $finalData = [
+            'latest_plan'=>[
+                'logic_junction_id'=>$data['junction_id'],
+                'time_plan'=>[],
+            ],
+            'total_plan'=>0,
+        ];
+
+        foreach ($timing['data']['schedules'][0]['tods'] as $tk=>$tv){
+            if($tv['end_time']=="00:00:00"){
+                $tv['end_time']="24:00:00";
+            }
+            $plan = [
+                'tod_end_time'=> $tv['end_time'],
+                'tod_start_time'=> $tv['start_time'],
+                'time_plan_id'=>1,
+                'plan_id'=>$tv['plan']['id'],
+                'plan_detail'=>[
+                    'extra_timing'=>[
+                        'cycle'=>$tv['plan']['cycle'],
+                        'offset'=>$tv['plan']['offset'],
+                    ],
+                    'movement_timing'=>[],
+                ],
+            ];
+
+            foreach ($tv['plan']['movements'] as $mk => $mv){
+                foreach ($mv['sub_phases'] as $sk => $sv){
+                    $plan['comment']=$tv['plan']['id'];
+                    $comment = $mv['name'];
+                    if(isset($flowMap[$mv['id']]) && $flowMap[$mv['id']] !=''){
+                        $comment = $flowMap[$mv['id']];
+                    }
+                    if ($comment == "") {
+                        $comment = "非机动车";
+                    }
+
+                    $plan['plan_detail']['movement_timing'][$mk][] = [
+                        "movement_id"=>$mk,
+                        'start_time'=>$sv['start_time'],
+                        'duration'=>$sv['green']+$sv['yellow']+$sv['red_clearance'],
+                        'state'=>1,
+                        'flow_logic'=>[
+                            'comment'=>$comment,
+                            'logic_flow_id'=>$mv['id']
+                        ]
+                    ];
+                }
+
+            }
+            $finalData['latest_plan']['time_plan'][] = $plan;
+        }
+        $finalData['total_plan'] = count($finalData['latest_plan']['time_plan']);
+        return $finalData;
+    }
+
 
     /**
      * 批量获取路口配时数据(http://wiki.intra.xiaojukeji.com/pages/viewpage.action?pageId=125744261#id-配时API-根据获取多数据源配时信息)
@@ -573,11 +676,6 @@ class Timing_model extends CI_Model
         return $timing['data'];
     }
 
-    //临时方案,先不考虑批量查询
-    public function getNewTimingData($data){
-
-
-    }
 
     //新版本配时
     public function getNewTimngData($data)
@@ -604,6 +702,8 @@ class Timing_model extends CI_Model
         } catch (Exception $e) {
             return [];
         }
+        //使用路网的flow信息完善数据
+//        $flowInfo = $this->waymap_model->flowsByJunctionOnline($data['logic_junction_id']);
 
         return $timing['data'];
 
@@ -650,4 +750,18 @@ class Timing_model extends CI_Model
 
     }
 
+    // 查询路口配时状态
+    public function queryTimingStatus($data)
+    {
+        // $authorization = "Authorization: Basic ".base64_encode("test:1234");
+        $timing = httpPOST($this->config->item('signal_timing_status_url'), $data, 0, 'json');
+        $timing = json_decode($timing, true);
+        if (isset($timing['errno']) && $timing['errno'] != 0) {
+            return [];
+        }
+        if (empty($timing['data'])) {
+            return [];
+        }
+        return $timing['data'];
+    }
 }

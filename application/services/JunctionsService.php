@@ -440,7 +440,7 @@ class JunctionsService extends BaseService
     public function getJunctionsTimingInfo($params)
     {
         // 获取配时数据
-        $data = $this->timing_model->getTimingData($params);
+        $data = $this->timing_model->getNewTimingInfo($params);
         if (!$data) {
             return [];
         }
@@ -469,7 +469,7 @@ class JunctionsService extends BaseService
             if (strtotime($tod_end_time) > strtotime($task_end_time)) {
                 $tod_end_time = date("H:i:s", strtotime($task_end_time));
             }
-            $result['plan_list'][strtotime($tod_start_time)]['id'] = $v['time_plan_id'];
+            $result['plan_list'][strtotime($tod_start_time)]['id'] = $v['plan_id'];
             $result['plan_list'][strtotime($tod_start_time)]['start_time'] = $tod_start_time;
             $result['plan_list'][strtotime($tod_start_time)]['end_time'] = $tod_end_time;
 
@@ -477,38 +477,41 @@ class JunctionsService extends BaseService
             if (isset($v['plan_detail']['extra_timing']['cycle'])
                 && isset($v['plan_detail']['extra_timing']['offset'])
             ) {
-                $result['timing_detail'][$v['time_plan_id']]['cycle'] = $v['plan_detail']['extra_timing']['cycle'];
-                $result['timing_detail'][$v['time_plan_id']]['offset'] = $v['plan_detail']['extra_timing']['offset'];
+                $result['timing_detail'][$v['plan_id']]['cycle'] = $v['plan_detail']['extra_timing']['cycle'];
+                $result['timing_detail'][$v['plan_id']]['offset'] = $v['plan_detail']['extra_timing']['offset'];
             }
 
             if (!empty($v['plan_detail']['movement_timing'])) {
                 foreach ($v['plan_detail']['movement_timing'] as $k1=>$v1) {
                     foreach ($v1 as $key=>$val) {
+                        if(!isset($val['flow_logic']['logic_flow_id']) || $val['flow_logic']['logic_flow_id']==''){
+                            continue;
+                        }
                         // 信号灯状态 1=绿灯
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['state']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['state']
                             = isset($val['state']) ? $val['state'] : 0;
                         // 绿灯开始时间
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['start_time']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['start_time']
                             = isset($val['start_time']) ? $val['start_time'] : 0;
                         // 绿灯持续时间
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['duration']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['duration']
                             = isset($val['duration']) ? $val['duration'] : 0;
                         // 绿灯结束时间
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['end_time']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['end_time']
                             = $val['start_time'] + $val['duration'];
                         // 逻辑flow id
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['logic_flow_id']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['logic_flow_id']
                             = isset($val['flow_logic']['logic_flow_id']) ? $val['flow_logic']['logic_flow_id'] : 0;
                         // flow 描述
-                        $result['timing_detail'][$v['time_plan_id']]['timing'][$k1+$key]['comment']
+                        $result['timing_detail'][$v['plan_id']]['timing'][$k1+$key]['comment']
                             = isset($val['flow_logic']['comment']) ? $val['flow_logic']['comment'] : '';
                     }
                 }
             }
 
-            if (!empty($result['timing_detail'][$v['time_plan_id']]['timing'])) {
-                $result['timing_detail'][$v['time_plan_id']]['timing']
-                    = array_values($result['timing_detail'][$v['time_plan_id']]['timing']);
+            if (!empty($result['timing_detail'][$v['plan_id']]['timing'])) {
+                $result['timing_detail'][$v['plan_id']]['timing']
+                    = array_values($result['timing_detail'][$v['plan_id']]['timing']);
             }
         }
 
@@ -1133,17 +1136,20 @@ class JunctionsService extends BaseService
      * @param $timingType  配时数据来源 1：人工 2：反推
      * @return array
      */
-    private function formatJunctionDetailData($data, $dates, $resultType, $timingType)
+    public function formatJunctionDetailData($data, $dates, $resultType, $timingType)
     {
         if (empty($data) || empty($dates) || (int)$resultType < 1) {
             return [];
         }
 
+        $timeList = explode("-",$data['time_range']);
+        $startTime = $timeList[0];
+        $endTime = $timeList[1];
         // 因为详情页地图下方列表所有相位都有 置信度字段，而置信度不属于指标，固将此放到扩展指标集合中
-        $data['extend_flow_quota']['confidence'] = '置信度';
+//        $data['extend_flow_quota']['confidence'] = '置信度';
 
         // movement级指标数据在数据表中以json格式的存储，需要json_decode
-        $data['movements'] = json_decode($data['movements'], true);
+//        $data['movements'] = json_decode($data['movements'], true);
         if (empty($data['movements'])) {
             return [];
         }
@@ -1152,7 +1158,7 @@ class JunctionsService extends BaseService
         $timing_data = [
             'junction_id' => trim($data['junction_id']),
             'dates'       => $dates,
-            'time_range'  => $data['start_time'] . '-' . date("H:i", strtotime($data['end_time']) - 60),
+            'time_range'  => $startTime . '-' . date("H:i", strtotime($endTime) - 60),
             'timingType'  => $timingType
         ];
         $flowIdName = $this->timing_model->getFlowIdToName($timing_data);
@@ -1181,14 +1187,14 @@ class JunctionsService extends BaseService
         $tempMovements = [];
         foreach ($data['movements'] as $k=>&$v) {
             // 相位名称
-            $v['comment'] = $flowIdName[$v['movement_id']] ?? '';
+//            $v['comment'] = $flowIdName[$v['movement_id']] ?? '';
 
             // 加这个判断是旧的任务结果数据中没有此字段
-            if (isset($v['confidence'])) {
-                $v['confidence'] = $confidenceConf[$v['confidence']]['name'] ?? '';
-            } else {
-                $v['confidence'] = '';
-            }
+//            if (isset($v['confidence'])) {
+//                $v['confidence'] = $confidenceConf[$v['confidence']]['name'] ?? '';
+//            } else {
+//                $v['confidence'] = '';
+//            }
 
             // 组织flow级指标对应相位集合及格式化指标数据
             foreach ($flowQuotaKeyConf as $key=>$val) {
@@ -1212,11 +1218,11 @@ class JunctionsService extends BaseService
         }
         // 因为foreach 使用了引用&$v，所以foreach完成后要销毁$v
         unset($v);
-
+//TODO 相位排序
         if (!empty($tempMovements)) {
-            unset($data['movements']);
+//            unset($data['movements']);
             ksort($tempMovements);
-            $data['movements'] = array_values($tempMovements);
+//            $data['movements'] = array_values($tempMovements);
         }
 
         if ($resultType == 2) { // 诊断详情页
@@ -1261,7 +1267,9 @@ class JunctionsService extends BaseService
         }
 
         $resultCommentConf = $this->config->item('result_comment');
-        $data['result_comment'] = $resultCommentConf[$data['result_comment']] ?? '';
+        if(isset($data['result_comment'])){
+            $data['result_comment'] = $resultCommentConf[$data['result_comment']] ?? '';
+        }
         return $data;
     }
 

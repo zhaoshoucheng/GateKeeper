@@ -522,6 +522,12 @@ class TimingAdaptionAreaService extends BaseService
                 ];
             }
         }
+
+        if (empty($result['data'])) {
+            return [
+                'dataList' => [],
+            ];
+        }
         usort($result['data'], function($a, $b) {
             if ($a['is_ignore'] != $b['is_ignore']) {
                 return ($a['is_ignore'] < $b['is_ignore']) ? 1 : -1;
@@ -531,7 +537,6 @@ class TimingAdaptionAreaService extends BaseService
             }
             return ($a['duration_time'] < $b['duration_time']) ? 1 : -1;
         });
-
         return [
             'dataList' => array_values($result['data'] ?? []),
         ];
@@ -1029,7 +1034,7 @@ class TimingAdaptionAreaService extends BaseService
 
         }else{
             foreach ($timingInfo['vehicle_phase'] as $tk => $tv){
-                if (count($tv['flow_info']) == 0){
+                if (empty($tv['flow_info']) || count($tv['flow_info']) == 0){
                     continue;
                 }
                 foreach ($tv['flow_info'] as $fk=>$fv){
