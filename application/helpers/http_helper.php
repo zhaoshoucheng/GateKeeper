@@ -66,7 +66,7 @@ if (!function_exists('httpGET')) {
             }
             //特殊请求的url不报警
             $ignoreRequest = 'RealtimeQuota/flow';
-            if(strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
+            if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
                 return false;
             }
             com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query)));
@@ -126,7 +126,7 @@ if (!function_exists('httpPOST')) {
             }
             //特殊请求的url不报警
             $ignoreRequest = 'RealtimeQuota/flow';
-            if(strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
+            if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
                 return false;
             }
             com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data));
