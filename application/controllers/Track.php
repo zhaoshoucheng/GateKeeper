@@ -331,7 +331,8 @@ class Track extends MY_Controller
             //查找第一个在停车点的轨迹
             foreach ($tv as $k=>$v){
                 if($v[1]<=0){
-                    $offTime = $v[0]-intval(($v[0]-$offset-$clockshift)/$cycle);
+                    $offTime = intval(($v[0]-$offset-$clockshift)/$cycle)*$cycle+$cycle;
+
                     break;
                 }
             }
