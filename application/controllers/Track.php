@@ -206,6 +206,7 @@ class Track extends MY_Controller
         $signalRange = []; //配时描述数据
         //配时查询
         $timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
+        $clockShift=0;
         //重构配时相关内容
         if(!empty($timing)){
             $clockShift = $this->timingAdaptionAreaService->getClockShift($data);
@@ -285,26 +286,7 @@ class Track extends MY_Controller
         if (count($dataList) >200){
             $dataList = array_rand($dataList,200);
         }
-        //基于周期数据融合
-        $cycle=300;
-        if(isset($timing['cycle'])){
-            $cycle = $timing['cycle'];
-        }
-        foreach ($dataList as $dk=>$dv){
-
-            $step= intval($dv[count($dv)/2][0]/$cycle);
-
-            foreach ($dv as $k=>$v){
-                if($step==0){
-                    break;
-                }
-//                $tmpStep = intval($v[0]/$cycle);
-//                $dataList[$dk][$k][0] = $v[0]%$cycle + $cycle*($tmpStep-$step);
-                $dataList[$dk][$k][0] = $v[0]-$cycle*$step;
-            }
-
-        }
-
+        $dataList = $this->correctTraj($dataList,$signalInfo['cycle'],$signalInfo['offset'],$clockShift);
 
 
         $info['id'] = $params['flow_id'];
@@ -343,6 +325,24 @@ class Track extends MY_Controller
 
         return $this->response($finalRet);
     }
+    private function correctTraj($trajList,$cycle,$offset,$clockshift){
+        foreach ($trajList as $tk => $tv){
+            $offTime=0;//第一个进入停车点的时间平移时间
+            //查找第一个在停车点的轨迹
+            foreach ($tv as $k=>$v){
+                if($v[1]<=0){
+                    $offTime = $v[0]-intval(($v[0]-$offset-$clockshift)/$cycle);
+                    break;
+                }
+            }
+
+            foreach ($tv as $k=>$v){
+                $trajList[$tk][$k][0] = $v[0]-$offTime;
+            }
+        }
+        return $trajList;
+    }
+
     //纠正时间范围
     private function correntTimeRange($timeRange){
         $timeArr = explode("-",$timeRange);
