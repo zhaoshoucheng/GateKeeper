@@ -449,7 +449,14 @@ $config['diagnosis_flow_quota_key'] = [
         },  // 格式化数据
         'unit' => '米'       // 单位
     ],
-    'queue_position' => [
+    'confidence'=>[
+        'name'=>'置信度',
+        'unit'=>'',
+        'round'=>function($val){
+            return $val;
+        },
+    ],//置信度
+    'queue_length' => [
         'name' => '排队长度',
         'round' => function ($val) {
             return round($val);
@@ -491,13 +498,13 @@ $config['diagnosis_flow_quota_key'] = [
         },
         'unit' => '',
     ],
-    'flow_num' => [
-        'name' => '流量',
-        'round' => function ($val) {
-            return round($val);
-        },
-        'unit' => '每小时/车道',
-    ],
+//    'flow_num' => [
+//        'name' => '流量',
+//        'round' => function ($val) {
+//            return round($val);
+//        },
+//        'unit' => '每小时/车道',
+//    ],
     'free_flow_speed' => [
         'name' => '自由流',
         'round' => function ($val) {
