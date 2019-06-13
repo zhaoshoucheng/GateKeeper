@@ -613,10 +613,11 @@ class Timing_model extends CI_Model
                     if(isset($flowMap[$mv['id']]) && $flowMap[$mv['id']] !=''){
                         $comment = $flowMap[$mv['id']];
                     }
+
                     $plan['plan_detail']['movement_timing'][$mk][] = [
                         "movement_id"=>$mk,
                         'start_time'=>$sv['start_time'],
-                        'duration'=>$sv['green']+$sv['yellow'],
+                        'duration'=>$sv['green']+$sv['yellow']+$sv['red_clearance'],
                         'state'=>1,
                         'flow_logic'=>[
                             'comment'=>$comment,
