@@ -226,6 +226,7 @@ class RoadService extends BaseService
     {
         $cityId = $params['city_id'];
         $show_type = $params['show_type'];
+        $force = $params['force'] ?? 0 ;
         $pre_key = $show_type ? 'Road_extend_' : 'Road_';
 
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
@@ -238,7 +239,9 @@ class RoadService extends BaseService
 //            }
             $roadId = $item['road_id'];
             $res = $this->redis_model->getData($pre_key . $roadId);
-//            $res = [];
+            if ($force) {
+                $res = [];
+            }
             if (!$res) {
                 $data = [
                     'city_id' => $cityId,
