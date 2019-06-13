@@ -292,7 +292,8 @@ class Track extends MY_Controller
         }
         foreach ($dataList as $dk=>$dv){
 
-            $step= intval($dv[0][0]/$cycle);
+            $step= intval($dv[count($dv)/2][0]/$cycle);
+
             foreach ($dv as $k=>$v){
                 if($step==0){
                     break;
