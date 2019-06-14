@@ -1206,6 +1206,9 @@ class JunctionsService extends BaseService
                 if (isset($v[$key])) {
                     $v[$key] = $val['round']($v[$key]);
                     $data['flow_quota_all'][$key]['movements'][$k]['value'] = $val['round']($v[$key]);
+                }else{
+                    $data['flow_quota_all'][$key]['movements'][$k]['value'] = 'n/a';
+
                 }
             }
             if (array_key_exists(trim($v['comment']), $phase)

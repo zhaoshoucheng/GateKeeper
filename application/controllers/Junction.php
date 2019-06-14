@@ -130,7 +130,7 @@ class Junction extends MY_Controller
         $data['junction_id'] = strip_tags(trim($params['junction_id']));
         $data['search_type'] = intval($params['search_type']);
         $data['type'] = intval($params['type']);
-        $data['time_range'] = strip_tags(trim($params['task_time_range']));
+        $data['time_range'] = strip_tags(trim($params['time_range']));
         $data['city_id'] = intval($params['city_id']);
         $data['timingType'] = $this->timingType;
 
