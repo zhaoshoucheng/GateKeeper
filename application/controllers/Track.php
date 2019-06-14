@@ -208,7 +208,7 @@ class Track extends MY_Controller
         $timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
         $clockShift=0;
         //重构配时相关内容
-        if(!empty($timing)){
+        if(!empty($timing) && isset($timing['signal'])){
             $clockShift = $this->timingAdaptionAreaService->getClockShift($data);
             $signalInfo['cycle'] = $timing['cycle'];
             $signalInfo['offset'] = $timing['offset'];
