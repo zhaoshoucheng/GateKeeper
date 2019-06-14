@@ -286,7 +286,21 @@ class Track extends MY_Controller
         if (count($dataList) >200){
             $dataList = array_rand($dataList,200);
         }
-        $dataList = $this->correctTraj($dataList,$signalInfo['cycle'],$signalInfo['offset'],$clockShift);
+        $cycle=0;
+        $offset=0;
+        if(!empty($signalInfo)){
+//            $dataList = $this->correctTraj($dataList,$signalInfo['cycle'],$signalInfo['offset'],$clockShift);
+            $cycle=$signalInfo['cycle'];
+            $offset = $signalInfo['offset'];
+        }
+        foreach ($dataList as $k=>$v){
+            $dataList[$k] = $this->timingAdaptionAreaService->getTrajsInOneCycle($v
+                , $cycle
+                , ($offset + $clockShift) % $cycle);
+        }
+//        $dataList = $this->timingAdaptionAreaService->getTrajsInOneCycle();
+
+
 
 
         $info['id'] = $params['flow_id'];
@@ -332,7 +346,6 @@ class Track extends MY_Controller
             foreach ($tv as $k=>$v){
                 if($v[1]<=0){
                     $offTime = intval(($v[0]-$offset-$clockshift)/$cycle)*$cycle+$cycle;
-
                     break;
                 }
             }

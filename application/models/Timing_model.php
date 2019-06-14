@@ -588,6 +588,10 @@ class Timing_model extends CI_Model
             'total_plan'=>0,
         ];
 
+        if(!isset($timing['data']['schedules']) || count($timing['data']['schedules'])==0){
+            return [];
+        }
+
         foreach ($timing['data']['schedules'][0]['tods'] as $tk=>$tv){
             if($tv['end_time']=="00:00:00"){
                 $tv['end_time']="24:00:00";

@@ -1071,7 +1071,7 @@ class TimingAdaptionAreaService extends BaseService
      *
      * @return array 调整后的轨迹
      */
-    private function getTrajsInOneCycle(array $trajs, int $cycleLength, int $offset)
+    public function getTrajsInOneCycle(array $trajs, int $cycleLength, int $offset)
     {
         $trajsCol = Collection::make($trajs);
 
