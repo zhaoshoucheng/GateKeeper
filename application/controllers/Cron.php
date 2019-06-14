@@ -215,7 +215,11 @@ class Cron extends CI_Controller
         $cityIds = $this->config->item('city_ids', 'cron');
         foreach ($cityIds as $cityId) {
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||message=begin getAllRoadDetailCache\n\r";
-            $params = ["city_id"=>$cityId,"show_type"=>1];
+            $params = [
+                "city_id" => $cityId,
+                "show_type" =>1, 
+                "force" => 1,
+            ];
             $this->roadService->getAllRoadDetail($params);
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||message=finish getAllRoadDetailCache\n\r";
         }

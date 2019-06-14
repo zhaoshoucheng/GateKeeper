@@ -588,6 +588,10 @@ class Timing_model extends CI_Model
             'total_plan'=>0,
         ];
 
+        if(!isset($timing['data']['schedules']) || count($timing['data']['schedules'])==0){
+            return [];
+        }
+
         foreach ($timing['data']['schedules'][0]['tods'] as $tk=>$tv){
             if($tv['end_time']=="00:00:00"){
                 $tv['end_time']="24:00:00";
@@ -609,14 +613,18 @@ class Timing_model extends CI_Model
             foreach ($tv['plan']['movements'] as $mk => $mv){
                 foreach ($mv['sub_phases'] as $sk => $sv){
                     $plan['comment']=$tv['plan']['id'];
-                    $comment = $mv['name'];
-                    if(isset($flowMap[$mv['id']])){
+                    $comment = "";
+                    if(isset($flowMap[$mv['id']]) && $flowMap[$mv['id']] !=''){
                         $comment = $flowMap[$mv['id']];
                     }
+                    if ($comment == "") {
+                        $comment = "非机动车";
+                    }
+
                     $plan['plan_detail']['movement_timing'][$mk][] = [
                         "movement_id"=>$mk,
                         'start_time'=>$sv['start_time'],
-                        'duration'=>$sv['green']+$sv['yellow'],
+                        'duration'=>$sv['green']+$sv['yellow']+$sv['red_clearance'],
                         'state'=>1,
                         'flow_logic'=>[
                             'comment'=>$comment,

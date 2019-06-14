@@ -18,6 +18,7 @@ class Splitoptimize extends MY_Controller
         $this->load->model('timing_model');
         $this->load->model('splitoptimize_model');
         $this->load->model('traj_model');
+        $this->load->model("waymap_model");
         $this->setTimingType();
     }
 
@@ -110,7 +111,21 @@ class Splitoptimize extends MY_Controller
         ];
 
         $result = $this->traj_model->getSplitOptimizePlan($data);
-
+        //替换flow名称
+        $flowInfos = $this->waymap_model->flowsByJunctionOnline(trim($data['logic_junction_id']));
+        $flowMap = [];
+        if(!empty($flowInfos)){
+            foreach ($flowInfos as $fk=> $fv){
+                if($fv['desc']!=""){
+                    $flowMap[$fv['logic_flow_id']] = $fv["desc"];
+                }
+            }
+        }
+        foreach ($result['movements'] as $k=>$v){
+            if(isset($flowMap[$v['info']['logic_flow_id']])){
+                $result['movements'][$k]['info']['comment'] = $flowMap[$v['info']['logic_flow_id']];
+            }
+        }
         return $this->response($result);
     }
 

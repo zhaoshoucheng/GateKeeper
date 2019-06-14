@@ -250,12 +250,26 @@ class DiagnosisNoTiming_model extends CI_Model
         if (empty($flows)) {
             return [];
         }
+        //使用flow备注名称统一处理名称
+        $flowInfos = $this->waymap_model->flowsByJunctionOnline($logicJunctionID);
+        $flowMap = [];
+        if(!empty($flowInfos)){
+            foreach ($flowInfos as $fk=> $fv){
+                if($fv["desc"]!=""){
+                    $flowMap[$fv['logic_flow_id']] = $fv["desc"];
+                }
+            }
+        }
         foreach ($flows as $item) {
             $flowId = $item["logic_flow_id"];
+            $comment = $item["phase_name"];
+            if(isset($flowMap[$flowId])){
+                $comment=$flowMap[$flowId];
+            }
             $movementInfo = [
                 "confidence" => $flowId,
                 "movement_id" => $flowId,
-                "comment" => $item["phase_name"],
+                "comment" => $comment,
                 "route_length" => $item["in_link_length"],
             ];
             if (isset($result[$flowId])) {

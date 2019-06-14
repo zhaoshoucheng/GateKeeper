@@ -202,10 +202,13 @@ class Track extends MY_Controller
             'logic_junction_id'=>$params['junction_id'],
             'logic_flow_id'=>$params['flow_id'],
         ];
+        $signalInfo = []; //配时数据
+        $signalRange = []; //配时描述数据
         //配时查询
         $timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
+        $clockShift=0;
         //重构配时相关内容
-        if(!empty($timing)){
+        if(!empty($timing) && isset($timing['signal'])){
             $clockShift = $this->timingAdaptionAreaService->getClockShift($data);
             $signalInfo['cycle'] = $timing['cycle'];
             $signalInfo['offset'] = $timing['offset'];
@@ -272,8 +275,7 @@ class Track extends MY_Controller
         $result_data = $this->dianosisService->getSpaceTimeDiagram($params);
         $dataList = []; // 轨迹集合
         $info = []; //轨迹描述数据
-        $signalInfo = []; //配时数据
-        $signalRange = []; //配时描述数据
+
 
         //数据合并
         foreach ($result_data as $rk=>$rv){
@@ -284,23 +286,20 @@ class Track extends MY_Controller
         if (count($dataList) >200){
             $dataList = array_rand($dataList,200);
         }
-        //基于周期数据融合
-        $cycle=300;
-        if(isset($timing['cycle'])){
-            $cycle = $timing['cycle'];
+        $cycle=0;
+        $offset=0;
+        if(!empty($signalInfo)){
+//            $dataList = $this->correctTraj($dataList,$signalInfo['cycle'],$signalInfo['offset'],$clockShift);
+            $cycle=$signalInfo['cycle'];
+            $offset = $signalInfo['offset'];
         }
-        foreach ($dataList as $dk=>$dv){
-
-            $step= intval($dv[0][0]/$cycle);
-            foreach ($dv as $k=>$v){
-                if($v[0]<$cycle){
-                    continue;
-                }
-                $tmpStep = intval($v[0]/$cycle);
-                $dataList[$dk][$k][0] = $v[0]%$cycle + $cycle*($tmpStep-$step);
-            }
-
+        foreach ($dataList as $k=>$v){
+            $dataList[$k] = $this->timingAdaptionAreaService->getTrajsInOneCycle($v
+                , $cycle
+                , ($offset + $clockShift) % $cycle);
         }
+//        $dataList = $this->timingAdaptionAreaService->getTrajsInOneCycle();
+
 
 
 
@@ -316,10 +315,10 @@ class Track extends MY_Controller
         foreach ($dataList as $dk=>$dv){
             foreach ($dv as $k => $v){
                 if($v[0]>$info['x']['max']){
-                    $info['x']['max']=$v[0]+400;
+                    $info['x']['max']=$v[0];
                 }
                 if($v[0]<$info['x']['min']){
-                    $info['x']['min']=$v[0]-100;
+                    $info['x']['min']=$v[0];
                 }
                 if($v[1]>$info['y']['max']){
                     $info['y']['max']=$v[1];
@@ -340,6 +339,24 @@ class Track extends MY_Controller
 
         return $this->response($finalRet);
     }
+    private function correctTraj($trajList,$cycle,$offset,$clockshift){
+        foreach ($trajList as $tk => $tv){
+            $offTime=0;//第一个进入停车点的时间平移时间
+            //查找第一个在停车点的轨迹
+            foreach ($tv as $k=>$v){
+                if($v[1]<=0){
+                    $offTime = intval(($v[0]-$offset-$clockshift)/$cycle)*$cycle+$cycle;
+                    break;
+                }
+            }
+
+            foreach ($tv as $k=>$v){
+                $trajList[$tk][$k][0] = $v[0]-$offTime;
+            }
+        }
+        return $trajList;
+    }
+
     //纠正时间范围
     private function correntTimeRange($timeRange){
         $timeArr = explode("-",$timeRange);
