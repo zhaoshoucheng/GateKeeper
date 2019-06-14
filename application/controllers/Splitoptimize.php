@@ -96,6 +96,10 @@ class Splitoptimize extends MY_Controller
             return;
         }
 
+        foreach ($params['dates'] as $key=>$v){
+            $params['dates'][$key] = date("Y-m-d",strtotime($v));
+        }
+
         $params['time_range'] = explode('-', trim($params['time_range']));
 
         $data = [
