@@ -610,30 +610,33 @@ class Timing_model extends CI_Model
                 ],
             ];
 
-            foreach ($tv['plan']['movements'] as $mk => $mv){
-                foreach ($mv['sub_phases'] as $sk => $sv){
-                    $plan['comment']=$tv['plan']['id'];
-                    $comment = "";
-                    if(isset($flowMap[$mv['id']]) && $flowMap[$mv['id']] !=''){
-                        $comment = $flowMap[$mv['id']];
-                    }
-                    if ($comment == "") {
-                        $comment = "非机动车";
+            if (!empty($tv['plan']['movements'])) {
+                foreach ($tv['plan']['movements'] as $mk => $mv) {
+                    foreach ($mv['sub_phases'] as $sk => $sv) {
+                        $plan['comment'] = $tv['plan']['id'];
+                        $comment = "";
+                        if (isset($flowMap[$mv['id']]) && $flowMap[$mv['id']] != '') {
+                            $comment = $flowMap[$mv['id']];
+                        }
+                        if ($comment == "") {
+                            $comment = "非机动车";
+                        }
+
+                        $plan['plan_detail']['movement_timing'][$mk][] = [
+                            "movement_id" => $mk,
+                            'start_time' => $sv['start_time'],
+                            'duration' => $sv['green'] + $sv['yellow'] + $sv['red_clearance'],
+                            'state' => 1,
+                            'flow_logic' => [
+                                'comment' => $comment,
+                                'logic_flow_id' => $mv['id'],
+                            ],
+                        ];
                     }
 
-                    $plan['plan_detail']['movement_timing'][$mk][] = [
-                        "movement_id"=>$mk,
-                        'start_time'=>$sv['start_time'],
-                        'duration'=>$sv['green']+$sv['yellow']+$sv['red_clearance'],
-                        'state'=>1,
-                        'flow_logic'=>[
-                            'comment'=>$comment,
-                            'logic_flow_id'=>$mv['id']
-                        ]
-                    ];
                 }
-
             }
+
             $finalData['latest_plan']['time_plan'][] = $plan;
         }
         $finalData['total_plan'] = count($finalData['latest_plan']['time_plan']);
