@@ -221,6 +221,12 @@ class Cron extends CI_Controller
                 "force" => 1,
             ];
             $this->roadService->getAllRoadDetail($params);
+            $params = [
+                "city_id" => $cityId,
+                "show_type" =>0,
+                "force" => 1,
+            ];
+            $this->roadService->getAllRoadDetail($params);
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||message=finish getAllRoadDetailCache\n\r";
         }
     }
