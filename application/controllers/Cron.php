@@ -212,7 +212,7 @@ class Cron extends CI_Controller
     public function getAllRoadDetailCache()
     {
         $this->config->load('cron', TRUE);
-        $cityIds = $this->config->item('city_ids', 'cron');
+        $cityIds = $this->config->item('all_city_ids', 'cron');
         foreach ($cityIds as $cityId) {
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||message=begin getAllRoadDetailCache\n\r";
             $params = [
