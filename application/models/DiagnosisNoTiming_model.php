@@ -9,11 +9,11 @@ class DiagnosisNoTiming_model extends CI_Model
 {
     public function __construct()
     {
-        $this->load->config('disgnosisnotiming_conf');
+        ;
         parent::__construct();
+        $this->load->config('disgnosisnotiming_conf');
         $this->load->model('waymap_model');
         $this->load->helper('phase');
-        $this->load->model('traj_model');
         $this->load->config("nconf");
     }
 
@@ -121,6 +121,7 @@ class DiagnosisNoTiming_model extends CI_Model
             'dates' => $dates,
         ];
         $url = $this->config->item('data_service_interface');
+
         $res = httpPOST($url . '/GetJunctionQuotaList', $req, 0, 'json');
         if (!empty($res)) {
             $res = json_decode($res, true);
@@ -386,17 +387,6 @@ class DiagnosisNoTiming_model extends CI_Model
         }
         return $alarmResult;
     }
-
-    /**
-     *
-     * @param $params
-     * @return array
-     */
-    /*public function getSpaceTimeDiagram($params)
-    {
-        $result = $this->traj_model->getSpaceTimeDiagram($params);
-        return $result;
-    }*/
 
 
     public function getJunctionAlarmDataByHour($city_id, $dates) {
