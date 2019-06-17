@@ -108,7 +108,12 @@ class AlarmanalysisService extends BaseService
 
         /* 0-23整点小时保持连续 原因：数据表中可以会有某个整点没有报警，这样会导致前端画表时出现异常 */
         // 当前整点
-        $nowHour = date('H');
+        //FIXME 只有查询当天的时候使用date('H')
+        if(date("Y-m-d") == date("Y-m-d",strtotime($params['start_time'])) && date("Y-m-d") == date("Y-m-d",strtotime($params['end_time']))){
+            $nowHour = date("h");
+        }else{
+            $nowHour = 24;
+        }
         for ($i = 0; $i < $nowHour; $i++) {
             $continuousHour[$i . ':00'] = [];
         }
@@ -282,7 +287,12 @@ class AlarmanalysisService extends BaseService
         }, $result['aggregations']['hour']['buckets']);
 
         // 当前整点
-        $nowHour = date('H');
+        //FIXME 只有查询当天的时候使用date('H')
+        if(date("Y-m-d") == date("Y-m-d",strtotime($params['start_time'])) && date("Y-m-d") == date("Y-m-d",strtotime($params['end_time']))){
+            $nowHour = date("h");
+        }else{
+            $nowHour = 24;
+        }
         // 将tempRes数据重新置为 ['hour'=>value] 数组
         $tempResData = array_column($tempRes, 'value', 'hour');
         /* 0-23整点小时保持连续 原因：数据表中可以会有某个整点没有报警，这样会导致前端画表时出现异常 */
