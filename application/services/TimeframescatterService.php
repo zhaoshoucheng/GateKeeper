@@ -53,6 +53,7 @@ class TimeframescatterService extends BaseService
             'junction_id' => $data['junction_id'],
             'dates' => $data['dates'],
         ];
+//        print_r($dparam);exit;
         $result_data = $this->dianosisService->getScatterDiagram($dparam);
         $scatterList = [];
         foreach ($result_data as $item){

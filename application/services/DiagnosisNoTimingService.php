@@ -129,13 +129,11 @@ class DiagnosisNoTimingService extends BaseService
                 "token"=>"1",//不能为空
                 "dates"=>[$eachDate],
             ];
-            //print_r($trajParam);
             try{
                 $trajInfo = $this->traj_model->getSpaceTimeDiagram($trajParam);
             }catch (\Exception $e){
                 continue;
             }
-            //print_r($trajInfo);exit;
             $trajList = $trajInfo['dataList'][0]['forward_traj'] ?? [];
             foreach ($trajList as $key=>$item){
                 foreach ($item as $k=>$value){
@@ -215,7 +213,6 @@ class DiagnosisNoTimingService extends BaseService
                 "token"=>"1",//不能为空
                 "dates"=>[$eachDate],
             ];
-            //print_r($trajParam);
             try{
                 $trajInfo = $this->traj_model->getSpaceTimeDiagram($trajParam);
             }catch (\Exception $e){
