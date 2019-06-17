@@ -110,7 +110,7 @@ class AlarmanalysisService extends BaseService
         // 当前整点
         //FIXME 只有查询当天的时候使用date('H')
         if(date("Y-m-d") == date("Y-m-d",strtotime($params['start_time'])) && date("Y-m-d") == date("Y-m-d",strtotime($params['end_time']))){
-            $nowHour = date("h");
+            $nowHour = date("H");
         }else{
             $nowHour = 24;
         }
@@ -289,7 +289,7 @@ class AlarmanalysisService extends BaseService
         // 当前整点
         //FIXME 只有查询当天的时候使用date('H')
         if(date("Y-m-d") == date("Y-m-d",strtotime($params['start_time'])) && date("Y-m-d") == date("Y-m-d",strtotime($params['end_time']))){
-            $nowHour = date("h");
+            $nowHour = date("H");
         }else{
             $nowHour = 24;
         }
