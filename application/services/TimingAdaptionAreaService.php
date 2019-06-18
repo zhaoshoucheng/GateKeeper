@@ -1223,6 +1223,9 @@ class TimingAdaptionAreaService extends BaseService
         $value = [];
 
         foreach ($detail['result'] as $k => $v) {
+            if ($v['stopDelayBefore'] > 300) {
+                continue;
+            }
             $dataValueTime = date("H:i",$v['timestamp']);
             foreach ($flowTimingCurve as $flowtime=>$flowItem){
                 $flowFullTimestamp = strtotime(date("Y-m-d")." ".$flowtime.":00");
@@ -1234,16 +1237,16 @@ class TimingAdaptionAreaService extends BaseService
             // 将时间转为秒数
             $time = date_parse(date("H:i:s", $v['timestamp']));
             $second = $time['hour'] * 3600 + $time['minute'] * 60 + $time['second'];
-            $ret['dataList'][$k] = [
+            $ret['dataList'][] = [
                 $second,                 // 时间秒数 X轴
                 $v['stopDelayBefore'],  // 值      Y轴
                 $dataValueTime
             ];
 
             // 记录所有时间 用于获取最大最小值
-            $timestamp[$k] = $second;
+            $timestamp[] = $second;
             // 记录所有值 用于获取最大最小值
-            $value[$k] = $v['stopDelayBefore'];
+            $value[] = $v['stopDelayBefore'];
         }
 
         // X轴 Y轴 信息集合
