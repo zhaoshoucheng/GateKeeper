@@ -29,7 +29,7 @@ class City extends MY_Controller {
             $center = $info['center_point'];
             $point = explode(",", $center);
             $point = array_map(function($item) {
-                return float($item);
+                return (float)$item;
             }, $point);
             $name = $info['city_name'];
             $pinyins = $pinyinService->convert($name, PINYIN_NO_TONE);
