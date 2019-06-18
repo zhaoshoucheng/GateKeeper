@@ -130,6 +130,9 @@ class Splitoptimize extends MY_Controller
         foreach ($movements as $key => $movement) {
             $logicFlowId = $movement['movement_id'];
 
+            $movements[$key]['g_start_time'] = null;
+            $movements[$key]['g_duration'] = null;
+            $movements[$key]['yellowLight'] = null;
             // 获取配时
             if (isset($flowSignal[$logicFlowId])) {
                 $movements[$key] = array_merge($movements[$key], $flowSignal[$logicFlowId][0]);
