@@ -91,7 +91,7 @@ class Splitoptimize extends MY_Controller
 
         $timeRange = explode('-', trim($params['time_range']));
 
-        $data = [
+        $query = [
             'logic_junction_id'     => strip_tags(trim($params['junction_id'])),
             'dates'                 => implode(',', $params['dates']),
             'start_time'            => $timeRange[0],
@@ -99,9 +99,10 @@ class Splitoptimize extends MY_Controller
         ];
 
         // 获取配时
-        $plan = $this->traj_model->getSplitOptimizePlan($data);
-
-
+        $url = $this->config->item('traj_interface') . '/greensplit/getOriginTimingPlan';
+        $ret =  httpPOST($url, $query, 20000, "json");
+        $ret = json_decode($ret, true);
+        $plan = $ret['data'];
         // 配时重新组织
         $flowSignal = [];
         foreach ($plan['movements'] as $movement) {
@@ -126,24 +127,69 @@ class Splitoptimize extends MY_Controller
         $dianosisService = new DiagnosisNoTimingService();
         $quotas = $dianosisService->getFlowQuotas($query);
 
+        $flow_quota_all = $quotas['flow_quota_all'];
         $movements = $quotas['movements'];
-        foreach ($movements as $key => $movement) {
-            $logicFlowId = $movement['movement_id'];
-
-            $movements[$key]['g_start_time'] = null;
-            $movements[$key]['g_duration'] = null;
-            $movements[$key]['yellowLight'] = null;
-            // 获取配时
-            if (isset($flowSignal[$logicFlowId])) {
-                $movements[$key] = array_merge($movements[$key], $flowSignal[$logicFlowId][0]);
-            }
+        $tmp = [];
+        foreach ($movements as $movement) {
+            $tmp[$movement['movement_id']] = $movement;
         }
 
-        // 聚合两个结构
+
         $result = [
-            'flow_quota_all' => $quotas['flow_quota_all'],
-            'movements' => $movements,
+            'flow_quota_all' => $flow_quota_all,
+            'movements' => [],
         ];
+
+        foreach ($plan['movements'] as $movement) {
+            $logicFlowId = $movement['info']['logic_flow_id'];
+            // 是非机动车相位，不显示，直接过滤
+            if (empty($logicFlowId)|| $movement['info']['type'] == 1) {
+                continue;
+            }
+
+            // 这里有个要注意的点，这里只用第一个配时信息，如果有二次放行，会出现问题。
+            $signal = $movement['signal'];
+            if (isset($tmp[$logicFlowId])) {
+                // 有指标就计算上去
+                $tmp[$logicFlowId]['comment'] = $movement['info']['comment'];
+                $result['movements'][] = array_merge($tmp[$logicFlowId], $signal[0]);
+            } else {
+                // 没有指标
+                $result['movements'][] = array_merge([
+                    "confidence" => "无",
+                    "movement_id" => $logicFlowId,
+                    "comment" => $movement['info']['comment'],
+                    "route_length" => null,
+                    "delay_sum"=> null,
+                    "free_flow_speed"=>  null,
+                    "free_speed"=>  null,
+                    "nonsaturation_delay"=>  null,
+                    "nonsaturation_stop_frequency"=>  null,
+                    "nonsaturation_traj_count"=>  null,
+                    "oversaturation_delay"=>  null,
+                    "oversaturation_stop_frequency"=>  null,
+                    "oversaturation_traj_count"=>  null,
+                    "queue_length"=>  null,
+                    "speed"=>  null,
+                    "spillover_delay"=>  null,
+                    "spillover_rate"=>  null,
+                    "spillover_stop_frequency"=>  null,
+                    "spillover_traj_count"=>  null,
+                    "stop_delay"=>  null,
+                    "stop_rate"=>  null,
+                    "stop_time_cycle"=>  null,
+                    "traj_count"=>  null,
+                    "twice_stop_rate"=>  null,
+                    "weight"=>  null,
+                    "stop_delay_flag"=>  null,
+                    "queue_length_flag"=>  null,
+                    "spillover_rate_flag"=>  null,
+                    "stop_rate_flag"=>  null,
+                ], $signal[0]);
+            }
+
+        }
+
 
         return $this->response($result);
     }
@@ -192,22 +238,10 @@ class Splitoptimize extends MY_Controller
             'end_time'              => $params['time_range'][1],
         ];
 
-        $result = $this->traj_model->getSplitOptimizePlan($data);
-        //替换flow名称
-        $flowInfos = $this->waymap_model->flowsByJunctionOnline(trim($data['logic_junction_id']));
-        $flowMap = [];
-        if(!empty($flowInfos)){
-            foreach ($flowInfos as $fk=> $fv){
-                if($fv['desc']!=""){
-                    $flowMap[$fv['logic_flow_id']] = $fv["desc"];
-                }
-            }
-        }
-        foreach ($result['movements'] as $k=>$v){
-            if(isset($flowMap[$v['info']['logic_flow_id']])){
-                $result['movements'][$k]['info']['comment'] = $flowMap[$v['info']['logic_flow_id']];
-            }
-        }
+        $url = $this->config->item('traj_interface') . '/greensplit/getOriginTimingPlan';
+        $ret =  httpPOST($url, $data, 20000, "json");
+        $ret = json_decode($ret, true);
+        $result = $ret['data'];
         return $this->response($result);
     }
 
@@ -255,21 +289,6 @@ class Splitoptimize extends MY_Controller
         ];
 
         $result = $this->traj_model->getSplitOptimizePlan($data);
-        //替换flow名称
-        $flowInfos = $this->waymap_model->flowsByJunctionOnline(trim($data['logic_junction_id']));
-        $flowMap = [];
-        if(!empty($flowInfos)){
-            foreach ($flowInfos as $fk=> $fv){
-                if($fv['desc']!=""){
-                    $flowMap[$fv['logic_flow_id']] = $fv["desc"];
-                }
-            }
-        }
-        foreach ($result['movements'] as $k=>$v){
-            if(isset($flowMap[$v['info']['logic_flow_id']])){
-                $result['movements'][$k]['info']['comment'] = $flowMap[$v['info']['logic_flow_id']];
-            }
-        }
         return $this->response($result);
     }
 
@@ -338,7 +357,6 @@ class Splitoptimize extends MY_Controller
         // 校验参数
         $validate = Validate::make($params,
             [
-//                'task_id'          => 'min:1',
                 'junction_id'      => 'nullunable',
                 'task_time_range'  => 'nullunable'
             ]

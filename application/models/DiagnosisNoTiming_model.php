@@ -322,9 +322,11 @@ class DiagnosisNoTiming_model extends CI_Model
         }, $flowsMovement);
         $flowPhases = array_column($flowsMovement,"phase_name","logic_flow_id");
 
+
         // 路网相位信息
-        $uniqueDirections = [];
         $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionID, array_keys($flowPhases));
+        $uniqueDirections = [];
+
         foreach ($ret as $k => $v) {
             if (!empty($flowPhases[$v['logic_flow_id']])) {
                 $phaseWord = $flowPhases[$v['logic_flow_id']];
@@ -344,8 +346,10 @@ class DiagnosisNoTiming_model extends CI_Model
                     }
                 }
                 $uniqueDirections[] = $phaseWord;
+
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
                 $result['dataList'][$k]['flow_label'] = $phaseWord;
+
                 $result['dataList'][$k]['lng'] = $v['flows'][0][0];
                 $result['dataList'][$k]['lat'] = $v['flows'][0][1];
             }
