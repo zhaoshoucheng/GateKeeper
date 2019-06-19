@@ -91,7 +91,7 @@ class Splitoptimize extends MY_Controller
 
         $timeRange = explode('-', trim($params['time_range']));
 
-        $data = [
+        $query = [
             'logic_junction_id'     => strip_tags(trim($params['junction_id'])),
             'dates'                 => implode(',', $params['dates']),
             'start_time'            => $timeRange[0],
@@ -99,9 +99,10 @@ class Splitoptimize extends MY_Controller
         ];
 
         // 获取配时
-        $plan = $this->traj_model->getSplitOptimizePlan($data);
-
-
+        $url = $this->config->item('traj_interface') . '/greensplit/getOriginTimingPlan';
+        $ret =  httpPOST($url, $query, 20000, "json");
+        $ret = json_decode($ret, true);
+        $plan = $ret['data'];
         // 配时重新组织
         $flowSignal = [];
         foreach ($plan['movements'] as $movement) {
@@ -126,24 +127,33 @@ class Splitoptimize extends MY_Controller
         $dianosisService = new DiagnosisNoTimingService();
         $quotas = $dianosisService->getFlowQuotas($query);
 
+        $flow_quota_all = $quotas['flow_quota_all'];
         $movements = $quotas['movements'];
-        foreach ($movements as $key => $movement) {
-            $logicFlowId = $movement['movement_id'];
-
-            $movements[$key]['g_start_time'] = null;
-            $movements[$key]['g_duration'] = null;
-            $movements[$key]['yellowLight'] = null;
-            // 获取配时
-            if (isset($flowSignal[$logicFlowId])) {
-                $movements[$key] = array_merge($movements[$key], $flowSignal[$logicFlowId][0]);
-            }
+        $tmp = [];
+        foreach ($movements as $movement) {
+            $tmp[$movement['movement_id']] = $movement;
         }
 
-        // 聚合两个结构
+
         $result = [
-            'flow_quota_all' => $quotas['flow_quota_all'],
-            'movements' => $movements,
+            'flow_quota_all' => $flow_quota_all,
+            'movements' => [],
         ];
+
+        foreach ($plan['movements'] as $movement) {
+            $logicFlowId = $movement['info']['logic_flow_id'];
+            if (empty($logicFlowId)) {
+                continue;
+            }
+
+            $signal = $movement['signal'];
+            if (isset($tmp[$logicFlowId])) {
+                $tmp[$logicFlowId]['comment'] = $movement['info']['comment'];
+                $result['movements'][] = array_merge($tmp[$logicFlowId], $signal[0]);
+            }
+
+        }
+
 
         return $this->response($result);
     }
