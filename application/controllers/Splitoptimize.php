@@ -142,7 +142,7 @@ class Splitoptimize extends MY_Controller
 
         foreach ($plan['movements'] as $movement) {
             $logicFlowId = $movement['info']['logic_flow_id'];
-            if (empty($logicFlowId)|| $movement['info']['comment'] == "非机动车") {
+            if (empty($logicFlowId)|| $movement['info']['type'] == 1) {
                 continue;
             }
 
@@ -239,21 +239,6 @@ class Splitoptimize extends MY_Controller
         $ret =  httpPOST($url, $data, 20000, "json");
         $ret = json_decode($ret, true);
         $result = $ret['data'];
-        //替换flow名称
-        $flowInfos = $this->waymap_model->flowsByJunctionOnline(trim($data['logic_junction_id']));
-        $flowMap = [];
-        if(!empty($flowInfos)){
-            foreach ($flowInfos as $fk=> $fv){
-                if($fv['desc']!=""){
-                    $flowMap[$fv['logic_flow_id']] = $fv["desc"];
-                }
-            }
-        }
-        foreach ($result['movements'] as $k=>$v){
-            if(isset($flowMap[$v['info']['logic_flow_id']])){
-                $result['movements'][$k]['info']['comment'] = $flowMap[$v['info']['logic_flow_id']];
-            }
-        }
         return $this->response($result);
     }
 
@@ -301,21 +286,6 @@ class Splitoptimize extends MY_Controller
         ];
 
         $result = $this->traj_model->getSplitOptimizePlan($data);
-        //替换flow名称
-        $flowInfos = $this->waymap_model->flowsByJunctionOnline(trim($data['logic_junction_id']));
-        $flowMap = [];
-        if(!empty($flowInfos)){
-            foreach ($flowInfos as $fk=> $fv){
-                if($fv['desc']!=""){
-                    $flowMap[$fv['logic_flow_id']] = $fv["desc"];
-                }
-            }
-        }
-        foreach ($result['movements'] as $k=>$v){
-            if(isset($flowMap[$v['info']['logic_flow_id']])){
-                $result['movements'][$k]['info']['comment'] = $flowMap[$v['info']['logic_flow_id']];
-            }
-        }
         return $this->response($result);
     }
 
