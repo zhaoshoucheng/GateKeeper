@@ -142,12 +142,15 @@ class Splitoptimize extends MY_Controller
 
         foreach ($plan['movements'] as $movement) {
             $logicFlowId = $movement['info']['logic_flow_id'];
+            // 是非机动车相位，不显示，直接过滤
             if (empty($logicFlowId)|| $movement['info']['type'] == 1) {
                 continue;
             }
 
+            // 这里有个要注意的点，这里只用第一个配时信息，如果有二次放行，会出现问题。
             $signal = $movement['signal'];
             if (isset($tmp[$logicFlowId])) {
+                // 有指标就计算上去
                 $tmp[$logicFlowId]['comment'] = $movement['info']['comment'];
                 $result['movements'][] = array_merge($tmp[$logicFlowId], $signal[0]);
             } else {
@@ -354,7 +357,6 @@ class Splitoptimize extends MY_Controller
         // 校验参数
         $validate = Validate::make($params,
             [
-//                'task_id'          => 'min:1',
                 'junction_id'      => 'nullunable',
                 'task_time_range'  => 'nullunable'
             ]

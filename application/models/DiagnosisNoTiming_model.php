@@ -315,37 +315,16 @@ class DiagnosisNoTiming_model extends CI_Model
         $cityID = $data['city_id'];
         $result = [];
         $newMapVersion = $this->waymap_model->getLastMapVersion();
-        $flowsMovement = $this->waymap_model->getFlowMovement($cityID, $logicJunctionID, "all", 1);
-        $flowsMovement = array_map(function ($v) {
-            $v = $this->adjustPhase($v);
-            return $v;
-        }, $flowsMovement);
-        $flowPhases = array_column($flowsMovement,"phase_name","logic_flow_id");
+        $info32 = $this->waymap_model->getFlowInfo32($logicJunctionID);
+        $flowPhases = array_column($info32,"phase_name","logic_flow_id");
 
         // 路网相位信息
-        $uniqueDirections = [];
         $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionID, array_keys($flowPhases));
         foreach ($ret as $k => $v) {
             if (!empty($flowPhases[$v['logic_flow_id']])) {
-                $phaseWord = $flowPhases[$v['logic_flow_id']];
-                if($uniqueDirection){
-                    $firstWord = mb_substr($flowPhases[$v['logic_flow_id']],0,1);
-                    if(in_array($firstWord,["东","西","南","北"])){
-                        $phaseWord = $firstWord;
-                    }
-                    if(mb_strlen($flowPhases[$v['logic_flow_id']])>1){
-                        $secondWord = mb_substr($flowPhases[$v['logic_flow_id']],1,1);
-                        if(in_array($secondWord,["东","西","南","北"]) && !in_array($secondWord,$uniqueDirections)){
-                            $phaseWord = $secondWord;
-                        }
-                    }
-                    if(in_array($phaseWord,$uniqueDirections)){
-                        continue;
-                    }
-                }
-                $uniqueDirections[] = $phaseWord;
+
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
-                $result['dataList'][$k]['flow_label'] = $phaseWord;
+                $result['dataList'][$k]['flow_label'] = $flowPhases[$v['logic_flow_id']];
                 $result['dataList'][$k]['lng'] = $v['flows'][0][0];
                 $result['dataList'][$k]['lat'] = $v['flows'][0][1];
             }
