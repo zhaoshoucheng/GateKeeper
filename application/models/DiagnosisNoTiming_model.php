@@ -320,8 +320,12 @@ class DiagnosisNoTiming_model extends CI_Model
             $v = $this->adjustPhase($v);
             return $v;
         }, $flowsMovement);
-        $flowPhases = array_column($flowsMovement,"phase_name","logic_flow_id");
-
+        if ($uniqueDirection) {
+            $flowPhases = array_column($flowsMovement,"phase_name","logic_flow_id");
+        } else {
+            $info32 = $this->waymap_model->getFlowInfo32($logicJunctionID);
+            $flowPhases = array_column($info32,"phase_name","logic_flow_id");
+        }
 
         // 路网相位信息
         $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionID, array_keys($flowPhases));
