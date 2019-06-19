@@ -235,7 +235,10 @@ class Splitoptimize extends MY_Controller
             'end_time'              => $params['time_range'][1],
         ];
 
-        $result = $this->traj_model->getSplitOptimizePlan($data);
+        $url = $this->config->item('traj_interface') . '/greensplit/getOriginTimingPlan';
+        $ret =  httpPOST($url, $data, 20000, "json");
+        $ret = json_decode($ret, true);
+        $result = $ret['data'];
         //替换flow名称
         $flowInfos = $this->waymap_model->flowsByJunctionOnline(trim($data['logic_junction_id']));
         $flowMap = [];
