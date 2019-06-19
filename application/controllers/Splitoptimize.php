@@ -142,7 +142,7 @@ class Splitoptimize extends MY_Controller
 
         foreach ($plan['movements'] as $movement) {
             $logicFlowId = $movement['info']['logic_flow_id'];
-            if (empty($logicFlowId)) {
+            if (empty($logicFlowId)|| $movement['info']['comment'] == "非机动车") {
                 continue;
             }
 
@@ -150,6 +150,39 @@ class Splitoptimize extends MY_Controller
             if (isset($tmp[$logicFlowId])) {
                 $tmp[$logicFlowId]['comment'] = $movement['info']['comment'];
                 $result['movements'][] = array_merge($tmp[$logicFlowId], $signal[0]);
+            } else {
+                // 没有指标
+                $result['movements'][] = array_merge([
+                    "confidence" => "无",
+                    "movement_id" => $logicFlowId,
+                    "comment" => $movement['info']['comment'],
+                    "route_length" => null,
+                    "delay_sum"=> null,
+                    "free_flow_speed"=>  null,
+                    "free_speed"=>  null,
+                    "nonsaturation_delay"=>  null,
+                    "nonsaturation_stop_frequency"=>  null,
+                    "nonsaturation_traj_count"=>  null,
+                    "oversaturation_delay"=>  null,
+                    "oversaturation_stop_frequency"=>  null,
+                    "oversaturation_traj_count"=>  null,
+                    "queue_length"=>  null,
+                    "speed"=>  null,
+                    "spillover_delay"=>  null,
+                    "spillover_rate"=>  null,
+                    "spillover_stop_frequency"=>  null,
+                    "spillover_traj_count"=>  null,
+                    "stop_delay"=>  null,
+                    "stop_rate"=>  null,
+                    "stop_time_cycle"=>  null,
+                    "traj_count"=>  null,
+                    "twice_stop_rate"=>  null,
+                    "weight"=>  null,
+                    "stop_delay_flag"=>  null,
+                    "queue_length_flag"=>  null,
+                    "spillover_rate_flag"=>  null,
+                    "stop_rate_flag"=>  null,
+                ], $signal[0]);
             }
 
         }
