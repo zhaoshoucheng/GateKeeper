@@ -328,31 +328,5 @@ class Track extends MY_Controller
 
         return $this->response($finalRet);
     }
-    private function correctTraj($trajList,$cycle,$offset,$clockshift){
-        foreach ($trajList as $tk => $tv){
-            $offTime=0;//第一个进入停车点的时间平移时间
-            //查找第一个在停车点的轨迹
-            foreach ($tv as $k=>$v){
-                if($v[1]<=0){
-                    $offTime = intval(($v[0]-$offset-$clockshift)/$cycle)*$cycle+$cycle;
-                    break;
-                }
-            }
 
-            foreach ($tv as $k=>$v){
-                $trajList[$tk][$k][0] = $v[0]-$offTime;
-            }
-        }
-        return $trajList;
-    }
-
-    //纠正时间范围
-    private function correntTimeRange($timeRange){
-        $timeArr = explode("-",$timeRange);
-        if($timeArr[0]==$timeArr[1]){
-            $timeArr[1] = date("H:i",strtotime(date("Y-m-d")." ".$timeArr[1].":00")+30*60);
-            return $timeArr[0]."-".$timeArr[1];
-        }
-        return $timeRange;
-    }
 }
