@@ -349,8 +349,22 @@ if (!function_exists('splitTimeDurationToPoints')) {
         if(count($timeSplit)!=2){
             return [$timeDuration];
         }
+
+        // 开始时间获取后面第一个整半点的
+        $startSplits = explode(":", $timeSplit[0]);
+        if ($startSplits[1] != "00" && $startSplits[1] != "30") {
+            if ($startSplits[1] <= 30) {
+                $timeSplit[0] = $startSplits[0] . ":30";
+            } else {
+                $timeSplit[0] = $startSplits[0] + 1 . ":00";
+            }
+        }
+
         $startTime = strtotime(date("Y-m-d")." ".$timeSplit[0]);
         $endTime = strtotime(date("Y-m-d")." ".$timeSplit[1]);
+
+
+
 
         $timePoints = [];
         for($i = $startTime; $i<=$endTime; $i+=30*60){

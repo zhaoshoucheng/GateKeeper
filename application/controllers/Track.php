@@ -125,7 +125,6 @@ class Track extends MY_Controller
         // 校验参数
         $validate = Validate::make($params,
             [
-//                'task_id'     => 'min:1',
                 'junction_id' => 'nullunable',
                 'search_type' => 'min:0',
                 'flow_id'     => 'nullunable'
@@ -157,16 +156,6 @@ class Track extends MY_Controller
             }
         }
 
-//        $data = [
-////            'task_id'         => intval($params['task_id']),
-//            'junction_id'     => strip_tags(trim($params['junction_id'])),
-//            'flow_id'         => strip_tags(trim($params['flow_id'])),
-//            'search_type'     => intval($params['search_type']),
-//            'time_point'      => strip_tags(trim($params['time_point'])),
-//            'time_range'      => strip_tags(trim($params['time_range'])),
-//            'timingType'      => $this->timingType
-//        ];
-//        $result_data = $this->track_model->getTrackData($data, 'getSpaceTimeMtraj');
         $params = [
             'city_id' => $this->input->post("city_id", TRUE),
             'flow_id' => $this->input->post("flow_id", TRUE),
@@ -282,6 +271,10 @@ class Track extends MY_Controller
             $info['comment'] = $rv['flow_label'];
             $dataList = array_merge($dataList,$rv['dataList']);
         }
+
+        // 从路网获取路口flow信息
+
+
         //轨迹抽样,考虑前端性能问题,暂时上限200
         if (count($dataList) >200){
             $dataList = array_rand($dataList,200);
@@ -289,7 +282,6 @@ class Track extends MY_Controller
         $cycle=0;
         $offset=0;
         if(!empty($signalInfo)){
-//            $dataList = $this->correctTraj($dataList,$signalInfo['cycle'],$signalInfo['offset'],$clockShift);
             $cycle=$signalInfo['cycle'];
             $offset = $signalInfo['offset'];
         }
@@ -298,9 +290,6 @@ class Track extends MY_Controller
                 , $cycle
                 , ($offset + $clockShift) % $cycle);
         }
-//        $dataList = $this->timingAdaptionAreaService->getTrajsInOneCycle();
-
-
 
 
         $info['id'] = $params['flow_id'];
@@ -339,31 +328,5 @@ class Track extends MY_Controller
 
         return $this->response($finalRet);
     }
-    private function correctTraj($trajList,$cycle,$offset,$clockshift){
-        foreach ($trajList as $tk => $tv){
-            $offTime=0;//第一个进入停车点的时间平移时间
-            //查找第一个在停车点的轨迹
-            foreach ($tv as $k=>$v){
-                if($v[1]<=0){
-                    $offTime = intval(($v[0]-$offset-$clockshift)/$cycle)*$cycle+$cycle;
-                    break;
-                }
-            }
 
-            foreach ($tv as $k=>$v){
-                $trajList[$tk][$k][0] = $v[0]-$offTime;
-            }
-        }
-        return $trajList;
-    }
-
-    //纠正时间范围
-    private function correntTimeRange($timeRange){
-        $timeArr = explode("-",$timeRange);
-        if($timeArr[0]==$timeArr[1]){
-            $timeArr[1] = date("H:i",strtotime(date("Y-m-d")." ".$timeArr[1].":00")+30*60);
-            return $timeArr[0]."-".$timeArr[1];
-        }
-        return $timeRange;
-    }
 }
