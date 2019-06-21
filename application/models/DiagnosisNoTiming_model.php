@@ -184,6 +184,7 @@ class DiagnosisNoTiming_model extends CI_Model
         $phaseName = phase_name($phaseId);
         $flow['phase_id'] = $phaseId;
         $flow['phase_name'] = $phaseName;
+        $flow['sort_key'] = phase_sort_key($flow['in_degree'], $flow['out_degree']);
         return $flow;
     }
 
@@ -261,6 +262,13 @@ class DiagnosisNoTiming_model extends CI_Model
                 }
             }
         }
+
+        $keys = [];
+        foreach ($flowsMovement as $idx => $flow) {
+            $keys[$idx] = $flow['sort_key'];
+        }
+        array_multisort($keys, SORT_NUMERIC, SORT_DESC, $flowsMovement);
+
         foreach ($flows as $item) {
             $flowId = $item["logic_flow_id"];
             $comment = $item["phase_name"];
