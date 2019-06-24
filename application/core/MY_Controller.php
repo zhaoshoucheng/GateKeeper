@@ -135,6 +135,14 @@ class MY_Controller extends CI_Controller
             }
         }
 
+        if (!in_array($host, $escapeSso)) {
+            $needValidateCity = $this->config->item('validate_city');
+            if (isset($_REQUEST['city_id']) && $needValidateCity && !$this->_validateCity($_REQUEST['city_id'])) {
+                $this->_output();
+                exit();
+            }
+        }
+
         //客户端ip与city_id绑定校验:联通定制版
         if($_SERVER["REMOTE_ADDR"]=="123.124.255.72"
             && isset($_REQUEST['city_id'])
@@ -193,6 +201,11 @@ class MY_Controller extends CI_Controller
                 $this->userPerm['admin_area_id'] = !empty($this->userPerm['admin_area_id']) ? explode(";",$this->userPerm['admin_area_id']) : [];
                 $this->userPerm['route_id'] = !empty($this->userPerm['route_id']) ? explode(";",$this->userPerm['route_id']) : [];
                 $this->userPerm['junction_id'] = !empty($this->userPerm['junction_id']) ? explode(";",$this->userPerm['junction_id']) : [];
+            }
+            $validateCitys = $this->getValidateCity();
+            if (!empty($validateCitys) && in_array($downgradeCityId, $validateCitys)) {
+                $this->userPerm['city_id'] = array_merge($this->userPerm['city_id'], $validateCitys);
+                array_unique($this->userPerm['city_id']);
             }
         }
     }
@@ -369,6 +382,22 @@ class MY_Controller extends CI_Controller
         $this->username = $this->user->username;
 
         return true;
+    }
+
+
+    public function getValidateCity()
+    {
+        $ret = $this->user->getAuthorizedCityid();
+        if (empty($ret)) {
+            $this->errno = ERR_AUTH_AREA;
+            return false;
+        }
+
+        $cityIds = [];
+        foreach ($ret as $val) {
+            $cityIds[] = $val['taxiId'];
+        }
+        return $cityIds;
     }
 
     /*
