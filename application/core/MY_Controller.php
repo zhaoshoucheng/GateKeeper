@@ -178,7 +178,7 @@ class MY_Controller extends CI_Controller
             exit;
         }
         //<============降级结束
-       
+
 
         //写入权限信息
         $this->permCitys = [];
@@ -190,8 +190,8 @@ class MY_Controller extends CI_Controller
             //获取的city_id对应权限
             $this->permCitys = !empty($this->userPerm["data"]) ? array_keys($this->userPerm["data"]) : [];
             $this->userPerm = !empty($this->userPerm["data"][$downgradeCityId]) ? $this->userPerm["data"][$downgradeCityId] : [];
-            $this->userPerm['group_id'] = $_SERVER['HTTP_DIDI_HEADER_USERGROUP'];
             if(!empty($this->userPerm)){
+                $this->userPerm['group_id'] = $_SERVER['HTTP_DIDI_HEADER_USERGROUP'];
                 $this->userPerm['city_id'] = !empty($this->userPerm['city_id']) ? explode(";",$this->userPerm['city_id']) : [];
                 $this->userPerm['area_id'] = !empty($this->userPerm['area_id']) ? explode(";",$this->userPerm['area_id']) : [];
                 $this->userPerm['admin_area_id'] = !empty($this->userPerm['admin_area_id']) ? explode(";",$this->userPerm['admin_area_id']) : [];
@@ -209,11 +209,12 @@ class MY_Controller extends CI_Controller
                 }
                 $this->permCitys[] = $city;
                 if ($city == $downgradeCityId) {
-                    $this->userPerm['city_id'] = $city;
+                    $this->userPerm['city_id'] = [$city];
                     $this->userPerm['area_id'] = [];
                     $this->userPerm['admin_area_id'] = [];
                     $this->userPerm['route_id'] = [];
                     $this->userPerm['junction_id'] = [];
+                    $this->userPerm['group_id'] = 0;
                 }
             }
         }
@@ -233,8 +234,8 @@ class MY_Controller extends CI_Controller
             'city_id' => isset($_REQUEST['city_id']) ? $_REQUEST['city_id'] : "",
             'user_perm' => $this->userPerm,
             'permCitys' => $this->permCitys,
-        ]);  
-	}
+        ]);
+    }
 
     // 判断当前登录用户与当前任务创建用户关系及是否可以看反推配时
 
