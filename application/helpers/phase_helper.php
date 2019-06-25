@@ -57,6 +57,36 @@ if(!function_exists('phase_map')) {
     }
 }
 
+if(!function_exists('phase_sort_key')) {
+    function phase_sort_key($in, $out)
+    {
+        if($in < 0 || $in > 360 || $out < 0 || $out > 360)
+            return false;
+        $direction = phase_direction($in);
+        $turn = phase_action($in, $out);
+        $direct_map = [
+            'NORTH' => 1,
+            'NORTH_EAST' => 2,
+            'EAST'  => 3,
+            'SOUTH_EAST' => 4,
+            'SOUTH' => 5,
+            'SOUTH_WEST' => 6,
+            'WEST'  => 7,
+            'NORTH_WEST' => 8,
+        ];
+        $turn_map = [
+            'TURN_ROUND' => 1, // 掉头
+            'TURN_LEFT'  => 2, // 左转
+            'STRAIGHT'   => 3, // 直行
+            'TURN_RIGHT' => 4, // 右转
+        ];
+        $direct_tag = isset($direct_map[$direction]) ? $direct_map[$direction] : 9;
+        $turn_tag = isset($turn_map[$turn]) ? $turn_map[$turn] : 9;
+        // 根据这些数据拼接出一些数据
+        return $direct_tag*10 + $turn_tag;
+    }
+}
+
 if(!function_exists('phase_direction')) {
     function phase_direction($link)
     {

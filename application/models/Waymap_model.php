@@ -524,6 +524,35 @@ class Waymap_model extends CI_Model
         return json_decode($result, true);
     }
 
+    public function getFlowInfo32($logicJunctionId)
+    {
+        $flowInfos = $this->getFlowsInfo32($logicJunctionId);
+        return $flowInfos[$logicJunctionId];
+    }
+
+
+
+    public function getFlowsInfo32($logic_junction_ids)
+    {
+        $this->load->helper('phase');
+        $version = self::$lastMapVersion;
+
+        if (is_array($logic_junction_ids)) {
+            $logic_junction_ids = implode(",", $logic_junction_ids);
+        }
+
+        $data = compact('logic_junction_ids');
+        $url = $this->waymap_interface . '/signal-map/mapJunction/phase32';
+        $res = $this->post($url, $data);
+        // 调用相位接口出错
+        if (count($logic_junction_ids) > 0 && count($res) == 0) {
+            com_log_warning('mapJunction_phase_empty', 0, "mapJunction_phase_empty",
+                ["junctionIds" => $logic_junction_ids, "res" => count($res),]);
+        }
+
+        return $res;
+    }
+
     /**
      * 修改路口的flow，校准 phase_id 和 phase_name
      *
@@ -559,7 +588,6 @@ class Waymap_model extends CI_Model
         $url   = $this->waymap_interface . '/signal-map/flow/movement';
 
         $res = $this->get($url, $data);
-
         if ($juncMovements == 1) {
             return $res['juncMovements'] ?? [];
         }

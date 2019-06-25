@@ -16,7 +16,7 @@ class City extends MY_Controller {
         if (empty($cityInfos)) {
             $this->errno = ERR_DATABASE;
             $this->errmsg = "获取开城城市列表失败";
-            return; 
+            return;
         }
         $permCitys = !empty($this->userPerm['city_id']) ? $this->userPerm['city_id'] : [];
         $data = [];
@@ -28,6 +28,9 @@ class City extends MY_Controller {
             }
             $center = $info['center_point'];
             $point = explode(",", $center);
+            $point = array_map(function($item) {
+                return (float)$item;
+            }, $point);
             $name = $info['city_name'];
             $pinyins = $pinyinService->convert($name, PINYIN_NO_TONE);
             $letter = "";
