@@ -202,9 +202,20 @@ class MY_Controller extends CI_Controller
 
         if (!empty($_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'])) {
             $citys = $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'];
-            $permCitys = explode(",", $citys);
-            $this->permCitys = array_merge($this->permCitys, $permCitys);
-            array_unique($this->permCitys);
+            $userPermCitys = explode(",", $citys);
+            foreach ($userPermCitys as $city) {
+                if (in_array($city, $this->permCitys)) {
+                    continue;
+                }
+                $this->permCitys[] = $city;
+                if ($city == $downgradeCityId) {
+                    $this->userPerm['city_id'] = $city;
+                    $this->userPerm['area_id'] = [];
+                    $this->userPerm['admin_area_id'] = [];
+                    $this->userPerm['route_id'] = [];
+                    $this->userPerm['junction_id'] = [];
+                }
+            }
         }
 
         if (!empty($this->permCitys)) {
