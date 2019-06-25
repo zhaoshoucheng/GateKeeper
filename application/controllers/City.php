@@ -18,7 +18,7 @@ class City extends MY_Controller {
             $this->errmsg = "获取开城城市列表失败";
             return;
         }
-        $permCitys = !empty($this->userPerm['city_id']) ? $this->userPerm['city_id'] : [];
+        $permCitys = $this->permCitys;
         $data = [];
         $pinyinService = new Pinyin('Overtrue\Pinyin\MemoryFileDictLoader');
         foreach ($cityInfos as $info) {
