@@ -264,11 +264,10 @@ class DiagnosisNoTiming_model extends CI_Model
         }
 
         $keys = [];
-        foreach ($flowsMovement as $idx => $flow) {
+        foreach ($flows as $idx => $flow) {
             $keys[$idx] = $flow['sort_key'];
         }
-        array_multisort($keys, SORT_NUMERIC, SORT_DESC, $flowsMovement);
-
+        array_multisort($keys, SORT_NUMERIC, SORT_ASC, $flows);
         foreach ($flows as $item) {
             $flowId = $item["logic_flow_id"];
             $comment = $item["phase_name"];
@@ -284,6 +283,7 @@ class DiagnosisNoTiming_model extends CI_Model
             if (isset($result[$flowId])) {
                 $movementInfo = array_merge($movementInfo, $result[$flowId]);
                 $movementInfo["confidence"] = $quotaRound["confidence"]['round']($result[$flowId]["traj_count"]);
+                $movementInfo["sort_key"] = $item["sort_key"];
                 $movements[] = $movementInfo;
             }
 
