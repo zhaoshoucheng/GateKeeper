@@ -177,6 +177,7 @@ class MY_Controller extends CI_Controller
             exit;
         }
         //<============降级结束
+       
 
         //写入权限信息
         if(!empty($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'])){
@@ -194,6 +195,16 @@ class MY_Controller extends CI_Controller
                 $this->userPerm['route_id'] = !empty($this->userPerm['route_id']) ? explode(";",$this->userPerm['route_id']) : [];
                 $this->userPerm['junction_id'] = !empty($this->userPerm['junction_id']) ? explode(";",$this->userPerm['junction_id']) : [];
             }
+        }
+        
+        if (!empty($_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'])) {
+            $citys = $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'];
+            $permCitys = explode(",", $citys);
+            if (isset($this->userPerm['city_id'])) {
+                $this->userPerm['city_id'] = [];
+            }
+            $this->userPerm['city_id'] = array_merge($this->userPerm['city_id'], $permCitys);
+            array_unique($this->userPerm['city_id']);
         }
     }
 
