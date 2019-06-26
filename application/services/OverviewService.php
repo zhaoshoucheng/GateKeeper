@@ -877,6 +877,8 @@ class OverviewService extends BaseService
                     'flow_name' => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
                     'alarm_comment' => $alarmCate[$val['type']]['name'] ?? '',
                     'alarm_key' => $val['type'],
+                    'type' => $val['type'],
+                    'junction_type' => $val['junction_type'],
                     'order' => $alarmCate[$val['type']]['order'] ?? 0,
                 ];
             }

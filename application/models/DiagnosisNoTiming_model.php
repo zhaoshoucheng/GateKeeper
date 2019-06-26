@@ -252,23 +252,15 @@ class DiagnosisNoTiming_model extends CI_Model
         if (empty($flows)) {
             return [];
         }
-        //使用flow备注名称统一处理名称
-        $flowInfos = $this->waymap_model->flowsByJunctionOnline($logicJunctionID);
-        $flowMap = [];
-        if(!empty($flowInfos)){
-            foreach ($flowInfos as $fk=> $fv){
-                if($fv["desc"]!=""){
-                    $flowMap[$fv['logic_flow_id']] = $fv["desc"];
-                }
-            }
-        }
 
+        $info32 = $this->waymap_model->getFlowInfo32($logicJunctionID);
+        $flowMap = array_column($info32,"phase_name","logic_flow_id");
+        //使用flow备注名称统一处理名称
         $keys = [];
-        foreach ($flowsMovement as $idx => $flow) {
+        foreach ($flows as $idx => $flow) {
             $keys[$idx] = $flow['sort_key'];
         }
-        array_multisort($keys, SORT_NUMERIC, SORT_DESC, $flowsMovement);
-
+        array_multisort($keys, SORT_NUMERIC, SORT_ASC, $flows);
         foreach ($flows as $item) {
             $flowId = $item["logic_flow_id"];
             $comment = $item["phase_name"];
@@ -284,6 +276,7 @@ class DiagnosisNoTiming_model extends CI_Model
             if (isset($result[$flowId])) {
                 $movementInfo = array_merge($movementInfo, $result[$flowId]);
                 $movementInfo["confidence"] = $quotaRound["confidence"]['round']($result[$flowId]["traj_count"]);
+                $movementInfo["sort_key"] = $item["sort_key"];
                 $movements[] = $movementInfo;
             }
 
