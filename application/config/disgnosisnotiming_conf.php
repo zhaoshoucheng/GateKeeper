@@ -122,13 +122,13 @@ $config['conf_rule'] = [
             ],
     ],
     'alarm_quotas' => [
-        'speed' => [
-            'name' => '平均延误',
-            "unit" =>  "秒",
-        ],
         'delay' => [
             'name' => '平均速度',
             "unit" =>  "千米/时",
+        ],
+        'speed' => [
+            'name' => '平均延误',
+            "unit" =>  "秒",
         ],
     ],
 ];
