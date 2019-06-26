@@ -252,17 +252,10 @@ class DiagnosisNoTiming_model extends CI_Model
         if (empty($flows)) {
             return [];
         }
-        //使用flow备注名称统一处理名称
-        $flowInfos = $this->waymap_model->flowsByJunctionOnline($logicJunctionID);
-        $flowMap = [];
-        if(!empty($flowInfos)){
-            foreach ($flowInfos as $fk=> $fv){
-                if($fv["desc"]!=""){
-                    $flowMap[$fv['logic_flow_id']] = $fv["desc"];
-                }
-            }
-        }
 
+        $info32 = $this->waymap_model->getFlowInfo32($logicJunctionID);
+        $flowMap = array_column($info32,"phase_name","logic_flow_id");
+        //使用flow备注名称统一处理名称
         $keys = [];
         foreach ($flows as $idx => $flow) {
             $keys[$idx] = $flow['sort_key'];
