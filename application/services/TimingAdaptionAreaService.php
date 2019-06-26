@@ -895,7 +895,7 @@ class TimingAdaptionAreaService extends BaseService
         ];
 
         $ret['signal_info'] = $timingInfo;
-        $ret['clock_shift'] = $clockShift;
+        $ret['clock_shift'] = intval($clockShift);
 
         return $ret;
     }
