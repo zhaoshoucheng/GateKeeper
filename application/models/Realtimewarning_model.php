@@ -537,7 +537,7 @@ class Realtimewarning_model extends CI_Model
                 $junctionName=$junctionsInfo[$item['logic_junction_id']]['name'] ?? '';
                 $alarmInfo = $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo);
                 //北京时路口出现行人时过滤
-                if(strpos($junctionName,"行人")===false && $cityId==1){
+                if(strpos($junctionName,"行人")!==false && $cityId==1){
                     $alarmInfo = [];
                 }
                 return [
