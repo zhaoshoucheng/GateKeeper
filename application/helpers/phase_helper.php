@@ -62,17 +62,17 @@ if(!function_exists('phase_sort_key')) {
     {
         if($in < 0 || $in > 360 || $out < 0 || $out > 360)
             return false;
-        $direction = phase_direction($in);
+        $direction = phase_direction($in); // from的方向
         $turn = phase_action($in, $out);
         $direct_map = [
-            'NORTH' => 1,
-            'NORTH_EAST' => 2,
-            'EAST'  => 3,
-            'SOUTH_EAST' => 4,
-            'SOUTH' => 5,
-            'SOUTH_WEST' => 6,
-            'WEST'  => 7,
-            'NORTH_WEST' => 8,
+            'SOUTH' => 1, // 向南，从北来
+            'SOUTH_WEST' => 2,
+            'WEST'  => 3,
+            'NORTH_WEST' => 4,
+            'NORTH' => 5,
+            'NORTH_EAST' => 6,
+            'EAST'  => 7,
+            'SOUTH_EAST' => 8,
         ];
         $turn_map = [
             'TURN_ROUND' => 1, // 掉头
