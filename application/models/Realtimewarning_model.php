@@ -531,13 +531,19 @@ class Realtimewarning_model extends CI_Model
         }
 
         //数组初步处理，去除无用数据
-        $realtimeJunctionList = array_map(function ($item) use ($flowsInfo, $realTimeAlarmsInfo) {
+        $realtimeJunctionList = array_map(function ($item) use ($flowsInfo, $realTimeAlarmsInfo, $junctionsInfo, $cityId) {
             $alarmInfo = $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo);
             if ($item['traj_count'] >= 5 || !empty($alarmInfo)) {
+                $junctionName=$junctionsInfo[$item['logic_junction_id']]['name'] ?? '';
+                $alarmInfo = $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo);
+                //北京时路口出现行人时过滤
+                if(strpos($junctionName,"行人")===false && $cityId==1){
+                    $alarmInfo = [];
+                }
                 return [
                     'logic_junction_id' => $item['logic_junction_id'],
                     'quota' => $this->getRawQuotaInfo($item),
-                    'alarm_info' => $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo),
+                    'alarm_info' => $alarmInfo,
                 ];
             }
         }, $realtimeJunctionList);
