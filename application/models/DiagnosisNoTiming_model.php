@@ -398,11 +398,14 @@ class DiagnosisNoTiming_model extends CI_Model
     }
 
 
-    public function getJunctionAlarmDataByHour($city_id, $dates) {
+    public function getJunctionAlarmDataByHour($city_id, $dates, $userPerm = []) {
         $req = [
             'city_id' => $city_id,
             'dates' => $dates,
         ];
+        if (isset($userPerm['junction_id']) && !empty($userPerm['junction_id'])) {
+            $req['junction_ids'] = $userPerm['junction_id'];
+        }
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByHour', $req, 0, 'json');
         if (!empty($res)) {
