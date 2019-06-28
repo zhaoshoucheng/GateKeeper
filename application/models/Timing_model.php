@@ -547,13 +547,8 @@ class Timing_model extends CI_Model
 
     //获取新版本配时并格式化成旧版本格式
     public function getNewTimingInfo($data){
-        $flowInfos = $this->waymap_model->flowsByJunctionOnline(trim($data['junction_id']));
-        $flowMap = [];
-        if(!empty($flowInfos)){
-            foreach ($flowInfos as $fk=> $fv){
-                $flowMap[$fv['logic_flow_id']] = $fv["desc"];
-            }
-        }
+        $info32 = $this->waymap_model->getFlowInfo32(trim($data['junction_id']));
+        $flowMap = array_column($info32,"phase_name","logic_flow_id");
         //flow信息替换
         $time_range = array_filter(explode('-', trim($data['time_range'])));
         $this->load->helper('http');
