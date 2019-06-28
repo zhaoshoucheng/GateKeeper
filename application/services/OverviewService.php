@@ -98,25 +98,25 @@ class OverviewService extends BaseService
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['pagesize'] = $params['pagesize'] ?? 20;
+        if(!empty($this->userPerm['group_id']) && $this->userPerm['group_id']!="426") {
+            $delayList = $this->stopDelayTopList($params, $this->userPerm);
+            $newDelayList = [];
+            foreach ($delayList as $item) {
+                $newDelayList[$item["logic_junction_id"]] = $item["stop_delay"];
+            }
 
-        $delayList = $this->stopDelayTopList($params,$this->userPerm);
-        $newDelayList = [];
-        foreach ($delayList as $item){
-            $newDelayList[$item["logic_junction_id"]] = $item["stop_delay"];
-        }
-
-        $cycleList = $this->stopTimeCycleTopList($params,$this->userPerm);
-        $newCycleList = [];
-        foreach ($cycleList as $item){
-            if(isset($newCycleList[$item["logic_junction_id"]])){
-                if($item["stop_time_cycle"]>$newCycleList[$item["logic_junction_id"]]){
+            $cycleList = $this->stopTimeCycleTopList($params, $this->userPerm);
+            $newCycleList = [];
+            foreach ($cycleList as $item) {
+                if (isset($newCycleList[$item["logic_junction_id"]])) {
+                    if ($item["stop_time_cycle"] > $newCycleList[$item["logic_junction_id"]]) {
+                        $newCycleList[$item["logic_junction_id"]] = $item["stop_time_cycle"];
+                    }
+                } else {
                     $newCycleList[$item["logic_junction_id"]] = $item["stop_time_cycle"];
                 }
-            }else{
-                $newCycleList[$item["logic_junction_id"]] = $item["stop_time_cycle"];
             }
         }
-
         if(!empty($data)){
             foreach ($data["dataList"] as $key=>$item){
                 if(!empty($junctionIds) && !in_array($item["jid"],$junctionIds)){
@@ -877,6 +877,8 @@ class OverviewService extends BaseService
                     'flow_name' => $flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']] ?? '',
                     'alarm_comment' => $alarmCate[$val['type']]['name'] ?? '',
                     'alarm_key' => $val['type'],
+                    'type' => $val['type'],
+                    'junction_type' => $val['junction_type'],
                     'order' => $alarmCate[$val['type']]['order'] ?? 0,
                 ];
             }
