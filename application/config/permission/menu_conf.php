@@ -188,7 +188,7 @@ $config['menu'] = [
             3 =>
                 [
                     'name'   => '诊断',
-                    'url'    => '/diagnose/',
+                    'url'    => '/diagnose/tendency',
                 ],
             4 =>
                 [
