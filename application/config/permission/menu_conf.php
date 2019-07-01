@@ -189,20 +189,6 @@ $config['menu'] = [
                 [
                     'name'   => '诊断',
                     'url'    => '/diagnose/',
-                    'remark' => 'signal',
-                    'son'    =>
-                        [
-                            0 =>
-                                [
-                                    'name' => '趋势',
-                                    'url'  => 'tendency',
-                                ],
-                            1 =>
-                                [
-                                    'name' => '详情',
-                                    'url'  => 'index',
-                                ],
-                        ],
                 ],
             4 =>
                 [
