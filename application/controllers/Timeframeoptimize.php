@@ -142,6 +142,18 @@ class Timeframeoptimize extends MY_Controller
     public function getTodOptimizePlan()
     {
         $params = $this->input->post(NULL, TRUE);
+        $timeSplit = explode("-",$params['task_time_range']);
+        //每段保证最短15分钟
+
+        $startTime =$timeSplit[0];
+        $endTime=$timeSplit[1];
+        $shm = explode(":",$startTime);
+        $ehm = explode(":",$endTime);
+
+        if(($ehm[0]*3600+$ehm[1]*60 - $shm[0]*3600+$shm[1]*60)< 15*60){
+            return $this->response("",0,"每个时段最少15分钟");
+        }
+
         $result = $this->traj_model->getTodOptimizePlan($params);
         return $this->response($result);
         /*
