@@ -151,7 +151,7 @@ class Timeframeoptimize extends MY_Controller
         $ehm = explode(":",$endTime);
 
         if(($ehm[0]*3600+$ehm[1]*60 - $shm[0]*3600+$shm[1]*60)< $params['divide_num']*15*60){
-            return $this->response("",0,"每个时段最少15分钟");
+            return $this->response([],0,"每个时段最少15分钟");
         }
 
         $result = $this->traj_model->getTodOptimizePlan($params);
