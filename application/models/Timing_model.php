@@ -58,16 +58,16 @@ class Timing_model extends CI_Model
         }
 
         // 获取配时数据
-//        $timing = $this->getTimingData($data);
         $timing = $this->getNewTimingInfo($data);
         // 对返回数据格式化,返回需要的格式
         if (count($timing) >= 1) {
-            $timing = $this->formatTimingIdToName($timing);
+            $flowId2Name = $this->formatTimingIdToName($timing);
         } else {
-            return [];
+            $info32 = $this->waymap_model->getFlowInfo32(trim($data['junction_id']));
+            $flowId2Name = array_column($info32,"phase_name","logic_flow_id");
         }
 
-        return $timing;
+        return $flowId2Name;
     }
 
     /**
@@ -146,7 +146,7 @@ class Timing_model extends CI_Model
      */
     public function gitFlowTimingByOptimizeScatter($data)
     {
-        if (empty($data)) {
+        if (empty($data) || !isset($data['flow_id'])) {
             return [];
         }
 
@@ -156,6 +156,19 @@ class Timing_model extends CI_Model
         $timing = $this->getNewTimingInfo($data);
         if (!empty($timing)) {
             $result = $this->formatTimingDataByOptimizeScatter($timing, $data['flow_id']);
+        } else {
+            
+            $info32 = $this->waymap_model->getFlowInfo32(trim($data['junction_id']));
+            $flowId2Name = array_column($info32,"phase_name","logic_flow_id");
+            $flowId = trim($data['flow_id']);
+            $result = [
+                "info" =>[
+                    'logic_flow_id' => $flowId, 
+                    'comment' => isset($flowId2Name[$flowId]) ? $flowId2Name[$flowId] : "",
+                ],
+                "maxCycle" => 0,
+                "planList" => [],
+            ];
         }
         return $result;
     }
@@ -547,13 +560,8 @@ class Timing_model extends CI_Model
 
     //获取新版本配时并格式化成旧版本格式
     public function getNewTimingInfo($data){
-        $flowInfos = $this->waymap_model->flowsByJunctionOnline(trim($data['junction_id']));
-        $flowMap = [];
-        if(!empty($flowInfos)){
-            foreach ($flowInfos as $fk=> $fv){
-                $flowMap[$fv['logic_flow_id']] = $fv["desc"];
-            }
-        }
+        $info32 = $this->waymap_model->getFlowInfo32(trim($data['junction_id']));
+        $flowMap = array_column($info32,"phase_name","logic_flow_id");
         //flow信息替换
         $time_range = array_filter(explode('-', trim($data['time_range'])));
         $this->load->helper('http');

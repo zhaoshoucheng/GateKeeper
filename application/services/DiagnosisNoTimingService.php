@@ -273,10 +273,10 @@ class DiagnosisNoTimingService extends BaseService
         return $ret;
     }
 
-    public function getJunctionAlarmDataByHour($params) {
+    public function getJunctionAlarmDataByHour($params, $userPerm = []) {
         $city_id = $params['city_id'];
         $dates = $params['dates'];
-        $data = $this->diagnosisNoTiming_model->getJunctionAlarmDataByHour($city_id, $dates);
+        $data = $this->diagnosisNoTiming_model->getJunctionAlarmDataByHour($city_id, $dates, $userPerm);
 
         $conf_rule = $this->config->item('conf_rule');
         $frequency_threshold = $conf_rule['frequency_threshold'];

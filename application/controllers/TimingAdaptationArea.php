@@ -107,7 +107,7 @@ class TimingAdaptationArea extends MY_Controller
             'flow_alarm_type' => 'required|greater_than[0]',
             'junction_alarm_type' => 'required|greater_than[0]',
             'city_id' => 'required|is_natural_no_zero',
-            'area_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|is_natural',
             'logic_junction_id' => 'required|trim|min_length[1]',
             'logic_flow_id' => 'required|trim|min_length[1]',
             'is_correct' => 'required|in_list[1,2]',

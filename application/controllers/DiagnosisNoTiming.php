@@ -214,7 +214,7 @@ class DiagnosisNoTiming extends MY_Controller
                 throw new \Exception("datas参数格式错误");
             }
         }
-        $res = $this->dianosisService->getJunctionAlarmDataByHour($params);
+        $res = $this->dianosisService->getJunctionAlarmDataByHour($params, $this->userPerm);
         $this->response($res);
     }
 
