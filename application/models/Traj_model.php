@@ -45,8 +45,16 @@ class Traj_model extends CI_Model
     public function getTodOptimizePlan($data)
     {
         $timeSplit = explode("-",$data['task_time_range']);
-        $data['start_time'] =$timeSplit[0].":00";
-        $data['end_time']=$timeSplit[1].":00";
+        $sstr = $timeSplit[0];
+        if(strlen($sstr)==4){
+            $sstr = "0".$sstr;
+        }
+        $estr = $timeSplit[1];
+        if(strlen($estr)==4){
+            $estr = "0".$estr;
+        }
+        $data['start_time'] =$sstr.":00";
+        $data['end_time']=$estr.":00";
         $url = $this->interface . '/timeframeoptimize/getTodOptimizePlan';
         return $this->post($url, $data, 20000, "json");
     }
