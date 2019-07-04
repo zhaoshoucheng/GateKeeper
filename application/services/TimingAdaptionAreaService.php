@@ -123,6 +123,7 @@ class TimingAdaptionAreaService extends BaseService
 
             if (!empty($junctions)) {
                 // 路口ID串
+                $junctions = array_slice($junctions, 0, 250);
                 $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
 
                 // 获取区域平均速度
