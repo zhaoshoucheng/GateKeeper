@@ -574,7 +574,7 @@ class Timing_model extends CI_Model
             'start_time'        => trim($time_range[0]).":00",
             'end_time'          => date('H:i', strtotime(trim($time_range[1])) - 60).":00",
             'source'            => 2,
-            'version'           => $date."000000",
+            'version'           => "30192233000000",
             'date'              => $reqdate,
             'new_type'          => 1,
 
