@@ -5,10 +5,10 @@ $config['flow_quota_key'] = [
         'name' => '路段长度', // 中文名称
         'unit' => '米'       // 单位
     ],
-    'queue_length' => [
-        'name' => '排队长度',
-        'unit' => '米',
-    ],
+    //'queue_length' => [
+    //    'name' => '排队长度',
+    //    'unit' => '米',
+    //],
     'stop_delay' => [
         'name' => '停车延误',
         'unit' => '秒',
@@ -25,10 +25,10 @@ $config['flow_quota_key'] = [
         'name' => '停车比率',
         'unit' => '',
     ],
-    'free_flow_speed' => [
-        'name' => '自由流速度',
-        'unit' => '千米/时',
-    ],
+    //'free_flow_speed' => [
+    //    'name' => '自由流速度',
+    //    'unit' => '千米/时',
+    //],
     'confidence' => [
         'name' => '置信度',
         'unit' => '',
