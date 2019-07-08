@@ -232,9 +232,12 @@ class Track extends MY_Controller
                     ]
                 ];
             $clockShiftInfo = $this->traj_model->getClockShiftCorrect(json_encode($clockParam));
-            if(!empty($clockShiftInfo)){
-                $clockShift = $clockShiftInfo[0]['clock_shift'] ?? 0;
+            if(empty($clockShiftInfo)){
+                $this->errno = ERR_DEFAULT;
+                $this->errmsg = "clock shift 为空";
+                return;
             }
+            $clockShift = $clockShiftInfo[0]['clock_shift'] ?? 0;
 
             $signalInfo['cycle'] = $timing['cycle'];
             $signalInfo['offset'] = $timing['offset'];
