@@ -187,22 +187,55 @@ class Track extends MY_Controller
             'timingType'  => 1
         ];
 
-        $data = [
-            'city_id'=>$params['city_id'],
-            'logic_junction_id'=>$params['junction_id'],
-            'dates'       => $this->input->post("dates", TRUE),
-            'time_range'  => $params['time_range'],
-            'logic_flow_id'=>$params['flow_id'],
-        ];
+        //$data = [
+        //    'city_id'=>$params['city_id'],
+        //    'logic_junction_id'=>$params['junction_id'],
+        //    'dates'       => $this->input->post("dates", TRUE),
+        //    'time_range'  => $params['time_range'],
+        //    'logic_flow_id'=>$params['flow_id'],
+        //];
+        //$clockShift = $this->timingAdaptionAreaService->getClockShift($data);
         $signalInfo = []; //配时数据
         $signalRange = []; //配时描述数据
         //配时查询
         $timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
         $clockShift=0;
         //重构配时相关内容
+        list($startTime, $endTime) = explode("-", $params['time_range']); 
         if(!empty($timing) && isset($timing['signal'])){
-            $clockShift = $this->traj_model->getClockShiftCorrect($data);
-            //$clockShift = $this->timingAdaptionAreaService->getClockShift($data);
+            $formatGreen = [];
+            foreach ($timing['signal'] as $sk => $sv){
+                $formatGreen[] = [
+                    "green_start"    => $sv["start_time"],
+                    "green_duration" => $sv["duration"],
+                    "yellow"         => $sv["yellow"],
+                    "green"          => $sv["green"],
+                    "red_clean"      => $sv["red_clearance"],
+                ];
+            }
+            $clockParam = [
+                "dates"=>$this->input->post("dates", TRUE),
+                    "junction_list"=>[
+                        [
+                            "junction_id"=>$params['junction_id'],
+                            "start_time"=>$startTime,
+                            "end_time"=>$endTime,
+                            "movement"=>[
+                                [
+                                    "movement_id"=>$params['flow_id'],
+                                    "green"=>$formatGreen,
+                                ]
+                            ],
+                            "cycle"=>$timing['cycle'],
+                            "offset"=>$timing['offset'],
+                        ],
+                    ]
+                ];
+            $clockShiftInfo = $this->traj_model->getClockShiftCorrect(json_encode($clockParam));
+            if(!empty($clockShiftInfo)){
+                $clockShift = $clockShiftInfo[0]['clock_shift'] ?? 0;
+            }
+
             $signalInfo['cycle'] = $timing['cycle'];
             $signalInfo['offset'] = $timing['offset'];
             $signalInfo['yellow'] = 3;
@@ -328,7 +361,7 @@ class Track extends MY_Controller
         $finalRet['info'] = $info;
         $finalRet['signal_info'] = $signalInfo;
         $finalRet['signal_range'] = $signalRange;
-
+        $finalRet['clock_shift'] = $clockShift;
 
         return $this->response($finalRet);
     }

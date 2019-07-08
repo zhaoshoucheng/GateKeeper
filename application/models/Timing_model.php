@@ -325,6 +325,9 @@ class Timing_model extends CI_Model
                         $res['signal'][$vv['start_time']]['state'] = $vv['state'];
                         $res['signal'][$vv['start_time']]['start_time'] = $vv['start_time'];
                         $res['signal'][$vv['start_time']]['duration'] = $vv['duration'];
+                        $res['signal'][$vv['start_time']]['green'] = $vv['green'];
+                        $res['signal'][$vv['start_time']]['yellow'] = $vv['yellow'];
+                        $res['signal'][$vv['start_time']]['red_clearance'] = $vv['red_clearance'];
                     }
                 }
                 $res['comment'] = $v[0]['flow_logic']['comment'];
@@ -634,6 +637,9 @@ class Timing_model extends CI_Model
                             "movement_id" => $mk,
                             'start_time' => $sv['start_time'],
                             'duration' => $sv['green'] + $sv['yellow'] + $sv['red_clearance'],
+                            'green'    => $sv['green'],
+                            'yellow'   => $sv['yellow'],
+                            'red_clearance'=> $sv['red_clearance'],
                             'state' => 1,
                             'flow_logic' => [
                                 'comment' => $comment,
