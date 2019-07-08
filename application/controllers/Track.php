@@ -218,8 +218,8 @@ class Track extends MY_Controller
                     "junction_list"=>[
                         [
                             "junction_id"=>$params['junction_id'],
-                            "start_time"=>$startTime,
-                            "end_time"=>$endTime,
+                            "start_time"=>$startTime . ":00",
+                            "end_time"=>$endTime . ":00",
                             "movement"=>[
                                 [
                                     "movement_id"=>$params['flow_id'],
