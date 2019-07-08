@@ -1034,23 +1034,25 @@ class TimingAdaptionAreaService extends BaseService
             }
 
         }else{
-            foreach ($timingInfo['vehicle_phase'] as $tk => $tv){
-                if (empty($tv['flow_info']) || count($tv['flow_info']) == 0){
-                    continue;
-                }
-                foreach ($tv['flow_info'] as $fk=>$fv){
-                    if($fv['logic_flow_id']!=$data['logic_flow_id']){//过滤无用的flow
+            if (isset($timingInfo['vehicle_phase']) && !empty($timingInfo['vehicle_phase'])) {
+                foreach ($timingInfo['vehicle_phase'] as $tk => $tv){
+                    if (empty($tv['flow_info']) || count($tv['flow_info']) == 0){
                         continue;
                     }
-                    //找到目标flow
-                    $tmpMovementTiming = array(
-                        'comment'=>$tv['sg_name'],
-                        'logic_flow_id'=>$fv['logic_flow_id'],
-                        'start_time'=>$tv['start_time'],
-                        'duration'=>$tv['end_time']-$tv['start_time'],
-                    );
-                    $res['green'][] = $tmpMovementTiming;
+                    foreach ($tv['flow_info'] as $fk=>$fv){
+                        if($fv['logic_flow_id']!=$data['logic_flow_id']){//过滤无用的flow
+                            continue;
+                        }
+                        //找到目标flow
+                        $tmpMovementTiming = array(
+                            'comment'=>$tv['sg_name'],
+                            'logic_flow_id'=>$fv['logic_flow_id'],
+                            'start_time'=>$tv['start_time'],
+                            'duration'=>$tv['end_time']-$tv['start_time'],
+                        );
+                        $res['green'][] = $tmpMovementTiming;
 
+                    }
                 }
             }
         }
