@@ -15,6 +15,7 @@ class Track extends MY_Controller
     {
         parent::__construct();
         $this->load->model('track_model');
+        $this->load->model('traj_model');
         $this->setTimingType();
         $this->timeframescatterService = new TimeframescatterService();
         $this->dianosisService = new DiagnosisNoTimingService();
@@ -189,6 +190,8 @@ class Track extends MY_Controller
         $data = [
             'city_id'=>$params['city_id'],
             'logic_junction_id'=>$params['junction_id'],
+            'dates'       => $this->input->post("dates", TRUE),
+            'time_range'  => $params['time_range'],
             'logic_flow_id'=>$params['flow_id'],
         ];
         $signalInfo = []; //配时数据
@@ -198,7 +201,8 @@ class Track extends MY_Controller
         $clockShift=0;
         //重构配时相关内容
         if(!empty($timing) && isset($timing['signal'])){
-            $clockShift = $this->timingAdaptionAreaService->getClockShift($data);
+            $clockShift = $this->traj_model->getClockShiftCorrect($data);
+            //$clockShift = $this->timingAdaptionAreaService->getClockShift($data);
             $signalInfo['cycle'] = $timing['cycle'];
             $signalInfo['offset'] = $timing['offset'];
             $signalInfo['yellow'] = 3;
