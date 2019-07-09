@@ -316,12 +316,12 @@ class DiagnosisNoTiming_model extends CI_Model
         $cityID = $data['city_id'];
         $result = [];
         $newMapVersion = $this->waymap_model->getLastMapVersion();
-        $flowsMovement = $this->waymap_model->getFlowMovement($cityID, $logicJunctionID, "all", 1);
-        $flowsMovement = array_map(function ($v) {
-            $v = $this->adjustPhase($v);
-            return $v;
-        }, $flowsMovement);
         if ($uniqueDirection) {
+            $flowsMovement = $this->waymap_model->getFlowMovement($cityID, $logicJunctionID, "all", 1);
+            $flowsMovement = array_map(function ($v) {
+                $v = $this->adjustPhase($v);
+                return $v;
+            }, $flowsMovement);
             $flowPhases = array_column($flowsMovement,"phase_name","logic_flow_id");
         } else {
             $info32 = $this->waymap_model->getFlowInfo32($logicJunctionID);
