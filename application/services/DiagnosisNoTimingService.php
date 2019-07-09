@@ -136,6 +136,14 @@ class DiagnosisNoTimingService extends BaseService
             }
             $trajList = $trajInfo['dataList'][0]['forward_traj'] ?? [];
             foreach ($trajList as $key=>$item){
+                if (count($item) < 2) {
+                    continue;
+                }
+                $st = $item[0][0];
+                $et = $item[count($item) - 1][0];
+                if (abs($st)>600 || abs($et)>600 || $et - $st > 1000) {
+                    continue;
+                }
                 foreach ($item as $k=>$value){
                     $trajList[$key][$k] = [
                         $value[0],                      // 时间秒数         X轴
@@ -212,7 +220,7 @@ class DiagnosisNoTimingService extends BaseService
                 "map_version"=>"1",//不能为空
                 "token"=>"1",//不能为空
                 "dates"=>[$eachDate],
-                "simple_num" => 100,
+                "simple_num" => 500,
             ];
             try{
                 $trajInfo = $this->traj_model->getSpaceTimeDiagram($trajParam);

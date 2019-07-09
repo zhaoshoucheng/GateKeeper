@@ -895,6 +895,14 @@ class TimingAdaptionAreaService extends BaseService
             ],
         ];
 
+        $info = $ret['info'];
+        $cycle = $cycleLength;
+        // 坐标轴的范围: [min(-10, max(t_min, -3*cycle_length)), max(10+cycle_length, min(t_max, 2*cycle_length))];
+        $tmp_min = $info['x']['min'] > -3*$cycle ? $info['x']['min'] : -3*$cycle;
+        $info['x']['min'] = $tmp_min < -10 ? $tmp_min : -10;
+        $tmp_max = $info['x']['max'] < 2*$cycle ? $info['x']['max'] : 2*$cycle;
+        $info['x']['max'] = $tmp_max > 10+$cycle ? $tmp_max : 10+$cycle;
+        $ret['info'] = $info;
         $ret['signal_info'] = $timingInfo;
         $ret['clock_shift'] = intval($clockShift);
 
