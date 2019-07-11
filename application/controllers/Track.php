@@ -318,6 +318,7 @@ class Track extends MY_Controller
             $cycle=$signalInfo['cycle'];
             $offset = $signalInfo['offset'];
         }
+        $cnt = 0;
         foreach ($dataList as $k=>$v){
             $pts = $this->timingAdaptionAreaService->getTrajsInOneCycle($v
                 , $cycle
@@ -330,7 +331,8 @@ class Track extends MY_Controller
             if (abs($st)>600 || abs($et)>600 || $et - $st > 1000) {
                 continue;
             }
-            $dataList[$k] = $pts;
+            $dataList[$cnt] = $pts;
+            $cnt ++;
         }
 
         //轨迹抽样,考虑前端性能问题,暂时上限200

@@ -136,14 +136,6 @@ class DiagnosisNoTimingService extends BaseService
             }
             $trajList = $trajInfo['dataList'][0]['forward_traj'] ?? [];
             foreach ($trajList as $key=>$item){
-                if (count($item) < 2) {
-                    continue;
-                }
-                $st = $item[0][0];
-                $et = $item[count($item) - 1][0];
-                if (abs($st)>600 || abs($et)>600 || $et - $st > 1000) {
-                    continue;
-                }
                 foreach ($item as $k=>$value){
                     $trajList[$key][$k] = [
                         $value[0],                      // 时间秒数         X轴

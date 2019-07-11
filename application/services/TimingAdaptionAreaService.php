@@ -858,6 +858,7 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         $ret['dataList'] = [];
+        $cnt = 0;
         //$v代表一条轨迹
         foreach ($detail['result'] as $k => $v) {
             // 按时间正序排序
@@ -875,9 +876,19 @@ class TimingAdaptionAreaService extends BaseService
                 ];
             }
             //获取把时空图轨迹压缩在一个周期内
-            $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k]
+            $pts = $this->getTrajsInOneCycle($ret['dataList'][$k]
                 , $cycleLength
                 , ($offset + $clockShift) % $cycleLength);   //纠偏
+            if (count($pts) < 2) {
+                continue;
+            }
+            $st = $pts[0][0];
+            $et = $pts[count($pts) - 1][0];
+            if (abs($st)>600 || abs($et)>600 || $et - $st > 1000) {
+                continue;
+            }
+            $ret['dataList'][$cnt] = $pts;
+            $cnt ++;
         }
         $ret['dataList'] = array_filter($ret['dataList']);
 

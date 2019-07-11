@@ -439,7 +439,7 @@ class Waymap_model extends CI_Model
         $res = httpPOST($url, $data, $timeout, $contentType, $header);
 
         if (!$res) {
-            throw new \Exception('接口请求失败', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception($url . '接口请求失败', ERR_REQUEST_WAYMAP_API);
         }
 
         $res = json_decode($res, true);
