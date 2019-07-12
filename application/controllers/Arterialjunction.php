@@ -37,7 +37,6 @@ class Arterialjunction extends MY_Controller
         $commonService = new \Services\CommonService();
         $userPerm = $commonService->mergeUserPermAreaJunction($cityId, $this->userPerm);
 
-
         // 获取配时
         $timingModel = new Timing_model();
         $timing = $timingModel->queryTimingStatus(
@@ -58,10 +57,7 @@ class Arterialjunction extends MY_Controller
         $version = $waymapModel::$lastMapVersion;
 
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
-        $allCityJunctions = $waymapModel->getAllCityJunctions($data['city_id'], $version);
-        if (count($allCityJunctions) < 1 || !$allCityJunctions || !is_array($allCityJunctions)) {
-            return [];
-        }
+        $allCityJunctions = $waymapModel->getAllCityJunctions($cityId, $version);
 
         // 根据权限做一次过滤
         if(!empty($userPerm)){
@@ -93,6 +89,7 @@ class Arterialjunction extends MY_Controller
 
         $resultData['junctionTotal'] = count($resultData['dataList']);
 
+        // TODO: 城市中心点可以从后台数据库中获取
         $junctionCenterFunc = function ($dataList) {
             $count_lng = 0;
             $count_lat = 0;

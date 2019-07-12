@@ -707,10 +707,7 @@ class Waymap_model extends CI_Model
         $ret = $this->get($url, [
             'city_id' => $cityId,
         ]);
-        if ($ret['errorCode'] != 0) {
-            throw new Exception("获取按照配置区域过滤路口错误");
-        }
-        $junctionIds = $ret['data']['filter_junc_ids'];
+        $junctionIds = $ret['filter_junc_ids'];
         return $junctionIds;
     }
 
