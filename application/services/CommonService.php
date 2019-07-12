@@ -355,7 +355,7 @@ class CommonService extends BaseService
     {
         $wayModel = new \Waymap_model();
         $junctionIds = $wayModel->getRestrictJunction($cityId);
-        if (empty($junctions)) {
+        if (empty($junctionIds)) {
             return $userPerm;
         }
 
