@@ -17,13 +17,13 @@ class Arterialjunction extends MY_Controller
     }
 
     /**
-     * 获取绿波全城路口集合接口
+     * 获取优化全城路口集合接口
      */
     public function getAllJunctions()
     {
+        // 获取参数
         $params = $this->input->post();
         $validate = Validate::make($params, [
-            //'task_id' => 'min:1',
             'city_id' => 'min:1',
         ]);
         if (!$validate['status']) {
@@ -31,13 +31,82 @@ class Arterialjunction extends MY_Controller
             $this->errmsg = $validate['errmsg'];
             return;
         }
+        $cityId = intval($params['city_id']);
 
-        $data = $this->arterialjunction_model->getAllJunctions([
-            'task_id' => !empty($params['task_id']) ? intval($params['task_id']) : "",
-            'city_id' => intval($params['city_id']),
-        ]);
+        // 获取权限
+        $commonService = new \Services\CommonService();
+        $userPerm = $commonService->mergeUserPermAreaJunction($cityId, $this->userPerm);
 
-        return $this->response($data);
+
+        // 获取配时
+        $timingModel = new Timing_model();
+        $timing = $timingModel->queryTimingStatus(
+            [
+                'city_id' => $cityId,
+                'source' => 2,
+            ]
+        );
+        $hasTiming = [];
+        foreach ($timing as $item) {
+            if ($item['status'] == 1) {
+                $hasTiming[] = $item['logic_junction_id'];
+            }
+        }
+
+        $waymapModel = new Waymap_model();
+        // 获取地图版本
+        $version = $waymapModel::$lastMapVersion;
+
+        // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
+        $allCityJunctions = $waymapModel->getAllCityJunctions($data['city_id'], $version);
+        if (count($allCityJunctions) < 1 || !$allCityJunctions || !is_array($allCityJunctions)) {
+            return [];
+        }
+
+        // 根据权限做一次过滤
+        if(!empty($userPerm)){
+            $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+            if (!empty($junctionIds)) {
+                $allCityJunctions = array_filter($allCityJunctions, function($item) use($junctionIds) {
+                    if (in_array($item['logic_junction_id'], $junctionIds)) {
+                        return true;
+                    }
+                    return false;
+                });
+            }
+        }
+
+        $resultData = [];
+        $resultData['dataList'] = array_reduce($allCityJunctions, function ($v, $w) use($hasTiming) {
+            if (empty($v)) {
+                $v = [];
+            }
+            $v[] = array(
+                "logic_junction_id" => $w["logic_junction_id"],
+                "lng" => $w["lng"],
+                "lat" => $w["lat"],
+                "name" => $w["name"],
+                "timing_status" => in_array($w['logic_junction_id'], $hasTiming) ? 1 : 0,
+            );
+            return $v;
+        });
+
+        $resultData['junctionTotal'] = count($resultData['dataList']);
+
+        $junctionCenterFunc = function ($dataList) {
+            $count_lng = 0;
+            $count_lat = 0;
+            $qcount = count($dataList);
+            foreach ($dataList as $v) {
+                $count_lng += $v['lng'];
+                $count_lat += $v['lat'];
+            }
+            return ["lng" => round($count_lng / $qcount, 6), "lat" => round($count_lat / $qcount, 6),];
+        };
+        $resultData['center'] = $junctionCenterFunc($resultData['dataList']);
+        $resultData['map_version'] = $version;
+
+        return $this->response($resultData);
     }
 
     /**
@@ -56,11 +125,7 @@ class Arterialjunction extends MY_Controller
         }
 
         $qJson = json_decode($params['q'],true);
-        /*if(empty($qJson["task_id"]) || !($qJson["task_id"]>0)){
-            $this->errno = ERR_PARAMETERS;
-            $this->errmsg = 'The task_id cannot be empty and must be interger.';
-            return;
-        }*/
+
         if(empty($qJson["city_id"]) || !($qJson["city_id"]>0)){
             $this->errno = ERR_PARAMETERS;
             $this->errmsg = 'The city_id cannot be empty and must be interger.';

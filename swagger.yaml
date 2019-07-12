@@ -3,7 +3,15 @@ info:
   description: 智慧信号灯接口文档
   version: 1.0.0
   title: 智慧信号灯接口文档
-tags: []
+tags:
+  - 概览
+  - 诊断
+  - 评估
+  - 优化
+  - 自适应
+  - 报告
+  - 配时
+  - 管理
 schemes:
 - http
 - https
@@ -1972,9 +1980,10 @@ paths:
                 example: unknown
   /Arterialjunction/getAllJunctions:
     post:
-      summary: 干线绿波优化-获取全城路口集合接口
-      description: 干线绿波优化-获取全城路口集合接口
-      tags: []
+      summary: 优化-获取全城路口集合接口
+      description: 优化-获取全城路口集合
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -1982,9 +1991,9 @@ paths:
       parameters:
       - name: city_id
         in: formData
-        description: '周期任务的时间点 示例: 134'
-        required: false
-        type: string
+        description: '城市id 示例: 134'
+        required: true
+        type: integer
       responses:
         200:
           description: 请求成功
@@ -1998,16 +2007,16 @@ paths:
                 properties:
                   center:
                     type: object
-                    description: ""
+                    description: "城市中心点"
                     properties:
                       lat:
                         type: number
-                        description: ""
+                        description: "纬度"
                         example: 24.399688
                         format: float
                       lng:
                         type: number
-                        description: ""
+                        description: "经度"
                         example: 109.444603
                         format: float
                   dataList:
@@ -2027,23 +2036,23 @@ paths:
                           example: "109.75376"
                         logic_junction_id:
                           type: string
-                          description: ""
+                          description: "路口逻辑id"
                           example: "2017030116_1082731"
                         name:
                           type: string
-                          description: ""
+                          description: "路口名称"
                           example: 建中东路_元宝路
                         timing_status:
                           type: integer
-                          description: ""
+                          description: "配时状态，0/1 无配时/有配时"
                           example: 0
                   junctionTotal:
                     type: integer
-                    description: ""
+                    description: "总的路口数目"
                     example: 611
                   map_version:
                     type: integer
-                    description: ""
+                    description: "地图版本号"
                     example: 2.019070918e+09
               errmsg:
                 type: string
