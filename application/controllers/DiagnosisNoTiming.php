@@ -251,7 +251,10 @@ class DiagnosisNoTiming extends MY_Controller
             }
         }
 
-        $res = $this->dianosisService->getAllCityJunctionsDiagnoseList($params, $this->userPerm);
+        $commonService = new \Services\CommonService();
+        $cityUserPerm = $commonService->mergeUserPermAreaJunction($params['city_id'], $this->userPerm);
+
+        $res = $this->dianosisService->getAllCityJunctionsDiagnoseList($params, $cityUserPerm);
         $this->response($res);
     }
 }
