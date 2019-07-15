@@ -439,7 +439,7 @@ class Waymap_model extends CI_Model
         $res = httpPOST($url, $data, $timeout, $contentType, $header);
 
         if (!$res) {
-            throw new \Exception('接口请求失败', ERR_REQUEST_WAYMAP_API);
+            throw new \Exception($url . '接口请求失败', ERR_REQUEST_WAYMAP_API);
         }
 
         $res = json_decode($res, true);
@@ -638,7 +638,8 @@ class Waymap_model extends CI_Model
     }
 
     // 单个路口详情
-    public function getJunctionDetail($logic_junction_id){
+    public function getJunctionDetail($logic_junction_id)
+    {
         $data = [
                     'logic_id'   => $logic_junction_id,
                     // 'token'     => $this->config->item('waymap_token'),
@@ -652,7 +653,8 @@ class Waymap_model extends CI_Model
     }
 
     // 单个路口flag version
-    public function getJunctionVersion($logic_junction_id){
+    public function getJunctionVersion($logic_junction_id)
+    {
         $data = [
                     'logic_junction_ids'   => $logic_junction_id,
                     // 'token'     => $this->config->item('waymap_token'),
@@ -665,7 +667,8 @@ class Waymap_model extends CI_Model
     }
 
     // 单个路口main node id
-    public function getLogicMaps(array $logic_ids, $version){
+    public function getLogicMaps(array $logic_ids, $version)
+    {
         $data = [
             'logic_junction_ids' => implode(",", $logic_ids),
             'version' => $version,
@@ -682,7 +685,8 @@ class Waymap_model extends CI_Model
         return $res['simple_main_node_id'] ?? '';
     }
 
-    public function flowsByJunction($logic_junction_id, $version){
+    public function flowsByJunction($logic_junction_id, $version)
+    {
         $data = [
             'logic_junction_id'   => $logic_junction_id,
             'version' => $version,
@@ -695,13 +699,16 @@ class Waymap_model extends CI_Model
         return $res;
     }
 
-    public function flowsByJunctionOnline($logic_junction_id){
-        $data = [
-            'logic_junction_id'   => $logic_junction_id,
-        ];
-
-        $url   = 'http://100.69.238.11:8000/its//signal-map/mapFlow/flowsByJunction';
-        $res = $this->get($url, $data);
-        return $res;
+    // 获取后台区域限制的路口
+    // 如果返回空数组，则代表不做限制
+    public function getRestrictJunction($cityId)
+    {
+        $url   = $this->waymap_interface . '/signal-map/mapJunction/area';
+        $ret = $this->get($url, [
+            'city_id' => $cityId,
+        ]);
+        $junctionIds = $ret['filter_junc_ids'];
+        return $junctionIds;
     }
+
 }

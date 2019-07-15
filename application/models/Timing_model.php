@@ -723,8 +723,6 @@ class Timing_model extends CI_Model
         } catch (Exception $e) {
             return [];
         }
-        //使用路网的flow信息完善数据
-//        $flowInfo = $this->waymap_model->flowsByJunctionOnline($data['logic_junction_id']);
 
         return $timing['data'];
 

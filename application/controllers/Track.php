@@ -312,26 +312,34 @@ class Track extends MY_Controller
             $dataList = array_merge($dataList,$rv['dataList']);
         }
 
-        // 从路网获取路口flow信息
-
-
-        //轨迹抽样,考虑前端性能问题,暂时上限200
-        if (count($dataList) >200){
-            $dataList = array_rand($dataList,200);
-        }
         $cycle=0;
         $offset=0;
         if(!empty($signalInfo)){
             $cycle=$signalInfo['cycle'];
             $offset = $signalInfo['offset'];
         }
+        $cnt = 0;
         foreach ($dataList as $k=>$v){
-            $dataList[$k] = $this->timingAdaptionAreaService->getTrajsInOneCycle($v
+            $pts = $this->timingAdaptionAreaService->getTrajsInOneCycle($v
                 , $cycle
                 , ($offset + $clockShift) % $cycle);
+            if (count($pts) < 2) {
+                continue;
+            }
+            $st = $pts[0][0];
+            $et = $pts[count($pts) - 1][0];
+            if (abs($st)>600 || abs($et)>600 || $et - $st > 1000) {
+                continue;
+            }
+            $dataList[$cnt] = $pts;
+            $cnt ++;
         }
 
-
+        //轨迹抽样,考虑前端性能问题,暂时上限200
+        if (count($dataList) >200){
+            $dataList = array_rand($dataList,200);
+        }
+ 
         $info['id'] = $params['flow_id'];
         $info['x']=[
             'max'=>-999999,
@@ -358,6 +366,11 @@ class Track extends MY_Controller
             }
         }
 
+        // 坐标轴的范围: [min(-10, max(t_min, -3*cycle_length)), max(10+cycle_length, min(t_max, 2*cycle_length))];
+        $tmp_min = $info['x']['min'] > -3*$cycle ? $info['x']['min'] : -3*$cycle;
+        $info['x']['min'] = $tmp_min < -10 ? $tmp_min : -10;
+        $tmp_max = $info['x']['max'] < 2*$cycle ? $info['x']['max'] : 2*$cycle;
+        $info['x']['max'] = $tmp_max > 10+$cycle ? $tmp_max : 10+$cycle;
 
         $finalRet = [];
         $finalRet['dataList'] = $dataList;

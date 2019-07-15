@@ -105,6 +105,11 @@ class Splitoptimize extends MY_Controller
         $plan = $ret['data'];
         // 配时重新组织
         $flowSignal = [];
+        if (!isset($plan['movements'])) {
+            $this->errno = ERR_UNKNOWN;
+            $this->errmsg = "获取movements失败";
+            return;
+        }
         foreach ($plan['movements'] as $movement) {
             $logicFlowId = $movement['info']['logic_flow_id'];
             if (empty($logicFlowId)) {
