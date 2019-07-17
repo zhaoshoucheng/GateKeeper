@@ -353,6 +353,10 @@ class CommonService extends BaseService
      */
     public function mergeUserPermAreaJunction($cityId, $userPerm)
     {
+        if ($userPerm == null) {
+            $userPerm = [];
+        }
+
         $wayModel = new \Waymap_model();
         $junctionIds = $wayModel->getRestrictJunction($cityId);
         if (empty($junctionIds)) {
