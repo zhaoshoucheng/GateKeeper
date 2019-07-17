@@ -358,6 +358,12 @@ class CommonService extends BaseService
         if (empty($junctionIds)) {
             return $userPerm;
         }
+        if (!isset($userPerm['city_id'])) {
+            $userPerm['city_id'] = [];
+        }
+        if (!isset($userPerm['junction_id'])) {
+            $userPerm['junction_id'] = [];
+        }
 
         if (in_array($cityId, $userPerm['city_id'])) {
             // 有选择全城，所以junction_id就限制为当前限制区域
