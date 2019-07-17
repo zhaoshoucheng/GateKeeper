@@ -45,11 +45,12 @@ class Arterialtiming extends MY_Controller
         $timePoint = $params['time_point'];
         $date = $params['dates'];
         $finalTimingInfo=[];
-        if (isset($params['source_type']) && $params['source_type']==2){
-            $timingInfo = $this->arterialtiming_model->tmpGetNewJunctionTimingInfos($data,$timePoint,$date[0]);
-        }else{
-            $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,$date[0]);
-        }
+        $timingInfo = $this->arterialtiming_model->tmpGetNewJunctionTimingInfos($data,$timePoint,$date[0], $params['source_type']==2);
+        // if (isset($params['source_type']) && $params['source_type']==2){
+        //     $timingInfo = $this->arterialtiming_model->tmpGetNewJunctionTimingInfos($data,$timePoint,$date[0]);
+        // }else{
+        //     $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,$date[0]);
+        // }
         foreach ($data as $d){
             if(isset($timingInfo[$d['logic_junction_id']])){
                 $finalTimingInfo[$d['logic_junction_id']] = $timingInfo[$d['logic_junction_id']];
