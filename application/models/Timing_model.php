@@ -572,7 +572,7 @@ class Timing_model extends CI_Model
         $reqdate = substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2);
         // 获取配时详情
         $timing_data = [
-            'logic_junction_id' => trim($data['junction_id']),
+            'logic_junction_ids' => trim($data['junction_id']),
 //            'days'              => trim(implode(',', $data['dates'])),
             'start_time'        => trim($time_range[0]).":00",
             'end_time'          => trim($time_range[1]).":00",
