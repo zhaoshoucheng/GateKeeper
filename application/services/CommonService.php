@@ -366,7 +366,7 @@ class CommonService extends BaseService
         }
 
         // 没有选择全城，取交集
-        $userPerm['junction_id'] = array_intersect($userPerm['junction_id'], $junctionIds);
+        $userPerm['junction_id'] = array_values(array_intersect($userPerm['junction_id'], $junctionIds));
         return $userPerm;
 
     }
