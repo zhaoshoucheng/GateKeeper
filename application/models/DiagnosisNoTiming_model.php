@@ -172,6 +172,38 @@ class DiagnosisNoTiming_model extends CI_Model
     }
 
     /**
+     * 获取相位报警数据
+     * @param $cityID
+     * @param $logicJunctionID
+     * @param $hour Y 批次号
+     * @param $dt   Y 日期
+     * @return array
+     */
+    public function getFlowDiagnosisAlarm($cityID, $logicJunctionID, $hour, $dt)
+    {
+        $req = [
+            'city_id' => (string)$cityID,
+            'logic_junction_id' => $logicJunctionID,
+            'hour' => $hour,
+            'dt' => $dt,
+        ];
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetFlowDiagnosisAlarm', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            $result = [];
+            if (!empty($res['data']['hits'])) {
+                foreach ($res['data']['hits'] as $item) {
+                    $result[] = $item['_source']??[];
+                }
+            }
+            return $result;
+        } else {
+            return [];
+        }
+    }
+
+    /**
      * 修改路口的flow，校准 phase_id 和 phase_name
      *
      * @param $flows
@@ -188,6 +220,17 @@ class DiagnosisNoTiming_model extends CI_Model
         return $flow;
     }
 
+    private function isSinglePoint($timePoint, $dates){
+        if(count($dates)==1 && count($timePoint)==2){
+            $time0 = date("Y-m-d")." ".$timePoint[0].":00";
+            $time1 = date("Y-m-d")." ".$timePoint[1].":00";
+            if((strtotime($time1)-strtotime($time0))==30*60){
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * 获取相位指标数据
      * @param $cityID
@@ -199,6 +242,11 @@ class DiagnosisNoTiming_model extends CI_Model
     public function getMovementQuota($cityID, $logicJunctionID, $timePoint, $dates)
     {
         $flowList = $this->getFlowQuotaList($cityID, $logicJunctionID, $timePoint, $dates);
+        $alarmList = [];
+        if($this->isSinglePoint($timePoint,$dates)){
+            $alarmList = $this->getFlowDiagnosisAlarm($cityID, $logicJunctionID, current($timePoint), current($dates));
+            $alarmList = array_column($alarmList, null, 'logic_flow_id');
+        }
         $itemTrajSum = [];
         foreach ($flowList as $item){
             if(!isset($quotaWeightSum[$item['logic_flow_id']]["flowStopWeight"])){
@@ -277,28 +325,38 @@ class DiagnosisNoTiming_model extends CI_Model
                 $movementInfo = array_merge($movementInfo, $result[$flowId]);
                 $movementInfo["confidence"] = $quotaRound["confidence"]['round']($result[$flowId]["traj_count"]);
                 $movementInfo["sort_key"] = $item["sort_key"];
-                $movements[] = $movementInfo;
-            }
 
-            //防御性代码处理
-            if(isset($movementInfo["queue_length"])
-                && isset($movementInfo["route_length"])
-                && isset($movementInfo["spillover_rate"])
-                && isset($movementInfo["stop_rate"])
-                && isset($movementInfo["free_flow_speed"])
-            ){
-                if(intval($movementInfo["queue_length"])>intval($movementInfo["route_length"])){
-                    $movementInfo["queue_length"] = $movementInfo["route_length"];
+                //防御性代码处理
+                if(isset($movementInfo["queue_length"])
+                    && isset($movementInfo["route_length"])
+                    && isset($movementInfo["spillover_rate"])
+                    && isset($movementInfo["stop_rate"])
+                    && isset($movementInfo["free_flow_speed"])
+                ){
+                    if(intval($movementInfo["queue_length"])>intval($movementInfo["route_length"])){
+                        $movementInfo["queue_length"] = $movementInfo["route_length"];
+                    }
+                    if($movementInfo["spillover_rate"]>1){
+                        $movementInfo["spillover_rate"] = 1;
+                    }
+                    if($movementInfo["stop_rate"]>1){
+                        $movementInfo["stop_rate"] = 1;
+                    }
+                    if($movementInfo["free_flow_speed"]>80){
+                        $movementInfo["free_flow_speed"] = 80;
+                    }
                 }
-                if($movementInfo["spillover_rate"]>1){
-                    $movementInfo["spillover_rate"] = 1;
+
+                //追加alarm信息
+                $movementInfo["is_empty"] = 0;
+                $movementInfo["is_oversaturation"] = 0;
+                $movementInfo["is_spillover"] = 0;
+                if(isset($alarmList[$flowId])){
+                    $movementInfo["is_empty"] = $alarmList[$flowId]["is_empty"];
+                    $movementInfo["is_oversaturation"] = $alarmList[$flowId]["is_empty"];
+                    $movementInfo["is_spillover"] = $alarmList[$flowId]["is_spillover"];
                 }
-                if($movementInfo["stop_rate"]>1){
-                    $movementInfo["stop_rate"] = 1;
-                }
-                if($movementInfo["free_flow_speed"]>80){
-                    $movementInfo["free_flow_speed"] = 80;
-                }
+                $movements[] = $movementInfo;
             }
         }
         return $movements;

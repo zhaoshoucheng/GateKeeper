@@ -205,8 +205,8 @@ class EvaluateService extends BaseService
                 $esData['junctionId'] = implode(",",$junctionIds);
                 $esData["andOperations"]['junctionId'] = 'in';
             }
-
-            $esRes = $this->realtime_model->searchQuota($esData);
+            print_r(json_encode($esData));exit;
+            $esRes = $this->realtime_model->getRealtimeQuota($esData);
             if (!$esRes) {
                 return [];
             }
