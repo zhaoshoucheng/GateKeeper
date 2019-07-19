@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: signal-gateway
+  labels:
+    app: signal-gateway
+spec:
+  ports:
+    - port: 8071
+  selector:
+    app: signal-gateway
+    tier: its-service
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: signal-gateway
+spec:
+  serviceName: "signal-gateway"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: signal-gateway
+      tier: its-service
+  template:
+    metadata:
+      name: signal-gateway
+      labels:
+        app: signal-gateway
+        tier: its-service
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: signal-gateway
+          image: cloud/signal-gateway:v1.0.5
+          ports:
+            - containerPort: 8071
