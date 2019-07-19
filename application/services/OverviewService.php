@@ -33,6 +33,7 @@ class OverviewService extends BaseService
         $this->load->model('waymap_model');
         $this->load->model('realtime_model');
         $this->load->model('alarmanalysis_model');
+        $this->load->model('timeAlarmRemarks_model');
 
         $this->config->load('realtime_conf');
     }
@@ -840,6 +841,12 @@ class OverviewService extends BaseService
 
         // 需要获取路口name的路口ID串
         $alarmJunctonIdArr = array_unique(array_column($res, 'logic_junction_id'));
+        $alarmFlowIdArr = array_unique(array_column($res, 'logic_flow_id'));
+        $alarmRemarks = $this->timeAlarmRemarks_model->getAlarmRemarks($cityId, 0, $alarmJunctonIdArr, $alarmFlowIdArr);
+        $alarmRemarksFlowKeyTypeValue = [];
+        if (!empty($alarmRemarks)) {
+            $alarmRemarksFlowKeyTypeValue = array_column($alarmRemarks, 'type', 'logic_flow_id');
+        }
         asort($alarmJunctonIdArr);
         $ids = implode(',', $alarmJunctonIdArr);
 
@@ -861,6 +868,12 @@ class OverviewService extends BaseService
                 $durationTime = 2;
             }
 
+            // 人工标注
+            $check = 0;
+            if (!empty($alarmRemarksFlowKeyTypeValue)) {
+                $check = $alarmRemarksFlowKeyTypeValue[$val['logic_flow_id']] ?? 0;
+            }
+
             //无权限路口数据跳过
             if(!empty($junctionIds) && !in_array($val["logic_junction_id"],$junctionIds)){
                 continue;
@@ -880,6 +893,7 @@ class OverviewService extends BaseService
                     'type' => $val['type'],
                     'junction_type' => $val['junction_type'],
                     'order' => $alarmCate[$val['type']]['order'] ?? 0,
+                    'check' => $check,
                 ];
             }
         }

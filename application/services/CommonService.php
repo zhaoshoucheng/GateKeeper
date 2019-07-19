@@ -27,6 +27,7 @@ class CommonService extends BaseService
         $this->evaluateService = new EvaluateService();
     }
 
+
     /**
      * 获取路口所属行政区域及交叉节点信息
      * @param $params ['city_id']           int    Y 城市ID
@@ -345,5 +346,28 @@ class CommonService extends BaseService
                 $c = !$c;
         }
         return $c;
+    }
+
+    /*
+     * 将用户权限和权限过滤合并
+     */
+    public function mergeUserPermAreaJunction($cityId, $userPerm)
+    {
+        $wayModel = new \Waymap_model();
+        $junctionIds = $wayModel->getRestrictJunction($cityId);
+        if (empty($junctionIds)) {
+            return $userPerm;
+        }
+
+        if (in_array($cityId, $userPerm['city_id'])) {
+            // 有选择全城，所以junction_id就限制为当前限制区域
+            $userPerm['junction_id'] = $junctionIds;
+            return $userPerm;
+        }
+
+        // 没有选择全城，取交集
+        $userPerm['junction_id'] = array_intersect($userPerm['junction_id'], $junctionIds);
+        return $userPerm;
+
     }
 }

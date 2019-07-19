@@ -105,6 +105,11 @@ class Splitoptimize extends MY_Controller
         $plan = $ret['data'];
         // 配时重新组织
         $flowSignal = [];
+        if (!isset($plan['movements'])) {
+            $this->errno = ERR_UNKNOWN;
+            $this->errmsg = "获取movements失败";
+            return;
+        }
         foreach ($plan['movements'] as $movement) {
             $logicFlowId = $movement['info']['logic_flow_id'];
             if (empty($logicFlowId)) {
@@ -194,6 +199,62 @@ class Splitoptimize extends MY_Controller
         return $this->response($result);
     }
 
+
+    public function getOrderTimingMovements()
+    {
+         $params = $this->input->post(NULL, TRUE);
+        // 校验参数
+        $validate = Validate::make($params,
+            [
+                'junction_id'      => 'nullunable',
+                'time_range'       => 'nullunable',
+            ]
+        );
+        if (!$validate['status']) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = $validate['errmsg'];
+            return;
+        }
+
+        if (!is_array($params['dates']) || empty($params['dates'])) {
+            $this->errno = ERR_PARAMETERS;
+            $this->errmsg = '参数dates必须为数组且不可为空！';
+            return;
+        }
+
+        foreach ($params['dates'] as $key=>$v){
+            $params['dates'][$key] = date("Y-m-d",strtotime($v));
+        }
+
+        $params['time_range'] = explode('-', trim($params['time_range']));
+
+        $data = [
+            'logic_junction_id'     => strip_tags(trim($params['junction_id'])),
+            'dates'                 => implode(',', $params['dates']),
+            'start_time'            => $params['time_range'][0],
+            'end_time'              => $params['time_range'][1],
+        ];
+
+        $url = $this->config->item('traj_interface') . '/greensplit/getOriginTimingPlan';
+        $ret =  httpPOST($url, $data, 20000, "json");
+        $ret = json_decode($ret, true);
+        $result = $ret['data'];
+        // 解析获取到movements
+        if (!isset($result['movements'])) {
+            $this->errno = ERR_UNKNOWN;
+            $this->errmsg = "获取配时排序的movements失败";
+            return;
+        }
+        $movements = $result['movements'];
+        $flows = [];
+        foreach ($movements as $movement) {
+            $flows[] = [
+                'logic_flow_id' => $movement['info']['logic_flow_id'],
+                'name'       => $movement['info']['comment'],
+            ];
+        }
+        return $this->response($flows);
+    }
 
     /**
      * 获取绿信比优化方案

@@ -15,6 +15,7 @@ class Track extends MY_Controller
     {
         parent::__construct();
         $this->load->model('track_model');
+        $this->load->model('traj_model');
         $this->setTimingType();
         $this->timeframescatterService = new TimeframescatterService();
         $this->dianosisService = new DiagnosisNoTimingService();
@@ -186,19 +187,58 @@ class Track extends MY_Controller
             'timingType'  => 1
         ];
 
-        $data = [
-            'city_id'=>$params['city_id'],
-            'logic_junction_id'=>$params['junction_id'],
-            'logic_flow_id'=>$params['flow_id'],
-        ];
+        //$data = [
+        //    'city_id'=>$params['city_id'],
+        //    'logic_junction_id'=>$params['junction_id'],
+        //    'dates'       => $this->input->post("dates", TRUE),
+        //    'time_range'  => $params['time_range'],
+        //    'logic_flow_id'=>$params['flow_id'],
+        //];
+        //$clockShift = $this->timingAdaptionAreaService->getClockShift($data);
         $signalInfo = []; //配时数据
         $signalRange = []; //配时描述数据
         //配时查询
         $timing = $this->timing_model->getFlowTimingInfoForTheTrack($timing_data);
         $clockShift=0;
         //重构配时相关内容
+        list($startTime, $endTime) = explode("-", $params['time_range']); 
         if(!empty($timing) && isset($timing['signal'])){
-            $clockShift = $this->timingAdaptionAreaService->getClockShift($data);
+            $formatGreen = [];
+            foreach ($timing['signal'] as $sk => $sv){
+                $formatGreen[] = [
+                    "green_start"    => $sv["start_time"],
+                    "green_duration" => $sv["duration"],
+                    "yellow"         => $sv["yellow"],
+                    "green"          => $sv["green"],
+                    "red_clean"      => $sv["red_clearance"],
+                ];
+            }
+            $clockParam = [
+                "dates"=>$this->input->post("dates", TRUE),
+                    "junction_list"=>[
+                        [
+                            "junction_id"=>$params['junction_id'],
+                            "start_time"=>$startTime . ":00",
+                            "end_time"=>$endTime . ":00",
+                            "movement"=>[
+                                [
+                                    "movement_id"=>$params['flow_id'],
+                                    "green"=>$formatGreen,
+                                ]
+                            ],
+                            "cycle"=>$timing['cycle'],
+                            "offset"=>$timing['offset'],
+                        ],
+                    ]
+                ];
+            $clockShiftInfo = $this->traj_model->getClockShiftCorrect(json_encode($clockParam));
+            if(empty($clockShiftInfo)){
+                $this->errno = ERR_DEFAULT;
+                $this->errmsg = "clock shift 为空";
+                return;
+            }
+            $clockShift = $clockShiftInfo[0]['clock_shift'] ?? 0;
+
             $signalInfo['cycle'] = $timing['cycle'];
             $signalInfo['offset'] = $timing['offset'];
             $signalInfo['yellow'] = 3;
@@ -272,26 +312,34 @@ class Track extends MY_Controller
             $dataList = array_merge($dataList,$rv['dataList']);
         }
 
-        // 从路网获取路口flow信息
-
-
-        //轨迹抽样,考虑前端性能问题,暂时上限200
-        if (count($dataList) >200){
-            $dataList = array_rand($dataList,200);
-        }
         $cycle=0;
         $offset=0;
         if(!empty($signalInfo)){
             $cycle=$signalInfo['cycle'];
             $offset = $signalInfo['offset'];
         }
+        $cnt = 0;
         foreach ($dataList as $k=>$v){
-            $dataList[$k] = $this->timingAdaptionAreaService->getTrajsInOneCycle($v
+            $pts = $this->timingAdaptionAreaService->getTrajsInOneCycle($v
                 , $cycle
                 , ($offset + $clockShift) % $cycle);
+            if (count($pts) < 2) {
+                continue;
+            }
+            $st = $pts[0][0];
+            $et = $pts[count($pts) - 1][0];
+            if (abs($st)>600 || abs($et)>600 || $et - $st > 1000) {
+                continue;
+            }
+            $dataList[$cnt] = $pts;
+            $cnt ++;
         }
 
-
+        //轨迹抽样,考虑前端性能问题,暂时上限200
+        if (count($dataList) >200){
+            $dataList = array_rand($dataList,200);
+        }
+ 
         $info['id'] = $params['flow_id'];
         $info['x']=[
             'max'=>-999999,
@@ -318,13 +366,18 @@ class Track extends MY_Controller
             }
         }
 
+        // 坐标轴的范围: [min(-10, max(t_min, -3*cycle_length)), max(10+cycle_length, min(t_max, 2*cycle_length))];
+        $tmp_min = $info['x']['min'] > -3*$cycle ? $info['x']['min'] : -3*$cycle;
+        $info['x']['min'] = $tmp_min < -10 ? $tmp_min : -10;
+        $tmp_max = $info['x']['max'] < 2*$cycle ? $info['x']['max'] : 2*$cycle;
+        $info['x']['max'] = $tmp_max > 10+$cycle ? $tmp_max : 10+$cycle;
 
         $finalRet = [];
         $finalRet['dataList'] = $dataList;
         $finalRet['info'] = $info;
         $finalRet['signal_info'] = $signalInfo;
         $finalRet['signal_range'] = $signalRange;
-
+        $finalRet['clock_shift'] = $clockShift;
 
         return $this->response($finalRet);
     }

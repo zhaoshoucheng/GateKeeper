@@ -123,6 +123,7 @@ class TimingAdaptionAreaService extends BaseService
 
             if (!empty($junctions)) {
                 // 路口ID串
+                $junctions = array_slice($junctions, 0, 250);
                 $esJunctionIds = implode(',', array_filter(array_column($junctions, 'logic_junction_id')));
 
                 // 获取区域平均速度
@@ -857,6 +858,7 @@ class TimingAdaptionAreaService extends BaseService
         }
 
         $ret['dataList'] = [];
+        $cnt = 0;
         //$v代表一条轨迹
         foreach ($detail['result'] as $k => $v) {
             // 按时间正序排序
@@ -874,9 +876,19 @@ class TimingAdaptionAreaService extends BaseService
                 ];
             }
             //获取把时空图轨迹压缩在一个周期内
-            $ret['dataList'][$k] = $this->getTrajsInOneCycle($ret['dataList'][$k]
+            $pts = $this->getTrajsInOneCycle($ret['dataList'][$k]
                 , $cycleLength
                 , ($offset + $clockShift) % $cycleLength);   //纠偏
+            if (count($pts) < 2) {
+                continue;
+            }
+            $st = $pts[0][0];
+            $et = $pts[count($pts) - 1][0];
+            if (abs($st)>600 || abs($et)>600 || $et - $st > 1000) {
+                continue;
+            }
+            $ret['dataList'][$cnt] = $pts;
+            $cnt ++;
         }
         $ret['dataList'] = array_filter($ret['dataList']);
 
@@ -894,6 +906,14 @@ class TimingAdaptionAreaService extends BaseService
             ],
         ];
 
+        $info = $ret['info'];
+        $cycle = $cycleLength;
+        // 坐标轴的范围: [min(-10, max(t_min, -3*cycle_length)), max(10+cycle_length, min(t_max, 2*cycle_length))];
+        $tmp_min = $info['x']['min'] > -3*$cycle ? $info['x']['min'] : -3*$cycle;
+        $info['x']['min'] = $tmp_min < -10 ? $tmp_min : -10;
+        $tmp_max = $info['x']['max'] < 2*$cycle ? $info['x']['max'] : 2*$cycle;
+        $info['x']['max'] = $tmp_max > 10+$cycle ? $tmp_max : 10+$cycle;
+        $ret['info'] = $info;
         $ret['signal_info'] = $timingInfo;
         $ret['clock_shift'] = intval($clockShift);
 
@@ -1033,23 +1053,25 @@ class TimingAdaptionAreaService extends BaseService
             }
 
         }else{
-            foreach ($timingInfo['vehicle_phase'] as $tk => $tv){
-                if (empty($tv['flow_info']) || count($tv['flow_info']) == 0){
-                    continue;
-                }
-                foreach ($tv['flow_info'] as $fk=>$fv){
-                    if($fv['logic_flow_id']!=$data['logic_flow_id']){//过滤无用的flow
+            if (isset($timingInfo['vehicle_phase']) && !empty($timingInfo['vehicle_phase'])) {
+                foreach ($timingInfo['vehicle_phase'] as $tk => $tv){
+                    if (empty($tv['flow_info']) || count($tv['flow_info']) == 0){
                         continue;
                     }
-                    //找到目标flow
-                    $tmpMovementTiming = array(
-                        'comment'=>$tv['sg_name'],
-                        'logic_flow_id'=>$fv['logic_flow_id'],
-                        'start_time'=>$tv['start_time'],
-                        'duration'=>$tv['end_time']-$tv['start_time'],
-                    );
-                    $res['green'][] = $tmpMovementTiming;
+                    foreach ($tv['flow_info'] as $fk=>$fv){
+                        if($fv['logic_flow_id']!=$data['logic_flow_id']){//过滤无用的flow
+                            continue;
+                        }
+                        //找到目标flow
+                        $tmpMovementTiming = array(
+                            'comment'=>$tv['sg_name'],
+                            'logic_flow_id'=>$fv['logic_flow_id'],
+                            'start_time'=>$tv['start_time'],
+                            'duration'=>$tv['end_time']-$tv['start_time'],
+                        );
+                        $res['green'][] = $tmpMovementTiming;
 
+                    }
                 }
             }
         }

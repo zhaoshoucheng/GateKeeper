@@ -305,7 +305,7 @@ class EvaluateService extends BaseService
         // 指标配置
         $quotaConf = $this->config->item('real_time_quota');
         // 比如stop_rate现在对应的es的新字段是oneStopRatioUp+multiStopRatioUp
-        $esQuotaKey = explode(',', $quotaConf[$params['quota_key']]['escolumn']);
+        $esQuotaKey = explode('+', $quotaConf[$params['quota_key']]['escolumn']);
 
         $data = $this->realtime_model->getQuotaByFlowId($params);
         $result = [];
