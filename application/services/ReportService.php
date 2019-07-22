@@ -478,7 +478,12 @@ class ReportService extends BaseService
             }, []);
 
             $protocol   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-            $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+            $hostName = $_SERVER['HTTP_HOST'];
+            if($_SERVER['REMOTE_ADDR']=="59.52.254.218"){
+                $hostName = "59.52.254.216:91";
+            }
+            $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
             $lastPos    = strrpos($currentUrl, '/');
             $baseUrl    = substr($currentUrl, 0, $lastPos);
             foreach ($result as $key => $item) {

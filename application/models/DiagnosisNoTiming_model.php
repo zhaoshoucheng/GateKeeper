@@ -321,6 +321,8 @@ class DiagnosisNoTiming_model extends CI_Model
                 "comment" => $comment,
                 "route_length" => $item["in_link_length"],
             ];
+
+
             if (isset($result[$flowId])) {
                 $movementInfo = array_merge($movementInfo, $result[$flowId]);
                 $movementInfo["confidence"] = $quotaRound["confidence"]['round']($result[$flowId]["traj_count"]);
@@ -353,7 +355,7 @@ class DiagnosisNoTiming_model extends CI_Model
                 $movementInfo["is_spillover"] = 0;
                 if(isset($alarmList[$flowId])){
                     $movementInfo["is_empty"] = $alarmList[$flowId]["is_empty"];
-                    $movementInfo["is_oversaturation"] = $alarmList[$flowId]["is_empty"];
+                    $movementInfo["is_oversaturation"] = $alarmList[$flowId]["is_oversaturation"];
                     $movementInfo["is_spillover"] = $alarmList[$flowId]["is_spillover"];
                 }
                 $movements[] = $movementInfo;
