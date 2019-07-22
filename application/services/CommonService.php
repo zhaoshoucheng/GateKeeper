@@ -362,6 +362,12 @@ class CommonService extends BaseService
         if (empty($junctionIds)) {
             return $userPerm;
         }
+        if (!isset($userPerm['city_id'])) {
+            $userPerm['city_id'] = [];
+        }
+        if (!isset($userPerm['junction_id'])) {
+            $userPerm['junction_id'] = [];
+        }
 
         if (!isset($userPerm['city_id'])) {
             $userPerm['city_id'] = [];

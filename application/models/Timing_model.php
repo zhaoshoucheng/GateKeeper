@@ -572,14 +572,14 @@ class Timing_model extends CI_Model
         $reqdate = substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2);
         // 获取配时详情
         $timing_data = [
-            'logic_junction_id' => trim($data['junction_id']),
+            'logic_junction_ids' => trim($data['junction_id']),
 //            'days'              => trim(implode(',', $data['dates'])),
             'start_time'        => trim($time_range[0]).":00",
             'end_time'          => trim($time_range[1]).":00",
             'source'            => '2,1',
             // 'version'           => "30192233000000",
             'date'              => $reqdate,
-            'format'          => 4,
+            'format'          => 3,
 
         ];
         $timing = httpGET(
@@ -599,11 +599,11 @@ class Timing_model extends CI_Model
             'total_plan'=>0,
         ];
 
-        if(!isset($timing['data']['schedules']) || count($timing['data']['schedules'])==0){
+        if(!isset($timing['data'][0]['schedules']) || count($timing['data'][0]['schedules'])==0){
             return [];
         }
 
-        foreach ($timing['data']['schedules'][0]['tods'] as $tk=>$tv){
+        foreach ($timing['data'][0]['schedules'][0]['tods'] as $tk=>$tv){
             if($tv['end_time']=="00:00:00"){
                 $tv['end_time']="24:00:00";
             }
