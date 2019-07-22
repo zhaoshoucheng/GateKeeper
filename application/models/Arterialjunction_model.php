@@ -45,11 +45,6 @@ class Arterialjunction_model extends CI_Model
     public function getAdjJunctions($data)
     {
         if(empty($data['q']['map_version'])){
-            // 获取任务详情
-            $task = $this->task_model->getTaskById($data['q']['task_id']);
-            if(empty($task["dates"])){
-                throw new \Exception("The task not found.");
-            }
             // 获取地图版本
             $data['q']['map_version'] = $this->waymap_model->getLastMapVersion();
             if (empty($data['q']['map_version'])) {
