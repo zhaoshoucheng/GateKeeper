@@ -359,14 +359,18 @@ class CommonService extends BaseService
             return $userPerm;
         }
 
-        if (in_array($cityId, $userPerm['city_id'])) {
+        if (!empty($userPerm['city_id']) && in_array($cityId, $userPerm['city_id'])) {
             // 有选择全城，所以junction_id就限制为当前限制区域
             $userPerm['junction_id'] = $junctionIds;
             return $userPerm;
         }
 
         // 没有选择全城，取交集
-        $userPerm['junction_id'] = array_values(array_intersect($userPerm['junction_id'], $junctionIds));
+        if(!empty($userPerm['city_id'])){
+            $userPerm['junction_id'] = array_values(array_intersect($userPerm['junction_id'], $junctionIds));
+        }else{
+            $userPerm['junction_id'] = [];
+        }
         return $userPerm;
 
     }
