@@ -351,11 +351,11 @@ class DiagnosisNoTiming_model extends CI_Model
 
                 //追加alarm信息
                 $movementInfo["is_empty"] = 0;
-                $movementInfo["is_oversaturation"] = 0;
+                $movementInfo["is_imbalance"] = 0;
                 $movementInfo["is_spillover"] = 0;
                 if(isset($alarmList[$flowId])){
                     $movementInfo["is_empty"] = $alarmList[$flowId]["is_empty"];
-                    $movementInfo["is_oversaturation"] = $alarmList[$flowId]["is_oversaturation"];
+                    $movementInfo["is_imbalance"] = $alarmList[$flowId]["is_oversaturation"];
                     $movementInfo["is_spillover"] = $alarmList[$flowId]["is_spillover"];
                 }
                 $movements[] = $movementInfo;
