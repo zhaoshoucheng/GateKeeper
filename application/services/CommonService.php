@@ -353,11 +353,22 @@ class CommonService extends BaseService
      */
     public function mergeUserPermAreaJunction($cityId, $userPerm)
     {
+        if ($userPerm == null) {
+            $userPerm = [];
+        }
+
         $wayModel = new \Waymap_model();
         $junctionIds = $wayModel->getRestrictJunction($cityId);
         if (empty($junctionIds)) {
             return $userPerm;
         }
+        if (!isset($userPerm['city_id'])) {
+            $userPerm['city_id'] = [];
+        }
+        if (!isset($userPerm['junction_id'])) {
+            $userPerm['junction_id'] = [];
+        }
+
         if (!isset($userPerm['city_id'])) {
             $userPerm['city_id'] = [];
         }
@@ -374,6 +385,5 @@ class CommonService extends BaseService
         // 没有选择全城，取交集
         $userPerm['junction_id'] = array_intersect($userPerm['junction_id'], $junctionIds);
         return $userPerm;
-
     }
 }
