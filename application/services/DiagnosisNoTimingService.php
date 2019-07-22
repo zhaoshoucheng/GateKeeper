@@ -544,4 +544,8 @@ class DiagnosisNoTimingService extends BaseService
         $clockShift = $clockShiftInfo[0]['clock_shift'] ?? 0;
         */
     }
+
+    public function GetLastAlarmDateByCityID($cityID){
+        return $this->diagnosisNoTiming_model->GetLastAlarmDateByCityID($cityID);
+    }
 }
