@@ -23,7 +23,7 @@ class Arterialtiming_model extends CI_Model
         $this->load->model('road_model');
     }
 
-    public function tmpGetNewJunctionTimingInfos($data,$timePoint,$date)
+    public function tmpGetNewJunctionTimingInfos($data,$timePoint,$date,$source)
     {
 
         $finalRet = [];
@@ -35,12 +35,13 @@ class Arterialtiming_model extends CI_Model
             $ret  = $this->timing_model->getNewTimngData(array(
                 "logic_junction_id"=>$dv['logic_junction_id'],
                 'start_time'=>$timePoint.":00",
-                'end_time'=>$timePoint.":00",
+                'end_time'=>$timePoint.":01",
                 'date'=>$reqdate,
-                'version'=>$versionStr,
+                // 'version'=>$versionStr,
+                'source'=>$source,
             ));
 
-            if(empty($ret)){
+            if(empty($ret) or empty($ret['schedule'])){
                 continue;
             }
             $tod = $ret['schedule'][0]['tod'][0];

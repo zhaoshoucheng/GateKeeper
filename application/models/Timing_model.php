@@ -157,13 +157,13 @@ class Timing_model extends CI_Model
         if (!empty($timing)) {
             $result = $this->formatTimingDataByOptimizeScatter($timing, $data['flow_id']);
         } else {
-            
+
             $info32 = $this->waymap_model->getFlowInfo32(trim($data['junction_id']));
             $flowId2Name = array_column($info32,"phase_name","logic_flow_id");
             $flowId = trim($data['flow_id']);
             $result = [
                 "info" =>[
-                    'logic_flow_id' => $flowId, 
+                    'logic_flow_id' => $flowId,
                     'comment' => isset($flowId2Name[$flowId]) ? $flowId2Name[$flowId] : "",
                 ],
                 "maxCycle" => 0,
@@ -572,18 +572,18 @@ class Timing_model extends CI_Model
         $reqdate = substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2);
         // 获取配时详情
         $timing_data = [
-            'logic_junction_id' => trim($data['junction_id']),
+            'logic_junction_ids' => trim($data['junction_id']),
 //            'days'              => trim(implode(',', $data['dates'])),
             'start_time'        => trim($time_range[0]).":00",
-            'end_time'          => date('H:i', strtotime(trim($time_range[1])) - 60).":00",
-            'source'            => 2,
-            'version'           => "30192233000000",
+            'end_time'          => trim($time_range[1]).":00",
+            'source'            => '2,1',
+            // 'version'           => "30192233000000",
             'date'              => $reqdate,
-            'new_type'          => 1,
+            'format'          => 3,
 
         ];
         $timing = httpGET(
-            $this->config->item('signal_base_url') ,
+            $this->config->item('signal_timing_url') ,
             $timing_data
         );
         $timing = json_decode($timing, true);
@@ -599,11 +599,11 @@ class Timing_model extends CI_Model
             'total_plan'=>0,
         ];
 
-        if(!isset($timing['data']['schedules']) || count($timing['data']['schedules'])==0){
+        if(!isset($timing['data'][0]['schedules']) || count($timing['data'][0]['schedules'])==0){
             return [];
         }
 
-        foreach ($timing['data']['schedules'][0]['tods'] as $tk=>$tv){
+        foreach ($timing['data'][0]['schedules'][0]['tods'] as $tk=>$tv){
             if($tv['end_time']=="00:00:00"){
                 $tv['end_time']="24:00:00";
             }
@@ -704,16 +704,17 @@ class Timing_model extends CI_Model
         $this->load->helper('http');
         // 获取配时详情
         $timing_data = [
-            'logic_junction_id'      => $data['logic_junction_id'],
-            'source'              => 2,
+            'logic_junction_ids'      => $data['logic_junction_id'],
+            'source'              => $data['source'],
             'start_time'        => $data['start_time'],
             'end_time'          => $data['end_time'],
             'date'            => $data['date'],
-            'version'            => $data['version'],
+            'format' => 1,
+            // 'version'            => $data['version'],
         ];
         try {
             $timing = httpGET(
-                "http://10.160.96.160:8072/signal-control/signalopt/querybasetiming",
+                $this->config->item('signal_timing_url'),
                 $timing_data
             );
             $timing = json_decode($timing, true);
@@ -724,7 +725,7 @@ class Timing_model extends CI_Model
             return [];
         }
 
-        return $timing['data'];
+        return $timing['data'][0];
 
 
     }
