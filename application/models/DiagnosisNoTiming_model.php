@@ -493,6 +493,18 @@ class DiagnosisNoTiming_model extends CI_Model
         }
     }
 
+    public function GetLastAlarmDateByCityID($cityID){
+        $url = $this->config->item('data_service_interface');
+        $res = httpGET($url . '/GetLastAlarmDateByCityID?city_id='.$cityID, [], 0);
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            $dt = !empty($res['data']['dt']) ? $res['data']['dt'] : "";
+            return $dt;
+        } else {
+            return "";
+        }
+    }
+
     public function GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour, $userPerm = []) {
         $req = [
             'city_id' => $city_id,
