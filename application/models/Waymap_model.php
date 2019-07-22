@@ -498,15 +498,12 @@ class Waymap_model extends CI_Model
         $redis_key = 'getFlowsInfo_cache_' . $version . '_' . md5($logic_junction_ids);
 
         $result = $cached ? $this->redis_model->getData($redis_key) : [];
-
         if (!$result) {
             $data = compact('logic_junction_ids', 'version');
 
-            $url = $this->waymap_interface . '/signal-map/mapJunction/phase';
+            $url = $this->waymap_interface . '/signal-map/mapJunction/phase32';
             $res = $this->post($url, $data);
             $res = array_map(function ($v) {
-                // 纠正这里的 phase_id 和 phase_name
-                $v = $this->adjustPhase($v);
                 return array_column($v, 'phase_name', 'logic_flow_id');
             }, $res);
 

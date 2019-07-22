@@ -257,4 +257,14 @@ class DiagnosisNoTiming extends MY_Controller
         $res = $this->dianosisService->getAllCityJunctionsDiagnoseList($params, $cityUserPerm);
         $this->response($res);
     }
+
+    public function GetLastAlarmDateByCityID(){
+        $params = [];
+        $params["city_id"] = intval($this->input->get("city_id", true));
+        if(empty($params["city_id"])){
+            throw new \Exception("city_id为空");
+        }
+        $dt = $this->dianosisService->GetLastAlarmDateByCityID($params["city_id"]);
+        $this->response($dt);
+    }
 }

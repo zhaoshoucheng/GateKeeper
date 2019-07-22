@@ -420,11 +420,12 @@ class OverviewService extends BaseService
         $realTimeQuota = $this->config->item('real_time_quota');
 
         $result = array_map(function ($item) use ($junctionIdNames, $realTimeQuota, $hour) {
+            $stopDelay = sprintf("%.2f",$realTimeQuota['stop_delay']['round']($item['weight_avg']));
             return [
                 'time' => $hour,
                 'logic_junction_id' => $item['junctionId'],
                 'junction_name' => $junctionIdNames[$item['junctionId']] ?? '未知路口',
-                'stop_delay' => $realTimeQuota['stop_delay']['round']($item['weight_avg']),
+                'stop_delay' => $stopDelay,
                 'quota_unit' => $realTimeQuota['stop_delay']['unit'],
             ];
         }, $result);

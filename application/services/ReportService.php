@@ -60,6 +60,11 @@ class ReportService extends BaseService
      */
     public function searchJunction($params)
     {
+        $majorJunctionID = "";
+        if(!empty($_SERVER["HTTP_REFERER"])){
+            parse_str($_SERVER["HTTP_REFERER"],$arrs);
+            $majorJunctionID=$arrs["junctionId"];
+        }
         $cityId  = $params['city_id'];
         $keyword = $params['keyword'];
 
@@ -72,7 +77,7 @@ class ReportService extends BaseService
         $final_data = [];
 
         $count = 0;
-
+        $majorJunctionInfo = [];
         foreach ($junctions as $j) {
             if ($count >= $topNum) {
                 break;
@@ -80,7 +85,8 @@ class ReportService extends BaseService
             if (!$j['is_traffic']) {
                 continue;
             }
-            $final_data[] = [
+
+            $jInfo = [
                 'logic_junction_id' => $j['logic_junction_id'],
                 'lng' => $j['lng'],
                 'lat' => $j['lat'],
@@ -88,10 +94,23 @@ class ReportService extends BaseService
                 'name' => $j['name'],
                 'name_sim' => $j['name_sim'],
             ];
-
+            if($jInfo["logic_junction_id"]==$majorJunctionID){
+                $majorJunctionInfo = $jInfo;
+            }else{
+                $final_data[] = [
+                    'logic_junction_id' => $j['logic_junction_id'],
+                    'lng' => $j['lng'],
+                    'lat' => $j['lat'],
+                    'city_id' => $cityId,
+                    'name' => $j['name'],
+                    'name_sim' => $j['name_sim'],
+                ];
+            }
             $count += 1;
         }
-
+        if(!empty($majorJunctionInfo)){
+            array_unshift($final_data,$majorJunctionInfo);
+        }
         return $final_data;
     }
 
