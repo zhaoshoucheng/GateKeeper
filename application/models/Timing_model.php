@@ -494,12 +494,12 @@ class Timing_model extends CI_Model
                 $resultTiming["24:00"] = [
                     'start'   => $value['start'],
                     'end'     => "24:00",
-                    'comment' => $value['name']
+                    'comment' => $value['comment']
                 ];
                 $resultTiming[$value['end']] = [
                     'start'   => "00:00",
                     'end'     => $value['end'],
-                    'comment' => $value['name']
+                    'comment' => $value['comment']
                 ];
             }
         }
