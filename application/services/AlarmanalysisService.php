@@ -203,7 +203,7 @@ class AlarmanalysisService extends BaseService
         /* 使日期连续 因为表中可能某个日期是没有的，就会出现断裂*/
         $startTime = strtotime($params['start_time']);
         $endTime = strtotime($params['end_time']);
-        for ($i = $startTime; $i < $endTime; $i += 24 * 3600) {
+        for ($i = $startTime; $i <= $endTime; $i += 24 * 3600) {
             $continuousTime[date('Y-m-d', $i)] = [];
         }
 
