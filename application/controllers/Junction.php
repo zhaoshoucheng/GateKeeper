@@ -483,7 +483,7 @@ class Junction extends MY_Controller
             'city_id'           => 'required',
             'junction_name'     => 'required',
         ]);
-        $result = $this->junctionsService->saveJunctionName($params);
+        $result = $this->junctionsService->saveJunctionName($params["junction_id"],$params["city_id"],$params["junction_name"]);
         $this->response($result);
     }
 }
