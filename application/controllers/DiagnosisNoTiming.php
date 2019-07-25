@@ -59,7 +59,7 @@ class DiagnosisNoTiming extends MY_Controller
             $params["dates"] = [];
             foreach ($tmpDates as $date) {
                 $w = date('w', strtotime($date));
-                if $w >= 1 && $w <= 5 {
+                if ($w >= 1 && $w <= 5) {
                     $params["dates"][] = $date;
                 }
             } 
@@ -67,7 +67,7 @@ class DiagnosisNoTiming extends MY_Controller
             $params["dates"] = [];
             foreach ($tmpDates as $date) {
                 $w = date('w', strtotime($date));
-                if $w < 1 || $w > 5 {
+                if ($w < 1 || $w > 5) {
                     $params["dates"][] = $date;
                 }
             }
