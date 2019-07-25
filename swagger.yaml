@@ -4,18 +4,1116 @@ info:
   version: 1.0.0
   title: 智慧信号灯接口文档
 tags:
-  - 概览
-  - 诊断
-  - 评估
-  - 优化
-  - 自适应
-  - 报告
-  - 配时
-  - 管理
+  - name: "概览"
+  - name: "诊断"
+  - name: "评估"
+  - name: "优化"
+  - name: "自适应"
+  - name: "报告"
+  - name: "配时"
+  - name: "管理"
+  - name: "济南项目"
 schemes:
 - http
 - https
 paths:
+  /traj_service/Report/searchJunction:
+    get:
+      summary: 路口搜索
+      description: 根据中文或logic_junction_id搜索路口
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          type: string
+          description: 城市id
+          required: true
+        - name: keyword
+          in: query
+          type: string
+          description: 查询关键词，支持文本和logic_junction_id
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: array
+                description: ""
+                items:
+                  type: object
+                  description: ""
+                  properties:
+                    city_id:
+                      type: string
+                      description: 城市id
+                      example: "23"
+                    lat:
+                      type: string
+                      description: ""
+                      example: "31.27516"
+                    lng:
+                      type: string
+                      description: ""
+                      example: "120.72473"
+                    logic_junction_id:
+                      type: string
+                      description: ""
+                      example: "2017030116_3478718"
+                    name:
+                      type: string
+                      description: ""
+                      example: 星湖街_仁爱路
+                    name_sim:
+                      type: integer
+                      description: ""
+                      example: 100
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1965秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1931秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+  /overview/server_time:
+    get:
+      summary: 路口搜索
+      description: 根据中文或logic_junction_id搜索路口
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          type: string
+          description: 城市id
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: object
+                description: ""
+                properties:
+                  time:
+                    type: string
+                    description: 当前服务器时间
+                    example: "20:30:10"
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1965秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1931秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+  /overview/junctionsurvey:
+    get:
+      summary: 济南全城概览
+      description: 济南全城指标概览
+      tags:
+        - 济南项目
+      parameters:
+      - name: city_id
+        in : query
+        type: string
+        description:    '城市id 示例: 12'
+        required: true
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: object
+                description: ""
+                properties:
+                  junction_total:
+                    type: integer
+                    description: "总路口数"
+                    example: 1158
+                  alarm_total:
+                    type: integer
+                    description: "总报警数"
+                    example: 5
+                  speed_avg:
+                    type: string
+                    description: "平均速度"
+                    example: "23.46km/h"
+                  stop_delay_avg:
+                    type: string
+                    description: "平均延误"
+                    example: "39s"
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1440秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1406秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 645a430d5d26a832a1d918ee038e8102
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+  /overview/junctionslist:
+    get:
+      summary: 济南全城路口列表
+      description: 济南全城路口列表，包含指标，报警，和pi信息
+      tags:
+        - 济南项目
+      parameters:
+      - name: city_id
+        in : query
+        type: string
+        description:    '城市id 示例: 12'
+        required: true
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: object
+                description: ""
+                properties:
+                  center:
+                    type: object
+                    description: "城市中心坐标"
+                    properties:
+                      lat:
+                        type: number
+                        description: "纬度"
+                        example: 36.669197210611
+                      lng:
+                        type: number
+                        description: "经度"
+                        example: 117.03854901929
+                  level_num:
+                    type: object
+                    description: "各等级pi路口数"
+                    properties:
+                      A:
+                        type: integer
+                        description: "A等级路口数"
+                        example: 1205
+                      B:
+                        type: integer
+                        description: "B等级路口数"
+                        example: 1205
+                      C:
+                        type: integer
+                        description: "C等级路口数"
+                        example: 1205
+                      D:
+                        type: integer
+                        description: "D等级路口数"
+                        example: 1205
+                      E:
+                        type: integer
+                        description: "E等级路口数"
+                        example: 1205
+
+                  junc_list:
+                    type: array
+                    description: ""
+                    items:
+                      type: object
+                      description: ""
+                      properties:
+                        pi:
+                          type: number
+                          description: "pi值"
+                          example: 11.3
+                        jid:
+                          type: string
+                          description: "路网logic_junction_id"
+                          example: "340000199101277623"
+                        name:
+                          type: string
+                          description: "名称"
+                          example: "测试路口"
+                        lat:
+                          type: number
+                          description: "纬度"
+                          example: 36.32556
+                        lng:
+                          type: number
+                          description: "经度"
+                          example: 117.82271
+                        quota:
+                          type: array
+                          description: "指标"
+                          items:
+                            type: object
+                            description: ""
+                            properties:
+                              stop_delay:
+                                type: object
+                                description: "平均延误"
+                                properties:
+                                  name:
+                                    type: string
+                                    example: "平均延误"
+                                  unit:
+                                    type: string
+                                    example: "秒"
+                                  value:
+                                    type: number
+                                    example: 1.474
+                              stop_time_cycle:
+                                type: object
+                                description: "最大停车次数"
+                                properties:
+                                  name:
+                                    type: string
+                                    example: "最大停车次数"
+                                  unit:
+                                    type: string
+                                    example: "次"
+                                  value:
+                                    type: number
+                                    example: 1.474
+                        status:
+                          type: object
+                          description: "路口当前状态"
+                          properties:
+                            name:
+                              type: string
+                              example: "通畅"
+                            key:
+                              type: integer
+                              description: "1,畅通，2，缓行，3，拥堵"
+                              example: 1
+                        alarm:
+                          type: object
+                          description: "报警状态"
+                          properties:
+                            is:
+                              type: integer
+                              description: "是否报警"
+                              example: 0
+                            comment:
+                              type: array
+                              description: "报警具体描述"
+                              items:
+                                type: string
+
+                  stop_delay_avg:
+                    type: string
+                    description: "平均延误"
+                    example: "39s"
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1440秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1406秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 645a430d5d26a832a1d918ee038e8102
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+  /overview/piconfig:
+    get:
+      summary: 获取服务等级配置
+      description: 获取服务等级配置信息
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          type: string
+          description: 城市id
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: array
+                description: ""
+                items:
+                  type: object
+                  properties:
+                    level:
+                      type: string
+                      description: "服务等级"
+                      example: "A"
+                    from:
+                      type: integer
+                      description: "服务等级范围"
+                      example: 60
+                    to:
+                      type: integer
+                      description: "服务等级范围"
+                      example: 80
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1965秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1931秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+
+  /pianalysis/realtime:
+    get:
+      summary: pi实时数据分析
+      description: pi实时数据分析
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          type: string
+          description: 城市id
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: 路网逻辑路口id
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: object
+                description: ""
+                properties:
+                  "2019-07-01" :
+                    type: array
+                    description: "日期"
+                    items:
+                      type: object
+                      description: "具体数值"
+                      properties:
+                        x:
+                          type: string
+                          description: "x轴时间刻度"
+                          example: "00:30"
+                        desc:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                description:  指标名称
+                                example: 单次停车比率
+                              value:
+                                type: string
+                                example: 15.2%
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1965秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1931秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+  /pianalysis/history:
+    post:
+      summary: pi历史数据分析
+      description: pi历史数据分析
+      tags:
+        - 济南项目
+      produces:
+        - application/json
+      parameters:
+        - in : "body"
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              city_id:
+                description: '城市id 示例: 12'
+                type: integer
+                example: 12
+              logic_junction_id:
+                description: '路网逻辑路口id'
+                type: string
+                example: "2017030116_53551019"
+              date:
+                description: '日期'
+                type: array
+                items:
+                  type: string
+                  example: "2019-06-18"
+              date_type:
+                description: 1,工作日  2，非工作日  0，全部
+                type: integer
+                example: 1
+              start_time:
+                description: "开始时间"
+                type: string
+                example: "05:00"
+              end_time:
+                description: "结束时间"
+                type: string
+                example: "18:00"
+              with_last_week:
+                description: "上周平均"
+                type: integer
+                example: 1
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: object
+                description: ""
+                properties:
+                  "2019-07-01" :
+                    type: array
+                    description: "日期"
+                    items:
+                      type: object
+                      description: "具体数值"
+                      properties:
+                        x:
+                          type: string
+                          description: "x轴时间刻度"
+                          example: "00:30"
+                        desc:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                description:  指标名称
+                                example: 单次停车比率
+                              value:
+                                type: string
+                                example: 15.2%
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1965秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1931秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+  /alarm/realtime:
+    get:
+      summary: 实时报警分析
+      description: 实时报警分析
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          description: '城市id 示例: 12'
+          required: true
+          type: string
+        - name: logic_junction_id
+          in : query
+          description: '路网逻辑路口id'
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: array
+                description: ""
+                items:
+                  type: object
+                  properties:
+                    x:
+                      type: string
+                      description: x轴时间点
+                      example: "00:00"
+                    desc:
+                      type: array
+                      description:  具体报警内容
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: 溢流
+                          value:
+                            type: integer
+                            example: 8
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1965秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1931秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+  /alarm/history:
+    post:
+      summary: 报警历史数据分析
+      description: 报警历史数据分析
+      tags:
+        - 济南项目
+      produces:
+      - application/json
+      parameters:
+        - in : "body"
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              city_id:
+                description: '城市id 示例: 12'
+                type: integer
+                example: 12
+              logic_junction_id:
+                description: '路网逻辑路口id'
+                type: string
+                example: "2017030116_53551019"
+              date:
+                description: '日期'
+                type: array
+                items:
+                  type: string
+                  example: "2019-06-18"
+              date_type:
+                description: 1,工作日  2，非工作日  0，全部
+                type: integer
+                example: 1
+              start_time:
+                description: "开始时间"
+                type: string
+                example: "05:00"
+              end_time:
+                description: "结束时间"
+                type: string
+                example: "18:00"
+              with_last_week:
+                description: "上周平均"
+                type: integer
+                example: 1
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: array
+                description: ""
+                items:
+                  type: object
+                  properties:
+                    x:
+                      type: string
+                      description: x轴时间点
+                      example: "00:00"
+                    desc:
+                      type: array
+                      description:  具体报警内容
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: 溢流
+                          value:
+                            type: integer
+                            example: 8
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1965秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1931秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+  /junctionmodel/junctionlist:
+    get:
+      summary: 全城路口配置信息概览
+      description: 全城路口配置信息概览
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          description: '城市id 示例: 12'
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: object
+                description: ""
+                properties:
+                  center:
+                    type: object
+                    properties:
+                      lat:
+                        type: number
+                        example: 36.669197210611
+                      lng:
+                        type: number
+                        example: 117.03854901929
+                  junc_total:
+                    type: integer
+                    example: 2448
+                  model_total:
+                    type: integer
+                    example: 590
+                  avi_total:
+                    type: integer
+                    example: 223
+                  junc_list:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        jid:
+                          type: string
+                          example: 2017030116_53551019
+                        name:
+                          type: string
+                          example: "测试路口"
+                        lat:
+                          type: number
+                          example: 36.045006
+                        lng:
+                          type: number
+                          example: 117.44765
+                        has_model:
+                          type: integer
+                          example: 0
+                        has_avi:
+                          type: integer
+                          example: 0
+                        update_time:
+                          type: string
+                          example: "2019-05-31 02:41:14"
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1965秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1931秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+  /avi/flow_analysis:
+    post:
+      summary: 济南流量历史数据分析
+      description: 济南流量历史数据分析
+      tags:
+        - 济南项目
+      produces:
+        - application/json
+      parameters:
+        - in : "body"
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              city_id:
+                description: '城市id 示例: 12'
+                type: integer
+                example: 12
+              logic_junction_id:
+                description: '路网逻辑路口id'
+                type: string
+                example: "2017030116_53551019"
+              date:
+                description: '日期'
+                type: array
+                items:
+                  type: string
+                  example: "2019-06-18"
+              date_type:
+                description: 1,工作日  2，非工作日  0，全部
+                type: integer
+                example: 1
+              start_time:
+                description: "开始时间"
+                type: string
+                example: "05:00"
+              end_time:
+                description: "结束时间"
+                type: string
+                example: "18:00"
+              with_last_week:
+                description: "上周平均"
+                type: integer
+                example: 1
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: object
+                description: ""
+                properties:
+                  "2019-07-01" :
+                    type: object
+                    description: "日期"
+                    properties:
+                      directions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            dname:
+                              type: string
+                              example: 南
+                            channel_list:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  data_list:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        start_time:
+                                          type: string
+                                          example: "00:00"
+                                        end_time:
+                                          type: string
+                                          example: "01:00"
+                                        value:
+                                          type: integer
+                                          example: 72
+                    # items:
+                    #   type: object
+                    #   description: "具体数值"
+                    #   properties:
+                    #     x:
+                    #       type: string
+                    #       description: "x轴时间刻度"
+                    #       example: "00:30"
+                    #     desc:
+                    #       type: array
+                    #       items:
+                    #         type: object
+                    #         properties:
+                    #           name:
+                    #             type: string
+                    #             description:  指标名称
+                    #             example: 单次停车比率
+                    #           value:
+                    #             type: string
+                    #             example: 15.2%
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1965秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1931秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+  /avi/realtime_flow:
+    get:
+      summary: 实时流量数据
+      description: 实时流量数据
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          description: '城市id 示例: 12'
+          required: true
+          type: string
+        - name: logic_junction_id
+          in: query
+          description: '路网logic_junction_id'
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: integer
+                description: ""
+                example: 791
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              time:
+                type: object
+                description: 接口耗时
+                properties:
+                  a:
+                    type: string
+                    description: ""
+                    example: 0.1965秒
+                  s:
+                    type: string
+                    description: ""
+                    example: 0.1931秒
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+              username:
+                type: string
+                description: 用户名
+                example: unknown
+
   /AdpArea/getAreaJunctionList:
     post:
       summary: 自适应区域管理–查询区域路口列表
@@ -28,7 +1126,7 @@ paths:
       parameters:
       - name: city_id
         in: formData
-        description: '城市id 示例: 134'
+        description: '城市id 示例: 12'
         required: false
         type: string
       - name: area_id
