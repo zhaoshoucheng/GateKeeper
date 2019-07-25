@@ -708,4 +708,17 @@ class Waymap_model extends CI_Model
         return $junctionIds;
     }
 
+    // 修改路口名称
+    public function saveJunctionName($junctionID,$junctionName)
+    {
+        $url = $this->waymap_interface . '/signal-map/mapJunction/area';
+        $ret = $this->post($url, [
+            'logic_id' => $junctionID,
+            'name' => $junctionName,
+        ]);
+        if($ret["data"]["name"]==$junctionName){
+            return true;
+        }
+        return false;
+    }
 }
