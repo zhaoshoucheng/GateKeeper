@@ -716,8 +716,7 @@ class Waymap_model extends CI_Model
             'logic_id' => $junctionID,
             'name' => $junctionName,
         ]);
-        print_r($ret);exit;
-        if($ret["data"]["name"]==$junctionName){
+        if($ret["name"]==$junctionName){
             return true;
         }
         return false;
