@@ -465,4 +465,25 @@ class Junction extends MY_Controller
 
         $this->response($result);
     }
+
+    /**
+    * 修改路口名称
+    * @param junction_id     string   Y 逻辑路口ID
+    * @param city_id         string   Y 城市ID
+    * @param junction_name   string   Y 路口名称
+    * @return json
+    */
+    public function saveJunctionName()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        // 校验参数
+        $this->validate([
+            'junction_id'       => 'required|min_length[4]',
+            'city_id'           => 'required',
+            'junction_name'     => 'required',
+        ]);
+        $result = $this->junctionsService->saveJunctionName($params);
+        $this->response($result);
+    }
 }
