@@ -1284,14 +1284,14 @@ class JunctionsService extends BaseService
      * @return bool
      */
     public function saveJunctionName($junctionID,$cityID,$junctionName){
-        $junctionInfo = $this->waymap_model->getJunctionInfo($logicJunctionId);
+        $junctionInfo = $this->waymap_model->getJunctionInfo($junctionID);
         if(empty($junctionInfo)){
             throw new \Exception('路口不存在', ERR_PARAMETERS);
         }
         if($junctionInfo["city_id"]!=$cityID){
             throw new \Exception('参数错误', ERR_PARAMETERS);
         }
-        if(!$this->waymap_model->saveJunctionName($logicJunctionId,$junctionName)){
+        if(!$this->waymap_model->saveJunctionName($junctionID,$junctionName)){
             throw new \Exception('路口名称修改错误', ERR_PARAMETERS);
         }
         return true;
