@@ -1288,8 +1288,7 @@ class JunctionsService extends BaseService
         if(empty($junctionInfo)){
             throw new \Exception('路口不存在', ERR_PARAMETERS);
         }
-        print_r($junctionInfo);exit;
-        if($junctionInfo["city_id"]!=$cityID){
+        if($junctionInfo[0]["city_id"]!=$cityID){
             throw new \Exception('参数错误', ERR_PARAMETERS);
         }
         if(!$this->waymap_model->saveJunctionName($junctionID,$junctionName)){
