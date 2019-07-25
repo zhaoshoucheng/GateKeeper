@@ -711,7 +711,7 @@ class Waymap_model extends CI_Model
     // 修改路口名称
     public function saveJunctionName($junctionID,$junctionName)
     {
-        $url = $this->waymap_interface . '/signal-map/mapJunction/area';
+        $url = $this->waymap_interface . '/signal-map/map/saveJunctionName';
         $ret = $this->post($url, [
             'logic_id' => $junctionID,
             'name' => $junctionName,
