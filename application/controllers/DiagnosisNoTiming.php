@@ -53,6 +53,27 @@ class DiagnosisNoTiming extends MY_Controller
                 throw new \Exception("datas参数格式错误");
             }
         }
+        $params["data_type"] = $this->input->post("data_type", true);
+        $tmpDates = $params["dates"];
+        if ($params["data_type"] == 1) {
+            $params["dates"] = [];
+            foreach ($tmpDates as $date) {
+                $w = date('w', strtotime($date));
+                if ($w >= 1 && $w <= 5) {
+                    $params["dates"][] = $date;
+                }
+            } 
+        } else if ($params["data_type"] == 2) {
+            $params["dates"] = [];
+            foreach ($tmpDates as $date) {
+                $w = date('w', strtotime($date));
+                if ($w < 1 || $w > 5) {
+                    $params["dates"][] = $date;
+                }
+            }
+        } else {
+            $params["dates"] = $tmpDates;
+        }
 
         // 获取路口指标详情
         $res = $this->dianosisService->getFlowQuotas($params);
@@ -251,7 +272,20 @@ class DiagnosisNoTiming extends MY_Controller
             }
         }
 
-        $res = $this->dianosisService->getAllCityJunctionsDiagnoseList($params, $this->userPerm);
+        $commonService = new \Services\CommonService();
+        $cityUserPerm = $commonService->mergeUserPermAreaJunction($params['city_id'], $this->userPerm);
+
+        $res = $this->dianosisService->getAllCityJunctionsDiagnoseList($params, $cityUserPerm);
         $this->response($res);
+    }
+
+    public function GetLastAlarmDateByCityID(){
+        $params = [];
+        $params["city_id"] = intval($this->input->get("city_id", true));
+        if(empty($params["city_id"])){
+            throw new \Exception("city_id为空");
+        }
+        $dt = $this->dianosisService->GetLastAlarmDateByCityID($params["city_id"]);
+        $this->response($dt);
     }
 }

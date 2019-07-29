@@ -1277,6 +1277,27 @@ class JunctionsService extends BaseService
     }
 
     /**
+     * 修改路口名称
+     * @param $junctionID
+     * @param $cityID
+     * @param $junctionName
+     * @return bool
+     */
+    public function saveJunctionName($junctionID,$cityID,$junctionName){
+        $junctionInfo = $this->waymap_model->getJunctionInfo($junctionID);
+        if(empty($junctionInfo)){
+            throw new \Exception('路口不存在', ERR_PARAMETERS);
+        }
+        if($junctionInfo[0]["city_id"]!=$cityID){
+            throw new \Exception('参数错误', ERR_PARAMETERS);
+        }
+        if(!$this->waymap_model->saveJunctionName($junctionID,$junctionName)){
+            throw new \Exception('路口名称修改错误', ERR_PARAMETERS);
+        }
+        return true;
+    }
+
+    /**
      * 将查询出来的评估/诊断数据合并到全城路口模板中
      * @param $allData  全城路口
      * @param $data     任务结果路口

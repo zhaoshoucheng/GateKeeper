@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: signal-gateway
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: www.test.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: signal-gateway
+              servicePort: 8071

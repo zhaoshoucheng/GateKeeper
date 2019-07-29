@@ -42,7 +42,7 @@ class Arterialjunction extends MY_Controller
         $timing = $timingModel->queryTimingStatus(
             [
                 'city_id' => $cityId,
-                'source' => 2,
+                'source' => 0,
             ]
         );
         $hasTiming = [];

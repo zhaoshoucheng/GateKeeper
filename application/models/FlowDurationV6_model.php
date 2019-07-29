@@ -95,7 +95,7 @@ class FlowDurationV6_model extends CI_Model
             'logic_junction_id' => $logicJunctionId,
             'group_by'          => 'logic_flow_id, hour',
             'order_by'          => 'logic_flow_id, hour',
-            'traj_count_value'  => 10,
+            'traj_count_value'  => 0,
             'date'              => $dates,
             'hour'              => $hours,
             'engine'            => $this->engine,

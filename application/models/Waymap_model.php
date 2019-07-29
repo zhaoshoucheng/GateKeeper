@@ -498,15 +498,12 @@ class Waymap_model extends CI_Model
         $redis_key = 'getFlowsInfo_cache_' . $version . '_' . md5($logic_junction_ids);
 
         $result = $cached ? $this->redis_model->getData($redis_key) : [];
-
         if (!$result) {
             $data = compact('logic_junction_ids', 'version');
 
-            $url = $this->waymap_interface . '/signal-map/mapJunction/phase';
+            $url = $this->waymap_interface . '/signal-map/mapJunction/phase32';
             $res = $this->post($url, $data);
             $res = array_map(function ($v) {
-                // 纠正这里的 phase_id 和 phase_name
-                $v = $this->adjustPhase($v);
                 return array_column($v, 'phase_name', 'logic_flow_id');
             }, $res);
 
@@ -711,4 +708,17 @@ class Waymap_model extends CI_Model
         return $junctionIds;
     }
 
+    // 修改路口名称
+    public function saveJunctionName($junctionID,$junctionName)
+    {
+        $url = $this->waymap_interface . '/signal-map/map/saveJunctionName';
+        $ret = $this->post($url, [
+            'logic_id' => $junctionID,
+            'name' => $junctionName,
+        ]);
+        if($ret["name"]==$junctionName){
+            return true;
+        }
+        return false;
+    }
 }

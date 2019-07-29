@@ -53,7 +53,6 @@ if ($development == 2) {
 
     $signal_rollback_url = "http://10.85.128.81:30357/signal-control/signalprofile/rollback";
     $signal_base_url = "http://10.85.128.81:30357/signal-control/signalopt/querybasetiming";
-    $signal_timing_url = "http://10.85.128.81:30357/signal-control/signal/querytiming";
 
     // 路口配时状态
     $signal_timing_status_url = "http://10.85.128.81:30357/signal-control/signalprofile/timingstatusbatch";
@@ -141,7 +140,6 @@ if ($development == 2) {
     // signal_rollback
     $signal_rollback_url = "http://100.90.164.31:8016/signal-control/signalprofile/rollback";
     $signal_base_url = "http://100.90.164.31:8016/signal-control/signalopt/querybasetiming";
-    $signal_timing_url = "http://100.90.164.31:8016/signal-control/signal/querytiming";
 
     // 路口配时状态
     $signal_timing_status_url = "http://100.90.164.31:8016/signal-control/signalprofile/timingstatusbatch";
@@ -200,7 +198,7 @@ if ($development == 2) {
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
 
     //新版报警开城列表
-    $alarm_v2_city_ids = [];
+    $alarm_v2_city_ids = [12];
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -234,7 +232,6 @@ $config['signal_light_interface'] = $signal_light_server;
 // signal_rollback
 $config['signal_rollback_url'] = $signal_rollback_url;
 $config['signal_base_url'] = $signal_base_url;
-$config['signal_timing_url'] = $signal_timing_url;
 
 $config['signal_timing_status_url'] = $signal_timing_status_url;
 
