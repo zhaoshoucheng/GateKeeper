@@ -490,7 +490,7 @@ class Timing_model extends CI_Model
 
         foreach ($resultTiming as $key => $value) {
             if ($value['start'] > $value['end']) {
-                unset(strtotime($resultTiming[$key]));
+                unset($resultTiming[$key]);
                 $resultTiming[strtotime("24:00:00")] = [
                     'start'   => $value['start'],
                     'end'     => "24:00:00",
