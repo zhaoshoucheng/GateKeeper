@@ -9,10 +9,15 @@ $config['menu'] = [
         if(isset($_REQUEST['city_id']) && $_REQUEST['city_id']=="85"){
             return 3;
         }
+        //南昌本地化
         if(isset($_REQUEST['city_id']) 
             && isset($_REQUEST['conf']) 
             && $_REQUEST['city_id']=="38" 
             && $_REQUEST['conf']=="local"){
+            return 4;
+        }
+        //南昌固定IP
+        if($_SERVER['REMOTE_ADDR']=="59.52.254.218"){
             return 4;
         }
         if (in_array($user, $users)) {
