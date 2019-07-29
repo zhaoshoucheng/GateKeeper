@@ -263,6 +263,11 @@ $config['menu'] = [
                     'url'    => '/overview',
                     'remark' => 'signal',
                 ],
+            1 =>
+                [
+                    'name' => '自适应',
+                    'url'  => '/adaptive',
+                ],
             2 =>
                 [
                     'name'   => '优化',
