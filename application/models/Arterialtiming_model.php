@@ -142,11 +142,11 @@ class Arterialtiming_model extends CI_Model
                         //找到目标flow
                         $tmpMovementTiming = array(
                             'comment'=>$tv['sg_name'],
-                            'logic_flow_id'=>$fv['logic_flow_id'],
+                            'logic_flow_id'=>$fv['logic_flows_id'],
                             'start_time'=>$tv['start_time'],
                             'duration'=>$tv['end_time']-$tv['start_time'],
                         );
-                        $finalRet[$dv['logic_junction_id']][0]['movement_timing'][] = $tmpMovementTiming;
+                        $finalRet[$dv['logic_junction_id']][0]['timing_info']['movement_timing'][] = $tmpMovementTiming;
 
                     }
                 }
