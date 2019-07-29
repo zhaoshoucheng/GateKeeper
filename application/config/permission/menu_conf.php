@@ -9,6 +9,12 @@ $config['menu'] = [
         if(isset($_REQUEST['city_id']) && $_REQUEST['city_id']=="85"){
             return 3;
         }
+        if(isset($_REQUEST['city_id']) 
+            && isset($_REQUEST['conf']) 
+            && $_REQUEST['city_id']=="38" 
+            && $_REQUEST['conf']=="local"){
+            return 4;
+        }
         if (in_array($user, $users)) {
             return 2;
         }
@@ -240,6 +246,87 @@ $config['menu'] = [
                             [
                                 'name' => '参数管理',
                                 'url'  => 'argument',
+                            ],
+                    ],
+                ],
+        ],
+        // 南昌定制菜单
+        4 => [
+            0 =>
+                [
+                    'name'   => '概览',
+                    'url'    => '/overview',
+                    'remark' => 'signal',
+                ],
+            2 =>
+                [
+                    'name'   => '优化',
+                    'url'    => '/optimize/',
+                    'remark' => 'signal',
+                    'son'    =>
+                        [
+                            0 =>
+                                [
+                                    'name' => '单点时段优化',
+                                    'url'  => 'signal',
+                                ],
+                            1 =>
+                                [
+                                    'name' => '单点绿信比优化',
+                                    'url'  => 'green',
+                                ],
+                            2 =>
+                                [
+                                    'name' => '干线协调优化',
+                                    'url'  => 'coordinate',
+                                ],
+                        ],
+                ],
+            3 =>
+                [
+                    'name'   => '诊断',
+                    'url'    => '/diagnose/tendency',
+                ],
+            4 =>
+                [
+                    'name'   => '评估',
+                    'url'    => '/assessment/',
+                    'remark' => 'signal',
+                    'son'    =>
+                        [
+                            0 =>
+                                [
+                                    'name' => '路口评估',
+                                    'url'  => 'junction',
+                                ],
+                            1 =>
+                                [
+                                    'name' => '干线评估',
+                                    'url'  => 'road',
+                                ],
+                            2 =>
+                                [
+                                    'name' => '区域评估',
+                                    'url'  => 'area',
+                                ],
+                        ],
+                ],
+            5 =>
+                [
+                    'name'   => '报告',
+                    'url'    => '/report',
+                    'remark' => 'signal',
+                ],
+            6 =>
+                [
+                    'name'   => '管理',
+                    'url'    => '/manage/',
+                    'remark' => 'signal',
+                    'son'    => [
+                        0 =>
+                            [
+                                'name' => '路口管理',
+                                'url'  => 'configuration',
                             ],
                     ],
                 ],
