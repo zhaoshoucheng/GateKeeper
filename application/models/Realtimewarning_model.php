@@ -511,6 +511,13 @@ class Realtimewarning_model extends CI_Model
             if ($cityId == "12" && strtotime($item["last_time"]) - strtotime($item["start_time"]) < 180) {
                 continue;
             }
+
+            //过滤南昌70路口
+            $ncFilterJuncIDS = $this->config->item('nanchang_filter_junction_ids');
+            if($cityId=="38" && !in_array($item['logic_junction_id'], $ncFilterJuncIDS)){
+                continue;
+            }
+
             $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
         }
 
