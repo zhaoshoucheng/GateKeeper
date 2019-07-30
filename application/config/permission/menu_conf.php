@@ -270,35 +270,6 @@ $config['menu'] = [
                 ],
             2 =>
                 [
-                    'name'   => '优化',
-                    'url'    => '/optimize/',
-                    'remark' => 'signal',
-                    'son'    =>
-                        [
-                            0 =>
-                                [
-                                    'name' => '单点时段优化',
-                                    'url'  => 'signal',
-                                ],
-                            1 =>
-                                [
-                                    'name' => '单点绿信比优化',
-                                    'url'  => 'green',
-                                ],
-                            2 =>
-                                [
-                                    'name' => '干线协调优化',
-                                    'url'  => 'coordinate',
-                                ],
-                        ],
-                ],
-            3 =>
-                [
-                    'name'   => '诊断',
-                    'url'    => '/diagnose/tendency',
-                ],
-            4 =>
-                [
                     'name'   => '评估',
                     'url'    => '/assessment/',
                     'remark' => 'signal',
@@ -318,6 +289,35 @@ $config['menu'] = [
                                 [
                                     'name' => '区域评估',
                                     'url'  => 'area',
+                                ],
+                        ],
+                ],
+            3 =>
+                [
+                    'name'   => '诊断',
+                    'url'    => '/diagnose/tendency',
+                ],
+            4 =>
+                [
+                    'name'   => '优化',
+                    'url'    => '/optimize/',
+                    'remark' => 'signal',
+                    'son'    =>
+                        [
+                            0 =>
+                                [
+                                    'name' => '单点时段优化',
+                                    'url'  => 'signal',
+                                ],
+                            1 =>
+                                [
+                                    'name' => '单点绿信比优化',
+                                    'url'  => 'green',
+                                ],
+                            2 =>
+                                [
+                                    'name' => '干线协调优化',
+                                    'url'  => 'coordinate',
                                 ],
                         ],
                 ],
