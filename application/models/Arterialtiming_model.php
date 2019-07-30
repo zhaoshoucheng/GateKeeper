@@ -146,7 +146,7 @@ class Arterialtiming_model extends CI_Model
                             'start_time'=>$tv['start_time'],
                             'duration'=>$tv['end_time']-$tv['start_time'],
                         );
-                        $finalRet[$dv['logic_junction_id']][0]['movement_timing'][] = $tmpMovementTiming;
+                        $finalRet[$dv['logic_junction_id']][0]['timing_info']['movement_timing'][] = $tmpMovementTiming;
 
                     }
                 }
