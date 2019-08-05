@@ -547,6 +547,7 @@ class Realtimewarning_model extends CI_Model
                 if(strpos($junctionName,"行人")!==false && $cityId==1){
                     $alarmInfo = [];
                 }
+                //里面已经丢弃了，flow信息
                 return [
                     'logic_junction_id' => $item['logic_junction_id'],
                     'quota' => $this->getRawQuotaInfo($item),
