@@ -483,7 +483,6 @@ class Junction extends MY_Controller
             'city_id'           => 'required',
             'junction_name'     => 'required',
         ]);
-        throw new \Exception("暂时未开放");
         $result = $this->junctionsService->saveJunctionName($params["junction_id"],$params["city_id"],$params["junction_name"]);
         $waymapModel = new Waymap_model();
         $version = $waymapModel::$lastMapVersion;
