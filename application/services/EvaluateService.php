@@ -178,7 +178,7 @@ class EvaluateService extends BaseService
                 "cityId"    => $cityId,
                 'requestId' => get_traceid(),
                 "dayTime"   => $dayTime,
-                "trailNum"  => 10,
+                "trailNum"  => 5,
                 "andOperations" => [
                     "cityId"   => "eq",
                     "dayTime"  => "eq",
@@ -218,7 +218,7 @@ class EvaluateService extends BaseService
                     "cityId"    => $cityId,
                     'requestId' => get_traceid(),
                     "dayTime"   => $dayTime,
-                    "trailNum"  => 10,
+                    "trailNum"  => 5,
                     "andOperations" => [
                         "cityId"   => "eq",
                         "dayTime"  => "eq",

@@ -544,7 +544,7 @@ class Realtime_model extends CI_Model
                 "cityId" => $cityId,
                 'requestId' => get_traceid(),
                 "dayTime" => $dayTime,
-                "trailNum" => 10,
+                "trailNum" => 5,
                 "andOperations" => [
                     "cityId" => "eq",
                     "dayTime" => "eq",
@@ -601,7 +601,7 @@ class Realtime_model extends CI_Model
             "cityId" => $cityId,
             'requestId' => get_traceid(),
             "dayTime" => $dayTime,
-            "trailNum" => 10,
+            "trailNum" => 5,
             "andOperations" => [
                 "cityId" => "eq",
                 "dayTime" => "eq",
@@ -644,7 +644,7 @@ class Realtime_model extends CI_Model
                 'source' => 'signal_control', // 调用方
                 'cityId' => $cityId,          // 城市ID
                 'requestId' => get_traceid(),    // trace id
-                'trailNum' => 10,
+                'trailNum' => 5,
                 'dayTime' => $date . " " . $hour,
                 'andOperations' => [
                     'cityId' => 'eq',  // cityId相等
@@ -697,7 +697,7 @@ class Realtime_model extends CI_Model
             'source' => 'signal_control', // 调用方
             'cityId' => $cityId,          // 城市ID
             'requestId' => get_traceid(),    // trace id
-            'trailNum' => 10,
+            'trailNum' => 5,
             'dayTime' => $date . " " . $hour,
             'andOperations' => [
                 'cityId' => 'eq',  // cityId相等
@@ -805,7 +805,7 @@ class Realtime_model extends CI_Model
                 "cityId"    => $cityId,
                 'requestId' => get_traceid(),
                 "dayTime"   => $dayTime,
-                "trailNum"  => 10,
+                "trailNum"  => 5,
                 "andOperations" => [
                     "cityId"   => "eq",
                     "dayTime"  => "eq",
@@ -845,7 +845,7 @@ class Realtime_model extends CI_Model
                     "cityId"    => $cityId,
                     'requestId' => get_traceid(),
                     "dayTime"   => $dayTime,
-                    "trailNum"  => 10,
+                    "trailNum"  => 5,
                     "andOperations" => [
                         "cityId"   => "eq",
                         "dayTime"  => "eq",
