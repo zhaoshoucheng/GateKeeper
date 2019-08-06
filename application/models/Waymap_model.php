@@ -230,11 +230,12 @@ class Waymap_model extends CI_Model
      *
      * @param int $city_id   城市ID
      * @param int $version   版本号
+     * @param int $force     强制
      * @return array
      *
      * @throws \Exception
      */
-    public function getAllCityJunctions($city_id, $version = 0)
+    public function getAllCityJunctions($city_id, $version = 0, $force=0)
     {
         /*-------------------------------------------------
         | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
@@ -248,7 +249,9 @@ class Waymap_model extends CI_Model
 
         $redis_key = 'all_city_junctions_' . $city_id . '_' . $version;
         $result = $this->redis_model->getData($redis_key);
-
+        if($force){
+            $result = 0;
+        }
         if (!$result) {
 
             $offset = 0;

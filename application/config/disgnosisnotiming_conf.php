@@ -84,9 +84,9 @@ $config['flow_quota_round'] = [
     ],
     'confidence' => [
         'round' => function ($val) {
-            if($val>=30){
+            if($val>=50){
                 return "高";
-            }elseif ($val<=10){
+            }elseif ($val<=20){
                 return "低";
             }
             return "中";
