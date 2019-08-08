@@ -200,7 +200,7 @@ if ($development == 2) {
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
 
     //新版报警开城列表
-    $alarm_v2_city_ids = [12];
+    $alarm_v2_city_ids = [12,23,134];
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
