@@ -234,9 +234,6 @@ class RoadService extends BaseService
         $roadList = $this->road_model->getRoadsByCityId($cityId, $select);
         $results = [];
         foreach ($roadList as $item) {
-//            if($item['id']!="303"){
-//                continue;
-//            }
             $roadId = $item['road_id'];
             $res = $this->redis_model->getData($pre_key . $roadId);
             if ($force) {
@@ -280,14 +277,12 @@ class RoadService extends BaseService
         $roadId = $params['road_id'];
         $showType = $params['show_type'];
         $roadInfo = $this->road_model->getRoadByRoadId($roadId, 'logic_junction_ids');
-//        print_r($roadInfo);exit;
         if($showType){
             $junctionIdList = $this->getPathHeadTailJunction(["city_id"=>$cityId,
                 "junction_ids"=>$roadInfo['logic_junction_ids']]);
         }else{
             $junctionIdList = explode(",",$roadInfo['logic_junction_ids']);
         }
-//        print_r($junctionIdList);exit;
         $maxWaymapVersion = $this->waymap_model->getLastMapVersion();
         $res = $this->waymap_model->getConnectPath($cityId, $maxWaymapVersion, $junctionIdList);
         if (!$res || empty($res['junctions_info']) || empty($res['forward_path_flows']) || empty($res['backward_path_flows'])) {
@@ -326,10 +321,7 @@ class RoadService extends BaseService
         }
 
         foreach ($backwardPathFlowsCollection as $key => $item) {
-            $reverseGeo = $this->waymap_model->getLinksGeoInfos($item['path_links'], $maxWaymapVersion);
-
             if (isset($roadInfo[$key])) {
-                //$roadInfo[$key]['reverse_geo'] = $reverseGeo;
                 $roadInfo[$key]['reverse_geo'] = [];
             }
         }
