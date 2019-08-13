@@ -37,6 +37,9 @@ class AlarmanalysisService extends BaseService
         if ($params['start_time'] == $params['end_time']) {
             // 获取当天报警分析
             return $this->getDailyAlarmAnalysis($params);
+        }else if(isset($params['time_range'])){
+            //济南需求,新增过滤逻辑
+            return $this->getNewTimeAlarmAnalysis($params);
         } else {
             // 按时间段获取报警分析
             return $this->getTimeAlarmAnalysis($params);
@@ -129,6 +132,133 @@ class AlarmanalysisService extends BaseService
         $resultData = array_merge($continuousHour, $temp);
 
         return $resultData;
+    }
+
+    private function filterTime($timeRange,$dateType,$timeStamp){
+        $timeRanges = explode("-",$timeRange);
+        $st = $timeRanges[0];
+        $et = $timeRanges[1];
+        if($et =='24:00'){
+            $et = "23:30";
+        }
+        $ddt = date('Y-m-d',$timeStamp);
+        $dt = date('Y-m-d H:i:s',$timeStamp);
+
+        if($dateType == 1 && in_array(date("w",strtotime($dt)),[0,6])){
+            return true;
+        }else if($dateType == 2 && in_array(date("w",strtotime($dt)),[1,2,3,4,5])){
+            return true;
+        }
+
+        if(strtotime($dt) < strtotime($ddt+" "+$st+":00")   ||  strtotime($dt) > strtotime($ddt+" "+$et+":00")){
+            return true;
+        }
+
+        return false;
+
+
+    }
+
+    /**
+     * 按时间段获取报警分析,济南特殊需求
+     * @param $params['city_id']           int    Y 城市ID
+     * @param $params['logic_junction_id'] string N 逻辑路口ID 当：不为空时，按路口报警分析查询;为空时，按城市报警分析查询
+     * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
+     * @param $params['start_time']        string Y 查询开始日期 yyyy-mm-dd
+     * @param $params['end_time']          string Y 查询结束日期 yyyy-mm-dd
+     * @param $params['time_range']          string Y 查询时间段 00:00-24:00
+     * @param $params['date_type']          string Y 查询日期类型 0全部,1工作日,2非工作日
+     * @return array
+     */
+    private function getNewTimeAlarmAnalysis($params)
+    {
+        $timeRange = $params['time_range'];
+        $dateType = $params['date_type'];
+        // 组织DSL所需json
+        $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
+
+        // where city_id
+        $json .= '{"match":{"city_id":{"query":' . (int)$params['city_id'] . ',"type":"phrase"}}}';
+
+        // where date >= start_time
+        $json .= ',{"range":{"date":{"from":"' . trim($params['start_time']) . '","to":null,"include_lower":true,"include_upper":true}}}';
+
+        // where date <= end_time
+        $json .= ',{"range":{"date":{"from":null,"to":"' . trim($params['end_time']) . '","include_lower":true,"include_upper":true}}}';
+
+        // 当按路口报警分析查询时
+        if (!empty($params['logic_junction_id'])) {
+            // where logic_junction_id
+            $json .= ',{"match":{"logic_junction_id":{"query":"' . trim($params['logic_junction_id']) . '","type":"phrase"}}}';
+        }
+
+        // 当选择了报警频率时
+        if ($params['frequency_type'] != 0
+            && array_key_exists($params['frequency_type'], $this->config->item('frequency_type'))) {
+            // where frequency_type
+            $json .= ',{"match":{"frequency_type":{"query":'. (int)$params['frequency_type'] .',"type":"phrase"}}}';
+        }
+
+        $json .= ']}}}},"_source":{"includes":["COUNT","date"],"excludes":[]},"fields":"date","aggregations":{"date":{"terms":{"field":"date","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
+
+        $result = $this->alarmanalysis_model->search($json);
+        if (!$result) {
+            return (object)[];
+        }
+        if (empty($result['aggregations']['date']['buckets'])) {
+            return (object)[];
+        }
+        // 路口报警类型配置
+        $junctionAlarmType = $this->config->item('junction_alarm_type');
+        $tempRes = array_map(function($item) use ($junctionAlarmType,$timeRange,$dateType) {
+            if (!empty($item['type']['buckets'])) {
+                // $item['key'] / 1000 es返回的是毫秒级的时间戳，固除以1000
+                $timeStamp =  $item['key'] / 1000;
+                $key = date('Y-m-d',$timeStamp);
+                $tempData[$key]['list'] = array_map(function($typeData) use ($junctionAlarmType,$timeRange,$dateType,$timeStamp) {
+                    //日期与时间段过滤
+                    if($this->filterTime($timeRange,$dateType,$timeStamp)){
+                        return [
+                            'name'  => $junctionAlarmType[$typeData['key']],
+                            'value' => 0,
+                            'key'   => $typeData['key'],
+                        ];
+                    }else{
+                        return [
+                            'name'  => $junctionAlarmType[$typeData['key']],
+                            'value' => $typeData['num']['value'],
+                            'key'   => $typeData['key'],
+                        ];
+                    }
+
+                }, $item['type']['buckets']);
+                return $tempData;
+            } else {
+                return [];
+            }
+        }, $result['aggregations']['date']['buckets']);
+
+        /* 使日期连续 因为表中可能某个日期是没有的，就会出现断裂*/
+        $startTime = strtotime($params['start_time']);
+        $endTime = strtotime($params['end_time']);
+        for ($i = $startTime; $i <= $endTime; $i += 24 * 3600) {
+            $continuousTime[date('Y-m-d', $i)] = [];
+        }
+
+
+        // 平铺数组
+        $temp = Collection::make($tempRes)->collapse()->get();
+        foreach ($temp as $k=>$v) {
+            // 各种报警条数总数
+            $temp[$k]['count'] = array_sum(array_column($v['list'], 'value'));
+        }
+
+        // 合并数组
+        $resultData = array_merge($continuousTime, $temp);
+
+        return $resultData;
+
+
     }
 
     /**

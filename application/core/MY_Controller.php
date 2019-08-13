@@ -26,7 +26,14 @@ class MY_Controller extends CI_Controller
     public $templates = [];
     public $routerUri = '';
     public $username = 'unknown';
-    public $userPerm = [];
+    public $userPerm = [
+        "group_id" => [],
+        "city_id" => [],
+        "area_id" => [],
+        "admin_area_id" => [],
+        "route_id" => [],
+        "junction_id" => [],
+    ];
     public $permCitys = [];
 
     /**

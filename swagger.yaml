@@ -464,7 +464,6 @@ paths:
                 type: string
                 description: 用户名
                 example: unknown
-
   /pianalysis/realtime:
     get:
       summary: pi实时数据分析
@@ -1113,12 +1112,12 @@ paths:
                 type: string
                 description: 用户名
                 example: unknown
-
   /AdpArea/getAreaJunctionList:
     post:
       summary: 自适应区域管理–查询区域路口列表
       description: 自适应区域管理–查询区域路口列表
-      tags: []
+      tags:
+        - 自适应
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -1254,7 +1253,8 @@ paths:
     post:
       summary: 自适应区域管理–区域列表查询
       description: 自适应区域管理–区域列表查询
-      tags: []
+      tags:
+        - 自适应
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -1327,7 +1327,8 @@ paths:
     post:
       summary: 概览详情-城市/路口报警分析接口
       description: 概览详情-城市/路口报警分析接口
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -1810,7 +1811,8 @@ paths:
     post:
       summary: 概览详情-城市/路口报警时段分布接口
       description: 概览详情-城市/路口报警时段分布接口
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -1904,7 +1906,8 @@ paths:
     post:
       summary: 概览详情-七日报警均值
       description: 概览详情-七日报警均值
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -1978,7 +1981,8 @@ paths:
     post:
       summary: 评估页-区域评估-获取区域评估结果
       description: 评估页-区域评估-获取区域评估结果
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -2184,7 +2188,8 @@ paths:
     post:
       summary: 区域评估数据下载
       description: 区域评估数据下载
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -2242,7 +2247,8 @@ paths:
     post:
       summary: 区域管理–查询城市全部区域路口列表
       description: 区域管理–查询城市全部区域路口列表
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -2376,7 +2382,8 @@ paths:
     post:
       summary: 区域管理–查询区域路口列表
       description: 区域管理–查询区域路口列表
-      tags: []
+      tags:
+        - 管理
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -2512,7 +2519,8 @@ paths:
     post:
       summary: 区域管理–区域列表查询
       description: 区域管理–区域列表查询
-      tags: []
+      tags:
+        - 管理
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -2601,7 +2609,8 @@ paths:
     post:
       summary: 评估页-区域评估-获取区域评估指标列表
       description: 评估页-区域评估-获取区域评估指标列表
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -2665,7 +2674,8 @@ paths:
     post:
       summary: 干线绿波优化-绿波优化方案接口
       description: 干线绿波优化-绿波优化方案接口
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -2723,7 +2733,8 @@ paths:
     post:
       summary: 干线绿波优化-请求绿波图优化接口
       description: 干线绿波优化-请求绿波图优化接口
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/json
       produces:
@@ -2776,7 +2787,8 @@ paths:
     post:
       summary: 干线绿波优化-获取可连接为干线的路口集合接口
       description: 干线绿波优化-获取可连接为干线的路口集合接口
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -3184,7 +3196,8 @@ paths:
     post:
       summary: 干线绿波优化-获取时空图接口
       description: 干线绿波优化-获取时空图接口
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -3889,7 +3902,8 @@ paths:
     post:
       summary: 评估页-路口评估-详情-下载对比数据
       description: 评估页-路口评估-详情-下载对比数据
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -3947,7 +3961,8 @@ paths:
     post:
       summary: 评估页-路口评估-获取全城路口列表
       description: 评估页-路口评估-获取全城路口列表
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -4038,7 +4053,8 @@ paths:
     post:
       summary: 评估页-路口评估-获取相位（方向）列表
       description: 评估页-路口评估-获取相位（方向）列表
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -4112,7 +4128,8 @@ paths:
     post:
       summary: 评估页-路口评估-获取路口地图数据
       description: 评估页-路口评估-获取路口地图数据
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -4212,7 +4229,8 @@ paths:
     post:
       summary: 评估页-路口评估-获取路口指标排序列表
       description: 评估页-路口评估-获取路口指标排序列表
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -4307,7 +4325,8 @@ paths:
     post:
       summary: 评估页-路口评估-获取指标列表
       description: 评估页-路口评估-获取指标列表
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -4380,7 +4399,8 @@ paths:
     post:
       summary: 评估页-路口评估-获取指标趋势图
       description: 评估页-路口评估-获取指标趋势图
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -4475,7 +4495,8 @@ paths:
     post:
       summary: 评估页-路口评估-详情-指标评估对比
       description: 评估页-路口评估-详情-指标评估对比
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -4975,7 +4996,8 @@ paths:
     post:
       summary: 新增报告–单点路口分析–数据查询
       description: 新增报告–单点路口分析–数据查询
-      tags: []
+      tags:
+        - 报告
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -5552,7 +5574,8 @@ paths:
     post:
       summary: 概览页-拥堵概览
       description: 概览页-拥堵概览
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -5636,7 +5659,8 @@ paths:
     post:
       summary: 概览页-获取当前日期时间
       description: 概览页-获取当前日期时间
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -5697,7 +5721,8 @@ paths:
     post:
       summary: 概览页-路口概况
       description: 概览页-路口概况
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -5767,7 +5792,8 @@ paths:
     post:
       summary: 概览页-实时路口列表
       description: 概览页-实时路口列表
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -5922,7 +5948,8 @@ paths:
     post:
       summary: 概览页-运行情况
       description: 概览页-运行情况
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -5999,7 +6026,8 @@ paths:
     post:
       summary: 概览页-实时报警列表
       description: 概览页-实时报警列表
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -6113,7 +6141,8 @@ paths:
     post:
       summary: 概览页-7日报警变化
       description: 概览页-7日报警变化
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -6182,7 +6211,8 @@ paths:
     post:
       summary: 概览页-今日报警概览
       description: 概览页-今日报警概览
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -6266,7 +6296,8 @@ paths:
     post:
       summary: 概览页-延误TOP20
       description: 概览页-延误TOP20
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -6349,7 +6380,8 @@ paths:
     post:
       summary: 概览页-停车TOP20
       description: 概览页-停车TOP20
-      tags: []
+      tags:
+        - 概览
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -6440,7 +6472,8 @@ paths:
     post:
       summary: 新增报告–周、月报–早(晚)高峰平均延误柱状图
       description: 新增报告–周、月报–早(晚)高峰平均延误柱状图
-      tags: []
+      tags:
+        - 报告
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -6537,7 +6570,8 @@ paths:
     post:
       summary: 新增报告–周、月报–行政区交通运行情况（全天，早高峰，晚高峰 ）
       description: 新增报告–周、月报–行政区交通运行情况（全天，早高峰，晚高峰 ）
-      tags: []
+      tags:
+        - 报告
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -6643,7 +6677,8 @@ paths:
     post:
       summary: 新增报告–周、月报–市运行情况概述信息
       description: 新增报告–周、月报–市运行情况概述信息
-      tags: []
+      tags:
+        - 报告
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -6719,7 +6754,8 @@ paths:
     post:
       summary: 新增报告–周、月报–指标最大top20(top10)
       description: 新增报告–周、月报–指标最大top20(top10)
-      tags: []
+      tags:
+        - 报告
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -6847,7 +6883,8 @@ paths:
     post:
       summary: 新增报告–周、月报–早(晚)高峰平均速度柱状图
       description: 新增报告–周、月报–早(晚)高峰平均速度柱状图
-      tags: []
+      tags:
+        - 报告
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -6944,7 +6981,8 @@ paths:
     post:
       summary: 新增报告–周、月报–市平均延误运行情况表格
       description: 新增报告–周、月报–市平均延误运行情况表格
-      tags: []
+      tags:
+        - 报告
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -7044,7 +7082,8 @@ paths:
     post:
       summary: 新增报告–生成报告
       description: 新增报告–生成报告
-      tags: []
+      tags:
+        - 报告
       consumes:
       - multipart/form-data
       produces:
@@ -7126,7 +7165,8 @@ paths:
     post:
       summary: 已有报告–已有报告查询
       description: 已有报告–已有报告查询
-      tags: []
+      tags:
+        - 报告
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -7242,7 +7282,8 @@ paths:
     post:
       summary: 新增报告–报表配置项目查询
       description: 新增报告–报表配置项目查询
-      tags: []
+      tags:
+        - 报告
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -7354,7 +7395,8 @@ paths:
     post:
       summary: 新增报告–路口信息查询（支持名称模糊查询）
       description: 新增报告–路口信息查询（支持名称模糊查询）
-      tags: []
+      tags:
+        - 报告
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -7440,7 +7482,8 @@ paths:
     post:
       summary: 评估页-干线评估-获取干线评估结果
       description: 评估页-干线评估-获取干线评估结果
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -7655,7 +7698,8 @@ paths:
     post:
       summary: 评估页-干线评估-干线评估数据下载
       description: 评估页-干线评估-干线评估数据下载
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -7713,7 +7757,8 @@ paths:
     post:
       summary: 评估页-干线评估-查询城市全部干线详情接口
       description: 评估页-干线评估-查询城市全部干线详情接口
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -7985,7 +8030,8 @@ paths:
     post:
       summary: 评估页-干线评估-获取干线评估指标列表
       description: 评估页-干线评估-获取干线评估指标列表
-      tags: []
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -8049,7 +8095,8 @@ paths:
     post:
       summary: 干线管理–查询干线信息详情
       description: 干线管理–查询干线信息详情
-      tags: []
+      tags:
+        - 管理
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -8229,7 +8276,8 @@ paths:
     post:
       summary: 干线管理–查询干线列表
       description: 干线管理–查询干线列表
-      tags: []
+      tags:
+        - 管理
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -8509,7 +8557,8 @@ paths:
     post:
       summary: 绿信比优化-获取原有配时方案
       description: 绿信比优化-获取原有配时方案
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -8643,7 +8692,8 @@ paths:
     post:
       summary: 绿信比优化-获取绿信比优化方案
       description: 绿信比优化-获取绿信比优化方案
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -8778,7 +8828,8 @@ paths:
     post:
       summary: 绿信比优化-获取原有配时切割
       description: 绿信比优化-获取原有配时切割
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -8840,7 +8891,8 @@ paths:
     post:
       summary: 时段优化-获取路口单相位任务全时段散点图(无配时)
       description: 时段优化-获取路口单相位任务全时段散点图(无配时)
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -8966,7 +9018,8 @@ paths:
     post:
       summary: 获取自适应路口下发状态
       description: 获取自适应路口下发状态
-      tags: []
+      tags:
+        - 自适应
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -9073,7 +9126,8 @@ paths:
     post:
       summary: 基准配时信息详情
       description: 基准配时信息详情
-      tags: []
+      tags:
+        - 自适应
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -9326,7 +9380,8 @@ paths:
     post:
       summary: 获取自适应区域内路口列表信息
       description: 获取自适应区域内路口列表信息
-      tags: []
+      tags:
+        - 自适应
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -9436,7 +9491,8 @@ paths:
     post:
       summary: 获取自适应区域列表
       description: 获取自适应区域列表
-      tags: []
+      tags:
+        - 自适应
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -9557,7 +9613,8 @@ paths:
     post:
       summary: 获取自适应区域指标信息折线图
       description: 获取自适应区域指标信息折线图
-      tags: []
+      tags:
+        - 自适应
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -9631,7 +9688,8 @@ paths:
     post:
       summary: 获取排队长度
       description: 获取排队长度
-      tags: []
+      tags:
+        - 自适应
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -9768,7 +9826,8 @@ paths:
     post:
       summary: 获取散点图
       description: 获取散点图
-      tags: []
+      tags:
+        - 自适应
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -10174,7 +10233,8 @@ paths:
     post:
       summary: 获取时空图
       description: 获取时空图
-      tags: []
+      tags:
+        - 自适应
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -10330,7 +10390,8 @@ paths:
     post:
       summary: 获取自适应区域路口实时报警信息
       description: 获取自适应区域路口实时报警信息
-      tags: []
+      tags:
+        - 自适应
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -10468,7 +10529,8 @@ paths:
     post:
       summary: 干线绿波优化-获取干线路口详细信息
       description: 干线绿波优化-获取干线路口详细信息
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -10717,7 +10779,8 @@ paths:
     post:
       summary: 干线绿波优化-获取干线路口配时信息
       description: 干线绿波优化-获取干线路口配时信息
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -11643,7 +11706,8 @@ paths:
     post:
       summary: 新诊断-列表页 -  诊断路口问题详情
       description: 新诊断-列表页 -  诊断路口问题详情
-      tags: []
+      tags:
+        - 诊断
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -11943,7 +12007,8 @@ paths:
     post:
       summary: 新诊断-详细页 - 诊断路口底图数据
       description: 新诊断-详细页 - 诊断路口底图数据
-      tags: []
+      tags:
+        - 诊断
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -12043,7 +12108,8 @@ paths:
     post:
       summary: 新诊断-详细页 - 诊断路口问题趋势
       description: 新诊断-详细页 - 诊断路口问题趋势
-      tags: []
+      tags:
+        - 诊断
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -12747,7 +12813,8 @@ paths:
     post:
       summary: 新诊断-详细页 - 诊断路口指标信息
       description: 新诊断-详细页 - 诊断路口指标信息
-      tags: []
+      tags:
+        - 诊断
       consumes:
       - application/json
       produces:
@@ -13033,7 +13100,8 @@ paths:
     post:
       summary: 新诊断-列表页 -  诊断路口问题趋势
       description: 新诊断-列表页 -  诊断路口问题趋势
-      tags: []
+      tags:
+        - 诊断
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -15444,7 +15512,8 @@ paths:
     post:
       summary: 新诊断-详细页 - 诊断路口散点图信息
       description: 新诊断-详细页 - 诊断路口散点图信息
-      tags: []
+      tags:
+        - 诊断
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -15564,7 +15633,8 @@ paths:
     post:
       summary: 新诊断-详细页 - 诊断路口时空图信息
       description: 新诊断-详细页 - 诊断路口时空图信息
-      tags: []
+      tags:
+        - 诊断
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -15687,7 +15757,8 @@ paths:
     get:
       summary: ""
       description: ""
-      tags: []
+      tags:
+        - 评估
       consumes: []
       produces:
       - application/vnd.ms-excel
@@ -15993,7 +16064,8 @@ paths:
     post:
       summary: 绿信比优化- 获取配时/指标接口
       description: 绿信比优化- 获取配时/指标接口
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -16387,7 +16459,8 @@ paths:
     post:
       summary: 时段优化-获取路口按NEMA排序的所有相位（取指标结果json串中相位）
       description: 时段优化-获取路口按NEMA排序的所有相位（取指标结果json串中相位）
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -16467,7 +16540,8 @@ paths:
     post:
       summary: 时段优化-获取配时时段
       description: 时段优化-获取配时时段
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -16533,7 +16607,8 @@ paths:
     post:
       summary: 时段优化-获取时段划分方案
       description: 时段优化-获取时段划分方案
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -16728,7 +16803,8 @@ paths:
     post:
       summary: 绿信比优化-获取散点图数据
       description: 绿信比优化-获取散点图数据
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -16924,7 +17000,8 @@ paths:
     post:
       summary: 绿信比优化-获取时空图数据
       description: 绿信比优化-获取时空图数据
-      tags: []
+      tags:
+        - 优化
       consumes:
       - application/x-www-form-urlencoded
       produces:
