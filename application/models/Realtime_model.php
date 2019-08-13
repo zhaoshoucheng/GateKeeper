@@ -288,8 +288,8 @@ class Realtime_model extends CI_Model
 
         return [
             date('H:i:s', strtotime($dayTime)) => [
-                'value' => $quotaValueInfo['quotaMap']['weight_avg'],
-                'hour' => date('H:i:s', strtotime($quotaValueInfo['quotaMap']['dayTime'])),
+                'value' => isset($quotaValueInfo['quotaMap']['weight_avg']) ?? 0,
+                'hour' => date('H:i:s', strtotime(isset($quotaValueInfo['quotaMap']['dayTime']) ?? "")),
             ]
         ];
     }
@@ -781,7 +781,7 @@ class Realtime_model extends CI_Model
      * @param $params['date']           string  N 日期 yyyy-mm-dd
      * @param $params['time_point']     string  N 时间 HH:ii:ss
      * @param $params['limit']          int     Y 限定数量
-     * 
+     *
      * @return array
      * @throws \Exception
      */
