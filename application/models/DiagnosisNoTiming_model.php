@@ -503,7 +503,7 @@ class DiagnosisNoTiming_model extends CI_Model
             $dt = !empty($res['data']['dt']) ? $res['data']['dt'] : "";
             return $dt;
         } else {
-            return "";
+            return date("Y-m-d",strtotime("-1 day"));
         }
     }
 

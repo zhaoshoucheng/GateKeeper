@@ -19,6 +19,7 @@ class Realtimewarning_model extends CI_Model
 {
     protected $token;
     protected $userid = '';
+    protected $cityQuotaList = [];
 
     /**
      * @var CI_DB_query_builder
@@ -300,7 +301,8 @@ class Realtimewarning_model extends CI_Model
              * 轨迹数大于5的报警路口
              * 过滤济南持续时间<3分钟数据
              */
-            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal);
+            $cityQuotaList = $this->getCityQuotaList($cityId,$date,$hour,10000);
+            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal, $cityQuotaList);
             $jDataList = $junctionList['dataList'] ?? [];
             $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.getJunctionAggResult\n\r";
             $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.getJunctionAggResult", "log_time"=>date("Y-m-d H:i:s"),]);
@@ -456,7 +458,8 @@ class Realtimewarning_model extends CI_Model
             foreach ($realTimeAlarmsInfoResult as $item) {
                 $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
             }
-            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo);
+            $cityQuotaList = $this->getCityQuotaList($cityId,$date,$hour,10000);
+            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo, $cityQuotaList);
 
 
             //计算junctionSurvey 数据
@@ -499,11 +502,12 @@ class Realtimewarning_model extends CI_Model
      *
      * @param $cityId
      * @param $realtimeJunctionList 指标数据
-     * @param $realTimeAlarmsInfo   报警数据
+     * @param $realTimeAlarmsInfoResultOrigal   报警数据
+     * @param $cityQuotaList   城市指标数据
      *
      * @return array
      */
-    private function getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal)
+    private function getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal, $cityQuotaList)
     {
         $realTimeAlarmsInfo = [];
         foreach ($realTimeAlarmsInfoResultOrigal as $item) {
@@ -547,9 +551,9 @@ class Realtimewarning_model extends CI_Model
                 if(strpos($junctionName,"行人")!==false && $cityId==1){
                     $alarmInfo = [];
                 }
+                //里面已经丢弃了，flow信息
                 return [
                     'logic_junction_id' => $item['logic_junction_id'],
-                    'quota' => $this->getRawQuotaInfo($item),
                     'alarm_info' => $alarmInfo,
                 ];
             }
@@ -566,13 +570,14 @@ class Realtimewarning_model extends CI_Model
         };
 
         //处理数据内容格式
-        $temporgin = array_map(function ($item) use ($junctionsInfo) {
+        $temporgin = array_map(function ($item) use ($junctionsInfo,$cityQuotaList) {
+            $quota = $this->getFinalQuotaInfo($item, $cityQuotaList);
             return [
                 'jid' => $item['logic_junction_id'],
                 'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
                 'lng' => $junctionsInfo[$item['logic_junction_id']]['lng'] ?? '',
                 'lat' => $junctionsInfo[$item['logic_junction_id']]['lat'] ?? '',
-                'quota' => ($quota = $this->getFinalQuotaInfo($item)),
+                'quota' => $quota,
                 'alarm' => $this->getFinalAlarmInfo($item),
                 'status' => $this->getJunctionStatus($quota),
             ];
@@ -651,17 +656,42 @@ class Realtimewarning_model extends CI_Model
      */
     private function mergeFlowInfo($target, $item)
     {
-        //合并属性 停车延误加权求和，停车时间求最大，权值求和
-        $target['quota']['stop_delay_weight'] += $item['quota']['stop_delay_weight'];
-        $target['quota']['stop_time_cycle'] = max($target['quota']['stop_time_cycle'], $item['quota']['stop_time_cycle']);
-        $target['quota']['traj_count'] += $item['quota']['traj_count'];
-
         if (isset($target['alarm_info'])) {
-            //合并报警信息
             $target['alarm_info'] = array_merge($target['alarm_info'], $item['alarm_info']) ?? [];
         }
-
         return $target;
+    }
+
+    /**
+     * 获取全城路口聚合指标
+     * @param $cityID
+     * @param $date
+     * @param $timePoint
+     * @param $limit
+     * @return array
+     */
+    private function getCityQuotaList($cityID,$date,$timePoint,$limit){
+        $params = [
+            "city_id"=>$cityID,
+            "quota_key"=>"stop_delay",
+            "date"=>$date, 
+            "time_point"=>$timePoint,
+            "limit"=>$limit,
+        ];
+        if(!isset($this->cityQuotaList["stop_delay"])){
+            $params["quota_key"] = "stop_delay";
+            $sortList = $this->realtime_model->getJunctionQuotaSortList($params);
+            $sortList = $sortList["dataList"];
+            $sortList = array_column($sortList,null,"logic_junction_id");
+            $this->cityQuotaList["stop_delay"] = $sortList;
+
+            $params["quota_key"] = "stop_time_cycle";
+            $sortList = $this->realtime_model->getJunctionQuotaSortList($params);
+            $sortList = $sortList["dataList"];
+            $sortList = array_column($sortList,null,"logic_junction_id");
+            $this->cityQuotaList["stop_time_cycle"] = $sortList;
+        }
+        return $this->cityQuotaList;
     }
 
     /**
@@ -671,19 +701,22 @@ class Realtimewarning_model extends CI_Model
      *
      * @return array
      */
-    private function getFinalQuotaInfo($item)
+    private function getFinalQuotaInfo($item,$cityQuotaList)
     {
         //实时指标配置文件
         $realTimeQuota = $this->config->item('real_time_quota');
+        $junctionID = $item["logic_junction_id"];
+        $stopDelayQuota = $this->cityQuotaList["stop_delay"][$junctionID]["quota_value"] ?? 0;
+        $stopTimeCycle = $this->cityQuotaList["stop_time_cycle"][$junctionID]["quota_value"] ?? 0;
         return [
             'stop_delay' => [
                 'name' => '平均延误',
-                'value' => $realTimeQuota['stop_delay']['round']($item['quota']['stop_delay_weight'] / $item['quota']['traj_count']),
+                'value' => $realTimeQuota['stop_delay']['round']($stopDelayQuota),
                 'unit' => $realTimeQuota['stop_delay']['unit'],
             ],
             'stop_time_cycle' => [
                 'name' => '最大停车次数',
-                'value' => $realTimeQuota['stop_time_cycle']['round']($item['quota']['stop_time_cycle']),
+                'value' => $realTimeQuota['stop_time_cycle']['round']($stopTimeCycle),
                 'unit' => $realTimeQuota['stop_time_cycle']['unit'],
             ],
         ];

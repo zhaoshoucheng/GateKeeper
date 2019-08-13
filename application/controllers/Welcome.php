@@ -598,4 +598,15 @@ class Welcome extends CI_Controller
 
         print_r($res);
     }
+
+    public function Aes()
+    {
+        $pwdStr=time()."_"."nanchang";
+        $aes = new Aes('1234567ab2345678');  
+        $encrypted = $aes->encrypt($pwdStr);
+        echo '要加密的字符串：'.$pwdStr.'<br>加密后的字符串：', $encrypted, '<hr>';
+        $decrypted = $aes->decrypt($encrypted);
+        echo '要解密的字符串：', $encrypted, '<br>解密后的字符串：', $decrypted;
+        exit;
+    }
 }
