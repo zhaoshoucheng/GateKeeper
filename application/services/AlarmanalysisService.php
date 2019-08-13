@@ -150,7 +150,7 @@ class AlarmanalysisService extends BaseService
             return true;
         }
 
-        if(strtotime($dt) < strtotime($ddt+" "+$st+":00")   ||  strtotime($dt) > strtotime($ddt+" "+$et+":00")){
+        if(strtotime($dt) < strtotime($ddt." ".$st.":00")   ||  strtotime($dt) > strtotime($ddt." ".$et.":00")){
             return true;
         }
 
