@@ -135,6 +135,9 @@ class AlarmanalysisService extends BaseService
             $timeRanges = explode("-",$params['time_range']);
             $st = $timeRanges[0];
             $et = $timeRanges[1];
+            if($et=="24:00"){
+                $et = "23:59";
+            }
             foreach ($resultData as $rk => $rv){
                 if(count($rk) == 4){
                     $rk = "0".$rk;
