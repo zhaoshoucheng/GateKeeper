@@ -173,7 +173,7 @@ class AlarmanalysisService extends BaseService
     private function getNewTimeAlarmAnalysis($params)
     {
         $timeRange = $params['time_range'];
-        $dateType = $params['date_type'];
+        $dateType = isset($params['date_type'])? $params['date_type']:0;
         // 组织DSL所需json
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
@@ -256,6 +256,14 @@ class AlarmanalysisService extends BaseService
         // 合并数组
         $resultData = array_merge($continuousTime, $temp);
 
+        //日期过滤
+        foreach ($resultData as $rk=>$rv){
+            if($dateType == 1 && in_array(date("w",strtotime($rk)),[0,6])){
+               unset($resultData[$rk]);
+            }else if($dateType == 2 && in_array(date("w",strtotime($rk)),[1,2,3,4,5])){
+                unset($resultData[$rk]);
+            }
+        }
         return $resultData;
 
 
