@@ -178,15 +178,19 @@ class Road extends MY_Controller
         ]);
         $data = $this->roadService->getAllRoadDetail($params);
 
-        // 根据权限做干线过滤
-        if (!empty($this->userPerm)) {
+        // 有当前城市的权限,则干线无需过滤
+        if (!empty($this->userPerm) && empty($this->userPerm["city_id"])) {
             $roadIds = $this->userPerm['route_id'];
-            $data = array_values(array_filter($data, function($item) use($roadIds){
-                if (in_array($item['road_id'], $roadIds)) {
-                    return true;
-                }
-                return false;
-            }));
+            if(!empty($areaIds)){
+                $data = array_values(array_filter($data, function($item) use($roadIds){
+                    if (in_array($item['road_id'], $roadIds)) {
+                        return true;
+                    }
+                    return false;
+                }));
+            }else{
+                $data = [];
+            }
         }
 
         $this->response($data);

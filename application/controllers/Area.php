@@ -134,16 +134,18 @@ class Area extends MY_Controller
         $data = $this->areaService->getCityAreaDetail($params);
 
         // 根据权限过滤区域
-        if (!empty($this->userPerm)) {
-                $areaIds = $this->userPerm['area_id'];
-                if(!empty($areaIds)){
-                    $data = array_values(array_filter($data, function ($item) use ($areaIds) {
-                        if (in_array($item['area_id'], $areaIds)) {
-                            return true;
-                        }
-                        return false;
-                    }));
-                }
+        if (!empty($this->userPerm) && empty($this->userPerm["city_id"])) {
+            $areaIds = $this->userPerm['area_id'];
+            if(!empty($areaIds)){
+                $data = array_values(array_filter($data, function ($item) use ($areaIds) {
+                    if (in_array($item['area_id'], $areaIds)) {
+                        return true;
+                    }
+                    return false;
+                }));
+            }else{
+                $data = [];
+            }
         }
         $this->response($data);
     }
