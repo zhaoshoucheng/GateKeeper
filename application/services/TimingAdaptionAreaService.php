@@ -834,6 +834,7 @@ class TimingAdaptionAreaService extends BaseService
         ];
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/space/query';
+        
         if(ENVIRONMENT=="development"){
             $esUrl = 'http://10.85.128.208:8001/api/data/estimate/space/query';
         }
@@ -1218,6 +1219,7 @@ class TimingAdaptionAreaService extends BaseService
         ];
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/scatter/query';
+        
         if(ENVIRONMENT=="development"){
             $esUrl = 'http://10.85.128.208:8001/api/data/estimate/scatter/query';
         }
@@ -1341,6 +1343,7 @@ class TimingAdaptionAreaService extends BaseService
         ];
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/queue/query';
+        
         if(ENVIRONMENT=="development"){
             $esUrl = 'http://10.85.128.208:8001/api/data/estimate/queue/query';
         }
