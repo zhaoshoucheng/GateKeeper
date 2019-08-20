@@ -130,6 +130,23 @@ class AlarmanalysisService extends BaseService
 
         // 合并数组
         $resultData = array_merge($continuousHour, $temp);
+        //时间过滤
+        if(isset($params['time_range'])){
+            $timeRanges = explode("-",$params['time_range']);
+            $st = $timeRanges[0];
+            $et = $timeRanges[1];
+            if($et=="24:00"){
+                $et = "23:59";
+            }
+            foreach ($resultData as $rk => $rv){
+                if(count($rk) == 4){
+                    $rk = "0".$rk;
+                }
+                if(strtotime($rk) < strtotime($st)   ||  strtotime($rk) > strtotime($et)){
+                   unset($resultData[$rk]);
+                }
+            }
+        }
 
         return $resultData;
     }
@@ -173,7 +190,7 @@ class AlarmanalysisService extends BaseService
     private function getNewTimeAlarmAnalysis($params)
     {
         $timeRange = $params['time_range'];
-        $dateType = $params['date_type'];
+        $dateType = isset($params['date_type'])? $params['date_type']:0;
         // 组织DSL所需json
         $json = '{"from":0,"size":0,"query":{"bool":{"must":{"bool":{"must":[';
 
@@ -256,6 +273,14 @@ class AlarmanalysisService extends BaseService
         // 合并数组
         $resultData = array_merge($continuousTime, $temp);
 
+        //日期过滤
+        foreach ($resultData as $rk=>$rv){
+            if($dateType == 1 && in_array(date("w",strtotime($rk)),[0,6])){
+               unset($resultData[$rk]);
+            }else if($dateType == 2 && in_array(date("w",strtotime($rk)),[1,2,3,4,5])){
+                unset($resultData[$rk]);
+            }
+        }
         return $resultData;
 
 

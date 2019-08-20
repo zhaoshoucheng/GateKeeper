@@ -17,7 +17,7 @@ schemes:
 - http
 - https
 paths:
-  /traj_service/Report/searchJunction:
+  /traj_service/itstool/Report/searchJunction:
     get:
       summary: 路口搜索
       description: 根据中文或logic_junction_id搜索路口
@@ -80,30 +80,14 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1965秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1931秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 64454c135d25c58d58fd81d4267cf502
-              username:
-                type: string
-                description: 用户名
-                example: unknown
-  /overview/server_time:
+  /traj_service/itstool/overview/server_time:
     get:
-      summary: 路口搜索
-      description: 根据中文或logic_junction_id搜索路口
+      summary: 获取当前服务器时间
+      description: 获取当前服务器时间，用于前端展示
       tags:
         - 济南项目
       parameters:
@@ -135,27 +119,11 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1965秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1931秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 64454c135d25c58d58fd81d4267cf502
-              username:
-                type: string
-                description: 用户名
-                example: unknown
-  /overview/junctionsurvey:
+  /traj_service/itstool/overview/junctionsurvey:
     get:
       summary: 济南全城概览
       description: 济南全城指标概览
@@ -202,27 +170,11 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1440秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1406秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 645a430d5d26a832a1d918ee038e8102
-              username:
-                type: string
-                description: 用户名
-                example: unknown
-  /overview/junctionslist:
+  /traj_service/itstool/overview/junctionslist:
     get:
       summary: 济南全城路口列表
       description: 济南全城路口列表，包含指标，报警，和pi信息
@@ -379,18 +331,6 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1440秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1406秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
@@ -399,7 +339,7 @@ paths:
                 type: string
                 description: 用户名
                 example: unknown
-  /overview/piconfig:
+  /traj_service/itstool/overview/piconfig:
     get:
       summary: 获取服务等级配置
       description: 获取服务等级配置信息
@@ -444,27 +384,31 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1965秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1931秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 64454c135d25c58d58fd81d4267cf502
-              username:
-                type: string
-                description: 用户名
-                example: unknown
-  /pianalysis/realtime:
+  /traj_service/itstool/pianalysis/realtime/download:
+    get:
+      summary: pi实时数据查询结果报表下载
+      description: pi 实时数据分析
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          type: string
+          description: 城市id
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: 路网逻辑路口id
+          required: true
+      responses:
+        200:
+          description: 成功
+  /traj_service/itstool/pianalysis/realtime:
     get:
       summary: pi实时数据分析
       description: pi实时数据分析
@@ -523,27 +467,46 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1965秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1931秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 64454c135d25c58d58fd81d4267cf502
-              username:
-                type: string
-                description: 用户名
-                example: unknown
-  /pianalysis/history:
+  /traj_service/itstool/pianalysis/history/download:
+    get:
+      summary: pi历史数据报表下载
+      description: pi历史数据报表下载
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          type: string
+          description: 城市id
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: 路口id
+          required: true
+        - name: dates
+          in: query
+          type: string
+          description: 日期，多个日期用逗号”，“分割
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: 开始时间，比如00:00
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: 结束时间，比如20:00
+          required: true
+      responses:
+        200:
+          description: 成功
+  /traj_service/itstool/pianalysis/history:
     post:
       summary: pi历史数据分析
       description: pi历史数据分析
@@ -630,27 +593,11 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1965秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1931秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 64454c135d25c58d58fd81d4267cf502
-              username:
-                type: string
-                description: 用户名
-                example: unknown
-  /alarm/realtime:
+  /traj_service/itstool/alarm/realtime:
     get:
       summary: 实时报警分析
       description: 实时报警分析
@@ -704,27 +651,36 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1965秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1931秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 64454c135d25c58d58fd81d4267cf502
-              username:
-                type: string
-                description: 用户名
-                example: unknown
-  /alarm/history:
+  /traj_service/itstool/alarm/history/download:
+    get:
+      summary: 报警历史数据报表下载
+      description: 报警历史数据报表下载
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          type: string
+          description: 城市id
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: 路口id
+          required: true
+        - name: dates
+          in: query
+          type: string
+          description: 日期，多个日期用逗号”，“分割
+          required: true
+      responses:
+        200:
+          description: 成功
+  /traj_service/itstool/alarm/history:
     post:
       summary: 报警历史数据分析
       description: 报警历史数据分析
@@ -806,27 +762,137 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1965秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1931秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 64454c135d25c58d58fd81d4267cf502
-              username:
+  /traj_service/itstool/quota/weekavg:
+    post:
+      summary: 济南流量历史数据分析
+      description: 济南流量历史数据分析
+      tags:
+        - 济南项目
+      produces:
+        - application/json
+      parameters:
+        - in : "body"
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              city_id:
+                description: '城市id 示例: 12'
+                type: integer
+                example: 12
+              logic_junction_id:
+                description: '路网逻辑路口id'
                 type: string
-                description: 用户名
-                example: unknown
-  /junctionmodel/junctionlist:
+                example: "2017030116_53551019"
+              quota_key:
+                description: '指标类型，当前支持stop_delay，spillover_rate，stop_time_cycle，queue_length，stop_rate，free_speed'
+                type: string
+                example: "stop_delay"
+              date:
+                description: '日期'
+                type: array
+                items:
+                  type: string
+                  example: "2019-06-18"
+              date_type:
+                description: 1,工作日  2，非工作日  0，全部
+                type: integer
+                example: 1
+              start_time:
+                description: "开始时间"
+                type: string
+                example: "05:00"
+              end_time:
+                description: "结束时间"
+                type: string
+                example: "18:00"
+              last_week_avg:
+                description: "上周平均"
+                type: boolean
+                example: 1
+              week_avg:
+                description: "本周平均"
+                type: boolean
+                example: 1
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              data:
+                type: object
+                description: ""
+                properties: 
+                  dates:
+                    type: array
+                    items:
+                      type: string
+                      example: "2019-06-18"
+                  last_dates:
+                    type: array
+                    items:
+                      type: string
+                      example: "2019-06-18"
+                  quota_list:
+                    type: object
+                    properties:
+                      "2019-06-18":
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            hour:
+                              type: string
+                              example: "00:00"
+                            value:
+                              type: float
+                              example: 6.23
+
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /traj_service/itstool/quota/history/download:
+    get:
+      summary: 历史指标数据报表下载
+      description: 历史指标数据报表下载
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          type: string
+          description: 城市id
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: 路口id
+          required: true
+        - name: dates
+          in: query
+          type: string
+          description: 日期，多个日期用逗号”，“分割
+          required: true
+      responses:
+        200:
+          description: 成功
+  /traj_service/itstool/junctionmodel/junctionlist:
     get:
       summary: 全城路口配置信息概览
       description: 全城路口配置信息概览
@@ -901,27 +967,81 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1965秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1931秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 64454c135d25c58d58fd81d4267cf502
-              username:
-                type: string
-                description: 用户名
-                example: unknown
-  /avi/flow_analysis:
+  /vehicle_flow/avi/flow_analysis/download:
+    get:
+      summary: 报警历史数据报表下载
+      description: 报警历史数据报表下载
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          type: string
+          description: 城市id
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: 路口id
+          required: true
+        - name: dates
+          in: query
+          type: string
+          description: 日期，多个日期用逗号”，“分割
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: 开始时间 比如00:00
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: 结束时间 比如20:00
+          required: true
+      responses:
+        200:
+          description: 成功
+  /vehicle_flow/avi/flow_analysis/today/download:
+    get:
+      summary: 今日流量数据分析报表下载
+      description: 今日流量数据分析报表下载
+      tags:
+        - 济南项目
+      parameters:
+        - name: city_id
+          in: query
+          type: string
+          description: 城市id
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: 路口id
+          required: true
+        - name: dates
+          in: query
+          type: string
+          description: 日期，多个日期用逗号”，“分割
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: 开始时间 比如00:00
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: 结束时间 比如20:00
+          required: true
+      responses:
+        200:
+          description: 成功
+  /vehicle_flow/avi/flow_analysis:
     post:
       summary: 济南流量历史数据分析
       description: 济南流量历史数据分析
@@ -1008,26 +1128,6 @@ paths:
                                         value:
                                           type: integer
                                           example: 72
-                    # items:
-                    #   type: object
-                    #   description: "具体数值"
-                    #   properties:
-                    #     x:
-                    #       type: string
-                    #       description: "x轴时间刻度"
-                    #       example: "00:30"
-                    #     desc:
-                    #       type: array
-                    #       items:
-                    #         type: object
-                    #         properties:
-                    #           name:
-                    #             type: string
-                    #             description:  指标名称
-                    #             example: 单次停车比率
-                    #           value:
-                    #             type: string
-                    #             example: 15.2%
               errmsg:
                 type: string
                 description: 错误信息，当errno非0的时候有内容，可直接在页面显示
@@ -1036,27 +1136,11 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1965秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1931秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 64454c135d25c58d58fd81d4267cf502
-              username:
-                type: string
-                description: 用户名
-                example: unknown
-  /avi/realtime_flow:
+  /vehicle_flow/avi/realtime_flow:
     get:
       summary: 实时流量数据
       description: 实时流量数据
@@ -1092,26 +1176,10 @@ paths:
                 type: integer
                 description: 请求返回码，0才表示逻辑成功
                 example: 0
-              time:
-                type: object
-                description: 接口耗时
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1965秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1931秒
               traceid:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 64454c135d25c58d58fd81d4267cf502
-              username:
-                type: string
-                description: 用户名
-                example: unknown
   /AdpArea/getAreaJunctionList:
     post:
       summary: 自适应区域管理–查询区域路口列表
