@@ -531,17 +531,23 @@ class Waymap_model extends CI_Model
     }
 
 
-
-    public function getFlowsInfo32($logic_junction_ids)
+    /**
+     * getFlowsInfo32
+     * 
+     * @param with_hidden 是否包含隐藏flow
+     * 
+     */
+    public function getFlowsInfo32($logic_junction_ids,$version=0,$with_hidden=0)
     {
         $this->load->helper('phase');
-        $version = self::$lastMapVersion;
-
+        if(empty($version)){
+            $version = self::$lastMapVersion;
+        }
         if (is_array($logic_junction_ids)) {
             $logic_junction_ids = implode(",", $logic_junction_ids);
         }
 
-        $data = compact('logic_junction_ids');
+        $data = compact('logic_junction_ids','version','with_hidden');
         $url = $this->waymap_interface . '/signal-map/mapJunction/phase32';
         $res = $this->post($url, $data);
         // 调用相位接口出错
@@ -722,6 +728,21 @@ class Waymap_model extends CI_Model
         if($ret["name"]==$junctionName){
             return true;
         }
+        return false;
+    }
+
+
+    // 修改相位信息
+    public function saveFlowInfo($junctionID,$flowID,$phaseName,$isHidden=0)
+    {
+        $url = $this->waymap_interface . '/signal-map/mapFlow/saveDesc';
+        $data = [
+            'logic_junction_id' => $junctionID,
+            'flows' => [
+                ["logic_flow_id"=>$flowID,"desc"=>$phaseName,"is_hidden"=>$isHidden,]
+            ],
+        ];
+        $ret = $this->post($url, $data, 5000, 'json');
         return false;
     }
 }
