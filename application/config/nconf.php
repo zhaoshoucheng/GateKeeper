@@ -199,8 +199,8 @@ if ($development == 2) {
     //新版诊断指标开城列表
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
 
-    //新版报警开城列表
-    $alarm_v2_city_ids = [12,23,134];
+    //新版报警开城列表（当接收到报警消息时，哪些走新版报警？）
+    $alarm_v2_city_ids = [10,5,12,23,134];
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
