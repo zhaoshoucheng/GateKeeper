@@ -108,7 +108,7 @@ if ($development == 2) {
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
 
     //新版报警开城列表
-    $alarm_v2_city_ids = [23];
+    $alarm_v2_city_ids = [12, 23];
 } else {
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
@@ -200,7 +200,7 @@ if ($development == 2) {
     $quota_v2_city_ids = [1,2,3,4,5,6,10,11,12,13,15,22,23,26,29,33,34,38,47,56,57,60,85,134,135,145,157,161,162,164,168,232,260,262];
 
     //新版报警开城列表（当接收到报警消息时，哪些城市走scala新版报警？）
-    $alarm_v2_city_ids = [5,10,12,23,134];
+    $alarm_v2_city_ids = [1,5,10,12,23,134];
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";

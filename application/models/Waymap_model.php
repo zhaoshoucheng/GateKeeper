@@ -555,7 +555,7 @@ class Waymap_model extends CI_Model
             com_log_warning('mapJunction_phase_empty', 0, "mapJunction_phase_empty",
                 ["junctionIds" => $logic_junction_ids, "res" => count($res),]);
         }
-
+        $res["version"] = $version; 
         return $res;
     }
 

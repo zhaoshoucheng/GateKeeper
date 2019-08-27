@@ -28,6 +28,7 @@ class Mapflow extends MY_Controller
         $logic_junction_id = $this->input->get_post('logic_junction_id');
         $version = $this->input->get_post('version');
         $logic_flow_ids = $this->input->get_post('logic_flow_ids');
+        $with_hidden = $this->input->get_post('with_hidden');
         try {
             $data = [
                         'logic_junction_id' => $logic_junction_id,
@@ -35,6 +36,7 @@ class Mapflow extends MY_Controller
                         'logic_flow_ids' => $logic_flow_ids,
                         'token'     => $this->config->item('waymap_token'),
                         'user_id'   => $this->config->item('waymap_userid'),
+                        'with_hidden'   => $with_hidden,   //是否包含隐藏相位
                     ];
             $ret = httpPOST($this->config->item('waymap_interface') . '/signal-map/MapFlow/simplifyFlows', $data);
             $ret = json_decode($ret, true);
@@ -57,9 +59,6 @@ class Mapflow extends MY_Controller
         }
         if (empty($params['city_id'])) {
             throw new \Exception('参数 city_id 不能为空！', ERR_PARAMETERS);
-        }
-        if (empty($params['version'])) {
-            throw new \Exception('参数 version 不能为空！', ERR_PARAMETERS);
         }
         $ret = $this->mapFlowService->getFlows($params);
         $this->response($ret);
