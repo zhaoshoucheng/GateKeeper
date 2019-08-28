@@ -461,7 +461,7 @@ class TimingAdaptionService extends BaseService
         $optStatus = json_decode($res['opt_status'], true);
 
         // 获取路口配时成功下发时间
-        $currentResult = $this->getCurrentUpdateResult($logicJunctionId);
+        // $currentResult = $this->getCurrentUpdateResult($logicJunctionId);
 
         // // 获取信号机生效配时
         // $currentTimingInfo = $this->getCurrentTimingInfo($params);
@@ -470,6 +470,7 @@ class TimingAdaptionService extends BaseService
         // $planTime = !empty($currentTimingInfo["start_time"])
         //     ? getTodayTimeOrFullTime($currentTimingInfo["start_time"])
         //     : "-";
+
         $status = $this->getUpDowntime($logicJunctionId);
 
         if (!$params['is_open']) {
@@ -545,14 +546,6 @@ class TimingAdaptionService extends BaseService
      */
     private function getUpDowntime($logic_junction_id)
     {
-        //优先从db中获取数据
-        $res = $this->adapt_model->getAdaptByJunctionId($logic_junction_id);
-        if (!empty($res['current_info']) && $result = json_decode($res['current_info'], true)) {
-            if(!empty($result['data']) && is_array($result['data'])){
-                return $result['data'];
-            }
-        }
-
         $address = $this->config->item('signal_timing_machine_status_url');
         $res = httpGET($address, compact('logic_junction_id'));
 
