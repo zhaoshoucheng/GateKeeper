@@ -23,6 +23,7 @@ class TimingAdaptionService extends BaseService
     public function __construct()
     {
         parent::__construct();
+        date_default_timezone_set('Asia/Shanghai');
 
         $this->load->model('redis_model');
         $this->load->model('adapt_model');
@@ -458,17 +459,18 @@ class TimingAdaptionService extends BaseService
         //$baseInfo = []; //基准配时
         $baseInfo = json_decode($res['base_info'], true);
         $optStatus = json_decode($res['opt_status'], true);
-        
+
         // 获取路口配时成功下发时间
         $currentResult = $this->getCurrentUpdateResult($logicJunctionId);
 
-        // 获取信号机生效配时
-        $currentTimingInfo = $this->getCurrentTimingInfo($params);
+        // // 获取信号机生效配时
+        // $currentTimingInfo = $this->getCurrentTimingInfo($params);
 
-        // 获取方案时间
-        $planTime = !empty($currentTimingInfo["start_time"])
-            ? getTodayTimeOrFullTime($currentTimingInfo["start_time"])
-            : "-";
+        // // 获取方案时间
+        // $planTime = !empty($currentTimingInfo["start_time"])
+        //     ? getTodayTimeOrFullTime($currentTimingInfo["start_time"])
+        //     : "-";
+        $status = $this->getUpDowntime($logicJunctionId);
 
         if (!$params['is_open']) {
             // 路口下发按钮未开启
@@ -497,7 +499,7 @@ class TimingAdaptionService extends BaseService
             '2' => '正在进行自适应控制',
             '3' => '正在切换基本方案',
         ];
-        
+
         // 下发频率获取
         $uploadInterval = 2;
 
@@ -518,10 +520,10 @@ class TimingAdaptionService extends BaseService
             : '-';
 
         return [
-            //方案获取时间
-            'get_current_plan_time' => $planTime,
-            //上次方案下发时间(更新上次调度程序的下发时间为上次方案下发时间) 数据来源是:调度程序
-            'last_upload_time' => $lastUploadTime,
+            //方案获取时间，从signal_version获取
+            'get_current_plan_time' => $status['upload_at'],
+            //上次方案下发时间，从signal_version获取
+            'last_upload_time' => $status['download_at'],
             //优化方案保存生成时间 == 优化方案下发时间 (是否下发取决于开关)
             'adapte_time' => $adapteTime,
             //预计下次方案下发时间
@@ -530,6 +532,55 @@ class TimingAdaptionService extends BaseService
             'opt_status' => $optStatus,
             'tmp' => $tmp,
             'message' => $messages[$status],
+        ];
+    }
+
+    /**
+     * 获取配时上传下发时间
+     *
+     * @param $logic_junction_id
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function getUpDowntime($logic_junction_id)
+    {
+        //优先从db中获取数据
+        $res = $this->adapt_model->getAdaptByJunctionId($logic_junction_id);
+        if (!empty($res['current_info']) && $result = json_decode($res['current_info'], true)) {
+            if(!empty($result['data']) && is_array($result['data'])){
+                return $result['data'];
+            }
+        }
+
+        $address = $this->config->item('signal_timing_machine_status_url');
+        $res = httpGET($address, compact('logic_junction_id'));
+
+        if (!$res) {
+            throw new \Exception('获取配时上传下发时间失败', ERR_REQUEST_WAYMAP_API);
+        }
+
+        $result = json_decode($res, true);
+
+        if (!$result) {
+            return [
+                'upload_at' => "-",
+                'download_at' => "-",
+            ];
+        }
+
+        if (isset($result['errno']) && $result['errno'] != 0) {
+            return [
+                'upload_at' => "-",
+                'download_at' => "-",
+            ];
+        }
+
+        $up = date("Y-m-d H:i:s", $result['data']['upload_at']);
+        $download = date("Y-m-d H:i:s", $result['data']['download_at']);
+        return [
+            'upload_at' => $up,
+            'download_at' => $down,
         ];
     }
 }
