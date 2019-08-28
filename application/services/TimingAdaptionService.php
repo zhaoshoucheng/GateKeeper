@@ -573,7 +573,7 @@ class TimingAdaptionService extends BaseService
         $download = date("Y-m-d H:i:s", $result['data']['download_at']);
         return [
             'upload_at' => $up,
-            'download_at' => $down,
+            'download_at' => $download,
         ];
     }
 }
