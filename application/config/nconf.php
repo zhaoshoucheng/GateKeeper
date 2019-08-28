@@ -58,7 +58,7 @@ if ($development == 2) {
     // 路口配时状态
     $signal_timing_status_url = "http://10.85.128.81:30357/signal-control/signalprofile/timingstatusbatch";
     // 配时上传下发时间
-    $signal_timing_machine_status = "http://10.85.128.81:30357/signal-control/signalprofile/machinestatus";
+    $signal_timing_machine_status_url = "http://10.85.128.81:30357/signal-control/signalprofile/machinestatus";
     // es 老实时轨迹、指标数据
     $es_server = 'http://10.85.128.208:8001';
 
@@ -148,7 +148,7 @@ if ($development == 2) {
     // 路口配时状态
     $signal_timing_status_url = "http://100.90.164.31:8016/signal-control/signalprofile/timingstatusbatch";
     // 配时上传下发时间
-    $signal_timing_machine_status = "http://100.90.164.31:8016/signal-control/signalprofile/machinestatus";
+    $signal_timing_machine_status_url = "http://100.90.164.31:8016/signal-control/signalprofile/machinestatus";
 
     // es
     $es_server = 'http://10.89.236.25:8087';
