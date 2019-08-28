@@ -241,7 +241,7 @@ $config['signal_base_url'] = $signal_base_url;
 $config['signal_timing_url'] = $signal_timing_url;
 
 $config['signal_timing_status_url'] = $signal_timing_status_url;
-$config['signal_timing_machine_status_url'] = $signal_timing_status_url;
+$config['signal_timing_machine_status_url'] = $signal_timing_machine_status_url;
 
 // 实时指标接口地址
 $config['es_interface'] = $es_server;
