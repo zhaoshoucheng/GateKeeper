@@ -471,7 +471,7 @@ class TimingAdaptionService extends BaseService
         //     ? getTodayTimeOrFullTime($currentTimingInfo["start_time"])
         //     : "-";
 
-        $status = $this->getUpDowntime($logicJunctionId);
+        $updown = $this->getUpDowntime($logicJunctionId);
 
         if (!$params['is_open']) {
             // 路口下发按钮未开启
@@ -522,9 +522,9 @@ class TimingAdaptionService extends BaseService
 
         return [
             //方案获取时间，从signal_version获取
-            'get_current_plan_time' => $status['upload_at'],
+            'get_current_plan_time' => $updown['upload_at'],
             //上次方案下发时间，从signal_version获取
-            'last_upload_time' => $status['download_at'],
+            'last_upload_time' => $updown['download_at'],
             //优化方案保存生成时间 == 优化方案下发时间 (是否下发取决于开关)
             'adapte_time' => $adapteTime,
             //预计下次方案下发时间
