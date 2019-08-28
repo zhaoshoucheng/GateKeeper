@@ -57,6 +57,8 @@ if ($development == 2) {
 
     // 路口配时状态
     $signal_timing_status_url = "http://10.85.128.81:30357/signal-control/signalprofile/timingstatusbatch";
+    // 配时上传下发时间
+    $signal_timing_machine_status_url = "http://10.85.128.81:30357/signal-control/signalprofile/machinestatus";
     // es 老实时轨迹、指标数据
     $es_server = 'http://10.85.128.208:8001';
 
@@ -108,7 +110,7 @@ if ($development == 2) {
     $quota_v2_city_ids = [1, 12, 57, 85, 134];
 
     //新版报警开城列表
-    $alarm_v2_city_ids = [23];
+    $alarm_v2_city_ids = [12, 23];
 } else {
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
@@ -145,6 +147,8 @@ if ($development == 2) {
 
     // 路口配时状态
     $signal_timing_status_url = "http://100.90.164.31:8016/signal-control/signalprofile/timingstatusbatch";
+    // 配时上传下发时间
+    $signal_timing_machine_status_url = "http://100.90.164.31:8016/signal-control/signalprofile/machinestatus";
 
     // es
     $es_server = 'http://10.89.236.25:8087';
@@ -196,11 +200,11 @@ if ($development == 2) {
         "134"=>2,
     ];
 
-    //新版诊断指标开城列表
-    $quota_v2_city_ids = [1, 12, 57, 85, 134];
+    //新版诊断指标开城列表(后期被common_model->getV5DMPCityID替代了)
+    $quota_v2_city_ids = [1,2,3,4,5,6,10,11,12,13,15,22,23,26,29,33,34,38,47,56,57,60,85,134,135,145,157,161,162,164,168,232,260,262];
 
-    //新版报警开城列表
-    $alarm_v2_city_ids = [12,23,134];
+    //新版报警开城列表（当接收到报警消息时，哪些城市走scala新版报警？）
+    $alarm_v2_city_ids = [1,5,10,12,23,134];
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -237,6 +241,7 @@ $config['signal_base_url'] = $signal_base_url;
 $config['signal_timing_url'] = $signal_timing_url;
 
 $config['signal_timing_status_url'] = $signal_timing_status_url;
+$config['signal_timing_machine_status_url'] = $signal_timing_machine_status_url;
 
 // 实时指标接口地址
 $config['es_interface'] = $es_server;

@@ -288,8 +288,8 @@ class Realtime_model extends CI_Model
 
         return [
             date('H:i:s', strtotime($dayTime)) => [
-                'value' => isset($quotaValueInfo['quotaMap']['weight_avg']) ?? 0,
-                'hour' => date('H:i:s', strtotime(isset($quotaValueInfo['quotaMap']['dayTime']) ?? "")),
+                'value' => $quotaValueInfo['quotaMap']['weight_avg'] ?? 0,
+                'hour' => date('H:i:s', strtotime($quotaValueInfo['quotaMap']['dayTime'] ?? "")),
             ]
         ];
     }

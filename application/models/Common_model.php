@@ -18,7 +18,7 @@ class Common_model extends CI_Model
     {
         parent::__construct();
         $this->db = $this->load->database('default', true);
-
+        $this->load->config('nconf');
     }
 
     /**
@@ -114,12 +114,16 @@ class Common_model extends CI_Model
     }
 
     /**
-     * 获取v5开城列表
+     * 获取v5开城列表（新版指标城市）
      * @param $cityId long 城市ID
      * @return mixed
      */
     public function getV5DMPCityID()
     {
+        if(ENVIRONMENT=="development"){
+            $cityIDS = $this->config->item('quota_v2_city_ids');
+            return $cityIDS;
+        }
         //return $this->getAdaptCityIDS();
         $table = 'dmp_city_config';
         $select = 'city_id, city_name';

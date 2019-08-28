@@ -210,7 +210,7 @@ class MY_Controller extends CI_Controller
         }
         // 如果是不是线上环境，赋给“所有”权限
         if (ENVIRONMENT != 'production') {
-            $this->userPerm['city_id'] = [1, 12, 23, 134, 157];
+            //$this->userPerm['city_id'] = [1, 12, 23, 134, 157];
         }
 
         if (!empty($_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'])) {
