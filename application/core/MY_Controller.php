@@ -188,7 +188,6 @@ class MY_Controller extends CI_Controller
             $permData = $this->Redis_model->getData($redisKey);
             $this->userPerm = json_decode($permData,true);
             //获取的city_id对应权限
-            $this->permCitys = !empty($this->userPerm["data"]) ? array_keys($this->userPerm["data"]) : [];
             $this->userPerm = !empty($this->userPerm["data"][$downgradeCityId]) ? $this->userPerm["data"][$downgradeCityId] : [];
             if(!empty($this->userPerm)){
                 $this->userPerm['group_id'] = $_SERVER['HTTP_DIDI_HEADER_USERGROUP'];
@@ -200,6 +199,9 @@ class MY_Controller extends CI_Controller
             }
         }
 
+        // 从用户权限
+        // // 获取可以验证的城市列表获取可以验证的城市列表
+        /*
         if (!empty($_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'])) {
             $citys = $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'];
             $userPermCitys = explode(",", $citys);
@@ -217,7 +219,7 @@ class MY_Controller extends CI_Controller
                     $this->userPerm['group_id'] = 0;
                 }
             }
-        }
+        }*/
 
         if (!empty($this->permCitys)) {
             $needValidateCity = $this->config->item('validate_city');
@@ -423,7 +425,9 @@ class MY_Controller extends CI_Controller
         }
 
         foreach ($ret as $val) {
-            if ($area == $val['taxiId']) {
+            $cityId = $val['taxiId'];
+            $this->permCitys[] = $cityId;
+            if ($area == $cityId) {
                 return true;
             }
         }
