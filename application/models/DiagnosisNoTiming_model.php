@@ -249,6 +249,7 @@ class DiagnosisNoTiming_model extends CI_Model
         }
         $itemTrajSum = [];
         foreach ($flowList as $item){
+            //计算权重
             if(!isset($quotaWeightSum[$item['logic_flow_id']]["flowStopWeight"])){
                 $quotaWeightSum[$item['logic_flow_id']]["flowStopWeight"] = 0;
             }
@@ -325,7 +326,9 @@ class DiagnosisNoTiming_model extends CI_Model
 
             if (isset($result[$flowId])) {
                 $movementInfo = array_merge($movementInfo, $result[$flowId]);
-                $movementInfo["confidence"] = $quotaRound["confidence"]['round']($result[$flowId]["traj_count"]);
+                $movementInfo["confidence"] = $quotaRound["confidence"]['round']($quotaWeightSum[$flowId]["flowWeight"]);
+
+
                 $movementInfo["sort_key"] = $item["sort_key"];
 
                 //防御性代码处理

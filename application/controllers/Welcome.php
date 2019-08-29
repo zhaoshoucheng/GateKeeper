@@ -50,6 +50,12 @@ class Welcome extends CI_Controller
 
     public function ping()
     {
+        echo "pong";
+        exit;
+    }
+
+    public function check()
+    {
         $redisKey = !empty($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY']) ?  $_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'] : "";
         $this->load->model('Redis_model');
         $permData = $this->Redis_model->getData($redisKey);
