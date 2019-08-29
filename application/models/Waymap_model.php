@@ -263,7 +263,7 @@ class Waymap_model extends CI_Model
 
             $res = $this->get($url, $data);
 
-            $this->redis_model->setEx($redis_key, json_encode($res), 24 * 3600);
+            $this->redis_model->setEx($redis_key, json_encode($res), 10 * 3600);
 
             return $res;
         }
@@ -533,9 +533,9 @@ class Waymap_model extends CI_Model
 
     /**
      * getFlowsInfo32
-     * 
+     *
      * @param with_hidden 是否包含隐藏flow
-     * 
+     *
      */
     public function getFlowsInfo32($logic_junction_ids,$version=0,$with_hidden=0)
     {
@@ -555,7 +555,7 @@ class Waymap_model extends CI_Model
             com_log_warning('mapJunction_phase_empty', 0, "mapJunction_phase_empty",
                 ["junctionIds" => $logic_junction_ids, "res" => count($res),]);
         }
-        $res["version"] = $version; 
+        $res["version"] = $version;
         return $res;
     }
 
