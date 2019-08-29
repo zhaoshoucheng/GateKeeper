@@ -230,11 +230,12 @@ class Waymap_model extends CI_Model
      *
      * @param int $city_id   城市ID
      * @param int $version   版本号
+     * @param int $force     强制
      * @return array
      *
      * @throws \Exception
      */
-    public function getAllCityJunctions($city_id, $version = 0)
+    public function getAllCityJunctions($city_id, $version = 0, $force=0)
     {
         /*-------------------------------------------------
         | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
@@ -248,7 +249,9 @@ class Waymap_model extends CI_Model
 
         $redis_key = 'all_city_junctions_' . $city_id . '_' . $version;
         $result = $this->redis_model->getData($redis_key);
-
+        if($force){
+            $result = 0;
+        }
         if (!$result) {
 
             $offset = 0;
@@ -260,7 +263,7 @@ class Waymap_model extends CI_Model
 
             $res = $this->get($url, $data);
 
-            $this->redis_model->setEx($redis_key, json_encode($res), 24 * 3600);
+            $this->redis_model->setEx($redis_key, json_encode($res), 10 * 3600);
 
             return $res;
         }
@@ -528,17 +531,23 @@ class Waymap_model extends CI_Model
     }
 
 
-
-    public function getFlowsInfo32($logic_junction_ids)
+    /**
+     * getFlowsInfo32
+     *
+     * @param with_hidden 是否包含隐藏flow
+     *
+     */
+    public function getFlowsInfo32($logic_junction_ids,$version=0,$with_hidden=0)
     {
         $this->load->helper('phase');
-        $version = self::$lastMapVersion;
-
+        if(empty($version)){
+            $version = self::$lastMapVersion;
+        }
         if (is_array($logic_junction_ids)) {
             $logic_junction_ids = implode(",", $logic_junction_ids);
         }
 
-        $data = compact('logic_junction_ids');
+        $data = compact('logic_junction_ids','version','with_hidden');
         $url = $this->waymap_interface . '/signal-map/mapJunction/phase32';
         $res = $this->post($url, $data);
         // 调用相位接口出错
@@ -546,7 +555,7 @@ class Waymap_model extends CI_Model
             com_log_warning('mapJunction_phase_empty', 0, "mapJunction_phase_empty",
                 ["junctionIds" => $logic_junction_ids, "res" => count($res),]);
         }
-
+        $res["version"] = $version;
         return $res;
     }
 
@@ -719,6 +728,21 @@ class Waymap_model extends CI_Model
         if($ret["name"]==$junctionName){
             return true;
         }
+        return false;
+    }
+
+
+    // 修改相位信息
+    public function saveFlowInfo($junctionID,$flowID,$phaseName,$isHidden=0)
+    {
+        $url = $this->waymap_interface . '/signal-map/mapFlow/saveDesc';
+        $data = [
+            'logic_junction_id' => $junctionID,
+            'flows' => [
+                ["logic_flow_id"=>$flowID,"desc"=>$phaseName,"is_hidden"=>$isHidden,]
+            ],
+        ];
+        $ret = $this->post($url, $data, 5000, 'json');
         return false;
     }
 }

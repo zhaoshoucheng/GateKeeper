@@ -36,6 +36,7 @@
 		},
 		"files": [
 			"application/libraries/SSOSdk.php",
+			"application/libraries/Aes.php",
 			"application/libraries/php_tracelog/src/common_helper.php"
 		]
 	}

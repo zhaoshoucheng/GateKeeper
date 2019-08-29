@@ -834,6 +834,7 @@ class TimingAdaptionAreaService extends BaseService
         ];
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/space/query';
+
         if(ENVIRONMENT=="development"){
             $esUrl = 'http://10.85.128.208:8001/api/data/estimate/space/query';
         }
@@ -1160,16 +1161,18 @@ class TimingAdaptionAreaService extends BaseService
                         foreach ($tv['flow_info'] as $fk=>$fv){
                                 if($fv['logic_flow_id'] == $data['logic_flow_id'] ){
 
-                                    $green = $tv['end_time']-$tv['start_time']-3;
+                                    $green = $tv['green'];
+                                    $yellow = $tv['yellow'];
                                      if (isset($flowTimingCurve[date("H:i", strtotime($ctime))]) && !isset($phaseMap[$tv['phase_num']."_".$tv['sequence_num']."_".date("H:i", strtotime($ctime))])) {
 
                                         $flowTimingCurve[date("H:i", strtotime($ctime))]["green"] += $green;
+                                        $flowTimingCurve[date("H:i", strtotime($ctime))]["yellow"] += $yellow;
 
 
                                      } else {
                                         $flowTimingCurve[date("H:i", strtotime($ctime))] = [
-                                            "yellow" => 3,
                                             "green" => $green,
+                                            "yellow" => $yellow,
                                             "cycle" => $cycle,
                                             "offset" => $offset,
                                         ];
@@ -1218,6 +1221,7 @@ class TimingAdaptionAreaService extends BaseService
         ];
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/scatter/query';
+
         if(ENVIRONMENT=="development"){
             $esUrl = 'http://10.85.128.208:8001/api/data/estimate/scatter/query';
         }
@@ -1341,6 +1345,7 @@ class TimingAdaptionAreaService extends BaseService
         ];
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/queue/query';
+
         if(ENVIRONMENT=="development"){
             $esUrl = 'http://10.85.128.208:8001/api/data/estimate/queue/query';
         }

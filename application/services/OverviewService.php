@@ -99,7 +99,7 @@ class OverviewService extends BaseService
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['pagesize'] = $params['pagesize'] ?? 20;
-        if(!empty($this->userPerm['group_id']) && $this->userPerm['group_id']!="426") {
+        if(empty($this->userPerm['group_id']) || $this->userPerm['group_id']!="426") {
             $delayList = $this->stopDelayTopList($params, $this->userPerm);
             $newDelayList = [];
             foreach ($delayList as $item) {

@@ -484,6 +484,10 @@ class Junction extends MY_Controller
             'junction_name'     => 'required',
         ]);
         $result = $this->junctionsService->saveJunctionName($params["junction_id"],$params["city_id"],$params["junction_name"]);
+        $waymapModel = new Waymap_model();
+        $version = $waymapModel::$lastMapVersion;
+        $waymapModel->getAllCityJunctions($params["city_id"], $version, 1);
+
         $this->response($result);
     }
 }
