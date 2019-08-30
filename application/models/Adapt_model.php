@@ -107,6 +107,9 @@ class Adapt_model extends CI_Model
         $data = [
             'created_at' => date("Y-m-d H:i:s"),
         ];
+        if(!isset($data["trace_id"])){
+            $data["trace_id"] = "";
+        }
         $data = array_merge($params,$data);
         return $this->logDb->insert('adapt_timing_log', $data);
     }
