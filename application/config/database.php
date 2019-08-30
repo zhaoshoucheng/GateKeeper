@@ -155,11 +155,11 @@ $db['signal_control'] = array(
 
 $db['its_trace_log'] = array(
     'dsn'   => '',
-    'username' => 'root',
-    'hostname' => '100.90.164.31',
-    'port' => 3306,
-    'password' => 'Znjty@Didi@2017',
-    'database' => 'its_trace_log',
+    'hostname' => $hostname,
+    'username' => $username,
+    'password' => $password,
+    'database' => $database,
+    'port'     => $port,
     'dbdriver' => 'mysqli',
     'dbprefix' => '',
     'pconnect' => FALSE,
