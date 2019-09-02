@@ -141,7 +141,9 @@ class Waymap_model extends CI_Model
      */
     public function getSuggestJunction($city_id, $keyword)
     {
-        $data = compact('city_id', 'keyword');
+        $version = self::$lastMapVersion;
+
+        $data = compact('city_id', 'keyword', 'version');
 
         $url = $this->waymap_interface . '/signal-map/mapJunction/suggest';
 
