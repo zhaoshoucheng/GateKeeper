@@ -199,4 +199,22 @@ class Road_model extends CI_Model
 
         return $this->db->get()->num_rows() === 0;
     }
+
+    /**
+     * 批量获取干线详情
+     *
+     * @param $cityId
+     * @param string $select
+     * @return array
+     */
+    public function getRoadsByRoadID($road_ids, $select = '*')
+    {
+        $res = $this->db->select($select)
+            ->from($this->tb)
+            ->where_in('id', $road_ids)
+            ->where('is_delete', 0)
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
 }
