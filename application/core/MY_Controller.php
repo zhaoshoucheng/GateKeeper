@@ -214,15 +214,12 @@ class MY_Controller extends CI_Controller
 
         // 从用户权限
         // // 获取可以验证的城市列表获取可以验证的城市列表
-        /*
         if (!empty($_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'])) {
             $citys = $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'];
             $userPermCitys = explode(",", $citys);
             foreach ($userPermCitys as $city) {
-                if (in_array($city, $this->permCitys)) {
-                    continue;
-                }
                 $this->permCitys[] = $city;
+                /*
                 if ($city == $downgradeCityId) {
                     $this->userPerm['city_id'] = [$city];
                     $this->userPerm['area_id'] = [];
@@ -230,9 +227,9 @@ class MY_Controller extends CI_Controller
                     $this->userPerm['route_id'] = [];
                     $this->userPerm['junction_id'] = [];
                     $this->userPerm['group_id'] = 0;
-                }
+                }*/
             }
-        }*/
+        }
 
         if (!empty($this->permCitys)) {
             $needValidateCity = $this->config->item('validate_city');
@@ -439,7 +436,6 @@ class MY_Controller extends CI_Controller
 
         foreach ($ret as $val) {
             $cityId = $val['taxiId'];
-            $this->permCitys[] = $cityId;
             if ($area == $cityId) {
                 return true;
             }
