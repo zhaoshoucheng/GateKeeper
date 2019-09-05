@@ -143,7 +143,10 @@ class MY_Controller extends CI_Controller
                 $accessType = 4; // 使用用户名密码访问
                 $accessUser = $this->username;
             }
+        } else {
+            $accessUser = $_COOKIE['username'] ?? "unkown";
         }
+        $this->username = $accessUser;
 
         //客户端ip与city_id绑定校验:联通定制版
         if($_SERVER["REMOTE_ADDR"]=="123.124.255.72"
@@ -229,6 +232,10 @@ class MY_Controller extends CI_Controller
                     $this->userPerm['group_id'] = 0;
                 }*/
             }
+            com_log_notice("_com_perm_citys",[
+                "citys" => $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'],
+                "username" => $accessUser,
+            ]);
         }
 
         if (!empty($this->permCitys)) {
