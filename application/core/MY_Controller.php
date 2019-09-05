@@ -217,10 +217,13 @@ class MY_Controller extends CI_Controller
 
         // 从用户权限
         // // 获取可以验证的城市列表获取可以验证的城市列表
-        if (!empty($_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'])) {
+        if (isset($_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'])) {
             $citys = $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'];
             $userPermCitys = explode(",", $citys);
             foreach ($userPermCitys as $city) {
+                if (intval($city) <= 0) {
+                    continue;
+                }
                 $this->permCitys[] = $city;
                 /*
                 if ($city == $downgradeCityId) {
@@ -235,7 +238,13 @@ class MY_Controller extends CI_Controller
             com_log_notice("_com_perm_citys",[
                 "citys" => $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'],
                 "username" => $accessUser,
+                "permCitys" => $this->permCitys,
             ]);
+            if (empty($this->permCitys)) {
+                $this->errno = ERR_AUTH_AREA;
+                $this->_output();
+                exit;
+            }
         }
 
         if (!empty($this->permCitys)) {
