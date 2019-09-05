@@ -152,7 +152,7 @@ class OpttaskService extends BaseService {
         if (!empty($data)) {
             $data = $data[0];
             $config = json_decode($data['config'], true);
-            $config['config']['task_id'] = $data['id'];
+            $config['task_id'] = $data['id'];
             return $config;
         } else {
             return [];
@@ -195,7 +195,7 @@ class OpttaskService extends BaseService {
         $road_id = $params['road_id'];
         $task_type = $params['task_type'];
 
-        $task_list = $this->Opttask->TaskListByCityID($city_id, $task_type);
+        $task_list = $this->opttask_model->TaskListByCityID($city_id, $task_type);
         $road_task_map = [];
         $new_task_list = [];
         foreach ($task_list as $value) {
@@ -213,13 +213,12 @@ class OpttaskService extends BaseService {
         foreach ($road_list as $key => $value) {
             if ($value['road_id'] == $road_id) {
                 $road_info = $value;
-                unset($road_list[$key]);
             }
         }
         $data = [];
         if (isset($road_info)) {
             $junction_list = explode(',', $road_info['logic_junction_ids']);
-            foreach ($junction_id as $junction_list) {
+            foreach ($junction_list as $junction_id) {
                 $one = [
                     'logic_flow_id' => $junction_id,
                     'conflict_task' => [],
@@ -231,14 +230,15 @@ class OpttaskService extends BaseService {
                     $tmp_junction_list = explode(',', $road['logic_junction_ids']);
                     if (in_array($junction_id, $tmp_junction_list)) {
                         $one['conflict_task'][] = [
-                            'task_id' => $task_list[$road_task_map[$road['road_id']]]['task_id'],
+                            'task_id' => $task_list[$road_task_map[$road['road_id']]]['id'],
                             'task_name' => $task_list[$road_task_map[$road['road_id']]]['task_name'],
                         ];
                     }
                 }
+                $data[] = $one;
             }
         }
 
-        $this->response($data);
+        return $data;
     }
 }
