@@ -143,7 +143,10 @@ class MY_Controller extends CI_Controller
                 $accessType = 4; // 使用用户名密码访问
                 $accessUser = $this->username;
             }
+        } else {
+            $accessUser = $_COOKIE['username'] ?? "unkown";
         }
+        $this->username = $accessUser;
 
         //客户端ip与city_id绑定校验:联通定制版
         if($_SERVER["REMOTE_ADDR"]=="123.124.255.72"
@@ -214,15 +217,12 @@ class MY_Controller extends CI_Controller
 
         // 从用户权限
         // // 获取可以验证的城市列表获取可以验证的城市列表
-        /*
         if (!empty($_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'])) {
             $citys = $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'];
             $userPermCitys = explode(",", $citys);
             foreach ($userPermCitys as $city) {
-                if (in_array($city, $this->permCitys)) {
-                    continue;
-                }
                 $this->permCitys[] = $city;
+                /*
                 if ($city == $downgradeCityId) {
                     $this->userPerm['city_id'] = [$city];
                     $this->userPerm['area_id'] = [];
@@ -230,9 +230,13 @@ class MY_Controller extends CI_Controller
                     $this->userPerm['route_id'] = [];
                     $this->userPerm['junction_id'] = [];
                     $this->userPerm['group_id'] = 0;
-                }
+                }*/
             }
-        }*/
+            com_log_notice("_com_perm_citys",[
+                "citys" => $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'],
+                "username" => $accessUser,
+            ]);
+        }
 
         if (!empty($this->permCitys)) {
             $needValidateCity = $this->config->item('validate_city');
@@ -439,7 +443,6 @@ class MY_Controller extends CI_Controller
 
         foreach ($ret as $val) {
             $cityId = $val['taxiId'];
-            $this->permCitys[] = $cityId;
             if ($area == $cityId) {
                 return true;
             }
