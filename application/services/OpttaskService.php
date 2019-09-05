@@ -241,4 +241,25 @@ class OpttaskService extends BaseService {
 
         return $data;
     }
+
+    /**
+     * 创建、更新任务
+     *
+     * @param $params
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function SearchRoad($params) {
+        $city_id = $params['city_id'];
+        $keyword = $params['keyword'];
+        $road_list =$this->road_model->searchRoadsByKeyword($city_id, $keyword);
+        $road_list = array_map(function($item) {
+            return [
+                'road_id' => $item['road_id'],
+                'road_name' => $item['road_name'],
+            ];
+        }, $road_list);
+        return $road_list;
+    }
 }

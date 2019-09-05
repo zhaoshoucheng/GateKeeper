@@ -96,4 +96,23 @@ class Optroadtask extends MY_Controller
 
         $this->response($data);
     }
+
+    /**
+     * 任务干线路口冲突
+     *
+     * @throws Exception
+     */
+    public function search()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'keyword' => 'required|trim|min_length[1]',
+        ]);
+
+        $data = $this->opttaskService->SearchRoad($params);
+
+        $this->response($data);
+    }
 }
