@@ -194,29 +194,7 @@ class MY_Controller extends CI_Controller
 
         //写入权限信息
         $this->permCitys = [];
-        if(!empty($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'])){
-            $redisKey = $_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'];
-            $this->load->model('Redis_model');
-            $permData = $this->Redis_model->getData($redisKey);
-            $this->userPerm = json_decode($permData,true);
-            //获取的city_id对应权限
-            $this->userPerm = !empty($this->userPerm["data"][$downgradeCityId]) ? $this->userPerm["data"][$downgradeCityId] : [];
-            if(!empty($this->userPerm)){
-                $this->userPerm['group_id'] = $_SERVER['HTTP_DIDI_HEADER_USERGROUP'];
-                $this->userPerm['city_id'] = !empty($this->userPerm['city_id']) ? explode(";",$this->userPerm['city_id']) : [];
-                $this->userPerm['area_id'] = !empty($this->userPerm['area_id']) ? explode(";",$this->userPerm['area_id']) : [];
-                $this->userPerm['admin_area_id'] = !empty($this->userPerm['admin_area_id']) ? explode(";",$this->userPerm['admin_area_id']) : [];
-                $this->userPerm['route_id'] = !empty($this->userPerm['route_id']) ? explode(";",$this->userPerm['route_id']) : [];
-                $this->userPerm['junction_id'] = !empty($this->userPerm['junction_id']) ? explode(";",$this->userPerm['junction_id']) : [];
-            }
-        }
-        // 如果是不是线上环境，赋给“所有”权限
-        if (ENVIRONMENT != 'production') {
-            //$this->userPerm['city_id'] = [1, 12, 23, 134, 157];
-        }
-
-        // 从用户权限
-        // // 获取可以验证的城市列表获取可以验证的城市列表
+        // 从用户权限获取可以验证的城市列表获取可以验证的城市列表
         if (isset($_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'])) {
             $citys = $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'];
             $userPermCitys = explode(",", $citys);
@@ -225,15 +203,6 @@ class MY_Controller extends CI_Controller
                     continue;
                 }
                 $this->permCitys[] = $city;
-                /*
-                if ($city == $downgradeCityId) {
-                    $this->userPerm['city_id'] = [$city];
-                    $this->userPerm['area_id'] = [];
-                    $this->userPerm['admin_area_id'] = [];
-                    $this->userPerm['route_id'] = [];
-                    $this->userPerm['junction_id'] = [];
-                    $this->userPerm['group_id'] = 0;
-                }*/
             }
             com_log_notice("_com_perm_citys",[
                 "citys" => $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'],
@@ -247,6 +216,31 @@ class MY_Controller extends CI_Controller
             }
         }
 
+        if(!empty($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'])){
+            $redisKey = $_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'];
+            $this->load->model('Redis_model');
+            $permData = $this->Redis_model->getData($redisKey);
+            $userPerm = json_decode($permData,true);
+            //获取的city_id对应权限
+            if (!empty($userPerm["data"][$downgradeCityId])) {
+                $this->userPerm = $userPerm["data"][$downgradeCityId];
+            } else if (!empty($userPerm["data"])) {
+                $this->errno = ERR_AUTH_AREA;
+                $this->errmsg = "没有此地区的数据权限";
+                $this->_output();
+                exit;
+            } else {
+                $this->userPerm = [];
+            }
+            if(!empty($this->userPerm)){
+                $this->userPerm['group_id'] = $_SERVER['HTTP_DIDI_HEADER_USERGROUP'];
+                $this->userPerm['city_id'] = !empty($this->userPerm['city_id']) ? explode(";",$this->userPerm['city_id']) : [];
+                $this->userPerm['area_id'] = !empty($this->userPerm['area_id']) ? explode(";",$this->userPerm['area_id']) : [];
+                $this->userPerm['admin_area_id'] = !empty($this->userPerm['admin_area_id']) ? explode(";",$this->userPerm['admin_area_id']) : [];
+                $this->userPerm['route_id'] = !empty($this->userPerm['route_id']) ? explode(";",$this->userPerm['route_id']) : [];
+                $this->userPerm['junction_id'] = !empty($this->userPerm['junction_id']) ? explode(";",$this->userPerm['junction_id']) : [];
+            }
+        }
         if (!empty($this->permCitys)) {
             $needValidateCity = $this->config->item('validate_city');
             if (isset($_REQUEST['city_id']) && $needValidateCity && !in_array($_REQUEST['city_id'], $this->permCitys)) {
