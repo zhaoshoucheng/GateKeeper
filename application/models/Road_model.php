@@ -207,11 +207,11 @@ class Road_model extends CI_Model
      * @param string $select
      * @return array
      */
-    public function getRoadsByRoadID($road_ids, $select = '*')
+    public function getRoadsByRoadIDs($road_ids, $select = '*')
     {
         $res = $this->db->select($select)
             ->from($this->tb)
-            ->where_in('id', $road_ids)
+            ->where_in('road_id', $road_ids)
             ->where('is_delete', 0)
             ->get();
 

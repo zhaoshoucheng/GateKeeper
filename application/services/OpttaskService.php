@@ -45,19 +45,22 @@ class OpttaskService extends BaseService {
     public function TaskList($params) {
         $limit = $params['page_size'];
         $offset = $params['page_size'] * ($params['page'] - 1);
-        $tatal = $this->opttask_model->TasTotal($params['city_id'], $params['task_type'], $limit, $offset);
+        $total = $this->opttask_model->TaskTotal($params['city_id'], $params['task_type'], $limit, $offset);
         $task_list = $this->opttask_model->TaskList($params['city_id'], $params['task_type'], $limit, $offset);
 
         $road_ids = array_column($task_list, 'road_id');
-        $road_list = $this->road_model->getRoadsByRoadID($road_ids);
+        $road_list = [];
+        if (!empty($road_ids)) {
+            $road_list = $this->road_model->getRoadsByRoadIDs($road_ids);
+        }
         $road_id_name_map = [];
         foreach ($road_list as $value) {
             $road_id_name_map[$value['road_id']] = $value['road_name'];
         }
 
         $task_list = array_map(function($item) use($road_id_name_map) {
-            $config = json_decode($item['config']);
-            $weekday = $config['timing']['weekdays'];
+            $config = json_decode($item['config'], true);
+            $weekday = $config['timing']['weekday'];
             $weekdays = [];
             foreach ($weekday as $value) {
                 if ($value == 1) {
@@ -105,7 +108,7 @@ class OpttaskService extends BaseService {
                 'status'=> $status,
                 'action' => $action,
             ];
-        }, $data);
+        }, $task_list);
         return [
             'page' => $params['page'],
             'page_size' => $params['page_size'],
@@ -128,15 +131,10 @@ class OpttaskService extends BaseService {
         $task_name = $params['task_name'];
         $task_type = $params['task_type'];
         $road_id = $params['road_id'];
-        $config = $params['config'];
-        $config['task_id'] = $task_id;
-        $config['task_name'] = $task_name;
-        $config['task_type'] = $task_type;
-        $config['road_id'] = $road_id;
         if ($task_id <= 0) {
-            return $this->opttask_model->CreateTask($city_id, $task_name, $task_type, $road_id, $config);
+            return $this->opttask_model->CreateTask($city_id, $task_name, $task_type, $road_id, $params);
         } else {
-            return $this->opttask_model->UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $config);
+            return $this->opttask_model->UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $params);
         }
     }
 
@@ -153,8 +151,9 @@ class OpttaskService extends BaseService {
         $data = $this->opttask_model->TaskInfo($task_id);
         if (!empty($data)) {
             $data = $data[0];
-            $data['config']['task_id'] = $data['id'];
-            return $data;
+            $config = json_decode($data['config'], true);
+            $config['config']['task_id'] = $data['id'];
+            return $config;
         } else {
             return [];
         }
@@ -170,14 +169,14 @@ class OpttaskService extends BaseService {
      */
     public function UpdateTaskStatus($params) {
         $task_id = $params['task_id'];
-        $status = $params['status'];
+        $status = $params['action'];
         if ($status == 0 or $status == 1) {
             $fields = [
                 'status' => $status,
             ];
         } elseif ($status == 2) {
             $fields = [
-                'update_at' => time(),
+                'delete_at' => date('Y-m-d H:i:s'),
             ];
         } else {
             return false;
@@ -207,7 +206,10 @@ class OpttaskService extends BaseService {
         $road_ids = array_column($task_list, 'road_id');
         $road_ids[] = $road_id;
 
-        $road_list = $this->road_model->getRoadsByRoadID($road_ids);
+        $road_list = [];
+        if (!empty($road_ids)) {
+            $road_list = $this->road_model->getRoadsByRoadIDs($road_ids);
+        }
         foreach ($road_list as $key => $value) {
             if ($value['road_id'] == $road_id) {
                 $road_info = $value;

@@ -44,7 +44,7 @@ class Opttask extends MY_Controller
             $params['page'] = 1;
         }
         if (!isset($params['page_size'])) {
-            $params['page'] = 20;
+            $params['page_size'] = 20;
         }
 
         $data = $this->opttaskService->TaskList($params);

@@ -95,7 +95,7 @@ class Opttask_model extends CI_Model {
             'task_type' => $task_type,
             'road_id' => $road_id,
             'config' => json_encode($config),
-            'status' => 1,
+            'status' => 0,
         ];
         $res = $this->db->insert($this->tb, $obj);
         if ($res == false) {
@@ -132,10 +132,9 @@ class Opttask_model extends CI_Model {
     {
         $res = $this->db->select($select)
             ->from($this->tb)
-            ->where('task_id', $task_id)
+            ->where('id', $task_id)
             ->where('delete_at', "1971-01-01 00:00:00")
             ->get();
-
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
@@ -147,6 +146,7 @@ class Opttask_model extends CI_Model {
     public function UpdateTaskStatus($task_id, $fields)
     {
         $res = $this->db->where('id', $task_id)->update($this->tb, $fields);
+
         return $res;
     }
 }

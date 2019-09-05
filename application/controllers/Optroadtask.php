@@ -33,13 +33,13 @@ class Optroadtask extends MY_Controller
     {
         $params = $this->input->raw_input_stream;
         $params = json_decode($params, true);
-        if (empty($params) or !$this->CheckTaskConf($params)) {
-            $this->errno = -1;
-            $this->errmsg = "输入错误";
-            $this->response("");
-            return;
+        // if (empty($params) or !$this->CheckTaskConf($params)) {
+        //     $this->errno = -1;
+        //     $this->errmsg = "输入错误";
+        //     $this->response("");
+        //     return;
 
-        }
+        // }
 
         $data = $this->opttaskService->UpdateTask($params);
         if ($data == false) {
