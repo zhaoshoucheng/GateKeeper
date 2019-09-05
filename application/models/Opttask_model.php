@@ -50,6 +50,22 @@ class Opttask_model extends CI_Model {
     }
 
     /**
+     * 获取任务列表
+     *
+     * @return array
+     */
+    public function TaskListByCityID($city_id, $task_type, $select = '*') {
+        $res = $this->db->select($select)
+            ->from($this->tb)
+            ->where('city_id', $city_id)
+            ->where('task_type', $task_type)
+            ->where('delete_at', "1971-01-01 00:00:00")
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
+
+    /**
      * 获取任务总数
      *
      * @return array
@@ -110,7 +126,7 @@ class Opttask_model extends CI_Model {
      /**
      * 任务详情
      *
-     * @return bool
+     * @return array
      */
     public function TaskInfo($task_id, $select = '*')
     {

@@ -76,4 +76,24 @@ class Optroadtask extends MY_Controller
 
         $this->response($data);
     }
+
+    /**
+     * 任务干线路口冲突
+     *
+     * @throws Exception
+     */
+    public function roadconflict()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'road_id' => 'required',
+            'task_type' => 'required',
+        ]);
+
+        $data = $this->opttaskService->RoadConflict($params);
+
+        $this->response($data);
+    }
 }

@@ -46,6 +46,7 @@ class Opttask extends MY_Controller
         if (!isset($params['page_size'])) {
             $params['page'] = 20;
         }
+
         $data = $this->opttaskService->TaskList($params);
 
         $this->response($data);
@@ -64,8 +65,6 @@ class Opttask extends MY_Controller
         $this->validate([
             'task_id' => 'required|is_natural_no_zero',
             'action' => 'required',
-            // 'page' => 'required',
-            // 'page_size' => 'required',
         ]);
 
         $data = $this->opttaskService->UpdateTaskStatus($params);
