@@ -157,10 +157,10 @@ class OpttaskService extends BaseService {
         if (!empty($data)) {
             $data = $data[0];
             $config = json_decode($data['config'], true);
-            $config['task_id'] = $data['id'];
-            $config['city_id'] = $data['city_id'];
+            $config['task_id'] = intval($data['id']);
+            $config['city_id'] = intval($data['city_id']);
             $config['task_name'] = $data['task_name'];
-            $config['task_type'] = $data['task_type'];
+            $config['task_type'] = intval($data['task_type']);
             $config['road_id'] = $data['road_id'];
             // todo: 获取最新干线路口更新路口信息
             return $config;
