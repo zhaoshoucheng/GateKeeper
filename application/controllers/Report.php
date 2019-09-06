@@ -105,6 +105,31 @@ class Report extends MY_Controller
         $this->response($data);
     }
 
+    public function reportProxy()
+    {
+        $params = $this->input->get(null, true);
+
+        $opts = array('http' =>
+            array(
+                'method' => 'GET',
+                'max_redirects' => '0',
+                'ignore_errors' => '1'
+            )
+        );
+        $url = base64_decode($params['url']);
+        $context = stream_context_create($opts);
+        $stream = fopen($url, 'r', false, $context);
+        $body = stream_get_contents($stream);
+        fclose($stream);
+        foreach (get_headers($url) as $k=>$v){
+            header($v);
+        }
+
+        echo $body;
+        exit();
+
+    }
+
     /**
      * @throws Exception
      */
