@@ -221,10 +221,11 @@ class MY_Controller extends CI_Controller
             $this->load->model('Redis_model');
             $permData = $this->Redis_model->getData($redisKey);
             $userPerm = json_decode($permData,true);
+            $cityId = isset($_REQUEST['city_id']) ? $_REQUEST['city_id'] : 0;
             //获取的city_id对应权限
-            if (!empty($userPerm["data"][$downgradeCityId])) {
-                $this->userPerm = $userPerm["data"][$downgradeCityId];
-            } else if (!empty($userPerm["data"])) {
+            if (!empty($userPerm["data"][$cityId])) {
+                $this->userPerm = $userPerm["data"][$cityId];
+            } else if (!empty($userPerm["data"]) && $cityId > 0) {
                 $this->errno = ERR_AUTH_AREA;
                 $this->errmsg = "没有此地区的数据权限";
                 $this->_output();
