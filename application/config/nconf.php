@@ -111,6 +111,8 @@ if ($development == 2) {
 
     //新版报警开城列表
     $alarm_v2_city_ids = [12, 23];
+
+    $report_proxy_url = "https://sts.didichuxing.com/sg1/api/signalpro/api";
 } else {
     // 路网接口服务器地址
     $waymap_server = '100.90.164.31';
@@ -205,6 +207,8 @@ if ($development == 2) {
 
     //新版报警开城列表（当接收到报警消息时，哪些城市走scala新版报警？）
     $alarm_v2_city_ids = [1,5,10,12,23,134];
+
+    $report_proxy_url = "http://10.179.148.73/sg1/api/signalpro/api";
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -214,6 +218,8 @@ $es_port           = !empty($es_port) ? ":" . $es_port : "";
 $quota_v2_es_port  = !empty($quota_v2_es_port) ? ":" . $quota_v2_es_port : "";
 $alarm_port        = !empty($alarm_port) ? ":" . $alarm_port : "";
 $data_service_prot = !empty($data_service_prot) ? ':' . $data_service_prot : '';
+//报告代理回主域名使用
+$config['report_proxy'] = $report_proxy_url;
 
 // 路网接口地址
 $config['waymap_interface'] = 'http://' . $waymap_server . $temp_waymap_port . $waymap_ext;

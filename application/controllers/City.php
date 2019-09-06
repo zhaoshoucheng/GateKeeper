@@ -23,7 +23,7 @@ class City extends MY_Controller {
         $pinyinService = new Pinyin('Overtrue\Pinyin\MemoryFileDictLoader');
         foreach ($cityInfos as $info) {
             $cityId = intval($info['city_id']);
-            if (!empty($permCitys) && !in_array($cityId, $permCitys)) {
+            if (!in_array($cityId, $permCitys)) {
                 continue;
             }
             $center = $info['center_point'];

@@ -86,7 +86,9 @@ class Overview extends MY_Controller
         $params['date'] = $params['date'] ?? date('Y-m-d');
 
         $data = $this->overviewService->junctionSurvey($params,$this->userPerm);
-
+        if($params['city_id'] == 12){   //济南项目,概览页路口总数暂时写死,与济南本地化项目(traj_service)数值保持一致
+            $data['junction_total'] = 1589;
+        }
         $this->response($data);
 
     }

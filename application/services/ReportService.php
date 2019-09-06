@@ -26,6 +26,8 @@ class ReportService extends BaseService
         $this->load->model('uploadFile_model');
         $this->load->model('gift_model');
         $this->load->model('waymap_model');
+
+        $this->report_proxy = $this->config->item('report_proxy');
     }
 
     /**
@@ -451,6 +453,7 @@ class ReportService extends BaseService
         return $data['itstool_private'];
     }
 
+
     /**
      * @param $params
      *
@@ -485,11 +488,12 @@ class ReportService extends BaseService
             }
             $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
             $lastPos    = strrpos($currentUrl, '/');
-            $baseUrl    = substr($currentUrl, 0, $lastPos);
+//            $baseUrl    = substr($currentUrl, 0, $lastPos);
+            $baseUrl    = $this->report_proxy;
             foreach ($result as $key => $item) {
                 $itemInfo = $this->gift_model->getResourceUrlList($resourceKeys, $namespace);
                 if (!empty($itemInfo[$item["file_key"]])) {
-                    $result[$key]['url']      = $itemInfo[$item["file_key"]]['download_url'];
+                    $result[$key]['url']      = $baseUrl."/Report/reportProxy?url=".base64_encode($itemInfo[$item["file_key"]]['download_url']);
                     $result[$key]['down_url'] = $baseUrl . "/downReport?key=" . $item["file_key"];
                 }
             }

@@ -143,7 +143,10 @@ class MY_Controller extends CI_Controller
                 $accessType = 4; // 使用用户名密码访问
                 $accessUser = $this->username;
             }
+        } else {
+            $accessUser = $_COOKIE['username'] ?? "unkown";
         }
+        $this->username = $accessUser;
 
         //客户端ip与city_id绑定校验:联通定制版
         if($_SERVER["REMOTE_ADDR"]=="123.124.255.72"
@@ -191,13 +194,45 @@ class MY_Controller extends CI_Controller
 
         //写入权限信息
         $this->permCitys = [];
+        // 从用户权限获取可以验证的城市列表获取可以验证的城市列表
+        if (isset($_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'])) {
+            $citys = $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'];
+            $userPermCitys = explode(",", $citys);
+            foreach ($userPermCitys as $city) {
+                if (intval($city) <= 0) {
+                    continue;
+                }
+                $this->permCitys[] = $city;
+            }
+            com_log_notice("_com_perm_citys",[
+                "citys" => $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'],
+                "username" => $accessUser,
+                "permCitys" => $this->permCitys,
+            ]);
+            if (empty($this->permCitys)) {
+                $this->errno = ERR_AUTH_AREA;
+                $this->_output();
+                exit;
+            }
+        }
+
         if(!empty($_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'])){
             $redisKey = $_SERVER['HTTP_DIDI_HEADER_USERGROUPKEY'];
             $this->load->model('Redis_model');
             $permData = $this->Redis_model->getData($redisKey);
-            $this->userPerm = json_decode($permData,true);
+            $userPerm = json_decode($permData,true);
+            $cityId = isset($_REQUEST['city_id']) ? $_REQUEST['city_id'] : 0;
             //获取的city_id对应权限
-            $this->userPerm = !empty($this->userPerm["data"][$downgradeCityId]) ? $this->userPerm["data"][$downgradeCityId] : [];
+            if (!empty($userPerm["data"][$cityId])) {
+                $this->userPerm = $userPerm["data"][$cityId];
+            } else if (!empty($userPerm["data"]) && $cityId > 0) {
+                $this->errno = ERR_AUTH_AREA;
+                $this->errmsg = "没有此地区的数据权限";
+                $this->_output();
+                exit;
+            } else {
+                $this->userPerm = [];
+            }
             if(!empty($this->userPerm)){
                 $this->userPerm['group_id'] = $_SERVER['HTTP_DIDI_HEADER_USERGROUP'];
                 $this->userPerm['city_id'] = !empty($this->userPerm['city_id']) ? explode(";",$this->userPerm['city_id']) : [];
@@ -207,33 +242,6 @@ class MY_Controller extends CI_Controller
                 $this->userPerm['junction_id'] = !empty($this->userPerm['junction_id']) ? explode(";",$this->userPerm['junction_id']) : [];
             }
         }
-        // 如果是不是线上环境，赋给“所有”权限
-        if (ENVIRONMENT != 'production') {
-            //$this->userPerm['city_id'] = [1, 12, 23, 134, 157];
-        }
-
-        // 从用户权限
-        // // 获取可以验证的城市列表获取可以验证的城市列表
-        /*
-        if (!empty($_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'])) {
-            $citys = $_SERVER['HTTP_DIDI_HEADER_USERCITYPERM'];
-            $userPermCitys = explode(",", $citys);
-            foreach ($userPermCitys as $city) {
-                if (in_array($city, $this->permCitys)) {
-                    continue;
-                }
-                $this->permCitys[] = $city;
-                if ($city == $downgradeCityId) {
-                    $this->userPerm['city_id'] = [$city];
-                    $this->userPerm['area_id'] = [];
-                    $this->userPerm['admin_area_id'] = [];
-                    $this->userPerm['route_id'] = [];
-                    $this->userPerm['junction_id'] = [];
-                    $this->userPerm['group_id'] = 0;
-                }
-            }
-        }*/
-
         if (!empty($this->permCitys)) {
             $needValidateCity = $this->config->item('validate_city');
             if (isset($_REQUEST['city_id']) && $needValidateCity && !in_array($_REQUEST['city_id'], $this->permCitys)) {
@@ -439,7 +447,6 @@ class MY_Controller extends CI_Controller
 
         foreach ($ret as $val) {
             $cityId = $val['taxiId'];
-            $this->permCitys[] = $cityId;
             if ($area == $cityId) {
                 return true;
             }
