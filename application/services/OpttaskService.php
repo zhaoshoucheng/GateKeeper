@@ -103,6 +103,7 @@ class OpttaskService extends BaseService {
                 'timing_type' => $config['plan']['timing_type'],
                 'opt_type' => $config['plan']['opt_type'],
                 'equal_cycle' => $config['plan']['equal_cycle'],
+                'date_source' => $config['timing']['date_source'],
                 'time_point' => implode(' ', $config['timing']['time_point']),
                 'weekday' => implode(' ', $weekdays),
                 'status'=> $status,
