@@ -126,11 +126,16 @@ class OpttaskService extends BaseService {
      * @throws \Exception
      */
     public function UpdateTask($params) {
-        $city_id = $params['city_id'];
         $task_id = $params['task_id'];
+        $city_id = $params['city_id'];
         $task_name = $params['task_name'];
         $task_type = $params['task_type'];
         $road_id = $params['road_id'];
+        unset($params['task_id']);
+        unset($params['city_id']);
+        unset($params['task_name']);
+        unset($params['task_type']);
+        unset($params['road_id']);
         if ($task_id <= 0) {
             return $this->opttask_model->CreateTask($city_id, $task_name, $task_type, $road_id, $params);
         } else {
@@ -153,6 +158,11 @@ class OpttaskService extends BaseService {
             $data = $data[0];
             $config = json_decode($data['config'], true);
             $config['task_id'] = $data['id'];
+            $config['city_id'] = $data['city_id'];
+            $config['task_name'] = $data['task_name'];
+            $config['task_type'] = $data['task_type'];
+            $config['road_id'] = $data['road_id'];
+            // todo: 获取最新干线路口更新路口信息
             return $config;
         } else {
             return [];
