@@ -116,11 +116,15 @@ class Report extends MY_Controller
                 'ignore_errors' => '1'
             )
         );
-
+        $url = base64_decode($params['url']);
         $context = stream_context_create($opts);
-        $stream = fopen($params['url'], 'r', false, $context);
+        $stream = fopen($url, 'r', false, $context);
         $body = stream_get_contents($stream);
         fclose($stream);
+        foreach (get_headers($url) as $k=>$v){
+            header($v);
+        }
+
         echo $body;
         exit();
 

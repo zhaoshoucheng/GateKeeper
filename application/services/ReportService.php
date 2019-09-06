@@ -493,8 +493,7 @@ class ReportService extends BaseService
             foreach ($result as $key => $item) {
                 $itemInfo = $this->gift_model->getResourceUrlList($resourceKeys, $namespace);
                 if (!empty($itemInfo[$item["file_key"]])) {
-//                    $result[$key]['url']      = $itemInfo[$item["file_key"]]['download_url'];
-                    $result[$key]['url']      = $baseUrl."/Report/reportProxy?url=".$itemInfo[$item["file_key"]]['download_url'];
+                    $result[$key]['url']      = $baseUrl."/Report/reportProxy?url=".base64_encode($itemInfo[$item["file_key"]]['download_url']);
                     $result[$key]['down_url'] = $baseUrl . "/downReport?key=" . $item["file_key"];
                 }
             }
