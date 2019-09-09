@@ -70,8 +70,7 @@ class Opttask_model extends CI_Model {
      *
      * @return array
      */
-    public function TaskTotal($city_id, $task_type)
-    {
+    public function TaskTotal($city_id, $task_type) {
         $res = $this->db
             ->from($this->tb)
             ->where('city_id', $city_id)
@@ -87,8 +86,7 @@ class Opttask_model extends CI_Model {
      *
      * @return int
      */
-    public function CreateTask($city_id, $task_name, $task_type, $road_id, $config, $start_date, $end_date)
-    {
+    public function CreateTask($city_id, $task_name, $task_type, $road_id, $config, $start_date, $end_date) {
         $obj = [
             'city_id' => $city_id,
             'task_name' => $task_name,
@@ -112,8 +110,7 @@ class Opttask_model extends CI_Model {
      *
      * @return bool
      */
-    public function UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $config, $start_date, $end_date)
-    {
+    public function UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $config, $start_date, $end_date) {
         $obj = [
             'city_id' => $city_id,
             'task_name' => $task_name,
@@ -132,8 +129,7 @@ class Opttask_model extends CI_Model {
      *
      * @return array
      */
-    public function TaskInfo($task_id, $select = '*')
-    {
+    public function TaskInfo($task_id, $select = '*') {
         $res = $this->db->select($select)
             ->from($this->tb)
             ->where('id', $task_id)
@@ -147,8 +143,7 @@ class Opttask_model extends CI_Model {
      *
      * @return bool
      */
-    public function UpdateTaskStatus($task_id, $fields)
-    {
+    public function UpdateTaskStatus($task_id, $fields) {
         $res = $this->db->where('id', $task_id)->update($this->tb, $fields);
 
         return $res;

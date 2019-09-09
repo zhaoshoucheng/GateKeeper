@@ -292,6 +292,8 @@ class OpttaskService extends BaseService {
             return [
                 'result_id' => $item['id'],
                 'created_at' => $item['created_at'],
+                'result_errno' => $item['result_errno'],
+                'result_errmsg' => $item['result_errmsg'],
             ];
         }, $result_list);
         return $result_list;
@@ -336,7 +338,7 @@ class OpttaskService extends BaseService {
         $field = $params['field'];
         $result =$this->opttaskresultroad_model->GetField($result_id, $field);
         if (!empty($result)) {
-            $data = json_decode($result[0], true);
+            $data = json_decode($result[0][$field], true);
             if (isset($data['data'])) {
                 return $data['data'];
             }

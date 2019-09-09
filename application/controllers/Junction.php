@@ -490,4 +490,25 @@ class Junction extends MY_Controller
 
         $this->response($result);
     }
+
+    /**
+     * 路口配时信息
+     *
+     * @throws Exception
+     */
+    public function timing_status() {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'logic_junction_ids' => 'required|trim',
+            'source' => 'required|is_natural',
+        ]);
+
+        $params['logic_junction_id'] = explode(',', $params['logic_junction_ids']);
+        unset($params['logic_junction_ids']);
+        $data = $this->timing_model->queryTimingStatus($params);
+
+        $this->response($data);
+    }
 }

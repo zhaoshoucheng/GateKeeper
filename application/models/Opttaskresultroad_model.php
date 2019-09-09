@@ -7,8 +7,7 @@
  ********************************************/
 use Didi\Cloud\Collection\Collection;
 
-class Opttaskresultroad_model extends CI_Model
-{
+class Opttaskresultroad_model extends CI_Model {
     private $tb = 'opt_task_result_road';
 
     /**
@@ -20,8 +19,7 @@ class Opttaskresultroad_model extends CI_Model
      * Opttaskresultroad_model constructor.
      * @throws \Exception
      */
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
 
         $this->db = $this->load->database('default', true);
@@ -56,8 +54,7 @@ class Opttaskresultroad_model extends CI_Model
      *
      * @return array
      */
-    public function ResultTaskInfo($result_id, $select = '*')
-    {
+    public function ResultTaskInfo($result_id, $select = '*') {
         $res = $this->db->select($select)
             ->from($this->tb)
             ->where('id', $result_id)
