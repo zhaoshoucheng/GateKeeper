@@ -155,6 +155,21 @@ class Optroadtask extends MY_Controller
         $this->response($data);
     }
 
+    // getSpaceTimeDiagram
+    public function getSpaceTimeDiagramArg()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'result_id' => 'required|is_natural_no_zero',
+        ]);
+
+        $params['field'] = 'road_info';
+        $data = $this->opttaskService->GetResultField($params);
+
+        $this->response($data);
+    }
     // getRoadDetail
     public function getRoadDetail()
     {
