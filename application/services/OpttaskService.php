@@ -187,7 +187,7 @@ class OpttaskService extends BaseService {
             ];
         } elseif ($status == 2) {
             $fields = [
-                'delete_at' => date('Y-m-d H:i:s'),
+                'is_deleted' => 1,
             ];
         } else {
             return false;
@@ -272,5 +272,73 @@ class OpttaskService extends BaseService {
             ];
         }, $road_list);
         return $road_list;
+    }
+
+    /**
+     * 获取结果列表
+     *
+     * @param $params
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function ResultList($params) {
+        $city_id = $params['city_id'];
+        $task_id = $params['task_id'];
+        $result_list =$this->opttaskresultroad_model->ResultList($city_id, $task_id);
+        $result_list = array_map(function($item) {
+            return [
+                'result_id' => $item['id'],
+                'created_at' => $item['created_at'],
+            ];
+        }, $result_list);
+        return $result_list;
+    }
+
+    /**
+     * 根据结果id获取任务配置详情
+     *
+     * @param $params
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function ResultTaskInfo($params) {
+        $city_id = $params['city_id'];
+        $result_id = $params['result_id'];
+        $data = $this->opttaskresultroad_model->ResultTaskInfo($result_id);
+        if (!empty($data)) {
+            $data = $data[0];
+            $config = json_decode($data['config'], true);
+            $config['task_id'] = intval($data['task_id']);
+            $config['city_id'] = intval($data['city_id']);
+            $config['task_name'] = $data['task_name'];
+            $config['task_type'] = intval($data['task_type']);
+            $config['road_id'] = $data['road_id'];
+            return $config;
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * 获取结果字段
+     *
+     * @param $params
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function GetResultField($params) {
+        $result_id = $params['result_id'];
+        $field = $params['field'];
+        $result =$this->opttaskresultroad_model->GetField($result_id, $field);
+        if (!empty($result)) {
+            $data = json_decode($result[0], true);
+            if (isset($data['data'])) {
+                return $data['data'];
+            }
+        }
+        return [];
     }
 }

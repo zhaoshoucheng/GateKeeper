@@ -41,8 +41,8 @@ class Opttask_model extends CI_Model {
             ->from($this->tb)
             ->where('city_id', $city_id)
             ->where('task_type', $task_type)
-            ->where('delete_at', "1971-01-01 00:00:00")
-            ->order_by('update_at', 'DESC')
+            ->where('is_deleted', 0)
+            ->order_by('updated_at', 'DESC')
             ->limit($limit, $offset)
             ->get();
 
@@ -59,7 +59,7 @@ class Opttask_model extends CI_Model {
             ->from($this->tb)
             ->where('city_id', $city_id)
             ->where('task_type', $task_type)
-            ->where('delete_at', "1971-01-01 00:00:00")
+            ->where('is_deleted', 0)
             ->get();
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
@@ -76,7 +76,7 @@ class Opttask_model extends CI_Model {
             ->from($this->tb)
             ->where('city_id', $city_id)
             ->where('task_type', $task_type)
-            ->where('delete_at', "1971-01-01 00:00:00")
+            ->where('is_deleted', 0)
             ->count_all_results();
 
         return $res;
@@ -133,7 +133,7 @@ class Opttask_model extends CI_Model {
         $res = $this->db->select($select)
             ->from($this->tb)
             ->where('id', $task_id)
-            ->where('delete_at', "1971-01-01 00:00:00")
+            ->where('is_deleted', 0)
             ->get();
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
