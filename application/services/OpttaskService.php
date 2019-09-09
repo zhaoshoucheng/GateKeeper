@@ -133,14 +133,16 @@ class OpttaskService extends BaseService {
         $task_type = $params['task_type'];
         $road_id = $params['road_id'];
         unset($params['task_id']);
+        $start_date = $params['timing']['start_date'];
+        $end_date = $params['timing']['end_date'];
         unset($params['city_id']);
         unset($params['task_name']);
         unset($params['task_type']);
         unset($params['road_id']);
         if ($task_id <= 0) {
-            return $this->opttask_model->CreateTask($city_id, $task_name, $task_type, $road_id, $params);
+            return $this->opttask_model->CreateTask($city_id, $task_name, $task_type, $road_id, $params, $start_date, $end_date);
         } else {
-            return $this->opttask_model->UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $params);
+            return $this->opttask_model->UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $params, $start_date, $end_date);
         }
     }
 

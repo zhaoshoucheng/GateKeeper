@@ -87,7 +87,7 @@ class Opttask_model extends CI_Model {
      *
      * @return int
      */
-    public function CreateTask($city_id, $task_name, $task_type, $road_id, $config)
+    public function CreateTask($city_id, $task_name, $task_type, $road_id, $config, $start_date, $end_date)
     {
         $obj = [
             'city_id' => $city_id,
@@ -96,6 +96,8 @@ class Opttask_model extends CI_Model {
             'road_id' => $road_id,
             'config' => json_encode($config),
             'status' => 0,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
         ];
         $res = $this->db->insert($this->tb, $obj);
         if ($res == false) {
@@ -110,7 +112,7 @@ class Opttask_model extends CI_Model {
      *
      * @return bool
      */
-    public function UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $config)
+    public function UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $config, $start_date, $end_date)
     {
         $obj = [
             'city_id' => $city_id,
@@ -118,6 +120,8 @@ class Opttask_model extends CI_Model {
             'task_type' => $task_type,
             'road_id' => $road_id,
             'config' => json_encode($config),
+            'start_date' => $start_date,
+            'end_date' => $end_date,
         ];
         $res = $this->db->where('id', $task_id)->update($this->tb, $obj);
         return $res;
