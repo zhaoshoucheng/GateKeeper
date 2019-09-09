@@ -1,5 +1,17 @@
 <?php
 
+if (!function_exists('needValidPerm')) {
+    /**
+     * 是否需要验证权限   
+     */
+    function needValidPerm(){
+        if(ENVIRONMENT=="development" || gethostname()=="ipd-cloud-preweb00.gz01"){
+            return false;
+        }
+        return true;
+    }
+}
+
 if (!function_exists('getOpenSign')) {
     /**
      * @param array $params API调用的请求参数集合的关联数组，不包含sign参数

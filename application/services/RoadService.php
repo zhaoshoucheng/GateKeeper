@@ -488,6 +488,16 @@ class RoadService extends BaseService
             ->groupBy([$baseOrEvaluateCallback, 'date'], $groupByItemFormatCallback)
             ->get();
 
+        //数据排序
+        $base = $result["base"] ?? [];
+        $sorter = [];
+        foreach ($base as $date=>$bdata){
+            $sorter[$date] = strtotime($date);
+        }
+        array_multisort($sorter,SORT_NUMERIC,SORT_ASC,$base);
+        $result["base"] = $base;
+        
+
         $result['info'] = [
             'road_name' => $roadName,
             'quota_name' => $nameMaps[$quotaKey] ?? '',
