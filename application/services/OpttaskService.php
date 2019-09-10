@@ -289,7 +289,7 @@ class OpttaskService extends BaseService {
         $task_id = $params['task_id'];
 
         $data = [];
-        $data['succeed'] = $this->opttaskresultroad_model->ResulCnt($city_id, $task_id, "result_errno = 0");
+        $data['total'] = $this->opttaskresultroad_model->ResulCnt($city_id, $task_id, "0 = 0");
         $data['failed'] = $this->opttaskresultroad_model->ResulCnt($city_id, $task_id, "result_errno != 0");
         $result_list = $this->opttaskresultroad_model->ResultList($city_id, $task_id);
         $result_list = array_map(function($item) {
