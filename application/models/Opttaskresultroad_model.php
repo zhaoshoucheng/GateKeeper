@@ -50,6 +50,23 @@ class Opttaskresultroad_model extends CI_Model {
     }
 
     /**
+     * 获取结果统计
+     *
+     * @return array
+     */
+    public function ResulCnt($city_id, $task_id, $cond) {
+        $res = $this->db->select('count(*) as cnt')
+            ->from($this->tb)
+            ->where('city_id', $city_id)
+            ->where('task_id', $task_id)
+            ->where($cond)
+            ->where('is_deleted', 0)
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array()[0]['cnt'] : 0;
+    }
+
+    /**
      * 任务详情
      *
      * @return array

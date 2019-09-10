@@ -287,7 +287,11 @@ class OpttaskService extends BaseService {
     public function ResultList($params) {
         $city_id = $params['city_id'];
         $task_id = $params['task_id'];
-        $result_list =$this->opttaskresultroad_model->ResultList($city_id, $task_id);
+
+        $data = [];
+        $data['succeed'] = $this->opttaskresultroad_model->ResulCnt($city_id, $task_id, "result_errno = 0");
+        $data['failed'] = $this->opttaskresultroad_model->ResulCnt($city_id, $task_id, "result_errno != 0");
+        $result_list = $this->opttaskresultroad_model->ResultList($city_id, $task_id);
         $result_list = array_map(function($item) {
             return [
                 'result_id' => $item['id'],
@@ -296,7 +300,8 @@ class OpttaskService extends BaseService {
                 'result_errmsg' => $item['result_errmsg'],
             ];
         }, $result_list);
-        return $result_list;
+        $data['result_list'] = $result_list;
+        return $data;
     }
 
     /**
