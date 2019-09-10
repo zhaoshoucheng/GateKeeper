@@ -829,7 +829,7 @@ paths:
               data:
                 type: object
                 description: ""
-                properties: 
+                properties:
                   dates:
                     type: array
                     items:
@@ -17268,3 +17268,116 @@ paths:
                 type: string
                 description: 用户名
                 example: unknown
+  /opttask/list:
+    post:
+      summary: 获取任务列表
+      description: 获取任务列表
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: task_type
+          required: true
+          type: integer
+          description: "任务类型：1"
+        - in: formData
+          name: page
+          required: false
+          type: integer
+          description: ""
+        - in: formData
+          name: page_size
+          required: false
+          type: integer
+          description: ""
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: object
+                description: ""
+                properties:
+                  total:
+                    type: integer
+                    description: ""
+                    example: 120
+                  task_list:
+                    type: array
+                    description: ""
+                    items:
+                      type: object
+                      description: ""
+                      properties:
+                        task_id:
+                          type: integer
+                          description: ""
+                          example: 1
+                        task_name:
+                          type: string
+                          description: ""
+                          example: "任务名称"
+                        road_id:
+                          type: string
+                          description: ""
+                          example: "干线ID"
+                        road_name:
+                          type: string
+                          description: "称"
+                          example: "任务名称"
+                        direction:
+                          type: integer
+                          description: "0 正；1 反；2 双；"
+                          example: 0
+                        timing_type:
+                          type: integer
+                          description: "0 原始方案；1 校准方案"
+                          example: 0
+                        opt_type:
+                          type: integer
+                          description: "0 带宽优化；1 轨迹优化"
+                          example: 0
+                        equal_cycle:
+                          type: integer
+                          description: "0 ；1 同周期"
+                          example: 0
+                        time_point:
+                          type: string
+                          description: ""
+                          example: "08:00 18:00"
+                        weekday:
+                          type: string
+                          description: ""
+                          example: "星期一 星期日"
+                        status:
+                          type: integer
+                          description: "0 运行中；1 未开始；2已失效"
+                          example: 0
+                        action:
+                          type: integer
+                          description: "0 运行；1 暂停"
+                          example: 0
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
