@@ -338,10 +338,16 @@ class OpttaskService extends BaseService {
         $field = $params['field'];
         $result =$this->opttaskresultroad_model->GetField($result_id, $field);
         if (!empty($result)) {
+            if ($field == 'diagram_arg') {
+                return $result[0][$field];
+            }
             $data = json_decode($result[0][$field], true);
             if (isset($data['data'])) {
                 return $data['data'];
             }
+        }
+        if ($field == 'diagram_arg') {
+            return '';
         }
         return [];
     }

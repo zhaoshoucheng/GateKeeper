@@ -165,7 +165,7 @@ class Optroadtask extends MY_Controller
             'result_id' => 'required|is_natural_no_zero',
         ]);
 
-        $params['field'] = 'road_info';
+        $params['field'] = 'diagram_arg';
         $data = $this->opttaskService->GetResultField($params);
 
         $this->response($data);
