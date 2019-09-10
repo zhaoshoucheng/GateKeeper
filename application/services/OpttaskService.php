@@ -103,6 +103,7 @@ class OpttaskService extends BaseService {
                 'timing_type' => $config['plan']['timing_type'],
                 'opt_type' => $config['plan']['opt_type'],
                 'equal_cycle' => $config['plan']['equal_cycle'],
+                'date_source' => $config['timing']['date_source'],
                 'time_point' => implode(' ', $config['timing']['time_point']),
                 'weekday' => implode(' ', $weekdays),
                 'status'=> $status,
@@ -126,15 +127,22 @@ class OpttaskService extends BaseService {
      * @throws \Exception
      */
     public function UpdateTask($params) {
-        $city_id = $params['city_id'];
         $task_id = $params['task_id'];
+        $city_id = $params['city_id'];
         $task_name = $params['task_name'];
         $task_type = $params['task_type'];
         $road_id = $params['road_id'];
+        unset($params['task_id']);
+        $start_date = $params['timing']['start_date'];
+        $end_date = $params['timing']['end_date'];
+        unset($params['city_id']);
+        unset($params['task_name']);
+        unset($params['task_type']);
+        unset($params['road_id']);
         if ($task_id <= 0) {
-            return $this->opttask_model->CreateTask($city_id, $task_name, $task_type, $road_id, $params);
+            return $this->opttask_model->CreateTask($city_id, $task_name, $task_type, $road_id, $params, $start_date, $end_date);
         } else {
-            return $this->opttask_model->UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $params);
+            return $this->opttask_model->UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $params, $start_date, $end_date);
         }
     }
 
@@ -152,7 +160,12 @@ class OpttaskService extends BaseService {
         if (!empty($data)) {
             $data = $data[0];
             $config = json_decode($data['config'], true);
-            $config['task_id'] = $data['id'];
+            $config['task_id'] = intval($data['id']);
+            $config['city_id'] = intval($data['city_id']);
+            $config['task_name'] = $data['task_name'];
+            $config['task_type'] = intval($data['task_type']);
+            $config['road_id'] = $data['road_id'];
+            // todo: 获取最新干线路口更新路口信息
             return $config;
         } else {
             return [];
@@ -176,7 +189,7 @@ class OpttaskService extends BaseService {
             ];
         } elseif ($status == 2) {
             $fields = [
-                'delete_at' => date('Y-m-d H:i:s'),
+                'is_deleted' => 1,
             ];
         } else {
             return false;
@@ -261,5 +274,86 @@ class OpttaskService extends BaseService {
             ];
         }, $road_list);
         return $road_list;
+    }
+
+    /**
+     * 获取结果列表
+     *
+     * @param $params
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function ResultList($params) {
+        $city_id = $params['city_id'];
+        $task_id = $params['task_id'];
+
+        $data = [];
+        $data['total'] = $this->opttaskresultroad_model->ResulCnt($city_id, $task_id, "0 = 0");
+        $data['failed'] = $this->opttaskresultroad_model->ResulCnt($city_id, $task_id, "result_errno != 0");
+        $result_list = $this->opttaskresultroad_model->ResultList($city_id, $task_id);
+        $result_list = array_map(function($item) {
+            return [
+                'result_id' => $item['id'],
+                'created_at' => $item['created_at'],
+                'result_errno' => $item['result_errno'],
+                'result_errmsg' => $item['result_errmsg'],
+            ];
+        }, $result_list);
+        $data['result_list'] = $result_list;
+        return $data;
+    }
+
+    /**
+     * 根据结果id获取任务配置详情
+     *
+     * @param $params
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function ResultTaskInfo($params) {
+        $city_id = $params['city_id'];
+        $result_id = $params['result_id'];
+        $data = $this->opttaskresultroad_model->ResultTaskInfo($result_id);
+        if (!empty($data)) {
+            $data = $data[0];
+            $config = json_decode($data['config'], true);
+            $config['task_id'] = intval($data['task_id']);
+            $config['city_id'] = intval($data['city_id']);
+            $config['task_name'] = $data['task_name'];
+            $config['task_type'] = intval($data['task_type']);
+            $config['road_id'] = $data['road_id'];
+            return $config;
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * 获取结果字段
+     *
+     * @param $params
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function GetResultField($params) {
+        $result_id = $params['result_id'];
+        $field = $params['field'];
+        $result =$this->opttaskresultroad_model->GetField($result_id, $field);
+        if (!empty($result)) {
+            if ($field == 'diagram_arg') {
+                return $result[0][$field];
+            }
+            $data = json_decode($result[0][$field], true);
+            if (isset($data['data'])) {
+                return $data['data'];
+            }
+        }
+        if ($field == 'diagram_arg') {
+            return '';
+        }
+        return [];
     }
 }

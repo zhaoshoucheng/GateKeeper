@@ -35,7 +35,7 @@ class Opttask extends MY_Controller
 
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
-            'task_type' => 'required',
+            'task_type' => 'required|is_natural',
             // 'page' => 'required',
             // 'page_size' => 'required',
         ]);
@@ -63,8 +63,9 @@ class Opttask extends MY_Controller
         $params = $this->input->post(null, true);
 
         $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
             'task_id' => 'required|is_natural_no_zero',
-            'action' => 'required',
+            'action' => 'required|is_natural',
         ]);
 
         $data = $this->opttaskService->UpdateTaskStatus($params);

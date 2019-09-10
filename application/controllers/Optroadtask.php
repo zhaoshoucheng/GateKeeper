@@ -69,6 +69,7 @@ class Optroadtask extends MY_Controller
         $params = $this->input->post(null, true);
 
         $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
             'task_id' => 'required|is_natural_no_zero',
         ]);
 
@@ -88,8 +89,8 @@ class Optroadtask extends MY_Controller
 
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
-            'road_id' => 'required',
-            'task_type' => 'required',
+            'road_id' => 'required|trim|min_length[1]',
+            'task_type' => 'required|is_natural',
         ]);
 
         $data = $this->opttaskService->RoadConflict($params);
@@ -112,6 +113,135 @@ class Optroadtask extends MY_Controller
         ]);
 
         $data = $this->opttaskService->SearchRoad($params);
+
+        $this->response($data);
+    }
+
+    /**
+     * 获取结果列表
+     *
+     * @throws Exception
+     */
+    public function list()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'task_id' => 'required|is_natural_no_zero',
+        ]);
+
+        $data = $this->opttaskService->ResultList($params);
+
+        $this->response($data);
+    }
+
+    /**
+     * 根据结果id获取任务配置详情，因为可能会变化，所以快照存储
+     *
+     * @throws Exception
+     */
+    public function resulttaskinfo()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'result_id' => 'required|is_natural_no_zero',
+        ]);
+
+        $data = $this->opttaskService->ResultTaskInfo($params);
+
+        $this->response($data);
+    }
+
+    // getSpaceTimeDiagram
+    public function getSpaceTimeDiagramArg()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'result_id' => 'required|is_natural_no_zero',
+        ]);
+
+        $params['field'] = 'diagram_arg';
+        $data = $this->opttaskService->GetResultField($params);
+
+        $this->response($data);
+    }
+    // getRoadDetail
+    public function getRoadDetail()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'result_id' => 'required|is_natural_no_zero',
+        ]);
+
+        $params['field'] = 'road_info';
+        $data = $this->opttaskService->GetResultField($params);
+
+        $this->response($data);
+    }
+    // queryarterialjunctionInfo
+    public function queryarterialjunctionInfo()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'result_id' => 'required|is_natural_no_zero',
+        ]);
+
+        $params['field'] = 'junction_info';
+        $data = $this->opttaskService->GetResultField($params);
+
+        $this->response($data);
+    }
+    // queryarterialtiminginfo
+    public function queryarterialtiminginfo()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'result_id' => 'required|is_natural_no_zero',
+        ]);
+
+        $params['field'] = 'timing_info';
+        $data = $this->opttaskService->GetResultField($params);
+
+        $this->response($data);
+    }
+    // opt getClockShiftCorrect
+    public function getClockShiftCorrect()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'result_id' => 'required|is_natural_no_zero',
+        ]);
+
+        $params['field'] = 'clockshift_info';
+        $data = $this->opttaskService->GetResultField($params);
+
+        $this->response($data);
+    }
+    // queryGreenWaveOptPlan
+    public function queryGreenWaveOptPlan()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'result_id' => 'required|is_natural_no_zero',
+        ]);
+
+        $params['field'] = 'opt_result';
+        $data = $this->opttaskService->GetResultField($params);
 
         $this->response($data);
     }
