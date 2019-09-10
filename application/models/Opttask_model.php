@@ -41,8 +41,8 @@ class Opttask_model extends CI_Model {
             ->from($this->tb)
             ->where('city_id', $city_id)
             ->where('task_type', $task_type)
-            ->where('delete_at', "1971-01-01 00:00:00")
-            ->order_by('update_at', 'DESC')
+            ->where('is_deleted', 0)
+            ->order_by('updated_at', 'DESC')
             ->limit($limit, $offset)
             ->get();
 
@@ -59,7 +59,7 @@ class Opttask_model extends CI_Model {
             ->from($this->tb)
             ->where('city_id', $city_id)
             ->where('task_type', $task_type)
-            ->where('delete_at', "1971-01-01 00:00:00")
+            ->where('is_deleted', 0)
             ->get();
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
@@ -70,13 +70,12 @@ class Opttask_model extends CI_Model {
      *
      * @return array
      */
-    public function TaskTotal($city_id, $task_type)
-    {
+    public function TaskTotal($city_id, $task_type) {
         $res = $this->db
             ->from($this->tb)
             ->where('city_id', $city_id)
             ->where('task_type', $task_type)
-            ->where('delete_at', "1971-01-01 00:00:00")
+            ->where('is_deleted', 0)
             ->count_all_results();
 
         return $res;
@@ -87,8 +86,7 @@ class Opttask_model extends CI_Model {
      *
      * @return int
      */
-    public function CreateTask($city_id, $task_name, $task_type, $road_id, $config)
-    {
+    public function CreateTask($city_id, $task_name, $task_type, $road_id, $config, $start_date, $end_date) {
         $obj = [
             'city_id' => $city_id,
             'task_name' => $task_name,
@@ -96,6 +94,8 @@ class Opttask_model extends CI_Model {
             'road_id' => $road_id,
             'config' => json_encode($config),
             'status' => 0,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
         ];
         $res = $this->db->insert($this->tb, $obj);
         if ($res == false) {
@@ -110,14 +110,15 @@ class Opttask_model extends CI_Model {
      *
      * @return bool
      */
-    public function UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $config)
-    {
+    public function UpdateTask($task_id, $city_id, $task_name, $task_type, $road_id, $config, $start_date, $end_date) {
         $obj = [
             'city_id' => $city_id,
             'task_name' => $task_name,
             'task_type' => $task_type,
             'road_id' => $road_id,
             'config' => json_encode($config),
+            'start_date' => $start_date,
+            'end_date' => $end_date,
         ];
         $res = $this->db->where('id', $task_id)->update($this->tb, $obj);
         return $res;
@@ -128,12 +129,11 @@ class Opttask_model extends CI_Model {
      *
      * @return array
      */
-    public function TaskInfo($task_id, $select = '*')
-    {
+    public function TaskInfo($task_id, $select = '*') {
         $res = $this->db->select($select)
             ->from($this->tb)
             ->where('id', $task_id)
-            ->where('delete_at', "1971-01-01 00:00:00")
+            ->where('is_deleted', 0)
             ->get();
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
@@ -143,8 +143,7 @@ class Opttask_model extends CI_Model {
      *
      * @return bool
      */
-    public function UpdateTaskStatus($task_id, $fields)
-    {
+    public function UpdateTaskStatus($task_id, $fields) {
         $res = $this->db->where('id', $task_id)->update($this->tb, $fields);
 
         return $res;

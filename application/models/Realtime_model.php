@@ -226,7 +226,7 @@ class Realtime_model extends CI_Model
             }
             $esRes = $this->searchQuota($data);
             if (empty($esRes['result']['quotaResults'])) {
-                return [];
+                //return [];
             }
             if(!empty($esRes['result']['quotaResults'])){
                 foreach ($esRes['result']['quotaResults'] as $k => $v) {

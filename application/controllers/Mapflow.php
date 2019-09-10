@@ -75,6 +75,18 @@ class Mapflow extends MY_Controller
             'is_hidden' => 'required|is_natural',
         ]);
         $this->mapFlowService->editFlow($params);
+
+        $this->load->model('user/user', 'user');
+        $logData = [
+            "data"=>$params,
+            "user_name"=>$this->user->getUserName(),
+            "client_ip"=>$_SERVER["HTTP_X_REAL_IP"],
+            "log_time"=>date("Y-m-d H:i:s"),
+        ];
+        $logFormat = function($logData){
+            return sprintf("[INFO] [%s] _editFlow_log||log=%s",date("Y-m-d H:i:s"),json_encode($logData));
+        };
+        file_put_contents("/home/xiaoju/php7/logs/cloud/itstool/editFlow.log", $logFormat($logData).PHP_EOL, FILE_APPEND);
         $this->response([]);
     }
 }

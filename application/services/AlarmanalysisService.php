@@ -129,7 +129,11 @@ class AlarmanalysisService extends BaseService
         }
 
         // 合并数组
-        $resultData = array_merge($continuousHour, $temp);
+        if(is_array($continuousHour)){
+            $resultData = array_merge($continuousHour, $temp);
+        }else{
+            $resultData = $temp;
+        }
         //时间过滤
         if(isset($params['time_range'])){
             $timeRanges = explode("-",$params['time_range']);
