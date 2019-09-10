@@ -506,7 +506,9 @@ class Junction extends MY_Controller
         ]);
 
         $params['logic_junction_id'] = explode(',', $params['logic_junction_ids']);
+        $params['source'] = intval($params['source']);
         unset($params['logic_junction_ids']);
+        unset($params['city_id']);
         $data = $this->timing_model->queryTimingStatus($params);
 
         $this->response($data);
