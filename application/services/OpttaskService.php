@@ -65,7 +65,7 @@ class OpttaskService extends BaseService {
             foreach ($weekday as $value) {
                 if ($value == 1) {
                     $weekdays[] = '周一';
-                } elseif ($value == 1) {
+                } elseif ($value == 2) {
                     $weekdays[] = '周二';
                 } elseif ($value == 3) {
                     $weekdays[] = '周三';
