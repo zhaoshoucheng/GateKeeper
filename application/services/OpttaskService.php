@@ -212,7 +212,7 @@ class OpttaskService extends BaseService {
         $road_task_map = [];
         $new_task_list = [];
         foreach ($task_list as $value) {
-            $road_task_map[$value['road_id']] = $value['id'];
+            $road_task_map[$value['road_id']][] = $value['id'];
             $new_task_list[$value['id']] = $value;
         }
         $task_list = $new_task_list;
@@ -242,10 +242,12 @@ class OpttaskService extends BaseService {
                     }
                     $tmp_junction_list = explode(',', $road['logic_junction_ids']);
                     if (in_array($junction_id, $tmp_junction_list)) {
-                        $one['conflict_task'][] = [
-                            'task_id' => $task_list[$road_task_map[$road['road_id']]]['id'],
-                            'task_name' => $task_list[$road_task_map[$road['road_id']]]['task_name'],
-                        ];
+                        foreach ($road_task_map[$road['road_id']] as $road_task) {
+                            $one['conflict_task'][] = [
+                                'task_id' => $task_list[$road_task]['id'],
+                                'task_name' => $task_list[$road_task]['task_name'],
+                            ];
+                        }
                     }
                 }
                 $data[] = $one;
