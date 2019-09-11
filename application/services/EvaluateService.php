@@ -171,6 +171,12 @@ class EvaluateService extends BaseService
         $hour = $this->helperService->getLastestHour($cityId);
         $dayTime = date('Y-m-d') . ' ' . $hour;
 
+        //轨迹数
+        $trajNum = 5;
+        if($cityId==175){
+            $trajNum = 1;
+        }
+
         // es所需data
         if(empty($junctionIds)){
             $esData = [
@@ -178,7 +184,7 @@ class EvaluateService extends BaseService
                 "cityId"    => $cityId,
                 'requestId' => get_traceid(),
                 "dayTime"   => $dayTime,
-                "trailNum"  => 5,
+                "trailNum"  => $trajNum,
                 "andOperations" => [
                     "cityId"   => "eq",
                     "dayTime"  => "eq",
@@ -218,7 +224,7 @@ class EvaluateService extends BaseService
                     "cityId"    => $cityId,
                     'requestId' => get_traceid(),
                     "dayTime"   => $dayTime,
-                    "trailNum"  => 5,
+                    "trailNum"  => $trajNum,
                     "andOperations" => [
                         "cityId"   => "eq",
                         "dayTime"  => "eq",

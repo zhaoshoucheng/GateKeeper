@@ -377,11 +377,15 @@ class Realtime_model extends CI_Model
      */
     public function getRealTimeJunctionsQuota($cityId, $date, $hour, $junctionIds=[])
     {
+        $trajNum = 5;
+        if($cityId==175){
+            $trajNum = 1;
+        }
         $data = [
             'source' => 'signal_control', // 调用方
             'cityId' => $cityId,          // 城市ID
             'requestId' => get_traceid(),    // trace id
-            'trailNum' => 5,
+            'trailNum' => $trajNum,
             'dayTime' => $date . " " . $hour,
             'andOperations' => [
                 'cityId' => 'eq',  // cityId相等
@@ -408,11 +412,15 @@ class Realtime_model extends CI_Model
      */
     public function getRealTimeJunctions($cityId, $date, $hour, $junctionIds=[])
     {
+        $trajNum = 5;
+        if($cityId==175){
+            $trajNum = 1;
+        }
         $data = [
             'source' => 'signal_control', // 调用方
             'cityId' => $cityId,          // 城市ID
             'requestId' => get_traceid(),    // trace id
-            'trailNum' => 5,
+            'trailNum' => $trajNum,
             'dayTime' => $date . " " . $hour,
             'andOperations' => [
                 'cityId' => 'eq',  // cityId相等
@@ -536,6 +544,11 @@ class Realtime_model extends CI_Model
     {
         $dayTime = $date . ' ' . $hour;
 
+        $trajNum = 5;
+        if($cityId==175){
+            $trajNum = 1;
+        }
+
         $tmpRs = [];
         $chunkJunctionIds=array_chunk($junctionIds,1000);
         foreach ($chunkJunctionIds as $Jids){
@@ -544,7 +557,7 @@ class Realtime_model extends CI_Model
                 "cityId" => $cityId,
                 'requestId' => get_traceid(),
                 "dayTime" => $dayTime,
-                "trailNum" => 5,
+                "trailNum" => $trajNum,
                 "andOperations" => [
                     "cityId" => "eq",
                     "dayTime" => "eq",
@@ -595,13 +608,18 @@ class Realtime_model extends CI_Model
             return $this->getTopStopDelayByJunctionId($cityId,$date,$hour,$pagesize,$junctionIds);
         }
 
+        $trajNum = 5;
+        if($cityId==175){
+            $trajNum = 1;
+        }
+
         $dayTime = $date . ' ' . $hour;
         $data = [
             "source" => "signal_control",
             "cityId" => $cityId,
             'requestId' => get_traceid(),
             "dayTime" => $dayTime,
-            "trailNum" => 5,
+            "trailNum" => $trajNum,
             "andOperations" => [
                 "cityId" => "eq",
                 "dayTime" => "eq",
@@ -637,6 +655,11 @@ class Realtime_model extends CI_Model
      */
     public function getTopCycleTimeByJunctionId($cityId, $date, $hour, $pagesize, $junctionIds=[])
     {
+        $trajNum = 5;
+        if($cityId==175){
+            $trajNum = 1;
+        }
+
         $tmpRs = [];
         $chunkJunctionIds=array_chunk($junctionIds,500);
         foreach ($chunkJunctionIds as $Jids){
@@ -644,7 +667,7 @@ class Realtime_model extends CI_Model
                 'source' => 'signal_control', // 调用方
                 'cityId' => $cityId,          // 城市ID
                 'requestId' => get_traceid(),    // trace id
-                'trailNum' => 5,
+                'trailNum' => $trajNum,
                 'dayTime' => $date . " " . $hour,
                 'andOperations' => [
                     'cityId' => 'eq',  // cityId相等
@@ -693,11 +716,17 @@ class Realtime_model extends CI_Model
         if(!empty($junctionIds)){
             return $this->getTopCycleTimeByJunctionId($cityId, $date, $hour, $pagesize, $junctionIds);
         }
+
+        $trajNum = 5;
+        if($cityId==175){
+            $trajNum = 1;
+        }
+
         $data = [
             'source' => 'signal_control', // 调用方
             'cityId' => $cityId,          // 城市ID
             'requestId' => get_traceid(),    // trace id
-            'trailNum' => 5,
+            'trailNum' => $trajNum,
             'dayTime' => $date . " " . $hour,
             'andOperations' => [
                 'cityId' => 'eq',  // cityId相等
@@ -798,6 +827,11 @@ class Realtime_model extends CI_Model
         // 获取最近时间
         $dayTime = $params['date'] . ' ' . $params['time_point'];
 
+        $trajNum = 5;
+        if($cityId==175){
+            $trajNum = 1;
+        }
+
         // es所需data
         if(empty($junctionIds)){
             $esData = [
@@ -805,7 +839,7 @@ class Realtime_model extends CI_Model
                 "cityId"    => $cityId,
                 'requestId' => get_traceid(),
                 "dayTime"   => $dayTime,
-                "trailNum"  => 5,
+                "trailNum"  => $trajNum,
                 "andOperations" => [
                     "cityId"   => "eq",
                     "dayTime"  => "eq",
@@ -845,7 +879,7 @@ class Realtime_model extends CI_Model
                     "cityId"    => $cityId,
                     'requestId' => get_traceid(),
                     "dayTime"   => $dayTime,
-                    "trailNum"  => 5,
+                    "trailNum"  => $trajNum,
                     "andOperations" => [
                         "cityId"   => "eq",
                         "dayTime"  => "eq",

@@ -548,7 +548,12 @@ class Realtimewarning_model extends CI_Model
         //数组初步处理，去除无用数据
         $realtimeJunctionList = array_map(function ($item) use ($flowsInfo, $realTimeAlarmsInfo, $junctionsInfo, $cityId) {
             $alarmInfo = $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo);
-            if ($item['traj_count'] >= 5 || !empty($alarmInfo)) {
+
+            $trajNum = 5;
+            if($cityId==175){
+                $trajNum = 1;
+            }
+            if ($item['traj_count'] >= $trajNum || !empty($alarmInfo)) {
                 $junctionName=$junctionsInfo[$item['logic_junction_id']]['name'] ?? '';
                 $alarmInfo = $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo);
                 //北京时路口出现行人时过滤
