@@ -79,19 +79,4 @@ class Opttaskresultroad_model extends CI_Model {
             ->get();
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
-
-    /**
-     * 获取结果字段
-     *
-     * @return array
-     */
-    public function GetField($result_id, $field) {
-        $res = $this->db->select($field)
-            ->from($this->tb)
-            ->where('id', $result_id)
-            ->where('is_deleted', 0)
-            ->get();
-
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
-    }
 }

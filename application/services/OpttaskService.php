@@ -343,18 +343,26 @@ class OpttaskService extends BaseService {
     public function GetResultField($params) {
         $result_id = $params['result_id'];
         $field = $params['field'];
-        $result =$this->opttaskresultroad_model->GetField($result_id, $field);
+        $result =$this->opttaskresultroad_model->ResultTaskInfo($result_id);
         if (!empty($result)) {
+            $result = $result[0];
+            $data = json_decode($result[$field], true);
             if ($field == 'diagram_arg') {
-                return $result[0][$field];
+                if (empty($data)) {
+                    return [];
+                }
+                return [
+                    'junctions' => $data,
+                    'time_point' => $result['time_point'],
+                    'dates' => explode(',', $result['dates']),
+                    'method' => $result['direction'],
+                    'map_version' => $result['map_version'],
+                    'token' => "",
+                ];
+            } else {
+                return $data;
             }
-            $data = json_decode($result[0][$field], true);
-            if (isset($data['data'])) {
-                return $data['data'];
-            }
-        }
-        if ($field == 'diagram_arg') {
-            return '';
+
         }
         return [];
     }
