@@ -38,7 +38,7 @@ class Arterialtiming_model extends CI_Model
                 'end_time'=>$timePoint.":01",
                 'date'=>$reqdate,
                 // 'version'=>$versionStr,
-                'source'=>$source,
+                'source'=>$source == 0 ? '2,1' : $source,
             ));
 
             if(empty($ret) or empty($ret['schedule'])){
