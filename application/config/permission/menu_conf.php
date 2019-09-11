@@ -10,9 +10,9 @@ $config['menu'] = [
             return 3;
         }
         //南昌本地化
-        if(isset($_REQUEST['city_id']) 
-            && isset($_REQUEST['conf']) 
-            && $_REQUEST['city_id']=="38" 
+        if(isset($_REQUEST['city_id'])
+            && isset($_REQUEST['conf'])
+            && $_REQUEST['city_id']=="38"
             && $_REQUEST['conf']=="local"){
             return 4;
         }
@@ -124,6 +124,11 @@ $config['menu'] = [
                             [
                                 'name' => '参数管理',
                                 'url'  => 'argument',
+                            ],
+                        3 =>
+                            [
+                                'name' => '任务管理',
+                                'url'  => 'task',
                             ],
                     ],
                 ],
