@@ -64,19 +64,19 @@ class OpttaskService extends BaseService {
             $weekdays = [];
             foreach ($weekday as $value) {
                 if ($value == 1) {
-                    $weekdays[] = '星期一';
+                    $weekdays[] = '周一';
                 } elseif ($value == 1) {
-                    $weekdays[] = '星期二';
+                    $weekdays[] = '周二';
                 } elseif ($value == 3) {
-                    $weekdays[] = '星期三';
+                    $weekdays[] = '周三';
                 } elseif ($value == 4) {
-                    $weekdays[] = '星期四';
+                    $weekdays[] = '周四';
                 } elseif ($value == 5) {
-                    $weekdays[] = '星期五';
+                    $weekdays[] = '周五';
                 } elseif ($value == 6) {
-                    $weekdays[] = '星期六';
+                    $weekdays[] = '周六';
                 } elseif ($value == 7) {
-                    $weekdays[] = '星期日';
+                    $weekdays[] = '周日';
                 }
             }
             if ($item['status'] == 0) {
@@ -104,8 +104,8 @@ class OpttaskService extends BaseService {
                 'opt_type' => $config['plan']['opt_type'],
                 'equal_cycle' => $config['plan']['equal_cycle'],
                 'date_source' => $config['timing']['date_source'],
-                'time_point' => implode(' ', $config['timing']['time_point']),
-                'weekday' => implode(' ', $weekdays),
+                'time_point' => implode(',', $config['timing']['time_point']),
+                'weekday' => implode(',', $weekdays),
                 'status'=> $status,
                 'action' => $action,
             ];
