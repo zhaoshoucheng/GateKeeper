@@ -287,7 +287,11 @@ class OpttaskService extends BaseService {
     public function ResultList($params) {
         $city_id = $params['city_id'];
         $task_id = $params['task_id'];
-        $result_list =$this->opttaskresultroad_model->ResultList($city_id, $task_id);
+
+        $data = [];
+        $data['total'] = $this->opttaskresultroad_model->ResulCnt($city_id, $task_id, "0 = 0");
+        $data['failed'] = $this->opttaskresultroad_model->ResulCnt($city_id, $task_id, "result_errno != 0");
+        $result_list = $this->opttaskresultroad_model->ResultList($city_id, $task_id);
         $result_list = array_map(function($item) {
             return [
                 'result_id' => $item['id'],
@@ -296,7 +300,8 @@ class OpttaskService extends BaseService {
                 'result_errmsg' => $item['result_errmsg'],
             ];
         }, $result_list);
-        return $result_list;
+        $data['result_list'] = $result_list;
+        return $data;
     }
 
     /**
@@ -338,10 +343,16 @@ class OpttaskService extends BaseService {
         $field = $params['field'];
         $result =$this->opttaskresultroad_model->GetField($result_id, $field);
         if (!empty($result)) {
+            if ($field == 'diagram_arg') {
+                return $result[0][$field];
+            }
             $data = json_decode($result[0][$field], true);
             if (isset($data['data'])) {
                 return $data['data'];
             }
+        }
+        if ($field == 'diagram_arg') {
+            return '';
         }
         return [];
     }
