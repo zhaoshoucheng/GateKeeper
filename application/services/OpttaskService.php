@@ -98,7 +98,7 @@ class OpttaskService extends BaseService {
                 'task_name' => $item['task_name'],
                 'task_type' => $item['task_type'],
                 'road_id' => $item['road_id'],
-                'road_name' => $road_id_name_map[$item['road_id']],
+                'road_name' => isset($road_id_name_map[$item['road_id']]) ? $road_id_name_map[$item['road_id']] : "",
                 'direction' => $config['plan']['direction'],
                 'timing_type' => $config['plan']['timing_type'],
                 'opt_type' => $config['plan']['opt_type'],
