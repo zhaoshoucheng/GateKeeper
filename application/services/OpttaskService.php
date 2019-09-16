@@ -90,7 +90,7 @@ class OpttaskService extends BaseService {
                 // 开始
                 $action = 0;
             }
-            if (strtotime($config['timing']['end_date']) < time()) {
+            if ($config['timing']['end_date'] < date('Y-m-d')) {
                 $status = 2;
             }
             return [
