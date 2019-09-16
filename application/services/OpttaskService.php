@@ -319,8 +319,10 @@ class OpttaskService extends BaseService {
                 $result_errmsg = "路网服务发生错误";
             } else if (in_array($result_errno, [7, 8])) {
                 $result_errmsg = "后台优化服务错误";
-            } else {
+            } else if ($result_errno != 0) {
                 $result_errmsg = "其它原因";
+            } else {
+                $result_errmsg = "";
             }
             return [
                 'result_id' => $item['id'],
