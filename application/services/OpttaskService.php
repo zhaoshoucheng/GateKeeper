@@ -286,6 +286,19 @@ class OpttaskService extends BaseService {
      * @return mixed
      * @throws \Exception
      */
+    /*
+    const (
+        TASK_CONFIG_DECODE_FAILED int = 1
+        GET_ROAD_DETAIL_FAILED int = 2
+        GET_JUNCTION_IDS_FAILED int = 3
+        GET_JUNCTIONS_INFO_FAILED int = 4
+        GET_SOURCE_DATES_FAILED int = 5
+        GET_TIMING_INFO_FAILED int = 6
+        GET_GREEN_WAVE_OPT_REQ_FAILED int = 7
+        REQ_GREEN_WAVE_OPT_TOKEN_FAILED int = 8
+        GREEN_WAVE_OPT_RESULT_FAILED int = 9
+    )
+     */
     public function ResultList($params) {
         $city_id = $params['city_id'];
         $task_id = $params['task_id'];
@@ -295,11 +308,25 @@ class OpttaskService extends BaseService {
         $data['failed'] = $this->opttaskresultroad_model->ResulCnt($city_id, $task_id, "result_errno != 0");
         $result_list = $this->opttaskresultroad_model->ResultList($city_id, $task_id);
         $result_list = array_map(function($item) {
+            $result_errno = intval($item['result_errno']);
+            if (in_array($result_errno, [1, 3])) {
+                $result_errmsg = "干线本身属性发生变化，请检查干线信息";
+            } else if (in_array($result_errno, [9])) {
+                $result_errmsg = "所选数据来源时间内无轨迹数据";
+            } else if (in_array($result_errno, [6])) {
+                $result_errmsg = "路口配时发生错误";
+            } else if (in_array($result_errno, [2, 4])) {
+                $result_errmsg = "路网服务发生错误";
+            } else if (in_array($result_errno, [7, 8])) {
+                $result_errmsg = "后台优化服务错误";
+            } else {
+                $result_errmsg = "其它原因";
+            }
             return [
                 'result_id' => $item['id'],
                 'created_at' => $item['created_at'],
-                'result_errno' => $item['result_errno'],
-                'result_errmsg' => $item['result_errmsg'],
+                'result_errno' => $result_errno,
+                'result_errmsg' => $result_errmsg,
             ];
         }, $result_list);
         $data['result_list'] = $result_list;
