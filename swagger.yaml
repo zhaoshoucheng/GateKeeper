@@ -14,10 +14,54 @@ tags:
   - name: "管理"
   - name: "济南项目"
   - name: "例行化优化"
+  - name: "开放平台"
 schemes:
 - http
 - https
 paths:
+  /esdata/sync:
+    post:
+      summary: 同步es数据
+      description: 远端服务获取滴滴内部指标数据,通过开放平台认证
+      tags:
+        - 开放平台
+      produces:
+        - application/json
+      parameters:
+        - name: index
+          in: query
+          type: string
+          description: 	"es索引，当前支持 new_dmp_forecast  实时指标数据;online_its_alarm_movement_month 实时报警数据;online_its_alarm_junction_month 路口级别;cn_12_flow_duration_v 济南离线指标表;cn_diagnosis_alarm_pro_offline_index 离线报警表;cn_flow_diagnosis_alarm_offline  离线报警数据"
+          required: true
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所属城市：济南 12"
+          required: true
+        - name: dsl
+          in: query
+          type: string
+          description: "es 查询语句 例如:cn_12_flow_duration_v6 dsl 查询样例: {\"from\":0,\"size\":200,\"query\":{\"bool\":{\"must\":{\"bool\":{\"must\":[{\"match\":{\"city_id\":{\"query\":12,\"type\":\"phrase\"}}},{\"range\":{\"dt\":{\"from\":\"2019-07-01\",\"to\":\"2019-08-01\",\"include_lower\":false,\"include_upper\":false}}}]}}}}}"
+        - name: scroll_id
+          in: query
+          type: string
+          description: scroll分页查询使用，会在第一次dsl查询后返回
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "返回结果将公司es结果进行透传,具体业务问题可咨询大数据组相关同事"
+            properties:
+                data:
+                  type: "string"
+                  example: "{\"_scroll_id\":\"ZWNtLWFyaXVzLW9sYXA0!DnF1ZXJ5VGhlbkZldGNoJAAAAAAENHGrFmY1bUo3MWxrVHhLTmpoWGRLU2NFMHcAAAAABDRxrBZmNW1KNzFsa1R4S05qaFhkS1NjRTB3AAAAAAPR0mAWZmdNd1pveEdROVcwTlBYNlNFV09UdwAAAAAFlmNNFnowcFEtWXdnU0ZtM1NmTzVkTGpIY2cAAAAABZZjShZ6MHBRLVl3Z1NGbTNTZk81ZExqSGNnAAAAAAPR0mEWZmdNd1pveEdROVcwTlBYNlNFV09UdwAAAAAFhAXaFlhFUm5FdEZGUVBLQmdqaXpGbXc3UkEAAAAABZZjSxZ6MHBRLVl3Z1NGbTNTZk81ZExqSGNnAAAAAAWWY0wWejBwUS1Zd2dTRm0zU2ZPNWRMakhjZwAAAAAFhAXbFlhFUm5FdEZGUVBLQmdqaXpGbXc3UkEAAAAABZ5uNBZpWEF4MTdpMVRFSzd1dzhPandkTlJ3AAAAAAWEBdwWWEVSbkV0RkZRUEtCZ2ppekZtdzdSQQAAAAAD2x5RFjZ4cEI1MWRKVGtLX3NDQU1hdWFKVncAAAAAA9seUBY2eHBCNTFkSlRrS19zQ0FNYXVhSlZ3AAAAAAWebjUWaVhBeDE3aTFURUs3dXc4T2p3ZE5SdwAAAAADB8rFFlFmcHFyN3VxVFFpaGRocWVKdEZmVHcAAAAAA9seTxY2eHBCNTFkSlRrS19zQ0FNYXVhSlZ3AAAAAAPbHk4WNnhwQjUxZEpUa0tfc0NBTWF1YUpWdwAAAAADB8rEFlFmcHFyN3VxVFFpaGRocWVKdEZmVHcAAAAABRcV_xZTa1R4a1VXcFRFZWtFUGVJN0hqV3V3AAAAAAUXFf4WU2tUeGtVV3BURWVrRVBlSTdIald1dwAAAAADI_9BFlluUmwxQzNKU29lQzZkenRlSDd3a0EAAAAABRcWABZTa1R4a1VXcFRFZWtFUGVJN0hqV3V3AAAAAAMj_0MWWW5SbDFDM0pTb2VDNmR6dGVIN3drQQAAAAADI_9EFlluUmwxQzNKU29lQzZkenRlSDd3a0EAAAAABWXilBZBaVVGT0g4RFM2dTR4LXlPa2pSU2RRAAAAAAMj_0IWWW5SbDFDM0pTb2VDNmR6dGVIN3drQQAAAAAFZeKbFkFpVUZPSDhEUzZ1NHgteU9ralJTZFEAAAAABWXiixZBaVVGT0g4RFM2dTR4LXlPa2pSU2RRAAAAAAOcKfcWY2hta0M0N2xTcy1sNVF4bDVSSGdBUQAAAAAFPQDbFkJhMUpLVDdIVDYyWHFTeVR1QklUcncAAAAABT0A3BZCYTFKS1Q3SFQ2MlhxU3lUdUJJVHJ3AAAAAAOcKfgWY2hta0M0N2xTcy1sNVF4bDVSSGdBUQAAAAAFPQDaFkJhMUpLVDdIVDYyWHFTeVR1QklUcncAAAAABT0A2RZCYTFKS1Q3SFQ2MlhxU3lUdUJJVHJ3AAAAAAQ0ca0WZjVtSjcxbGtUeEtOamhYZEtTY0Uwdw==\",\"took\":894,\"timed_out\":false,\"_shards\":{\"total\":36,\"successful\":36,\"failed\":0},\"hits\":{\"total\":5289179,\"max_score\":2.0,\"hits\":[{\"_index\":\"new_dmp_forecast_2019-09-04\",\"_type\":\"type\",\"_id\":\"2019-09-04 00:39:10_2017101118_i_90000010974100_2017030116_o_63694591\",\"_score\":2.0,\"_source\":{\"over_saturation_level_down\":\"0.0\",\"queue_ratio_5min_up\":\"0.0\",\"over_saturation_prob_up\":\"0.0\",\"total_spillover_alarm_traj_num_down\":\"0\",\"day_time_hms\":\"2019-09-04 00:39:10\",\"multi_stop_pi_up\":\"0.0\",\"traj_first_stop_pos_total_ratio_up\":\"0.0\",\"free_flow_speed_down\":\"6.3\",\"queue_ratio_up\":\"0.0\",\"spillover_rate_up\":\"0.0\",\"avg_queue_length5min_up\":\"0.0\",\"avg_stop_num_up\":\"0.0\",\"traj_first_stop_pos_total_ratio_down\":\"0.0\",\"one_stop_pi_down\":\"54.0\",\"avg_queue_length5min_down\":\"12.0\",\"multi_stop_ratio_up\":\"0.0\",\"queue_ratio_down\":\"0.025974026\",\"over_saturation_pi_5min_down\":\"0.0\",\"over_saturation_prob_down\":\"0.0027700618\",\"avg_stop_num_down\":\"1.0\",\"logic_flow_id\":\"2017101118_i_90000010974100_2017030116_o_63694591\",\"spillover_level_down\":\"0.0\",\"city_id\":\"12\",\"total_spillover_alarm_traj_num_up\":\"0\",\"queue_ratio_5min_down\":\"0.025974026\",\"one_stop_ratio_down\":\"1.0\",\"stop_delay_up\":\"0.0\",\"avg_speed_up\":\"5.550006\",\"avg_speed_down\":\"1.2343707\",\"logic_junction_id\":\"2017030116_4864757\",\"over_saturation_pi_5min_up\":\"0.0\",\"spillover_level_up\":\"0.0\",\"multi_stop_pi_down\":\"0.0\",\"spillover_pi_down\":\"0.0\",\"sinkTime\":1567528756340,\"spillover_pi_up\":\"0.0\",\"one_stop_pi_up\":\"0.0\",\"spillover_prob_down\":\"5.362839\",\"timestamp\":\"1567528756250\",\"spillover_rate_down\":\"0.0\",\"queue_length_up\":\"0.0\",\"multi_stop_ratio_down\":\"0.0\",\"over_saturation_level_up\":\"0.0\",\"free_flow_speed_up\":\"6.6666665\",\"spillover_prob_up\":\"0.0\",\"queue_length_down\":\"12.0\",\"traj_num\":\"1\",\"stop_delay_down\":\"44.0\",\"one_stop_ratio_up\":\"0.0\"}}]}}"
+                errmsg:
+                  type: "string"
+                  example: ""
+                errno:
+                  type: "number"
+                  example: 0
   /traj_service/itstool/Report/searchJunction:
     get:
       summary: 路口搜索
