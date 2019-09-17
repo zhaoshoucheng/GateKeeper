@@ -55,7 +55,10 @@ class MY_Controller extends CI_Controller
 
         $this->load->config('nconf');
         $this->routerUri = $this->uri->ruri_string();
-        $token = isset($_REQUEST['token']) ? $_REQUEST['token'] : "";
+        $token = isset($_GET['token']) ? $_GET['token'] : "";
+        if (empty($token)) {
+            $token = isset($_POST['token']) ? $_POST['token'] : "";
+        }
 
         $accessType = 0; // 权限认证通过的类型
         $accessUser = ""; // 权限认证通过的用户信息
