@@ -70,6 +70,10 @@ class Opttask extends MY_Controller
 
         $data = $this->opttaskService->UpdateTaskStatus($params);
 
-        $this->response($data);
+        if ($data != true) {
+            $this->errno = -1;
+            $this->errmsg = "操作失败";
+        }
+        $this->response("");
     }
 }
