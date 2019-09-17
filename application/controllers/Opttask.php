@@ -74,6 +74,6 @@ class Opttask extends MY_Controller
             $this->errno = -1;
             $this->errmsg = "操作失败";
         }
-        $this->response();
+        $this->response("");
     }
 }
