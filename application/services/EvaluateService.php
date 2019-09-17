@@ -69,10 +69,16 @@ class EvaluateService extends BaseService
         };
 
         $result = $this->waymap_model->getAllCityJunctions($cityId);
-
+        $restrictJuncs = $this->waymap_model->getRestrictJunctionCached($cityId);
+        $result = array_filter($result, function($item) use($restrictJuncs){
+            if (in_array($item['logic_junction_id'], $restrictJuncs)) {
+                return true;
+            }
+            return false;
+        });
+        
         $junctionCollection = Collection::make($result)->map($collectionMap);
         $dataList = $junctionCollection->get();
-
         foreach ($dataList as $key=>$item){
             if(!empty($junctionIds) && !in_array($item["logic_junction_id"],$junctionIds)){
                 unset($dataList[$key]);

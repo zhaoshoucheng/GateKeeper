@@ -58,7 +58,14 @@ class Arterialjunction extends MY_Controller
 
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
         $allCityJunctions = $waymapModel->getAllCityJunctions($cityId, $version);
-
+        $restrictJuncs = $this->waymap_model->getRestrictJunctionCached($cityId);
+        $result = array_filter($allCityJunctions, function($item) use($restrictJuncs){
+            if (in_array($item['logic_junction_id'], $restrictJuncs)) {
+                return true;
+            }
+            return false;
+        });
+        
         // 根据权限做一次过滤
         if(!empty($userPerm)){
             $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
