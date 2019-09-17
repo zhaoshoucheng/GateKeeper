@@ -832,7 +832,7 @@ class TimingAdaptionAreaService extends BaseService
             "source" => "signal_control",
             "startTime" => $startTime,
         ];
-
+        
         $esUrl = $this->config->item('new_es_interface') . '/estimate/space/query';
 
         if(ENVIRONMENT=="development"){

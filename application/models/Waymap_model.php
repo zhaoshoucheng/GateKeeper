@@ -707,7 +707,7 @@ class Waymap_model extends CI_Model
         return $res;
     }
 
-    public function getRestrictJunctionCached($cityId)
+    public function getRestrictJunctionCached($cityId, $version = 0, $force=0)
     {
         /*-------------------------------------------------
         | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
@@ -716,9 +716,9 @@ class Waymap_model extends CI_Model
         if ($version == 0) {
             $version = self::$lastMapVersion;
         }
-        
+
         $result = [];
-        $redis_key = 'all_restrict_junctions_' . $city_id . '_' . $version;
+        $redis_key = 'all_restrict_junctions_' . $cityId . '_' . $version;
         $result = $this->redis_model->getData($redis_key);
         if($force){
             $result = 0;
