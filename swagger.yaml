@@ -13,6 +13,7 @@ tags:
   - name: "配时"
   - name: "管理"
   - name: "济南项目"
+  - name: "例行化优化"
 schemes:
 - http
 - https
@@ -852,7 +853,7 @@ paths:
                               type: string
                               example: "00:00"
                             value:
-                              type: float
+                              type: number
                               example: 6.23
 
               errmsg:
@@ -17369,6 +17370,1271 @@ paths:
                           type: integer
                           description: "0 运行；1 暂停"
                           example: 0
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /opttask/action:
+    post:
+      summary: 修改任务状态
+      description: 修改任务状态
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: task_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: action
+          required: true
+          type: integer
+          description: "0 开始 1 暂停 2 删除"
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: string
+                example: ""
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /optroadtask/update:
+    post:
+      summary: 创建任务，修改任务
+      description: 创建任务，修改任务
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: "body"
+          name: "body"
+          description: 成功
+          schema:
+            properties:
+              junction:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    junction_id:
+                      type: "string"
+                      example: "2017030116_1308840"
+                    junction_name:
+                      type: "string"
+                      example: "东环大道-花鸟市场路"
+                    min_cycle:
+                      type: "number"
+                      description: "最小周期"
+                      example: 0
+                    max_cycle:
+                      type: "number"
+                      description: "最大周期"
+                      example: 200
+                    forward_weight:
+                      type: "number"
+                      description: "正向权重"
+                      example: 50
+                    backword_weight:
+                      type: "number"
+                      description: "反向权重"
+                      example: 50
+                    lock_cycle:
+                      type: "number"
+                      description: "是否锁定周期"
+                      example: 0
+                    lock_offset:
+                      type: "number"
+                      description: "是否锁定相位差"
+                      example: 0
+              plan:
+                required:
+                  - "direction"
+                  - "timing_type"
+                  - "opt_type"
+                  - "equal_cycle"
+                properties:
+                  direction:
+                    type: "number"
+                    description: "0 正向；1 反向；2 双向"
+                    example: 0
+                  timing_type:
+                    type: "number"
+                    description: "0 原始方案；1 校准方案"
+                    example: 0
+                  opt_type:
+                    type: "number"
+                    description: "0 带宽优化；1 轨迹优化"
+                    example: 0
+                  equal_cycle:
+                    type: "number"
+                    description: "是否同周期"
+                    example: 0
+                type: "object"
+              timing:
+                required:
+                  - "date_source"
+                  - "time_point"
+                  - "weekday"
+                  - "start_date"
+                  - "end_date"
+                properties:
+                  date_source:
+                    type: "number"
+                    description: ""
+                    example: 1
+                  time_point:
+                    type: "array"
+                    items:
+                      type: "string"
+                    example:
+                      - "08:00"
+                      - "12:00"
+                      - "18:00"
+                  weekday:
+                    type: "array"
+                    items:
+                      type: "number"
+                    example:
+                      - 1
+                      - 2
+                      - 3
+                      - 4
+                      - 5
+                      - 6
+                      - 7
+                  start_date:
+                    type: "string"
+                    example: "2019-01-01"
+                  end_date:
+                    type: "string"
+                    example: "2020-12-01"
+                type: "object"
+              task_id:
+                type: "number"
+                example: 11
+              city_id:
+                type: "number"
+                example: 134
+              task_name:
+                type: "string"
+                example: "东环大道1"
+              task_type:
+                type: "number"
+                example: 1
+              road_id:
+                type: "string"
+                example: "afd6782ab6bcde1388101a231bb9cb4f"
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: string
+                example: ""
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /optroadtask/info:
+    post:
+      summary: 任务详情
+      description: 任务详情
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: task_id
+          required: true
+          type: integer
+          description: ""
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: object
+                properties:
+                  junction:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        junction_id:
+                          type: "string"
+                          example: "2017030116_1308840"
+                        junction_name:
+                          type: "string"
+                          example: "东环大道-花鸟市场路"
+                        min_cycle:
+                          type: "number"
+                          description: "最小周期"
+                          example: 0
+                        max_cycle:
+                          type: "number"
+                          description: "最大周期"
+                          example: 200
+                        forward_weight:
+                          type: "number"
+                          description: "正向权重"
+                          example: 50
+                        backword_weight:
+                          type: "number"
+                          description: "反向权重"
+                          example: 50
+                        lock_cycle:
+                          type: "number"
+                          description: "是否锁定周期"
+                          example: 0
+                        lock_offset:
+                          type: "number"
+                          description: "是否锁定相位差"
+                          example: 0
+                  plan:
+                    required:
+                      - "direction"
+                      - "timing_type"
+                      - "opt_type"
+                      - "equal_cycle"
+                    properties:
+                      direction:
+                        type: "number"
+                        description: "0 正向；1 反向；2 双向"
+                        example: 0
+                      timing_type:
+                        type: "number"
+                        description: "0 原始方案；1 校准方案"
+                        example: 0
+                      opt_type:
+                        type: "number"
+                        description: "0 带宽优化；1 轨迹优化"
+                        example: 0
+                      equal_cycle:
+                        type: "number"
+                        description: "是否同周期"
+                        example: 0
+                    type: "object"
+                  timing:
+                    required:
+                      - "date_source"
+                      - "time_point"
+                      - "weekday"
+                      - "start_date"
+                      - "end_date"
+                    properties:
+                      date_source:
+                        type: "number"
+                        description: ""
+                        example: 1
+                      time_point:
+                        type: "array"
+                        items:
+                          type: "string"
+                        example:
+                          - "08:00"
+                          - "12:00"
+                          - "18:00"
+                      weekday:
+                        type: "array"
+                        items:
+                          type: "number"
+                        example:
+                          - 1
+                          - 2
+                          - 3
+                          - 4
+                          - 5
+                          - 6
+                          - 7
+                      start_date:
+                        type: "string"
+                        example: "2019-01-01"
+                      end_date:
+                        type: "string"
+                        example: "2020-12-01"
+                    type: "object"
+                  task_id:
+                    type: "number"
+                    example: 11
+                  city_id:
+                    type: "number"
+                    example: 134
+                  task_name:
+                    type: "string"
+                    example: "东环大道1"
+                  task_type:
+                    type: "number"
+                    example: 1
+                  road_id:
+                    type: "string"
+                    example: "afd6782ab6bcde1388101a231bb9cb4f"
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /optroadtask/resulttaskinfo:
+    post:
+      summary: 结果对应任务配置
+      description: 结果对应任务配置
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: result_id
+          required: true
+          type: integer
+          description: ""
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: object
+                properties:
+                  junction:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        junction_id:
+                          type: "string"
+                          example: "2017030116_1308840"
+                        junction_name:
+                          type: "string"
+                          example: "东环大道-花鸟市场路"
+                        min_cycle:
+                          type: "number"
+                          description: "最小周期"
+                          example: 0
+                        max_cycle:
+                          type: "number"
+                          description: "最大周期"
+                          example: 200
+                        forward_weight:
+                          type: "number"
+                          description: "正向权重"
+                          example: 50
+                        backword_weight:
+                          type: "number"
+                          description: "反向权重"
+                          example: 50
+                        lock_cycle:
+                          type: "number"
+                          description: "是否锁定周期"
+                          example: 0
+                        lock_offset:
+                          type: "number"
+                          description: "是否锁定相位差"
+                          example: 0
+                  plan:
+                    required:
+                      - "direction"
+                      - "timing_type"
+                      - "opt_type"
+                      - "equal_cycle"
+                    properties:
+                      direction:
+                        type: "number"
+                        description: "0 正向；1 反向；2 双向"
+                        example: 0
+                      timing_type:
+                        type: "number"
+                        description: "0 原始方案；1 校准方案"
+                        example: 0
+                      opt_type:
+                        type: "number"
+                        description: "0 带宽优化；1 轨迹优化"
+                        example: 0
+                      equal_cycle:
+                        type: "number"
+                        description: "是否同周期"
+                        example: 0
+                    type: "object"
+                  timing:
+                    required:
+                      - "date_source"
+                      - "time_point"
+                      - "weekday"
+                      - "start_date"
+                      - "end_date"
+                    properties:
+                      date_source:
+                        type: "number"
+                        description: ""
+                        example: 1
+                      time_point:
+                        type: "array"
+                        items:
+                          type: "string"
+                        example:
+                          - "08:00"
+                          - "12:00"
+                          - "18:00"
+                      weekday:
+                        type: "array"
+                        items:
+                          type: "number"
+                        example:
+                          - 1
+                          - 2
+                          - 3
+                          - 4
+                          - 5
+                          - 6
+                          - 7
+                      start_date:
+                        type: "string"
+                        example: "2019-01-01"
+                      end_date:
+                        type: "string"
+                        example: "2020-12-01"
+                    type: "object"
+                  task_id:
+                    type: "number"
+                    example: 11
+                  city_id:
+                    type: "number"
+                    example: 134
+                  task_name:
+                    type: "string"
+                    example: "东环大道1"
+                  task_type:
+                    type: "number"
+                    example: 1
+                  road_id:
+                    type: "string"
+                    example: "afd6782ab6bcde1388101a231bb9cb4f"
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /optroadtask/roadconflict:
+    post:
+      summary: 干线路口冲突信息
+      description: 干线路口冲突信息
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: road_id
+          required: true
+          type: string
+          description: ""
+        - in: formData
+          name: task_type
+          required: true
+          type: integer
+          description: ""
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: "object"
+                properties:
+                  conflict_info:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        logic_junction_id:
+                          type: "string"
+                          example: "e286c810c703cc95bc1ab3d00c8fdcb9"
+                        conflict_task:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              task_id:
+                                type: "number"
+                                example: 111
+                              task_name:
+                                type: "string"
+                                example: "111"
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /optroadtask/search:
+    post:
+      summary: 干线搜索
+      description: 干线搜索
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: keyword
+          required: true
+          type: string
+          description: "搜索关键字"
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    road_id:
+                      type: "string"
+                      example: "42c82d9d34c5926e43d932d18ab4456c"
+                    road_name:
+                      type: "string"
+                      example: "test111"
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /optroadtask/list:
+    post:
+      summary: 任务结果列表
+      description: 任务结果列表
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: task_id
+          required: true
+          type: integer
+          description: ""
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    result_id:
+                      type: "integer"
+                      example: 3
+                    created_at:
+                      type: "string"
+                      example: "2019-09-10 11:40:12"
+                    result_errno:
+                      type: "integer"
+                      example: 0
+                      description: "0表示成功"
+                    result_errmsg:
+                      type: "string"
+                      example: ""
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /optroadtask/getSpaceTimeDiagramArg:
+    post:
+      summary: 获取时空图参数
+      description: 获取时空图参数
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: result_id
+          required: true
+          type: integer
+          description: ""
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: "object"
+                properties:
+                  junctions:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        junction_id:
+                          type: "string"
+                          example: "2017030116_1308840"
+                        junction_inner_links:
+                          type: "string"
+                          example: "17186190,17186191,17186330,17186331,17230930,17230931"
+                        forward_flow_id:
+                          type: "string"
+                          example: "2017030116_i_146994250_2017030116_o_244102360"
+                        forward_in_links:
+                          type: "string"
+                          example: "146994240,146994250"
+                        forward_out_links:
+                          type: "string"
+                          example: "244102360,457686170,457686180,146999060,742476270,742476280,648627850,648627860"
+                        reverse_flow_id:
+                          type: "string"
+                          example: "2017030116_i_244102311_2017030116_o_146994201"
+                        reverse_in_links:
+                          type: "string"
+                          example: "17186521,1005825111,1005825101,146999081,458525381,458525371,648627821,648627811"
+                        reverse_out_links:
+                          type: "string"
+                          example: "146994201,648627841,648627831"
+                        tod_start_time:
+                          type: "string"
+                          example: "07:00:00"
+                        tod_end_time:
+                          type: "string"
+                          example: "18:00:00"
+                        cycle:
+                          type: "number"
+                          example: 120
+                        offset:
+                          type: "number"
+                          example: 92
+                  time_point:
+                    type: "string"
+                    example: "14:10"
+                  dates:
+                    type: "array"
+                    items:
+                      type: "string"
+                    example:
+                      - "20190915"
+                      - "20190914"
+                      - "20190913"
+                      - "20190912"
+                      - "20190911"
+                      - "20190910"
+                      - "20190909"
+                  method:
+                    type: "string"
+                    example: "0"
+                  map_version:
+                    type: "string"
+                    example: "2019091018"
+                  token:
+                    type: "string"
+                    example: ""
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /optroadtask/queryarterialjunctionInfo:
+    post:
+      summary: 获取路口flow信息
+      description: 获取路口flow信息
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: result_id
+          required: true
+          type: integer
+          description: ""
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: "object"
+                properties:
+                  forward_path_flows:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        start_junc_id:
+                          type: "string"
+                          example: "2017030116_1321647"
+                        end_junc_id:
+                          type: "string"
+                          example: "2017030116_1308840"
+                        path_links:
+                          type: "string"
+                          example: "146994240,146994250"
+                        length:
+                          type: "number"
+                          example: 222
+                        logic_flow:
+                          required:
+                            - "logic_junction_id"
+                            - "logic_flow_id"
+                            - "inner_link_ids"
+                            - "inlinks"
+                            - "outlinks"
+                          properties:
+                            logic_junction_id:
+                              type: "string"
+                              example: "2017030116_1308840"
+                            logic_flow_id:
+                              type: "string"
+                              example: "2017030116_i_146994250_2017030116_o_244102360"
+                            inner_link_ids:
+                              type: "string"
+                              example: "17186190,17186191,17186330,17186331,17230930,17230931"
+                            inlinks:
+                              type: "string"
+                              example: "146994240,146994250"
+                            outlinks:
+                              type: "string"
+                              example: "244102360,457686170,457686180,146999060,742476270,742476280,648627850,648627860"
+                          type: "object"
+                        ave_length:
+                          type: "number"
+                          example: 225
+                        length_warning:
+                          type: "number"
+                          example: 0
+                  backward_path_flows:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        start_junc_id:
+                          type: "string"
+                          example: "2017030116_1311983"
+                        end_junc_id:
+                          type: "string"
+                          example: "2017030116_1308894"
+                        path_links:
+                          type: "string"
+                          example: "146998191,146998181,179235731,179235721,648627741,648627731"
+                        length:
+                          type: "number"
+                          example: 698
+                        logic_flow:
+                          required:
+                            - "logic_junction_id"
+                            - "logic_flow_id"
+                            - "inner_link_ids"
+                            - "inlinks"
+                            - "outlinks"
+                          properties:
+                            logic_junction_id:
+                              type: "string"
+                              example: "2017030116_1308894"
+                            logic_flow_id:
+                              type: "string"
+                              example: "2017030116_i_17200631_2017030116_o_17200501"
+                            inner_link_ids:
+                              type: "string"
+                              example: "17185600,17185631,17185660,17202340,17202341,17418590,17418891,17418920"
+                            inlinks:
+                              type: "string"
+                              example: "146998191,146998181,179235731,179235721,648627741,648627731"
+                            outlinks:
+                              type: "string"
+                              example: "17200501,648627761,648627751,179235761"
+                          type: "object"
+                        ave_length:
+                          type: "number"
+                          example: 694
+                        length_warning:
+                          type: "number"
+                          example: 0
+                  junctions_info:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        name:
+                          type: "string"
+                          example: "东环大道_河东路"
+                        lng:
+                          type: "string"
+                          example: "109.43689"
+                        lat:
+                          type: "string"
+                          example: "24.36048"
+                        node_ids:
+                          type: "array"
+                          items:
+                            type: "string"
+                          example:
+                            - "1321646"
+                            - "1321647"
+                            - "1327625"
+                            - "1330747"
+                            - "81295735"
+                        logic_junction_id:
+                          type: "string"
+                          example: "2017030116_1321647"
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /optroadtask/queryarterialtiminginfo:
+    post:
+      summary: 获取配时信息
+      description: 获取配时信息
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: result_id
+          required: true
+          type: integer
+          description: ""
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: "object"
+                properties:
+                  2017030116_1308840:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 842
+                        logic_junction_id:
+                          type: "string"
+                          example: "2017030116_1308840"
+                        date:
+                          type: "string"
+                          example: "20190915"
+                        timing_info:
+                          required:
+                            - "tod_start_time"
+                            - "tod_end_time"
+                            - "extra_timing"
+                            - "movement_timing"
+                          properties:
+                            tod_start_time:
+                              type: "string"
+                              example: "07:00:00"
+                            tod_end_time:
+                              type: "string"
+                              example: "18:00:00"
+                            extra_timing:
+                              required:
+                                - "cycle"
+                                - "offset"
+                              properties:
+                                cycle:
+                                  type: "number"
+                                  example: 120
+                                offset:
+                                  type: "number"
+                                  example: 92
+                              type: "object"
+                            movement_timing:
+                              type: "array"
+                              items:
+                                type: "object"
+                                properties:
+                                  start_time:
+                                    type: "number"
+                                    example: 0
+                                  duration:
+                                    type: "number"
+                                    example: 84
+                                  logic_flow_id:
+                                    type: "string"
+                                    example: "2017030116_i_146994250_2017030116_o_244102360"
+                                  comment:
+                                    type: "string"
+                                    example: ""
+                          type: "object"
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /optroadtask/getTaskClockShiftCorrect:
+    post:
+      summary: 获取配时校正信息
+      description: 获取配时校正信息
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: result_id
+          required: true
+          type: integer
+          description: ""
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    junction_id:
+                      type: "string"
+                      example: "2017030116_1308894"
+                    cycle:
+                      type: "number"
+                      example: 120
+                    offset:
+                      type: "number"
+                      example: 23
+                    clock_shift:
+                      type: "number"
+                      example: 55
+                    green_pass_rate:
+                      type: "number"
+                      example: 0.97927461139896
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /optroadtask/queryGreenWaveOptPlan:
+    post:
+      summary: 获取优化结果
+      description: 获取优化结果
+      tags:
+        - "例行化优化"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: result_id
+          required: true
+          type: integer
+          description: ""
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: "object"
+                properties:
+                  dataList:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        backward_green:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              green_duration:
+                                type: "number"
+                                example: 68
+                              green_start:
+                                type: "number"
+                                example: 16
+                        cycle:
+                          type: "number"
+                          example: 120
+                        forward_green:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              green_duration:
+                                type: "number"
+                                example: 84
+                              green_start:
+                                type: "number"
+                                example: 0
+                        junction_id:
+                          type: "string"
+                          example: "2017030116_1308840"
+                        offset:
+                          type: "number"
+                          example: 85
+                  token:
+                    type: "string"
+                    example: "acd5a6386d3a0634da8239ad9719a09f"
+              errmsg:
+                type: string
+                description: 错误信息，当errno非0的时候有内容，可直接在页面显示
+                example: ""
+              errno:
+                type: integer
+                description: 请求返回码，0才表示逻辑成功
+                example: 0
+              traceid:
+                type: string
+                description: 链路ID，追查错误使用
+                example: 64454c135d25c58d58fd81d4267cf502
+  /junction/timing_status:
+    post:
+      summary: 任务结果列表
+      description: 任务结果列表
+      tags:
+        - "例行化优化"
+        - "管理"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: city_id
+          required: true
+          type: integer
+          description: ""
+        - in: formData
+          name: logic_junction_ids
+          required: true
+          type: string
+          description: "逗号分隔"
+        - in: formData
+          name: source
+          required: true
+          type: integer
+          description: "0 所有，1人工，2信号机"
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              data:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    logic_junction_id:
+                      type: "string"
+                      example: "2017030116_15445094"
+                    status:
+                      type: "number"
+                      example: 1
+                    source:
+                      type: "array"
+                      items:
+                        type: "number"
+                      example:
+                        - 1
+                        - 2
               errmsg:
                 type: string
                 description: 错误信息，当errno非0的时候有内容，可直接在页面显示
