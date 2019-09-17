@@ -60,6 +60,8 @@ class OpttaskService extends BaseService {
 
         $task_list = array_map(function($item) use($road_id_name_map) {
             $config = json_decode($item['config'], true);
+            asort($config['timing']['weekday']);
+            asort($config['timing']['time_point']);
             $weekday = $config['timing']['weekday'];
             $weekdays = [];
             foreach ($weekday as $value) {
