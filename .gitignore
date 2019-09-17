@@ -6,4 +6,3 @@ webpack.config.js
 package.json
 application/logs/
 vendor/
-composer.lock
