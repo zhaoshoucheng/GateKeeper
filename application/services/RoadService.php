@@ -158,7 +158,8 @@ class RoadService extends BaseService
 
     /**
      * 获取path的上下游路口
-     *
+     * 高内聚函数，必须确保质量一般不会轻易动
+     * 
      * @param $params
      * @return array
      * @throws \Exception

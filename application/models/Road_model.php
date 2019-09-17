@@ -70,7 +70,11 @@ class Road_model extends CI_Model
             ->where('is_delete', 0)
             ->order_by('created_at desc')
             ->get();
-        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+        $result = $res instanceof CI_DB_result ? $res->result_array() : $res;
+        if(is_array($result) && count($result)>0){
+            return $result[0];
+        }
+        return $result;
     }
 
     /**

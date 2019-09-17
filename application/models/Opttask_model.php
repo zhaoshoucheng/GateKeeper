@@ -119,6 +119,7 @@ class Opttask_model extends CI_Model {
             'config' => json_encode($config),
             'start_date' => $start_date,
             'end_date' => $end_date,
+            'updated_at' => date('Y-m-d H:i:s'),
         ];
         $res = $this->db->where('id', $task_id)->update($this->tb, $obj);
         return $res;

@@ -38,7 +38,7 @@ class Arterialtiming_model extends CI_Model
                 'end_time'=>$timePoint.":01",
                 'date'=>$reqdate,
                 // 'version'=>$versionStr,
-                'source'=>$source,
+                'source'=>$source == 0 ? '2,1' : $source,
             ));
 
             if(empty($ret) or empty($ret['schedule'])){
@@ -229,18 +229,25 @@ class Arterialtiming_model extends CI_Model
     }
 
     //获取选中路口的flowIds
+    //
+    // 首先说一下请求的背景及当前函数流程
+    // 1、首先干线优化页面 Road/getAllRoadDetail?show_type=1时会调用 getPathHeadTailJunction 获取到补全的首尾路口信息。
+    // 2、$selectJunctions 就是补全后的路口列表数据
+    // 3、通过 junctions 获取到干线表中存储的首尾路口，如果存在则替换 对应路口信息
+    // 4、通过 new_junctions 获取路网的flow信息，完成显示
     public function getJunctionFlowInfos($cityID,$version,$selectJunctions){
         //从db中获取进出路口
         $forwardJunctions = $selectJunctions;
         $backwardJunctions = array_reverse($selectJunctions);
-        $forwardInfo = $this->road_model->getRoadsByJunctionIDs(implode(",",$forwardJunctions));
+        $forwardInfo = $this->road_model->getRoadsByJunctionIDs(implode(",",array_slice($forwardJunctions, 1, count($forwardJunctions)-2)));
         if(!empty($forwardInfo["forward_in_junctionid"])){
             $forwardJunctions[0] = $forwardInfo["forward_in_junctionid"];
             $backwardJunctions[count($selectJunctions)-1] = $forwardInfo["backward_out_junctionid"];
             $forwardJunctions[count($selectJunctions)-1] = $forwardInfo["forward_out_junctionid"];
             $backwardJunctions[0] = $forwardInfo["backward_in_junctionid"];
         }
-        $backwardInfo = $this->road_model->getRoadsByJunctionIDs(implode(",",$backwardJunctions));
+
+        $backwardInfo = $this->road_model->getRoadsByJunctionIDs(implode(",",array_slice($backwardJunctions, 1, count($backwardJunctions)-2)));
         if(!empty($backwardInfo["forward_in_junctionid"])){
             $forwardJunctions[0] = $forwardInfo["backward_in_junctionid"];
             $backwardJunctions[count($selectJunctions)-1] = $forwardInfo["forward_out_junctionid"];
@@ -284,20 +291,30 @@ class Arterialtiming_model extends CI_Model
 
         $result['forward_path_flows'] = $forwardPathFlows;
         $result['backward_path_flows'] = $backwardPathFlows;
-        if(!isset($junctionsInfo[$forwardJunctions[0]])){
-            $junctionsInfo[$forwardJunctions[0]] =[
+
+
+
+        //使用原始selectJunctions作信息补全
+        if(!isset($junctionsInfo[$selectJunctions[0]])){
+            $result['forward_path_flows'][0]["start_junc_id"] = $selectJunctions[0];
+            $result['backward_path_flows'][count($selectJunctions)-2]["end_junc_id"] = $selectJunctions[0];
+            $result['backward_path_flows'][count($selectJunctions)-2]["logic_flow"]["logic_junction_id"] = $selectJunctions[0];
+            $junctionsInfo[$selectJunctions[0]] =[
                 "lat"=>"",
                 "lng"=>"",
-                "logic_junction_id"=>$forwardJunctions[0],
+                "logic_junction_id"=>$selectJunctions[0],
                 "name"=>"未知路口",
                 "node_ids"=>[],
             ];
         }
-        if(!isset($junctionsInfo[$forwardJunctions[count($forwardJunctions)-1]])){
-            $junctionsInfo[$forwardJunctions[count($forwardJunctions)-1]] =[
+        if(!isset($junctionsInfo[$selectJunctions[count($selectJunctions)-1]])){
+            $result['forward_path_flows'][count($selectJunctions)-2]["end_junc_id"] = $selectJunctions[count($selectJunctions)-1];
+            $result['forward_path_flows'][count($selectJunctions)-2]["logic_flow"]["logic_junction_id"] = $selectJunctions[count($selectJunctions)-1];
+            $result['backward_path_flows'][0]["start_junc_id"] = $selectJunctions[count($selectJunctions)-1];
+            $junctionsInfo[$selectJunctions[count($selectJunctions)-1]] =[
                 "lat"=>"",
                 "lng"=>"",
-                "logic_junction_id"=>$forwardJunctions[count($forwardJunctions)-1],
+                "logic_junction_id"=>$selectJunctions[count($selectJunctions)-1],
                 "name"=>"未知路口",
                 "node_ids"=>[],
             ];

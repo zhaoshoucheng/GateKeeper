@@ -60,23 +60,25 @@ class OpttaskService extends BaseService {
 
         $task_list = array_map(function($item) use($road_id_name_map) {
             $config = json_decode($item['config'], true);
+            asort($config['timing']['weekday']);
+            asort($config['timing']['time_point']);
             $weekday = $config['timing']['weekday'];
             $weekdays = [];
             foreach ($weekday as $value) {
                 if ($value == 1) {
-                    $weekdays[] = '星期一';
-                } elseif ($value == 1) {
-                    $weekdays[] = '星期二';
+                    $weekdays[] = '周一';
+                } elseif ($value == 2) {
+                    $weekdays[] = '周二';
                 } elseif ($value == 3) {
-                    $weekdays[] = '星期三';
+                    $weekdays[] = '周三';
                 } elseif ($value == 4) {
-                    $weekdays[] = '星期四';
+                    $weekdays[] = '周四';
                 } elseif ($value == 5) {
-                    $weekdays[] = '星期五';
+                    $weekdays[] = '周五';
                 } elseif ($value == 6) {
-                    $weekdays[] = '星期六';
+                    $weekdays[] = '周六';
                 } elseif ($value == 7) {
-                    $weekdays[] = '星期日';
+                    $weekdays[] = '周日';
                 }
             }
             if ($item['status'] == 0) {
@@ -90,7 +92,7 @@ class OpttaskService extends BaseService {
                 // 开始
                 $action = 0;
             }
-            if (strtotime($config['timing']['end_date']) < time()) {
+            if ($config['timing']['end_date'] < date('Y-m-d')) {
                 $status = 2;
             }
             return [
@@ -98,14 +100,14 @@ class OpttaskService extends BaseService {
                 'task_name' => $item['task_name'],
                 'task_type' => $item['task_type'],
                 'road_id' => $item['road_id'],
-                'road_name' => $road_id_name_map[$item['road_id']],
+                'road_name' => isset($road_id_name_map[$item['road_id']]) ? $road_id_name_map[$item['road_id']] : "",
                 'direction' => $config['plan']['direction'],
                 'timing_type' => $config['plan']['timing_type'],
                 'opt_type' => $config['plan']['opt_type'],
                 'equal_cycle' => $config['plan']['equal_cycle'],
                 'date_source' => $config['timing']['date_source'],
-                'time_point' => implode(' ', $config['timing']['time_point']),
-                'weekday' => implode(' ', $weekdays),
+                'time_point' => implode(',', $config['timing']['time_point']),
+                'weekday' => implode(',', $weekdays),
                 'status'=> $status,
                 'action' => $action,
             ];
@@ -212,7 +214,7 @@ class OpttaskService extends BaseService {
         $road_task_map = [];
         $new_task_list = [];
         foreach ($task_list as $value) {
-            $road_task_map[$value['road_id']] = $value['id'];
+            $road_task_map[$value['road_id']][] = $value['id'];
             $new_task_list[$value['id']] = $value;
         }
         $task_list = $new_task_list;
@@ -242,10 +244,12 @@ class OpttaskService extends BaseService {
                     }
                     $tmp_junction_list = explode(',', $road['logic_junction_ids']);
                     if (in_array($junction_id, $tmp_junction_list)) {
-                        $one['conflict_task'][] = [
-                            'task_id' => $task_list[$road_task_map[$road['road_id']]]['id'],
-                            'task_name' => $task_list[$road_task_map[$road['road_id']]]['task_name'],
-                        ];
+                        foreach ($road_task_map[$road['road_id']] as $road_task) {
+                            $one['conflict_task'][] = [
+                                'task_id' => $task_list[$road_task]['id'],
+                                'task_name' => $task_list[$road_task]['task_name'],
+                            ];
+                        }
                     }
                 }
                 $data[] = $one;
@@ -284,6 +288,19 @@ class OpttaskService extends BaseService {
      * @return mixed
      * @throws \Exception
      */
+    /*
+    const (
+        TASK_CONFIG_DECODE_FAILED int = 1
+        GET_ROAD_DETAIL_FAILED int = 2
+        GET_JUNCTION_IDS_FAILED int = 3
+        GET_JUNCTIONS_INFO_FAILED int = 4
+        GET_SOURCE_DATES_FAILED int = 5
+        GET_TIMING_INFO_FAILED int = 6
+        GET_GREEN_WAVE_OPT_REQ_FAILED int = 7
+        REQ_GREEN_WAVE_OPT_TOKEN_FAILED int = 8
+        GREEN_WAVE_OPT_RESULT_FAILED int = 9
+    )
+     */
     public function ResultList($params) {
         $city_id = $params['city_id'];
         $task_id = $params['task_id'];
@@ -293,11 +310,27 @@ class OpttaskService extends BaseService {
         $data['failed'] = $this->opttaskresultroad_model->ResulCnt($city_id, $task_id, "result_errno != 0");
         $result_list = $this->opttaskresultroad_model->ResultList($city_id, $task_id);
         $result_list = array_map(function($item) {
+            $result_errno = intval($item['result_errno']);
+            if (in_array($result_errno, [1, 3])) {
+                $result_errmsg = "干线本身属性发生变化，请检查干线信息";
+            } else if (in_array($result_errno, [9])) {
+                $result_errmsg = "所选数据来源时间内无轨迹数据";
+            } else if (in_array($result_errno, [6])) {
+                $result_errmsg = "路口配时发生错误";
+            } else if (in_array($result_errno, [2, 4])) {
+                $result_errmsg = "路网服务发生错误";
+            } else if (in_array($result_errno, [7, 8])) {
+                $result_errmsg = "后台优化服务错误";
+            } else if ($result_errno != 0) {
+                $result_errmsg = "其它原因";
+            } else {
+                $result_errmsg = "";
+            }
             return [
                 'result_id' => $item['id'],
                 'created_at' => $item['created_at'],
-                'result_errno' => $item['result_errno'],
-                'result_errmsg' => $item['result_errmsg'],
+                'result_errno' => $result_errno,
+                'result_errmsg' => $result_errmsg,
             ];
         }, $result_list);
         $data['result_list'] = $result_list;
@@ -341,18 +374,26 @@ class OpttaskService extends BaseService {
     public function GetResultField($params) {
         $result_id = $params['result_id'];
         $field = $params['field'];
-        $result =$this->opttaskresultroad_model->GetField($result_id, $field);
+        $result =$this->opttaskresultroad_model->ResultTaskInfo($result_id);
         if (!empty($result)) {
+            $result = $result[0];
+            $data = json_decode($result[$field], true);
             if ($field == 'diagram_arg') {
-                return $result[0][$field];
+                if (empty($data)) {
+                    return [];
+                }
+                return [
+                    'junctions' => $data,
+                    'time_point' => $result['time_point'],
+                    'dates' => explode(',', $result['dates']),
+                    'method' => $result['direction'],
+                    'map_version' => $result['map_version'],
+                    'token' => "",
+                ];
+            } else {
+                return $data;
             }
-            $data = json_decode($result[0][$field], true);
-            if (isset($data['data'])) {
-                return $data['data'];
-            }
-        }
-        if ($field == 'diagram_arg') {
-            return '';
+
         }
         return [];
     }

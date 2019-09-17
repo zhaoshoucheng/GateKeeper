@@ -707,6 +707,30 @@ class Waymap_model extends CI_Model
         return $res;
     }
 
+    public function getRestrictJunctionCached($cityId, $version = 0, $force=0)
+    {
+        /*-------------------------------------------------
+        | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
+        --------------------------------------------------*/
+        $this->load->model('redis_model');
+        if ($version == 0) {
+            $version = self::$lastMapVersion;
+        }
+
+        $result = [];
+        $redis_key = 'all_restrict_junctions_' . $cityId . '_' . $version;
+        $result = $this->redis_model->getData($redis_key);
+        if($force){
+            $result = 0;
+        }
+        if (!$result) {
+            $res = $this->getRestrictJunction($cityId);
+            $this->redis_model->setEx($redis_key, json_encode($res), 10 * 3600);
+            return $res;
+        }
+        return json_decode($result, true);
+    }
+
     // 获取后台区域限制的路口
     // 如果返回空数组，则代表不做限制
     public function getRestrictJunction($cityId)

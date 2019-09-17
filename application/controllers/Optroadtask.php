@@ -216,7 +216,7 @@ class Optroadtask extends MY_Controller
         $this->response($data);
     }
     // opt getClockShiftCorrect
-    public function getClockShiftCorrect()
+    public function getTaskClockShiftCorrect()
     {
         $params = $this->input->post(null, true);
 

@@ -69,10 +69,16 @@ class EvaluateService extends BaseService
         };
 
         $result = $this->waymap_model->getAllCityJunctions($cityId);
-
+        $restrictJuncs = $this->waymap_model->getRestrictJunctionCached($cityId);
+        $result = array_filter($result, function($item) use($restrictJuncs){
+            if (in_array($item['logic_junction_id'], $restrictJuncs)) {
+                return true;
+            }
+            return false;
+        });
+        
         $junctionCollection = Collection::make($result)->map($collectionMap);
         $dataList = $junctionCollection->get();
-
         foreach ($dataList as $key=>$item){
             if(!empty($junctionIds) && !in_array($item["logic_junction_id"],$junctionIds)){
                 unset($dataList[$key]);
@@ -171,6 +177,12 @@ class EvaluateService extends BaseService
         $hour = $this->helperService->getLastestHour($cityId);
         $dayTime = date('Y-m-d') . ' ' . $hour;
 
+        //轨迹数
+        $trajNum = 5;
+        if($cityId==175){
+            $trajNum = 1;
+        }
+
         // es所需data
         if(empty($junctionIds)){
             $esData = [
@@ -178,7 +190,7 @@ class EvaluateService extends BaseService
                 "cityId"    => $cityId,
                 'requestId' => get_traceid(),
                 "dayTime"   => $dayTime,
-                "trailNum"  => 5,
+                "trailNum"  => $trajNum,
                 "andOperations" => [
                     "cityId"   => "eq",
                     "dayTime"  => "eq",
@@ -218,7 +230,7 @@ class EvaluateService extends BaseService
                     "cityId"    => $cityId,
                     'requestId' => get_traceid(),
                     "dayTime"   => $dayTime,
-                    "trailNum"  => 5,
+                    "trailNum"  => $trajNum,
                     "andOperations" => [
                         "cityId"   => "eq",
                         "dayTime"  => "eq",
