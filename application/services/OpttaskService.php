@@ -313,13 +313,13 @@ class OpttaskService extends BaseService {
             $result_errno = intval($item['result_errno']);
             if (in_array($result_errno, [1, 3])) {
                 $result_errmsg = "干线本身属性发生变化，请检查干线信息";
-            } else if (in_array($result_errno, [9])) {
+            } else if (in_array($result_errno, [])) {
                 $result_errmsg = "所选数据来源时间内无轨迹数据";
             } else if (in_array($result_errno, [6])) {
                 $result_errmsg = "路口配时发生错误";
             } else if (in_array($result_errno, [2, 4])) {
                 $result_errmsg = "路网服务发生错误";
-            } else if (in_array($result_errno, [7, 8])) {
+            } else if (in_array($result_errno, [7, 8, 9])) {
                 $result_errmsg = "后台优化服务错误";
             } else if ($result_errno != 0) {
                 $result_errmsg = "其它原因";
