@@ -732,11 +732,12 @@ class EvaluateService extends BaseService
         $flowsInfo[$logicJunctionId]['9999'] = '所有方向';
 
         $result = $this->fillZeroResult($result);
-
-        arsort($result["base"]);
-        if(is_array($result["evaluate"])){
+        if(isset($result["base"])){
+            ksort($result["base"]);
+        }
+        if(isset($result["evaluate"]) &&is_array($result["evaluate"])){
             foreach ($result["evaluate"] as $key => $value) {
-                arsort($result["evaluate"][$key]);
+                ksort($result["evaluate"][$key]);
             }
         }
         
