@@ -27,6 +27,7 @@ class Arterialtiming extends MY_Controller
      */
     public function queryArterialTimingInfo()
     {
+        $this->convertJsonToPost();
         $params = $this->input->post();
 
         // 校验参数

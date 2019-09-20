@@ -44,6 +44,7 @@ class Arterialspacetimediagram extends MY_Controller
     */
     public function getSpaceTimeDiagram()
     {
+        $this->convertJsonToPost();
         $params = $this->input->post(NULL, TRUE);
         $result = $this->traj_model->getSpaceTimeDiagram($params);
         $result['token'] = isset($params['token']) ?  $params['token'] : "";
