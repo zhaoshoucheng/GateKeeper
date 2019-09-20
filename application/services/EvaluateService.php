@@ -733,6 +733,13 @@ class EvaluateService extends BaseService
 
         $result = $this->fillZeroResult($result);
 
+        arsort($result["base"]);
+        if(is_array($result["evaluate"])){
+            foreach ($result["evaluate"] as $key => $value) {
+                arsort($result["evaluate"][$key]);
+            }
+        }
+        
         // 基本信息
         $result['info'] = [
             'junction_name' => $junctionIdName[$logicJunctionId] ?? '',

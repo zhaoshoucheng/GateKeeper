@@ -82,6 +82,7 @@ class Arterialtiming extends MY_Controller
      */
     public function queryArterialJunctionInfo()
     {
+        $this->convertJsonToPost();
         $params = $this->input->post();
         $validate = Validate::make($params, [
                 'city_id'               => 'nullunable',

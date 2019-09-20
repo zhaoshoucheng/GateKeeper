@@ -27,7 +27,7 @@ class DiagnosisNoTiming extends MY_Controller
     public function getJunctionQuotaDetail()
     {
         $this->convertJsonToPost();
-
+        
         // 校验参数
         $this->validate([
             'time_range' => 'required|trim|regex_match[/\d{2}:\d{2}-\d{2}:\d{2}/]',
