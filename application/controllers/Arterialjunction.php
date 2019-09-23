@@ -57,48 +57,52 @@ class Arterialjunction extends MY_Controller
         $version = $waymapModel::$lastMapVersion;
 
         // 获取全城路口模板 没有模板就没有lng、lat = 画不了图
+
         $allCityJunctions = $waymapModel->getAllCityJunctions($cityId, $version);
         $restrictJuncs = $this->waymap_model->getRestrictJunctionCached($cityId);
-        $result = array_filter($allCityJunctions, function($item) use($restrictJuncs){
-            if(empty($restrictJuncs)){
+        $mapRestrictJuncs = array_flip($restrictJuncs);
+
+        $result = array_filter($allCityJunctions, function($item) use($mapRestrictJuncs){
+            if(empty($mapRestrictJuncs)){
                 return true;
             }
-            if (in_array($item['logic_junction_id'], $restrictJuncs)) {
+            if(isset($mapRestrictJuncs[$item['logic_junction_id']])){
                 return true;
             }
             return false;
         });
-
         // 根据权限做一次过滤
         if(!empty($userPerm)){
             $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+            $mapJunctionIds = array_flip($junctionIds);
             if (!empty($junctionIds)) {
-                $allCityJunctions = array_filter($allCityJunctions, function($item) use($junctionIds) {
-                    if (in_array($item['logic_junction_id'], $junctionIds)) {
+                $allCityJunctions = array_filter($allCityJunctions, function($item) use($mapJunctionIds) {
+                    if(isset($mapJunctionIds[$item['logic_junction_id']])){
                         return true;
                     }
                     return false;
                 });
             }
         }
-
         $resultData = [];
-        $resultData['dataList'] = array_reduce($allCityJunctions, function ($v, $w) use($hasTiming) {
-            if (empty($v)) {
-                $v = [];
+        $mapHasTiming = array_flip($hasTiming);
+
+        $dataList = [];
+        foreach ($allCityJunctions as $key => $value) {
+            if(isset($mapHasTiming[$value['logic_junction_id']])){
+                $flag = 1;
             }
-            $v[] = array(
-                "logic_junction_id" => $w["logic_junction_id"],
-                "lng" => $w["lng"],
-                "lat" => $w["lat"],
-                "name" => $w["name"],
-                "timing_status" => in_array($w['logic_junction_id'], $hasTiming) ? 1 : 0,
+            $dataList[] = array(
+                "logic_junction_id" => $value["logic_junction_id"],
+                "lng" => $value["lng"],
+                "lat" => $value["lat"],
+                "name" => $value["name"],
+                "timing_status" => $flag,
             );
-            return $v;
-        });
-
+        }
+        $resultData['dataList'] = $dataList;
         $resultData['junctionTotal'] = count($resultData['dataList']);
-
+        
         // TODO: 城市中心点可以从后台数据库中获取
         $junctionCenterFunc = function ($dataList) {
             $count_lng = 0;
