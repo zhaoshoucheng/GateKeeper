@@ -70,8 +70,12 @@ class EvaluateService extends BaseService
 
         $result = $this->waymap_model->getAllCityJunctions($cityId);
         $restrictJuncs = $this->waymap_model->getRestrictJunctionCached($cityId);
-        $result = array_filter($result, function($item) use($restrictJuncs){
-            if (in_array($item['logic_junction_id'], $restrictJuncs)) {
+        $mapRestrictJuncs = array_flip($restrictJuncs);
+        $result = array_filter($result, function($item) use($mapRestrictJuncs){
+            if(empty($mapRestrictJuncs)){
+                return true;
+            }
+            if(isset($mapRestrictJuncs[$item['logic_junction_id']])){
                 return true;
             }
             return false;

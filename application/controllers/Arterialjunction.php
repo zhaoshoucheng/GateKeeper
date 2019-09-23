@@ -62,7 +62,7 @@ class Arterialjunction extends MY_Controller
         $restrictJuncs = $this->waymap_model->getRestrictJunctionCached($cityId);
         $mapRestrictJuncs = array_flip($restrictJuncs);
 
-        $result = array_filter($allCityJunctions, function($item) use($mapRestrictJuncs){
+        $allCityJunctions = array_filter($allCityJunctions, function($item) use($mapRestrictJuncs){
             if(empty($mapRestrictJuncs)){
                 return true;
             }
@@ -71,6 +71,7 @@ class Arterialjunction extends MY_Controller
             }
             return false;
         });
+        
         // 根据权限做一次过滤
         if(!empty($userPerm)){
             $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
@@ -89,6 +90,7 @@ class Arterialjunction extends MY_Controller
 
         $dataList = [];
         foreach ($allCityJunctions as $key => $value) {
+            $flag = 0;
             if(isset($mapHasTiming[$value['logic_junction_id']])){
                 $flag = 1;
             }
@@ -102,7 +104,7 @@ class Arterialjunction extends MY_Controller
         }
         $resultData['dataList'] = $dataList;
         $resultData['junctionTotal'] = count($resultData['dataList']);
-        
+
         // TODO: 城市中心点可以从后台数据库中获取
         $junctionCenterFunc = function ($dataList) {
             $count_lng = 0;
