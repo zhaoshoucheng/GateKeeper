@@ -174,11 +174,13 @@ class AdpAreaService extends BaseService
         if (!$areaInfo) {
             throw new \Exception(' 目标区域不存在', ERR_PARAMETERS);
         }
-
         $areaJunctionList = $this->adpArea_model->getAreaJunctions($areaId);
+        // print_r($areaJunctionList);exit;   
         $junction_ids = array_column($areaJunctionList, 'junction_id');
-
         $areaJunctionList = $this->adpArea_model->getJunctions($junction_ids);
+        if(empty($areaJunctionList)){
+            return [];
+        }
         $logic_junction_ids = array_map(function($item){
             return $item['logic_junction_id'];
         },$areaJunctionList);
@@ -236,6 +238,8 @@ class AdpAreaService extends BaseService
             },$t);
             $this->adpArea_model->deleteAreaJunctions($area_id, $t);
         }
+        // print_r("shouldCreated");
+        // print_r($shouldCreated);exit;
         // insert map junction flow
         if (!empty($shouldCreated)) {
             return $this->insertAreaJunctions($area_id, $shouldCreated);
@@ -288,11 +292,15 @@ class AdpAreaService extends BaseService
                     $flows = array_merge($flows, $junctionFlows);
                 }
             }
+            // print_r("realtes"); 
+            // print_r($relates);
             $this->adpArea_model->insertRelates($relates);
             if (!empty($flows)) {
                 $this->adpArea_model->insertFlows($flows);
             }
         } catch (Exception $e) {
+            // print_r($e);
+            // exit;
             return false;
         }
         return true;

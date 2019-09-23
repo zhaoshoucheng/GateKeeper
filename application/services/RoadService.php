@@ -240,6 +240,10 @@ class RoadService extends BaseService
             if ($force) {
                 $res = [];
             }
+            if($item['id']!=1143){
+                // continue;
+            }
+            // $res = [];
             if (!$res) {
                 $data = [
                     'city_id' => $cityId,

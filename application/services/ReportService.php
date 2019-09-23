@@ -80,6 +80,21 @@ class ReportService extends BaseService
 
         $count = 0;
         $majorJunctionInfo = [];
+
+
+        //数据过滤
+        $restrictJuncs = $this->waymap_model->getRestrictJunctionCached($cityId);
+        $mapRestrictJuncs = array_flip($restrictJuncs);
+
+        $junctions = array_filter($junctions, function($item) use($mapRestrictJuncs){
+            if(empty($mapRestrictJuncs)){
+                return true;
+            }
+            if(isset($mapRestrictJuncs[$item['logic_junction_id']])){
+                return true;
+            }
+            return false;
+        });
         foreach ($junctions as $j) {
             if ($count >= $topNum) {
                 break;

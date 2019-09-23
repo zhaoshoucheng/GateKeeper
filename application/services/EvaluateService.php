@@ -70,8 +70,12 @@ class EvaluateService extends BaseService
 
         $result = $this->waymap_model->getAllCityJunctions($cityId);
         $restrictJuncs = $this->waymap_model->getRestrictJunctionCached($cityId);
-        $result = array_filter($result, function($item) use($restrictJuncs){
-            if (in_array($item['logic_junction_id'], $restrictJuncs)) {
+        $mapRestrictJuncs = array_flip($restrictJuncs);
+        $result = array_filter($result, function($item) use($mapRestrictJuncs){
+            if(empty($mapRestrictJuncs)){
+                return true;
+            }
+            if(isset($mapRestrictJuncs[$item['logic_junction_id']])){
                 return true;
             }
             return false;
@@ -732,7 +736,15 @@ class EvaluateService extends BaseService
         $flowsInfo[$logicJunctionId]['9999'] = '所有方向';
 
         $result = $this->fillZeroResult($result);
-
+        if(isset($result["base"])){
+            ksort($result["base"]);
+        }
+        if(isset($result["evaluate"]) &&is_array($result["evaluate"])){
+            foreach ($result["evaluate"] as $key => $value) {
+                ksort($result["evaluate"][$key]);
+            }
+        }
+        
         // 基本信息
         $result['info'] = [
             'junction_name' => $junctionIdName[$logicJunctionId] ?? '',

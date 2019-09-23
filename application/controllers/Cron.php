@@ -255,6 +255,9 @@ class Cron extends CI_Controller
                 ];
                 try {
                     $junctions = $taaService->getAreaJunctionList($jdata);
+                    if(empty($junctions["dataList"])){
+                        continue;
+                    }
                     $esJunctionIds = implode(',', array_filter(array_column($junctions["dataList"], 'logic_junction_id')));
                     $helperService = new \Services\HelperService();
                     $lastHour = $helperService->getIndexLastestHour($cityId);

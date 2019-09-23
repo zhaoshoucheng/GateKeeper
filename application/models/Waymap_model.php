@@ -251,11 +251,11 @@ class Waymap_model extends CI_Model
 
         $redis_key = 'all_city_junctions_' . $city_id . '_' . $version;
         $result = $this->redis_model->getData($redis_key);
+
         if($force){
             $result = 0;
         }
-        if (!$result) {
-
+        if (empty($result)) {
             $offset = 0;
             $count  = 20000;
 
@@ -723,7 +723,7 @@ class Waymap_model extends CI_Model
         if($force){
             $result = 0;
         }
-        if (!$result) {
+        if (empty($result)) {
             $res = $this->getRestrictJunction($cityId);
             $this->redis_model->setEx($redis_key, json_encode($res), 10 * 3600);
             return $res;
