@@ -17,6 +17,7 @@ class AlarmanalysisService extends BaseService
 
         // load model
         $this->load->model('alarmanalysis_model');
+        $this->config->load('realtime_conf');
     }
 
     /**
@@ -498,6 +499,64 @@ class AlarmanalysisService extends BaseService
         }
 
         return $resultData;
+    }
+
+    public function junctionAlarmDealList($params){
+        //设置参数
+        $cityID = $params["city_id"];
+        $dates = $params["dates"];
+        $junctionID = $params["junction_id"];
+        if(empty($dates)){
+            $dates = [date("Y-m-d")];
+        }
+
+        $alarmList  = $this->getJunctionAlarmListByDates($cityID, $dates, $junctionID);
+        $timingPostList = [];
+
+        //排序再格式化
+        $mergeList = array_merge($alarmList,$timingPostList);
+        $sorterCreateTime = [];
+        foreach ($mergeList as $key=>$value) {
+            $sorterCreateTime[] = $value["create_time"];
+        }
+        array_multisort($sorterCreateTime,SORT_DESC,$mergeList);
+        return $mergeList;
+    }
+
+    private function getJunctionAlarmListByDates($cityID, $dates, $junctionID){
+        $phaseNames = $this->getFlowFinalPhaseNames($junctionID);
+        $alarmEsList = $this->alarmanalysis_model->getJunctionAlarmByDates($cityID, $dates, $junctionID);
+        $alarmCate = $this->config->item('flow_alarm_category');
+        $alarmList = [];
+        foreach ($alarmEsList as $val) {
+            $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
+            if ($durationTime < 1) {
+                $durationTime = 2;
+            }
+
+            if(!isset($phaseNames[$val["logic_flow_id"]])){
+                continue;
+            }
+            $phaseName = $phaseNames[$val["logic_flow_id"]];
+            $cateName = $alarmCate[$val["type"]]["name"];
+            $alarmItem["create_time"] = $val["start_time"];
+            $alarmItem["type"] = $val["type"];
+            $alarmItem["comments"] = "【".$phaseName."】- 【".$cateName."】，持续".$durationTime."分钟";
+            $alarmList[] = $alarmItem;
+        }
+        return $alarmList;
+    }
+
+    private function getFlowFinalPhaseNames($junctionId){
+        $flowInfo = $this->waymap_model->getFlowsInfo($junctionId);
+        $flowWaymapNames =  $flowInfo[$junctionId] ?? [];
+        $flowTimingNames = $this->common_model->getTimingMovementNames($junctionId);
+        foreach ($flowWaymapNames as $key => $value) {
+            if(isset($flowTimingNames[$key])){
+                $flowWaymapNames[$key] = $flowTimingNames[$key];
+            }
+        }
+        return $flowWaymapNames;
     }
 
     /**

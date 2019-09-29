@@ -226,6 +226,87 @@ class OverviewService extends BaseService
     }
 
     /**
+     * 当日拥堵概览
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $userPerm array N 用户权限点
+     * @return array
+     * @throws \Exception
+     */
+    public function todayJamCurve($params, $userPerm=[])
+    {
+        $cityId = $params['city_id'];
+        $date   = $params['date'] ?? date("Y-m-d");
+        $hour = $this->helperService->getLastestHour($cityId);
+
+        if(!empty($userPerm['group_id'])){
+            $redisKey = 'new_its_usergroup_realtime_today_jam_curve_'. $userPerm['group_id'] . '_' . $cityId . '_' . $date;
+        }else{
+            $redisKey = 'new_its_realtime_today_jam_curve_' . $cityId . '_' . $date;
+        }
+
+        $todayJamCurveData = $this->redis_model->getData($redisKey);
+        if (!$todayJamCurveData) {
+            return [];
+        }
+        $todayJamCurveArr = json_decode($todayJamCurveData, true);
+
+        //格式化
+        $unblockedList = ["key"=>0,"name"=>"通畅","list"=>[]];
+        $slowList = ["key"=>1,"name"=>"缓行","list"=>[]];
+        $jamList = ["key"=>2,"name"=>"拥堵","list"=>[]]; 
+        foreach($todayJamCurveArr as $hour=>$res){
+            $junctionTotal = $res['junction_total'] ?? 0;
+            if ($junctionTotal < 1) {
+                continue;
+            }
+            $ambleNum = $res['amble_total'] ?? 0;
+            $congestionNum = $res['congestion_total'] ?? 0;
+            $jamList["list"][] = ["hour"=>$hour,"value"=>$congestionNum];
+            $slowList["list"][] = ["hour"=>$hour,"value"=>$ambleNum];
+            $unblockedList["list"][] = ["hour"=>$hour,"value"=>$junctionTotal - ($ambleNum + $congestionNum)];
+        }
+        
+        $jamList["list"] = $this->completionCurveDataGap($jamList["list"]);
+        $slowList["list"] = $this->completionCurveDataGap($slowList["list"]);
+        $unblockedList["list"] = $this->completionCurveDataGap($unblockedList["list"]);
+        return [$jamList,$slowList,$unblockedList];
+    }
+    
+    //补全、采样 曲线数据空缺
+    private function completionCurveDataGap($jamList){
+        //以hour为key生成map
+        // $jamList = array_slice($jamList, 0, 3);
+        $mapList = [];
+        foreach ($jamList as $value) {
+            $mapList[$value["hour"]] = $value;
+        }
+        $pretime = strtotime($jamList[0]["hour"] ?? '00:00');
+        $preValue = intval($jamList[0]["value"]);
+        for($i=1;$i<count($jamList);$i++){
+            $nowTime = strtotime($jamList[$i]["hour"] ?? '00:00');
+            $nowValue = intval($jamList[$i]["value"]);
+            if (($nowTime - $pretime) < 5 * 60) {
+                unset($mapList[$jamList[$i]["hour"]]);
+                continue;
+            }
+            if (($nowTime - $pretime) >= 30 * 60) {
+                $rangeHours = range($pretime + 5 * 60, $nowTime - 5 * 60, 5 * 60);
+                $rangemap = array_flip($rangeHours);
+                $rangeavg = ($nowValue-$preValue)/count($rangemap);
+                
+                $addMapList = [];
+                foreach ($rangemap as $rk=>$rv){
+                    $addMapList[date('H:i:s', $rk)] = ["hour"=>date('H:i:s', $rk),"value"=>round($preValue+$rv*$rangeavg, 0)];
+                }
+                $mapList = array_merge($mapList,$addMapList);
+            }
+            $pretime = $nowTime;
+        }
+        ksort($mapList);
+        return array_values($mapList);
+    }
+
+    /**
      * 拥堵概览
      * @param $params['city_id']    int    Y 城市ID
      * @param $params['date']       string N 日期 yyyy-mm-dd
