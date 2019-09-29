@@ -32,7 +32,7 @@ paths:
         - application/json
       parameters:
         - name: city_id
-          in: query
+          in: formData
           type: string
           description: "数据所属城市：济南 12"
           required: true
