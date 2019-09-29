@@ -115,7 +115,6 @@ class RealtimeQuotaService extends BaseService
             $newFlowList = [];
             $flowLengths = $this->getFlowLength($cityId, $junctionId);
             $phaseNames = $this->getFlowFinalPhaseNames($junctionId);
-            // print_r($phaseNames);exit;
             foreach ($flowList as $key => $value) {
                 foreach ($value as $vk => $vv) {
                     $uncamelKey = uncamelize($vk);
@@ -130,7 +129,6 @@ class RealtimeQuotaService extends BaseService
                     }
                 }
                 if(isset($newFlowList[$key])){
-                    // echo $newFlowList[$key]["movement_id"];exit;
                     $newFlowList[$key]['comment'] = $phaseNames[$newFlowList[$key]["movement_id"]] ?? "";
                     $newFlowList[$key]['route_length'] = $flowLengths[$newFlowList[$key]["movement_id"]] ?? "";
                 }
@@ -140,6 +138,7 @@ class RealtimeQuotaService extends BaseService
                 $movementList["today"] = $newFlowList;
             }
         }
+        $result["hour"] = $hour;
         $result["movements"] = $movementList;
         return $result;
     }

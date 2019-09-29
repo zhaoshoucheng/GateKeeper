@@ -522,7 +522,6 @@ class Realtime_model extends CI_Model
         ];
 
         //特殊设置
-
         if (in_array($params['quota_key'],["stop_delay","avg_speed_up","one_stop_ratio_up","traffic_jam_index_up","travel_time_up"])) {
             $esData['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
             $esData['quotaRequest']['quotaType'] = "weight_avg";
