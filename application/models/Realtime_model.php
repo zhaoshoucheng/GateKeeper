@@ -309,8 +309,6 @@ class Realtime_model extends CI_Model
         return $newList;
     }
 
-
-
     /**
      * 获取区域指标平均值
      * @param $cityId      int    城市ID
