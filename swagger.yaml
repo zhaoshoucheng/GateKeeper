@@ -85,32 +85,32 @@ paths:
         - application/json
       parameters:
         - name: city_id
-          in: query
+          in: formData
           type: string
           description: "数据所属城市：济南 12"
           required: true
         - name: dates
-          in: query
+          in: formData
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
         - name: junction_id
-          in: query
+          in: formData
           type: string
           description: "路口ID"
           required: true
         - name: start_time
-          in: query
+          in: formData
           type: string
           description: "数据开始时间，如：00:00"
           required: true
         - name: end_time
-          in: query
+          in: formData
           type: string
           description: "数据结束时间，如：00:00"
           required: true
         - name: quota_key
-          in: query
+          in: formData
           type: string
           description: "被统计的指标，如：avg_stop_num_up"
           required: true
@@ -185,22 +185,22 @@ paths:
         - application/json
       parameters:
         - name: city_id
-          in: query
+          in: formData
           type: string
           description: "数据所属城市：济南 12"
           required: true
         - name: dates
-          in: query
+          in: formData
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
         - name: junction_id
-          in: query
+          in: formData
           type: string
           description: "路口ID"
           required: true
         - name: time
-          in: query
+          in: formData
           type: string
           description: "数据批次时间，如：15:30:00，为空表示当前批次"
           required: false
@@ -459,17 +459,17 @@ paths:
         - application/json
       parameters:
         - name: city_id
-          in: query
+          in: formData
           type: string
           description: "数据所属城市：济南 12"
           required: true
         - name: dates
-          in: query
+          in: formData
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
         - name: junction_id
-          in: query
+          in: formData
           type: string
           description: "路口ID"
           required: true

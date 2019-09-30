@@ -102,13 +102,13 @@ class RealtimeQuotaService extends BaseService
             $result["flow_quota_all"] = [
                 "route_length"=>["name"=>"路段长度","unit"=>"米",],
                 "stop_delay_up"=>["name"=>"停车延误","unit"=>"秒",],
-                "avg_stop_num_up"=>["name"=>"停车次数","unit"=>"",],
+                "avg_stop_num_up"=>["name"=>"停车次数","unit"=>"次",],
                 "spillover_rate_down"=>["name"=>"溢流比率","unit"=>"",],
                 "one_stop_ratio_up"=>["name"=>"停车比率","unit"=>"",],
-                "avg_speed_up"=>["name"=>"速度","unit"=>"km/h",],
-                "volume_up"=>["name"=>"流量","unit"=>"pcu/分",],
+                "avg_speed_up"=>["name"=>"速度","unit"=>"千米/小时",],
+                "volume_up"=>["name"=>"流量","unit"=>"辆/小时",],
                 "travel_time_up"=>["name"=>"通过时间","unit"=>"秒",],
-                "traffic_jam_index_up"=>["name"=>"拥堵指数 TTI","unit"=>"",],
+                "traffic_jam_index_up"=>["name"=>"拥堵指数","unit"=>"",],
                 "saturation_up"=>["name"=>"饱和度","unit"=>"",],
             ];
             $quotaKeys = ["movement_id","stop_delay_up","avg_stop_num_up","spillover_rate_down","one_stop_ratio_up","avg_speed_up","volume_up","travel_time_up","traffic_jam_index_up","saturation_up",];
@@ -122,6 +122,9 @@ class RealtimeQuotaService extends BaseService
                         if($uncamelKey=="avg_speed_up"){
                             $vv = $vv*3.6;
                         }
+                        if($uncamelKey=="volume_up"){
+                            $vv = $vv*2;
+                        }
                         if($uncamelKey!="movement_id"){
                            $vv = round($vv,2);
                         }
@@ -133,6 +136,8 @@ class RealtimeQuotaService extends BaseService
                     $newFlowList[$key]['route_length'] = $flowLengths[$newFlowList[$key]["movement_id"]] ?? "";
                 }
             }
+            //newFlowList排序
+            $newFlowList = $this->sortFlowList($cityId,$junctionId,$newFlowList);
             $movementList[$date] = $newFlowList;
             if($date==date("Y-m-d")){
                 $movementList["today"] = $newFlowList;
@@ -141,6 +146,16 @@ class RealtimeQuotaService extends BaseService
         $result["hour"] = $hour;
         $result["movements"] = $movementList;
         return $result;
+    }
+
+    private function adjustPhase($flow)
+    {
+        $phaseId = phase_map($flow['in_degree'], $flow['out_degree']);
+        $phaseName = phase_name($phaseId);
+        $flow['phase_id'] = $phaseId;
+        $flow['phase_name'] = $phaseName;
+        $flow['sort_key'] = phase_sort_key($flow['in_degree'], $flow['out_degree']);
+        return $flow;
     }
 
     private function getFlowLength($cityID, $junctionId){
@@ -153,6 +168,38 @@ class RealtimeQuotaService extends BaseService
             $flowLengths[$value["logic_flow_id"]] = $value["in_link_length"];
         }
         return $flowLengths;
+    }
+
+    private function sortFlowList($cityID,$junctionId,$newFlowList){
+        //相位信息
+        $flowsMovement = $this->waymap_model->getFlowMovement($cityID, $junctionId, "all", 1);
+        $flows = array_map(function ($v) {
+            $v = $this->adjustPhase($v);
+            return $v;
+        }, $flowsMovement);
+        $movements = [];
+        if (empty($flows)) {
+            return $newFlowList;
+        }
+        $sortKeys = [];
+        foreach ($flows as $idx => $flow) {
+            $sortKeys[$flow['logic_flow_id']] = $flow['sort_key'];
+        }
+        // print_r($newFlowList);exit;
+        // print_r($keys);exit;
+        usort($newFlowList,function($a,$b)use($sortKeys){
+            if(isset($sortKeys[$a["movement_id"]]) && isset($sortKeys[$b["movement_id"]])){
+                if($sortKeys[$a["movement_id"]]>$sortKeys[$b["movement_id"]]){
+                    return 1;
+                }else{
+                    return -1;
+                }
+            }
+            return 0;
+        });
+        return $newFlowList;
+        // print_r($newFlowList);exit;
+        // array_multisort($keys, SORT_NUMERIC, SORT_ASC, $flows);
     }
 
     private function getFlowFinalPhaseNames($junctionId){
