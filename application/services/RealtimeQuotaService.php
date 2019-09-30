@@ -73,7 +73,7 @@ class RealtimeQuotaService extends BaseService
         for($i=1;$i<count($quotaList);$i++){
             $nowTime = strtotime($quotaList[$i]["hour"] ?? '00:00:00');
             $nowValue = intval($quotaList[$i]["value"]);
-            if (($nowTime - $pretime) < 5 * 60) {
+            if (($nowTime - $pretime) < 2 * 60) {
                 unset($mapList[$quotaList[$i]["hour"]]);
                 continue;
             }

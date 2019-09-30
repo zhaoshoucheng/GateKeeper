@@ -294,6 +294,13 @@ class Realtimewarning_model extends CI_Model
              */
             $countData = array_column($realtimeJunctionList, 'traj_count', 'logic_junction_id');
             $junctionTotal = count($countData);
+
+            //junctionTotal针对个别城市取近7日离线排重路口数
+            $redisKey = sprintf("itstool_offline_juncnum_%s",$cityId);
+            $offlineJuncNum = $this->redis_model->getData($redisKey);
+            if(!empty($offlineJuncNum) && $offlineJuncNum>200){
+                $junctionTotal = $offlineJuncNum;
+            }
             $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
             com_log_notice('getRealTimeAlarmsInfoFromEs_Count', ["count"=>count($realTimeAlarmsInfoResultOrigal),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
             $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||alarm_movement_count=" . count($realTimeAlarmsInfoResultOrigal) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.getRealTimeAlarms||grep_message=grep '_com_http_success' /home/xiaoju/php7/logs/cloud/itstool/didi.log | grep '_search' | grep '{$hour}' | grep 'city_id\":{\"query\":{$cityId},'\n\r";

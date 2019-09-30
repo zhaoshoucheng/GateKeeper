@@ -251,7 +251,7 @@ class OverviewService extends BaseService
         $todayJamCurveArr = json_decode($todayJamCurveData, true);
 
         //格式化
-        $unblockedList = ["key"=>0,"name"=>"通畅","list"=>[]];
+        $unblockedList = ["key"=>0,"name"=>"畅通","list"=>[]];
         $slowList = ["key"=>1,"name"=>"缓行","list"=>[]];
         $jamList = ["key"=>2,"name"=>"拥堵","list"=>[]]; 
         foreach($todayJamCurveArr as $hour=>$res){
@@ -285,7 +285,7 @@ class OverviewService extends BaseService
         for($i=1;$i<count($jamList);$i++){
             $nowTime = strtotime($jamList[$i]["hour"] ?? '00:00');
             $nowValue = intval($jamList[$i]["value"]);
-            if (($nowTime - $pretime) < 5 * 60) {
+            if (($nowTime - $pretime) < 2 * 60) {
                 unset($mapList[$jamList[$i]["hour"]]);
                 continue;
             }

@@ -220,6 +220,24 @@ class Cron extends CI_Controller
     //     }
     // }
 
+    //缓存近7天路口总数方法
+    public function getOfflineJunctionNum(){
+        $cityIds = ["38"];
+        foreach ($cityIds as $cityId) {
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||message=begin getOfflineJunctionNum\n\r";
+
+            $url = $this->config->item('data_service_interface');
+            $url = sprintf("%s/getOfflineJunctionNum?city_id=%s&date=%s",$url,$cityId,date("Y-m-d",strtotime("-7 day")));
+            $retJson = httpGET($url);
+            $ret = json_decode($retJson,true);
+            if(isset($ret["data"]["count"]) && $ret["data"]["count"]>200){
+                $redisKey = sprintf("itstool_offline_juncnum_%s",$cityId);
+                $this->redis_model->setData($redisKey,$ret["data"]["count"]);
+                echo sprintf("%s=%s\n",$redisKey,$ret["data"]["count"]);
+            }
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||message=finish getOfflineJunctionNum\n\r";
+        }
+    }
 
     /**
      * 缓存指标数据到redis中
