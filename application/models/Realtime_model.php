@@ -510,55 +510,47 @@ class Realtime_model extends CI_Model
                 'trailNum' => 'gte',
             ],
             "quotaRequest" => [
-                'quotaType' => 'weight_avg',
-                'quotas' => 'sum_'.$quotaKey.'*trailNum,sum_trailNum',
+                // 'quotaType' => 'weight_avg',
+                // 'quotas' => 'sum_'.$quotaKey.'*trailNum,sum_trailNum',
                 'groupField' => 'dayTime',
-                'orderField' => 'dayTime',
+                // 'orderField' => 'dayTime',
                 'asc' => 'true',
             ],
         ];
 
         //特殊设置
+        $quotaValueKey = "weight_avg";
         if (in_array($params['quota_key'],["stop_delay","avg_speed_up","one_stop_ratio_up","traffic_jam_index_up","travel_time_up"])) {
-            $esData['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
-            $esData['quotaRequest']['quotaType'] = "weight_avg";
+            $data['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
+            $data['quotaRequest']['quotaType'] = "weight_avg";
         } elseif(in_array($params['quota_key'],["spillover_rate_up"])) {
-            $esData['quotaRequest']['quotas'] = 'max_' . $quotaKey;
-            $esData['quotaRequest']['quotaType'] = "max";
+            //无法排序
+            $data['quotaRequest']['quotas'] = 'max_' . $quotaKey;
+            // $data['quotaRequest']['quotaType'] = "max";
+            $quotaKey = 'max_' . $quotaKey;
         } else {
-            $esData['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
-            $esData['quotaRequest']['quotaType'] = "avg";
+            //无法排序
+            $data['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
+            // $data['quotaRequest']['quotaType'] = "avg";
+            $quotaKey = 'avg_' . $quotaKey;
         }
         $realTimeEsData = $this->searchQuota($data);
+        if(empty($realTimeEsData["result"]["quotaResults"])){
+            return $realTimeEsData;
+        }
+
+        //特殊排序
+        $keys = [];
+        foreach ($realTimeEsData["result"]["quotaResults"] as $key => $value) {
+            $keys[$key] = strtotime($value["quotaMap"]["dayTime"]);
+        }
+        array_multisort($keys, SORT_NUMERIC, SORT_ASC, $realTimeEsData["result"]["quotaResults"]);
+        foreach ($realTimeEsData["result"]["quotaResults"] as $key => $value) {
+            $value["quotaMap"]["weight_avg"] = $value["quotaMap"][$quotaKey];
+            $realTimeEsData["result"]["quotaResults"][$key] = $value;
+        }
         return $realTimeEsData;
     }
-
-
-    /*
-'{ 
-    "source": "signal_control",
-    "cityId": "38",
-    "requestId": "f4eed5d87edc4caaa969f1c697a511c2",
-    "dayTime": "2019-09-29 00:00:00",
-    "junctionId": "2019080918_3849656",
-    "trailNum": 0,
-    "andOperations": {
-        "cityId": "eq",
-        "dayTime": "gte",
-        "junctionId": "eq",
-        "trailNum": "gte"
-    },
-    "quotaRequest": {
-        "quotaType": "weight_avg",
-        "quotas": "sum_stopDelayUp*trailNum,sum_trailNum",
-        "groupField": "dayTime",
-        "orderField": "dayTime",
-        "asc": "false"
-    }
-}'
-
-
-    */
 
     /**
      * 获取指标趋势图

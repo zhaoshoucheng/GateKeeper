@@ -504,12 +504,14 @@ class AlarmanalysisService extends BaseService
     public function junctionAlarmDealList($params){
         //设置参数
         $cityID = $params["city_id"];
-        $dates = $params["dates"];
         $junctionID = $params["junction_id"];
         if(empty($dates)){
-            $dates = [date("Y-m-d")];
+            for($i=0;$i<7;$i++){
+                $dates[] = date("Y-m-d",strtotime("-$i day"));
+            }
+        }else{
+            $dates = $params["dates"];
         }
-
         $alarmList  = $this->getJunctionAlarmListByDates($cityID, $dates, $junctionID);
         $timingPostList = [];
 

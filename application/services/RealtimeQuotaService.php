@@ -45,7 +45,9 @@ class RealtimeQuotaService extends BaseService
             $data["quota_key"] = $quotaKey;
             $flowList = $this->realtime_model->getJunctionQuotaCurve($data,true);
             if($date==date("Y-m-d")){
-                $endTime = $lastHour;
+                if(strtotime(date("Y-m-d")." ".$endTime) > strtotime(date("Y-m-d")." ".$lastHour)){
+                   $endTime = $lastHour;                    
+                }
             }
             $quotaList = $this->getQuotaValue($quotaKey, $flowList, $startTime, $endTime);
             $resultList[$date] = $quotaList;
@@ -63,11 +65,11 @@ class RealtimeQuotaService extends BaseService
             //数据过滤
             $quotaDate = date("Y-m-d",strtotime($value['quotaMap']["dayTime"]));
             if(strtotime($value['quotaMap']["dayTime"])<strtotime($quotaDate." ".$startTime)){
-                print_r($value['quotaMap']["dayTime"]);
+                // print_r($value['quotaMap']["dayTime"]);
                 continue;
             }
             if(strtotime($value['quotaMap']["dayTime"])>strtotime($quotaDate." ".$endTime)){
-                print_r($value['quotaMap']["dayTime"]);
+                // print_r($value['quotaMap']["dayTime"]);
                 continue;
             }
 
@@ -203,8 +205,6 @@ class RealtimeQuotaService extends BaseService
         foreach ($flows as $idx => $flow) {
             $sortKeys[$flow['logic_flow_id']] = $flow['sort_key'];
         }
-        // print_r($newFlowList);exit;
-        // print_r($keys);exit;
         usort($newFlowList,function($a,$b)use($sortKeys){
             if(isset($sortKeys[$a["movement_id"]]) && isset($sortKeys[$b["movement_id"]])){
                 if($sortKeys[$a["movement_id"]]>$sortKeys[$b["movement_id"]]){
@@ -216,8 +216,6 @@ class RealtimeQuotaService extends BaseService
             return 0;
         });
         return $newFlowList;
-        // print_r($newFlowList);exit;
-        // array_multisort($keys, SORT_NUMERIC, SORT_ASC, $flows);
     }
 
     private function getFlowFinalPhaseNames($junctionId){

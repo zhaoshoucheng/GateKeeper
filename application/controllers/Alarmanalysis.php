@@ -216,9 +216,6 @@ class Alarmanalysis extends MY_Controller
                 'is_array' => '%s 必须是一个数组',
             ),
         ]);
-        if(empty($params["dates"])){
-            $params["dates"] = [date("Y-m-d")];
-        }
         $result = $this->alarmanalysisService->junctionAlarmDealList($params);
         $this->response($result);
     }
