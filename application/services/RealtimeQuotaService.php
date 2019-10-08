@@ -35,6 +35,7 @@ class RealtimeQuotaService extends BaseService
             $params["dates"] = [date("Y-m-d")];
         }
         $dates = $params["dates"];
+        $lastHour = $this->helperService->getLastestHour($cityID);
         $resultList = [];
         foreach ($dates as $date) {
             $data = [];
@@ -43,7 +44,10 @@ class RealtimeQuotaService extends BaseService
             $data["junction_id"] = $logicJunctionID;
             $data["quota_key"] = $quotaKey;
             $flowList = $this->realtime_model->getJunctionQuotaCurve($data,true);
-            $quotaList = $this->getQuotaValue($quotaKey, $flowList);
+            if($date==date("Y-m-d")){
+                $endTime = $lastHour;
+            }
+            $quotaList = $this->getQuotaValue($quotaKey, $flowList, $startTime, $endTime);
             $resultList[$date] = $quotaList;
             if($date==date("Y-m-d")){
                 $resultList["today"] = $quotaList;
@@ -52,9 +56,22 @@ class RealtimeQuotaService extends BaseService
         return $resultList;
     }
 
-    private function getQuotaValue($quotaKey,$flowList){
+    private function getQuotaValue($quotaKey,$flowList,$startTime,$endTime){
         $quotaList = [];
+        // echo date("Y-m-d")." ".$lastHour;exit;
         foreach ($flowList['result']['quotaResults'] as $value) {
+            //数据过滤
+            $quotaDate = date("Y-m-d",strtotime($value['quotaMap']["dayTime"]));
+            if(strtotime($value['quotaMap']["dayTime"])<strtotime($quotaDate." ".$startTime)){
+                print_r($value['quotaMap']["dayTime"]);
+                continue;
+            }
+            if(strtotime($value['quotaMap']["dayTime"])>strtotime($quotaDate." ".$endTime)){
+                print_r($value['quotaMap']["dayTime"]);
+                continue;
+            }
+
+            //格式化
             $quotaValue = $value['quotaMap']["weight_avg"];
             if($quotaKey=="avg_speed_up"){
                 $quotaValue = $quotaValue*3.6;
@@ -68,9 +85,10 @@ class RealtimeQuotaService extends BaseService
         foreach ($quotaList as $value) {
             $mapList[$value["hour"]] = $value;
         }
+        // print_r($keys);exit
         $pretime = strtotime($quotaList[0]["hour"] ?? '00:00:00');
         $preValue = intval($quotaList[0]["value"]);
-        for($i=1;$i<count($quotaList);$i++){
+        for($i=1;$i<(count($quotaList)-1);$i++){
             $nowTime = strtotime($quotaList[$i]["hour"] ?? '00:00:00');
             $nowValue = intval($quotaList[$i]["value"]);
             if (($nowTime - $pretime) < 2 * 60) {
@@ -97,7 +115,7 @@ class RealtimeQuotaService extends BaseService
         foreach ($dates as $date) {
             $movementList = [];
             $inputJunctionIds[] = $params["junction_id"];
-            $flowList = $this->realtime_model->getRealTimeJunctionsQuota($cityId, $date, $hour, $inputJunctionIds);
+            $flowList = $this->realtime_model->getRealTimeJunctionsQuota($cityId, $date, $hour, $inputJunctionIds, 0);
             $result = [];
             $result["flow_quota_all"] = [
                 "route_length"=>["name"=>"路段长度","unit"=>"米",],
@@ -122,9 +140,9 @@ class RealtimeQuotaService extends BaseService
                         if($uncamelKey=="avg_speed_up"){
                             $vv = $vv*3.6;
                         }
-                        if($uncamelKey=="volume_up"){
-                            $vv = $vv*2;
-                        }
+                        // if($uncamelKey=="volume_up"){
+                        //     $vv = $vv;
+                        // }
                         if($uncamelKey!="movement_id"){
                            $vv = round($vv,2);
                         }

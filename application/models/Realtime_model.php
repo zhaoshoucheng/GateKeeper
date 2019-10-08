@@ -373,9 +373,8 @@ class Realtime_model extends CI_Model
      * @param $junctionIds   array 路口数组
      * @return array
      */
-    public function getRealTimeJunctionsQuota($cityId, $date, $hour, $junctionIds=[])
+    public function getRealTimeJunctionsQuota($cityId, $date, $hour, $junctionIds=[],$trajNum=5)
     {
-        $trajNum = 5;
         if($cityId==175){
             $trajNum = 1;
         }
@@ -525,8 +524,10 @@ class Realtime_model extends CI_Model
             $esData['quotaRequest']['quotaType'] = "weight_avg";
         } elseif(in_array($params['quota_key'],["spillover_rate_up"])) {
             $esData['quotaRequest']['quotas'] = 'max_' . $quotaKey;
+            $esData['quotaRequest']['quotaType'] = "max";
         } else {
             $esData['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
+            $esData['quotaRequest']['quotaType'] = "avg";
         }
         $realTimeEsData = $this->searchQuota($data);
         return $realTimeEsData;
