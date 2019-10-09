@@ -523,6 +523,7 @@ class Realtime_model extends CI_Model
         if (in_array($params['quota_key'],["stop_delay","avg_speed_up","one_stop_ratio_up","traffic_jam_index_up","travel_time_up"])) {
             $data['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
             $data['quotaRequest']['quotaType'] = "weight_avg";
+            $quotaKey = 'weight_avg';
         } elseif(in_array($params['quota_key'],["spillover_rate_up"])) {
             //无法排序
             $data['quotaRequest']['quotas'] = 'max_' . $quotaKey;
@@ -545,7 +546,9 @@ class Realtime_model extends CI_Model
             $keys[$key] = strtotime($value["quotaMap"]["dayTime"]);
         }
         array_multisort($keys, SORT_NUMERIC, SORT_ASC, $realTimeEsData["result"]["quotaResults"]);
+        // print_r($realTimeEsData);exit;
         foreach ($realTimeEsData["result"]["quotaResults"] as $key => $value) {
+            // print_r($value);exit;
             $value["quotaMap"]["weight_avg"] = $value["quotaMap"][$quotaKey];
             $realTimeEsData["result"]["quotaResults"][$key] = $value;
         }
