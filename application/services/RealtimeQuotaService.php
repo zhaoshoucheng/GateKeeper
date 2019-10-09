@@ -78,6 +78,9 @@ class RealtimeQuotaService extends BaseService
             if($quotaKey=="avg_speed_up"){
                 $quotaValue = $quotaValue*3.6;
             }
+            if($quotaKey=="volume_up"){
+                $quotaValue = $quotaValue*2;
+            }
             $quotaList[] = [
                 "hour"=>date("H:i:s",strtotime($value['quotaMap']["dayTime"])),
                 "value"=>round($quotaValue,2),
@@ -142,9 +145,9 @@ class RealtimeQuotaService extends BaseService
                         if($uncamelKey=="avg_speed_up"){
                             $vv = $vv*3.6;
                         }
-                        // if($uncamelKey=="volume_up"){
-                        //     $vv = $vv;
-                        // }
+                        if($uncamelKey=="volume_up"){
+                            $vv = 2*$vv;
+                        }
                         if($uncamelKey!="movement_id"){
                            $vv = round($vv,2);
                         }
