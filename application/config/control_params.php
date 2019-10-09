@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $config['control_params'] = [
     "city"=>[
         "default"=>[
-            "queue_ratio_thresh"=>0.8,
+            "queue_ratio_thresh"=>0.7,
             "movement_weight_thresh"=>0.8,
             "min_trajs_num"=>6,
             "multi_stop_upper_thresh"=>0.2,
