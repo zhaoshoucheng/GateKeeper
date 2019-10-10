@@ -182,7 +182,6 @@ class OverviewService extends BaseService
             //$carry是上一个元素值
             $now = strtotime($item[1] ?? '00:00');
             $pretime = strtotime($carry[1] ?? '00:00');
-
             $nowValue = floatval($item[0]);
             $preValue = floatval($carry[0]);
             if ($now - $pretime >= 30 * 60) {
@@ -219,10 +218,168 @@ class OverviewService extends BaseService
                 $newResult[$item[1]] = $item;
             }
         }
+        unset($newResult["00:01"]);
+        // print_r($newResult);exit;
+
+
+        //数据补全成分钟级
+        $padMapList = [];
+        $nowMin = round((strtotime(date("Y-m-d H:i:s"))-strtotime(date("Y-m-d")))/60);  //当天所有分钟数
+        for ($i=0; $i < $nowMin; $i++) {
+            $padHour = date("H:i",strtotime(date("Y-m-d"))+$i*60);
+            $padMapList[$padHour] = 0;
+        }
+        $currentItem = current($newResult);
+        $newResult = array_merge($padMapList,$newResult);
+        // print_r($newResult);exit; 
+        foreach ($newResult as $key => $value) {
+            if(empty($value)){
+                $newResult[$key] = [$currentItem[0],$key];
+            }else{
+                $currentItem = $value;
+            }
+        }
+        // print_r($newResult);exit; 
+
+        //数据抽样及格式化
+        $newMapList = [];
+        $copyList = array_values($newResult);
+        $pretime = strtotime($copyList[0][1] ?? '00:00');
+        $preValue = round($copyList[0][0],2);
+        for($i=0;$i<count($copyList);$i++){
+            $nowHour = $copyList[$i][1];
+            $nowTime = strtotime($copyList[$i][1] ?? '00:00');
+            $nowValue = round($copyList[$i][0],2);
+            if ($i>0 && ($nowTime - $pretime) < 2 * 60) {
+                continue;
+            }
+            $newMapList[$nowHour] = [$nowValue,$nowHour];
+            $pretime = $nowTime;
+        }
+        // print_r($newMapList);exit;
         return [
-            'dataList' => array_values($newResult),
+            'dataList' => array_values($newMapList),
             'info' => $info,
         ];
+    }
+
+    /**
+     * 当日拥堵概览
+     * @param $params['city_id']    int    Y 城市ID
+     * @param $userPerm array N 用户权限点
+     * @return array
+     * @throws \Exception
+     */
+    public function todayJamCurve($params, $userPerm=[])
+    {
+        $cityId = $params['city_id'];
+        $date   = $params['date'] ?? date("Y-m-d");
+        $hour = $this->helperService->getLastestHour($cityId);
+
+        if(!empty($userPerm['group_id'])){
+            $redisKey = 'new_its_usergroup_realtime_today_jam_curve_'. $userPerm['group_id'] . '_' . $cityId . '_' . $date;
+        }else{
+            $redisKey = 'new_its_realtime_today_jam_curve_' . $cityId . '_' . $date;
+        }
+
+        $todayJamCurveData = $this->redis_model->getData($redisKey);
+        if (!$todayJamCurveData) {
+            return [];
+        }
+        $todayJamCurveArr = json_decode($todayJamCurveData, true);
+
+        //格式化
+        $unblockedList = ["key"=>0,"name"=>"畅通","list"=>[]];
+        $slowList = ["key"=>1,"name"=>"缓行","list"=>[]];
+        $jamList = ["key"=>2,"name"=>"拥堵","list"=>[]]; 
+        foreach($todayJamCurveArr as $hour=>$res){
+            $junctionTotal = $res['junction_total'] ?? 0;
+            if ($junctionTotal < 1) {
+                continue;
+            }
+            $ambleNum = $res['amble_total'] ?? 0;
+            $congestionNum = $res['congestion_total'] ?? 0;
+            $jamList["list"][] = ["hour"=>$hour,"value"=>$congestionNum];
+            $slowList["list"][] = ["hour"=>$hour,"value"=>$ambleNum];
+            $unblockedList["list"][] = ["hour"=>$hour,"value"=>$junctionTotal - ($ambleNum + $congestionNum)];
+        }
+        
+        $jamList["list"] = $this->completionCurveDataGap($jamList["list"]);
+        $slowList["list"] = $this->completionCurveDataGap($slowList["list"]);
+        $unblockedList["list"] = $this->completionCurveDataGap($unblockedList["list"]);
+        return [$jamList,$slowList,$unblockedList];
+    }
+    
+    //平滑、补全、采样 曲线数据空缺
+    private function completionCurveDataGap($jamList){
+        //以hour为key生成map
+        // $jamList = array_slice($jamList, 0, 3);
+        $mapList = [];
+        foreach ($jamList as $value) {
+            $mapList[$value["hour"]] = $value;
+            // $mapList[substr($value["hour"],0,5)] = $value;
+            // $mapList[substr($value["hour"],0,5)] = ["hour"=>substr($value["hour"],0,5),"value"=>$value["value"]];
+        }
+
+        //数据平滑处理
+        $pretime = strtotime($jamList[0]["hour"] ?? '00:00');
+        $preValue = intval($jamList[0]["value"]);
+        for($i=1;$i<count($jamList);$i++){
+            $nowTime = strtotime($jamList[$i]["hour"] ?? '00:00');
+            $nowValue = intval($jamList[$i]["value"]);
+            // if (($nowTime - $pretime) < 2 * 60) {
+            //     unset($mapList[$jamList[$i]["hour"]]);
+            //     continue;
+            // }
+            if (($nowTime - $pretime) >= 30 * 60) {
+                $rangeHours = range($pretime + 5 * 60, $nowTime - 5 * 60, 5 * 60);
+                $rangemap = array_flip($rangeHours);
+                $rangeavg = ($nowValue-$preValue)/count($rangemap);
+                
+                $addMapList = [];
+                foreach ($rangemap as $rk=>$rv){
+                    $addMapList[date('H:i:s', $rk)] = ["hour"=>date('H:i:s', $rk),"value"=>round($preValue+$rv*$rangeavg, 0)];
+                }
+                $mapList = array_merge($mapList,$addMapList);
+            }
+            $pretime = $nowTime;
+        }
+        ksort($mapList);
+
+        //数据补全成分钟级
+        $padMapList = [];
+        $nowMin = round((strtotime(date("Y-m-d H:i:s"))-strtotime(date("Y-m-d")))/60);  //当天所有分钟数
+        for ($i=0; $i < $nowMin; $i++) {
+            $padHour = date("H:i:s",strtotime(date("Y-m-d"))+$i*60);
+            $padMapList[$padHour] = 0;
+        }
+        $currentItem = current($mapList);
+        $mapList = array_merge($padMapList,$mapList);
+        foreach ($mapList as $key => $value) {
+            if(empty($value)){
+                $mapList[$key] = ["hour"=>$key,"value"=>$currentItem["value"]];
+            }else{
+                $currentItem = $value;
+            }
+        }
+
+        //数据抽样及格式化
+        $newMapList = [];
+        $copyList = array_values($mapList);
+        $pretime = strtotime($mapList[0]["hour"] ?? '00:00');
+        $preValue = intval($copyList[0]["value"]);
+        for($i=0;$i<count($copyList);$i++){
+            $nowHour = $copyList[$i]["hour"];
+            $nowTime = strtotime($copyList[$i]["hour"] ?? '00:00');
+            $nowValue = intval($copyList[$i]["value"]);
+            if ($i>0 && ($nowTime - $pretime) < 2 * 60) {
+                continue;
+            }
+            $newMapList[substr($nowHour,0,5)] = ["hour"=>substr($nowHour,0,5),"value"=>$nowValue];
+            $pretime = $nowTime;
+        }
+        // print_r(array_values($newMapList));exit;
+        return array_values($newMapList);
     }
 
     /**

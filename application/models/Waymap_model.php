@@ -106,7 +106,7 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function get($url, $data, $timeout = 20000, $header = [])
+    public function get($url, $data, $timeout = 40000, $header = [])
     {
         $data['token']   = $this->token;
         $data['user_id'] = $this->userid;

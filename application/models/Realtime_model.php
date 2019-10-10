@@ -309,8 +309,6 @@ class Realtime_model extends CI_Model
         return $newList;
     }
 
-
-
     /**
      * 获取区域指标平均值
      * @param $cityId      int    城市ID
@@ -375,9 +373,8 @@ class Realtime_model extends CI_Model
      * @param $junctionIds   array 路口数组
      * @return array
      */
-    public function getRealTimeJunctionsQuota($cityId, $date, $hour, $junctionIds=[])
+    public function getRealTimeJunctionsQuota($cityId, $date, $hour, $junctionIds=[],$trajNum=5)
     {
-        $trajNum = 5;
         if($cityId==175){
             $trajNum = 1;
         }
@@ -493,6 +490,71 @@ class Realtime_model extends CI_Model
         return $realTimeEsData;
     }
 
+    public function getJunctionQuotaCurve($params){
+        $timestamp = strtotime($params['date'] . ' 00:00:00') * 1000;
+        $dayTime = $params['date'] . ' 00:00:00';
+        $quotaKey = camelize($params['quota_key']);
+        $data = [
+            'source' => 'signal_control',   // 调用方
+            'cityId' => $params['city_id'], // 城市ID
+            'requestId' => get_traceid(),      // trace id
+            'timestamp' => $timestamp,
+            'dayTime'=> $dayTime,
+            'junctionId' => $params['junction_id'],
+            'trailNum' => 0,
+            'andOperations' => [
+                'cityId' => 'eq',  // cityId相等
+                'timestamp' => 'gte', // 大于等于当天开始时间
+                'dayTime' => 'gte', // 大于等于当天开始时间
+                'junctionId' => 'eq',
+                'trailNum' => 'gte',
+            ],
+            "quotaRequest" => [
+                // 'quotaType' => 'weight_avg',
+                // 'quotas' => 'sum_'.$quotaKey.'*trailNum,sum_trailNum',
+                'groupField' => 'dayTime',
+                // 'orderField' => 'dayTime',
+                'asc' => 'true',
+            ],
+        ];
+
+        //特殊设置
+        $quotaValueKey = "weight_avg";
+        if (in_array($params['quota_key'],["stop_delay","avg_speed_up","one_stop_ratio_up","traffic_jam_index_up","travel_time_up"])) {
+            $data['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
+            $data['quotaRequest']['quotaType'] = "weight_avg";
+            $quotaKey = 'weight_avg';
+        } elseif(in_array($params['quota_key'],["spillover_rate_up"])) {
+            //无法排序
+            $data['quotaRequest']['quotas'] = 'max_' . $quotaKey;
+            // $data['quotaRequest']['quotaType'] = "max";
+            $quotaKey = 'max_' . $quotaKey;
+        } else {
+            //无法排序
+            $data['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
+            // $data['quotaRequest']['quotaType'] = "avg";
+            $quotaKey = 'avg_' . $quotaKey;
+        }
+        $realTimeEsData = $this->searchQuota($data);
+        if(empty($realTimeEsData["result"]["quotaResults"])){
+            return $realTimeEsData;
+        }
+
+        //特殊排序
+        $keys = [];
+        foreach ($realTimeEsData["result"]["quotaResults"] as $key => $value) {
+            $keys[$key] = strtotime($value["quotaMap"]["dayTime"]);
+        }
+        array_multisort($keys, SORT_NUMERIC, SORT_ASC, $realTimeEsData["result"]["quotaResults"]);
+        // print_r($realTimeEsData);exit;
+        foreach ($realTimeEsData["result"]["quotaResults"] as $key => $value) {
+            // print_r($value);exit;
+            $value["quotaMap"]["weight_avg"] = $value["quotaMap"][$quotaKey];
+            $realTimeEsData["result"]["quotaResults"][$key] = $value;
+        }
+        return $realTimeEsData;
+    }
+
     /**
      * 获取指标趋势图
      * @param $params ['city_id']      int    Y 城市ID
@@ -502,7 +564,7 @@ class Realtime_model extends CI_Model
      * @return array
      * @throws Exception
      */
-    public function getQuotaByFlowId($params)
+    public function getQuotaByFlowId($params,$cached=false)
     {
         $timestamp = strtotime($params['date'] . ' 00:00:00') * 1000;
         $data = [
@@ -526,8 +588,17 @@ class Realtime_model extends CI_Model
                 ],
             ],
         ];
-        $realTimeEsData = $this->searchDetail($data);
-        return $realTimeEsData;
+
+        $redis_key = 'getQuotaByFlowId_' . md5(json_encode($data));
+        $result = $cached ? $this->redis_model->getData($redis_key) : [];
+        if (!$result) {
+            $realTimeEsData = $this->searchDetail($data);
+            if($cached){
+                $this->redis_model->setEx($redis_key, json_encode($realTimeEsData), 120);
+            }
+            return $realTimeEsData;
+        }
+        return json_decode($result, true);
     }
 
     /**
@@ -815,6 +886,139 @@ class Realtime_model extends CI_Model
      * @throws \Exception
      */
     public function getJunctionQuotaSortList($params)
+    {
+        $cityId   = $params['city_id'];
+        $limit   = $params['limit'];
+        $junctionIds = !empty($params['junction_id']) ? $params['junction_id'] : [];
+
+        // 指标配置
+        $quotaConf = $this->config->item('real_time_quota');
+        $quotaKey = $quotaConf[$params['quota_key']]['escolumn'];
+
+        // 获取最近时间
+        $dayTime = $params['date'] . ' ' . $params['time_point'];
+
+        $trajNum = 5;
+        if($cityId==175){
+            $trajNum = 1;
+        }
+
+        // es所需data
+        if(empty($junctionIds)){
+            $esData = [
+                "source"    => "signal_control",
+                "cityId"    => $cityId,
+                'requestId' => get_traceid(),
+                "dayTime"   => $dayTime,
+                "trailNum"  => $trajNum,
+                "andOperations" => [
+                    "cityId"   => "eq",
+                    "dayTime"  => "eq",
+                    "trailNum" => 'gte',
+                ],
+                "quotaRequest" => [
+                    "groupField" => "junctionId",
+                    "asc"        => "false",
+                    "limit"      => $limit,
+                ],
+            ];
+            if ($params['quota_key'] == 'stop_delay') {
+                $esData['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
+                $esData['quotaRequest']['orderField'] = "weight_avg";
+                $esData['quotaRequest']['quotaType'] = "weight_avg";
+                $esQuotaKey = 'weight_avg'; // es接口返回的字段名
+            } else {
+                $esData['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
+                $esData['quotaRequest']['orderField'] = 'avg_' . $quotaKey;
+                $esQuotaKey = 'avg_' . $quotaKey; // es接口返回的字段名
+            }
+
+            if (!empty($junctionIds)) {
+                $esData['junctionId'] = implode(",",$junctionIds);
+                $esData["andOperations"]['junctionId'] = 'in';
+            }
+            $esRes = $this->searchQuota($esData);
+            if (!$esRes) {
+                return [];
+            }
+        }else{
+            $chunkJunctionIds = array_chunk($junctionIds,1000);
+            $tmpRes = [];
+            foreach ($chunkJunctionIds as $Jids){
+                $esData = [
+                    "source"    => "signal_control",
+                    "cityId"    => $cityId,
+                    'requestId' => get_traceid(),
+                    "dayTime"   => $dayTime,
+                    "trailNum"  => $trajNum,
+                    "andOperations" => [
+                        "cityId"   => "eq",
+                        "dayTime"  => "eq",
+                        "trailNum" => 'gte',
+                    ],
+                    "quotaRequest" => [
+                        "groupField" => "junctionId",
+                        "asc"        => "false",
+                        "limit"      => $limit,
+                    ],
+                ];
+                if ($params['quota_key'] == 'stop_delay') {
+                    $esData['quotaRequest']['quotas'] = 'sum_' . $quotaKey . '*trailNum, sum_trailNum';
+                    $esData['quotaRequest']['orderField'] = "weight_avg";
+                    $esData['quotaRequest']['quotaType'] = "weight_avg";
+                    $esQuotaKey = 'weight_avg'; // es接口返回的字段名
+                } else {
+                    $esData['quotaRequest']['quotas'] = 'avg_' . $quotaKey;
+                    $esData['quotaRequest']['orderField'] = 'avg_' . $quotaKey;
+                    $esQuotaKey = 'avg_' . $quotaKey; // es接口返回的字段名
+                }
+
+                $esData['junctionId'] = implode(",",$Jids);
+                $esData["andOperations"]['junctionId'] = 'in';
+
+                $searchRes = $this->searchQuota($esData);
+                if (!empty($searchRes['result']['quotaResults'])) {
+                    $tmpRes = array_merge($tmpRes,$searchRes['result']['quotaResults']);
+                }
+            }
+            $esRes = [];
+            uasort($tmpRes,function ($a,$b) use($esQuotaKey) {
+                $aValue = !empty($a["quotaMap"][$esQuotaKey]) ? $a["quotaMap"][$esQuotaKey] : 0;
+                $bValue = !empty($b["quotaMap"][$esQuotaKey]) ? $b["quotaMap"][$esQuotaKey] : 0;
+                if ($aValue==$bValue) return 0;
+                return ($aValue<$bValue)?1:-1;
+            });
+            $esRes['result']['quotaResults'] = array_values($tmpRes);
+        }
+
+        $data = array_column($esRes['result']['quotaResults'], 'quotaMap');
+        $result = [];
+
+        // 所需查询路口名称的路口ID串
+        $junctionIds = implode(',', array_unique(array_column($data, 'junctionId')));
+
+        // 获取路口信息
+        $junctionsInfo  = $this->waymap_model->getJunctionInfo($junctionIds);
+        $junctionIdName = array_column($junctionsInfo, 'name', 'logic_junction_id');
+
+        foreach ($data as $k => $val) {
+            $result['dataList'][$k] = [
+                'logic_junction_id' => $val['junctionId'],
+                'junction_name' => $junctionIdName[$val['junctionId']] ?? '未知路口',
+                'quota_value' => $val[$esQuotaKey],
+            ];
+        }
+
+        // 返回数据：指标信息
+        $result['quota_info'] = [
+            'name' => $quotaConf[$params['quota_key']]['name'],
+            'key' => $params['quota_key'],
+            'unit' => $quotaConf[$params['quota_key']]['unit'],
+        ];
+        return $result;
+    }
+
+    public function junctionRealtimeFlowQuotaList($params)
     {
         $cityId   = $params['city_id'];
         $limit   = $params['limit'];

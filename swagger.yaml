@@ -15,10 +15,495 @@ tags:
   - name: "济南项目"
   - name: "例行化优化"
   - name: "开放平台"
+  - name: "南昌本地化"
 schemes:
 - http
 - https
 paths:
+  /Overview/todayJamCurve:
+    post:
+      summary: 当日拥堵概览曲线
+      description: 当日拥堵概览曲线
+      tags:
+        - 概览
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: string
+          description: "数据所属城市：济南 12"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: "实时单指标曲线图数据"
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+            properties: 
+              errno: 
+                type: "number"
+                example: 0
+              errmsg: 
+                type: "string"
+                example: ""
+              data: 
+                type: "array"
+                items: 
+                  type: "object"
+                  properties: 
+                    key: 
+                      type: "number"
+                      example: 2
+                    name: 
+                      type: "string"
+                      example: "拥堵"
+                    list: 
+                      type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          hour: 
+                            type: "string"
+                            example: "00:00:00"
+                          value: 
+                            type: "number"
+                            example: 4            
+  /Alarmanalysis/realtimeSingleQuotaCurve:
+    post:
+      summary: 实时单指标曲线图
+      description: 实时单指标曲线图数据
+      tags:
+        - 南昌本地化
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: string
+          description: "数据所属城市：济南 12"
+          required: true
+        - name: dates
+          in: formData
+          type: array
+          description: "数据产生日期，为空表示当日"
+          required: false
+        - name: junction_id
+          in: formData
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: formData
+          type: string
+          description: "数据开始时间，如：00:00"
+          required: true
+        - name: end_time
+          in: formData
+          type: string
+          description: "数据结束时间，如：00:00"
+          required: true
+        - name: quota_key
+          in: formData
+          type: string
+          description: "被统计的指标，如：avg_stop_num_up"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: "实时单指标曲线图数据"
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+            properties: 
+              errno: 
+                type: "number"
+                example: 0
+              errmsg: 
+                type: "string"
+                example: ""
+              data: 
+                required: 
+                  - "quota_list"
+                  - "dates"
+                  - "current_time"
+                properties: 
+                  quota_list: 
+                    required: 
+                      - "2019-09-28"
+                      - "today"
+                    properties: 
+                      2019-09-28: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            hour: 
+                              type: "string"
+                              example: "00:00:00"
+                            value: 
+                              type: "string"
+                              example: "0.25"
+                      today: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            hour: 
+                              type: "string"
+                              example: "00:00"
+                            value: 
+                              type: "string"
+                              example: "0.25"
+                    type: "object"
+                  dates: 
+                    type: "array"
+                    items: 
+                      type: "string"
+                    example: 
+                      - "2019-09-28"
+                  current_time: 
+                    type: "string"
+                    example: "00:00"
+                type: "object"
+  /Alarmanalysis/junctionRealtimeFlowQuotaList:
+    post:
+      summary: 路口实时flow指标列表
+      description: 路口实时flow指标列表
+      tags:
+        - 南昌本地化
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: string
+          description: "数据所属城市：济南 12"
+          required: true
+        - name: dates
+          in: formData
+          type: array
+          description: "数据产生日期，为空表示当日"
+          required: false
+        - name: junction_id
+          in: formData
+          type: string
+          description: "路口ID"
+          required: true
+        - name: time
+          in: formData
+          type: string
+          description: "数据批次时间，如：15:30:00，为空表示当前批次"
+          required: false
+      responses:
+        200:
+          type: object
+          description: 成功
+          schema:
+            description: "实时单指标曲线图数据"
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+            properties: 
+              errno: 
+                type: "number"
+                example: 0
+              errmsg: 
+                type: "string"
+                example: ""
+              data: 
+                required: 
+                  - "flow_quota_all"
+                  - "movements"
+                properties: 
+                  flow_quota_all: 
+                    required: 
+                      - "route_length"
+                      - "stop_delay_up"
+                      - "avg_stop_num_up"
+                      - "spillover_rate_down"
+                      - "one_stop_ratio_up"
+                      - "avg_speed_up"
+                      - "volume_up"
+                      - "travel_time_up"
+                      - "traffic_jam_index_up"
+                      - "saturation_up"
+                    properties: 
+                      route_length: 
+                        required: 
+                          - "name"
+                          - "unit"
+                        properties: 
+                          name: 
+                            type: "string"
+                            example: "路段长度"
+                          unit: 
+                            type: "string"
+                            example: "米"
+                        type: "object"
+                      stop_delay_up: 
+                        required: 
+                          - "name"
+                          - "unit"
+                        properties: 
+                          name: 
+                            type: "string"
+                            example: "停车延误"
+                          unit: 
+                            type: "string"
+                            example: "秒"
+                        type: "object"
+                      avg_stop_num_up: 
+                        required: 
+                          - "name"
+                          - "unit"
+                        properties: 
+                          name: 
+                            type: "string"
+                            example: "停车次数"
+                          unit: 
+                            type: "string"
+                            example: ""
+                        type: "object"
+                      spillover_rate_down: 
+                        required: 
+                          - "name"
+                          - "unit"
+                        properties: 
+                          name: 
+                            type: "string"
+                            example: "溢流比率"
+                          unit: 
+                            type: "string"
+                            example: ""
+                        type: "object"
+                      one_stop_ratio_up: 
+                        required: 
+                          - "name"
+                          - "unit"
+                        properties: 
+                          name: 
+                            type: "string"
+                            example: "停车比率"
+                          unit: 
+                            type: "string"
+                            example: ""
+                        type: "object"
+                      avg_speed_up: 
+                        required: 
+                          - "name"
+                          - "unit"
+                        properties: 
+                          name: 
+                            type: "string"
+                            example: "速度"
+                          unit: 
+                            type: "string"
+                            example: "km/h"
+                        type: "object"
+                      volume_up: 
+                        required: 
+                          - "name"
+                          - "unit"
+                        properties: 
+                          name: 
+                            type: "string"
+                            example: "流量"
+                          unit: 
+                            type: "string"
+                            example: "pcu/分"
+                        type: "object"
+                      travel_time_up: 
+                        required: 
+                          - "name"
+                          - "unit"
+                        properties: 
+                          name: 
+                            type: "string"
+                            example: "通过时间"
+                          unit: 
+                            type: "string"
+                            example: "秒"
+                        type: "object"
+                      traffic_jam_index_up: 
+                        required: 
+                          - "name"
+                          - "unit"
+                        properties: 
+                          name: 
+                            type: "string"
+                            example: "拥堵指数 TTI"
+                          unit: 
+                            type: "string"
+                            example: ""
+                        type: "object"
+                      saturation_up: 
+                        required: 
+                          - "name"
+                          - "unit"
+                        properties: 
+                          name: 
+                            type: "string"
+                            example: "饱和度"
+                          unit: 
+                            type: "string"
+                            example: ""
+                        type: "object"
+                    type: "object"
+                  movements: 
+                    required: 
+                      - "2019-09-29"
+                      - "today"
+                    properties: 
+                      2019-09-29: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            movement_id: 
+                              type: "string"
+                              example: "687f3ec1332b17117b5a9672c54a91fd"
+                            avg_stop_num_up: 
+                              type: "string"
+                              example: "0.33333334"
+                            spillover_rate_down: 
+                              type: "string"
+                              example: "0"
+                            stop_delay_up: 
+                              type: "string"
+                              example: "40.333332"
+                            avg_speed_up: 
+                              type: "string"
+                              example: "2.820939"
+                            one_stop_ratio_up: 
+                              type: "string"
+                              example: "0.33333334"
+                            travel_time_up: 
+                              type: "string"
+                              example: "361.22723"
+                            traffic_jam_index_up: 
+                              type: "string"
+                              example: "0"
+                            saturation_up: 
+                              type: "string"
+                              example: "0.50416666"
+                            volume_up: 
+                              type: "string"
+                              example: "54"
+                            comment: 
+                              type: "string"
+                              example: "西右"
+                            route_length: 
+                              type: "string"
+                              example: "1019"
+                      today: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            movement_id: 
+                              type: "string"
+                              example: "687f3ec1332b17117b5a9672c54a91fd"
+                            avg_stop_num_up: 
+                              type: "string"
+                              example: "0.33333334"
+                            spillover_rate_down: 
+                              type: "string"
+                              example: "0"
+                            stop_delay_up: 
+                              type: "string"
+                              example: "40.333332"
+                            avg_speed_up: 
+                              type: "string"
+                              example: "2.820939"
+                            one_stop_ratio_up: 
+                              type: "string"
+                              example: "0.33333334"
+                            travel_time_up: 
+                              type: "string"
+                              example: "361.22723"
+                            traffic_jam_index_up: 
+                              type: "string"
+                              example: "0"
+                            saturation_up: 
+                              type: "string"
+                              example: "0.50416666"
+                            volume_up: 
+                              type: "string"
+                              example: "54"
+                            comment: 
+                              type: "string"
+                              example: "西右"
+                            route_length: 
+                              type: "string"
+                              example: "1019"
+                    type: "object"
+                type: "object"
+  /Alarmanalysis/junctionAlarmDealList:
+    post:
+      summary: 路口报警处置记录
+      description: 路口报警处置记录
+      tags:
+        - 南昌本地化
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: string
+          description: "数据所属城市：济南 12"
+          required: true
+        - name: dates
+          in: formData
+          type: array
+          description: "数据产生日期，为空表示当日"
+          required: false
+        - name: junction_id
+          in: formData
+          type: string
+          description: "路口ID"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "实时单指标曲线图数据"
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+            properties: 
+              errno: 
+                type: "number"
+                example: 0
+              errmsg: 
+                type: "string"
+                example: ""
+              data: 
+                type: "array"
+                items: 
+                  type: "object"
+                  properties: 
+                    create_time: 
+                      type: "string"
+                      example: "2019-09-28 18:49:00"
+                    type: 
+                      type: "number"
+                      example: 1
+                    comments: 
+                      type: "string"
+                      example: "【西直】- 【过饱和】，持续2分钟"
   /esdata/sync:
     post:
       summary: 同步es数据
@@ -31,7 +516,7 @@ paths:
         - name: index
           in: query
           type: string
-          description: 	"es索引，当前支持 new_dmp_forecast  实时指标数据;online_its_alarm_movement_month 实时报警数据;online_its_alarm_junction_month 路口级别;cn_12_flow_duration_v 济南离线指标表;cn_diagnosis_alarm_pro_offline_index 离线报警表;cn_flow_diagnosis_alarm_offline  离线报警数据"
+          description:   "es索引，当前支持 new_dmp_forecast  实时指标数据;online_its_alarm_movement_month 实时报警数据;online_its_alarm_junction_month 路口级别;cn_12_flow_duration_v 济南离线指标表;cn_diagnosis_alarm_pro_offline_index 离线报警表;cn_flow_diagnosis_alarm_offline  离线报警数据"
           required: true
         - name: city_id
           in: query

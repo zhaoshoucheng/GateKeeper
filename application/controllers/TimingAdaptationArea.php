@@ -38,9 +38,7 @@ class TimingAdaptationArea extends MY_Controller
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
         ]);
-
         $data = $this->timingAdaptionAreaService->getAreaListFormat($params);
-
         $this->response($data);
     }
 

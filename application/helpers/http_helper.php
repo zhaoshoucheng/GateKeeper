@@ -53,7 +53,7 @@ if (!function_exists('httpGET')) {
             }
 
             //记录报警
-            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query)));
+            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query), 'proc_time'=> $totalTime));
             return false;
         }
         $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -69,7 +69,7 @@ if (!function_exists('httpGET')) {
             if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
                 return false;
             }
-            com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query)));
+            com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query), 'proc_time'=> $totalTime));
             return false;
         }
 
@@ -129,7 +129,7 @@ if (!function_exists('httpPOST')) {
             if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
                 return false;
             }
-            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data));
+            com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data, 'proc_time'=> $totalTime));
             return false;
         }
         $responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -146,10 +146,10 @@ if (!function_exists('httpPOST')) {
             if(strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
                 return false;
             }
-            com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data));
+            com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data, 'proc_time'=> $totalTime));
             return false;
         }
-
+        
         com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>$data, "response"=>substr($ret,0,10*1024), "errno"=>$responseCode, 'proc_time'=> $totalTime]);
         return $ret;
     }
