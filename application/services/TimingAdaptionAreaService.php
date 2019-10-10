@@ -1313,7 +1313,7 @@ class TimingAdaptionAreaService extends BaseService
     {
         $this->load->config('control_params');
         $controlParams = $this->config->item('control_params');
-        $cityParams = $controlParams["city"][$default];
+        $cityParams = $controlParams["city"]['default'];
         if (isset($controlParams["city"][$cityId])) {
             $cityParams = $controlParams["city"][$cityId];
         }
