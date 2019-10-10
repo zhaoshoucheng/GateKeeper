@@ -497,9 +497,7 @@ class DiagnosisNoTiming_model extends CI_Model
             return [];
         }
     }
-
-    public function GetOfflineJunctionFlowAlarmDataByHours
-
+    
     public function GetLastAlarmDateByCityID($cityID){
         $url = $this->config->item('data_service_interface');
         $res = httpGET($url . '/GetLastAlarmDateByCityID?city_id='.$cityID, [], 0);
