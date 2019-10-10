@@ -528,4 +528,13 @@ class DiagnosisNoTiming_model extends CI_Model
             return [];
         }
     }
+
+    public function GetBaseQuotaFlowData($params){
+        $cityID = $params["city_id"];
+        $dates = [$params["dates"]];
+        $logicJunctionID = $params["logic_junction_id"];
+        $timePoints = [$params["hour"]];
+        $quotaList = $this->getFlowQuotaList($cityID, $logicJunctionID, $timePoints, $dates);
+        print_r($quotaList);exit;
+    }
 }

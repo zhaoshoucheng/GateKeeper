@@ -548,4 +548,13 @@ class DiagnosisNoTimingService extends BaseService
     public function GetLastAlarmDateByCityID($cityID){
         return $this->diagnosisNoTiming_model->GetLastAlarmDateByCityID($cityID);
     }
+
+    public function GetBaseQuotaFlowData($params){
+        $quotaList = $this->diagnosisNoTiming_model->GetBaseQuotaFlowData($params);
+        $resultList = [];
+        $retainKeys = ["stop_delay","stop_time_cycle","speed"];
+        foreach ($quotaList as $key => $value) {
+            
+        }
+    }
 }
