@@ -498,6 +498,8 @@ class DiagnosisNoTiming_model extends CI_Model
         }
     }
 
+    public function GetOfflineJunctionFlowAlarmDataByHours
+
     public function GetLastAlarmDateByCityID($cityID){
         $url = $this->config->item('data_service_interface');
         $res = httpGET($url . '/GetLastAlarmDateByCityID?city_id='.$cityID, [], 0);
@@ -531,10 +533,20 @@ class DiagnosisNoTiming_model extends CI_Model
 
     public function GetBaseQuotaFlowData($params){
         $cityID = $params["city_id"];
-        $dates = [$params["dates"]];
+        $dates = [$params["date"]];
         $logicJunctionID = $params["logic_junction_id"];
         $timePoints = [$params["hour"]];
         $quotaList = $this->getFlowQuotaList($cityID, $logicJunctionID, $timePoints, $dates);
+        return $quotaList;
+    }
+
+    public function GetDiagnosisFlowData($params){
+        $cityID = $params["city_id"];
+        $dates = [$params["date"]];
+        $logicJunctionID = $params["logic_junction_id"];
+        $timePoints = [$params["hour"]];
+        $quotaList = $this->getJunctionAlarmDataByJunction($cityID, $dates, $timePoints);
         print_r($quotaList);exit;
+        return $quotaList;
     }
 }

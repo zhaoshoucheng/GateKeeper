@@ -551,10 +551,33 @@ class DiagnosisNoTimingService extends BaseService
 
     public function GetBaseQuotaFlowData($params){
         $quotaList = $this->diagnosisNoTiming_model->GetBaseQuotaFlowData($params);
+        $retainKeys = ["logic_flow_id","stop_delay","stop_time_cycle","speed"];
         $resultList = [];
-        $retainKeys = ["stop_delay","stop_time_cycle","speed"];
         foreach ($quotaList as $key => $value) {
-            
+            $resultList[$key] = $this->retainArrayKeys($retainKeys,$value);
         }
+        return $resultList;
+    }
+
+    public function GetDiagnosisFlowData($params){
+        $quotaList = $this->diagnosisNoTiming_model->GetDiagnosisFlowData($params);
+        $retainKeys = ["logic_flow_id","stop_delay","stop_time_cycle","speed"];
+        $resultList = [];
+        foreach ($quotaList as $key => $value) {
+            $resultList[$key] = $this->retainArrayKeys($retainKeys,$value);
+        }
+        return $resultList;
+    }
+
+    private function retainArrayKeys($keys,$arr){
+        if(empty($keys)){
+            return $arr;
+        }
+        foreach($arr as $key=>$value){
+            if(!in_array($key,$keys)){
+                unset($arr[$key]);
+            }
+        }
+        return $arr;
     }
 }
