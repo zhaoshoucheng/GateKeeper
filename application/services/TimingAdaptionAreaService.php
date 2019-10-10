@@ -832,7 +832,7 @@ class TimingAdaptionAreaService extends BaseService
             "source" => "signal_control",
             "startTime" => $startTime,
         ];
-        
+
         $esUrl = $this->config->item('new_es_interface') . '/estimate/space/query';
 
         if(ENVIRONMENT=="development"){
@@ -1313,7 +1313,10 @@ class TimingAdaptionAreaService extends BaseService
     {
         $this->load->config('control_params');
         $controlParams = $this->config->item('control_params');
-        $cityParams = $controlParams["city"][$cityId];
+        $cityParams = $controlParams["city"][$default];
+        if (isset($controlParams["city"][$cityId])) {
+            $cityParams = $controlParams["city"][$cityId];
+        }
         $cityParams["queue_ratio_thresh"] = $cityParams["queue_ratio_thresh"]*100;
         return $cityParams;
     }

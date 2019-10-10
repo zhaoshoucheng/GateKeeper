@@ -503,11 +503,11 @@ class DiagnosisNoTiming_model extends CI_Model
         $res = httpGET($url . '/GetLastAlarmDateByCityID?city_id='.$cityID, [], 0);
         if (!empty($res)) {
             $res = json_decode($res, true);
-            $dt = !empty($res['data']['dt']) ? $res['data']['dt'] : "";
-            return $dt;
-        } else {
-            return date("Y-m-d",strtotime("-1 day"));
+            if (isset($res['data']['dt'])) {
+                return $res['data']['dt'];
+            }
         }
+        return date("Y-m-d",strtotime("-1 day"));
     }
 
     public function GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour, $userPerm = []) {
