@@ -93,6 +93,17 @@ class Overview extends MY_Controller
 
     }
 
+    public function todayJamCurve()
+    {
+        $this->convertJsonToPost();
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id'    => 'required|is_natural_no_zero',
+        ]);
+        $data = $this->overviewService->todayJamCurve($params);
+        $this->response($data);
+    }
+
     /**
      * 拥堵概览
      * @param $params['city_id']    int    Y 城市ID

@@ -332,11 +332,16 @@ $config['menu'] = [
                 ],
             5 =>
                 [
+                    'name' => '自适应',
+                    'url'  => '/adaptive',
+                ],
+            6 =>
+                [
                     'name'   => '报告',
                     'url'    => '/report',
                     'remark' => 'signal',
                 ],
-            6 =>
+            7 =>
                 [
                     'name'   => '管理',
                     'url'    => '/manage/',

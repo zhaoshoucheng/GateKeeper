@@ -242,11 +242,12 @@ class Realtimewarning_model extends CI_Model
         //验证数据表是否存在?
         $rtwRule = $this->config->item('realtimewarning_rule');
         $rtwRule = empty($rtwRule[$cityId]) ? $rtwRule['default'] : $rtwRule[$cityId];
-        $this->load->model('redis_model');
+        $this->load->model('redis_model'); 
 
         //设置rediskey
         $avgStopDelayKey = "new_its_realtime_avg_stop_delay_{$cityId}_{$date}";
         $junctionSurveyKey = "new_its_realtime_pretreat_junction_survey_{$cityId}_{$date}_{$hour}";
+        $todayJamCurveKey = "new_its_realtime_today_jam_curve_{$cityId}_{$date}";
         $junctionListKey = "new_its_realtime_pretreat_junction_list_{$cityId}_{$date}_{$hour}";
         $lastHourKey = "new_its_realtime_lasthour_{$cityId}";
         $lastScheduleKey = "new_its_schedule_lasthour_{$cityId}";
@@ -272,25 +273,33 @@ class Realtimewarning_model extends CI_Model
 
         $realtimeJunctionList = $realTimeAlarmsInfoResult = [];
         if ($ctype == 0) {
+            //获取实时数据延迟缓冲
+            if(in_array($cityId,[1])){
+                sleep(30);
+            }else{
+                sleep(20);
+            }
+            //这里可能对南昌数据再做特殊处理
+
             //获取实时指标数据
             $realtimeJunctionList = $this->realtime_model->getRealTimeJunctions($cityId, $date, $hour);
             $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||realtimeJunctionCount=" . count($realtimeJunctionList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.getRealTimeIndex\n\r";
             $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.getRealTimeIndex", "log_time"=>date("Y-m-d H:i:s"),]);
             echo $message;
-
+            
             /**
              * 计算路口总数
              * 为什么拿原始数据来计算，是因为如果处理后再统计，因为有的路口不在路网，
-             * 会导致丢失，这样就和拥堵概览的路口总数匹配不上了
+             * 会导致丢失，这样就和拥堵概览的路口总数匹配不上了  
              */
             $countData = array_column($realtimeJunctionList, 'traj_count', 'logic_junction_id');
             $junctionTotal = count($countData);
 
-            //获取实时报警表数据
-            if(in_array($cityID,[1])){
-                sleep(30);
-            }else{
-                sleep(20);
+            //junctionTotal针对个别城市取近7日离线排重路口数
+            $redisKey = sprintf("itstool_offline_juncnum_%s",$cityId);
+            $offlineJuncNum = $this->redis_model->getData($redisKey);
+            if(!empty($offlineJuncNum) && $offlineJuncNum>200){
+                $junctionTotal = $offlineJuncNum;
             }
             $realTimeAlarmsInfoResultOrigal = $this->alarmanalysis_model->getRealTimeAlarmsInfoFromEs($cityId, $date, $hour);
             com_log_notice('getRealTimeAlarmsInfoFromEs_Count', ["count"=>count($realTimeAlarmsInfoResultOrigal),"cityId"=>$cityId,"date"=>$date,"hour"=>$hour,]);
@@ -369,6 +378,15 @@ class Realtimewarning_model extends CI_Model
         } elseif ($ctype == 0) {
             // 路口概览数据
             $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 6 * 3600);
+            // 当日拥堵概览曲线 
+            $todayJamCurve = [];
+            $todayJamCurveData = $this->redis_model->getData($todayJamCurveKey);
+            if(!empty($todayJamCurveData)){
+                $todayJamCurve = json_decode($todayJamCurveData,true);
+                $todayJamCurve[$hour] = $junctionSurvey;
+            }
+            $todayJamCurve[$hour] = $junctionSurvey;
+            $this->redis_model->setEx($todayJamCurveKey, json_encode($todayJamCurve), 60 * 24 * 3600);
             // 缓存诊断路口列表数据
             $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 6 * 3600);
             // 缓存实时报警路口数据
@@ -407,6 +425,7 @@ class Realtimewarning_model extends CI_Model
         //设置rediskey
         $avgStopDelayKey = "new_its_usergroup_realtime_avg_stop_delay_{$groupId}_{$cityId}_{$date}";
         $junctionSurveyKey = "new_its_usergroup_realtime_pretreat_junction_survey_{$groupId}_{$cityId}_{$date}_{$hour}";
+        $todayJamCurveKey = "new_its_usergroup_realtime_today_jam_curve_{$cityId}_{$date}";
         $junctionListKey = "new_its_usergroup_realtime_pretreat_junction_list_{$groupId}_{$cityId}_{$date}_{$hour}";
         $realTimeAlarmRedisKey = "new_its_usergroup_realtime_alarm_{$groupId}_{$cityId}";
         $realTimeAlarmBakKey = "new_its_usergroup_realtime_alarm_{$groupId}_{$date}_{$hour}";
@@ -490,6 +509,15 @@ class Realtimewarning_model extends CI_Model
         } elseif ($ctype == 0) {
             // 路口概览数据
             $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 6 * 3600);
+            // 当日拥堵概览曲线
+            $todayJamCurve = [];
+            $todayJamCurveData = $this->redis_model->getData($todayJamCurveKey);
+            if(!empty($todayJamCurveData)){
+                $todayJamCurve = json_decode($todayJamCurveData,true);
+                $todayJamCurve[$hour] = $junctionSurvey;
+            }
+            $todayJamCurve[$hour] = $junctionSurvey;
+            $this->redis_model->setEx($todayJamCurveKey, json_encode($todayJamCurve), 60 * 24 * 3600);
             // 缓存诊断路口列表数据
             $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 6 * 3600);
             // 缓存实时报警路口数据

@@ -288,4 +288,39 @@ class DiagnosisNoTiming extends MY_Controller
         $dt = $this->dianosisService->GetLastAlarmDateByCityID($params["city_id"]);
         $this->response($dt);
     }
+
+    //
+    public function GetBaseQuotaFlowData(){
+        $this->convertJsonToPost();
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'logic_junction_id' => 'required',
+            'date' => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'hour' => 'required|trim|regex_match[/\d{1,2}:\d{2}/]',
+        ]);
+        $params = [];
+        $params["city_id"] = intval($this->input->post("city_id", true));
+        $params["date"] = $this->input->post("date", true);
+        $params["logic_junction_id"] = $this->input->post("logic_junction_id", true);
+        $params["hour"] = $this->input->post("hour", true);
+        $dt = $this->dianosisService->GetBaseQuotaFlowData($params);
+        $this->response(["list"=>$dt]);
+    }
+    
+    public function GetDiagnosisFlowData(){
+        $this->convertJsonToPost();
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'logic_junction_id' => 'required',
+            'date' => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'hour' => 'required|trim|regex_match[/\d{1,2}:\d{2}/]',
+        ]);
+        $params = [];
+        $params["city_id"] = intval($this->input->post("city_id", true));
+        $params["date"] = $this->input->post("date", true);
+        $params["logic_junction_id"] = $this->input->post("logic_junction_id", true);
+        $params["hour"] = $this->input->post("hour", true);
+        $dt = $this->dianosisService->GetDiagnosisFlowData($params);
+        $this->response(["list"=>$dt]);
+    }
 }

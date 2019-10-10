@@ -8,17 +8,19 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Services\AlarmanalysisService;
+use Services\RealtimeQuotaService;
 
 class Alarmanalysis extends MY_Controller
 {
     protected $alarmanalysisService;
+    protected $realtimeQuotaService;
 
     public function __construct()
     {
         parent::__construct();
 
         $this->alarmanalysisService = new alarmanalysisService();
-
+        $this->realtimeQuotaService = new realtimeQuotaService();
         $this->load->config('alarmanalysis_conf');
     }
 
@@ -156,9 +158,65 @@ class Alarmanalysis extends MY_Controller
         $params['logic_junction_id'] = !empty($params['logic_junction_id'])
                                         ? strip_tags(trim($params['logic_junction_id']))
                                         : '';
-
         $result = $this->alarmanalysisService->sevenDayAlarmMeanValue($params);
+        $this->response($result);
+    }
 
+    public function realtimeSingleQuotaCurve(){
+        $this->convertJsonToPost();
+        $params = $this->input->post(null, true);
+        // 校验参数
+        $this->validate([
+            'city_id'        => 'required|is_natural_no_zero',
+            'dates'        => 'is_array',
+            'junction_id'  => 'required|trim',
+            // 'movement_id'  => 'required|trim',
+            'start_time'        => 'required|trim|regex_match[/\d{2}:\d{2}/]',
+            'end_time'        => 'required|trim|regex_match[/\d{2}:\d{2}/]',
+            'quota_key'        => 'required|trim',
+        ], [
+            'dates' => array(
+                'is_array' => '%s 必须是一个数组',
+            ),
+        ]);
+        if(empty($params["dates"])){
+            $params["dates"] = [date("Y-m-d")];
+        }
+        $resultList = $this->realtimeQuotaService->realtimeSingleQuotaCurve($params);
+        $currentTime = "";
+        if(isset($resultList["today"])){
+            $lastResult = end($resultList["today"]);
+            $currentTime = $lastResult["hour"];
+        }
+        $this->response(["quota_list"=>$resultList,"dates"=>$params["dates"],"current_time"=>$currentTime]);
+    }
+
+    public function junctionRealtimeFlowQuotaList(){
+        $this->convertJsonToPost();
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id'        => 'required|is_natural_no_zero',
+            'junction_id'  => 'required|trim', 
+            'dates'        => 'is_array',
+            'time'        => 'trim|regex_match[/\d{2}:\d{2}:\d{2}/]',
+        ]);
+        $result = $this->realtimeQuotaService->junctionRealtimeFlowQuotaList($params);
+        $this->response($result);
+    }
+
+    public function junctionAlarmDealList(){
+        $this->convertJsonToPost();
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id'        => 'required|is_natural_no_zero',
+            'dates'        => 'is_array',
+            'junction_id'  => 'required|trim',
+        ], [
+            'dates' => array(
+                'is_array' => '%s 必须是一个数组',
+            ),
+        ]);
+        $result = $this->alarmanalysisService->junctionAlarmDealList($params);
         $this->response($result);
     }
 }

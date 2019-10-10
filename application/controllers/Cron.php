@@ -202,6 +202,42 @@ class Cron extends CI_Controller
         log_message('debug', "hello failed");
     }
 
+    // public function writecache(){
+    //     //新实时数据城市
+    //     //读取开城列表
+    //     $this->config->load('cron', TRUE);
+    //     $cityIds = $this->config->item('city_ids', 'cron');
+    //     $date = date("Y-m-d");
+    //     foreach ($cityIds as $cityID) {
+    //         $todayJamCurveKey = "new_its_realtime_today_jam_curve_{$cityID}_{$date}";
+    //         $groupIds = $this->userperm_model->getUserPermAllGroupid();
+    //         if (empty($groupIds)) {
+    //             com_log_warning("getUserPermAllGroupid_Empty", 0, "", array("groupids" => $groupIds));
+    //         }
+    //         foreach ($groupIds as $groupId) {
+                
+    //         }
+    //     }
+    // }
+
+    //缓存近7天路口总数方法
+    public function getOfflineJunctionNum(){
+        $cityIds = ["38"];
+        foreach ($cityIds as $cityId) {
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||message=begin getOfflineJunctionNum\n\r";
+
+            $url = $this->config->item('data_service_interface');
+            $url = sprintf("%s/getOfflineJunctionNum?city_id=%s&date=%s",$url,$cityId,date("Y-m-d",strtotime("-7 day")));
+            $retJson = httpGET($url);
+            $ret = json_decode($retJson,true);
+            if(isset($ret["data"]["count"]) && $ret["data"]["count"]>200){
+                $redisKey = sprintf("itstool_offline_juncnum_%s",$cityId);
+                $this->redis_model->setData($redisKey,$ret["data"]["count"]);
+                echo sprintf("%s=%s\n",$redisKey,$ret["data"]["count"]);
+            }
+            echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||message=finish getOfflineJunctionNum\n\r";
+        }
+    }
 
     /**
      * 缓存指标数据到redis中
