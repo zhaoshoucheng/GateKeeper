@@ -352,7 +352,11 @@ class Realtimewarning extends Inroute_Controller
             "dltag"=>"task_handler_doing", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
         //new_dmp最大20秒延迟
-        sleep(20);
+        if($cityId==4){
+            sleep(30);
+        }else{
+            sleep(5);
+        }
         $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params, 600000);
         if (!$res) {
             com_log_warning('realtime_callback_task_handler_error', 0, $res, compact("params"));
