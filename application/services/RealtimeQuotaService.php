@@ -127,7 +127,7 @@ class RealtimeQuotaService extends BaseService
                 "route_length"=>["name"=>"路段长度","unit"=>"米",],
                 "stop_delay_up"=>["name"=>"停车延误","unit"=>"秒",],
                 "avg_stop_num_up"=>["name"=>"停车次数","unit"=>"次",],
-                "spillover_rate_down"=>["name"=>"溢流比率","unit"=>"",],
+                "spillover_rate_up"=>["name"=>"溢流比率","unit"=>"",],
                 "one_stop_ratio_up"=>["name"=>"停车比率","unit"=>"",],
                 "avg_speed_up"=>["name"=>"速度","unit"=>"千米/小时",],
                 "volume_up"=>["name"=>"流量","unit"=>"辆/小时",],
@@ -135,7 +135,7 @@ class RealtimeQuotaService extends BaseService
                 "traffic_jam_index_up"=>["name"=>"拥堵指数","unit"=>"",],
                 "saturation_up"=>["name"=>"饱和度","unit"=>"",],
             ];
-            $quotaKeys = ["movement_id","stop_delay_up","avg_stop_num_up","spillover_rate_down","one_stop_ratio_up","avg_speed_up","volume_up","travel_time_up","traffic_jam_index_up","saturation_up",];
+            $quotaKeys = ["movement_id","stop_delay_up","avg_stop_num_up","spillover_rate_up","one_stop_ratio_up","avg_speed_up","volume_up","travel_time_up","traffic_jam_index_up","saturation_up",];
             $newFlowList = [];
             $flowLengths = $this->getFlowLength($cityId, $junctionId);
             $phaseNames = $this->getFlowFinalPhaseNames($junctionId);
