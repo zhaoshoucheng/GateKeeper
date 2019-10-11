@@ -186,7 +186,7 @@ class DiagnosisNoTiming_model extends CI_Model
             'logic_junction_id' => $logicJunctionID,
             'hour' => $hour,
             'dt' => $dt,
-        ];
+        ]; 
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetFlowDiagnosisAlarm', $req, 0, 'json');
         if (!empty($res)) {
@@ -531,20 +531,19 @@ class DiagnosisNoTiming_model extends CI_Model
 
     public function GetBaseQuotaFlowData($params){
         $cityID = $params["city_id"];
-        $dates = [$params["date"]];
+        $date = [$params["date"]];
         $logicJunctionID = $params["logic_junction_id"];
         $timePoints = [$params["hour"]];
-        $quotaList = $this->getFlowQuotaList($cityID, $logicJunctionID, $timePoints, $dates);
+        $quotaList = $this->getFlowQuotaList($cityID, $logicJunctionID, $timePoints, $date);
         return $quotaList;
     }
 
     public function GetDiagnosisFlowData($params){
         $cityID = $params["city_id"];
-        $dates = [$params["date"]];
+        $date = $params["date"];
         $logicJunctionID = $params["logic_junction_id"];
-        $timePoints = [$params["hour"]];
-        $quotaList = $this->getJunctionAlarmDataByJunction($cityID, $dates, $timePoints);
-        print_r($quotaList);exit;
-        return $quotaList;
+        $timePoint = $params["hour"];
+        $alarmList = $this->getFlowDiagnosisAlarm($cityID, $logicJunctionID, $timePoint, $date); 
+        return $alarmList;
     }
 }

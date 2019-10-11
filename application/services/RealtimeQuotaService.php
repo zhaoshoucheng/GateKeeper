@@ -21,6 +21,7 @@ class RealtimeQuotaService extends BaseService
         $this->load->model('waymap_model');
         $this->load->helper('http_helper');
         $this->load->model('common_model');
+        $this->load->model('alarmanalysis_model');
         $this->helperService = new HelperService();
         $this->load->config("nconf");
     }
@@ -304,5 +305,13 @@ class RealtimeQuotaService extends BaseService
             }
         }
         return ["list"=>$newFlowList,"batch_time"=>$date." ".$hour];
+    }
+
+    public function getRealTimeAlarmsInfo($cityId, $date){
+        $res = $this->alarmanalysis_model->getRealTimeAlarmsInfo($cityId, $date);
+        return $res;
+        // $res = '[{"logic_junction_id":"2017030116_3881747","logic_flow_id":"2017030116_i_48853100_2017030116_o_48853031","start_time":"2019-10-10 00:05:00","last_time":"2019-10-10 00:05:00","type":1,"junction_type":3},{"logic_junction_id":"2017030116_4408929","logic_flow_id":"2017030116_i_48853100_2017030116_o_48853031","start_time":"2019-10-10 00:05:00","last_time":"2019-10-10 00:05:00","type":2,"junction_type":3},{"logic_junction_id":"2017030116_4408929","logic_flow_id":"2017030116_i_48853100_2017030116_o_48853031","start_time":"2019-10-10 00:05:00","last_time":"2019-10-10 00:05:00","type":3,"junction_type":3}]';
+        // $res = json_decode($res,true);
+        // return $res;
     }
 }

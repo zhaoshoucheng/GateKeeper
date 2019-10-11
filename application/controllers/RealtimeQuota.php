@@ -10,6 +10,7 @@ class RealtimeQuota extends MY_Controller
         parent::__construct();
 
         $this->realtimeQuotaService = new RealtimeQuotaService();
+        $this->load->model('redis_model');
     }
 
     /**
@@ -111,5 +112,65 @@ class RealtimeQuota extends MY_Controller
         $data = $this->timingAdaptService->getAdapteStatus($params);
 
         $this->response($data);
+    }
+
+    /**
+     * 获取实时指标数据10分钟间隔
+     * for 中控SaaS
+     */
+    public function GetQuotaFlowData(){
+        $this->convertJsonToPost();
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'logic_junction_id' => 'required',
+        ]);
+        $params = [];
+        $params["city_id"] = intval($this->input->post("city_id", true));
+        $params["logic_junction_id"] = $this->input->post("logic_junction_id", true);
+        $quotaKeys = ["stop_delay_up","avg_stop_num_up","avg_speed_up"];
+
+
+        //10分钟一个路口只能调用一次
+        $res = $this->redis_model->getData("zk_realtime_quota_".$params["logic_junction_id"]);
+        if(!empty($res)){
+            throw new \Exception("单路口10分钟内只能调用一次");
+        }
+        $this->redis_model->setEx("zk_realtime_quota_".$params["logic_junction_id"], 1, 5);
+
+        $data = $this->realtimeQuotaService->getFlowQuota($params["city_id"],[$params["logic_junction_id"]],$quotaKeys,$this->userPerm);
+        foreach ($data["list"] as $key => $value) {
+            unset($data["list"][$key]["confidence"]);
+            unset($data["list"][$key]["movement_name"]);
+        }
+        $alarmList = $this->realtimeQuotaService->getRealTimeAlarmsInfo($params["city_id"],date("Y-m-d"));
+        $alarmMap = [];
+        foreach($alarmList as $key=>$value){
+            if(empty($alarmMap[$value["logic_flow_id"]])){
+                $alarmMap[$value["logic_flow_id"]] = [];
+            }
+            $alarmMap[$value["logic_flow_id"]][] = $value["type"];
+        }
+        // print_r($alarmMap);exit;
+
+        //遍历报警数据
+        foreach ($data["list"] as $key => $value) {
+            $flowTypes = $alarmMap[$value["logic_flow_id"]] ?? [];
+            if(in_array(3,$flowTypes)){
+                $data["list"][$key]["is_empty"] = 1;
+            }else{
+                $data["list"][$key]["is_empty"] = 0;
+            }
+            if(in_array(1,$flowTypes)){
+                $data["list"][$key]["is_oversaturation"] = 1;
+            }else{
+                $data["list"][$key]["is_oversaturation"] = 0;
+            }
+            if(in_array(2,$flowTypes)){
+                $data["list"][$key]["is_spillover"] = 1;
+            }else{
+                $data["list"][$key]["is_spillover"] = 0;
+            }
+        }
+        $this->response(["list"=>$data,]);
     }
 }

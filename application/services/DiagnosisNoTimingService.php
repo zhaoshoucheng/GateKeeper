@@ -550,18 +550,21 @@ class DiagnosisNoTimingService extends BaseService
     }
 
     public function GetBaseQuotaFlowData($params){
+        $flowInfo = $this->waymap_model->getFlowsInfo($params["logic_junction_id"]);
         $quotaList = $this->diagnosisNoTiming_model->GetBaseQuotaFlowData($params);
         $retainKeys = ["logic_flow_id","stop_delay","stop_time_cycle","speed"];
         $resultList = [];
+        $flowMap = $flowInfo[$params["logic_junction_id"]] ?? [];
         foreach ($quotaList as $key => $value) {
             $resultList[$key] = $this->retainArrayKeys($retainKeys,$value);
+            $resultList[$key]["phase_name"] = $flowMap[$value["logic_flow_id"]];
         }
         return $resultList;
     }
 
     public function GetDiagnosisFlowData($params){
         $quotaList = $this->diagnosisNoTiming_model->GetDiagnosisFlowData($params);
-        $retainKeys = ["logic_flow_id","stop_delay","stop_time_cycle","speed"];
+        $retainKeys = ["logic_flow_id","is_empty","is_oversaturation","is_spillover"];
         $resultList = [];
         foreach ($quotaList as $key => $value) {
             $resultList[$key] = $this->retainArrayKeys($retainKeys,$value);

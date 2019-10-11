@@ -289,8 +289,11 @@ class DiagnosisNoTiming extends MY_Controller
         $this->response($dt);
     }
 
-    //
-    public function GetBaseQuotaFlowData(){
+    /**
+     * 获取实时指标数据10分钟间隔
+     * for 中控SaaS
+     */
+    public function GetQuotaFlowData(){
         $this->convertJsonToPost();
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
@@ -303,24 +306,19 @@ class DiagnosisNoTiming extends MY_Controller
         $params["date"] = $this->input->post("date", true);
         $params["logic_junction_id"] = $this->input->post("logic_junction_id", true);
         $params["hour"] = $this->input->post("hour", true);
-        $dt = $this->dianosisService->GetBaseQuotaFlowData($params);
-        $this->response(["list"=>$dt]);
-    }
-    
-    public function GetDiagnosisFlowData(){
-        $this->convertJsonToPost();
-        $this->validate([
-            'city_id' => 'required|is_natural_no_zero',
-            'logic_junction_id' => 'required',
-            'date' => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
-            'hour' => 'required|trim|regex_match[/\d{1,2}:\d{2}/]',
-        ]);
-        $params = [];
-        $params["city_id"] = intval($this->input->post("city_id", true));
-        $params["date"] = $this->input->post("date", true);
-        $params["logic_junction_id"] = $this->input->post("logic_junction_id", true);
-        $params["hour"] = $this->input->post("hour", true);
-        $dt = $this->dianosisService->GetDiagnosisFlowData($params);
-        $this->response(["list"=>$dt]);
+        
+        $bList = $this->dianosisService->GetBaseQuotaFlowData($params);
+        $dList = $this->dianosisService->GetDiagnosisFlowData($params);
+        $dMap = [];
+        foreach($dList as $key=>$value){
+            $dMap[$value["logic_flow_id"]] = $value;
+        }
+        foreach($bList as $key=>$value){
+            $dInfo = $dMap[$value["logic_flow_id"]] ?? [];
+            $bList[$key]["is_empty"] = $dInfo["is_empty"] ?? 0;
+            $bList[$key]["is_oversaturation"] = $dInfo["is_oversaturation"] ?? 0;
+            $bList[$key]["is_spillover"] = $dInfo["is_spillover"] ?? 0;
+        }
+        $this->response(["list"=>$bList,]);
     }
 }

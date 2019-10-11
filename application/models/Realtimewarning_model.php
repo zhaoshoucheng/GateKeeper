@@ -274,7 +274,7 @@ class Realtimewarning_model extends CI_Model
         $realtimeJunctionList = $realTimeAlarmsInfoResult = [];
         if ($ctype == 0) {
             //获取实时数据延迟缓冲
-            if(in_array($cityId,[1])){
+            if(in_array($cityId,[1,4])){
                 sleep(30);
             }else{
                 sleep(20);
