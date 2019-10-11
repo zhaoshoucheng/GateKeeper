@@ -506,7 +506,7 @@ class AlarmanalysisService extends BaseService
         $cityID = $params["city_id"];
         $junctionID = $params["junction_id"];
         if(empty($dates)){
-            for($i=0;$i<7;$i++){
+            for($i=0;$i<15;$i++){
                 $dates[] = date("Y-m-d",strtotime("-$i day"));
             }
         }else{
