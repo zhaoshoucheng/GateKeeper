@@ -535,7 +535,6 @@ class Realtime_model extends CI_Model
             // $data['quotaRequest']['quotaType'] = "avg";
             $quotaKey = 'avg_' . $quotaKey;
         }
-        // print_r($data);exit;
         $realTimeEsData = $this->searchQuota($data);
         if(empty($realTimeEsData["result"]["quotaResults"])){
             return $realTimeEsData;
