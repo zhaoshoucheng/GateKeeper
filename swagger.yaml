@@ -16,10 +16,195 @@ tags:
   - name: "例行化优化"
   - name: "开放平台"
   - name: "南昌本地化"
+  - name: "中控SaaS"
 schemes:
 - http
 - https
 paths:
+  /diagnosisNoTiming/GetQuotaFlowData:
+    post:
+      summary: 路口离线相位指标数据
+      description: 路口离线相位指标数据
+      tags:
+        - 中控SaaS
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: string
+          description: "数据所属城市：38"
+          required: true
+        - name: date
+          in: formData
+          type: string
+          description: "数据产生日期: 2019-10-09"
+          required: true
+        - name: logic_junction_id
+          in: formData
+          type: string
+          description: "路口ID: 2017030116_3881747"
+          required: true
+        - name: hour
+          in: formData
+          type: string
+          description: "数据时间：17:00"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: "路口离线相位指标数据"
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+            properties: 
+              errno: 
+                type: "number"
+                example: 0
+              errmsg: 
+                type: "string"
+                example: ""
+              data: 
+                required: 
+                  - "list"
+                properties: 
+                  list: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        logic_flow_id: 
+                          type: "string"
+                          example: "2017030116_i_48897790_2017030116_o_48853071"
+                          description: "相位ID"
+                        speed: 
+                          type: "number"
+                          example: "5"
+                          description: "速度 单位: 米/秒"
+                        stop_delay: 
+                          type: "number"
+                          example: 43.25
+                          description: "停车延误 单位：秒"
+                        stop_time_cycle: 
+                          type: "number"
+                          example: 0.65
+                          description: "停车次数"
+                        phase_name: 
+                          type: "string"
+                          example: "东南直"
+                          description: "相位名称"
+                        is_empty: 
+                          type: "number"
+                          example: 0
+                          description: "是否空放"
+                        is_oversaturation: 
+                          type: "number"
+                          example: 0
+                          description: "是否过饱和"
+                        is_spillover: 
+                          type: "number"
+                          example: 0
+                          description: "是否溢流"
+                type: "object"
+              traceid: 
+                type: "string"
+                example: "645aa41f5d9f614a898c5d92b22674b0"
+  /realtimeQuota/GetQuotaFlowData:
+    post:
+      summary: 路口实时相位指标数据
+      description: 路口实时相位指标数据
+      tags:
+        - 中控SaaS
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: string
+          description: "数据所属城市：38"
+          required: true
+        - name: logic_junction_id
+          in: formData
+          type: string
+          description: "路口ID"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: "路口实时相位指标数据"
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+            properties: 
+              errno: 
+                type: "number"
+                example: 0
+              errmsg: 
+                type: "string"
+                example: ""
+              data: 
+                required: 
+                  - "list"
+                properties: 
+                  list: 
+                    required: 
+                      - "list"
+                      - "batch_time"
+                    properties: 
+                      list: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            avg_stop_num_up: 
+                              type: "number"
+                              example: 0.6111111
+                              description: "上游平均停车次数"
+                            stop_delay_up: 
+                              type: "number"
+                              example: 36.555557
+                              description: "上游延误时间 单位：秒"
+                            avg_speed_up: 
+                              type: "number"
+                              example: 6.741927
+                              description: "上游平均速度 单位：米/秒"
+                            phase_name: 
+                              type: "string"
+                              example: "北直"
+                              description: "相位名称"
+                            logic_flow_id: 
+                              type: "string"
+                              example: "2017030116_i_48853090_2017030116_o_48853051"
+                              description: "相位ID"
+                            is_empty: 
+                              type: "number"
+                              example: 0
+                              description: "是否空放"
+                            is_oversaturation: 
+                              type: "number"
+                              example: 0
+                              description: "是否过饱和"
+                            is_spillover: 
+                              type: "number"
+                              example: 0
+                              description: "是否溢流"
+                      batch_time: 
+                        type: "string"
+                        example: "2019-10-11 00:32:10"
+                        description: "数据批次号"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+                example: "645aa41f5d9f5d5c776d5d92143babb0"
   /Overview/todayJamCurve:
     post:
       summary: 当日拥堵概览曲线
@@ -75,6 +260,7 @@ paths:
                           value: 
                             type: "number"
                             example: 4            
+
   /Alarmanalysis/realtimeSingleQuotaCurve:
     post:
       summary: 实时单指标曲线图
