@@ -351,6 +351,8 @@ class Realtimewarning extends Inroute_Controller
         $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
             "dltag"=>"task_handler_doing", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
+        //这里有一些sleep确保指标可以查询到
+        sleep(10);
         $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params, 600000);
         if (!$res) {
             com_log_warning('realtime_callback_task_handler_error', 0, $res, compact("params"));

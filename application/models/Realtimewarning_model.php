@@ -277,7 +277,7 @@ class Realtimewarning_model extends CI_Model
             if(in_array($cityId,[1])){
                 sleep(30);
             }elseif(in_array($cityId,[4])){
-                sleep(50);
+                sleep(30);
             }else{
                 sleep(20);
             }
@@ -467,6 +467,12 @@ class Realtimewarning_model extends CI_Model
             $countData = array_column($realtimeJunctionList, 'traj_count', 'logic_junction_id');
             $junctionTotal = count($countData);
 
+            //junctionTotal针对个别城市取近7日离线排重路口数
+            $redisKey = sprintf("itstool_offline_juncnum_%s",$cityId);
+            $offlineJuncNum = $this->redis_model->getData($redisKey);
+            if(!empty($offlineJuncNum) && $offlineJuncNum>200){
+                $junctionTotal = $offlineJuncNum;
+            }
 
             //过滤实时报警表数据
             $realTimeAlarmsInfoResult = [];
