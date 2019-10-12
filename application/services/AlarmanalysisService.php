@@ -533,7 +533,7 @@ class AlarmanalysisService extends BaseService
         foreach ($alarmEsList as $val) {
             $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
             if ($durationTime < 1) {
-                $durationTime = 2;
+                $durationTime = 1;
             }
 
             if(!isset($phaseNames[$val["logic_flow_id"]])){

@@ -487,7 +487,7 @@ class TimingAdaptionAreaService extends BaseService
             // 持续时间
             $durationTime = (strtotime($val['last_time']) - strtotime($val['start_time'])) / 60;
             if ($durationTime == 0) {
-                $durationTime = 2;
+                $durationTime = 1;
             }
 
             $is_ignore = 2; // 是否忽略 默认未忽略

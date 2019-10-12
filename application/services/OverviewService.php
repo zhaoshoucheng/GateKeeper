@@ -1023,7 +1023,7 @@ class OverviewService extends BaseService
         foreach ($res as $k => $val) {
             $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
             if ($durationTime < 1) {
-                $durationTime = 2;
+                $durationTime = 1;
             }
 
             // 人工标注
