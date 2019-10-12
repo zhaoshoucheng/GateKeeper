@@ -7,6 +7,8 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\TimingService;
+
 /**
  * Class Arterialtiming
  *
@@ -18,6 +20,8 @@ class Arterialtiming extends MY_Controller
     {
         parent::__construct();
         $this->load->model('arterialtiming_model');
+
+        $this->timingService = new TimingService();
     }
 
     /**
@@ -40,41 +44,17 @@ class Arterialtiming extends MY_Controller
         if(!$validate['status']){
             return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
         }
-        $data = $params['junction_infos'];
-//        $data = json_decode($data,true);
 
-        $timePoint = $params['time_point'];
-        $date = $params['dates'];
-        $finalTimingInfo=[];
-        $timingInfo = $this->arterialtiming_model->tmpGetNewJunctionTimingInfos($data,$timePoint,$date[0], $params['source_type']);
-        // if (isset($params['source_type']) && $params['source_type']==2){
-        //     $timingInfo = $this->arterialtiming_model->tmpGetNewJunctionTimingInfos($data,$timePoint,$date[0]);
-        // }else{
-        //     $timingInfo = $this->arterialtiming_model->getJunctionTimingInfos($data,$timePoint,$date[0]);
-        // }
-        foreach ($data as $d){
-            if(isset($timingInfo[$d['logic_junction_id']])){
-                $finalTimingInfo[$d['logic_junction_id']] = $timingInfo[$d['logic_junction_id']];
-            }else{
-                $finalTimingInfo[$d['logic_junction_id']] = array(
-                    array(
-                        'id'=>null,
-                        'logic_junction_id'=>$d['logic_junction_id'],
-                        'date'=>null,
-                        'timing_info'=>array(
-                            'extra_timing'=>array(
-                                'cycle'=>null,
-                                'offset'=>null,
-                            ),
-                            'movement_timing'=>array()
-                        ),
-                    )
-                );
-            }
-        }
+        $data = [
+            'junction_infos'       => $params['junction_infos'],
+            'dates'       => $params['dates'],
+            'time_point'       => $params['time_point'],
+            'source' => $params['source_type'],
+        ];
 
+        $timing = $this->timingService->queryArterialTimingInfo($data);
 
-        return $this->response($finalTimingInfo);
+        return $this->response($timing);
     }
 
     /**
