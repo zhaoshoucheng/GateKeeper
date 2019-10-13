@@ -13,6 +13,7 @@ class Timing_model extends CI_Model
 
         $this->load->config('nconf');
         $this->load->model("waymap_model");
+        $this->load->helper('http');
     }
 
     /**
@@ -20,12 +21,11 @@ class Timing_model extends CI_Model
      * @param $data['junction_id'] string   逻辑路口ID
      * @param $data['dates']       array    评估/诊断日期
      * @param $data['time_range']  string   时间段 00:00-00:30
-     * @param $data['timingType']  int      配时数据源 0，全部；1，人工；2，配时反推；3，信号机上报
      * @return array
      */
     public function getOptimizeTiming($data)
     {
-        if (count($data) < 1) {
+        if (empty($data)) {
             return [];
         }
 
@@ -590,11 +590,9 @@ class Timing_model extends CI_Model
         // 获取配时详情
         $timing_data = [
             'logic_junction_ids' => trim($data['junction_id']),
-//            'days'              => trim(implode(',', $data['dates'])),
             'start_time'        => trim($time_range[0]).":00",
             'end_time'          => trim($time_range[1]).":00",
             'source'            => '2,1',
-            // 'version'           => "30192233000000",
             'date'              => $reqdate,
             'format'          => 3,
 
@@ -727,7 +725,6 @@ class Timing_model extends CI_Model
             'end_time'          => $data['end_time'],
             'date'            => $data['date'],
             'format' => 1,
-            // 'version'            => $data['version'],
         ];
         try {
             $timing = httpGET(
@@ -745,6 +742,33 @@ class Timing_model extends CI_Model
         return $timing['data'][0];
 
 
+    }
+
+    // 获取配时信息，单个路口或者批量
+    public function getNewTiming($data) {
+        // 获取配时详情
+        $timing_data = [
+            'logic_junction_ids'      => isset($data['logic_junction_id']) ? $data['logic_junction_id'] : $data['logic_junction_ids'],
+            'source'            => $data['source'],
+            'start_time'        => $data['start_time'],
+            'end_time'          => $data['end_time'],
+            'date'              => $data['date'],
+            'format'            => $data['format'],
+        ];
+        try {
+            $timing = httpGET(
+                $this->config->item('signal_timing_url'),
+                $timing_data
+            );
+            $timing = json_decode($timing, true);
+            if (isset($timing['errno']) && $timing['errno'] != 0) {
+                return [];
+            }
+        } catch (Exception $e) {
+            return [];
+        }
+
+        return isset($data['logic_junction_id']) ? $timing['data'][0] : $timing['data'];
     }
 
     public function getTimingDataBatch($data)
