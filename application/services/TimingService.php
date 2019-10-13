@@ -160,7 +160,7 @@ class TimingService extends BaseService {
                     }
                 }
             }
-            $ret[$logic_junction_id] = $one;
+            $ret[$logic_junction_id][] = $one;
         }
 
         return $ret;
