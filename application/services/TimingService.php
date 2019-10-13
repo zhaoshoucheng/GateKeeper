@@ -73,7 +73,7 @@ class TimingService extends BaseService {
 
     public function queryArterialTimingInfo($data) {
         $junction_flow = [];
-        foreach ($params['junction_infos'] as $value) {
+        foreach ($data['junction_infos'] as $value) {
             $logic_junction_id = $value['logic_junction_id'];
             $flows =$value['flows'];
             foreach ($flows as $flow) {
@@ -85,12 +85,12 @@ class TimingService extends BaseService {
         $date = $data['dates'][0];
         $reqdate = substr($date,0,4)."-".substr($date,4,2)."-".substr($date,6,2);
         $time_point = $data['time_point'];
-        $source = $params['source'];
+        $source = $data['source'];
         if ($source == 0) {
             $source = '2,1';
         }
         $req = [
-            'logic_junction_id' => $logic_junction_ids,
+            'logic_junction_ids' => implode(',', $logic_junction_ids),
             'source'            => $source,
             'start_time'        => $time_point.":00",
             'end_time'          => $time_point.":01",
@@ -114,7 +114,7 @@ class TimingService extends BaseService {
         foreach ($junction_flow as $logic_junction_id => $flows) {
             $one = [
                 'id' => 0,
-                'date' => $reqdate,
+                'date' => $date,
                 'junction_id' => $logic_junction_id,
                 'logic_junction_id' => $logic_junction_id,
                 'timing_info' => [
@@ -142,7 +142,7 @@ class TimingService extends BaseService {
                                 $one['timing_info']['movement_timing'][] = [
                                     "comment"=> "",
                                     "logic_flow_id"=> $movement['id'],
-                                    "start_time"=> $phase['start'],
+                                    "start_time"=> $phase['start_time'],
                                     "duration"=> $phase['green'],
                                 ];
                             }
@@ -160,39 +160,9 @@ class TimingService extends BaseService {
                     }
                 }
             }
-            $ret[] = $one;
+            $ret[$logic_junction_id] = $one;
         }
-        // $timing_tods = $timing['schedule'][0]['tod'];
 
-        foreach ($timing_tods as $key => $value) {
-            if ($value['end_time'] == '00:00:00') {
-                $value['end_time'] = '24:00:00';
-            }
-            if ($value['start_time'] <= $value['end_time']) {
-                $ret[] = [
-                    'start'=>$value['start_time'],
-                    'end'=>$value['end_time'],
-                ];
-            } else {
-                $ret[] = [
-                    'start'=>$value['start_time'],
-                    'end'=>'24:00:00',
-                ];
-                $ret[] = [
-                    'start'=>'00:00:00',
-                    'end'=>$value['end_time'],
-                ];
-            }
-        }
-        usort($ret, function($a, $b) {
-            if ($a['start'] != $b['end']) {
-                return ($a['start'] < $b['end']) ? -1 : 1;
-            }
-            return -1;
-        });
-        foreach ($ret as $key => $value) {
-            $ret[$key]['comment'] = (string)($key+1);
-        }
         return $ret;
     }
 }
