@@ -99,7 +99,7 @@ class OverviewService extends BaseService
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['pagesize'] = $params['pagesize'] ?? 20;
-        if(empty($this->userPerm['group_id'])) {
+        if(empty($this->userPerm['group_id']) || $cityId==38) {
             $delayList = $this->stopDelayTopList($params, $this->userPerm);
             $newDelayList = [];
             foreach ($delayList as $item) {
@@ -1023,7 +1023,7 @@ class OverviewService extends BaseService
         foreach ($res as $k => $val) {
             $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
             if ($durationTime < 1) {
-                $durationTime = 2;
+                $durationTime = 1;
             }
 
             // 人工标注

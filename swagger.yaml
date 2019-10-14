@@ -417,7 +417,7 @@ paths:
                       - "route_length"
                       - "stop_delay_up"
                       - "avg_stop_num_up"
-                      - "spillover_rate_down"
+                      - "spillover_rate_up"
                       - "one_stop_ratio_up"
                       - "avg_speed_up"
                       - "volume_up"
@@ -461,7 +461,7 @@ paths:
                             type: "string"
                             example: ""
                         type: "object"
-                      spillover_rate_down: 
+                      spillover_rate_up: 
                         required: 
                           - "name"
                           - "unit"
@@ -562,7 +562,7 @@ paths:
                             avg_stop_num_up: 
                               type: "string"
                               example: "0.33333334"
-                            spillover_rate_down: 
+                            spillover_rate_up: 
                               type: "string"
                               example: "0"
                             stop_delay_up: 
@@ -603,7 +603,7 @@ paths:
                             avg_stop_num_up: 
                               type: "string"
                               example: "0.33333334"
-                            spillover_rate_down: 
+                            spillover_rate_up: 
                               type: "string"
                               example: "0"
                             stop_delay_up: 

@@ -327,6 +327,7 @@ class Realtimewarning extends Inroute_Controller
 
     public function process($cityId = '12', $hour = '00:00', $date = "", $traceId = "", $uid = "")
     {
+        ini_set('max_execution_time', '0');
         ini_set('memory_limit', '-1');
         ob_end_flush();
         date_default_timezone_set('Asia/Shanghai');
@@ -351,6 +352,8 @@ class Realtimewarning extends Inroute_Controller
         $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
             "dltag"=>"task_handler_doing", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
+
+        sleep(5);
         $res = httpGET($this->config->item('realtime_callback')."/task_handler", $params, 600000);
         if (!$res) {
             com_log_warning('realtime_callback_task_handler_error', 0, $res, compact("params"));

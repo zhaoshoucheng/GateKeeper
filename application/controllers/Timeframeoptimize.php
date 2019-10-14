@@ -7,6 +7,8 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use Services\TimingService;
+
 class Timeframeoptimize extends MY_Controller
 {
     public function __construct()
@@ -16,6 +18,8 @@ class Timeframeoptimize extends MY_Controller
         $this->load->model('timing_model');
         $this->setTimingType();
         $this->load->model('traj_model');
+
+        $this->timingService = new TimingService();
     }
 
     /**
@@ -123,10 +127,14 @@ class Timeframeoptimize extends MY_Controller
             'dates'       => $params['dates'],
             'junction_id' => strip_tags(trim($params['junction_id'])),
             'time_range'  => strip_tags(trim($params['task_time_range'])),
-            'timingType'  => $this->timingType
         ];
+        // if (isset($params['source'])) {
+        //     $data['source'] = $params['source']);
+        // } elseif if (isset($params['source_type'])) {
+        //     $data['source'] = $params['source_type']);
+        // }
 
-        $timing = $this->timing_model->getOptimizeTiming($data);
+        $timing = $this->timingService->getOptimizeTiming($data);
 
         return $this->response($timing);
     }
