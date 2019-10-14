@@ -76,6 +76,9 @@ class TimingService extends BaseService {
         foreach ($data['junction_infos'] as $value) {
             $logic_junction_id = $value['logic_junction_id'];
             $flows =$value['flows'];
+            if (empty($flows)) {
+                continue;
+            }
             foreach ($flows as $flow) {
                 $junction_flow[$logic_junction_id][] = $flow;
             }
