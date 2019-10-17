@@ -126,8 +126,8 @@ class TimingService extends BaseService {
                         'cycle' => 0,
                         'offset' => 0,
                     ],
-                    'tod_start_time' => '00:00:00',
-                    'tod_end_time' => '00:00:00',
+                    'tod_start_time' => '',
+                    'tod_end_time' => '',
                     'movement_timing' => [],
                 ],
             ];
