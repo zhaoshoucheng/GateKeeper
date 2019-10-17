@@ -75,7 +75,11 @@ class TimingService extends BaseService {
         $junction_flow = [];
         foreach ($data['junction_infos'] as $value) {
             $logic_junction_id = $value['logic_junction_id'];
+            $junction_flow[$logic_junction_id] = [];
             $flows =$value['flows'];
+            if (empty($flows)) {
+                continue;
+            }
             foreach ($flows as $flow) {
                 $junction_flow[$logic_junction_id][] = $flow;
             }
@@ -122,8 +126,8 @@ class TimingService extends BaseService {
                         'cycle' => 0,
                         'offset' => 0,
                     ],
-                    'tod_start_time' => '00:00:00',
-                    'tod_end_time' => '00:00:00',
+                    'tod_start_time' => '',
+                    'tod_end_time' => '',
                     'movement_timing' => [],
                 ],
             ];

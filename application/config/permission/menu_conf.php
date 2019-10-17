@@ -274,11 +274,6 @@ $config['menu'] = [
                 ],
             1 =>
                 [
-                    'name' => '自适应',
-                    'url'  => '/adaptive',
-                ],
-            2 =>
-                [
                     'name'   => '评估',
                     'url'    => '/assessment/',
                     'remark' => 'signal',
@@ -301,12 +296,12 @@ $config['menu'] = [
                                 ],
                         ],
                 ],
-            3 =>
+            2 =>
                 [
                     'name'   => '诊断',
                     'url'    => '/diagnose/tendency',
                 ],
-            4 =>
+            3 =>
                 [
                     'name'   => '优化',
                     'url'    => '/optimize/',
@@ -330,18 +325,18 @@ $config['menu'] = [
                                 ],
                         ],
                 ],
-            5 =>
+            4 =>
                 [
                     'name' => '自适应',
                     'url'  => '/adaptive',
                 ],
-            6 =>
+            5 =>
                 [
                     'name'   => '报告',
                     'url'    => '/report',
                     'remark' => 'signal',
                 ],
-            7 =>
+            6 =>
                 [
                     'name'   => '管理',
                     'url'    => '/manage/',
