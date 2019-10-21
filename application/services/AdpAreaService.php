@@ -175,7 +175,7 @@ class AdpAreaService extends BaseService
             throw new \Exception(' 目标区域不存在', ERR_PARAMETERS);
         }
         $areaJunctionList = $this->adpArea_model->getAreaJunctions($areaId);
-        // print_r($areaJunctionList);exit;   
+        // print_r($areaJunctionList);exit;
         $junction_ids = array_column($areaJunctionList, 'junction_id');
         $areaJunctionList = $this->adpArea_model->getJunctions($junction_ids);
         if(empty($areaJunctionList)){
@@ -196,8 +196,8 @@ class AdpAreaService extends BaseService
             return round($item, 6);
         };
 
-        $centerLat = round(array_sum($lngs) / count($lngs), 6);
-        $centerLng = round(array_sum($lats) / count($lats), 6);
+        $centerLat = round(array_sum($lats) / count($lats), 6);
+        $centerLng = round(array_sum($lngs) / count($lngs), 6);
 
         return [
             'center_lat' => $centerLat,
@@ -292,7 +292,7 @@ class AdpAreaService extends BaseService
                     $flows = array_merge($flows, $junctionFlows);
                 }
             }
-            // print_r("realtes"); 
+            // print_r("realtes");
             // print_r($relates);
             $this->adpArea_model->insertRelates($relates);
             if (!empty($flows)) {
