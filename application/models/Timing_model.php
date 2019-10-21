@@ -16,6 +16,38 @@ class Timing_model extends CI_Model
         $this->load->helper('http');
     }
 
+    public function getJuncReleaseHistory($junctionID,$startTime,$endTime){
+        //debug
+        // $startTime = "2019-08-22 11:13:06";
+        // $junctionID = "2017030116_5125334";
+        $this->load->helper('http');
+        $urlStr = sprintf($this->config->item('signal_timing_releasehistory'),$junctionID,$startTime,$endTime);
+        $pData = ["logic_junction_id"=>$junctionID,"start_time"=>$startTime,"end_time"=>$endTime,];
+        $timing = httpPOST($this->config->item('signal_timing_releasehistory'),$pData);
+        $timing = json_decode($timing, true);
+        if (isset($timing['errorCode']) && $timing['errorCode'] != 0) {
+            throw new \Exception('获取配时详情失败: ' . $timing['errorMsg'], ERR_DEFAULT);
+        }
+        if (isset($timing['data']) && count($timing['data']) >= 1) {
+            return $timing['data'];
+        } else {
+            return [];
+        }
+    }
+
+    public function getJuncTimingHistory($junctionID,$startTime,$endTime){
+        $this->db = $this->load->database('default', true);
+        $res = $this->db->select("*")
+            ->from("adapt_timing_history")
+            ->where('logic_junction_id', $junctionID)
+            ->where('time_point >=',$startTime)
+            ->where('time_point <=',$endTime)
+            ->order_by('time_point desc')
+            ->get();
+        $result = $res instanceof CI_DB_result ? $res->result_array() : $res;
+        return $result;
+    }
+
     /**
      * 获取路口配时时间方案
      * @param $data['junction_id'] string   逻辑路口ID
