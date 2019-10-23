@@ -55,6 +55,8 @@ if ($development == 2) {
     $signal_base_url = "http://10.85.128.81:30357/signal-control/signalopt/querybasetiming";
     $signal_timing_url = "http://10.85.128.81:30357/signal-control/signal/querytiming";
 
+    // 路口配时版本历史
+    $signal_timing_releasehistory = "http://10.85.128.81:30357/signal-control/signalprofile/releasehistory";
     // 路口配时状态
     $signal_timing_status_url = "http://10.85.128.81:30357/signal-control/signalprofile/timingstatusbatch";
     // 配时上传下发时间
@@ -147,6 +149,8 @@ if ($development == 2) {
     $signal_base_url = "http://100.90.164.31:8016/signal-control/signalopt/querybasetiming";
     $signal_timing_url = "http://100.90.164.31:8016/signal-control/signal/querytiming";
 
+    // 路口配时版本历史
+    $signal_timing_releasehistory = "http://100.90.164.31:8016/signal-control/signalprofile/releasehistory";
     // 路口配时状态
     $signal_timing_status_url = "http://100.90.164.31:8016/signal-control/signalprofile/timingstatusbatch";
     // 配时上传下发时间
@@ -248,6 +252,7 @@ $config['signal_timing_url'] = $signal_timing_url;
 
 $config['signal_timing_status_url'] = $signal_timing_status_url;
 $config['signal_timing_machine_status_url'] = $signal_timing_machine_status_url;
+$config['signal_timing_releasehistory'] = $signal_timing_releasehistory;
 
 // 实时指标接口地址
 $config['es_interface'] = $es_server;

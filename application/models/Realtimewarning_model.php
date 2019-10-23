@@ -311,12 +311,12 @@ class Realtimewarning_model extends CI_Model
              * 过滤济南持续时间<3分钟数据
              */
             $cityQuotaList = $this->getCityQuotaList($cityId,$date,$hour,10000);
-            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal, $cityQuotaList);
+            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal, $cityQuotaList, $hour);
             $jDataList = $junctionList['dataList'] ?? [];
             $message= "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour={$hour}" . "||jDataListCount=" . count($jDataList) . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculate.getJunctionAggResult\n\r";
             $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId, "dltag"=>"calculate.getJunctionAggResult", "log_time"=>date("Y-m-d H:i:s"),]);
             echo $message;
-
+            
             /**
              * 路口概览 确认和路口列表数据一致
              */
@@ -326,6 +326,7 @@ class Realtimewarning_model extends CI_Model
             $result['congestion_total'] = 0;
             $result['amble_total'] = 0;
             $alarmJunctionIDS = [];
+            $alarmFlowTypes = [];
             foreach ($jDataList as $datum) {
                 // 报警数
                 $result['alarm_total'] += $datum['alarm']['is'] ?? 0;
@@ -333,19 +334,23 @@ class Realtimewarning_model extends CI_Model
                 $result['congestion_total'] += (int)(($datum['status']['key'] ?? 0) == 3);
                 // 缓行数
                 $result['amble_total'] += (int)(($datum['status']['key'] ?? 0) == 2);
-
                 if(isset($datum['alarm']['is']) && $datum['alarm']['is']){
                     $alarmJunctionIDS[] = $datum["jid"];
                 }
+                if(isset($datum['alarm_flow_type'])){
+                    foreach ($datum['alarm_flow_type'] as $val) {
+                        $alarmFlowTypes[] = $val["flow_id"].$val["cate"];
+                    }
+                } 
             }
             $junctionSurvey = $result;
 
             /**
-             * 实时报警数据计算
+             * 实时报警数据过滤
              */
             $realTimeAlarmsInfoResult = [];
             foreach ($realTimeAlarmsInfoResultOrigal as $item) {
-                if (!in_array($item["logic_junction_id"],$alarmJunctionIDS)){
+                if (!in_array($item['logic_flow_id'].$item['type'],$alarmFlowTypes)){
                     continue;
                 }
                 $realTimeAlarmsInfoResult[$item['logic_flow_id'] . $item['type']] = $item;
@@ -484,7 +489,7 @@ class Realtimewarning_model extends CI_Model
                 $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
             }
             $cityQuotaList = $this->getCityQuotaList($cityId,$date,$hour,10000);
-            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo, $cityQuotaList);
+            $junctionList = $this->getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfo, $cityQuotaList, $hour);
 
 
             //计算junctionSurvey 数据
@@ -541,9 +546,10 @@ class Realtimewarning_model extends CI_Model
      *
      * @return array
      */
-    private function getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal, $cityQuotaList)
+    private function getJunctionListResult($cityId, $realtimeJunctionList, $realTimeAlarmsInfoResultOrigal, $cityQuotaList, $hour)
     {
         $realTimeAlarmsInfo = [];
+        //基于报警数据的过滤
         foreach ($realTimeAlarmsInfoResultOrigal as $item) {
             //过滤济南<3分钟数据
             if ($cityId == "12" && strtotime($item["last_time"]) - strtotime($item["start_time"]) < 180) {
@@ -555,10 +561,9 @@ class Realtimewarning_model extends CI_Model
             if($cityId=="38" && !in_array($item['logic_junction_id'], $ncFilterJuncIDS)){
                 continue;
             }
-
             $realTimeAlarmsInfo[$item['logic_flow_id'] . $item['type']] = $item;
         }
-
+        // print_r($realTimeAlarmsInfo);exit;
         //获取路口信息的自定义返回格式
         $junctionsInfo = $this->waymap_model->getAllCityJunctions($cityId, 0);
         $junctionsInfo = array_column($junctionsInfo, null, 'logic_junction_id');
@@ -576,69 +581,98 @@ class Realtimewarning_model extends CI_Model
         }
 
         //数组初步处理，去除无用数据
-        $realtimeJunctionList = array_map(function ($item) use ($flowsInfo, $realTimeAlarmsInfo, $junctionsInfo, $cityId) {
-            $alarmInfo = $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo);
-
+        //基于指标数据的过滤
+        $newRealtimeFlowList = [];
+        foreach ($realtimeJunctionList as $item) {
+            $logicFlowID = $item['logic_flow_id'];
+            $logicJunctionID = $item['logic_junction_id'];
             $trajNum = 5;
             if($cityId==175){
                 $trajNum = 1;
             }
-            if ($item['traj_count'] >= $trajNum || !empty($alarmInfo)) {
-                $junctionName=$junctionsInfo[$item['logic_junction_id']]['name'] ?? '';
-                $alarmInfo = $this->getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo);
-                //北京时路口出现行人时过滤
-                if(strpos($junctionName,"行人")!==false && $cityId==1){
-                    $alarmInfo = [];
+
+            $alarmCategory = $this->config->item('flow_alarm_category');
+            $alarmInfo = [];
+            $alarmFlowType = [];
+            $flowList = [];
+
+            //一个flow对应的多个报警问题
+            if (isset($flowsInfo[$logicJunctionID][$logicFlowID])) {
+                foreach ($alarmCategory as $key => $value) {
+                    $alarmKey = $logicFlowID . $key;
+                    if(isset($realTimeAlarmsInfo[$alarmKey])){
+                        $comment = $flowsInfo[$logicJunctionID][$logicFlowID] .'-' . $value['name'];
+                        $alarmInfo[] = $comment; 
+                        $alarmFlowType[] = ["flow_id"=>$logicFlowID, "cate"=>$key]; 
+                    }
                 }
-                //里面已经丢弃了，flow信息
-                return [
-                    'logic_junction_id' => $item['logic_junction_id'],
-                    'alarm_info' => $alarmInfo,
+            }
+            //轨迹数大于某值 或者 报警数据不为空
+            if ($item['traj_count'] >= $trajNum || !empty($alarmInfo)) {
+                $newRealtimeFlowList[] = [
+                    "logic_junction_id"=>$logicJunctionID,
+                    "logic_flow_id"=>$logicFlowID,
+                    "alarm_flow_type"=>$alarmFlowType,
+                    "alarm_info"=>$alarmInfo,
                 ];
             }
-        }, $realtimeJunctionList);
+        }
 
-        //数组按照 logic_junction_id 进行合并
-        $temp = [];
-        foreach ($realtimeJunctionList as $item) {
-            if (!empty($item)) {
-                $temp[$item['logic_junction_id']] = isset($temp[$item['logic_junction_id']]) ?
-                    $this->mergeFlowInfo($temp[$item['logic_junction_id']], $item) :
-                    $item;
+        //路口数据聚合
+        $newRealtimeJunctionList = [];
+        foreach ($newRealtimeFlowList as $item) {
+            $logicFlowID = $item['logic_flow_id'];
+            $logicJunctionID = $item['logic_junction_id'];
+            $alarmInfo = [];
+            $alarmFlowType = [];
+            $flowList = [];
+            if(isset($newRealtimeJunctionList[$logicJunctionID])){
+                $alarmInfo = $newRealtimeJunctionList[$logicJunctionID]['alarm_info'];
+                $flowList = $newRealtimeJunctionList[$logicJunctionID]['flow_ids'];
+                $alarmFlowType = $newRealtimeJunctionList[$logicJunctionID]['alarm_flow_type'];
             }
-        };
-
-        //处理数据内容格式
-        $temporgin = array_map(function ($item) use ($junctionsInfo,$cityQuotaList) {
+            $flowList[] = $item["logic_flow_id"];
+            $alarmInfo = array_merge($alarmInfo, $item["alarm_info"]);
+            $alarmFlowType = array_merge($alarmFlowType, $item["alarm_flow_type"]);
             $quota = $this->getFinalQuotaInfo($item, $cityQuotaList);
-            return [
-                'jid' => $item['logic_junction_id'],
-                'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
-                'lng' => $junctionsInfo[$item['logic_junction_id']]['lng'] ?? '',
-                'lat' => $junctionsInfo[$item['logic_junction_id']]['lat'] ?? '',
+            $newRealtimeJunctionList[$logicJunctionID] = [
+                'logic_junction_id' => $logicJunctionID,
+                'flow_ids' => $flowList,
+                'alarm_flow_type' => $alarmFlowType,
+                'alarm_info' => $alarmInfo,
+            ];
+        }
+
+        $dataList = [];
+        foreach ($newRealtimeJunctionList as $item) {
+            $logicJunctionID = $item['logic_junction_id'];
+            $alarmInfo = $item["alarm_info"];
+            $alarmFlowType = $item["alarm_flow_type"];
+            $flowList = $item["flow_ids"];
+            $quota = $this->getFinalQuotaInfo($item, $cityQuotaList);
+            $dataList[$logicJunctionID] = [
+                'jid' => $logicJunctionID,
+                'flow_ids' => $flowList,
+                'name' => $junctionsInfo[$logicJunctionID]['name'] ?? '',
+                'lng' => $junctionsInfo[$logicJunctionID]['lng'] ?? '',
+                'lat' => $junctionsInfo[$logicJunctionID]['lat'] ?? '',
                 'quota' => $quota,
-                'alarm' => $this->getFinalAlarmInfo($item),
+                'alarm_flow_type' => $alarmFlowType,
+                'alarm' => [
+                    'is' => (int)!empty($alarmInfo),
+                    'comment' => $alarmInfo,
+                ],
                 'status' => $this->getJunctionStatus($quota),
             ];
-        }, $temp);
-
-        //过滤null的数据
-        $temp = [];
-        foreach ($temporgin as $item) {
-            if (!empty($item)) {
-                $temp[] = $item;
-            }
-        };
-
-        $lngs = array_filter(array_column($temp, 'lng'));
-        $lats = array_filter(array_column($temp, 'lat'));
-
+        }
+        $lngs = array_filter(array_column($dataList, 'lng'));
+        $lats = array_filter(array_column($dataList, 'lat'));
         $center['lng'] = count($lngs) == 0 ? 0 : (array_sum($lngs) / count($lngs));
         $center['lat'] = count($lats) == 0 ? 0 : (array_sum($lats) / count($lats));
-
         return [
-            'dataList' => array_values($temp),
+            'dataList' => array_values($dataList),
             'center' => $center,
+            'hour' => $hour,
         ];
     }
 
@@ -670,18 +704,16 @@ class Realtimewarning_model extends CI_Model
     private function getRawAlarmInfo($item, $flowsInfo, $realTimeAlarmsInfo)
     {
         $alarmCategory = $this->config->item('flow_alarm_category');
-
         $result = [];
-
         if (isset($flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']])) {
             foreach ($alarmCategory as $key => $value) {
                 if (array_key_exists($item['logic_flow_id'] . $key, $realTimeAlarmsInfo)) {
-                    $result[] = $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] .
+                    $comment = $flowsInfo[$item['logic_junction_id']][$item['logic_flow_id']] .
                         '-' . $value['name'];
+                    $result[] = ["comment"=>$comment,"flow_id"=>$item['logic_flow_id'],]; 
                 }
             }
         }
-
         return $result;
     }
 

@@ -399,6 +399,129 @@ class ReportService extends BaseService
             ],
         ];
 
+        $newJunctionReportConfig=[
+            'overview' => [
+                'title' => '路口概览',
+                'desc' => '路口报告',
+                'items' => [
+                    [
+                        'id' => 1,
+                        'title' => '路口运行状况对比',
+                        'desc' => '本周路口平均延误与上周对比',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 2,
+                        'title' => '路口运行情况',
+                        'desc' => '路口全天24小时各项运行指标分析',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 3,
+                        'title' => '区域重点路口运行指标分析',
+                        'desc' => '区域重点路口整体以及分转向的全天24小时指标分析',
+                        'quota_key' => '',
+                    ],
+                ],
+            ]
+        ];
+        $newRoadReportConfig=[
+            'overview' => [
+                'title' => '干线报告',
+                'desc' => '干线报告',
+                'items' => [
+                    [
+                        'id' => 1,
+                        'title' => '干线运行状况对比',
+                        'desc' => '本周干线路口平均延误与上周对比',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 2,
+                        'title' => '干线运行情况',
+                        'desc' => '干线全天24小时各项运行指标分析',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 3,
+                        'title' => '干线协调效果',
+                        'desc' => '干线不同时段协调效果分析',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 4,
+                        'title' => '干线拥堵情况分析',
+                        'desc' => '干线不同时段路口拥堵情况可视化',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 5,
+                        'title' => '干线路口报警总结',
+                        'desc' => '干线不同时段报警持续5分钟以上的路口分析',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 6,
+                        'title' => '干线路口运行指数排名',
+                        'desc' => '干线不同时段PI指数排名路口各项运行指标汇总',
+                        'quota_key' => '',
+                    ],
+
+                ],
+            ]
+        ];
+        $newAreaReportConfig=[
+            'overview' => [
+                'title' => '区域概览',
+                'desc' => '区域报告相关',
+                'items' => [
+                    [
+                        'id' => 1,
+                        'title' => '区域运行状况对比',
+                        'desc' => '本周区域路口平均延误与上周对比',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 2,
+                        'title' => '区域运行情况',
+                        'desc' => '区域全天24小时各项运行指标分析',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 3,
+                        'title' => '轨迹热力演变',
+                        'desc' => '区域早高峰运行状况演变过程',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 4,
+                        'title' => '区域拥堵情况分析',
+                        'desc' => '区域不同时段路口拥堵情况可视化',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 5,
+                        'title' => '区域路口报警总结',
+                        'desc' => '区域不同时段持续5分钟以上的路口分析',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 6,
+                        'title' => '区域路口运行指数排名',
+                        'desc' => '区域不同时段PI指数排名前20的路口各项运行指标汇总',
+                        'quota_key' => '',
+                    ],
+                    [
+                        'id' => 7,
+                        'title' => '区域重点路口运行指标分析',
+                        'desc' => '区域重点路口整体以及分转向的全天24小时指标分析',
+                        'quota_key' => '',
+                    ],
+
+                ],
+            ]
+        ];
+
         $type = $params['type'];
 
         switch ($type) {
@@ -410,6 +533,12 @@ class ReportService extends BaseService
                 return $weekReportConfig;
             case 4:
                 return $monthReportConfig;
+            case 10:
+                return $newJunctionReportConfig;
+            case 11:
+                return $newRoadReportConfig;
+            case 12:
+                return $newAreaReportConfig;
         }
 
         return 'undefined type';

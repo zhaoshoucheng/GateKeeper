@@ -17,6 +17,7 @@ class AlarmanalysisService extends BaseService
 
         // load model
         $this->load->model('alarmanalysis_model');
+        $this->load->model('timing_model');
         $this->config->load('realtime_conf');
     }
 
@@ -546,6 +547,39 @@ class AlarmanalysisService extends BaseService
             $alarmItem["comments"] = "【".$phaseName."】- 【".$cateName."】，持续".$durationTime."分钟";
             $alarmList[] = $alarmItem;
         }
+
+        //这里读取配时下发数据
+        $startTime = end($dates)." 00:00:00";
+        $endTime = date("Y-m-d H:i:s");
+        $timingHis = $this->timing_model->getJuncTimingHistory($junctionID,$startTime,$endTime);
+        // print_r($timingHis);exit;
+        foreach ($timingHis as $val) {
+            $alarmItem["create_time"] = $val["time_point"];
+            $alarmItem["type"] = 10;
+            $alarmItem["comments"] = "自适应方案 - 【下发】，执行成功";
+            $alarmList[] = $alarmItem;
+        }
+
+        //这里读取配时变更数据
+        $relsHis = $this->timing_model->getJuncReleaseHistory($junctionID,$startTime,$endTime);
+        foreach ($relsHis as $val) {
+            if(empty($val["comment"])){
+                $alarmItem["comments"] = "配时发布";
+            }else{
+                $alarmItem["comments"] = "配时发布，".$val["comment"];
+            }
+            $alarmItem["create_time"] = $val["time_point"];
+            $alarmItem["type"] = 20;
+            $alarmList[] = $alarmItem;
+        }
+
+        $createSlice = [];
+        foreach($alarmList as $key=>$val){
+            $createSlice[$key] = strtotime($val["create_time"]);
+        }
+
+        //排序数据
+        array_multisort($createSlice, SORT_NUMERIC, SORT_DESC, $alarmList);
         return $alarmList;
     }
 
