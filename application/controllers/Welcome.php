@@ -176,8 +176,17 @@ class Welcome extends CI_Controller
         print_r($res);exit;
     }
 
+    public function testPost(){
+        echo '<html><form method="post" action="http://100.90.164.31:8071/sg1/api/signalpro/api/welcome/test"><input name="abc" value="11"/><input type="submit" name="abc" value="11"/></form></html></html>';exit;
+    } 
+
+    public function pingPost(){
+        echo '<html><form method="post" action="http://100.90.164.31:8071/sg1/api/signalpro/api/welcome/ping"><input name="abc" value="11"/><input type="submit" name="abc" value="11"/></form></html></html>';exit;
+    }
+    
     public function test()
     {
+        sleep(200);exit;
         /*$queryStr="app_id=1004&ts=".time();
         $queryMap = [];
         parse_str($queryStr, $queryMap);
