@@ -51,7 +51,7 @@ class Report extends MY_Controller
         $params = $this->input->post(null, true);
 
         $this->validate([
-            'type' => 'required|in_list[1,2,3,4]',
+            'type' => 'required|in_list[1,2,3,4,10,11,12]',
         ]);
 
         $data = $this->reportService->reportConfig($params);

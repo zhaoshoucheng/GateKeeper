@@ -45,4 +45,22 @@ class JunctionReport extends MY_Controller
 
         $this->response($data);
     }
+
+    public function introduction(){
+
+    }
+
+    public function queryJuncDataComparison(){
+
+    }
+
+    public function queryJuncQuotaData(){
+
+    }
+
+    public function queryJuncQuotaAnalysis(){
+
+    }
+
+
 }
