@@ -266,4 +266,15 @@ class Area_model extends CI_Model
         }
         return $this->db->get()->num_rows() === 0;
     }
+
+    // 获取一个区域信息
+    public function getAreaInfo($area_id) {
+        $res = $this->db->select('*')
+            ->from($this->tb)
+            ->where('id', $area_id)
+            ->where('delete_at', '1970-01-01')
+            ->get()
+            ->first_row('array');
+        return $res;
+    }
 }
