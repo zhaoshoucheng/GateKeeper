@@ -40,9 +40,7 @@ class JunctionReportService extends BaseService{
 
     	return [
     		'desc' => $desc,
-    		// 'junction_name' => $junction_info['name'],
-    		// 'lng' => $junction_info['lng'],
-    		// 'lat' => $junction_info['lat'],
+    		'junction_info' => $junction_info,
     	];
     }
 }

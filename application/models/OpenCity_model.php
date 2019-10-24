@@ -40,7 +40,11 @@ class OpenCity_model extends CI_Model
 
     // 获取一个城市信息
     public function getCityInfo($city_id) {
-        $res = $this->db->select('*')->from($this->tb)->where('city_id', $city_id)->get()->first_row('array');
+        $res = $this->db->select('*')
+            ->from($this->tb)
+            ->where('city_id', $city_id)
+            ->get()
+            ->first_row('array');
         return $res;
     }
 }
