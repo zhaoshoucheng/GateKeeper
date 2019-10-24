@@ -6,6 +6,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Services\JunctionService;
+use Services\JunctionReportService;
 
 class JunctionReport extends MY_Controller
 {
@@ -18,6 +19,7 @@ class JunctionReport extends MY_Controller
         $this->config->load('report_conf');
 
         $this->junctionService = new JunctionService();
+        $this->junctionReportService = new JunctionReportService();
     }
 
     /**
@@ -46,8 +48,17 @@ class JunctionReport extends MY_Controller
         $this->response($data);
     }
 
-    public function introduction(){
+    public function introduction() {
+        $params = $this->input->get(null, true);
+        // $this->validate([
+        //     'city_id' => 'required|is_natural_no_zero',
+        //     'logic_junction_id' => 'required|min_length[1]',
+        //     'start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        //     'end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        // ]);
 
+        $data = $this->junctionReportService->introduction($params);
+        $this->response($data);
     }
 
     public function queryJuncDataComparison(){

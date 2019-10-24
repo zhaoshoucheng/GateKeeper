@@ -499,6 +499,21 @@ class MY_Controller extends CI_Controller
         }
     }
 
+    protected function get_validate($rules,$data)
+    {
+
+        $this->form_validation->validation_data = $data;
+        foreach ($rules as $field => $rule) {
+            $this->form_validation->set_rules($field, $field, $rule);
+        }
+
+        if ($this->form_validation->run() == false) {
+            $errmsg = current($this->form_validation->error_array());
+            throw new Exception($errmsg, ERR_PARAMETERS);
+        }
+    }
+
+
     private function _validateURI()
     {
         $ret = $this->user->isAuthorizedUri($this->routerUri);
