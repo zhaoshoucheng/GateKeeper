@@ -55,6 +55,9 @@ class RoadReportService extends BaseService{
     	]);
 
 
-    	return array_merge(['desc' => $desc,], $road_detail);
+    	return [
+    		'desc' => $desc,
+    		'road_info' => $road_detail,
+    	];
     }
 }

@@ -22,8 +22,8 @@ class RoadReport extends MY_Controller
     public function introduction() {
         $params = $this->input->get(null, true);
         // $this->validate([
-        //     'road_id' => 'required|is_natural_no_zero',
-        //     'logic_junction_id' => 'required|min_length[1]',
+        //     'city_id' => 'required|is_natural_no_zero',
+        //     'road_id' => 'required|min_length[1]',
         //     'start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
         //     'end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
         // ]);
