@@ -567,7 +567,6 @@ class OverviewService extends BaseService
         if (empty($result)) {
             return [];
         }
-
         $ids = implode(',', array_unique(array_column($result, 'junctionId')));
 
         if(!empty($ids)){

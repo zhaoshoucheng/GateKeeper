@@ -178,12 +178,18 @@ class Waymap_model extends CI_Model
     public function getJunctionInfo($logic_ids)
     {
         $version = self::$lastMapVersion;
-
-        $data = compact('logic_ids', 'version');
-
-        $url = $this->waymap_interface . '/signal-map/map/many';
-
-        return $this->post($url, $data);
+        $this->load->model('redis_model');
+        $redis_key = 'getJunctionInfo_' . $version . '_' . md5($logic_ids);
+        $result = $this->redis_model->getData($redis_key);
+        if (empty($result)) {
+            $data = compact('logic_ids', 'version');
+            $url = $this->waymap_interface . '/signal-map/map/many';
+            
+            $res = $this->post($url, $data);
+            $this->redis_model->setEx($redis_key, json_encode($res), 600);
+            return $res;
+        }
+        return json_decode($result, true);
     }
 
     /**
@@ -322,80 +328,90 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function getLinksGeoInfos($link_ids, $version)
+    public function getLinksGeoInfos($link_ids, $version, $cached=true)
     {
+        $this->load->model('redis_model');
+
         $link_ids = is_array($link_ids) ? implode(",", $link_ids) : $link_ids;
-        $data = compact('link_ids', 'version');
 
-        $url = $this->waymap_interface . '/signal-map/mapFlow/linkInfo';
+        $redis_key = 'getLinksGeoInfos_cache_' . $version . '_' . md5($link_ids);
+        // echo $redis_key;exit;
+        $redisResult = $cached ? $this->redis_model->getData($redis_key) : [];
+        if (!$redisResult) {
+            // print_r($redisResult);exit;
+            $data = compact('link_ids', 'version'); 
+            $url = $this->waymap_interface . '/signal-map/mapFlow/linkInfo';
+            $res = $this->get($url, $data);
+            $linksInfo = !empty($res['links_info']) ? $res['links_info'] : [];
+            $features = [];
+            foreach ($linksInfo as $linkId => $linkInfo) {
+                $geomArr = !empty($linkInfo['geom']) ? explode(';', $linkInfo['geom']) : [];
 
-        $res = $this->get($url, $data);
+                $coords = [];
 
-        $linksInfo = !empty($res['links_info']) ? $res['links_info'] : [];
-        $features = [];
+                foreach ($geomArr as $geo) {
 
-        foreach ($linksInfo as $linkId => $linkInfo) {
+                    $geoInfo = explode(',', $geo);
 
-            $geomArr = !empty($linkInfo['geom']) ? explode(';', $linkInfo['geom']) : [];
+                    $coords[] = [(float)$geoInfo[0], (float)$geoInfo[1]];
+                }
 
-            $coords = [];
+                $linkInfo['s_node']['lng']     = $linkInfo['s_node']['lng'] ?? 0;
+                $linkInfo['s_node']['lat']     = $linkInfo['s_node']['lat'] ?? 0;
+                $linkInfo['s_node']['node_id'] = $linkInfo['s_node']['node_id'] ?? 0;
+                $linkInfo['e_node']['lng']     = $linkInfo['e_node']['lng'] ?? 0;
+                $linkInfo['e_node']['lat']     = $linkInfo['e_node']['lat'] ?? 0;
+                $linkInfo['e_node']['node_id'] = $linkInfo['e_node']['node_id'] ?? 0;
 
-            foreach ($geomArr as $geo) {
+                $sPoint = [
+                    'geometry' => [
+                        'coordinates' => [$linkInfo['s_node']['lng'] / 100000, $linkInfo['s_node']['lat'] / 100000,],
+                        'type' => 'Point',
+                    ],
+                    'properties' => [
+                        'id' => (int)$linkInfo['s_node']['node_id'],
+                    ],
+                    'type' => 'Feature',
+                ];
 
-                $geoInfo = explode(',', $geo);
+                $ePoint = [
+                    'geometry' => [
+                        'coordinates' => [$linkInfo['e_node']['lng'] / 100000, $linkInfo['e_node']['lat'] / 100000,],
+                        'type' => 'Point',
+                    ],
+                    'properties' => [
+                        'id' => (int)$linkInfo['e_node']['node_id'],
+                    ],
+                    'type' => 'Feature',
+                ];
 
-                $coords[] = [(float)$geoInfo[0], (float)$geoInfo[1]];
+                $lineString = [
+                    'geometry' => [
+                        'coordinates' => $coords,
+                        'type' => 'LineString',
+                    ],
+                    'properties' => [
+                        'id' => $linkId,
+                        'snodeid' => (int)$linkInfo['s_node']['node_id'],
+                        'enodeid' => (int)$linkInfo['e_node']['node_id'],
+                    ],
+                    'type' => 'Feature',
+                ];
+                $features[] = $sPoint;
+                $features[] = $ePoint;
+                $features[] = $lineString;
             }
-
-            $linkInfo['s_node']['lng']     = $linkInfo['s_node']['lng'] ?? 0;
-            $linkInfo['s_node']['lat']     = $linkInfo['s_node']['lat'] ?? 0;
-            $linkInfo['s_node']['node_id'] = $linkInfo['s_node']['node_id'] ?? 0;
-            $linkInfo['e_node']['lng']     = $linkInfo['e_node']['lng'] ?? 0;
-            $linkInfo['e_node']['lat']     = $linkInfo['e_node']['lat'] ?? 0;
-            $linkInfo['e_node']['node_id'] = $linkInfo['e_node']['node_id'] ?? 0;
-
-            $sPoint = [
-                'geometry' => [
-                    'coordinates' => [$linkInfo['s_node']['lng'] / 100000, $linkInfo['s_node']['lat'] / 100000,],
-                    'type' => 'Point',
-                ],
-                'properties' => [
-                    'id' => (int)$linkInfo['s_node']['node_id'],
-                ],
-                'type' => 'Feature',
+            $res = [
+                'features' => $features,
+                'type' => 'FeatureCollection',
             ];
-
-            $ePoint = [
-                'geometry' => [
-                    'coordinates' => [$linkInfo['e_node']['lng'] / 100000, $linkInfo['e_node']['lat'] / 100000,],
-                    'type' => 'Point',
-                ],
-                'properties' => [
-                    'id' => (int)$linkInfo['e_node']['node_id'],
-                ],
-                'type' => 'Feature',
-            ];
-
-            $lineString = [
-                'geometry' => [
-                    'coordinates' => $coords,
-                    'type' => 'LineString',
-                ],
-                'properties' => [
-                    'id' => $linkId,
-                    'snodeid' => (int)$linkInfo['s_node']['node_id'],
-                    'enodeid' => (int)$linkInfo['e_node']['node_id'],
-                ],
-                'type' => 'Feature',
-            ];
-            $features[] = $sPoint;
-            $features[] = $ePoint;
-            $features[] = $lineString;
+            if($cached){
+                $this->redis_model->setEx($redis_key, json_encode($res), 12000);
+            }
+            return $res;
         }
-        return [
-            'features' => $features,
-            'type' => 'FeatureCollection',
-        ];
+        // print_r($redisResult);exit;
+        return json_decode($redisResult, true);
     }
 
     /**
