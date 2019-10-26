@@ -50,7 +50,7 @@ class Report_model extends CI_Model
      * 生成报告
      * @param $data['city_id'] int    城市ID
      * @param $data['title']   string 报告标题
-     * @param $data['type']    int    报告类型 1，路口分析报告；2，路口优化对比报告；3，城市分析报告（周报）；4，城市分析报告（月报）
+     * @param $data['type']    int    报告类型 1，路口分析报告；2，路口优化对比报告；3，城市分析报告（周报）；4，城市分析报告（月报）10,路口报告,11,干线报告,12,区域报告
      * @param $data['file']    binary 二进制文件
      * @return mixed
      */
