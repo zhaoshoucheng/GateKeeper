@@ -238,4 +238,15 @@ class Road_model extends CI_Model
             ->get();
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
+
+    // 获取一个城市信息
+    public function getRoadInfo($road_id) {
+        $res = $this->db->select('*')
+            ->from($this->tb)
+            ->where('road_id', $road_id)
+            ->where('is_delete', 0)
+            ->get()
+            ->first_row('array');
+        return $res;
+    }
 }
