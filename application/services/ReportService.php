@@ -661,4 +661,48 @@ class ReportService extends BaseService
     {
         $this->gift_model->downResource($params["key"], 'itstool_public');
     }
+
+    // 1 日报；2 周报；3 月报；4 季报；0 invalid
+    public function report_type($start_date, $end_date) {
+        $start_time = strtotime($start_date);
+        $end_time = strtotime($end_date);
+        if ($start_time == $end_time) {
+            return 1;
+        } elseif ($end_time - $start_time == 86400 * 6) {
+            return 2;
+        } elseif (date('Y-m-01', $start_time) == $start_date) {
+            $start_month = date('m', $start_time);
+            $end_month = date('m', $end_time);
+            if (date('Y-m-d', strtotime("$start_date +1 month -1 day")) == $end_date) {
+                return 3;
+            } elseif (date('Y-m-d', strtotime("$start_date +4 month -1 day")) == $end_date) {
+                return 4;
+            }
+        }
+        return 0;
+    }
+
+    public function last_report_date($start_date, $end_date, $report_type) {
+        $start_time = strtotime($start_date);
+        $end_time = strtotime($end_date);
+        $last_start_date = $start_date;
+        $last_end_date = $end_date;
+        if ($report_type == 1) {
+            $last_start_date = date('Y-m-d', $start_time - 86400);
+            $last_end_date = date('Y-m-d', $end_time - 86400);
+        } elseif ($report_type == 2) {
+            $last_start_date = date('Y-m-d', $start_time - 86400 * 7);
+            $last_end_date = date('Y-m-d', $end_time - 86400 * 7);
+        } elseif ($report_type == 3) {
+            $last_start_date = date('Y-m-01', "$start_date -1 month");
+            $last_end_date = date('Y-m-d', "$last_start_date +1 month -1 day");
+        } elseif ($report_type == 4) {
+            $last_start_date = date('Y-m-01', "$start_date -3 month");
+            $last_end_date = date('Y-m-d', "$last_start_date +1 month -1 day");
+        }
+        return [
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+        ];
+    }
 }
