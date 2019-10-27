@@ -705,4 +705,41 @@ class ReportService extends BaseService
             'end_date' => $end_date,
         ];
     }
+
+    public function getComparisonText($now, $last, $report_type) {
+        $text = [];
+        $s1 = array_sum($now) / count($now);
+        $s2 = array_sum($last) / count($last);
+        if ($s1 / $s2 - $s2 >= 0.01) {
+            $text[] = "更加严重";
+        }elseif ($s1 / $s2 - $s2 <= -0.01) {
+            $text[] = "得到缓解";
+        }else {
+            $text[] = "基本持平";
+        }
+        if ($report_type == 1) {
+            $text[] = '今天';
+            $text[] = '昨天';
+        } elseif ($report_type == 2) {
+            $text[] = '本周';
+            $text[] = '上周';
+        } elseif ($report_type == 3) {
+            $text[] = '本月';
+            $text[] = '上月';
+        } elseif ($report_type == 4) {
+            $text[] = '本季度';
+            $text[] = '上季度';
+        }
+        return $text;
+    }
+
+    public function getDatesFromRange($start_date, $end_date) {
+        $dates = [];
+        $start_time = strtotime($start_date);
+        $end_time = strtotime($end_date);
+        for ($t = $start_time; $t <= $end_time; $t += 86400) {
+            $dates[] = date('Y-m-d', $t);
+        }
+        return $dates;
+    }
 }
