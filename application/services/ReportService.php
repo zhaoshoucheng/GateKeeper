@@ -701,8 +701,8 @@ class ReportService extends BaseService
             $last_end_date = date('Y-m-d', "$last_start_date +1 month -1 day");
         }
         return [
-            'start_date' => $start_date,
-            'end_date' => $end_date,
+            'start_date' => $last_start_date,
+            'end_date' => $last_end_date,
         ];
     }
 
