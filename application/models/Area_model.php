@@ -113,6 +113,20 @@ class Area_model extends CI_Model
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
+    public function getJunctionsAllQuota($dates,$junctionIDs,$cityId){
+        $select='date, hour, round(avg(speed) * 3.6, 2) as speed,round(avg(stop_delay), 2) as stop_delay,round(avg(stop_time_cycle), 2) as stop_time_cycle ';
+
+        $res = $this->db->select($select)
+            ->from('junction_hour_report')
+            ->where_in('date', $dates)
+            ->where_in('logic_junction_id', $junctionIDs)
+            ->where('city_id', $cityId)
+            ->group_by('date, hour')
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
+
     /**
      * 创建区域
      *
