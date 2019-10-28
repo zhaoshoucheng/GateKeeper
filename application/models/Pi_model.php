@@ -24,7 +24,6 @@ class Pi_model extends CI_Model{
             ->from($this->tb.$cityId)
             ->where_in('date', $dates)
             ->where_in('logic_junction_id', $junctionIDs)
-            ->where('city_id', $cityId)
             ->get();
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
