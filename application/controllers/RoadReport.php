@@ -31,7 +31,30 @@ class RoadReport extends MY_Controller
         $data = $this->roadReportService->introduction($params);
         $this->response($data);
     }
-    public function queryRoadDataComparison(){}
+    public function queryRoadDataComparison(){
+        $params = $this->input->get(null, true);
+        // $this->validate([
+        //     'city_id' => 'required|is_natural_no_zero',
+        //     'road_id' => 'required|min_length[1]',
+        //     'start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        //     'end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        // ]);
+
+        $data = $this->roadReportService->queryRoadDataComparison($params);
+        $this->response($data);
+    }
+    public function queryRoadCongestion() {
+        $params = $this->input->get(null, true);
+        // $this->validate([
+        //     'city_id' => 'required|is_natural_no_zero',
+        //     'road_id' => 'required|min_length[1]',
+        //     'start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        //     'end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        // ]);
+
+        $data = $this->roadReportService->queryRoadCongestion($params);
+        $this->response($data);
+    }
     /*
      * 干线运行情况（停车次数，停车延误，行驶速度，PI）
      * city_id
@@ -79,7 +102,6 @@ class RoadReport extends MY_Controller
 
 
     public function queryRoadCoordination(){}
-    public function queryRoadCongestion(){}
     public function queryRoadAlarm(){}
     public function queryQuotaRank(){}
 

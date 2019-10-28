@@ -8,6 +8,8 @@
 
 namespace Services;
 
+use Services\DataService;
+
 /**
  * Class ReportService
  * @package Services
@@ -28,6 +30,8 @@ class ReportService extends BaseService
         $this->load->model('waymap_model');
 
         $this->report_proxy = $this->config->item('report_proxy');
+
+        $this->dataService = new DataService();
     }
 
     /**
@@ -701,8 +705,8 @@ class ReportService extends BaseService
             $last_end_date = date('Y-m-d', "$last_start_date +1 month -1 day");
         }
         return [
-            'start_date' => $start_date,
-            'end_date' => $end_date,
+            'start_date' => $last_start_date,
+            'end_date' => $last_end_date,
         ];
     }
 
@@ -741,5 +745,114 @@ class ReportService extends BaseService
             $dates[] = date('Y-m-d', $t);
         }
         return $dates;
+    }
+
+    public function getHoursFromRange($start_hour, $end_hour) {
+        $hs = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+        $ms = ['00', '30'];
+
+        $hours = [];
+        foreach ($hs as $h) {
+            foreach ($ms as $m) {
+                $hm = $h . ':' . $m;
+                if ($hm >= $start_hour and $hm < $end_hour) {
+                    $hours[] = $hm;
+                }
+            }
+        }
+        return $hours;
+    }
+
+    // 早晚高峰需要写两个很大的if else，分开写吧
+    // 早高峰开始结束时间
+    public function getMorningPeekRange($city_id, $logic_junction_ids, $dates) {
+        $hours = ['07:00', '07:30', '09:00', '09:30'];
+        $data = $this->dataService->call("/report/GetStopDelayByHour", [
+            'city_id' => $city_id,
+            'dates' => $dates,
+            'logic_junction_ids' => $logic_junction_ids,
+            'hours' => $hours,
+        ], "POST", 'json');
+
+        $data = array_map(function($item) {
+            return [
+                'x' => $item['key'],
+                'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+            ];
+        }, $data[2]);
+
+        if (count($data) != 4) {
+            return [
+                'start_hour' => '07:00',
+                'end_hour' => '09:00',
+            ];
+        }
+
+        $t = [];
+        for ($i = 0; $i < 3; $i ++) {
+            $t[] = $data[$i] + $data[$i + 1];
+        }
+        if ($t[0] >= $t[1] and $t[0] >= $t[2]) {
+            return [
+                'start_hour' => '07:00',
+                'end_hour' => '09:00',
+            ];
+        }
+        if ($t[2] >= $t[0] and $t[2] >= $t[2]) {
+            return [
+                'start_hour' => '08:00',
+                'end_hour' => '10:00',
+            ];
+        }
+        return [
+            'start_hour' => '07:30',
+            'end_hour' => '09:30',
+        ];
+    }
+
+    // 晚高峰开始结束时间
+    public function getEveningPeekRange($city_id, $logic_junction_ids, $dates) {
+        $hours = ['07:00', '07:30', '09:00', '09:30'];
+        $data = $this->dataService->call("/report/GetStopDelayByHour", [
+            'city_id' => $city_id,
+            'dates' => $dates,
+            'logic_junction_ids' => $logic_junction_ids,
+            'hours' => $hours,
+        ], "POST", 'json');
+
+        $data = array_map(function($item) {
+            return [
+                'x' => $item['key'],
+                'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+            ];
+        }, $data[2]);
+
+        if (count($data) != 4) {
+            return [
+                'start_hour' => '17:00',
+                'end_hour' => '19:00',
+            ];
+        }
+
+        $t = [];
+        for ($i = 0; $i < 3; $i ++) {
+            $t[] = $data[$i] + $data[$i + 1];
+        }
+        if ($t[0] >= $t[1] and $t[0] >= $t[2]) {
+            return [
+                'start_hour' => '17:00',
+                'end_hour' => '19:00',
+            ];
+        }
+        if ($t[2] >= $t[0] and $t[2] >= $t[2]) {
+            return [
+                'start_hour' => '18:00',
+                'end_hour' => '10:00',
+            ];
+        }
+        return [
+            'start_hour' => '17:30',
+            'end_hour' => '19:30',
+        ];
     }
 }
