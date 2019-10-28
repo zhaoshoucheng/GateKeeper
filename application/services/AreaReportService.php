@@ -19,6 +19,7 @@ class AreaReportService extends BaseService{
         $this->load->model('openCity_model');
         $this->load->model('waymap_model');
         $this->load->model('area_model');
+        $this->load->model('pi_model');
 
         $this->areaService = new AreaService();
         $this->reportService = new ReportService();
@@ -143,6 +144,131 @@ class AreaReportService extends BaseService{
           				'data' => $last_data,
           			],
 				],
+    		],
+    	];
+    }
+
+    public function queryQuotaRank($params) {
+    	$tpl = "需要注意的是PI指数的计算中考虑了对过饱和、失衡以及溢流状态的惩罚。例如，两个路口在同样的平均停车或延误时间的情况下，如果某个路口出现了过饱和、失衡或者溢流现象，则该路口的PI值会更高。";
+
+    	$city_id = intval($params['city_id']);
+    	$area_id = $params['area_id'];
+    	$start_date = $params['start_date'];
+    	$end_date = $params['end_date'];
+
+    	// $city_info = $this->openCity_model->getCityInfo($city_id);
+    	// if (empty($city_info)) {
+
+    	// }
+
+    	// $area_info = $this->area_model->getAreaInfo($area_id);
+    	// if (empty($area_info)) {
+
+    	// }
+
+    	$area_detail = $this->areaService->getAreaDetail([
+    		'city_id' => $city_id,
+    		'area_id' => $area_id,
+    	]);
+    	$logic_junction_ids = implode(',', array_column($area_detail['junction_list'], 'logic_junction_id'));
+
+    	$junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
+    	if (empty($junctions_info)) {
+
+    	}
+    	$junctions_map = [];
+    	array_map(function($item) use(&$junctions_map) {
+    		$junctions_map[$item['logic_junction_id']] = $item;
+    	}, $junctions_info);
+
+    	$report_type = $this->reportService->report_type($start_date, $end_date);
+    	$last_report_date = $this->reportService->last_report_date($start_date, $end_date, $report_type);
+    	$last_start_date = $last_report_date['start_date'];
+    	$last_end_date = $last_report_date['end_date'];
+
+    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+    	$evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+    	// var_dump($this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
+    	// var_dump($this->reportService->getHoursFromRange($evening_peek['start_hour'], $morning_peek['end_hour']));
+
+    	$morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date), $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
+    	usort($morning_pi_data, function($a, $b) {
+    		return $a['pi'] > $b['pi'] ? -1 : 1;
+    	});
+    	$morning_pi_data = array_slice($morning_pi_data, 0, 20);
+    	$morning_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($last_start_date, $last_end_date), $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
+    	$morning_last_pi_data_rank = [];
+    	for ($i = 0; $i < count($morning_last_pi_data); $i++) {
+    		$morning_last_pi_data_rank[$morning_last_pi_data[$i]['logic_junction_id']] = $i + 1;
+    	}
+    	$morning_data = $this->dataService->call("/report/GetIndexByJunction", [
+    		'city_id' => $city_id,
+    		'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
+    		'logic_junction_ids' => array_column($morning_pi_data, 'logic_junction_id'),
+    		'hours' => $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']),
+    	], "POST", 'json');
+    	$morning_data_map = [];
+    	array_map(function($item) use(&$morning_data_map) {
+    		$morning_data_map[$item['key']] = [
+    			'stop_delay' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+    			'stop_time_cycle' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
+    			'speed' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
+    		];
+     	}, $morning_data[2]);
+
+    	$evening_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date), $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
+    	usort($evening_pi_data, function($a, $b) {
+    		return $a['pi'] > $b['pi'] ? -1 : 1;
+    	});
+    	$evening_pi_data = array_slice($evening_pi_data, 0, 20);
+    	$evening_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($last_start_date, $last_end_date), $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
+    	$evening_last_pi_data_rank = [];
+    	for ($i = 0; $i < count($evening_last_pi_data); $i++) {
+    		$evening_last_pi_data_rank[$evening_last_pi_data[$i]['logic_junction_id']] = $i + 1;
+    	}
+    	$evening_data = $this->dataService->call("/report/GetIndexByJunction", [
+    		'city_id' => $city_id,
+    		'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
+    		'logic_junction_ids' => array_column($evening_pi_data, 'logic_junction_id'),
+    		'hours' => $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']),
+    	], "POST", 'json');
+    	$evening_data_map = [];
+    	array_map(function($item) use(&$evening_data_map) {
+    		$evening_data_map[$item['key']] = [
+    			'stop_delay' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+    			'stop_time_cycle' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
+    			'speed' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
+    		];
+     	}, $evening_data[2]);
+
+    	return [
+    		'morning_peek' => [
+    			'quota_table_desc' => $tpl,
+    			'quota_table_data' => array_map(function($item) use($junctions_map, $morning_last_pi_data_rank, $morning_data_map) {
+    				return [
+    					'logic_junction_id' => $item['logic_junction_id'],
+    					'name' => $junctions_map[$item['logic_junction_id']]['name'],
+    					'last_rank' => $morning_last_pi_data_rank[$item['logic_junction_id']],
+    					'stop_delay' => $morning_data_map[$item['logic_junction_id']]['stop_delay'],
+    					'stop_time_cycle' => $morning_data_map[$item['logic_junction_id']]['stop_time_cycle'],
+    					'speed' => $morning_data_map[$item['logic_junction_id']]['speed'],
+    					'PI' => round($item['pi'], 2),
+    				];
+    			}, $morning_pi_data),
+    		],
+    		'evening_peek' => [
+    			'quota_table_desc' => $tpl,
+    			'quota_table_data' => array_map(function($item) use($junctions_map, $evening_last_pi_data_rank, $evening_data_map) {
+    				return [
+    					'logic_junction_id' => $item['logic_junction_id'],
+    					'name' => $junctions_map[$item['logic_junction_id']]['name'],
+    					'last_rank' => $evening_last_pi_data_rank[$item['logic_junction_id']],
+    					'stop_delay' => $evening_data_map[$item['logic_junction_id']]['stop_delay'],
+    					'stop_time_cycle' => $evening_data_map[$item['logic_junction_id']]['stop_time_cycle'],
+    					'speed' => $evening_data_map[$item['logic_junction_id']]['speed'],
+    					'PI' => round($item['pi'], 2),
+    				];
+    			}, $evening_pi_data),
     		],
     	];
     }
