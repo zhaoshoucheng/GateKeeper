@@ -109,6 +109,7 @@ class RoadReportService extends BaseService{
      	usort($now_data, function($a, $b) {
             return ($a['x'] < $b['x']) ? -1 : 1;
         });
+
      	$last_data = array_map(function($item) {
             return [
             	'x' => $item['key'],
@@ -140,6 +141,114 @@ class RoadReportService extends BaseService{
           				'data' => $last_data,
           			],
 				],
+    		],
+    	];
+    }
+
+    public function queryRoadCongestion($params) {
+    	$tpl = "下图展示了分析干线%s高峰延误排名前%d的路口。其中%s%s高峰拥堵情况严重。";
+
+    	$city_id = intval($params['city_id']);
+    	$road_id = $params['road_id'];
+    	$start_date = $params['start_date'];
+    	$end_date = $params['end_date'];
+
+    	// $city_info = $this->openCity_model->getCityInfo($city_id);
+    	// if (empty($city_info)) {
+
+    	// }
+
+    	$road_info = $this->road_model->getRoadInfo($road_id);
+    	if (empty($road_info)) {
+
+    	}
+    	$logic_junction_ids = $road_info['logic_junction_ids'];
+
+    	$junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
+    	if (empty($junctions_info)) {
+
+    	}
+    	$junctions_map = [];
+    	array_map(function($item) use(&$junctions_map) {
+    		$junctions_map[$item['logic_junction_id']] = $item;
+    	}, $junctions_info);
+
+    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+    	$evenint_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+
+    	$morning_data = $this->dataService->call("/report/GetStopDelayByJunction", [
+    		'city_id' => $city_id,
+    		'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
+    		'logic_junction_ids' => explode(',', $logic_junction_ids),
+    		'hours' => $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']),
+    	], "POST", 'json');
+    	$evening_data = $this->dataService->call("/report/GetStopDelayByJunction", [
+    		'city_id' => $city_id,
+    		'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
+    		'logic_junction_ids' => explode(',', $logic_junction_ids),
+    		'hours' => $this->reportService->getHoursFromRange($evenint_peek['start_hour'], $evenint_peek['end_hour']),
+    	], "POST", 'json');
+
+    	$morning_data = array_map(function($item) use($junctions_map) {
+            return [
+            	'x' => $item['key'],
+            	'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+            	'name' => $junctions_map[$item['key']]['name'],
+            	'lng' => $junctions_map[$item['key']]['lng'],
+            	'lat' => $junctions_map[$item['key']]['lat'],
+            ];
+     	}, $morning_data[2]);
+     	usort($morning_data, function($a, $b) {
+            return ($a['y'] > $b['y']) ? -1 : 1;
+        });
+        $morning_data = array_slice($morning_data, 0, 10);
+        $morning_junction_names = array_map(function($item) use($junctions_map) {
+        	return $item['name'];
+        }, array_slice($morning_data, 0, 3));
+
+     	$evening_data = array_map(function($item) use($junctions_map) {
+            return [
+            	'x' => $item['key'],
+            	'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+            	'name' => $junctions_map[$item['key']]['name'],
+            	'lng' => $junctions_map[$item['key']]['lng'],
+            	'lat' => $junctions_map[$item['key']]['lat'],
+            ];
+     	}, $evening_data[2]);
+     	usort($evening_data, function($a, $b) {
+            return ($a['y'] > $b['y']) ? -1 : 1;
+        });
+        $evening_data = array_slice($evening_data, 0, 10);
+        $evening_junction_names = array_map(function($item) use($junctions_map) {
+        	return $item['name'];
+        }, array_slice($evening_data, 0, 3));
+
+    	return [
+    		'morning_peek' => [
+	    		'info' => [
+	    			'desc' => sprintf($tpl, '早', count($morning_data), implode(',', $morning_junction_names), '早'),
+	    		],
+	    		'chart' => [
+	    			'title' => '平均延误对比',
+					'scale_title' => '平均延误(s)',
+					'series' => [
+						'name' => '早高峰',
+          				'data' => $morning_data,
+					],
+	    		],
+    		],
+    		'evenint_peek' => [
+    			'info' => [
+	    			'desc' => sprintf($tpl, '晚', count($evening_data), implode(',', $evening_junction_names), '晚'),
+	    		],
+	    		'chart' => [
+	    			'title' => '平均延误对比',
+					'scale_title' => '平均延误(s)',
+					'series' => [
+          				'name' => '晚高峰',
+          				'data' => $evening_data,
+					],
+	    		],
     		],
     	];
     }
