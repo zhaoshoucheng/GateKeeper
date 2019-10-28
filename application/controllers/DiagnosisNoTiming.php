@@ -13,8 +13,26 @@ class DiagnosisNoTiming extends MY_Controller
         $this->dianosisService = new DiagnosisNoTimingService();
         $this->load->model('junction_model');
         $this->load->model('timing_model');
+        $this->load->model('waymap_model');
         $this->load->config('nconf');
         $this->setTimingType();
+    }
+
+    public function getDateVersion() {
+        $params = $this->input->get();
+        // 校验参数
+        $validate = Validate::make($params, [
+                'dates'         => 'nullunable',
+            ]
+        );
+        if(!$validate['status']){
+            return $this->response(array(), ERR_PARAMETERS, $validate['errmsg']);
+        }
+
+        $res = array();
+        $dates = $params['dates'];
+        $ret = $this->waymap_model->getDateVersion($dates);
+        return $this->response($ret);
     }
 
     /**

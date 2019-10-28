@@ -331,7 +331,6 @@ class Waymap_model extends CI_Model
     public function getLinksGeoInfos($link_ids, $version, $cached=true)
     {
         $this->load->model('redis_model');
-
         $link_ids = is_array($link_ids) ? implode(",", $link_ids) : $link_ids;
 
         $redis_key = 'getLinksGeoInfos_cache_' . $version . '_' . md5($link_ids);
