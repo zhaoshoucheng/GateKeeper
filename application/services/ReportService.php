@@ -847,7 +847,7 @@ class ReportService extends BaseService
         if ($t[2] >= $t[0] and $t[2] >= $t[2]) {
             return [
                 'start_hour' => '18:00',
-                'end_hour' => '10:00',
+                'end_hour' => '20:00',
             ];
         }
         return [
