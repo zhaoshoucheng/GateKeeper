@@ -71,7 +71,9 @@ class ReportService extends BaseService
         $majorJunctionID = "";
         if(!empty($_SERVER["HTTP_REFERER"])){
             parse_str($_SERVER["HTTP_REFERER"],$arrs);
-            $majorJunctionID=$arrs["junctionId"];
+            if (isset($arrs["junctionId"])) {
+                $majorJunctionID=$arrs["junctionId"];
+            }
         }
         $cityId  = $params['city_id'];
         $keyword = $params['keyword'];
