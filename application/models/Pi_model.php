@@ -40,4 +40,16 @@ class Pi_model extends CI_Model{
         // var_dump($this->db->last_query());
         return $res->result_array();
     }
+
+    public function getJunctionsPiByHours($city_id, $logic_junction_ids, $dates){
+        $res = $this->db
+            ->select('hour, sum(pi * traj_count) / sum(traj_count) as pi')
+            ->from($this->tb.$city_id)
+            ->where_in('logic_junction_id', $logic_junction_ids)
+            ->where_in('date', $dates)
+            ->group_by('hour')
+            ->get();
+        // var_dump($this->db->last_query());
+        return $res->result_array();
+    }
 }
