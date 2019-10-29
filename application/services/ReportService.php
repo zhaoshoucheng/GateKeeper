@@ -28,6 +28,8 @@ class ReportService extends BaseService
         $this->load->model('uploadFile_model');
         $this->load->model('gift_model');
         $this->load->model('waymap_model');
+        $this->load->model('road_model');
+        $this->load->model('area_model');
 
         $this->report_proxy = $this->config->item('report_proxy');
 
@@ -133,6 +135,32 @@ class ReportService extends BaseService
             array_unshift($final_data,$majorJunctionInfo);
         }
         return $final_data;
+    }
+
+    public function searchRoad($params) {
+        $city_id = $params['city_id'];
+        $keyword = $params['keyword'];
+        $road_list =$this->road_model->searchRoadsByKeyword($city_id, $keyword);
+        $road_list = array_map(function($item) {
+            return [
+                'road_id' => $item['road_id'],
+                'road_name' => $item['road_name'],
+            ];
+        }, $road_list);
+        return $road_list;
+    }
+
+    public function searchArea($params) {
+        $city_id = $params['city_id'];
+        $keyword = $params['keyword'];
+        $area_list =$this->area_model->searchAreasByKeyword($city_id, $keyword);
+        $area_list = array_map(function($item) {
+            return [
+                'area_id' => $item['id'],
+                'area_name' => $item['area_name'],
+            ];
+        }, $area_list);
+        return $area_list;
     }
 
     /**

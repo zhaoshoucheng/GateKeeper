@@ -291,4 +291,21 @@ class Area_model extends CI_Model
             ->first_row('array');
         return $res;
     }
+
+    /**
+     * 根据名称模糊搜索
+     *
+     * @param $cityId
+     * @param string $select
+     * @return array
+     */
+    public function searchareasByKeyword($city_id, $keyword, $select = '*')
+    {
+        $res = $this->db->select($select)
+            ->from($this->tb)
+            ->like('area_name', $keyword)
+            ->where('delete_at', '1970-01-01')
+            ->get();
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
 }

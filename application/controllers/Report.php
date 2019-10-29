@@ -43,6 +43,32 @@ class Report extends MY_Controller
         $this->response($data);
     }
 
+    public function searchRoad() {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'keyword' => 'required|trim|min_length[1]',
+        ]);
+
+        $data = $this->reportService->searchRoad($params);
+
+        $this->response($data);
+    }
+
+    public function searchArea() {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'keyword' => 'required|trim|min_length[1]',
+        ]);
+
+        $data = $this->reportService->searchArea($params);
+
+        $this->response($data);
+    }
+
     /**
      * @throws Exception
      */
