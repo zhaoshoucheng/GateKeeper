@@ -1294,6 +1294,20 @@ class JunctionsService extends BaseService
         if(!$this->waymap_model->saveJunctionName($junctionID,$junctionName)){
             throw new \Exception('路口名称修改错误', ERR_PARAMETERS);
         }
+
+        $this->load->model('user/user', 'user');
+        $logData = [
+            "junctionID"=>$junctionID,
+            "cityID"=>$cityID,
+            "junctionName"=>$junctionName,
+            "user_name"=>$this->user->getUserName(),
+            "client_ip"=>$_SERVER["HTTP_X_REAL_IP"],
+            "log_time"=>date("Y-m-d H:i:s"),
+        ];
+        $logFormat = function($logData){
+            return sprintf("[INFO] [%s] _saveJunctionName_log||log=%s",date("Y-m-d H:i:s"),json_encode($logData));
+        };
+        file_put_contents("/home/xiaoju/php7/logs/cloud/itstool/saveJunctionName.log", $logFormat($logData).PHP_EOL, FILE_APPEND);
         return true;
     }
 

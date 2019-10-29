@@ -32,16 +32,15 @@ class DataService extends BaseService
 
     // 通用调用api的服务, 进行远程调用
     // 错误信息通过Exception形式抛出
-    public function call($apiUrl, $params, $method = "GET")
+    public function call($apiUrl, $params, $method = "GET", $contentType='x-www-form-urlencoded')
     {
         $timeout = 1000;
 
         $url = "{$this->url}{$apiUrl}";
-
         if ($method == self::METHOD_GET) {
             $ret = httpGET($url, $params, $timeout);
         } else if ($method == self::METHOD_POST) {
-            $ret = httpPOST("{$this->url}{$apiUrl}", $params, $timeout);
+            $ret = httpPOST("{$this->url}{$apiUrl}", $params, $timeout, $contentType);
         }
 
         $ret = json_decode($ret, true);

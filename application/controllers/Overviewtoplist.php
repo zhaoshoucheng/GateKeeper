@@ -42,7 +42,7 @@ class Overviewtoplist extends MY_Controller
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['pagesize'] = $params['pagesize'] ?? 20;
         $data = $this->overviewService->stopDelayTopList($params,$this->userPerm);
-        $data = !empty($data) ? $data : (object)[];
+        $data = !empty($data) ? $data : [];
         $this->response($data);
     }
 
@@ -67,7 +67,7 @@ class Overviewtoplist extends MY_Controller
         $params['pagesize'] = $params['pagesize'] ?? 20;
 
         $data = $this->overviewService->stopTimeCycleTopList($params,$this->userPerm);
-        $data = !empty($data) ? $data : (object)[];
+        $data = !empty($data) ? $data : [];
         $this->response($data);
     }
 }

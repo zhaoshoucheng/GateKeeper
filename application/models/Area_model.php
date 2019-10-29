@@ -113,6 +113,20 @@ class Area_model extends CI_Model
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
+    public function getJunctionsAllQuota($dates,$junctionIDs,$cityId){
+        $select='date, hour, round(avg(speed) * 3.6, 2) as speed,round(avg(stop_delay), 2) as stop_delay,round(avg(stop_time_cycle), 2) as stop_time_cycle ';
+
+        $res = $this->db->select($select)
+            ->from('junction_hour_report')
+            ->where_in('date', $dates)
+            ->where_in('logic_junction_id', $junctionIDs)
+            ->where('city_id', $cityId)
+            ->group_by('date, hour')
+            ->get();
+
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
+
     /**
      * 创建区域
      *
@@ -265,5 +279,16 @@ class Area_model extends CI_Model
             $this->db->where('id != ', $areaId);
         }
         return $this->db->get()->num_rows() === 0;
+    }
+
+    // 获取一个区域信息
+    public function getAreaInfo($area_id) {
+        $res = $this->db->select('*')
+            ->from($this->tb)
+            ->where('id', $area_id)
+            ->where('delete_at', '1970-01-01')
+            ->get()
+            ->first_row('array');
+        return $res;
     }
 }
