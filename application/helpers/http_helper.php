@@ -53,7 +53,7 @@ if (!function_exists('httpGET')) {
             }
             //特殊请求的url不报警
             $ignoreRequest = 'profile/base/current';
-            if(strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
+            if(strpos($url,$ignoreRequest)!==false){
                 return false;
             }
 
@@ -76,13 +76,13 @@ if (!function_exists('httpGET')) {
             }
             //特殊请求的url不报警
             $ignoreRequest = 'profile/base/current';
-            if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
+            if(strpos($url,$ignoreRequest)!==false){
                 return false;
             }
             com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query), 'proc_time'=> $totalTime));
             return false;
         }
-
+        
         com_log_notice('_com_http_success', ["cspanid"=>$cSpanId, "url"=>$url, "args"=>http_build_query($query), "response"=>substr($ret,0,10*1024), "errno"=>$responseCode, 'proc_time'=> $totalTime]);
         return $ret;
     }
@@ -141,7 +141,7 @@ if (!function_exists('httpPOST')) {
             }
             //特殊请求的url不报警
             $ignoreRequest = 'profile/base/current';
-            if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
+            if(strpos($url,$ignoreRequest)!==false){
                 return false;
             }
             com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data, 'proc_time'=> $totalTime));
@@ -163,7 +163,7 @@ if (!function_exists('httpPOST')) {
             }
             //特殊请求的url不报警
             $ignoreRequest = 'profile/base/current';
-            if(strpos($_SERVER['REQUEST_URI'],$ignoreRequest)!==false){
+            if(strpos($url,$ignoreRequest)!==false){
                 return false;
             }
             com_log_warning("_com_http_failure", $responseCode, "", array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data, 'proc_time'=> $totalTime));
