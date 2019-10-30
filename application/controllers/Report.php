@@ -107,6 +107,7 @@ class Report extends MY_Controller
             'city_id' => intval($params['city_id']),
             'title'   => trim($params['title']),
             'type'    => intval($params['type']),
+            'timerange'=>$params['time_range'],
         ];
         $data = $this->reportService->generate($data);
 
