@@ -103,7 +103,7 @@ class AreaReport extends MY_Controller
             'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
         ],$params);
         //查询区域路口的平均指标
-        $data  = $this->areaReportService->QueryAreaQuotaInfo($params['city_id'],$params['road_id'],$params['start_time'],$params['end_time']);
+        $data  = $this->areaReportService->QueryAreaQuotaInfo($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time']);
 
         //格式化为前端要求的格式
         $chartDatas = $this->roadReportService->transRoadQuota2Chart($data);

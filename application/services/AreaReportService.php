@@ -599,4 +599,54 @@ class AreaReportService extends BaseService{
 
         return $fillChartData;
     }
+
+    public function QueryAreaQuotaInfo($ctyID,$roadID,$start_time,$end_time){
+        $area_detail = $this->areaService->getAreaDetail([
+            'city_id' => $ctyID,
+            'area_id' => $roadID,
+        ]);
+
+        $junctionIDs =array_column($area_detail['junction_list'], 'logic_junction_id');
+//        $junctionIDs = $road_info['logic_junction_ids'];
+        $dates = $this->getDateFromRange($start_time,$end_time);
+        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,explode(",",$junctionIDs),$ctyID);
+//        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
+        $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID);
+        //数据合并
+        $pd = $this->roadReportService->queryParamGroup($PiDatas,'pi','traj_count');
+        foreach ($pd as $p){
+            foreach ($roadQuotaData as $rk=>$rv){
+                if($p['date']==$rv['date'] && $p['hour']==$rv['hour']){
+                    $roadQuotaData[$rk]['pi']=$p['pi'];
+                    break;
+                }
+            }
+        }
+        //将天级别的数据处理为全部的数据的均值
+        $avgData=[];
+        foreach($roadQuotaData as $r){
+            if(!isset($avgData[$r['hour']])){
+                $avgData[$r['hour']]=[
+                    'stop_delay'=>0,
+                    'stop_time_cycle'=>0,
+                    'speed'=>0,
+                    'pi'=>0
+                ];
+            }
+            $avgData[$r['hour']]['stop_delay']+=$r['stop_delay'];
+            $avgData[$r['hour']]['stop_time_cycle']+=$r['stop_time_cycle'];
+            $avgData[$r['hour']]['speed']+=$r['speed'];
+            if(isset($r['pi'])){
+                $avgData[$r['hour']]['pi']+=$r['pi'];
+            }
+        }
+        $datelen = count($dates);
+        foreach ($avgData as $ak=>$av){
+            $avgData[$ak]['stop_delay'] = $av['stop_delay']/$datelen;
+            $avgData[$ak]['stop_time_cycle'] = $av['stop_time_cycle']/$datelen;
+            $avgData[$ak]['speed'] = $av['speed']/$datelen;
+            $avgData[$ak]['pi'] = $av['pi']/$datelen;
+        }
+        return $avgData;
+    }
 }

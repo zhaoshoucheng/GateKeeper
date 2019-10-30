@@ -558,7 +558,7 @@ class RoadReportService extends BaseService{
 
 
     //求pi加权平均
-    private function queryParamGroup($data,$quotaKey,$trajKey){
+    public function queryParamGroup($data,$quotaKey,$trajKey){
         $res=[];
         foreach ($data as $v){
             if(!isset($res[$v['date']." ".$v['hour']])){
