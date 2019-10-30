@@ -246,7 +246,9 @@ class AreaService extends BaseService
             $junctionCollection = Collection::make([]);
 
             foreach ($junctionIds as $id) {
-                $junctionCollection[] = $junctionIdList[$id] ?? '';
+                if (isset($junctionIdList[$id])) {
+                    $junctionCollection[] = $junctionIdList[$id];
+                }
             }
 
             $results[] = [
