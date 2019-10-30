@@ -592,6 +592,10 @@ class ReportService extends BaseService
         $cityId = $params['city_id'];
         $type   = $params['type'];
         $title  = $params['title'];
+        //兼容旧接口
+        if(!isset($params['time_range'])){
+            $params['time_range']="";
+        }
 
         //上传图片
         $data = $this->gift_model->Upload("file");
