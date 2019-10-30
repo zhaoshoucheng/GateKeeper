@@ -21,6 +21,8 @@ class RoadReportService extends BaseService{
         $this->load->model('road_model');
         $this->load->model('area_model');
         $this->load->model('pi_model');
+        $this->load->model('arterialtiming_model');
+        $this->load->model('diagnosisNoTiming_model');
 
         $this->roadService = new RoadService();
         $this->reportService = new ReportService();
@@ -597,6 +599,213 @@ class RoadReportService extends BaseService{
         }
 
         return $date;
+    }
+
+
+
+
+
+    //干线协调相关代码
+    public function queryRoadCoordination($city_id,$road_id,$startTime,$endTime,$morningRushTime,$eveningRushTime){
+        $road_info = $this->road_model->getRoadInfo($road_id);
+        $ret = $this->arterialtiming_model->getJunctionFlowInfos($city_id,0,explode(",",$road_info['logic_junction_ids']));
+
+        $forwardFlows=[];
+        $backwardFlows=[];
+        $flowmap=[];
+        $juncNameMap=[];
+        foreach ($ret['junctions_info'] as $jk=>$jv){
+            $juncNameMap[$jk] = $jv['name'];
+        }
+        foreach ($ret['forward_path_flows'] as $fk=>$fv){
+            $forwardFlows[] = $fv['logic_flow']['logic_flow_id'];
+            $flowmap[$fv['logic_flow']['logic_flow_id']]=  $juncNameMap[$fv['logic_flow']['logic_junction_id']];
+        }
+
+        foreach ($ret['backward_path_flows'] as $bk=>$bv){
+            $backwardFlows[] = $bv['logic_flow']['logic_flow_id'];
+            $flowmap[$bv['logic_flow']['logic_flow_id']]=  $juncNameMap[$bv['logic_flow']['logic_junction_id']];
+        }
+
+        $flows = array_merge($forwardFlows,$backwardFlows);
+        $quota = $this->diagnosisNoTiming_model->getSpecialFlowQuota($city_id,$flows,$startTime,$endTime);
+
+
+        //早高峰数据过滤
+        $morningData = $this->caculateRoadCoordinationTimeData($quota,$morningRushTime[0],$morningRushTime[1]);
+        //晚高峰数据过滤
+        $eveningData = $this->caculateRoadCoordinationTimeData($quota,$eveningRushTime[0],$eveningRushTime[1]);
+
+
+
+        $morningChart=[
+            'info'=>[
+                'desc'=>"以下两张图表现了早高峰".$road_info['road_name']."干线不同方向路口平均停车次数与路口延误随时间变化的趋势(蓝色为正,黄色为反)。"
+            ],
+            'chart_list'=>[]
+        ];
+        $morningChart['chart_list']=$this->transRoadCoordination2Chart($morningData,$forwardFlows,$backwardFlows,$flowmap);
+        $morningChart['info']['desc'].="车辆通过干线正向方向的".count($forwardFlows)."个路口平均需要停车".$morningChart['chart_list'][0]['series'][0]['avg']."次,其中".$morningChart['chart_list'][0]['series'][0]['max_key']."路口停车比例最高,为".$morningChart['chart_list'][0]['series'][0]['max']."次;
+        平均路口延误为".$morningChart['chart_list'][1]['series'][0]['avg']."秒,其中".$morningChart['chart_list'][1]['series'][0]['max_key']."路口延误时间最高,为".$morningChart['chart_list'][1]['series'][0]['max']."秒。
+                车辆通过干线反向方向的".count($backwardFlows)."个路口平均需要停车".$morningChart['chart_list'][0]['series'][1]['avg']."次,其中".$morningChart['chart_list'][0]['series'][1]['max_key']."路口停车比例最高,为".$morningChart['chart_list'][0]['series'][1]['max']."次;
+                平均路口延误为".$morningChart['chart_list'][1]['series'][1]['avg']."秒,其中".$morningChart['chart_list'][1]['series'][1]['avg']."路口延误时间最高,为".$morningChart['chart_list'][1]['series'][1]['avg']."秒。";
+        $eveningChart=[
+            'info'=>[
+                'desc'=>"以下两张图表现了晚高峰".$road_info['road_name']."干线不同方向路口平均停车次数与路口延误随时间变化的趋势(蓝色为正,黄色为反)。"
+            ],
+            'chart_list'=>[]
+        ];
+        $eveningChart['chart_list']=$this->transRoadCoordination2Chart($eveningData,$forwardFlows,$backwardFlows,$flowmap);
+        $eveningChart['info']['desc'].="车辆通过干线正向方向的".count($forwardFlows)."个路口平均需要停车".$eveningChart['chart_list'][0]['series'][0]['avg']."次,其中".$eveningChart['chart_list'][0]['series'][0]['max_key']."路口停车比例最高,为".$eveningChart['chart_list'][0]['series'][0]['max']."次;
+        平均路口延误为".$eveningChart['chart_list'][1]['series'][0]['avg']."秒,其中".$eveningChart['chart_list'][1]['series'][0]['max_key']."路口延误时间最高,为".$eveningChart['chart_list'][1]['series'][0]['max']."秒。
+                车辆通过干线反向方向的".count($backwardFlows)."个路口平均需要停车".$eveningChart['chart_list'][0]['series'][1]['avg']."次,其中".$eveningChart['chart_list'][0]['series'][1]['max_key']."路口停车比例最高,为".$eveningChart['chart_list'][0]['series'][1]['max']."次;
+                平均路口延误为".$eveningChart['chart_list'][1]['series'][1]['avg']."秒,其中".$eveningChart['chart_list'][1]['series'][1]['avg']."路口延误时间最高,为".$eveningChart['chart_list'][1]['series'][1]['avg']."秒。";
+
+        return [$morningChart,$eveningChart];
+    }
+
+    //查询表格中的平均值与最大值
+
+
+    //将干线协调结果转换成图表
+    public function transRoadCoordination2Chart($data,$forward,$backward,$flow2JuncMap){
+        $chart_list=[
+        ];
+        $stopTimeCycleChart=[
+            "title"=>"干线路口停车次数(次/路口)",
+            "scale_title"=> "",
+            "series"=>[]
+        ];
+        $stopDelayChart=[
+            "title"=>"干线路口延误(秒)",
+            "scale_title"=>"",
+            "series"=>[]
+        ];
+        $cycseriesf=[
+            'name'=>"正向",
+            "avg"=>0,
+            "max"=>0,
+            'data'=>[]
+        ];
+        $delayseriesf=[
+            'name'=>"正向",
+            "avg"=>0,
+            "max"=>0,
+            'data'=>[]
+        ];
+        $cycseriesb=[
+            'name'=>"反向",
+            "avg"=>0,
+            "max"=>0,
+            'data'=>[]
+        ];
+        $delayseriesb=[
+            'name'=>"反向",
+            "avg"=>0,
+            "max"=>0,
+            'data'=>[]
+        ];
+        foreach ($data as $k=>$v){
+
+            if(in_array($k,$forward)){
+                $cycseriesf['data'][] = [
+                    'x'=>$flow2JuncMap[$k],
+                    'y'=>$v['stop_time_cycle'],
+                ];
+                $delayseriesf['data'][]=[
+                    'x'=>$flow2JuncMap[$k],
+                    'y'=>$v['stop_delay'],
+                ];
+            }elseif (in_array($k,$backward)){
+                $cycseriesb['data'][] = [
+                    'x'=>$flow2JuncMap[$k],
+                    'y'=>$v['stop_time_cycle'],
+                ];
+                $delayseriesb['data'][]=[
+                    'x'=>$flow2JuncMap[$k],
+                    'y'=>$v['stop_delay'],
+                ];
+            }
+        }
+
+        $cycseriesfcol = array_column($cycseriesf['data'],'y');
+
+//        $cfs = array_multisort(array_column($cycseriesf['data'],'y'),SORT_DESC,$cycseriesf['data']);
+        $cycseriesf['max']=max($cycseriesfcol);
+        $key = array_search(max($cycseriesfcol),$cycseriesfcol);
+        $cycseriesf['max_key']=$cycseriesf['data'][$key]['x'];
+        $cycseriesf['avg']=round(array_sum($cycseriesfcol)/count($cycseriesfcol),2);
+
+        $cycseriesbcol = array_column($cycseriesb['data'],'y');
+        $cycseriesb['max']=max($cycseriesbcol);
+        $key = array_search(max($cycseriesbcol),$cycseriesbcol);
+        $cycseriesb['max_key']=$cycseriesb['data'][$key]['x'];
+        $cycseriesb['avg']=round(array_sum($cycseriesbcol)/count($cycseriesbcol),2);
+
+        $delayseriesfcol = array_column($delayseriesf['data'],'y');
+        $delayseriesf['max']=max($delayseriesfcol);
+        $key = array_search(max($delayseriesfcol),$delayseriesfcol);
+        $delayseriesf['max_key']=$delayseriesf['data'][$key]['x'];
+        $delayseriesf['avg']=round(array_sum($delayseriesfcol)/count($delayseriesfcol),2);
+
+        $delayseriesbcol = array_column($delayseriesb['data'],'y');
+        $delayseriesb['max']=max($delayseriesbcol);
+        $key = array_search(max($delayseriesbcol),$delayseriesbcol);
+        $delayseriesb['max_key']=$delayseriesb['data'][$key]['x'];
+        $delayseriesb['avg']=round(array_sum($delayseriesbcol)/count($delayseriesbcol),2);
+
+        $stopTimeCycleChart['series'][] = $cycseriesf;
+        $stopTimeCycleChart['series'][] = $cycseriesb;
+        $stopDelayChart['series'][] = $delayseriesf;
+        $stopDelayChart['series'][] = $delayseriesb;
+
+        $chart_list[] = $stopTimeCycleChart;
+        $chart_list[] = $stopDelayChart;
+        return $chart_list;
+
+    }
+
+    //抽取早晚高峰的数据,并求平均
+    public function caculateRoadCoordinationTimeData($data,$s,$e){
+        $ret = [];
+        $stime = strtotime($s);
+        $etime = strtotime($e);
+        foreach ($data as  $fk=>$fv){
+            $ret[$fk] = [
+                'speed'=>0,
+                'stop_delay'=>0,
+                'stop_time_cycle'=>0,
+                'traj_count'=>0,
+            ];
+            foreach ($fv as $yk => $yv){
+                foreach ($yv as $d){
+                    if($stime<=strtotime($d['hour']) && $etime>=strtotime($d['hour']) ){
+                        $ret[$fk]['speed']+=$d['speed']*$d['traj_count'];
+                        $ret[$fk]['stop_delay']+=$d['stop_delay']*$d['traj_count'];
+                        $ret[$fk]['stop_time_cycle']+=$d['stop_time_cycle']*$d['traj_count'];
+                        $ret[$fk]['traj_count']+=$d['traj_count'];
+                    }
+                }
+            }
+        }
+        $final=[];
+        foreach ($ret as $rfk => $rfv){
+            if($rfv['traj_count']==0){
+                $final[$rfk] = [
+                    'speed'=>0,
+                    'stop_delay'=>0,
+                    'stop_time_cycle'=>0,
+                ];
+            }else{
+                $final[$rfk] = [
+                    'speed'=>round($rfv['speed']/$rfv['traj_count'],2),
+                    'stop_delay'=>round($rfv['stop_delay']/$rfv['traj_count'],2),
+                    'stop_time_cycle'=>round($rfv['stop_time_cycle']/$rfv['traj_count'],2),
+                ];
+            }
+
+        }
+        return $final;
     }
 
 }

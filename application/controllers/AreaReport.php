@@ -21,12 +21,14 @@ class AreaReport extends MY_Controller
 
     public function introduction() {
         $params = $this->input->get(null, true);
-        // $this->validate([
-        //     'city_id' => 'required|is_natural_no_zero',
-        //     'area_id' => 'required|is_natural_no_zero',
-        //     'start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
-        //     'end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
-        // ]);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        $params['start_date'] = $params['start_time'];
+        $params['end_date'] = $params['end_time'];
 
         $data = $this->areaReportService->introduction($params);
         $this->response($data);
@@ -34,36 +36,42 @@ class AreaReport extends MY_Controller
 
     public function queryAreaDataComparison() {
         $params = $this->input->get(null, true);
-        // $this->validate([
-        //     'city_id' => 'required|is_natural_no_zero',
-        //     'area_id' => 'required|min_length[1]',
-        //     'start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
-        //     'end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
-        // ]);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        $params['start_date'] = $params['start_time'];
+        $params['end_date'] = $params['end_time'];
 
         $data = $this->areaReportService->queryAreaDataComparison($params);
         $this->response($data);
     }
     public function queryAreaCongestion() {
         $params = $this->input->get(null, true);
-        // $this->validate([
-        //     'city_id' => 'required|is_natural_no_zero',
-        //     'area_id' => 'required|min_length[1]',
-        //     'start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
-        //     'end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
-        // ]);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        $params['start_date'] = $params['start_time'];
+        $params['end_date'] = $params['end_time'];
 
         $data = $this->areaReportService->queryAreaCongestion($params);
         $this->response($data);
     }
     public function queryQuotaRank() {
         $params = $this->input->get(null, true);
-        // $this->validate([
-        //     'city_id' => 'required|is_natural_no_zero',
-        //     'area_id' => 'required|min_length[1]',
-        //     'start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
-        //     'end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
-        // ]);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        $params['start_date'] = $params['start_time'];
+        $params['end_date'] = $params['end_time'];
 
         $data = $this->areaReportService->queryQuotaRank($params);
         $this->response($data);
