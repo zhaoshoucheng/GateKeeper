@@ -728,11 +728,11 @@ class ReportService extends BaseService
             $last_start_date = date('Y-m-d', $start_time - 86400 * 7);
             $last_end_date = date('Y-m-d', $end_time - 86400 * 7);
         } elseif ($report_type == 3) {
-            $last_start_date = date('Y-m-01', "$start_date -1 month");
-            $last_end_date = date('Y-m-d', "$last_start_date +1 month -1 day");
+            $last_start_date = date('Y-m-01', strtotime("$start_date -1 month"));
+            $last_end_date = date('Y-m-d', strtotime("$last_start_date +1 month -1 day"));
         } elseif ($report_type == 4) {
-            $last_start_date = date('Y-m-01', "$start_date -3 month");
-            $last_end_date = date('Y-m-d', "$last_start_date +1 month -1 day");
+            $last_start_date = date('Y-m-01', strtotime("$start_date -3 month"));
+            $last_end_date = date('Y-m-d', strtotime("$last_start_date +1 month -1 day"));
         }
         return [
             'start_date' => $last_start_date,
