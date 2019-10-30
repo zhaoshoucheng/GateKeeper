@@ -728,11 +728,11 @@ class ReportService extends BaseService
             $last_start_date = date('Y-m-d', $start_time - 86400 * 7);
             $last_end_date = date('Y-m-d', $end_time - 86400 * 7);
         } elseif ($report_type == 3) {
-            $last_start_date = date('Y-m-01', "$start_date -1 month");
-            $last_end_date = date('Y-m-d', "$last_start_date +1 month -1 day");
+            $last_start_date = date('Y-m-01', strtotime("$start_date -1 month"));
+            $last_end_date = date('Y-m-d', strtotime("$last_start_date +1 month -1 day"));
         } elseif ($report_type == 4) {
-            $last_start_date = date('Y-m-01', "$start_date -3 month");
-            $last_end_date = date('Y-m-d', "$last_start_date +1 month -1 day");
+            $last_start_date = date('Y-m-01', strtotime("$start_date -3 month"));
+            $last_end_date = date('Y-m-d', strtotime("$last_start_date +1 month -1 day"));
         }
         return [
             'start_date' => $last_start_date,
@@ -791,6 +791,33 @@ class ReportService extends BaseService
             }
         }
         return $hours;
+    }
+
+    // {x : hh:mm, y : value}
+    // 48个时刻点补全 null
+    public function addto48($objs) {
+        $hs = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+        $ms = ['00', '30'];
+
+        $full = [];
+        foreach ($hs as $h) {
+            foreach ($ms as $m) {
+                $full[] = $h . ':' . $m;
+            }
+        }
+
+        $hms = array_column($objs, 'x');
+        $diff = array_diff($full, $hms);
+        foreach ($diff as $one) {
+            $objs[] = [
+                'x' => $one,
+                'y' => null,
+            ];
+        }
+        usort($objs, function($a, $b) {
+            return ($a['x'] < $b['x']) ? -1 : 1;
+        });
+        return $objs;
     }
 
     // 早晚高峰需要写两个很大的if else，分开写吧
