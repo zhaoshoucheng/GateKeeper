@@ -575,6 +575,26 @@ class DiagnosisNoTiming_model extends CI_Model
         }
     }
 
+    public function getJunctionAlarmHoursData($city_id, $junctions ,$dates ) {
+        $req = [
+            'city_id' => (int)$city_id,
+            'dates' => $dates,
+            'junction_ids'=>$junctions
+        ];
+
+
+
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetOnlineJunctionAlarmHoursData', $req, 0, 'json');
+
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            return $res['data'];
+        } else {
+            return [];
+        }
+    }
+
     public function getJunctionAlarmDataByJunction($city_id, $dates, $hour, $userPerm = []) {
         $req = [
             'city_id' => $city_id,

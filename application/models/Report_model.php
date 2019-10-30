@@ -100,7 +100,7 @@ class Report_model extends CI_Model
      */
     public function getSelectJoinUploadFile($cityId, $type, $pageNum, $pageSize, $namespace)
     {
-        $res = $this->db->select('report.id, report.title, report.create_at, file_key, namespace')
+        $res = $this->db->select('report.id, report.title, report.create_at, file_key, namespace,time_range')
             ->from('report')
             ->join('upload_files', 'upload_files.item_id = report.id')
             ->where('report.delete_at', "1970-01-01 00:00:00")
