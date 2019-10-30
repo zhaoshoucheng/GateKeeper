@@ -793,6 +793,33 @@ class ReportService extends BaseService
         return $hours;
     }
 
+    // {x : hh:mm, y : value}
+    // 48个时刻点补全 null
+    public function addto48($objs) {
+        $hs = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+        $ms = ['00', '30'];
+
+        $full = [];
+        foreach ($hs as $h) {
+            foreach ($ms as $m) {
+                $full[] = $h . ':' . $m;
+            }
+        }
+
+        $hms = array_column($objs, 'x');
+        $diff = array_diff($full, $hms);
+        foreach ($diff as $one) {
+            $objs[] = [
+                'x' => $one,
+                'y' => null,
+            ];
+        }
+        usort($objs, function($a, $b) {
+            return ($a['x'] < $b['x']) ? -1 : 1;
+        });
+        return $objs;
+    }
+
     // 早晚高峰需要写两个很大的if else，分开写吧
     // 早高峰开始结束时间
     public function getMorningPeekRange($city_id, $logic_junction_ids, $dates) {

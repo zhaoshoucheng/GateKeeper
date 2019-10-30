@@ -121,11 +121,11 @@ class JunctionReportService extends BaseService{
 				'series' => [
 					[
           				'name' => $text[1],
-          				'data' => $now_data,
+          				'data' => $this->reportService->addto48($now_data),
           			],
           			[
           				'name' => $text[2],
-          				'data' => $last_data,
+          				'data' => $this->reportService->addto48($last_data),
           			],
 				],
     		],
@@ -199,12 +199,12 @@ class JunctionReportService extends BaseService{
 					'scale_title' => '停车次数',
 					'series' => [
 						'name' => "",
-						'data' => array_map(function($item) {
+						'data' => $this->reportService->addto48(array_map(function($item) {
 							return [
 								'x' => $item['key'],
 								'y' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
 							];
-						}, $index_data),
+						}, $index_data)),
 					],
     			],
     			[
@@ -212,12 +212,12 @@ class JunctionReportService extends BaseService{
 					'scale_title' => '停车延误(s)',
 					'series' => [
 						'name' => "",
-						'data' => array_map(function($item) {
+						'data' => $this->reportService->addto48(array_map(function($item) {
 							return [
 								'x' => $item['key'],
 								'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
 							];
-						}, $index_data),
+						}, $index_data)),
 					],
     			],
     			[
@@ -225,12 +225,12 @@ class JunctionReportService extends BaseService{
 					'scale_title' => '行驶速度(km/h)',
 					'series' => [
 						'name' => "",
-						'data' => array_map(function($item) {
+						'data' => $this->reportService->addto48(array_map(function($item) {
 							return [
 								'x' => $item['key'],
 								'y' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
 							];
-						}, $index_data),
+						}, $index_data)),
 					],
     			],
     			[
@@ -238,12 +238,12 @@ class JunctionReportService extends BaseService{
 					'scale_title' => '',
 					'series' => [
 						'name' => "",
-						'data' => array_map(function($item) {
+						'data' => $this->reportService->addto48(array_map(function($item) {
 							return [
 								'x' => $item['hour'],
 								'y' => round($item['pi'], 2),
 							];
-						}, $pi_data),
+						}, $pi_data)),
 					],
     			],
     		],

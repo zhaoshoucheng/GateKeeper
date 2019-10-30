@@ -138,11 +138,11 @@ class RoadReportService extends BaseService{
 				'series' => [
 					[
           				'name' => $text[1],
-          				'data' => $now_data,
+          				'data' => $this->reportService->addto48($now_data),
           			],
           			[
           				'name' => $text[2],
-          				'data' => $last_data,
+          				'data' => $this->reportService->addto48($last_data),
           			],
 				],
     		],
