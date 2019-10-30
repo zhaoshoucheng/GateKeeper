@@ -250,6 +250,10 @@ class JunctionReportService extends BaseService{
     	];
     }
 
+    public function queryJuncInfo($logicJunctionID){
+        return $this->waymap_model->getJunctionDetail($logicJunctionID);
+    }
+
     public function queryJuncQuotaDetail($cityID,$logicJunctionID,$startTime,$endTime){
         //查询路网flow信息
         $flowsMovement = $this->waymap_model->getFlowMovement($cityID, $logicJunctionID, "all", 1);
