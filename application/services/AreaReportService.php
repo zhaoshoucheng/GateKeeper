@@ -8,6 +8,7 @@ namespace Services;
 use Services\AreaService;
 use Services\ReportService;
 use Services\DataService;
+use Services\RoadReportService;
 
 class AreaReportService extends BaseService{
     public function __construct()
@@ -24,6 +25,7 @@ class AreaReportService extends BaseService{
         $this->areaService = new AreaService();
         $this->reportService = new ReportService();
         $this->dataService = new DataService();
+        $this->roadReportService = new RoadReportService();
     }
 
     public function introduction($params) {
@@ -506,5 +508,95 @@ class AreaReportService extends BaseService{
     			],
     		],
     	];
+    }
+    private function getDateFromRange($startdate, $enddate)
+    {
+        $stimestamp = strtotime($startdate);
+        $etimestamp = strtotime($enddate);
+
+        // 计算日期段内有多少天
+        $days = ($etimestamp - $stimestamp) / 86400 + 1;
+        // 保存每天日期
+        $date = [];
+        for ($i = 0; $i < $days; $i++) {
+            $date[] = date('Y-m-d', $stimestamp + (86400 * $i));
+        }
+        return $date;
+    }
+
+    private function getTimeFromRange($st,$et,$step){
+        $stimestamp = strtotime($st);
+        $etimestamp = strtotime($et);
+        $hours=[];
+        for($i = $stimestamp;$i<=$etimestamp;$i+=$step*60){
+            $hours[] = date('H:i', $i);
+        }
+
+        return $hours;
+    }
+
+
+    //时间前后取整
+    private function roundingtime($time){
+        $hour = date("H",strtotime($time));
+        $min = date("i",strtotime($time));
+        if($min < 30){
+            $min = "00";
+        }else{
+            $min = "30";
+        }
+        return $hour.":".$min;
+    }
+
+    public function queryAreaAlarm($cityID,$areaID,$startTime,$endTime,$morningRushTime,$eveningRushTime){
+        $area_detail = $this->areaService->getAreaDetail([
+            'city_id' => $cityID,
+            'area_id' => $areaID,
+        ]);
+
+        $junctionList =array_column($area_detail['junction_list'], 'logic_junction_id');
+//        $junctionList  = explode(",",$roadInfo['logic_junction_ids']);
+        $juncNameMap=[];
+        $rd=[];
+        $rd['junction_info']=[];
+        foreach ($area_detail['junction_list'] as $k => $j){
+            $juncNameMap[$j['name']] = $j['logic_junction_id'];
+            $rd['junctions_info'][$j['logic_junction_id']] = ['name'=>$j['name']];
+        }
+
+        $alarmInfo = $this->diagnosisNoTiming_model->getJunctionAlarmHoursData($cityID, $junctionList, $this->getDateFromRange($startTime,$endTime));
+
+        //1: 过饱和 2: 溢流 3:失衡
+        $imbalance=[];
+        $oversaturation=[];
+        $spillover=[];
+        //路口报警统计
+        foreach ($alarmInfo as $ak => $av){
+            //过滤报警不足5分钟的
+            if(strtotime($av['end_time'])-strtotime($av['start_time']) < 5*60){
+                continue;
+            }
+            switch ($av['type']){
+                case 1:
+                    $oversaturation[$av['logic_junction_id']][]=$av['start_time'];
+                    break;
+                case 2:
+                    $spillover[$av['logic_junction_id']][]=$av['start_time'];
+                    break;
+                case 3:
+                    $imbalance[$av['logic_junction_id']][]=$av['start_time'];
+                    break;
+            }
+        }
+
+
+
+
+        //初始化表格
+        $initChartList = $this->roadReportService->initRoadAlarmChart($rd,$morningRushTime,$eveningRushTime);
+        $fillChartData = $this->roadReportService->fillRoadAlarmChart($initChartList,$imbalance,$oversaturation,$spillover,$juncNameMap);
+
+
+        return $fillChartData;
     }
 }
