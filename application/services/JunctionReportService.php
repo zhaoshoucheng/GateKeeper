@@ -288,6 +288,24 @@ class JunctionReportService extends BaseService{
         $flow['sort_key'] = phase_sort_key($flow['in_degree'], $flow['out_degree']);
         return $flow;
     }
+    private function sortAndFillHour($data){
+        $newData=[];
+        //初始化24小时的时段
+        for($i=0;$i<48;$i++){
+            $newData[] = [
+                "x"=>date("H:i",strtotime("00:00")+$i*30*60),
+                "y"=>0,
+            ];
+        }
+        foreach ($newData as $k => $v){
+            foreach ($data as $d){
+                if($d['x']==$v['x']){
+                    $newData[$k]['y']=$d['y'];
+                }
+            }
+        }
+        return $newData;
+    }
 
     //es数据转换为表格
     public function trans2Chart($flowQuota,$flowInfo){
@@ -327,12 +345,13 @@ class JunctionReportService extends BaseService{
                     "y"=>round($series['stop_delay']/$series['traj_count'],2)
                 ];
             }
+
             $stopTimeChartData['flowlist'][]=[
                 "logic_flow_id"=>$fk,
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"次/车",
-                    "series"=>[["name"=>"","data"=>$stopTimeCycleChart]],
+                    "series"=>[["name"=>"","data"=>$this->sortAndFillHour($stopTimeCycleChart)]],
                 ],
             ];
             $speedChartData['flowlist'][]=[
@@ -340,7 +359,7 @@ class JunctionReportService extends BaseService{
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"km/h",
-                    "series"=>[["name"=>"","data"=>$speedCycleChart]]
+                    "series"=>[["name"=>"","data"=>$this->sortAndFillHour($speedCycleChart)]]
                 ],
             ];
             $stopDelayChartData['flowlist'][]=[
@@ -348,7 +367,7 @@ class JunctionReportService extends BaseService{
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"S",
-                    "series"=>[["name"=>"","data"=>$stopDelayCycleChart]]
+                    "series"=>[["name"=>"","data"=>$this->sortAndFillHour($stopDelayCycleChart)]]
                 ],
             ];
         }

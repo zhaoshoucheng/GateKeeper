@@ -221,7 +221,14 @@ class DiagnosisNoTiming_model extends CI_Model
                                 "traj_count"=>$qv['total']['value'],
                             ];
                         }
-                        //TODO $qd 时间排序
+                        //$qd 时间排序
+//                        $last_names = array_column($qd,'hour');
+//                        $ctimestr=[];
+//                        foreach ($last_names as $k=> $l){
+//                            $qd[$k]['ctime_str'] = strtotime($l);
+//                            $ctimestr[] = $qd[$k]['ctime_str'];
+//                        }
+//                        array_multisort($ctimestr,SORT_ASC,$qd);
                         $result[$fv['key']][$yv['key']] = $qd;
                     }
                 }
