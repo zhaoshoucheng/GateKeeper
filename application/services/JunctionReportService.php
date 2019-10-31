@@ -193,7 +193,7 @@ class JunctionReportService extends BaseService{
     			'desc' => $desc,
     			'instructions' => $instructions,
     		],
-    		'chart' => [
+    		'charts' => [
     			[
 	    			'title' => '车均停车次数',
 					'scale_title' => '停车次数',

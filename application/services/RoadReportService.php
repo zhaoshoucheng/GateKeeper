@@ -467,10 +467,10 @@ class RoadReportService extends BaseService{
                 "y"=>round($v['pi'],2)
             ];
         }
-        $stopTimeChartData['series'][0] =['name'=>"",'data'=>$stopTimeCycleChart];
-        $speedChartData['series'][0] =['name'=>"",'data'=>$speedCycleChart];
-        $stopDelayChartData['series'][0] =['name'=>"",'data'=>$stopDelayCycleChart];
-        $piChartData['series'][0] =['name'=>"",'data'=>$piChart];
+        $stopTimeChartData['series'] =['name'=>"",'data'=>$stopTimeCycleChart];
+        $speedChartData['series'] =['name'=>"",'data'=>$speedCycleChart];
+        $stopDelayChartData['series'] =['name'=>"",'data'=>$stopDelayCycleChart];
+        $piChartData['series'] =['name'=>"",'data'=>$piChart];
         $charts[] = $stopTimeChartData;
         $charts[] = $stopDelayChartData;
         $charts[] = $speedChartData;
@@ -484,7 +484,7 @@ class RoadReportService extends BaseService{
         $value=0;
         $count=0;
         $flag=false;
-        $d = $chart['series'][0]['data'];
+        $d = $chart['series']['data'];
         foreach ($d as $k=>$v){
             if($v['x']==$from){
                 $value += $v['y'];
@@ -509,7 +509,7 @@ class RoadReportService extends BaseService{
         $suma=0;
         $sumb=0;
         $sumc=0;
-        $d = $chart['series'][0]['data'];
+        $d = $chart['series']['data'];
         foreach ($d as $k => $v){
             if ($v["x"]=="07:00"){
                 $suma = $d[$k]+$d[$k+1]+$d[$k+2]+$d[$k+3];
@@ -535,7 +535,7 @@ class RoadReportService extends BaseService{
         $suma=0;
         $sumb=0;
         $sumc=0;
-        $d = $chart['series'][0]['data'];
+        $d = $chart['series']['data'];
         foreach ($d as $k => $v){
             if ($v["x"]=="17:00"){
                 $suma = $d[$k]+$d[$k+1]+$d[$k+2]+$d[$k+3];

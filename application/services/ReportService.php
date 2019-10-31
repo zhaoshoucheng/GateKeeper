@@ -743,13 +743,15 @@ class ReportService extends BaseService
 
     public function getComparisonText($now, $last, $report_type) {
         $text = [];
-        $s1 = array_sum($now) / count($now);
-        $s2 = array_sum($last) / count($last);
-        if ($s1 / $s2 - $s2 >= 0.01) {
+        $s1 = (empty($now)) ? 0.00 : array_sum($now) / count($now);
+        $s2 = (empty($last)) ? 0.00: array_sum($last) / count($last);
+        if ($s2 == 0) {
+            $text[] = "基本持平";
+        } elseif ($s1 / $s2 - $s2 >= 0.01) {
             $text[] = "更加严重";
-        }elseif ($s1 / $s2 - $s2 <= -0.01) {
+        } elseif ($s1 / $s2 - $s2 <= -0.01) {
             $text[] = "得到缓解";
-        }else {
+        } else {
             $text[] = "基本持平";
         }
         if ($report_type == 1) {
@@ -764,6 +766,9 @@ class ReportService extends BaseService
         } elseif ($report_type == 4) {
             $text[] = '本季度';
             $text[] = '上季度';
+        } else {
+            $text[] = '';
+            $text[] = '';
         }
         return $text;
     }
