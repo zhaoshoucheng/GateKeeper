@@ -766,6 +766,9 @@ class ReportService extends BaseService
         } elseif ($report_type == 4) {
             $text[] = '本季度';
             $text[] = '上季度';
+        } else {
+            $text[] = '';
+            $text[] = '';
         }
         return $text;
     }
