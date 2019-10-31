@@ -389,10 +389,7 @@ class AreaReportService extends BaseService{
     	];
     }
 
-    public function queryAreaQuotaData($params) {
-    	$tpl = "下图利用滴滴数据绘制了该区域全天24小时各项运行指标（车均停车次数、车均停车延误、车均行驶速度、PI）。通过数据分析，该区域的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/车/路口，停车延误接近%.2f秒/车/路口，车均行驶速度也达到%.2f千米/小时左右。";
-    	$instructions = "报告采用综合评估指数（PI）来分析路口整体及各维度交通运行情况XXXX";
-
+    public function queryTopPI($params) {
     	$city_id = intval($params['city_id']);
     	$area_id = $params['area_id'];
     	$start_date = $params['start_date'];
@@ -420,122 +417,7 @@ class AreaReportService extends BaseService{
     	$evening_peek_hours = $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']);
     	$peek_hours = array_merge($morning_peek_hours, $evening_peek_hours);
 
-    	$index_data = $this->dataService->call("/report/GetIndexByHour", [
-    		'city_id' => $city_id,
-    		'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
-    		'logic_junction_ids' => $logic_junction_ids,
-    	], "POST", 'json');
-    	$index_data = $index_data[2];
-    	usort($index_data, function($a, $b) {
-            return ($a['key'] < $b['key']) ? -1 : 1;
-        });
-
-    	$pi_data = $this->pi_model->getJunctionsPiByHours($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date));
-    	usort($pi_data, function($a, $b) {
-            return ($a['hour'] < $b['hour']) ? -1 : 1;
-        });
-
-    	$stop_delay_data = [];
-    	$stop_time_cycle_data = [];
-    	$speed_data = [];
-    	foreach ($index_data as $value) {
-    		if (! in_array($value['key'], $peek_hours)) {
-    			continue;
-    		}
-    		$stop_delay_data[] = $value['stop_delay']['value'] / $value['traj_count']['value'];
-    		$stop_time_cycle_data[] = $value['stop_time_cycle']['value'] / $value['traj_count']['value'];
-    		$speed_data[] = $value['speed']['value'] / $value['traj_count']['value'] * 3.6;
-    	}
-
-    	$desc = sprintf($tpl, $morning_peek['start_hour'], $morning_peek['end_hour'], $evening_peek['start_hour'], $evening_peek['end_hour'], round(array_sum($stop_time_cycle_data) / count($stop_time_cycle_data), 2), round(array_sum($stop_delay_data) / count($stop_delay_data), 2), round(array_sum($speed_data) / count($speed_data), 2));
-
-    	return [
-    		'info' => [
-    			'desc' => $desc,
-    			'instructions' => $instructions,
-    		],
-    		'chart' => [
-    			[
-	    			'title' => '车均停车次数',
-					'scale_title' => '停车次数',
-					'series' => [
-						'name' => "",
-						'data' => $this->reportService->addto48(array_map(function($item) {
-							return [
-								'x' => $item['key'],
-								'y' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
-							];
-						}, $index_data)),
-					],
-    			],
-    			[
-	    			'title' => '车均停车延误',
-					'scale_title' => '停车延误(s)',
-					'series' => [
-						'name' => "",
-						'data' => $this->reportService->addto48(array_map(function($item) {
-							return [
-								'x' => $item['key'],
-								'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
-							];
-						}, $index_data)),
-					],
-    			],
-    			[
-	    			'title' => '车均行驶速度',
-					'scale_title' => '行驶速度(km/h)',
-					'series' => [
-						'name' => "",
-						'data' => $this->reportService->addto48(array_map(function($item) {
-							return [
-								'x' => $item['key'],
-								'y' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
-							];
-						}, $index_data)),
-					],
-    			],
-    			[
-	    			'title' => 'PI',
-					'scale_title' => '',
-					'series' => [
-						'name' => "",
-						'data' => $this->reportService->addto48(array_map(function($item) {
-							return [
-								'x' => $item['hour'],
-								'y' => round($item['pi'], 2),
-							];
-						}, $pi_data)),
-					],
-    			],
-    		],
-    	];
-    }
-    public function queryTopPI($params) {
-    	$city_id = intval($params['city_id']);
-    	$area_id = $params['area_id'];
-    	$start_date = $params['start_date'];
-    	$end_date = $params['end_date'];
-
-    	// $city_info = $this->openCity_model->getCityInfo($city_id);
-    	// if (empty($city_info)) {
-
-    	// }
-
-    	// $area_info = $this->area_model->getAreaInfo($area_id);
-    	// if (empty($area_info)) {
-
-    	// }
-
-    	$area_detail = $this->areaService->getAreaDetail([
-    		'city_id' => $city_id,
-    		'area_id' => $area_id,
-    	]);
-    	$logic_junction_ids =array_column($area_detail['junction_list'], 'logic_junction_id');
-
-    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date));
-    	// $evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
-
-    	$morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date), $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
+    	$morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date), $peek_hours);
     	usort($morning_pi_data, function($a, $b) {
     		return $a['pi'] > $b['pi'] ? -1 : 1;
     	});
