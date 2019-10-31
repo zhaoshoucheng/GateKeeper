@@ -138,11 +138,11 @@ class RoadReportService extends BaseService{
 				'series' => [
 					[
           				'name' => $text[1],
-          				'data' => $now_data,
+          				'data' => $this->reportService->addto48($now_data),
           			],
           			[
           				'name' => $text[2],
-          				'data' => $last_data,
+          				'data' => $this->reportService->addto48($last_data),
           			],
 				],
     		],
@@ -377,6 +377,40 @@ class RoadReportService extends BaseService{
     	];
     }
 
+    public function queryTopPI($params) {
+    	$city_id = intval($params['city_id']);
+    	$road_id = $params['road_id'];
+    	$start_date = $params['start_date'];
+    	$end_date = $params['end_date'];
+    	$top = 3;
+    	if (isset($params['top'])) {
+    		$top = $params['top'];
+    	}
+
+    	// $city_info = $this->openCity_model->getCityInfo($city_id);
+    	// if (empty($city_info)) {
+
+    	// }
+
+    	$road_info = $this->road_model->getRoadInfo($road_id);
+    	if (empty($road_info)) {
+
+    	}
+    	$logic_junction_ids = $road_info['logic_junction_ids'];
+
+    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+    	$morning_peek_hours = $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']);
+    	$evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+    	$evening_peek_hours = $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']);
+    	$peek_hours = array_merge($morning_peek_hours, $evening_peek_hours);
+
+    	$morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date), $peek_hours);
+    	usort($morning_pi_data, function($a, $b) {
+    		return $a['pi'] > $b['pi'] ? -1 : 1;
+    	});
+    	return array_slice(array_column($morning_pi_data, 'logic_junction_id'), 0, 3);
+    }
+
     public function QueryRoadQuotaInfo($ctyID,$roadID,$start_time,$end_time){
         $road_info = $this->road_model->getRoadInfo($roadID);
         $junctionIDs = $road_info['logic_junction_ids'];
@@ -467,10 +501,10 @@ class RoadReportService extends BaseService{
                 "y"=>round($v['pi'],2)
             ];
         }
-        $stopTimeChartData['series'][0] =['name'=>"",'data'=>$stopTimeCycleChart];
-        $speedChartData['series'][0] =['name'=>"",'data'=>$speedCycleChart];
-        $stopDelayChartData['series'][0] =['name'=>"",'data'=>$stopDelayCycleChart];
-        $piChartData['series'][0] =['name'=>"",'data'=>$piChart];
+        $stopTimeChartData['series'] =['name'=>"",'data'=>$stopTimeCycleChart];
+        $speedChartData['series'] =['name'=>"",'data'=>$speedCycleChart];
+        $stopDelayChartData['series'] =['name'=>"",'data'=>$stopDelayCycleChart];
+        $piChartData['series'] =['name'=>"",'data'=>$piChart];
         $charts[] = $stopTimeChartData;
         $charts[] = $stopDelayChartData;
         $charts[] = $speedChartData;
@@ -484,7 +518,7 @@ class RoadReportService extends BaseService{
         $value=0;
         $count=0;
         $flag=false;
-        $d = $chart['series'][0]['data'];
+        $d = $chart['series']['data'];
         foreach ($d as $k=>$v){
             if($v['x']==$from){
                 $value += $v['y'];
@@ -509,7 +543,7 @@ class RoadReportService extends BaseService{
         $suma=0;
         $sumb=0;
         $sumc=0;
-        $d = $chart['series'][0]['data'];
+        $d = $chart['series']['data'];
         foreach ($d as $k => $v){
             if ($v["x"]=="07:00"){
                 $suma = $d[$k]+$d[$k+1]+$d[$k+2]+$d[$k+3];
@@ -535,7 +569,7 @@ class RoadReportService extends BaseService{
         $suma=0;
         $sumb=0;
         $sumc=0;
-        $d = $chart['series'][0]['data'];
+        $d = $chart['series']['data'];
         foreach ($d as $k => $v){
             if ($v["x"]=="17:00"){
                 $suma = $d[$k]+$d[$k+1]+$d[$k+2]+$d[$k+3];
@@ -558,7 +592,7 @@ class RoadReportService extends BaseService{
 
 
     //求pi加权平均
-    private function queryParamGroup($data,$quotaKey,$trajKey){
+    public function queryParamGroup($data,$quotaKey,$trajKey){
         $res=[];
         foreach ($data as $v){
             if(!isset($res[$v['date']." ".$v['hour']])){
@@ -584,26 +618,482 @@ class RoadReportService extends BaseService{
 
     private function getDateFromRange($startdate, $enddate)
     {
-
         $stimestamp = strtotime($startdate);
         $etimestamp = strtotime($enddate);
 
         // 计算日期段内有多少天
         $days = ($etimestamp - $stimestamp) / 86400 + 1;
-
         // 保存每天日期
         $date = [];
-
         for ($i = 0; $i < $days; $i++) {
             $date[] = date('Y-m-d', $stimestamp + (86400 * $i));
         }
-
         return $date;
     }
 
+    private function getTimeFromRange($st,$et,$step){
+        $stimestamp = strtotime($st);
+        $etimestamp = strtotime($et);
+        $hours=[];
+        for($i = $stimestamp;$i<=$etimestamp;$i+=$step*60){
+            $hours[] = date('H:i', $i);
+        }
+
+        return $hours;
+    }
+
+
+    //时间前后取整
+    private function roundingtime($time){
+        $hour = date("H",strtotime($time));
+        $min = date("i",strtotime($time));
+        if($min < 30){
+            $min = "00";
+        }else{
+            $min = "30";
+        }
+        return $hour.":".$min;
+    }
+    //填充表格
+    public function fillRoadAlarmChart($chartList,$imbalanceData,$overData,$spillData,$juncName){
+        //前三个早高峰,后三个晚高峰,表格排序失衡,过饱和,溢流
+
+        $juncIndex=[];
+        $morningIndex=[];
+        $eveningIndex=[];
+
+        foreach ($chartList[0]['chart']['one_dimensional'] as $k=>$v){
+            $juncIndex[$juncName[$v]] = $k;
+        }
+        foreach ($chartList[0]['chart']['two_dimensional'] as $k=>$v){
+            $morningIndex[$v] = $k;
+        }
+        foreach ($chartList[3]['chart']['two_dimensional'] as $k=>$v){
+            $eveningIndex[$v] = $k;
+        }
+
+        foreach ($imbalanceData as $k=> $v){
+            $morningmaxscale=0;
+            $eveningmaxscale=0;
+            $morningdata=[];
+            $eveningdata=[];
+            foreach ($v as $t){
+                $time = $this->roundingtime($t);
+                if(isset($morningIndex[$time])){
+                    if(!isset($morningdata[$juncIndex[$k]])){
+                        $morningdata[$juncIndex[$k]]=[];
+                    }
+                    if(!isset($morningdata[$juncIndex[$k]][$morningIndex[$time]])){
+                        $morningdata[$juncIndex[$k]][$morningIndex[$time]]=0;
+                    }
+                    $morningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
+                }elseif(isset($eveningdata[$time])){
+                    if(!isset($eveningdata[$juncIndex[$k]])){
+                        $eveningdata[$juncIndex[$k]]=[];
+                    }
+                    if(!isset($eveningdata[$juncIndex[$k]][$eveningdata[$time]])){
+                        $eveningdata[$juncIndex[$k]][$eveningdata[$time]]=0;
+                    }
+                    $eveningdata[$juncIndex[$k]][$eveningdata[$time]]+=1;
+                }
+            }
+            if(!empty($morningdata)){
+                $mcd = &$chartList[0];
+                foreach ($morningdata as $k1=>$v1){
+                    foreach ($v1 as $k2=>$v2){
+                        if($v2>$morningmaxscale){
+                            $morningmaxscale=$v2;
+                        }
+
+                        $mcd['chart']['data'][] = [$k1,$k2,$v2];
+                    }
+                }
+                $mcd['chart']['scale']['max']=$morningmaxscale+5;
+                if(count($morningdata)>count($juncName)*0.1){
+                    $mcd['desc'].="整体失衡问题严重。其中排名靠前的";
+                }else{
+                    $mcd['desc'].="整体失衡问题较轻。其中排名靠前的";
+                }
+                //排名前三的路口名
+                $sd = $mcd['chart']['data'];
+                $last_names = array_column($sd,2);
+                array_multisort($last_names,SORT_DESC,$sd);
+                $sortJunc = [];
+                foreach ($sd as $s){
+                    $sortJunc[$mcd['chart']['one_dimensional'][$s[0]]]=1;
+                }
+                $i=0;
+                foreach ($sortJunc as $sjk=>$sjv){
+                    $mcd['desc'].= $sjk." ";
+                    $i+=1;
+                    if($i>=2){
+                        break;
+                    }
+                }
+                $mcd['desc'].="在早高峰失衡情况最严重";
+
+            }
+            if(!empty($eveningdata)){
+                $ecd=&$chartList[3];
+                foreach ($eveningdata as $k1=>$v1){
+                    foreach ($v1 as $k2=>$v2){
+                        if($v2>$eveningmaxscale){
+                            $eveningmaxscale=$v2;
+                        }
+
+                        $ecd['chart']['data'][] = [$k1,$k2,$v2];
+                    }
+                }
+                $ecd['chart']['scale']['max']=$eveningmaxscale+5;
+                if(count($eveningdata)>count($juncName)*0.1){
+                    $ecd['desc'].="整体失衡问题严重。其中排名靠前的";
+                }else{
+                    $ecd['desc'].="整体失衡问题较轻。其中排名靠前的";
+                }
+                //排名前三的路口名
+                $sd = $ecd['chart']['data'];
+                $last_names = array_column($sd,2);
+                array_multisort($last_names,SORT_DESC,$sd);
+                $sortJunc = [];
+                foreach ($sd as $s){
+                    $sortJunc[$ecd['chart']['one_dimensional'][$s[0]]]=1;
+                }
+                $i=0;
+                foreach ($sortJunc as $sjk=>$sjv){
+                    $ecd['desc'].= $sjk." ";
+                    $i+=1;
+                    if($i>=2){
+                        break;
+                    }
+                }
+                $ecd['desc'].="在晚高峰失衡情况最严重";
+            }
+        }
+
+        foreach ($overData as $k=> $v){
+            $morningmaxscale=0;
+            $eveningmaxscale=0;
+            $morningdata=[];
+            $eveningdata=[];
+            foreach ($v as $t){
+                $time = $this->roundingtime($t);
+                if(isset($morningIndex[$time])){
+                    if(!isset($morningdata[$juncIndex[$k]])){
+                        $morningdata[$juncIndex[$k]]=[];
+                    }
+                    if(!isset($morningdata[$juncIndex[$k]][$morningIndex[$time]])){
+                        $morningdata[$juncIndex[$k]][$morningIndex[$time]]=0;
+                    }
+                    $morningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
+                }elseif(isset($eveningdata[$time])){
+                    if(!isset($eveningdata[$juncIndex[$k]])){
+                        $eveningdata[$juncIndex[$k]]=[];
+                    }
+                    if(!isset($eveningdata[$juncIndex[$k]][$eveningdata[$time]])){
+                        $eveningdata[$juncIndex[$k]][$eveningdata[$time]]=0;
+                    }
+                    $eveningdata[$juncIndex[$k]][$eveningdata[$time]]+=1;
+                }
+            }
+            if(!empty($morningdata)){
+                $mcd = &$chartList[1];
+                foreach ($morningdata as $k1=>$v1){
+                    foreach ($v1 as $k2=>$v2){
+                        if($v2>$morningmaxscale){
+                            $morningmaxscale=$v2;
+                        }
+
+                        $mcd['chart']['data'][] = [$k1,$k2,$v2];
+                    }
+                }
+                $mcd['chart']['scale']['max']=$morningmaxscale+5;
+                if(count($morningdata)>count($juncName)*0.1){
+                    $mcd['desc'].="整体过饱和问题严重。其中排名靠前的";
+                }else{
+                    $mcd['desc'].="整体过饱和问题较轻。其中排名靠前的";
+                }
+                //排名前三的路口名
+                $sd = $mcd['chart']['data'];
+                $last_names = array_column($sd,2);
+                array_multisort($last_names,SORT_DESC,$sd);
+                $sortJunc = [];
+                foreach ($sd as $s){
+                    $sortJunc[$mcd['chart']['one_dimensional'][$s[0]]]=1;
+                }
+                $i=0;
+                foreach ($sortJunc as $sjk=>$sjv){
+                    $mcd['desc'].= $sjk." ";
+                    $i+=1;
+                    if($i>=2){
+                        break;
+                    }
+                }
+                $mcd['desc'].="在早高峰过饱和情况最严重";
+
+            }
+            if(!empty($eveningdata)){
+                $ecd=&$chartList[4];
+                foreach ($eveningdata as $k1=>$v1){
+                    foreach ($v1 as $k2=>$v2){
+                        if($v2>$eveningmaxscale){
+                            $eveningmaxscale=$v2;
+                        }
+
+                        $ecd['chart']['data'][] = [$k1,$k2,$v2];
+                    }
+                }
+                $ecd['chart']['scale']['max']=$eveningmaxscale+5;
+                if(count($eveningdata)>count($juncName)*0.1){
+                    $ecd['desc'].="整体过饱和问题严重。其中排名靠前的";
+                }else{
+                    $ecd['desc'].="整体过饱和问题较轻。其中排名靠前的";
+                }
+                //排名前三的路口名
+                $sd = $ecd['chart']['data'];
+                $last_names = array_column($sd,2);
+                array_multisort($last_names,SORT_DESC,$sd);
+                $sortJunc = [];
+                foreach ($sd as $s){
+                    $sortJunc[$ecd['chart']['one_dimensional'][$s[0]]]=1;
+                }
+                $i=0;
+                foreach ($sortJunc as $sjk=>$sjv){
+                    $ecd['desc'].= $sjk." ";
+                    $i+=1;
+                    if($i>=2){
+                        break;
+                    }
+                }
+                $ecd['desc'].="在晚高峰过饱和情况最严重";
+            }
+        }
+        foreach ($spillData as $k=> $v){
+            $morningmaxscale=0;
+            $eveningmaxscale=0;
+            $morningdata=[];
+            $eveningdata=[];
+            foreach ($v as $t){
+                $time = $this->roundingtime($t);
+                if(isset($morningIndex[$time])){
+                    if(!isset($morningdata[$juncIndex[$k]])){
+                        $morningdata[$juncIndex[$k]]=[];
+                    }
+                    if(!isset($morningdata[$juncIndex[$k]][$morningIndex[$time]])){
+                        $morningdata[$juncIndex[$k]][$morningIndex[$time]]=0;
+                    }
+                    $morningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
+                }elseif(isset($eveningdata[$time])){
+                    if(!isset($eveningdata[$juncIndex[$k]])){
+                        $eveningdata[$juncIndex[$k]]=[];
+                    }
+                    if(!isset($eveningdata[$juncIndex[$k]][$eveningdata[$time]])){
+                        $eveningdata[$juncIndex[$k]][$eveningdata[$time]]=0;
+                    }
+                    $eveningdata[$juncIndex[$k]][$eveningdata[$time]]+=1;
+                }
+            }
+            if(!empty($morningdata)){
+                $mcd = &$chartList[2];
+                foreach ($morningdata as $k1=>$v1){
+                    foreach ($v1 as $k2=>$v2){
+                        if($v2>$morningmaxscale){
+                            $morningmaxscale=$v2;
+                        }
+
+                        $mcd['chart']['data'][] = [$k1,$k2,$v2];
+                    }
+                }
+                $mcd['chart']['scale']['max']=$morningmaxscale+5;
+                if(count($morningdata)>count($juncName)*0.1){
+                    $mcd['desc'].="整体溢流问题严重。其中排名靠前的";
+                }else{
+                    $mcd['desc'].="整体溢流问题较轻。其中排名靠前的";
+                }
+                //排名前三的路口名
+                $sd = $mcd['chart']['data'];
+                $last_names = array_column($sd,2);
+                array_multisort($last_names,SORT_DESC,$sd);
+                $sortJunc = [];
+                foreach ($sd as $s){
+                    $sortJunc[$mcd['chart']['one_dimensional'][$s[0]]]=1;
+                }
+                $i=0;
+                foreach ($sortJunc as $sjk=>$sjv){
+                    $mcd['desc'].= $sjk." ";
+                    $i+=1;
+                    if($i>=2){
+                        break;
+                    }
+                }
+                $mcd['desc'].="在早高峰溢流情况最严重";
+
+            }
+            if(!empty($eveningdata)){
+                $ecd=&$chartList[5];
+                foreach ($eveningdata as $k1=>$v1){
+                    foreach ($v1 as $k2=>$v2){
+                        if($v2>$eveningmaxscale){
+                            $eveningmaxscale=$v2;
+                        }
+
+                        $ecd['chart']['data'][] = [$k1,$k2,$v2];
+                    }
+                }
+                $ecd['chart']['scale']['max']=$eveningmaxscale+5;
+                if(count($eveningdata)>count($juncName)*0.1){
+                    $ecd['desc'].="整体溢流问题严重。其中排名靠前的";
+                }else{
+                    $ecd['desc'].="整体失衡问题较轻。其中排名靠前的";
+                }
+                //排名前三的路口名
+                $sd = $ecd['chart']['data'];
+                $last_names = array_column($sd,2);
+                array_multisort($last_names,SORT_DESC,$sd);
+                $sortJunc = [];
+                foreach ($sd as $s){
+                    $sortJunc[$ecd['chart']['one_dimensional'][$s[0]]]=1;
+                }
+                $i=0;
+                foreach ($sortJunc as $sjk=>$sjv){
+                    $ecd['desc'].= $sjk." ";
+                    $i+=1;
+                    if($i>=2){
+                        break;
+                    }
+                }
+                $ecd['desc'].="在晚高峰溢流情况最严重";
+            }
+        }
+
+        return $chartList;
+    }
+
+    //先初始化表格,然后填充数据
+    public function initRoadAlarmChart($roadInfo,$morningRushTime,$eveningRushTime){
+        $chartList=[];
+        $junctionList=[];
+        foreach ($roadInfo['junctions_info'] as $k => $j){
+            $junctionList[] = $j['name'];
+        }
+        $morningTimes = $this->getTimeFromRange(explode("~",$morningRushTime)[0],explode("~",$morningRushTime)[1],30);
+        $eveningTimes = $this->getTimeFromRange(explode("~",$eveningRushTime)[0],explode("~",$eveningRushTime)[1],30);
+        $morningImbalanceChart=[
+            "desc"=>"干线早高峰失衡报警持续5分钟以上的路口排名如下图所示",
+            "chart"=>[
+                'title'=>$morningRushTime."重点路口持续5分钟以上失衡报警",
+                'scale'=>['min'=>0,'max'=>50],
+                'one_dimensional'=>$junctionList,
+                'two_dimensional'=>$morningTimes,
+                'data'=>[],
+            ],
+        ];
+        $morningOversaturationChart=[
+            "desc"=>"干线早高峰过饱和报警持续5分钟以上的路口排名如下图所示",
+            "chart"=>[
+                'title'=>$morningRushTime."重点路口持续5分钟以上过饱和报警",
+                'scale'=>['min'=>0,'max'=>50],
+                'one_dimensional'=>$junctionList,
+                'two_dimensional'=>$morningTimes,
+                'data'=>[],
+            ],
+        ];
+        $morningSpilloverChart=[
+            "desc"=>"干线早高峰溢流报警持续5分钟以上的路口排名如下图所示",
+            "chart"=>[
+                'title'=>$morningRushTime."重点路口持续5分钟以上溢流报警",
+                'scale'=>['min'=>0,'max'=>50],
+                'one_dimensional'=>$junctionList,
+                'two_dimensional'=>$morningTimes,
+                'data'=>[],
+            ],
+        ];
+
+        $eveningImbalanceChart=[
+            "desc"=>"干线晚高峰失衡报警持续5分钟以上的路口排名如下图所示",
+            "chart"=>[
+                'title'=>$eveningRushTime."重点路口持续5分钟以上失衡报警",
+                'scale'=>['min'=>0,'max'=>50],
+                'one_dimensional'=>$junctionList,
+                'two_dimensional'=>$eveningTimes,
+                'data'=>[],
+            ],
+        ];
+        $evemingOversaturationChart=[
+            "desc"=>"干线晚高峰过饱和报警持续5分钟以上的路口排名如下图所示",
+            "chart"=>[
+                'title'=>$eveningRushTime."重点路口持续5分钟以上过饱和报警",
+                'scale'=>['min'=>0,'max'=>50],
+                'one_dimensional'=>$junctionList,
+                'two_dimensional'=>$eveningTimes,
+                'data'=>[],
+            ],
+        ];
+        $eveningSpilloverChart=[
+            "desc"=>"干线晚高峰溢流报警持续5分钟以上的路口排名如下图所示",
+            "chart"=>[
+                'title'=>$eveningRushTime."重点路口持续5分钟以上溢流报警",
+                'scale'=>['min'=>0,'max'=>50],
+                'one_dimensional'=>$junctionList,
+                'two_dimensional'=>$eveningTimes,
+                'data'=>[],
+            ],
+        ];
+        $chartList[]=$morningImbalanceChart;
+        $chartList[]=$morningOversaturationChart;
+        $chartList[]=$morningSpilloverChart;
+        $chartList[]=$eveningImbalanceChart;
+        $chartList[]=$evemingOversaturationChart;
+        $chartList[]=$eveningSpilloverChart;
+
+        return $chartList;
+    }
+
+    public function queryRoadAlarm($cityID,$roadID,$startTime,$endTime,$morningRushTime,$eveningRushTime){
+        $roadInfo= $this->road_model->getRoadInfo($roadID);
+
+        $roadDetail = $this->arterialtiming_model->getJunctionFlowInfos($cityID,0,explode(",",$roadInfo['logic_junction_ids']));
+
+        $junctionList  = explode(",",$roadInfo['logic_junction_ids']);
+
+
+        $alarmInfo = $this->diagnosisNoTiming_model->getJunctionAlarmHoursData($cityID, $junctionList, $this->getDateFromRange($startTime,$endTime));
+
+        //1: 过饱和 2: 溢流 3:失衡
+        $imbalance=[];
+        $oversaturation=[];
+        $spillover=[];
+        //路口报警统计
+        foreach ($alarmInfo as $ak => $av){
+            //过滤报警不足5分钟的
+            if(strtotime($av['end_time'])-strtotime($av['start_time']) < 5*60){
+                continue;
+            }
+            switch ($av['type']){
+                case 1:
+                    $oversaturation[$av['logic_junction_id']][]=$av['start_time'];
+                    break;
+                case 2:
+                    $spillover[$av['logic_junction_id']][]=$av['start_time'];
+                    break;
+                case 3:
+                    $imbalance[$av['logic_junction_id']][]=$av['start_time'];
+                    break;
+            }
+        }
+
+        $juncNameMap=[];
+        foreach ($roadDetail['junctions_info'] as $k => $j){
+            $juncNameMap[$j['name']] = $k;
+        }
+
+        //初始化表格
+        $initChartList = $this->initRoadAlarmChart($roadDetail,$morningRushTime,$eveningRushTime);
+        $fillChartData = $this->fillRoadAlarmChart($initChartList,$imbalance,$oversaturation,$spillover,$juncNameMap);
 
 
 
+        return $fillChartData;
+    }
 
     //干线协调相关代码
     public function queryRoadCoordination($city_id,$road_id,$startTime,$endTime,$morningRushTime,$eveningRushTime){
@@ -635,7 +1125,6 @@ class RoadReportService extends BaseService{
         $morningData = $this->caculateRoadCoordinationTimeData($quota,$morningRushTime[0],$morningRushTime[1]);
         //晚高峰数据过滤
         $eveningData = $this->caculateRoadCoordinationTimeData($quota,$eveningRushTime[0],$eveningRushTime[1]);
-
 
 
         $morningChart=[

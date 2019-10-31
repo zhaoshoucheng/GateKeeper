@@ -97,16 +97,17 @@ class Report extends MY_Controller
     public function generate()
     {
         $params = $this->input->post(null, true);
-
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
             'title' => 'required|trim|min_length[1]',
             'type' => 'required',
         ]);
+
         $data = [
             'city_id' => intval($params['city_id']),
             'title'   => trim($params['title']),
             'type'    => intval($params['type']),
+            'time_range'=>$params['timerange'],
         ];
         $data = $this->reportService->generate($data);
 

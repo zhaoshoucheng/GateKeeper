@@ -121,11 +121,11 @@ class JunctionReportService extends BaseService{
 				'series' => [
 					[
           				'name' => $text[1],
-          				'data' => $now_data,
+          				'data' => $this->reportService->addto48($now_data),
           			],
           			[
           				'name' => $text[2],
-          				'data' => $last_data,
+          				'data' => $this->reportService->addto48($last_data),
           			],
 				],
     		],
@@ -193,18 +193,18 @@ class JunctionReportService extends BaseService{
     			'desc' => $desc,
     			'instructions' => $instructions,
     		],
-    		'chart' => [
+    		'charts' => [
     			[
 	    			'title' => '车均停车次数',
 					'scale_title' => '停车次数',
 					'series' => [
 						'name' => "",
-						'data' => array_map(function($item) {
+						'data' => $this->reportService->addto48(array_map(function($item) {
 							return [
 								'x' => $item['key'],
 								'y' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
 							];
-						}, $index_data),
+						}, $index_data)),
 					],
     			],
     			[
@@ -212,12 +212,12 @@ class JunctionReportService extends BaseService{
 					'scale_title' => '停车延误(s)',
 					'series' => [
 						'name' => "",
-						'data' => array_map(function($item) {
+						'data' => $this->reportService->addto48(array_map(function($item) {
 							return [
 								'x' => $item['key'],
 								'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
 							];
-						}, $index_data),
+						}, $index_data)),
 					],
     			],
     			[
@@ -225,12 +225,12 @@ class JunctionReportService extends BaseService{
 					'scale_title' => '行驶速度(km/h)',
 					'series' => [
 						'name' => "",
-						'data' => array_map(function($item) {
+						'data' => $this->reportService->addto48(array_map(function($item) {
 							return [
 								'x' => $item['key'],
 								'y' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
 							];
-						}, $index_data),
+						}, $index_data)),
 					],
     			],
     			[
@@ -238,16 +238,20 @@ class JunctionReportService extends BaseService{
 					'scale_title' => '',
 					'series' => [
 						'name' => "",
-						'data' => array_map(function($item) {
+						'data' => $this->reportService->addto48(array_map(function($item) {
 							return [
 								'x' => $item['hour'],
 								'y' => round($item['pi'], 2),
 							];
-						}, $pi_data),
+						}, $pi_data)),
 					],
     			],
     		],
     	];
+    }
+
+    public function queryJuncInfo($logicJunctionID){
+        return $this->waymap_model->getJunctionDetail($logicJunctionID);
     }
 
     public function queryJuncQuotaDetail($cityID,$logicJunctionID,$startTime,$endTime){
@@ -283,6 +287,24 @@ class JunctionReportService extends BaseService{
         $flow['phase_name'] = $phaseName;
         $flow['sort_key'] = phase_sort_key($flow['in_degree'], $flow['out_degree']);
         return $flow;
+    }
+    private function sortAndFillHour($data){
+        $newData=[];
+        //初始化24小时的时段
+        for($i=0;$i<48;$i++){
+            $newData[] = [
+                "x"=>date("H:i",strtotime("00:00")+$i*30*60),
+                "y"=>0,
+            ];
+        }
+        foreach ($newData as $k => $v){
+            foreach ($data as $d){
+                if($d['x']==$v['x']){
+                    $newData[$k]['y']=$d['y'];
+                }
+            }
+        }
+        return $newData;
     }
 
     //es数据转换为表格
@@ -323,12 +345,13 @@ class JunctionReportService extends BaseService{
                     "y"=>round($series['stop_delay']/$series['traj_count'],2)
                 ];
             }
+
             $stopTimeChartData['flowlist'][]=[
                 "logic_flow_id"=>$fk,
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"次/车",
-                    "series"=>[["name"=>"","data"=>$stopTimeCycleChart]],
+                    "series"=>[["name"=>"","data"=>$this->sortAndFillHour($stopTimeCycleChart)]],
                 ],
             ];
             $speedChartData['flowlist'][]=[
@@ -336,7 +359,7 @@ class JunctionReportService extends BaseService{
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"km/h",
-                    "series"=>[["name"=>"","data"=>$speedCycleChart]]
+                    "series"=>[["name"=>"","data"=>$this->sortAndFillHour($speedCycleChart)]]
                 ],
             ];
             $stopDelayChartData['flowlist'][]=[
@@ -344,7 +367,7 @@ class JunctionReportService extends BaseService{
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"S",
-                    "series"=>[["name"=>"","data"=>$stopDelayCycleChart]]
+                    "series"=>[["name"=>"","data"=>$this->sortAndFillHour($stopDelayCycleChart)]]
                 ],
             ];
         }

@@ -8,6 +8,7 @@ namespace Services;
 use Services\AreaService;
 use Services\ReportService;
 use Services\DataService;
+use Services\RoadReportService;
 
 class AreaReportService extends BaseService{
     public function __construct()
@@ -20,10 +21,12 @@ class AreaReportService extends BaseService{
         $this->load->model('waymap_model');
         $this->load->model('area_model');
         $this->load->model('pi_model');
+        $this->load->model('thermograph_model');
 
         $this->areaService = new AreaService();
         $this->reportService = new ReportService();
         $this->dataService = new DataService();
+        $this->roadReportService = new RoadReportService();
     }
 
     public function introduction($params) {
@@ -137,11 +140,11 @@ class AreaReportService extends BaseService{
 				'series' => [
 					[
           				'name' => $text[1],
-          				'data' => $now_data,
+          				'data' => $this->reportService->addto48($now_data),
           			],
           			[
           				'name' => $text[2],
-          				'data' => $last_data,
+          				'data' => $this->reportService->addto48($last_data),
           			],
 				],
     		],
@@ -384,5 +387,208 @@ class AreaReportService extends BaseService{
 	    		],
     		],
     	];
+    }
+
+    public function queryTopPI($params) {
+    	$city_id = intval($params['city_id']);
+    	$area_id = $params['area_id'];
+    	$start_date = $params['start_date'];
+    	$end_date = $params['end_date'];
+
+    	// $city_info = $this->openCity_model->getCityInfo($city_id);
+    	// if (empty($city_info)) {
+
+    	// }
+
+    	// $area_info = $this->area_model->getAreaInfo($area_id);
+    	// if (empty($area_info)) {
+
+    	// }
+
+    	$area_detail = $this->areaService->getAreaDetail([
+    		'city_id' => $city_id,
+    		'area_id' => $area_id,
+    	]);
+    	$logic_junction_ids =array_column($area_detail['junction_list'], 'logic_junction_id');
+
+    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date));
+    	$morning_peek_hours = $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']);
+    	$evening_peek = $this->reportService->getEveningPeekRange($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date));
+    	$evening_peek_hours = $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']);
+    	$peek_hours = array_merge($morning_peek_hours, $evening_peek_hours);
+
+    	$morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date), $peek_hours);
+    	usort($morning_pi_data, function($a, $b) {
+    		return $a['pi'] > $b['pi'] ? -1 : 1;
+    	});
+    	return array_slice(array_column($morning_pi_data, 'logic_junction_id'), 0, 3);
+    }
+
+    private function getDateFromRange($startdate, $enddate)
+    {
+        $stimestamp = strtotime($startdate);
+        $etimestamp = strtotime($enddate);
+
+        // 计算日期段内有多少天
+        $days = ($etimestamp - $stimestamp) / 86400 + 1;
+        // 保存每天日期
+        $date = [];
+        for ($i = 0; $i < $days; $i++) {
+            $date[] = date('Y-m-d', $stimestamp + (86400 * $i));
+        }
+        return $date;
+    }
+
+    private function getTimeFromRange($st,$et,$step){
+        $stimestamp = strtotime($st);
+        $etimestamp = strtotime($et);
+        $hours=[];
+        for($i = $stimestamp;$i<=$etimestamp;$i+=$step*60){
+            $hours[] = date('H:i', $i);
+        }
+
+        return $hours;
+    }
+
+
+    //时间前后取整
+    private function roundingtime($time){
+        $hour = date("H",strtotime($time));
+        $min = date("i",strtotime($time));
+        if($min < 30){
+            $min = "00";
+        }else{
+            $min = "30";
+        }
+        return $hour.":".$min;
+    }
+
+    public function queryAreaAlarm($cityID,$areaID,$startTime,$endTime,$morningRushTime,$eveningRushTime){
+        $area_detail = $this->areaService->getAreaDetail([
+            'city_id' => $cityID,
+            'area_id' => $areaID,
+        ]);
+
+        $junctionList =array_column($area_detail['junction_list'], 'logic_junction_id');
+//        $junctionList  = explode(",",$roadInfo['logic_junction_ids']);
+        $juncNameMap=[];
+        $rd=[];
+        $rd['junction_info']=[];
+        foreach ($area_detail['junction_list'] as $k => $j){
+            $juncNameMap[$j['name']] = $j['logic_junction_id'];
+            $rd['junctions_info'][$j['logic_junction_id']] = ['name'=>$j['name']];
+        }
+
+        $alarmInfo = $this->diagnosisNoTiming_model->getJunctionAlarmHoursData($cityID, $junctionList, $this->getDateFromRange($startTime,$endTime));
+
+        //1: 过饱和 2: 溢流 3:失衡
+        $imbalance=[];
+        $oversaturation=[];
+        $spillover=[];
+        //路口报警统计
+        foreach ($alarmInfo as $ak => $av){
+            //过滤报警不足5分钟的
+            if(strtotime($av['end_time'])-strtotime($av['start_time']) < 5*60){
+                continue;
+            }
+            switch ($av['type']){
+                case 1:
+                    $oversaturation[$av['logic_junction_id']][]=$av['start_time'];
+                    break;
+                case 2:
+                    $spillover[$av['logic_junction_id']][]=$av['start_time'];
+                    break;
+                case 3:
+                    $imbalance[$av['logic_junction_id']][]=$av['start_time'];
+                    break;
+            }
+        }
+
+
+
+
+        //初始化表格
+        $initChartList = $this->roadReportService->initRoadAlarmChart($rd,$morningRushTime,$eveningRushTime);
+        $fillChartData = $this->roadReportService->fillRoadAlarmChart($initChartList,$imbalance,$oversaturation,$spillover,$juncNameMap);
+
+
+        return $fillChartData;
+    }
+
+    public function QueryAreaQuotaInfo($ctyID,$roadID,$start_time,$end_time){
+        $area_detail = $this->areaService->getAreaDetail([
+            'city_id' => $ctyID,
+            'area_id' => $roadID,
+        ]);
+
+        $junctionIDs =array_column($area_detail['junction_list'], 'logic_junction_id');
+//        $junctionIDs = $road_info['logic_junction_ids'];
+        $dates = $this->getDateFromRange($start_time,$end_time);
+        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,explode(",",$junctionIDs),$ctyID);
+//        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
+        $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID);
+        //数据合并
+        $pd = $this->roadReportService->queryParamGroup($PiDatas,'pi','traj_count');
+        foreach ($pd as $p){
+            foreach ($roadQuotaData as $rk=>$rv){
+                if($p['date']==$rv['date'] && $p['hour']==$rv['hour']){
+                    $roadQuotaData[$rk]['pi']=$p['pi'];
+                    break;
+                }
+            }
+        }
+        //将天级别的数据处理为全部的数据的均值
+        $avgData=[];
+        foreach($roadQuotaData as $r){
+            if(!isset($avgData[$r['hour']])){
+                $avgData[$r['hour']]=[
+                    'stop_delay'=>0,
+                    'stop_time_cycle'=>0,
+                    'speed'=>0,
+                    'pi'=>0
+                ];
+            }
+            $avgData[$r['hour']]['stop_delay']+=$r['stop_delay'];
+            $avgData[$r['hour']]['stop_time_cycle']+=$r['stop_time_cycle'];
+            $avgData[$r['hour']]['speed']+=$r['speed'];
+            if(isset($r['pi'])){
+                $avgData[$r['hour']]['pi']+=$r['pi'];
+            }
+        }
+        $datelen = count($dates);
+        foreach ($avgData as $ak=>$av){
+            $avgData[$ak]['stop_delay'] = $av['stop_delay']/$datelen;
+            $avgData[$ak]['stop_time_cycle'] = $av['stop_time_cycle']/$datelen;
+            $avgData[$ak]['speed'] = $av['speed']/$datelen;
+            $avgData[$ak]['pi'] = $av['pi']/$datelen;
+        }
+        return $avgData;
+    }
+
+    public function saveThermograph($data,$res){
+        if($res == false){
+            return false;
+        }
+        $type=0;
+        $res = json_decode($res,true);
+        if($res['errorCode']!=0){
+            return false;
+        }
+        if(isset($res['data']['figureTitle'])){
+            $type=1;
+        }
+        if(isset($res['data']['videoTitle'])){
+            $type=2;
+        }
+        $insertData=[
+            'city_id'=>$data['city_id'],
+            'area_id'=>$data['area_id'],
+            'date'=>$data['date'],
+            'hour'=>$data['hour'],
+            'task_id'=>$res['data']['taskId'],
+            'type'=>$type
+        ];
+        $ret =  $this->thermograph_model->save($insertData);
+        return $ret;
     }
 }

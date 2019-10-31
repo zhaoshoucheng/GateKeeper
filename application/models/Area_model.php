@@ -303,6 +303,7 @@ class Area_model extends CI_Model
     {
         $res = $this->db->select($select)
             ->from($this->tb)
+            ->where('city_id', $city_id)
             ->like('area_name', $keyword)
             ->where('delete_at', '1970-01-01')
             ->get();

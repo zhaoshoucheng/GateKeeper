@@ -75,6 +75,20 @@ class RoadReport extends MY_Controller
         $data = $this->roadReportService->queryQuotaRank($params);
         $this->response($data);
     }
+    public function queryTopPI() {
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'road_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        $params['start_date'] = $params['start_time'];
+        $params['end_date'] = $params['end_time'];
+
+        $data = $this->roadReportService->queryTopPI($params);
+        $this->response($data);
+    }
 
     /*
      * 干线运行情况（停车次数，停车延误，行驶速度，PI）
@@ -130,19 +144,59 @@ class RoadReport extends MY_Controller
             'road_id' => 'required|min_length[1]',
             'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
-            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
-            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
+//            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
+//            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
         ],$params);
 
-        $morningTime = explode("~",$params['morning_rush_time']);
-        $eveningTime = explode("~",$params['evening_rush_time']);
+        //FIXME 自己计算早晚高峰
+        //查询干线路口的平均指标
+        $data  = $this->roadReportService->QueryRoadQuotaInfo($params['city_id'],$params['road_id'],$params['start_time'],$params['end_time']);
+
+        //格式化为前端要求的格式
+        $chartDatas = $this->roadReportService->transRoadQuota2Chart($data);
+
+        $mrushTime = $this->roadReportService->getMorningRushHour($chartDatas[1]);
+        $erushTime = $this->roadReportService->getEveningRushHour($chartDatas[1]);
+
+        $morningTime = [$mrushTime['s'],$mrushTime['e']];
+        $eveningTime = [$erushTime['s'],$erushTime['e']];
 
         $roaddata = $this->roadReportService->queryRoadCoordination($params['city_id'],$params['road_id'],$params['start_time'],$params['end_time'],$morningTime,$eveningTime);
 
 
         $this->response($roaddata);
     }
-    public function queryRoadAlarm(){}
+    //干线报警总结
+    public function queryRoadAlarm(){
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'road_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+//            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
+//            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
+        ],$params);
+
+
+        //FIXME 自己计算早晚高峰
+        //查询干线路口的平均指标
+        $data  = $this->roadReportService->QueryRoadQuotaInfo($params['city_id'],$params['road_id'],$params['start_time'],$params['end_time']);
+
+        //格式化为前端要求的格式
+        $chartDatas = $this->roadReportService->transRoadQuota2Chart($data);
+
+        $mrushTime = $this->roadReportService->getMorningRushHour($chartDatas[1]);
+        $erushTime = $this->roadReportService->getEveningRushHour($chartDatas[1]);
+
+        $morningTime = [$mrushTime['s'],$mrushTime['e']];
+        $eveningTime = [$erushTime['s'],$erushTime['e']];
+
+        $roadInfo = $this->roadReportService->queryRoadAlarm($params['city_id'],$params['road_id'],$params['start_time'],$params['end_time'],implode("~",$morningTime),implode("~",$eveningTime));
+
+        $this->response($roadInfo);
+
+    }
 
 
 }

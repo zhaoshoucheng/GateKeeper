@@ -221,7 +221,14 @@ class DiagnosisNoTiming_model extends CI_Model
                                 "traj_count"=>$qv['total']['value'],
                             ];
                         }
-                        //TODO $qd 时间排序
+                        //$qd 时间排序
+//                        $last_names = array_column($qd,'hour');
+//                        $ctimestr=[];
+//                        foreach ($last_names as $k=> $l){
+//                            $qd[$k]['ctime_str'] = strtotime($l);
+//                            $ctimestr[] = $qd[$k]['ctime_str'];
+//                        }
+//                        array_multisort($ctimestr,SORT_ASC,$qd);
                         $result[$fv['key']][$yv['key']] = $qd;
                     }
                 }
@@ -567,6 +574,26 @@ class DiagnosisNoTiming_model extends CI_Model
         }
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByHour', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            return $res['data'];
+        } else {
+            return [];
+        }
+    }
+
+    public function getJunctionAlarmHoursData($city_id, $junctions ,$dates ) {
+        $req = [
+            'city_id' => (int)$city_id,
+            'dates' => $dates,
+            'junction_ids'=>$junctions
+        ];
+
+
+
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetOnlineJunctionAlarmHoursData', $req, 0, 'json');
+
         if (!empty($res)) {
             $res = json_decode($res, true);
             return $res['data'];

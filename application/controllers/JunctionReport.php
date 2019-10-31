@@ -105,6 +105,8 @@ class JunctionReport extends MY_Controller
             'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
         ],$params);
 
+        $junctionInfo =$this->junctionReportService->queryJuncInfo($params['logic_junction_id']);
+
         $quotaData = $this->junctionReportService->queryJuncQuotaDetail($params['city_id'],$params['logic_junction_id'],$params['start_time'],$params['end_time']);
         //数据聚合
         $flowQuota=[];
@@ -133,6 +135,7 @@ class JunctionReport extends MY_Controller
         $finalData = [
             "overview"=>"路口各个转向的运行指标(包括停车次数、停车延误、行驶速度、排队长度等指标)变化情况如下图所示。",
             "quotalist"=>$finalData,
+            "junction_info"=>$junctionInfo
         ];
         $this->response($finalData);
     }
