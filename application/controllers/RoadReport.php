@@ -130,12 +130,22 @@ class RoadReport extends MY_Controller
             'road_id' => 'required|min_length[1]',
             'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
-            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
-            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
+//            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
+//            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
         ],$params);
 
-        $morningTime = explode("~",$params['morning_rush_time']);
-        $eveningTime = explode("~",$params['evening_rush_time']);
+        //FIXME 自己计算早晚高峰
+        //查询干线路口的平均指标
+        $data  = $this->roadReportService->QueryRoadQuotaInfo($params['city_id'],$params['road_id'],$params['start_time'],$params['end_time']);
+
+        //格式化为前端要求的格式
+        $chartDatas = $this->roadReportService->transRoadQuota2Chart($data);
+
+        $mrushTime = $this->roadReportService->getMorningRushHour($chartDatas[1]);
+        $erushTime = $this->roadReportService->getEveningRushHour($chartDatas[1]);
+
+        $morningTime = [$mrushTime['s'],$mrushTime['e']];
+        $eveningTime = [$erushTime['s'],$erushTime['e']];
 
         $roaddata = $this->roadReportService->queryRoadCoordination($params['city_id'],$params['road_id'],$params['start_time'],$params['end_time'],$morningTime,$eveningTime);
 
@@ -150,11 +160,25 @@ class RoadReport extends MY_Controller
             'road_id' => 'required|min_length[1]',
             'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
-            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
-            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
+//            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
+//            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
         ],$params);
 
-        $roadInfo = $this->roadReportService->queryRoadAlarm($params['city_id'],$params['road_id'],$params['start_time'],$params['end_time'],$params['morning_rush_time'],$params['evening_rush_time']);
+
+        //FIXME 自己计算早晚高峰
+        //查询干线路口的平均指标
+        $data  = $this->roadReportService->QueryRoadQuotaInfo($params['city_id'],$params['road_id'],$params['start_time'],$params['end_time']);
+
+        //格式化为前端要求的格式
+        $chartDatas = $this->roadReportService->transRoadQuota2Chart($data);
+
+        $mrushTime = $this->roadReportService->getMorningRushHour($chartDatas[1]);
+        $erushTime = $this->roadReportService->getEveningRushHour($chartDatas[1]);
+
+        $morningTime = [$mrushTime['s'],$mrushTime['e']];
+        $eveningTime = [$erushTime['s'],$erushTime['e']];
+
+        $roadInfo = $this->roadReportService->queryRoadAlarm($params['city_id'],$params['road_id'],$params['start_time'],$params['end_time'],implode("~",$morningTime),implode("~",$eveningTime));
 
         $this->response($roadInfo);
 
