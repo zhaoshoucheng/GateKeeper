@@ -232,6 +232,10 @@ class RoadReportService extends BaseService{
 	    		'info' => [
 	    			'desc' => sprintf($tpl, '早', count($morning_data), implode(',', $morning_junction_names), '早'),
 	    		],
+	    		'center' => [
+	    			'lng' => round(array_sum(array_column($morning_data, 'lng')) / count(array_column($morning_data, 'lng')), 5),
+	    			'lat' => round(array_sum(array_column($morning_data, 'lat')) / count(array_column($morning_data, 'lat')), 5),
+	    		],
 	    		'chart' => [
 	    			'title' => '平均延误对比',
 					'scale_title' => '平均延误(s)',
@@ -244,6 +248,10 @@ class RoadReportService extends BaseService{
     		'evenint_peek' => [
     			'info' => [
 	    			'desc' => sprintf($tpl, '晚', count($evening_data), implode(',', $evening_junction_names), '晚'),
+	    		],
+	    		'center' => [
+	    			'lng' => round(array_sum(array_column($evening_data, 'lng')) / count(array_column($evening_data, 'lng')), 5),
+	    			'lat' => round(array_sum(array_column($evening_data, 'lat')) / count(array_column($evening_data, 'lat')), 5),
 	    		],
 	    		'chart' => [
 	    			'title' => '平均延误对比',
