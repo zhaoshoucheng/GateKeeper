@@ -377,6 +377,37 @@ class RoadReportService extends BaseService{
     	];
     }
 
+    public function queryTopPI($params) {
+    	$city_id = intval($params['city_id']);
+    	$road_id = $params['road_id'];
+    	$start_date = $params['start_date'];
+    	$end_date = $params['end_date'];
+    	$top = 3;
+    	if (isset($params['top'])) {
+    		$top = $params['top'];
+    	}
+
+    	// $city_info = $this->openCity_model->getCityInfo($city_id);
+    	// if (empty($city_info)) {
+
+    	// }
+
+    	$road_info = $this->road_model->getRoadInfo($road_id);
+    	if (empty($road_info)) {
+
+    	}
+    	$logic_junction_ids = $road_info['logic_junction_ids'];
+
+    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+    	// $evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+
+    	$morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date), $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
+    	usort($morning_pi_data, function($a, $b) {
+    		return $a['pi'] > $b['pi'] ? -1 : 1;
+    	});
+    	return array_slice(array_column($morning_pi_data, 'logic_junction_id'), 0, 3);
+    }
+
     public function QueryRoadQuotaInfo($ctyID,$roadID,$start_time,$end_time){
         $road_info = $this->road_model->getRoadInfo($roadID);
         $junctionIDs = $road_info['logic_junction_ids'];

@@ -510,6 +510,38 @@ class AreaReportService extends BaseService{
     		],
     	];
     }
+    public function queryTopPI($params) {
+    	$city_id = intval($params['city_id']);
+    	$area_id = $params['area_id'];
+    	$start_date = $params['start_date'];
+    	$end_date = $params['end_date'];
+
+    	// $city_info = $this->openCity_model->getCityInfo($city_id);
+    	// if (empty($city_info)) {
+
+    	// }
+
+    	// $area_info = $this->area_model->getAreaInfo($area_id);
+    	// if (empty($area_info)) {
+
+    	// }
+
+    	$area_detail = $this->areaService->getAreaDetail([
+    		'city_id' => $city_id,
+    		'area_id' => $area_id,
+    	]);
+    	$logic_junction_ids =array_column($area_detail['junction_list'], 'logic_junction_id');
+
+    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date));
+    	// $evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+
+    	$morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date), $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
+    	usort($morning_pi_data, function($a, $b) {
+    		return $a['pi'] > $b['pi'] ? -1 : 1;
+    	});
+    	return array_slice(array_column($morning_pi_data, 'logic_junction_id'), 0, 3);
+    }
+
     private function getDateFromRange($startdate, $enddate)
     {
         $stimestamp = strtotime($startdate);

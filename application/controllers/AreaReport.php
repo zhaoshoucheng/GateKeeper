@@ -80,6 +80,21 @@ class AreaReport extends MY_Controller
         $data = $this->areaReportService->queryQuotaRank($params);
         $this->response($data);
     }
+    public function queryTopPI() {
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        $params['start_date'] = $params['start_time'];
+        $params['end_date'] = $params['end_time'];
+
+        $data = $this->areaReportService->queryTopPI($params);
+        $this->response($data);
+    }
+
     //区域报警总结
     public function queryAreaAlarm(){
         $params = $this->input->get(null, true);
