@@ -21,6 +21,7 @@ class AreaReportService extends BaseService{
         $this->load->model('waymap_model');
         $this->load->model('area_model');
         $this->load->model('pi_model');
+        $this->load->model('thermograph_model');
 
         $this->areaService = new AreaService();
         $this->reportService = new ReportService();
@@ -648,5 +649,32 @@ class AreaReportService extends BaseService{
             $avgData[$ak]['pi'] = $av['pi']/$datelen;
         }
         return $avgData;
+    }
+
+    public function saveThermograph($data,$res){
+        if($res == false){
+            return false;
+        }
+        $type=0;
+        $res = json_decode($res,true);
+        if($res['errorCode']!=0){
+            return false;
+        }
+        if(isset($res['data']['figureTitle'])){
+            $type=1;
+        }
+        if(isset($res['data']['videoTitle'])){
+            $type=2;
+        }
+        $insertData=[
+            'city_id'=>$data['city_id'],
+            'area_id'=>$data['area_id'],
+            'date'=>$data['date'],
+            'hour'=>$data['hour'],
+            'task_id'=>$res['data']['taskId'],
+            'type'=>$type
+        ];
+        $ret =  $this->thermograph_model->save($insertData);
+        return $ret;
     }
 }
