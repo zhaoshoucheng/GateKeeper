@@ -6,6 +6,8 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Services\AreaReportService;
+use Services\RoadReportService;
+use Services\AreaService;
 
 class AreaReport extends MY_Controller
 {
@@ -17,6 +19,8 @@ class AreaReport extends MY_Controller
         $this->config->load('report_conf');
 
         $this->areaReportService = new AreaReportService();
+        $this->roadReportService = new RoadReportService();
+        $this->areaService = new AreaService();
     }
 
     public function introduction() {
@@ -99,11 +103,24 @@ class AreaReport extends MY_Controller
             'area_id' => 'required|min_length[1]',
             'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
-            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
-            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
+//            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
+//            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
         ],$params);
 
-        $areaInfo = $this->areaReportService->queryAreaAlarm($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time'],$params['morning_rush_time'],$params['evening_rush_time']);
+        //FIXME 后端计算早晚高峰
+        //查询区域路口的平均指标
+        $data  = $this->areaReportService->QueryAreaQuotaInfo($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time']);
+
+        //格式化为前端要求的格式
+        $chartDatas = $this->roadReportService->transRoadQuota2Chart($data);
+
+        $mrushTime = $this->roadReportService->getMorningRushHour($chartDatas[1]);
+        $erushTime = $this->roadReportService->getEveningRushHour($chartDatas[1]);
+
+        $morningTime = [$mrushTime['s'],$mrushTime['e']];
+        $eveningTime = [$erushTime['s'],$erushTime['e']];
+
+        $areaInfo = $this->areaReportService->queryAreaAlarm($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time'],implode("~",$morningTime),implode("~",$eveningTime));
 
         $this->response($areaInfo);
 
@@ -141,6 +158,85 @@ class AreaReport extends MY_Controller
 
 
         $this->response(['info'=>['instructions'=>"报告采用综合评估指数（PI）来分析路口整体及各维度交通运行情况XXXX",'desc'=>$desc,'morning_rush_time'=>$mrushTime['s']."~".$mrushTime['e'],"evening_rush_time"=>$erushTime['s']."~".$erushTime['e']],'charts'=>$chartDatas]);
+    }
+
+    //查询区域轨迹热力图
+    public function queryAreaThermograph(){
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        //TODO 日期判断
+
+
+        $this->response([
+            'png'=>[],
+            'mp4'=>[],
+        ]);
+
+    }
+
+    //创建区域轨迹热力图
+    public function createAreaThermograph(){
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|min_length[1]',
+            'date'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        $areaInfo = $this->areaService->getAreaDetail([
+            'city_id' => $params['city_id'],
+            'area_id' => $params['area_id'],
+        ]);
+
+        //计算区域边框
+        $maxlng=0;
+        $maxlat=0;
+        $minlng=9999999;
+        $minlat=9999999;
+
+        //限制区域大小
+        foreach ($areaInfo['junction_list'] as  $j ){
+            if($j['lng'] > $maxlng){
+                $maxlng = $j['lng'];
+            }
+            if($j['lat'] > $maxlat){
+                $maxlat = $j['lat'];
+            }
+            if($j['lat'] < $minlat){
+                $minlat = $j['lat'];
+            }
+            if($j['lng'] < $minlng){
+                $minlng = $j['lng'];
+            }
+        }
+        //暂时写死
+        $hour = ["07:00","10:00"];
+        $params['hour'] = implode(",", $hour);
+
+
+        $reqdata = [
+            "cityId"=>$params['city_id'],
+            "consumer"=>"report",
+            "dateString"=>$params['date'],
+            "deadlineString"=>$params['date'],
+            "hourSpan"=>$hour,
+            "isPublic"=>"true",
+            "isShowColorbar"=>"false",
+            "polygon"=>$maxlng.",".$maxlat.";".$maxlng.",".$minlat.";".$minlng.",".$minlat.";".$minlng.",".$maxlat,
+            "figureTitle"=>$areaInfo['area_name'],
+            "autoStart"=>"true"
+        ];
+        $url = "http://100.90.164.31:8036/figure-service/create-task";
+        $res = httpPOST($url,$reqdata,0,'json');
+
+        $ret = $this->areaReportService->saveThermograph($params,$res);
+
+        $this->response($ret);
+
     }
 
 }
