@@ -233,6 +233,7 @@ class Road_model extends CI_Model
     {
         $res = $this->db->select($select)
             ->from($this->tb)
+            ->where('city_id', $city_id)
             ->like('road_name', $keyword)
             ->where('is_delete', 0)
             ->get();
