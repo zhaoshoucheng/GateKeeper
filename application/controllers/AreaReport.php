@@ -169,13 +169,39 @@ class AreaReport extends MY_Controller
             'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
         ],$params);
-        //TODO 日期判断
+
+        //查询早高峰
+        //查询区域路口的平均指标
+        $data  = $this->areaReportService->QueryAreaQuotaInfo($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time']);
+
+        //格式化为前端要求的格式
+        $chartDatas = $this->roadReportService->transRoadQuota2Chart($data);
+
+        $mrushTime = $this->roadReportService->getMorningRushHour($chartDatas[1]);
+
+        //查询taskID
+        $taskID = $this->areaReportService->queryThermographTaskID($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time'],1);
+
+        $url = "http://100.90.164.31:8036/figure-service/gift-urls";
+
+        //查询早高峰
+        $ret = $this->areaReportService->queryThermograph($url,$taskID['task_id'],$mrushTime);
 
 
         $this->response([
-            'png'=>[],
+            'png'=>$ret,
             'mp4'=>[],
+            'info'=>[
+                'png_info'=>"下图展示了分析区域".$taskID['date']."早高峰的轨迹热力演变图,图中路段的不同颜色代表了滴滴车辆的平均运行速度,轨迹回放视频与轨迹热力演变图清楚的展示分析区域早高峰交通运行情况的演变过程",
+                'mp4_info'=>""
+            ],
         ]);
+
+    }
+
+
+    //更新区域轨迹热力图状态
+    public function updateAreaThermographStatus(){
 
     }
 
@@ -214,7 +240,7 @@ class AreaReport extends MY_Controller
             }
         }
         //暂时写死
-        $hour = ["07:00","10:00"];
+        $hour = ["07:00:00","10:00:00"];
         $params['hour'] = implode(",", $hour);
 
 

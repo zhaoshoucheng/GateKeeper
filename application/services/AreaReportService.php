@@ -532,9 +532,9 @@ class AreaReportService extends BaseService{
         $junctionIDs =array_column($area_detail['junction_list'], 'logic_junction_id');
 //        $junctionIDs = $road_info['logic_junction_ids'];
         $dates = $this->getDateFromRange($start_time,$end_time);
-        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,explode(",",$junctionIDs),$ctyID);
+        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,$junctionIDs,$ctyID);
 //        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
-        $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID);
+        $PiDatas = $this->pi_model->getJunctionsPi($dates,$junctionIDs,$ctyID);
         //数据合并
         $pd = $this->roadReportService->queryParamGroup($PiDatas,'pi','traj_count');
         foreach ($pd as $p){
@@ -599,4 +599,71 @@ class AreaReportService extends BaseService{
         $ret =  $this->thermograph_model->save($insertData);
         return $ret;
     }
+
+    public function queryThermograph($url,$taskID,$morningRushTime){
+        $ret = httpGET($url."?taskId=".$taskID);
+        if($ret == false){
+            return [];
+        }
+
+        $ret = json_decode($ret,true);
+        if($ret['errorCode']!=0){
+            return [];
+        }
+        $gifts = $ret['data']['giftUrls'];
+        //根据早高峰过滤
+        $st = $morningRushTime['s'];
+        $et = $morningRushTime['e'];
+        $glist = [];
+        $flag = false;
+        foreach ($gifts as $g){
+
+            if(strstr($g,str_replace(":","",$st)."-")){
+                $glist[] =$g;
+                $flag = true;
+            }elseif(strstr($g,"-".str_replace(":","",$et))){
+                $glist[] =$g;
+                break;
+            }elseif($flag){
+                $glist[] =$g;
+            }
+        }
+        return $glist;
+    }
+
+
+    public function queryThermographTaskID($cityID,$areaID,$startTime,$endTime,$type){
+        $date = $startTime;
+        if($startTime == $endTime){
+            $date = $startTime;
+        }else{
+            $ds = $this->getDateFromRange($startTime,$endTime);
+            foreach ($ds as $v){
+                $week = date("w",strtotime($v));
+                if($week == 1){
+                    $date=$v;
+                    break;
+                }
+            }
+        }
+
+
+        $query=[
+            'city_id'=>$cityID,
+            'area_id'=>$areaID,
+            'date'=>$date,
+            'type'=>$type,
+        ];
+
+        $ret = $this->thermograph_model->query($query);
+
+        if(empty($ret)){
+            return false;
+        }
+        $taskID = $ret[0]['task_id'];
+
+        return ['task_id'=>$taskID,'date'=>$date];
+
+    }
+
 }

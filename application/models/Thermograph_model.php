@@ -15,7 +15,8 @@ class Thermograph_model extends CI_Model
     }
 
     function query($data){
-        $ret = $this->its_tool->select('task_id')->from($this->_table)->get()->result_array();
+
+        $ret = $this->its_tool->select('task_id')->from($this->_table)->where($data)->get()->result_array();
         return $ret;
     }
 
