@@ -187,7 +187,6 @@ class AreaReport extends MY_Controller
         //查询早高峰
         $ret = $this->areaReportService->queryThermograph($url,$taskID['task_id'],$mrushTime);
 
-
         $this->response([
             'png'=>$ret,
             'mp4'=>[],
@@ -238,6 +237,11 @@ class AreaReport extends MY_Controller
             if($j['lng'] < $minlng){
                 $minlng = $j['lng'];
             }
+        }
+        if(($maxlng-$minlng)>0.15 || ($maxlat-$minlat)>0.2){
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = "区域过大";
+            return;
         }
         //暂时写死
         $hour = ["07:00:00","10:00:00"];

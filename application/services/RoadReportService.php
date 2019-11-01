@@ -713,7 +713,7 @@ class RoadReportService extends BaseService{
                             $morningmaxscale=$v2;
                         }
 
-                        $mcd['chart']['data'][] = [$k1,$k2,$v2];
+                        $mcd['chart']['data'][] = [$k2,$k1,$v2];
                     }
                 }
                 $mcd['chart']['scale']['max']=$morningmaxscale+5;
@@ -749,7 +749,7 @@ class RoadReportService extends BaseService{
                             $eveningmaxscale=$v2;
                         }
 
-                        $ecd['chart']['data'][] = [$k1,$k2,$v2];
+                        $ecd['chart']['data'][] = [$k2,$k1,$v2];
                     }
                 }
                 $ecd['chart']['scale']['max']=$eveningmaxscale+5;
@@ -811,7 +811,7 @@ class RoadReportService extends BaseService{
                             $morningmaxscale=$v2;
                         }
 
-                        $mcd['chart']['data'][] = [$k1,$k2,$v2];
+                        $mcd['chart']['data'][] = [$k2,$k1,$v2];
                     }
                 }
                 $mcd['chart']['scale']['max']=$morningmaxscale+5;
@@ -847,7 +847,7 @@ class RoadReportService extends BaseService{
                             $eveningmaxscale=$v2;
                         }
 
-                        $ecd['chart']['data'][] = [$k1,$k2,$v2];
+                        $ecd['chart']['data'][] = [$k2,$k1,$v2];
                     }
                 }
                 $ecd['chart']['scale']['max']=$eveningmaxscale+5;
@@ -908,7 +908,7 @@ class RoadReportService extends BaseService{
                             $morningmaxscale=$v2;
                         }
 
-                        $mcd['chart']['data'][] = [$k1,$k2,$v2];
+                        $mcd['chart']['data'][] = [$k2,$k1,$v2];
                     }
                 }
                 $mcd['chart']['scale']['max']=$morningmaxscale+5;
@@ -944,7 +944,7 @@ class RoadReportService extends BaseService{
                             $eveningmaxscale=$v2;
                         }
 
-                        $ecd['chart']['data'][] = [$k1,$k2,$v2];
+                        $ecd['chart']['data'][] = [$k2,$k1,$v2];
                     }
                 }
                 $ecd['chart']['scale']['max']=$eveningmaxscale+5;
