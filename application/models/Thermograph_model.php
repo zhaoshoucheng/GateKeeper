@@ -20,6 +20,14 @@ class Thermograph_model extends CI_Model
         return $ret;
     }
 
+    function updateUnreadyTask($taskID,$status){
+        $data = [
+            'status'=>$status
+        ];
+        return $this->its_tool->where('task_id', $taskID)
+            ->update($this->_table, $data);
+    }
+
 //    function insert_batch($task_dates) {
 //        // $task['created_at'] = date('Y-m-d H:i:s');
 //        // $task['updated_at'] = date('Y-m-d H:i:s');

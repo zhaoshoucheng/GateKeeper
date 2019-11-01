@@ -201,6 +201,25 @@ class AreaReport extends MY_Controller
 
     //更新区域轨迹热力图状态
     public function updateAreaThermographStatus(){
+        //查询全部status为0的任务
+        $tasks = $this->areaReportService->queryUnreadyTask();
+        $giftUrl = "http://100.90.164.31:8036/figure-service/task-status";
+        $videoUrl = "http://100.90.164.31:8036/video-service/task-status";
+        foreach ($tasks as $t){
+            $rg = httpGET($giftUrl."?taskId=".$t);
+            $rg = json_decode($rg,true);
+            if(isset($rg['errorCode']) && $rg['errorCode']==0){
+                $this->areaReportService->updateUnreadyTasks($t,$rg['data']['taskStatus']);
+                continue;
+            }
+            $rv = httpGET($videoUrl."?taskId=".$t);
+            $rv = json_encode($rv,true);
+            if(isset($rv['errorCode']) && $rv['errorCode']==0){
+                $this->areaReportService->updateUnreadyTasks($t,$rv['data']['taskStatus']);
+            }
+        }
+
+        $this->response($tasks);
 
     }
 
@@ -260,10 +279,11 @@ class AreaReport extends MY_Controller
             "figureTitle"=>$areaInfo['area_name'],
             "autoStart"=>"true"
         ];
+        //创建热力轨迹图
         $url = "http://100.90.164.31:8036/figure-service/create-task";
         $res = httpPOST($url,$reqdata,0,'json');
-
         $ret = $this->areaReportService->saveThermograph($params,$res);
+        //创建热力视频
 
         $this->response($ret);
 

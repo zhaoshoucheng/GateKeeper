@@ -600,6 +600,19 @@ class AreaReportService extends BaseService{
         return $ret;
     }
 
+    //查询未知状态的任务
+    public function queryUnreadyTask(){
+        $where = [
+            'status'=>0
+        ];
+        $tasks = $this->thermograph_model->query($where);
+        return array_column($tasks,'task_id');
+    }
+    //更新任务的状态
+    public function updateUnreadyTasks($taskID,$status){
+        return $this->thermograph_model->updateUnreadyTask($taskID,$status);
+    }
+
     public function queryThermograph($url,$taskID,$morningRushTime){
         $ret = httpGET($url."?taskId=".$taskID);
         if($ret == false){
