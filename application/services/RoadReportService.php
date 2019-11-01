@@ -728,7 +728,7 @@ class RoadReportService extends BaseService{
                 array_multisort($last_names,SORT_DESC,$sd);
                 $sortJunc = [];
                 foreach ($sd as $s){
-                    $sortJunc[$mcd['chart']['one_dimensional'][$s[0]]]=1;
+                    $sortJunc[$mcd['chart']['one_dimensional'][$s[1]]]=1;
                 }
                 $i=0;
                 foreach ($sortJunc as $sjk=>$sjv){
@@ -764,7 +764,7 @@ class RoadReportService extends BaseService{
                 array_multisort($last_names,SORT_DESC,$sd);
                 $sortJunc = [];
                 foreach ($sd as $s){
-                    $sortJunc[$ecd['chart']['one_dimensional'][$s[0]]]=1;
+                    $sortJunc[$ecd['chart']['one_dimensional'][$s[1]]]=1;
                 }
                 $i=0;
                 foreach ($sortJunc as $sjk=>$sjv){
@@ -826,7 +826,7 @@ class RoadReportService extends BaseService{
                 array_multisort($last_names,SORT_DESC,$sd);
                 $sortJunc = [];
                 foreach ($sd as $s){
-                    $sortJunc[$mcd['chart']['one_dimensional'][$s[0]]]=1;
+                    $sortJunc[$mcd['chart']['one_dimensional'][$s[1]]]=1;
                 }
                 $i=0;
                 foreach ($sortJunc as $sjk=>$sjv){
@@ -862,7 +862,7 @@ class RoadReportService extends BaseService{
                 array_multisort($last_names,SORT_DESC,$sd);
                 $sortJunc = [];
                 foreach ($sd as $s){
-                    $sortJunc[$ecd['chart']['one_dimensional'][$s[0]]]=1;
+                    $sortJunc[$ecd['chart']['one_dimensional'][$s[1]]]=1;
                 }
                 $i=0;
                 foreach ($sortJunc as $sjk=>$sjv){
@@ -923,7 +923,7 @@ class RoadReportService extends BaseService{
                 array_multisort($last_names,SORT_DESC,$sd);
                 $sortJunc = [];
                 foreach ($sd as $s){
-                    $sortJunc[$mcd['chart']['one_dimensional'][$s[0]]]=1;
+                    $sortJunc[$mcd['chart']['one_dimensional'][$s[1]]]=1;
                 }
                 $i=0;
                 foreach ($sortJunc as $sjk=>$sjv){
@@ -959,7 +959,7 @@ class RoadReportService extends BaseService{
                 array_multisort($last_names,SORT_DESC,$sd);
                 $sortJunc = [];
                 foreach ($sd as $s){
-                    $sortJunc[$ecd['chart']['one_dimensional'][$s[0]]]=1;
+                    $sortJunc[$ecd['chart']['one_dimensional'][$s[1]]]=1;
                 }
                 $i=0;
                 foreach ($sortJunc as $sjk=>$sjv){
