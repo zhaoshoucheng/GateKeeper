@@ -135,7 +135,7 @@ class JunctionReport extends MY_Controller
         $finalData = [
             "overview"=>"路口各个转向的运行指标(包括停车次数、停车延误、行驶速度、排队长度等指标)变化情况如下图所示。",
             "quotalist"=>$finalData,
-            "junction_info"=>$junctionInfo
+            "junction_info"=>$junctionInfo[0]
         ];
         $this->response($finalData);
     }
