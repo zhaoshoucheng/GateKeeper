@@ -136,6 +136,7 @@ class AreaReport extends MY_Controller
         ],$params);
         //查询区域路口的平均指标
         $data  = $this->areaReportService->QueryAreaQuotaInfo($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time']);
+//        $data  = $this->areaReportService->getJunctionsAllQuotaEs($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time']);
 
         //格式化为前端要求的格式
         $chartDatas = $this->roadReportService->transRoadQuota2Chart($data);
@@ -186,6 +187,9 @@ class AreaReport extends MY_Controller
 
         //查询早高峰
         $ret = $this->areaReportService->queryThermograph($url,$taskID['task_id'],$mrushTime);
+
+        //查询视频
+
 
         $this->response([
             'png'=>$ret,

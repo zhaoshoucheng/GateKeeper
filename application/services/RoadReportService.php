@@ -509,10 +509,25 @@ class RoadReportService extends BaseService{
                 "y"=>round($v['pi'],2)
             ];
         }
+        //时间排序
+        usort($stopTimeCycleChart, function($a, $b) {
+            return (strtotime($a['x']) < strtotime($b['x'])) ? -1 : 1;
+        });
+        usort($speedCycleChart, function($a, $b) {
+            return (strtotime($a['x']) < strtotime($b['x'])) ? -1 : 1;
+        });
+        usort($stopDelayCycleChart, function($a, $b) {
+            return (strtotime($a['x']) < strtotime($b['x'])) ? -1 : 1;
+        });
+        usort($piChart, function($a, $b) {
+            return (strtotime($a['x']) < strtotime($b['x'])) ? -1 : 1;
+        });
+
         $stopTimeChartData['series'] =['name'=>"",'data'=>$stopTimeCycleChart];
         $speedChartData['series'] =['name'=>"",'data'=>$speedCycleChart];
         $stopDelayChartData['series'] =['name'=>"",'data'=>$stopDelayCycleChart];
         $piChartData['series'] =['name'=>"",'data'=>$piChart];
+
         $charts[] = $stopTimeChartData;
         $charts[] = $stopDelayChartData;
         $charts[] = $speedChartData;

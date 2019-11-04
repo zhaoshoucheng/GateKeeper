@@ -532,7 +532,9 @@ class AreaReportService extends BaseService{
         $junctionIDs =array_column($area_detail['junction_list'], 'logic_junction_id');
 //        $junctionIDs = $road_info['logic_junction_ids'];
         $dates = $this->getDateFromRange($start_time,$end_time);
-        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,$junctionIDs,$ctyID);
+//        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,$junctionIDs,$ctyID);
+        $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,$junctionIDs,$ctyID);
+
 //        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
         $PiDatas = $this->pi_model->getJunctionsPi($dates,$junctionIDs,$ctyID);
         //数据合并
@@ -603,7 +605,7 @@ class AreaReportService extends BaseService{
     //查询未知状态的任务
     public function queryUnreadyTask(){
         $where = [
-            'status'=>0
+            'status < '=>5
         ];
         $tasks = $this->thermograph_model->query($where);
         return array_column($tasks,'task_id');
@@ -613,6 +615,7 @@ class AreaReportService extends BaseService{
         return $this->thermograph_model->updateUnreadyTask($taskID,$status);
     }
 
+    //查询热力图
     public function queryThermograph($url,$taskID,$morningRushTime){
         $ret = httpGET($url."?taskId=".$taskID);
         if($ret == false){
@@ -630,7 +633,6 @@ class AreaReportService extends BaseService{
         $glist = [];
         $flag = false;
         foreach ($gifts as $g){
-
             if(strstr($g,str_replace(":","",$st)."-")){
                 $glist[] =$g;
                 $flag = true;
