@@ -423,7 +423,8 @@ class RoadReportService extends BaseService{
         $road_info = $this->road_model->getRoadInfo($roadID);
         $junctionIDs = $road_info['logic_junction_ids'];
         $dates = $this->getDateFromRange($start_time,$end_time);
-        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,explode(",",$junctionIDs),$ctyID);
+//        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,explode(",",$junctionIDs),$ctyID);
+        $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,explode(",",$junctionIDs),$ctyID);
 //        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
         $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID);
         //数据合并
