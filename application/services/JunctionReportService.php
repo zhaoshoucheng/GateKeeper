@@ -251,7 +251,7 @@ class JunctionReportService extends BaseService{
     }
 
     public function queryJuncInfo($logicJunctionID){
-        return $this->waymap_model->flowsByJunction($logicJunctionID);
+        return $this->waymap_model->getJunctionDetail($logicJunctionID);
     }
 
     public function queryJuncQuotaDetail($cityID,$logicJunctionID,$startTime,$endTime){
