@@ -643,6 +643,11 @@ class AreaReportService extends BaseService{
                 $glist[] =$g;
             }
         }
+
+        //临时兼容视频模块
+        if(count($glist) == 0){
+            $glist[] = $gifts[0];
+        }
         return $glist;
     }
 

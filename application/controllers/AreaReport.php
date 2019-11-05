@@ -185,15 +185,18 @@ class AreaReport extends MY_Controller
 
         $url = "http://100.90.164.31:8036/figure-service/gift-urls";
 
-        //查询早高峰
         $ret = $this->areaReportService->queryThermograph($url,$taskID['task_id'],$mrushTime);
 
         //查询视频
+        $taskID = $this->areaReportService->queryThermographTaskID($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time'],2);
 
+        $url = "http://100.90.164.31:8036/video-service/gift-urls";
+
+        $map4ret = $this->areaReportService->queryThermograph($url,$taskID['task_id'],$mrushTime);
 
         $this->response([
             'png'=>$ret,
-            'mp4'=>[],
+            'mp4'=>$map4ret,
             'info'=>[
                 'png_info'=>"下图展示了分析区域".$taskID['date']."早高峰的轨迹热力演变图,图中路段的不同颜色代表了滴滴车辆的平均运行速度,轨迹回放视频与轨迹热力演变图清楚的展示分析区域早高峰交通运行情况的演变过程",
                 'mp4_info'=>""
@@ -217,7 +220,8 @@ class AreaReport extends MY_Controller
                 continue;
             }
             $rv = httpGET($videoUrl."?taskId=".$t);
-            $rv = json_encode($rv,true);
+            $rv = json_decode($rv,true);
+
             if(isset($rv['errorCode']) && $rv['errorCode']==0){
                 $this->areaReportService->updateUnreadyTasks($t,$rv['data']['taskStatus']);
             }
@@ -285,11 +289,18 @@ class AreaReport extends MY_Controller
         ];
         //创建热力轨迹图
         $url = "http://100.90.164.31:8036/figure-service/create-task";
-        $res = httpPOST($url,$reqdata,0,'json');
-        $ret = $this->areaReportService->saveThermograph($params,$res);
+//        $giftres = httpPOST($url,$reqdata,0,'json');
+        $giftres="";
+//        $ret = $this->areaReportService->saveThermograph($params,$giftres);
         //创建热力视频
 
-        $this->response($ret);
+        $mp4url = "http://100.90.164.31:8036/video-service/create-task";
+        $reqdata['videoTitle'] = $areaInfo['area_name'];
+        $mp4res = httpPOST($mp4url,$reqdata,0,'json');
+//        var_export($mp4res);
+        $ret = $this->areaReportService->saveThermograph($params,$mp4res);
+
+        $this->response(['gift'=>$giftres,'mp4'=>$mp4res]);
 
     }
 
