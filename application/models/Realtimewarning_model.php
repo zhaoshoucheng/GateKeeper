@@ -634,7 +634,7 @@ class Realtimewarning_model extends CI_Model
             $flowList[] = $item["logic_flow_id"];
             $alarmInfo = array_merge($alarmInfo, $item["alarm_info"]);
             $alarmFlowType = array_merge($alarmFlowType, $item["alarm_flow_type"]);
-            $quota = $this->getFinalQuotaInfo($item, $cityQuotaList);
+            // $quota = $this->getFinalQuotaInfo($item, $cityQuotaList);
             $newRealtimeJunctionList[$logicJunctionID] = [
                 'logic_junction_id' => $logicJunctionID,
                 'flow_ids' => $flowList,

@@ -30,3 +30,49 @@ $config['junction_alarm_type'] = [
     2 => '溢流',
     3 => '失衡',
 ];
+
+
+//绿波优化工具参数&&TOP20延误阈值参数
+$config['tool_param_default'] = '{
+    "cycle_optimization_limit": "1",
+    "cycle_optimization_lower_limit": "2",
+    "congestion_level_lower_limit": "0",
+    "slow_down_level_lower_limit": "0"
+}';
+
+//默认离线报警参数
+$config['alarm_param_realtime_default'] = '{
+    "overSatuTrailNumPara": "10",
+    "greenSlackTrailNumPara": "5",
+    "stopDelayPara": "40.0",
+    "multiStopUpperBound": "0.2",
+    "multiStopLowerBound": "0.05",
+    "noneStopUpperBound": "0.5",
+    "noneStopLowerBound": "0.2",
+    "queueLengthUpperBound": "120.0",
+    "queueLengthLowerBound": "70.0",
+    "queueRatioLowBound": "0.25", 
+    "spilloverTrailNumPara": "8",
+    "spilloverRatioPara": "0.2",
+    "downstreamSpeedPara": "3.0"
+}';
+
+//默认离线报警参数
+$config['alarm_param_offline_default'] = '{
+    "over_saturation_traj_num": "10",
+    "over_saturation_multi_stop_ratio_up": "0.3",
+    "over_saturation_none_stop_ratio_up": "0.05",
+    "over_saturation_queue_length_up": "180",
+    "over_saturation_queue_rate_up": "0.4",
+    "spillover_traj_num": "10",
+    "spillover_rate_down": "0.2",
+    "spillover_queue_rate_down": "0.9",
+    "spillover_avg_speed_down": "5",
+    "unbalance_traj_num": "5",
+    "unbalance_free_multi_stop_ratio_up": "0.05",
+    "unbalance_free_none_stop_ratio_up": "0.4",
+    "unbalance_free_queue_length_up": "70",
+    "unbalance_over_saturation_multi_stop_ratio_up": "0.2",
+    "unbalance_over_saturation_none_stop_ratio_up": "0.05",
+    "unbalance_over_saturation_queue_length_up": "150"
+}';
