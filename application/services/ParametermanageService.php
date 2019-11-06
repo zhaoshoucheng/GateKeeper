@@ -113,69 +113,61 @@ class ParametermanageService extends BaseService
     public function getRealtimeKeys()
     {
         $res = [
-            'over_saturation_traj_num'=>[
-                'name'=>'过饱和轨迹量',
-                'key'=>'over_saturation_traj_num',
+            'overSatuTrailNumPara'=>[
+                'name'=>'过饱和轨迹数',
+                'key'=>'overSatuTrailNumPara',
             ],
-            'over_saturation_multi_stop_ratio_up'=>[
-                'name'=>'过饱和上游二次停车比例',
-                'key'=>'over_saturation_multi_stop_ratio_up',
+            'stopDelayPara'=>[
+                'name'=>'过饱和停车延误',
+                'key'=>'stopDelayPara',
             ],
-            'over_saturation_none_stop_ratio_up'=>[
-                'name'=>'过饱和上游无停车比例',
-                'key'=>'over_saturation_none_stop_ratio_up',
+            'multiStopUpperBound'=>[
+                'name'=>'多次停车比例上限',
+                'key'=>'multiStopUpperBound',
             ],
-            'over_saturation_queue_length_up'=>[
-                'name'=>'过饱和上游排队长度',
-                'key'=>'over_saturation_queue_length_up',
+            'noneStopLowerBound'=>[
+                'name'=>'不停车比例下限',
+                'key'=>'noneStopLowerBound',
             ],
-            'over_saturation_queue_rate_up'=>[
-                'name'=>'过饱和上游排队占比',
-                'key'=>'over_saturation_queue_rate_up',
+            'queueLengthUpperBound'=>[
+                'name'=>'排队长度上限',
+                'key'=>'queueLengthUpperBound',
             ],
-            'spillover_traj_num'=>[
-                'name'=>'溢流轨迹量',
-                'key'=>'spillover_traj_num',
+            'queueRatioLowBound'=>[
+                'name'=>'排队占比下限',
+                'key'=>'queueRatioLowBound',
             ],
-            'spillover_rate_down'=>[
-                'name'=>'溢流下游溢流比率',
-                'key'=>'spillover_rate_down',
+            'spilloverTrailNumPara'=>[
+                'name'=>'溢流轨迹数',
+                'key'=>'spilloverTrailNumPara',
             ],
-            'spillover_queue_rate_down'=>[
-                'name'=>'溢流下游排队占比',
-                'key'=>'spillover_queue_rate_down',
+            'spilloverAlarmTrailNumPara'=>[
+                'name'=>'溢流报警轨迹数',
+                'key'=>'spilloverAlarmTrailNumPara',
             ],
-            'spillover_avg_speed_down'=>[
-                'name'=>'溢流下游平均速度',
-                'key'=>'spillover_avg_speed_down',
+            'spilloverStopDelayPara'=>[
+                'name'=>'溢流停车延误',
+                'key'=>'spilloverStopDelayPara',
             ],
-            'unbalance_traj_num'=>[
-                'name'=>'失衡轨迹量',
-                'key'=>'unbalance_traj_num',
+            'queueRatioPara'=>[
+                'name'=>'排队占比',
+                'key'=>'queueRatioPara',
             ],
-            'unbalance_over_saturation_multi_stop_ratio_up'=>[
-                'name'=>'失衡过饱和上游二次停车比例',
-                'key'=>'unbalance_over_saturation_multi_stop_ratio_up',
+            'greenSlackTrailNumPara'=>[
+                'name'=>'绿损轨迹数',
+                'key'=>'greenSlackTrailNumPara',
             ],
-            'unbalance_over_saturation_none_stop_ratio_up'=>[
-                'name'=>'失衡过饱和上游无停车比例',
-                'key'=>'unbalance_over_saturation_none_stop_ratio_up',
+            'multiStopLowerBound'=>[
+                'name'=>'多次停车比例下限',
+                'key'=>'multiStopLowerBound',
             ],
-            'unbalance_over_saturation_queue_length_up'=>[
-                'name'=>'失衡过饱和上游排队长度',
-                'key'=>'unbalance_over_saturation_queue_length_up',
+            'noneStopUpperBound'=>[
+                'name'=>'不停车比例上限',
+                'key'=>'noneStopUpperBound',
             ],
-            'unbalance_free_multi_stop_ratio_up'=>[
-                'name'=>'失衡空放上游二次停车比例',
-                'key'=>'unbalance_free_multi_stop_ratio_up',
-            ],
-            'unbalance_free_none_stop_ratio_up'=>[
-                'name'=>'失衡空放上游无停车比例',
-                'key'=>'unbalance_free_none_stop_ratio_up',
-            ],
-            'unbalance_free_queue_length_up'=>[
-                'name'=>'失衡空放上游排队长度',
-                'key'=>'unbalance_free_queue_length_up',
+            'queueLengthLowerBound'=>[
+                'name'=>'排队长度下限',
+                'key'=>'queueLengthLowerBound',
             ],
         ];
         return $res;
