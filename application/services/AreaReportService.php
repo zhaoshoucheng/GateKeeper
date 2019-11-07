@@ -253,7 +253,7 @@ class AreaReportService extends BaseService{
     				return [
     					'logic_junction_id' => $item['logic_junction_id'],
     					'name' => $junctions_map[$item['logic_junction_id']]['name'],
-    					'last_rank' => isset($morning_last_pi_data_rank[$item['logic_junction_id']]) ? $morning_last_pi_data_rank[$item['logic_junction_id']] : -1,
+    					'last_rank' => isset($morning_last_pi_data_rank[$item['logic_junction_id']]) ? $morning_last_pi_data_rank[$item['logic_junction_id']] : '-',
     					'stop_delay' => $morning_data_map[$item['logic_junction_id']]['stop_delay'],
     					'stop_time_cycle' => $morning_data_map[$item['logic_junction_id']]['stop_time_cycle'],
     					'speed' => $morning_data_map[$item['logic_junction_id']]['speed'],
@@ -267,7 +267,7 @@ class AreaReportService extends BaseService{
     				return [
     					'logic_junction_id' => $item['logic_junction_id'],
     					'name' => $junctions_map[$item['logic_junction_id']]['name'],
-    					'last_rank' => isset($evening_last_pi_data_rank[$item['logic_junction_id']]) ? $evening_last_pi_data_rank[$item['logic_junction_id']] : -1,
+    					'last_rank' => isset($evening_last_pi_data_rank[$item['logic_junction_id']]) ? $evening_last_pi_data_rank[$item['logic_junction_id']] : '-',
     					'stop_delay' => $evening_data_map[$item['logic_junction_id']]['stop_delay'],
     					'stop_time_cycle' => $evening_data_map[$item['logic_junction_id']]['stop_time_cycle'],
     					'speed' => $evening_data_map[$item['logic_junction_id']]['speed'],
