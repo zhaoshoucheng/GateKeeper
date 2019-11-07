@@ -200,6 +200,7 @@ class AreaReportService extends BaseService{
     	});
     	$morning_pi_data = array_slice($morning_pi_data, 0, 20);
     	$morning_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($last_start_date, $last_end_date), $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
+        // print_r($morning_last_pi_data);
     	$morning_last_pi_data_rank = [];
     	for ($i = 0; $i < count($morning_last_pi_data); $i++) {
     		$morning_last_pi_data_rank[$morning_last_pi_data[$i]['logic_junction_id']] = $i + 1;
@@ -225,6 +226,7 @@ class AreaReportService extends BaseService{
     	});
     	$evening_pi_data = array_slice($evening_pi_data, 0, 20);
     	$evening_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($last_start_date, $last_end_date), $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
+        // print_r($evening_last_pi_data);
     	$evening_last_pi_data_rank = [];
     	for ($i = 0; $i < count($evening_last_pi_data); $i++) {
     		$evening_last_pi_data_rank[$evening_last_pi_data[$i]['logic_junction_id']] = $i + 1;
@@ -251,7 +253,7 @@ class AreaReportService extends BaseService{
     				return [
     					'logic_junction_id' => $item['logic_junction_id'],
     					'name' => $junctions_map[$item['logic_junction_id']]['name'],
-    					'last_rank' => $morning_last_pi_data_rank[$item['logic_junction_id']],
+    					'last_rank' => isset($morning_last_pi_data_rank[$item['logic_junction_id']]) ? $morning_last_pi_data_rank[$item['logic_junction_id']] : -1,
     					'stop_delay' => $morning_data_map[$item['logic_junction_id']]['stop_delay'],
     					'stop_time_cycle' => $morning_data_map[$item['logic_junction_id']]['stop_time_cycle'],
     					'speed' => $morning_data_map[$item['logic_junction_id']]['speed'],
@@ -265,7 +267,7 @@ class AreaReportService extends BaseService{
     				return [
     					'logic_junction_id' => $item['logic_junction_id'],
     					'name' => $junctions_map[$item['logic_junction_id']]['name'],
-    					'last_rank' => $evening_last_pi_data_rank[$item['logic_junction_id']],
+    					'last_rank' => isset($evening_last_pi_data_rank[$item['logic_junction_id']]) ? $evening_last_pi_data_rank[$item['logic_junction_id']] : -1,
     					'stop_delay' => $evening_data_map[$item['logic_junction_id']]['stop_delay'],
     					'stop_time_cycle' => $evening_data_map[$item['logic_junction_id']]['stop_time_cycle'],
     					'speed' => $evening_data_map[$item['logic_junction_id']]['speed'],
