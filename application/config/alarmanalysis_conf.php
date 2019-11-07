@@ -48,13 +48,14 @@ $config['alarm_param_realtime_default'] = '{
     "multiStopUpperBound": "0.2",
     "multiStopLowerBound": "0.05",
     "noneStopUpperBound": "0.5",
-    "noneStopLowerBound": "0.2",
-    "queueLengthUpperBound": "120.0",
-    "queueLengthLowerBound": "70.0",
-    "queueRatioLowBound": "0.25", 
-    "spilloverTrailNumPara": "8",
-    "spilloverRatioPara": "0.2",
-    "downstreamSpeedPara": "3.0"
+    "noneStopLowerBound": "0.1",
+    "queueLengthUpperBound": "140.0",
+    "queueLengthLowerBound": "50.0",
+    "queueRatioLowBound": "0.25",
+    "spilloverTrailNumPara": "10",
+    "queueRatioPara": "0.8",
+    "spilloverAlarmTrailNumPara": "2",
+    "spilloverStopDelayPara": "40.0"
 }';
 
 //默认离线报警参数
