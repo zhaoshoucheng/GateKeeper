@@ -754,7 +754,7 @@ class RoadReportService extends BaseService{
                     break;
                 }
             }
-            $mcd['desc'].="在早高峰失衡情况最严重";
+            $mcd['desc'].="在早高峰失衡情况最严重。";
 
         }
         if(!empty($eveningdata)){
@@ -790,7 +790,7 @@ class RoadReportService extends BaseService{
                     break;
                 }
             }
-            $ecd['desc'].="在晚高峰失衡情况最严重";
+            $ecd['desc'].="在晚高峰失衡情况最严重。";
         }
         //TODO 后续三段合成一段
         $morningmaxscale=0;
@@ -852,7 +852,7 @@ class RoadReportService extends BaseService{
                     break;
                 }
             }
-            $mcd['desc'].="在早高峰过饱和情况最严重";
+            $mcd['desc'].="在早高峰过饱和情况最严重。";
 
         }
         if(!empty($eveningdata)){
@@ -888,7 +888,7 @@ class RoadReportService extends BaseService{
                     break;
                 }
             }
-            $ecd['desc'].="在晚高峰过饱和情况最严重";
+            $ecd['desc'].="在晚高峰过饱和情况最严重。";
         }
         //TODO 后续三段合成一段
         $morningmaxscale=0;
@@ -950,7 +950,7 @@ class RoadReportService extends BaseService{
                     break;
                 }
             }
-            $mcd['desc'].="在早高峰溢流情况最严重";
+            $mcd['desc'].="在早高峰溢流情况最严重。";
 
         }
         if(!empty($eveningdata)){
@@ -986,7 +986,7 @@ class RoadReportService extends BaseService{
                     break;
                 }
             }
-            $ecd['desc'].="在晚高峰溢流情况最严重";
+            $ecd['desc'].="在晚高峰溢流情况最严重。";
         }
 
         return $chartList;
@@ -1022,7 +1022,7 @@ class RoadReportService extends BaseService{
             ],
         ];
         $morningSpilloverChart=[
-            "desc"=>"干线早高峰溢流报警持续5分钟以上的路口排名如下图所示",
+            "desc"=>"干线早高峰溢流报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$morningRushTime."重点路口持续5分钟以上溢流报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1033,7 +1033,7 @@ class RoadReportService extends BaseService{
         ];
 
         $eveningImbalanceChart=[
-            "desc"=>"干线晚高峰失衡报警持续5分钟以上的路口排名如下图所示",
+            "desc"=>"干线晚高峰失衡报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$eveningRushTime."重点路口持续5分钟以上失衡报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1043,7 +1043,7 @@ class RoadReportService extends BaseService{
             ],
         ];
         $evemingOversaturationChart=[
-            "desc"=>"干线晚高峰过饱和报警持续5分钟以上的路口排名如下图所示",
+            "desc"=>"干线晚高峰过饱和报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$eveningRushTime."重点路口持续5分钟以上过饱和报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1053,7 +1053,7 @@ class RoadReportService extends BaseService{
             ],
         ];
         $eveningSpilloverChart=[
-            "desc"=>"干线晚高峰溢流报警持续5分钟以上的路口排名如下图所示",
+            "desc"=>"干线晚高峰溢流报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$eveningRushTime."重点路口持续5分钟以上溢流报警",
                 'scale'=>['min'=>0,'max'=>50],

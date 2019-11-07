@@ -155,7 +155,7 @@ class AreaReport extends MY_Controller
         $avgSpeedm= $this->roadReportService->queryChartAvg($mrushTime['s'],$mrushTime['e'],$chartDatas[2]);
         $avgSpeede= $this->roadReportService->queryChartAvg($erushTime['s'],$erushTime['e'],$chartDatas[2]);
 
-        $desc="下图利用滴滴数据绘制了该区域全天24小时各项运行指标(车均停车次数、车均停车延误、车均行驶速度、PI)。通过数据分析,该区域的早高峰约为".$mrushTime['s']."~".$mrushTime['e'].",晚高峰约为".$erushTime['s']."~".$erushTime['e']."。与平峰相比,早晚高峰的停车次数达到".round(($avgStopCyclem+$avgStopCyclee)/2,2)."次/车/路口,停车延误接近".round(($avgStopDelaym+$avgStopDelaye)/2,2)."秒/车/路口,车均行驶速度也达到".round(($avgSpeedm+$avgSpeede)/2,2)."千米/小时左右";
+        $desc="下图利用滴滴数据绘制了该区域全天24小时各项运行指标(车均停车次数、车均停车延误、车均行驶速度、PI)。通过数据分析,该区域的早高峰约为".$mrushTime['s']."~".$mrushTime['e'].",晚高峰约为".$erushTime['s']."~".$erushTime['e']."。与平峰相比,早晚高峰的停车次数达到".round(($avgStopCyclem+$avgStopCyclee)/2,2)."次/车/路口,停车延误接近".round(($avgStopDelaym+$avgStopDelaye)/2,2)."秒/车/路口,车均行驶速度也达到".round(($avgSpeedm+$avgSpeede)/2,2)."千米/小时左右。";
 
 
         $this->response(['info'=>['instructions'=>"报告采用综合评估指数（PI）来分析路口整体及各维度交通运行情况XXXX",'desc'=>$desc,'morning_rush_time'=>$mrushTime['s']."~".$mrushTime['e'],"evening_rush_time"=>$erushTime['s']."~".$erushTime['e']],'charts'=>$chartDatas]);
@@ -198,7 +198,7 @@ class AreaReport extends MY_Controller
             'png'=>$ret,
             'mp4'=>$map4ret,
             'info'=>[
-                'png_info'=>"下图展示了分析区域".$taskID['date']."早高峰的轨迹热力演变图,图中路段的不同颜色代表了滴滴车辆的平均运行速度,轨迹回放视频与轨迹热力演变图清楚的展示分析区域早高峰交通运行情况的演变过程",
+                'png_info'=>"下图展示了分析区域".$taskID['date']."早高峰的轨迹热力演变图,图中路段的不同颜色代表了滴滴车辆的平均运行速度,轨迹回放视频与轨迹热力演变图清楚的展示分析区域早高峰交通运行情况的演变过程。",
                 'mp4_info'=>""
             ],
         ]);
