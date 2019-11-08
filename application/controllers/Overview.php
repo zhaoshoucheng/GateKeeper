@@ -166,4 +166,59 @@ class Overview extends MY_Controller
 
         $this->response($data);
     }
+
+
+    /*
+     * 查询tti概览信息,通过大脑的开放平台
+     * */
+    public function ttioverview(){
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+        ]);
+        if($params['city_id']!=11){
+            throw new \Exception('暂时不支持此城市！', ERR_PARAMETERS);
+        }
+        $url = "http://sts.didichuxing.com/api/tti/info_by_citytype?token=8b6a3fa13729ff63b4e6f66e2981ee5a";
+        $reqData = [
+            "cityname"=>"南京市",
+            "grain"=>"realtime",
+            "obj_type"=>2,
+            "pagenumber"=>1,
+            "pagesize"=>10,
+            "has_geo"=>0
+        ];
+        $data = httpPOST($url,$reqData,0,'json');
+        $data = json_decode($data,true);
+        $this->response($data['res']);
+    }
+
+    /*
+     * 查询tti随时间变化数据
+     * */
+    public function getttiinfo(){
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+        ]);
+        if($params['city_id']!=11){
+            throw new \Exception('暂时不支持此城市！', ERR_PARAMETERS);
+        }
+        $url = "http://sts.didichuxing.com/api/tti/get_tti_info_by_citytype?token=8b6a3fa13729ff63b4e6f66e2981ee5a";
+        $reqData = [
+            "cityname"=>"南京市",
+            "grain"=>"minute",
+            "obj_type"=>1,
+            "pagenumber"=>1,
+            "pagesize"=>10,
+            "has_geo"=>0,
+            "stime"=> date("Ymd")."0000",
+            "etime"=> date("YmdHi")
+        ];
+        $data = httpPOST($url,$reqData,0,'json');
+        $data = json_decode($data,true);
+        $this->response($data['res']);
+    }
+
+
 }
