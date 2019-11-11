@@ -33,6 +33,7 @@ class Traj_model extends CI_Model
         $this->token = $this->config->item('traj_token');
         $this->userid = $this->config->item('traj_userid');
         $this->interface = $this->config->item('traj_interface');
+        $this->its_interface = $this->config->item('its_traj_interface');
     }
 
     /**
@@ -69,6 +70,19 @@ class Traj_model extends CI_Model
     public function getSpaceTimeDiagram($data)
     {
         $url = $this->interface . '/Arterialspacetimediagram/getSpaceTimeDiagram';
+        return $this->post($url, $data, 20000, "json");
+    }
+
+    /**
+     * 从db并发获取pi数据
+     *
+     * @param array $data 请求的参数
+     * @return array
+     * @throws \Exception
+     */
+    public function getJunctionsPiConcurr($data)
+    {
+        $url = $this->its_interface . '/Report/queryJuncsPI';
         return $this->post($url, $data, 20000, "json");
     }
 

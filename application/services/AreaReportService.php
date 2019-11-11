@@ -21,6 +21,7 @@ class AreaReportService extends BaseService{
         $this->load->model('waymap_model');
         $this->load->model('area_model');
         $this->load->model('pi_model');
+        $this->load->model('traj_model');
         $this->load->model('thermograph_model');
 
         $this->areaService = new AreaService();
@@ -513,21 +514,46 @@ class AreaReportService extends BaseService{
                     break;
             }
         }
-
-
+        $imbalance = $this->sortSlice($imbalance);
+        $oversaturation = $this->sortSlice($oversaturation);
+        $spillover = $this->sortSlice($spillover);
 
 
         //初始化表格
-        $initChartList = $this->roadReportService->initRoadAlarmChart($rd,$morningRushTime,$eveningRushTime);
+        $initChartList = $this->roadReportService->initRoadAlarmChart($rd,$morningRushTime,$eveningRushTime,"区域");
         $fillChartData = $this->roadReportService->fillRoadAlarmChart($initChartList,$imbalance,$oversaturation,$spillover,$juncNameMap);
 
 
         return $fillChartData;
     }
 
-    public function QueryAreaQuotaInfo($ctyID,$roadID,$start_time,$end_time){
+    //各项指标数组进行排序
+    private function sortSlice($orimap){
+        $name = [];
+        $count=[];
+        foreach ($orimap as  $k=>$v){
+            $name[] = $k;
+            $count[] = count($v);
+        }
+        array_multisort($count,SORT_DESC,$name);
+        $newMap=[];
+        foreach ($count as $k => $v){
+            $newMap[$name[$k]] = $orimap[$name[$k]];
+        }
+        return $newMap;
+
+    }
+
+    private function createHours(){
+        $hours=[];
+        for($i=strtotime("00:00");$i<=strtotime("23:30");$i=$i+1800){
+            $hours[] = date("H:i",$i);
+        }
+        return $hours;
+    }
+    public function QueryAreaQuotaInfo($cityID,$roadID,$start_time,$end_time){
         $area_detail = $this->areaService->getAreaDetail([
-            'city_id' => $ctyID,
+            'city_id' => $cityID,
             'area_id' => $roadID,
         ]);
 
@@ -535,10 +561,18 @@ class AreaReportService extends BaseService{
 //        $junctionIDs = $road_info['logic_junction_ids'];
         $dates = $this->getDateFromRange($start_time,$end_time);
 //        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,$junctionIDs,$ctyID);
-        $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,$junctionIDs,$ctyID);
+        $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,$junctionIDs,$cityID);
 
 //        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
-        $PiDatas = $this->pi_model->getJunctionsPi($dates,$junctionIDs,$ctyID);
+//        $PiDatas = $this->pi_model->getJunctionsPi($dates,$junctionIDs,$ctyID,$this->createHours());
+//        $PiDatas = $this->traj_model->getJunctionsPi($dates,$junctionIDs,$ctyID,$this->createHours());
+        $reqData = [
+            'city_id'=>(int)$cityID,
+            'logic_junction_ids'=>$junctionIDs,
+            'dates'=>$dates,
+            'hours'=>$this->createHours(),
+        ];
+        $PiDatas = $this->traj_model->getJunctionsPiConcurr($reqData);
         //数据合并
         $pd = $this->roadReportService->queryParamGroup($PiDatas,'pi','traj_count');
         foreach ($pd as $p){

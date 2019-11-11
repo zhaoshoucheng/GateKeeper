@@ -236,6 +236,9 @@ $config['traj_interface'] = 'http://' . $traj_server . $traj_ext;
 $config['traj_token']  = '4c3e3b6a3588161128d0604daab528dbxxxx';
 $config['traj_userid'] = 'signalPro';
 
+$config['its_traj_interface'] = 'http://' . $traj_server . "/itstool";
+
+
 // 配时接口地址
 $config['timing_interface'] = 'http://' . $timing_server . $temp_timing_port . $timing_ext;
 

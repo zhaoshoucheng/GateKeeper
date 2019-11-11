@@ -578,6 +578,32 @@ class ReportService extends BaseService
         return 'undefined type';
     }
 
+
+    public function autoGenerate($params){
+
+        $inred = [
+            'city_id'=>$params['city_id'],
+            'type'=>$params['type'],
+            'title'=>$params['title'],
+            'time_range'=>$params['time_range']
+        ];
+
+
+
+        //插入
+        $itemId = $this->report_model->insertReport($inred);
+
+        $param = [
+            "file_key" => $params['report_gift']['resource_key'],
+            "item_id" => $itemId,
+            "namespace" => "itstool_public",
+            "b_type" => 1,
+        ];
+        $data = $this->uploadFile_model->insertUploadFile($param);
+
+        return $data['itstool_private'];
+    }
+
     /**
      * 生成报告
      * @param $params['city_id'] int    城市ID

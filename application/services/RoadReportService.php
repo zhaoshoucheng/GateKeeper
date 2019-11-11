@@ -21,6 +21,7 @@ class RoadReportService extends BaseService{
         $this->load->model('road_model');
         $this->load->model('area_model');
         $this->load->model('pi_model');
+        $this->load->model('traj_model');
         $this->load->model('arterialtiming_model');
         $this->load->model('diagnosisNoTiming_model');
 
@@ -419,14 +420,34 @@ class RoadReportService extends BaseService{
     	return array_slice(array_column($morning_pi_data, 'logic_junction_id'), 0, 3);
     }
 
-    public function QueryRoadQuotaInfo($ctyID,$roadID,$start_time,$end_time){
+    private function createHours(){
+        $hours=[];
+        for($i=strtotime("00:00");$i<=strtotime("23:30");$i=$i+1800){
+            $hours[] = date("H:i",$i);
+        }
+        return $hours;
+    }
+
+    public function QueryRoadQuotaInfo($cityID,$roadID,$start_time,$end_time){
         $road_info = $this->road_model->getRoadInfo($roadID);
         $junctionIDs = $road_info['logic_junction_ids'];
         $dates = $this->getDateFromRange($start_time,$end_time);
 //        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,explode(",",$junctionIDs),$ctyID);
-        $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,explode(",",$junctionIDs),$ctyID);
+
+        $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,explode(",",$junctionIDs),$cityID);
+
 //        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
-        $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID);
+
+//        $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID,$this->createHours());
+        $reqData = [
+            'city_id'=>(int)$cityID,
+            'logic_junction_ids'=>explode(",",$junctionIDs),
+            'dates'=>$dates,
+            'hours'=>$this->createHours(),
+        ];
+        $PiDatas = $this->traj_model->getJunctionsPiConcurr($reqData);
+//        $PiDatas = $this->pi_model->getJunctionsPiByHours(11,explode(",",$junctionIDs),$dates);
+
         //数据合并
         $pd = $this->queryParamGroup($PiDatas,'pi','traj_count');
         foreach ($pd as $p){
@@ -677,6 +698,30 @@ class RoadReportService extends BaseService{
             $min = "30";
         }
         return $hour.":".$min;
+    }
+
+    //报警热力图最多保留20个路口的数据
+    private function shortenChart($chartList){
+        $newChartList = [];
+        foreach ($chartList as $chartData){
+            if($chartData['chart']['one_dimensional']<=20){
+                $newChartList[] = $chartData;
+            }
+            $tmpChartData = $chartData;
+            //默认数据已经排序
+            $tmpChartData['chart']['one_dimensional'] = array_slice($tmpChartData['chart']['one_dimensional'], 0, 20);
+            $data = [];
+            foreach ($tmpChartData['chart']['data'] as $v){
+                if($v[0]>=20){
+                    continue;
+                }
+                $data[] = $v;
+            }
+            $tmpChartData['chart']['data'] = $data;
+            $newChartList[] = $tmpChartData;
+        }
+
+        return $newChartList;
     }
     //填充表格
     public function fillRoadAlarmChart($chartList,$imbalanceData,$overData,$spillData,$juncName){
@@ -989,11 +1034,11 @@ class RoadReportService extends BaseService{
             $ecd['desc'].="在晚高峰溢流情况最严重。";
         }
 
-        return $chartList;
+        return $this->shortenChart($chartList);
     }
 
     //先初始化表格,然后填充数据
-    public function initRoadAlarmChart($roadInfo,$morningRushTime,$eveningRushTime){
+    public function initRoadAlarmChart($roadInfo,$morningRushTime,$eveningRushTime,$type="干线"){
         $chartList=[];
         $junctionList=[];
         foreach ($roadInfo['junctions_info'] as $k => $j){
@@ -1002,7 +1047,7 @@ class RoadReportService extends BaseService{
         $morningTimes = $this->getTimeFromRange(explode("~",$morningRushTime)[0],explode("~",$morningRushTime)[1],30);
         $eveningTimes = $this->getTimeFromRange(explode("~",$eveningRushTime)[0],explode("~",$eveningRushTime)[1],30);
         $morningImbalanceChart=[
-            "desc"=>"干线早高峰失衡报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."早高峰失衡报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$morningRushTime."重点路口持续5分钟以上失衡报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1012,7 +1057,7 @@ class RoadReportService extends BaseService{
             ],
         ];
         $morningOversaturationChart=[
-            "desc"=>"干线早高峰过饱和报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."早高峰过饱和报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$morningRushTime."重点路口持续5分钟以上过饱和报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1022,7 +1067,7 @@ class RoadReportService extends BaseService{
             ],
         ];
         $morningSpilloverChart=[
-            "desc"=>"干线早高峰溢流报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."早高峰溢流报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$morningRushTime."重点路口持续5分钟以上溢流报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1033,7 +1078,7 @@ class RoadReportService extends BaseService{
         ];
 
         $eveningImbalanceChart=[
-            "desc"=>"干线晚高峰失衡报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."晚高峰失衡报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$eveningRushTime."重点路口持续5分钟以上失衡报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1043,7 +1088,7 @@ class RoadReportService extends BaseService{
             ],
         ];
         $evemingOversaturationChart=[
-            "desc"=>"干线晚高峰过饱和报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."晚高峰过饱和报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$eveningRushTime."重点路口持续5分钟以上过饱和报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1053,7 +1098,7 @@ class RoadReportService extends BaseService{
             ],
         ];
         $eveningSpilloverChart=[
-            "desc"=>"干线晚高峰溢流报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."晚高峰溢流报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$eveningRushTime."重点路口持续5分钟以上溢流报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1071,6 +1116,8 @@ class RoadReportService extends BaseService{
 
         return $chartList;
     }
+
+
 
     public function queryRoadAlarm($cityID,$roadID,$startTime,$endTime,$morningRushTime,$eveningRushTime){
         $roadInfo= $this->road_model->getRoadInfo($roadID);
