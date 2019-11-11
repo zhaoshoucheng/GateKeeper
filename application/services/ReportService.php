@@ -719,7 +719,7 @@ class ReportService extends BaseService
     public function downReport($params)
     {
         //兼容旧接口
-        if(!strstr($params['key'],"Report")){
+        if(!strstr($params['key'],"report")){
             $this->gift_model->downResource($params["key"], 'itstool_public');
         }else{
             $this->gift_model->downPrivateResource($params["key"], 'itstool_private');
