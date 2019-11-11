@@ -23,6 +23,9 @@ class Area_model extends CI_Model
     public function __construct()
     {
         parent::__construct();
+        $this->load->config("nconf");
+        $this->engine = $this->config->item('data_engine');
+
 
         $this->db = $this->load->database('default', true);
 
@@ -111,6 +114,67 @@ class Area_model extends CI_Model
             ->get();
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
+
+    public function getJunctionsAllQuotaEs($dates,$junctionIDs,$cityId){
+//        $select='select date, hour, round(avg(speed) * 3.6, 2) as speed,round(avg(stop_delay), 2) as stop_delay,round(avg(stop_time_cycle), 2) as stop_time_cycle  ';
+        $data = [
+            'city_id'           => (int)$cityId,
+            'dates'             =>$dates,
+            'junction_ids'      =>$junctionIDs,
+            'engine'            => $this->engine,
+        ];
+        $url = $this->config->item('data_service_interface');
+
+        $res = httpPOST($url . '/GetJunctionQuotaDataByAlarm', $data, 0, 'json');
+        if (!$res) {
+            return [];
+        }
+
+        $res = json_decode($res, true);
+        if ($res['errno'] != 0) {
+            return [];
+        }
+        //格式化为mysql的返回格式
+
+        $retData = $res['data'];
+        $avgData = [];
+
+        foreach ($retData['hits'] as $v){
+            if(!isset($avgData[$v['_source']['dt']])){
+                $avgData[$v['_source']['dt']]=[];
+            }
+            if(!isset($avgData[$v['_source']['dt']][$v['_source']['hour']])){
+                $avgData[$v['_source']['dt']][$v['_source']['hour']]=[
+                    "speed"=>0,
+                    "stop_delay"=>0,
+                    "stop_time_cycle"=>0,
+                    "traj_count"=>0,
+                ];
+            }
+            $avgData[$v['_source']['dt']][$v['_source']['hour']]['speed']+=$v['_source']['speed']*$v['_source']['traj_count'];
+            $avgData[$v['_source']['dt']][$v['_source']['hour']]['stop_delay']+=$v['_source']['stop_delay']*$v['_source']['traj_count'];
+            $avgData[$v['_source']['dt']][$v['_source']['hour']]['stop_time_cycle']+=$v['_source']['stop_time_cycle']*$v['_source']['traj_count'];
+            $avgData[$v['_source']['dt']][$v['_source']['hour']]['traj_count']+=$v['_source']['traj_count'];
+        }
+        //计算加权平均
+        $finalRet=[];
+       foreach ($avgData as $dk=>$dv){
+           foreach ($dv as $hk=>$hv){
+               $finalRet[] = [
+                   "date"=> $dk,
+                    "hour"=>$hk,
+                    "speed"=>round($hv['speed']/$hv['traj_count'],2),
+                    "stop_delay"=> round($hv['stop_delay']/$hv['traj_count'],2),
+                    "stop_time_cycle"=> round($hv['stop_time_cycle']/$hv['traj_count'],2)
+               ];
+           }
+       }
+
+
+
+        return $finalRet;
+
     }
 
     public function getJunctionsAllQuota($dates,$junctionIDs,$cityId){
@@ -290,5 +354,23 @@ class Area_model extends CI_Model
             ->get()
             ->first_row('array');
         return $res;
+    }
+
+    /**
+     * 根据名称模糊搜索
+     *
+     * @param $cityId
+     * @param string $select
+     * @return array
+     */
+    public function searchareasByKeyword($city_id, $keyword, $select = '*')
+    {
+        $res = $this->db->select($select)
+            ->from($this->tb)
+            ->where('city_id', $city_id)
+            ->like('area_name', $keyword)
+            ->where('delete_at', '1970-01-01')
+            ->get();
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 }

@@ -28,6 +28,8 @@ class ReportService extends BaseService
         $this->load->model('uploadFile_model');
         $this->load->model('gift_model');
         $this->load->model('waymap_model');
+        $this->load->model('road_model');
+        $this->load->model('area_model');
 
         $this->report_proxy = $this->config->item('report_proxy');
 
@@ -69,7 +71,9 @@ class ReportService extends BaseService
         $majorJunctionID = "";
         if(!empty($_SERVER["HTTP_REFERER"])){
             parse_str($_SERVER["HTTP_REFERER"],$arrs);
-            $majorJunctionID=$arrs["junctionId"];
+            if (isset($arrs["junctionId"])) {
+                $majorJunctionID=$arrs["junctionId"];
+            }
         }
         $cityId  = $params['city_id'];
         $keyword = $params['keyword'];
@@ -133,6 +137,32 @@ class ReportService extends BaseService
             array_unshift($final_data,$majorJunctionInfo);
         }
         return $final_data;
+    }
+
+    public function searchRoad($params) {
+        $city_id = $params['city_id'];
+        $keyword = $params['keyword'];
+        $road_list =$this->road_model->searchRoadsByKeyword($city_id, $keyword);
+        $road_list = array_map(function($item) {
+            return [
+                'road_id' => $item['road_id'],
+                'road_name' => $item['road_name'],
+            ];
+        }, $road_list);
+        return $road_list;
+    }
+
+    public function searchArea($params) {
+        $city_id = $params['city_id'];
+        $keyword = $params['keyword'];
+        $area_list =$this->area_model->searchAreasByKeyword($city_id, $keyword);
+        $area_list = array_map(function($item) {
+            return [
+                'area_id' => $item['id'],
+                'area_name' => $item['area_name'],
+            ];
+        }, $area_list);
+        return $area_list;
     }
 
     /**
@@ -563,6 +593,7 @@ class ReportService extends BaseService
         $type   = $params['type'];
         $title  = $params['title'];
 
+
         //上传图片
         $data = $this->gift_model->Upload("file");
 
@@ -698,11 +729,11 @@ class ReportService extends BaseService
             $last_start_date = date('Y-m-d', $start_time - 86400 * 7);
             $last_end_date = date('Y-m-d', $end_time - 86400 * 7);
         } elseif ($report_type == 3) {
-            $last_start_date = date('Y-m-01', "$start_date -1 month");
-            $last_end_date = date('Y-m-d', "$last_start_date +1 month -1 day");
+            $last_start_date = date('Y-m-01', strtotime("$start_date -1 month"));
+            $last_end_date = date('Y-m-d', strtotime("$last_start_date +1 month -1 day"));
         } elseif ($report_type == 4) {
-            $last_start_date = date('Y-m-01', "$start_date -3 month");
-            $last_end_date = date('Y-m-d', "$last_start_date +1 month -1 day");
+            $last_start_date = date('Y-m-01', strtotime("$start_date -3 month"));
+            $last_end_date = date('Y-m-d', strtotime("$last_start_date +1 month -1 day"));
         }
         return [
             'start_date' => $last_start_date,
@@ -712,13 +743,15 @@ class ReportService extends BaseService
 
     public function getComparisonText($now, $last, $report_type) {
         $text = [];
-        $s1 = array_sum($now) / count($now);
-        $s2 = array_sum($last) / count($last);
-        if ($s1 / $s2 - $s2 >= 0.01) {
+        $s1 = (empty($now)) ? 0.00 : array_sum($now) / count($now);
+        $s2 = (empty($last)) ? 0.00: array_sum($last) / count($last);
+        if ($s2 == 0) {
+            $text[] = "基本持平";
+        } elseif ($s1 / $s2 - $s2 >= 0.01) {
             $text[] = "更加严重";
-        }elseif ($s1 / $s2 - $s2 <= -0.01) {
+        } elseif ($s1 / $s2 - $s2 <= -0.01) {
             $text[] = "得到缓解";
-        }else {
+        } else {
             $text[] = "基本持平";
         }
         if ($report_type == 1) {
@@ -733,6 +766,9 @@ class ReportService extends BaseService
         } elseif ($report_type == 4) {
             $text[] = '本季度';
             $text[] = '上季度';
+        } else {
+            $text[] = '';
+            $text[] = '';
         }
         return $text;
     }
@@ -761,6 +797,33 @@ class ReportService extends BaseService
             }
         }
         return $hours;
+    }
+
+    // {x : hh:mm, y : value}
+    // 48个时刻点补全 null
+    public function addto48($objs) {
+        $hs = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+        $ms = ['00', '30'];
+
+        $full = [];
+        foreach ($hs as $h) {
+            foreach ($ms as $m) {
+                $full[] = $h . ':' . $m;
+            }
+        }
+
+        $hms = array_column($objs, 'x');
+        $diff = array_diff($full, $hms);
+        foreach ($diff as $one) {
+            $objs[] = [
+                'x' => $one,
+                'y' => null,
+            ];
+        }
+        usort($objs, function($a, $b) {
+            return ($a['x'] < $b['x']) ? -1 : 1;
+        });
+        return $objs;
     }
 
     // 早晚高峰需要写两个很大的if else，分开写吧

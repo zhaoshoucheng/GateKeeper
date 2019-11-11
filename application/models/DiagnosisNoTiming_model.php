@@ -137,6 +137,51 @@ class DiagnosisNoTiming_model extends CI_Model
         }
     }
 
+    public function getSpecialFlowQuota($cityID,$logicFlowIDs,$startTime,$endTime){
+        $st = date('Ymd',strtotime($startTime));
+        $et = date('Ymd',strtotime($endTime));
+        $req = [
+            'city_id' => (string)$cityID,
+            'logic_flow_list' => $logicFlowIDs,
+            'start_time' => (int)$st,
+            'end_time' => (int)$et,
+        ];
+
+        $url = $this->config->item('data_service_interface');
+
+        $res = httpPOST($url . '/GetSpecialFlowQuotaInfo', $req, 0, 'json');
+
+
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            $result = [];
+            if(!empty($res['data']['logic_flow_id']['buckets'])){
+                foreach ($res['data']['logic_flow_id']['buckets'] as  $fv){
+                    $result[$fv['key']]=[];
+                    foreach ($fv['ymd']['buckets'] as $yv){
+                        $result[$fv['key']][$yv['key']]=[];
+                        $qd = [];
+                        foreach ($yv['hour']['buckets'] as $qv){
+                            $qd[] = [
+                                "hour"=>$qv['key'],
+                                "speed"=>$qv['speed']['value']/$qv['total']['value'],
+                                "stop_delay"=>$qv['stop_delay']['value']/$qv['total']['value'],
+                                "stop_time_cycle"=>$qv['stop_time_cycle']['value']/$qv['total']['value'],
+                                "traj_count"=>$qv['total']['value'],
+                            ];
+                        }
+                        //TODO $qd 时间排序
+                        $result[$fv['key']][$yv['key']] = $qd;
+                    }
+                }
+
+            }
+            return $result;
+        } else {
+            return [];
+        }
+    }
+
     /**
      * 直接获取相位全部指标明细,暂时只按照日期划分
      * @param $logicJunctionId
@@ -176,7 +221,14 @@ class DiagnosisNoTiming_model extends CI_Model
                                 "traj_count"=>$qv['total']['value'],
                             ];
                         }
-                        //TODO $qd 时间排序
+                        //$qd 时间排序
+//                        $last_names = array_column($qd,'hour');
+//                        $ctimestr=[];
+//                        foreach ($last_names as $k=> $l){
+//                            $qd[$k]['ctime_str'] = strtotime($l);
+//                            $ctimestr[] = $qd[$k]['ctime_str'];
+//                        }
+//                        array_multisort($ctimestr,SORT_ASC,$qd);
                         $result[$fv['key']][$yv['key']] = $qd;
                     }
                 }
@@ -522,6 +574,26 @@ class DiagnosisNoTiming_model extends CI_Model
         }
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByHour', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            return $res['data'];
+        } else {
+            return [];
+        }
+    }
+
+    public function getJunctionAlarmHoursData($city_id, $junctions ,$dates ) {
+        $req = [
+            'city_id' => (int)$city_id,
+            'dates' => $dates,
+            'junction_ids'=>$junctions
+        ];
+
+
+
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetOnlineJunctionAlarmHoursData', $req, 0, 'json');
+
         if (!empty($res)) {
             $res = json_decode($res, true);
             return $res['data'];

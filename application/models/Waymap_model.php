@@ -489,8 +489,11 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function getConnectPath($city_id, $map_version, array $selected_junctionids)
+    public function getConnectPath($city_id, $map_version=0, array $selected_junctionids)
     {
+        if($map_version==0){
+            $map_version = self::$lastMapVersion;
+        }
         $data = compact('city_id', 'map_version', 'selected_junctionids');
 
         $url = $this->waymap_interface . '/signal-map/connect/path';
@@ -708,8 +711,11 @@ class Waymap_model extends CI_Model
         return $res['simple_main_node_id'] ?? '';
     }
 
-    public function flowsByJunction($logic_junction_id, $version)
+    public function flowsByJunction($logic_junction_id, $version = 0)
     {
+        if($version==0){
+            $version = self::$lastMapVersion;
+        }
         $data = [
             'logic_junction_id'   => $logic_junction_id,
             'version' => $version,
