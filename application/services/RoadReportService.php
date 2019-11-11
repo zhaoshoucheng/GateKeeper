@@ -21,6 +21,7 @@ class RoadReportService extends BaseService{
         $this->load->model('road_model');
         $this->load->model('area_model');
         $this->load->model('pi_model');
+        $this->load->model('traj_model');
         $this->load->model('arterialtiming_model');
         $this->load->model('diagnosisNoTiming_model');
 
@@ -427,17 +428,24 @@ class RoadReportService extends BaseService{
         return $hours;
     }
 
-    public function QueryRoadQuotaInfo($ctyID,$roadID,$start_time,$end_time){
+    public function QueryRoadQuotaInfo($cityID,$roadID,$start_time,$end_time){
         $road_info = $this->road_model->getRoadInfo($roadID);
         $junctionIDs = $road_info['logic_junction_ids'];
         $dates = $this->getDateFromRange($start_time,$end_time);
 //        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,explode(",",$junctionIDs),$ctyID);
 
-        $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,explode(",",$junctionIDs),$ctyID);
+        $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,explode(",",$junctionIDs),$cityID);
 
 //        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
 
-        $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID,$this->createHours());
+//        $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID,$this->createHours());
+        $reqData = [
+            'city_id'=>(int)$cityID,
+            'logic_junction_ids'=>explode(",",$junctionIDs),
+            'dates'=>$dates,
+            'hours'=>$this->createHours(),
+        ];
+        $PiDatas = $this->traj_model->getJunctionsPiConcurr($reqData);
 //        $PiDatas = $this->pi_model->getJunctionsPiByHours(11,explode(",",$junctionIDs),$dates);
 
         //数据合并
