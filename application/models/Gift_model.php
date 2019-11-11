@@ -89,7 +89,7 @@ class Gift_model extends CI_Model
         }
 
         $sUrl    = $url;
-        $tPath   = '/tmp/' . $resourceKey;
+        $tPath   = '/tmp/' . str_replace("/","",$resourceKey);
         $content = file_get_contents($sUrl);
         file_put_contents($tPath, $content);
         $file_filesize = filesize($tPath);
