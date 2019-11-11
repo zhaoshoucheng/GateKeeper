@@ -419,14 +419,27 @@ class RoadReportService extends BaseService{
     	return array_slice(array_column($morning_pi_data, 'logic_junction_id'), 0, 3);
     }
 
+    private function createHours(){
+        $hours=[];
+        for($i=strtotime("00:00");$i<=strtotime("23:30");$i=$i+1800){
+            $hours[] = date("H:i",$i);
+        }
+        return $hours;
+    }
+
     public function QueryRoadQuotaInfo($ctyID,$roadID,$start_time,$end_time){
         $road_info = $this->road_model->getRoadInfo($roadID);
         $junctionIDs = $road_info['logic_junction_ids'];
         $dates = $this->getDateFromRange($start_time,$end_time);
 //        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,explode(",",$junctionIDs),$ctyID);
+
         $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,explode(",",$junctionIDs),$ctyID);
+
 //        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
-        $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID);
+
+        $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID,$this->createHours());
+//        $PiDatas = $this->pi_model->getJunctionsPiByHours(11,explode(",",$junctionIDs),$dates);
+
         //数据合并
         $pd = $this->queryParamGroup($PiDatas,'pi','traj_count');
         foreach ($pd as $p){

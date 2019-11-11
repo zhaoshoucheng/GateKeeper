@@ -18,11 +18,12 @@ class Pi_model extends CI_Model{
 
     }
 
-    public function getJunctionsPi($dates,$junctionIDs,$cityId){
+    public function getJunctionsPi($dates,$junctionIDs,$cityId,$hours){
 
         $res = $this->db
             ->from($this->tb.$cityId)
             ->where_in('date', $dates)
+            ->where_in('hour',$hours)
             ->where_in('logic_junction_id', $junctionIDs)
             ->get();
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
@@ -37,7 +38,7 @@ class Pi_model extends CI_Model{
             ->where_in('hour', $hours)
             ->group_by('logic_junction_id')
             ->get();
-        // var_dump($this->db->last_query());
+//         var_dump($this->db->last_query());
         return $res->result_array();
     }
 
@@ -49,7 +50,7 @@ class Pi_model extends CI_Model{
             ->where_in('date', $dates)
             ->group_by('hour')
             ->get();
-        // var_dump($this->db->last_query());
+//         var_dump($this->db->last_query());
         return $res->result_array();
     }
 }
