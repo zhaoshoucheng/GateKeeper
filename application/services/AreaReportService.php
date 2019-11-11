@@ -513,8 +513,9 @@ class AreaReportService extends BaseService{
                     break;
             }
         }
-
-
+        $imbalance = $this->sortSlice($imbalance);
+        $oversaturation = $this->sortSlice($oversaturation);
+        $spillover = $this->sortSlice($spillover);
 
 
         //初始化表格
@@ -524,6 +525,24 @@ class AreaReportService extends BaseService{
 
         return $fillChartData;
     }
+
+    //各项指标数组进行排序
+    private function sortSlice($orimap){
+        $name = [];
+        $count=[];
+        foreach ($orimap as  $k=>$v){
+            $name[] = $k;
+            $count[] = count($v);
+        }
+        array_multisort($count,SORT_DESC,$name);
+        $newMap=[];
+        foreach ($count as $k => $v){
+            $newMap[$name[$k]] = $orimap[$name[$k]];
+        }
+        return $newMap;
+
+    }
+
 
     public function QueryAreaQuotaInfo($ctyID,$roadID,$start_time,$end_time){
         $area_detail = $this->areaService->getAreaDetail([

@@ -678,6 +678,30 @@ class RoadReportService extends BaseService{
         }
         return $hour.":".$min;
     }
+
+    //报警热力图最多保留20个路口的数据
+    private function shortenChart($chartList){
+        $newChartList = [];
+        foreach ($chartList as $chartData){
+            if($chartData['chart']['one_dimensional']<=20){
+                $newChartList[] = $chartData;
+            }
+            $tmpChartData = $chartData;
+            //默认数据已经排序
+            $tmpChartData['chart']['one_dimensional'] = array_slice($tmpChartData['chart']['one_dimensional'], 0, 20);
+            $data = [];
+            foreach ($tmpChartData['chart']['data'] as $v){
+                if($v[0]>=20){
+                    continue;
+                }
+                $data[] = $v;
+            }
+            $tmpChartData['chart']['data'] = $data;
+            $newChartList[] = $tmpChartData;
+        }
+
+        return $newChartList;
+    }
     //填充表格
     public function fillRoadAlarmChart($chartList,$imbalanceData,$overData,$spillData,$juncName){
         //前三个早高峰,后三个晚高峰,表格排序失衡,过饱和,溢流
@@ -989,7 +1013,7 @@ class RoadReportService extends BaseService{
             $ecd['desc'].="在晚高峰溢流情况最严重。";
         }
 
-        return $chartList;
+        return $this->shortenChart($chartList);
     }
 
     //先初始化表格,然后填充数据
@@ -1071,6 +1095,8 @@ class RoadReportService extends BaseService{
 
         return $chartList;
     }
+
+
 
     public function queryRoadAlarm($cityID,$roadID,$startTime,$endTime,$morningRushTime,$eveningRushTime){
         $roadInfo= $this->road_model->getRoadInfo($roadID);
