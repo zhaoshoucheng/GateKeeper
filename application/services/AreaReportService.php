@@ -543,7 +543,13 @@ class AreaReportService extends BaseService{
 
     }
 
-
+    private function createHours(){
+        $hours=[];
+        for($i=strtotime("00:00");$i<=strtotime("23:30");$i=$i+1800){
+            $hours[] = date("H:i",$i);
+        }
+        return $hours;
+    }
     public function QueryAreaQuotaInfo($ctyID,$roadID,$start_time,$end_time){
         $area_detail = $this->areaService->getAreaDetail([
             'city_id' => $ctyID,
@@ -557,7 +563,7 @@ class AreaReportService extends BaseService{
         $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,$junctionIDs,$ctyID);
 
 //        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
-        $PiDatas = $this->pi_model->getJunctionsPi($dates,$junctionIDs,$ctyID);
+        $PiDatas = $this->pi_model->getJunctionsPi($dates,$junctionIDs,$ctyID,$this->createHours());
         //数据合并
         $pd = $this->roadReportService->queryParamGroup($PiDatas,'pi','traj_count');
         foreach ($pd as $p){
