@@ -594,7 +594,7 @@ class ReportService extends BaseService
         $itemId = $this->report_model->insertReport($inred);
 
         $param = [
-            "file_key" => $params['resource_key'],
+            "file_key" => $params['report_gift']['resource_key'],
             "item_id" => $itemId,
             "namespace" => "itstool_public",
             "b_type" => 1,
