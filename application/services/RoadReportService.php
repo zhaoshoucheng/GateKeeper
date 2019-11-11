@@ -712,7 +712,7 @@ class RoadReportService extends BaseService{
             $tmpChartData['chart']['one_dimensional'] = array_slice($tmpChartData['chart']['one_dimensional'], 0, 20);
             $data = [];
             foreach ($tmpChartData['chart']['data'] as $v){
-                if($v[0]>=20){
+                if($v[1]>=20){
                     continue;
                 }
                 $data[] = $v;
