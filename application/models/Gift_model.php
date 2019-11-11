@@ -70,6 +70,41 @@ class Gift_model extends CI_Model
     }
 
     /**
+     * 下载私有key资源
+     *
+     * @param $resourceKey
+     * @param $namespace
+     *
+     * @return array|void
+     * @throws Exception
+     */
+    public function downPrivateResource($resourceKey, $namespace)
+    {
+        $itemInfo = $this->getResourceUrlList([$resourceKey], $namespace);
+
+        $url   = $itemInfo[$resourceKey]['download_url'];
+
+        if (empty($itemInfo[$resourceKey])) {
+            throw new \Exception("The key source not have.");
+        }
+
+        $sUrl    = $url;
+        $tPath   = '/tmp/' . $resourceKey;
+        $content = file_get_contents($sUrl);
+        file_put_contents($tPath, $content);
+        $file_filesize = filesize($tPath);
+        $file          = fopen($tPath, "r");
+
+        Header("Content-type: application/octet-stream");
+        Header("Accept-Ranges: bytes");
+        Header("Accept-Length: " . $file_filesize);
+        Header("Content-Disposition: attachment; filename=" . $resourceKey);
+        echo fread($file, $file_filesize);
+        fclose($file);
+        exit;
+    }
+
+    /**
      * 下载key资源
      *
      * @param $resourceKey

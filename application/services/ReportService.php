@@ -588,8 +588,6 @@ class ReportService extends BaseService
             'time_range'=>$params['time_range']
         ];
 
-
-
         //插入
         $itemId = $this->report_model->insertReport($inred);
 
@@ -720,7 +718,13 @@ class ReportService extends BaseService
      */
     public function downReport($params)
     {
-        $this->gift_model->downResource($params["key"], 'itstool_public');
+        //兼容旧接口
+        if(!strstr($params['key'],"Report")){
+            $this->gift_model->downResource($params["key"], 'itstool_public');
+        }else{
+            $this->gift_model->downPrivateResource($params["key"], 'itstool_private');
+        }
+
     }
 
     // 1 日报；2 周报；3 月报；4 季报；0 invalid
