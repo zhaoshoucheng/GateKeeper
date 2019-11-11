@@ -588,15 +588,13 @@ class ReportService extends BaseService
             'time_range'=>$params['time_range']
         ];
 
-
-
         //插入
         $itemId = $this->report_model->insertReport($inred);
 
         $param = [
             "file_key" => $params['report_gift']['resource_key'],
             "item_id" => $itemId,
-            "namespace" => "itstool_public",
+            "namespace" => "itstool_private",
             "b_type" => 1,
         ];
         $data = $this->uploadFile_model->insertUploadFile($param);
@@ -720,7 +718,13 @@ class ReportService extends BaseService
      */
     public function downReport($params)
     {
-        $this->gift_model->downResource($params["key"], 'itstool_public');
+        //兼容旧接口
+        if(!strstr($params['key'],"report")){
+            $this->gift_model->downResource($params["key"], 'itstool_public');
+        }else{
+            $this->gift_model->downPrivateResource($params["key"], 'itstool_private');
+        }
+
     }
 
     // 1 日报；2 周报；3 月报；4 季报；0 invalid
