@@ -568,7 +568,7 @@ class AreaReportService extends BaseService{
 //        $PiDatas = $this->traj_model->getJunctionsPi($dates,$junctionIDs,$ctyID,$this->createHours());
         $reqData = [
             'city_id'=>(int)$cityID,
-            'logic_junction_ids'=>explode(",",$junctionIDs),
+            'logic_junction_ids'=>$junctionIDs,
             'dates'=>$dates,
             'hours'=>$this->createHours(),
         ];
