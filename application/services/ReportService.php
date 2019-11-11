@@ -596,7 +596,7 @@ class ReportService extends BaseService
         $param = [
             "file_key" => $params['report_gift']['resource_key'],
             "item_id" => $itemId,
-            "namespace" => "itstool_public",
+            "namespace" => "itstool_private",
             "b_type" => 1,
         ];
         $data = $this->uploadFile_model->insertUploadFile($param);
