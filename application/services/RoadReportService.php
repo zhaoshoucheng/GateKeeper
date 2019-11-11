@@ -1017,7 +1017,7 @@ class RoadReportService extends BaseService{
     }
 
     //先初始化表格,然后填充数据
-    public function initRoadAlarmChart($roadInfo,$morningRushTime,$eveningRushTime){
+    public function initRoadAlarmChart($roadInfo,$morningRushTime,$eveningRushTime,$type="干线"){
         $chartList=[];
         $junctionList=[];
         foreach ($roadInfo['junctions_info'] as $k => $j){
@@ -1026,7 +1026,7 @@ class RoadReportService extends BaseService{
         $morningTimes = $this->getTimeFromRange(explode("~",$morningRushTime)[0],explode("~",$morningRushTime)[1],30);
         $eveningTimes = $this->getTimeFromRange(explode("~",$eveningRushTime)[0],explode("~",$eveningRushTime)[1],30);
         $morningImbalanceChart=[
-            "desc"=>"干线早高峰失衡报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."早高峰失衡报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$morningRushTime."重点路口持续5分钟以上失衡报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1036,7 +1036,7 @@ class RoadReportService extends BaseService{
             ],
         ];
         $morningOversaturationChart=[
-            "desc"=>"干线早高峰过饱和报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."早高峰过饱和报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$morningRushTime."重点路口持续5分钟以上过饱和报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1046,7 +1046,7 @@ class RoadReportService extends BaseService{
             ],
         ];
         $morningSpilloverChart=[
-            "desc"=>"干线早高峰溢流报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."早高峰溢流报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$morningRushTime."重点路口持续5分钟以上溢流报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1057,7 +1057,7 @@ class RoadReportService extends BaseService{
         ];
 
         $eveningImbalanceChart=[
-            "desc"=>"干线晚高峰失衡报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."晚高峰失衡报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$eveningRushTime."重点路口持续5分钟以上失衡报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1067,7 +1067,7 @@ class RoadReportService extends BaseService{
             ],
         ];
         $evemingOversaturationChart=[
-            "desc"=>"干线晚高峰过饱和报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."晚高峰过饱和报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$eveningRushTime."重点路口持续5分钟以上过饱和报警",
                 'scale'=>['min'=>0,'max'=>50],
@@ -1077,7 +1077,7 @@ class RoadReportService extends BaseService{
             ],
         ];
         $eveningSpilloverChart=[
-            "desc"=>"干线晚高峰溢流报警持续5分钟以上的路口排名如下图所示。",
+            "desc"=>$type."晚高峰溢流报警持续5分钟以上的路口排名如下图所示。",
             "chart"=>[
                 'title'=>$eveningRushTime."重点路口持续5分钟以上溢流报警",
                 'scale'=>['min'=>0,'max'=>50],
