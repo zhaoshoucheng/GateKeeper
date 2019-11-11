@@ -101,7 +101,7 @@ class Report extends MY_Controller
             'title' => 'required|trim|min_length[1]',
             'type' => 'required',
             'time_range'=>'required',
-            'report_gift'=>'required'
+//            'report_gift'=>'required'
         ]);
 
 //        $data = [
