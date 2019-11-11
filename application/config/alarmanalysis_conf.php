@@ -61,6 +61,7 @@ $config['alarm_param_realtime_default'] = '{
 //默认离线报警参数
 $config['alarm_param_offline_default'] = '{
     "over_saturation_traj_num": "10",
+    "over_stop_delay_up": "40",
     "over_saturation_multi_stop_ratio_up": "0.3",
     "over_saturation_none_stop_ratio_up": "0.05",
     "over_saturation_queue_length_up": "180",
