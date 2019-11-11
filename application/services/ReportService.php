@@ -585,7 +585,7 @@ class ReportService extends BaseService
             'city_id'=>$params['city_id'],
             'type'=>$params['type'],
             'title'=>$params['title'],
-            'time_range'=>$params['timerange']
+            'time_range'=>$params['time_range']
         ];
 
 
