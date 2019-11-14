@@ -415,7 +415,9 @@ class PeriodReportService extends BaseService
             $preLastTime = $this->getLastMonth(2);
         }
         $dateList    = self::getDateFromRange($lastTime['start_time'], $lastTime['end_time']);
+        // print_r($dateList);exit;
         $preDateList = self::getDateFromRange($preLastTime['start_time'], $preLastTime['end_time']);
+        // print_r($preDateList);exit;
         if ($timeType == self::ALLDAY) {
             $hour = null;
         } elseif ($timeType == self::MORNING) {
@@ -426,7 +428,9 @@ class PeriodReportService extends BaseService
 
         if ($timeType == self::ALLDAY && $type == self::WEEK) {
             $data    = $this->period_model->getJunctionWeekData($cityId, null, $lastTime['start_time'], $quotaKey . ' desc');
+            // print_r($data);exit;
             $predata = $this->period_model->getJunctionWeekData($cityId, null, $preLastTime['start_time'], $quotaKey . ' desc');
+            // print_r($preLastTime);exit;
         } elseif ($timeType == self::ALLDAY && $type == self::MONTH) {
             $data    = $this->period_model->getJunctionMonthData($cityId, null, explode('-', $lastTime['start_time'])[0], explode('-', $lastTime['start_time'])[1], $quotaKey . ' desc');
             $predata = $this->period_model->getJunctionMonthData($cityId, null, explode('-', $preLastTime['start_time'])[0], explode('-', $preLastTime['start_time'])[1], $quotaKey . ' desc');
@@ -467,8 +471,8 @@ class PeriodReportService extends BaseService
                 ];
             }
         }
-
-        if (empty($data) || empty($predata)) {
+        // print_r($predata);exit;
+        if (empty($data) && empty($predata)) {
             return [];
         }
 
