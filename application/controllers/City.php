@@ -7,6 +7,29 @@ class City extends MY_Controller {
     {
         parent::__construct();
         $this->load->model("openCity_model");
+        $this->load->model("cityFence_model");
+    }
+
+    //获取城市围栏
+    public function fence(){
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'division_id' => 'required',
+        ]);
+
+        $data = $this->cityFence_model->getCityFence($params['city_id'],$params['division_id']);
+        if(empty($data)){
+            $this->response([]);
+        }
+        foreach ($data as $k=>$v){
+
+            $data[$k]['geojson'] = json_decode($v['geojson'],true);
+        }
+
+        $this->response($data);
+
     }
 
     public function list()
