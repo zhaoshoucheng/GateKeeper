@@ -185,8 +185,20 @@ class JunctionReportService extends BaseService{
     		$stop_time_cycle_data[] = $value['stop_time_cycle']['value'] / $value['traj_count']['value'];
     		$speed_data[] = $value['speed']['value'] / $value['traj_count']['value'] * 3.6;
     	}
+        $stop_time_cycle = 0;
+        if (count($stop_time_cycle_data) != 0) {
+            $stop_time_cycle = round(array_sum($stop_time_cycle_data) / count($stop_time_cycle_data), 2);
+        }
+        $stop_delay = 0;
+        if (count($stop_delay_data) != 0) {
+            $stop_delay = round(array_sum($stop_delay_data) / count($stop_delay_data), 2);
+        }
+        $speed = 0;
+        if (count($speed_data) != 0) {
+            $speed = round(array_sum($speed_data) / count($speed_data), 2);
+        }
 
-    	$desc = sprintf($tpl, $morning_peek['start_hour'], $morning_peek['end_hour'], $evening_peek['start_hour'], $evening_peek['end_hour'], round(array_sum($stop_time_cycle_data) / count($stop_time_cycle_data), 2), round(array_sum($stop_delay_data) / count($stop_delay_data), 2), round(array_sum($speed_data) / count($speed_data), 2));
+    	$desc = sprintf($tpl, $morning_peek['start_hour'], $morning_peek['end_hour'], $evening_peek['start_hour'], $evening_peek['end_hour'], $stop_time_cycle, $stop_delay, $speed);
 
     	return [
     		'info' => [
