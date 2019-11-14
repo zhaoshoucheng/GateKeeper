@@ -262,4 +262,21 @@ class Road extends MY_Controller
 
         $this->roadService->download($params);
     }
+
+
+    /*
+     * 干线绿波分析,南京项目使用
+     *
+     * */
+    public function greenWaveAnalysis(){
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+        ]);
+
+        $data = $this->roadService->greenWaveAnalysis($params['city_id']);
+
+        $this->response($data);
+
+    }
 }
