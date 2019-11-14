@@ -262,4 +262,15 @@ class Road extends MY_Controller
 
         $this->roadService->download($params);
     }
+
+    public function cityRoadsOutter() {
+        $params = $this->input->get();
+
+        if (empty($params['city_id'])) {
+            throw new \Exception('参数city_id不能为空！', ERR_PARAMETERS);
+        }
+
+        $data = $this->roadService->cityRoadsOutter($params);
+        $this->response($data);
+    }
 }
