@@ -44,18 +44,18 @@ $config['tool_param_default'] = '{
 $config['alarm_param_realtime_default'] = '{
     "overSatuTrailNumPara": "10",
     "greenSlackTrailNumPara": "5",
-    "stopDelayPara": "40.0",
+    "stopDelayPara": "40",
     "multiStopUpperBound": "0.2",
     "multiStopLowerBound": "0.05",
     "noneStopUpperBound": "0.5",
     "noneStopLowerBound": "0.1",
-    "queueLengthUpperBound": "140.0",
-    "queueLengthLowerBound": "50.0",
+    "queueLengthUpperBound": "140",
+    "queueLengthLowerBound": "50",
     "queueRatioLowBound": "0.25",
     "spilloverTrailNumPara": "10",
     "queueRatioPara": "0.8",
     "spilloverAlarmTrailNumPara": "2",
-    "spilloverStopDelayPara": "40.0"
+    "spilloverStopDelayPara": "40"
 }';
 
 //默认离线报警参数

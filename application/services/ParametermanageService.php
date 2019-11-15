@@ -295,7 +295,7 @@ class ParametermanageService extends BaseService
                 'operator'=>'小于',
             ],
             'unbalance_traj_num'=>[
-                'name'=>'失衡轨迹量',
+                'name'=>'失衡轨迹数',
                 'key'=>'unbalance_traj_num',
                 'union'=>'条',
                 'group'=>'空放',
@@ -324,21 +324,21 @@ class ParametermanageService extends BaseService
             ],
             */
             'unbalance_free_multi_stop_ratio_up'=>[
-                'name'=>'失衡空放上游二次停车比例',
+                'name'=>'上游空放多次停车比例',
                 'key'=>'unbalance_free_multi_stop_ratio_up',
                 'union'=>'-',
                 'group'=>'空放',
                 'operator'=>'小于',
             ],
             'unbalance_free_none_stop_ratio_up'=>[
-                'name'=>'失衡空放上游无停车比例',
+                'name'=>'上游空放不停车比例',
                 'key'=>'unbalance_free_none_stop_ratio_up',
                 'union'=>'-',
                 'group'=>'空放',
                 'operator'=>'大于',
             ],
             'unbalance_free_queue_length_up'=>[
-                'name'=>'失衡空放上游排队长度',
+                'name'=>'上游空放排队长度',
                 'key'=>'unbalance_free_queue_length_up',
                 'union'=>'-',
                 'group'=>'空放', 
