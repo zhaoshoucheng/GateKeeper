@@ -39,6 +39,26 @@ class OverviewService extends BaseService
     }
 
     /**
+     *
+     * 为所有路口附加行政区划信息
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function addDivisionID($cityID,$divisionID,$data){
+        $djuncs = $this->waymap_model->getJunctionFilterByDistrict($cityID,$divisionID);
+
+        foreach ($data['dataList'] as $k => $v){
+            if(in_array($v['jid'],$djuncs)){
+                $data['dataList'][$k]['division_id']=(int)$divisionID;
+            }else{
+                $data['dataList'][$k]['division_id']=0;
+            }
+        }
+        return $data;
+    }
+
+    /**
      * 路口概况
      *
      * @param $params

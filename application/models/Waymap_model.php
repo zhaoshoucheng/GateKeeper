@@ -41,6 +41,22 @@ class Waymap_model extends CI_Model
         $this->waymap_interface = $this->config->item('waymap_interface');
     }
 
+    public function getJunctionFilterByDistrict($cityID,$district)
+    {
+        $data = [
+            'city_id'=>$cityID,
+            'districts'=>$district,
+            'version'=>self::$lastMapVersion
+        ];
+
+        $url = $this->waymap_interface . '/signal-map/mapJunction/polygon';
+
+        $result = $this->get($url, $data);
+
+        return array_keys($result['filter_juncs']);
+    }
+
+
     /**
      * 获取最新的路网版本
      *
