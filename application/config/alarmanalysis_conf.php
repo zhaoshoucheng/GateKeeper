@@ -40,7 +40,7 @@ $config['tool_param_default'] = '{
     "slow_down_level_lower_limit": "0"
 }';
 
-//默认离线报警参数
+//默认在线报警参数
 $config['alarm_param_realtime_default'] = '{
     "overSatuTrailNumPara": "10",
     "greenSlackTrailNumPara": "5",
@@ -60,20 +60,21 @@ $config['alarm_param_realtime_default'] = '{
 
 //默认离线报警参数
 $config['alarm_param_offline_default'] = '{
-    "over_saturation_traj_num": "10",
+    "over_saturation_traj_num": "8",
     "over_stop_delay_up": "40",
-    "over_saturation_multi_stop_ratio_up": "0.3",
-    "over_saturation_none_stop_ratio_up": "0.05",
-    "over_saturation_queue_length_up": "180",
-    "over_saturation_queue_rate_up": "0.4",
+    "over_saturation_multi_stop_ratio_up": "0.2",
+    "over_saturation_none_stop_ratio_up": "0.3",
+    "over_saturation_queue_length_up": "110",
+    "over_saturation_queue_rate_up": "0.2",
     "spillover_traj_num": "10",
     "spillover_rate_down": "0.2",
     "spillover_queue_rate_down": "0.9",
     "spillover_avg_speed_down": "5",
     "unbalance_traj_num": "5",
     "unbalance_free_multi_stop_ratio_up": "0.05",
-    "unbalance_free_none_stop_ratio_up": "0.4",
-    "unbalance_free_queue_length_up": "70",
+    "unbalance_free_none_stop_ratio_up": "0.5",
+    "unbalance_free_queue_length_up": "50",
+    
     "unbalance_over_saturation_multi_stop_ratio_up": "0.2",
     "unbalance_over_saturation_none_stop_ratio_up": "0.05",
     "unbalance_over_saturation_queue_length_up": "150"
