@@ -30,7 +30,6 @@ class Parametermanage extends MY_Controller
     public function paramList()
     {
         $params = $this->input->post(NULL, TRUE);
-
         // 校验参数
         $this->validate([
             'city_id'    => 'required|is_natural_no_zero',
@@ -82,4 +81,44 @@ class Parametermanage extends MY_Controller
             $this->response('', 500, $e);
         }
     }
+
+    public function realtimeAlarmParamList()
+    {
+        $params = $this->input->post(NULL, TRUE);
+
+        // 校验参数
+        $this->validate([
+            'city_id'    => 'required|is_natural_no_zero',
+            'area_id'    => 'required|integer',
+            'is_default' => 'required|in_list[0,1]',
+        ]);
+
+        try {
+            $data = $this->parametermanageService->realtimeAlarmParamList($params);
+            $this->response($data);
+        } catch (Exception $e) {
+            $this->response('', 500, $e);
+        }
+    }
+
+    /**
+     * 更新实时报警优化参数配置阀值
+     *
+     * @throws Exception
+     */
+    public function editRealtimeAlarmParam()
+    {
+        $params = file_get_contents("php://input");
+        $json = json_decode($params, true);
+        $json = $this->security->xss_clean($json);
+
+        try {
+            $this->parametermanageService->updateParam($json);
+            $this->response('');
+        } catch (Exception $e) {
+            $this->response('', 500, $e);
+        }
+    }
+
+
 }
