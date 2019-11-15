@@ -280,7 +280,7 @@ class RoadService extends BaseService
     /**
      * 获取path的上下游路口
      * 高内聚函数，必须确保质量一般不会轻易动
-     * 
+     *
      * @param $params
      * @return array
      * @throws \Exception
@@ -622,7 +622,7 @@ class RoadService extends BaseService
         }
         array_multisort($sorter,SORT_NUMERIC,SORT_ASC,$base);
         $result["base"] = $base;
-        
+
 
         $result['info'] = [
             'road_name' => $roadName,
@@ -754,5 +754,48 @@ class RoadService extends BaseService
         ob_end_clean();
         $objWriter->save('php://output');
         exit();
+    }
+
+    public function cityRoadsOutter($params) {
+        $city_id = $params['city_id'];
+        $road_infos = $this->road_model->getRoadsByCityId($city_id);
+        $logic_junction_ids = [];
+        foreach ($road_infos as $key => $road_info) {
+            $road_infos[$key]['logic_junction_ids'] = explode(',', $road_info['logic_junction_ids']);
+            $logic_junction_ids = array_merge($logic_junction_ids, $road_infos[$key]['logic_junction_ids']);
+        }
+        $logic_junction_ids = array_unique($logic_junction_ids);
+        $junction_infos = $this->waymap_model->getJunctionInfo(implode(',', $logic_junction_ids));
+        $junction_infos_map = [];
+        foreach ($junction_infos as $junction_info) {
+            $junction_infos_map[$junction_info['logic_junction_id']] = $junction_info;
+        }
+
+        $data = [];
+        foreach ($road_infos as $road_info) {
+            $lngs = [];
+            $lats = [];
+            foreach ($road_info['logic_junction_ids'] as $logic_junction_id) {
+                if (isset($junction_infos_map[$logic_junction_id])) {
+                    $lngs[] = $junction_infos_map[$logic_junction_id]['lng'];
+                    $lats[] = $junction_infos_map[$logic_junction_id]['lat'];
+                }
+            }
+            if (empty($lngs) or empty($lats)) {
+                continue;
+            }
+            $lblng = min($lngs) - 0.00050;
+            $lblat = min($lats) - 0.00050;
+            $rtlng = max($lngs) + 0.00050;
+            $rtlat = max($lats) + 0.00050;
+
+            $data[$road_info['road_id']] = [
+                'lblng' => $lblng,
+                'lblat' => $lblat,
+                'rtlng' => $rtlng,
+                'rtlat' => $rtlat,
+            ];
+        }
+        return $data;
     }
 }

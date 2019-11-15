@@ -231,8 +231,8 @@ class Splitoptimize extends MY_Controller
         $data = [
             'logic_junction_id'     => strip_tags(trim($params['junction_id'])),
             'dates'                 => implode(',', $params['dates']),
-            'start_time'            => $params['time_range'][0],
-            'end_time'              => $params['time_range'][1],
+            'start_time'            => substr($params['time_range'][0], 0, 5),
+            'end_time'              => substr($params['time_range'][1], 0, 5),
         ];
 
         $url = $this->config->item('traj_interface') . '/greensplit/getOriginTimingPlan';

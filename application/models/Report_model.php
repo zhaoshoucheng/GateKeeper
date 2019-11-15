@@ -83,9 +83,8 @@ class Report_model extends CI_Model
             ->where('upload_files.namespace', $namespace)
             ->where('report.city_id', $cityId)
             ->where('report.type', $type)
-            ->limit($pageSize, ($pageNum - 1) * $pageSize)
-            ->get();
-
+            // ->limit($pageSize, ($pageNum - 1) * $pageSize)
+            ->get(); 
         return $res instanceof CI_DB_result ? $res->row_array() : $res;
     }
 

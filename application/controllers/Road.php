@@ -263,6 +263,16 @@ class Road extends MY_Controller
         $this->roadService->download($params);
     }
 
+    public function cityRoadsOutter() {
+        $params = $this->input->get();
+
+        if (empty($params['city_id'])) {
+            throw new \Exception('参数city_id不能为空！', ERR_PARAMETERS);
+        }
+
+        $data = $this->roadService->cityRoadsOutter($params);
+        $this->response($data);
+    }
 
     /*
      * 干线绿波分析,南京项目使用
@@ -277,6 +287,5 @@ class Road extends MY_Controller
         $data = $this->roadService->greenWaveAnalysis($params['city_id']);
 
         $this->response($data);
-
     }
 }

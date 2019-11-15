@@ -7,7 +7,7 @@
 
 class Parametermanage_model extends CI_Model
 {
-    private $tb = 'optimized_parameter_config';
+    private $tb = 'optimized_offline_alarm_config';
     private $parameterLimitTB = 'optimized_parameter_config_limits';
     private $db = '';
 
@@ -28,26 +28,13 @@ class Parametermanage_model extends CI_Model
      * @param $isDefault
      * @return array
      */
-    public function getParameterByArea($cityId, $areaId, $isDefault)
+    public function getParameterByArea($cityID, $areaID="")
     {
-        $res = $this->db->select('*')
-                    ->from($this->tb)
-                    ->where('city_id', $cityId)
-                    ->where('area_id', $areaId)
-                    ->where('is_default', $isDefault)
-                    ->order_by('status', 'hour')
-                    ->get()->result_array();
-        if (empty($res)) {
-            $isDefault = 1;
-            $res = $this->db->select('*')
-                        ->from($this->tb)
-                        ->where('city_id', $cityId)
-                        ->where('area_id', $areaId)
-                        ->where('is_default', $isDefault)
-                        ->order_by('status', 'hour')
-                        ->get()->result_array();
+        $builder = $this->db->select('*')->from($this->tb)->where('city_id', $cityID);
+        if(!empty($areaID)){
+            $builder->where('area_id', $areaID);
         }
-
+        $res = $builder->order_by('hour asc')->get()->result_array();
         return $res;
     }
 
@@ -63,7 +50,6 @@ class Parametermanage_model extends CI_Model
                     ->from($this->parameterLimitTB)
                     ->where('city_id', $cityId)
                     ->get()->result_array();
-
         return $res;
     }
 
@@ -73,44 +59,25 @@ class Parametermanage_model extends CI_Model
      * @param $data
      * @return bool 更新的结果
      */
-    public function updateParameter($cityId, $areaId, $status, $data)
+    public function updateParameter($cityID, $areaID, $data)
     {
         unset($data['create_at']);
         unset($data['update_at']);
         unset($data['id']);
-        $data['is_default'] = 0;
-
         $hour = $data['hour'];
-
+        $data['city_id']=$cityID;
+        $data['area_id']=$areaID;
+        $data['update_at']=date("Y-m-d H:i:s");
         $res = $this->db->select('*')
                     ->from($this->tb)
-                    ->where('city_id', $cityId)
-                    ->where('area_id', $areaId)
+                    ->where('city_id', $cityID)
+                    ->where('area_id', $areaID)
                     ->where('hour', $hour)
-                    ->where('status', $status)
-                    ->where('is_default', 0)
                     ->get()->result_array();
-
         if (empty($res)) {
-            $res = $this->db->select('*')
-                        ->from($this->tb)
-                        ->where('city_id', $cityId)
-                        ->where('area_id', $areaId)
-                        ->where('hour', $hour)
-                        ->where('status', $status)
-                        ->where('is_default', 1)
-                        ->get()->result_array();
-            $res = $res[0];
-            unset($res['id']);
-            unset($res['create_at']);
-            unset($res['update_at']);
-            foreach ($data as $k=>$v) {
-                $res[$k] = $v;
-            }
-            return $this->db->insert($this->tb, $res);
+            return $this->db->insert($this->tb, $data);
         }
-        return $this->db->where('id', $res[0]['id'])
-                    ->update($this->tb, $data);
+        return $this->db->where('id', $res[0]['id'])->update($this->tb, $data);
     }
 
     /**
@@ -119,18 +86,22 @@ class Parametermanage_model extends CI_Model
      * @param $data
      * @return bool 更新的结果
      */
-    public function updateParameterLimit($cityId, $data)
+    public function updateParameterLimit($cityID, $data)
     {
         unset($data['create_at']);
         unset($data['update_at']);
         unset($data['id']);
-
+        $data['update_at'] = date("Y-m-d H:i:s");
+        $data['city_id'] = $cityID;
         $res = $this->db->select('*')
                     ->from($this->parameterLimitTB)
-                    ->where('city_id', $cityId)
+                    ->where('city_id', $cityID)
                     ->get()->result_array();
-
-        return $this->db->where('id', $res[0]['id'])
-                    ->update($this->parameterLimitTB, $data);
+        // print_r($res);exit;
+        if(empty($res)){
+            // print_r($data);exit;
+            return $this->db->insert($this->parameterLimitTB, $data);
+        }
+        return $this->db->where('id', $res[0]['id'])->update($this->parameterLimitTB, $data);
     }
 }

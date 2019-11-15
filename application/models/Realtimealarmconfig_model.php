@@ -19,65 +19,53 @@ class Realtimealarmconfig_model extends CI_Model
 
     }
 
-    /**
-     * 根据城市ID以及区域ID等参数获取优化配置阀值的参数
-     *
-     * @param $cityId
-     * @return array
-     */
-    public function getParameterLimit($cityId) 
+    public function getParameterLimit($cityID,$areaID="",$isDefault="") 
     {
-        $res = $this->db->select('*')
-                    ->from($this->tb)
-                    ->where('city_id', $cityId)
-                    ->get()->result_array();
-
+        $builder = $this->db->select('*')
+                        ->from($this->tb)
+                        ->where('city_id', $cityID);
+        if(!empty($areaID)){
+            $builder->where('area_id', $areaID);
+        }
+        if(!empty($isDefault)){
+            $builder->where('is_default', $isDefault);
+        }
+        $res = $builder->order_by("hour asc")->get()->result_array();
+        if (empty($res)) {
+            $isDefault = 1; 
+            $res = $this->db->select('*')
+                        ->from($this->tb)
+                        ->where('city_id', $cityID)
+                        ->order_by('hour asc')
+                        ->get()->result_array();
+        }
         return $res;
     }
-
+    
     /**
      * 更新优化配置的参数
      *
      * @param $data
      * @return bool 更新的结果
      */
-    public function updateParameter($cityId, $areaId, $status, $data)
+    public function updateParameter($cityID, $areaID, $data)
     {
         unset($data['create_at']);
         unset($data['update_at']);
         unset($data['id']);
-        $data['is_default'] = 0;
-
         $hour = $data['hour'];
-
+        $data['city_id']=$cityID;
+        $data['area_id']=$areaID;
+        $data['update_at']=date("Y-m-d H:i:s");
         $res = $this->db->select('*')
                     ->from($this->tb)
-                    ->where('city_id', $cityId)
-                    ->where('area_id', $areaId)
+                    ->where('city_id', $cityID)
+                    ->where('area_id', $areaID)
                     ->where('hour', $hour)
-                    ->where('status', $status)
-                    ->where('is_default', 0)
                     ->get()->result_array();
-
         if (empty($res)) {
-            $res = $this->db->select('*')
-                        ->from($this->tb)
-                        ->where('city_id', $cityId)
-                        ->where('area_id', $areaId)
-                        ->where('hour', $hour)
-                        ->where('status', $status)
-                        ->where('is_default', 1)
-                        ->get()->result_array();
-            $res = $res[0];
-            unset($res['id']);
-            unset($res['create_at']);
-            unset($res['update_at']);
-            foreach ($data as $k=>$v) {
-                $res[$k] = $v;
-            }
-            return $this->db->insert($this->tb, $res);
+            return $this->db->insert($this->tb, $data);
         }
-        return $this->db->where('id', $res[0]['id'])
-                    ->update($this->tb, $data);
+        return $this->db->where('id', $res[0]['id'])->update($this->tb, $data);
     }
 }
