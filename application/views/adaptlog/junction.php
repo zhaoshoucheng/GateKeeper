@@ -87,7 +87,7 @@
 		foreach ($list as $row) {
 			?>
 			<tr>
-				<td><?php echo $row["rel_id"]?> <br/><a href="./junction?rel_id=<?php echo $row["rel_id"]?>&&dltag=_didi_Junction.Do.Start">路口全批次</a> <a href="./junction?rel_id=<?php echo $row["rel_id"]?>&trace_id=<?php echo $row["trace_id"]?>">单批次详情</a></td>
+				<td><?php echo $row["rel_id"]?> <br/><a href="./junction?rel_id=<?php echo $row["rel_id"]?>&&dltag=_didi_Junction.BatchGetCurrentTiming.Start">路口全批次</a> <a href="./junction?rel_id=<?php echo $row["rel_id"]?>&trace_id=<?php echo $row["trace_id"]?>">单批次详情</a></td>
 				<td><?php echo $row["trace_id"]?></td>
 				<td><?php echo $row["dltag"]?></td>
 				<td>&nbsp;&nbsp;&nbsp;&nbsp;

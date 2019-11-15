@@ -32,6 +32,127 @@ class RoadService extends BaseService
     }
 
     /**
+     * 干线绿波分析
+     *
+     * @param $params
+     *
+     * @return array
+     */
+    public function greenWaveAnalysis($cityID){
+        //TODO 暂时写死
+        $roadIDs = ["f67d5bc1becbdcf98622b62649a264c5", "12beb023a415e27b0339f1300ba20d25"];
+
+        //查询干线信息
+        $roadInfos = [];
+        foreach ($roadIDs as $r){
+            $p=[
+                'city_id'=>$cityID,
+                'road_id'=>$r,
+                'show_type'=>0
+            ];
+            $data = $this->getRoadDetail($p);
+            $rinfo  = $this->road_model->getRoadByRoadId($r,"road_name");
+            //TODO 默认值
+            $roadInfos[] = [
+                'road_id'=>$r,
+                'road_name'=>$rinfo['road_name'],
+                'road_info'=>$data['road_info'],
+                'quota_info'=>[
+                    'forward_quota'=>[
+                        'time'=>0,
+                        'speed'=>0,
+                        'stop_time_cycle'=>0,
+                        'PI'=>20,
+                        'level'=>"A"
+                    ],
+                    'reverse_quota'=>[
+                        'time'=>0,
+                        'speed'=>0,
+                        'stop_time_cycle'=>0,
+                        'PI'=>20,
+                        'level'=>"A"
+                    ],
+                ],
+            ];
+        }
+
+
+
+        $url = $this->config->item('its_traj_interface') . '/road/greenwave';
+
+        $query = [
+            'road_ids' => $roadIDs,
+            'city_id' => (int)$cityID,
+        ];
+        $ret =  httpPOST($url, $query, 20000, "json");
+
+        $ret = json_decode($ret, true);
+        $data = $ret['data'];
+        $flowQuota = [];
+        //数据处理合并
+        if(!isset($data['RoadMap'])){
+            return $roadInfos;
+        }
+
+        foreach ($data['RoadMap'] as $rk => $rv){
+            if(count($rv['forward'])>0){
+                $flowQuota[$rk]=[
+                    'forward'=>[
+                        'time'=>0,
+                        'speed'=>array_sum(array_column($rv['forward'],"speed"))/count($rv['forward']),
+                        'stop_time_cycle'=>array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),
+                        'PI'=>array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),
+                        'length'=>array_sum(array_column($rv['forward'],"length")),
+                        'level'=>"A"
+                    ],
+                ];
+                $flowQuota[$rk]['forward']['time'] = $flowQuota[$rk]['forward']['length']/ $flowQuota[$rk]['forward']['speed'];
+            }
+            if(count($rv['backward'])>0){
+                $flowQuota[$rk]=[
+                    'backward'=>[
+                        'time'=>0,
+                        'speed'=>array_sum(array_column($rv['backward'],"speed"))/count($rv['backward']),
+                        'stop_time_cycle'=>array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),
+                        'PI'=>array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),
+                        'length'=>array_sum(array_column($rv['backward'],"length")),
+                        'level'=>"A"
+                    ]
+                ];
+                $flowQuota[$rk]['backward']['time'] = $flowQuota[$rk]['backward']['length']/ $flowQuota[$rk]['backward']['speed'];
+            }
+
+//            $flowQuota[$rk]=[
+//                'forward'=>[
+//                    'time'=>0,
+//                    'speed'=>array_sum(array_column($rv['forward'],"speed"))/count($rv['forward']),
+//                    'stop_time_cycle'=>array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),
+//                    'PI'=>array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),
+//                    'length'=>array_sum(array_column($rv['forward'],"length")),
+//                    'level'=>"A"
+//                ],
+//                'backward'=>[
+//                    'time'=>0,
+//                    'speed'=>array_sum(array_column($rv['backward'],"speed"))/count($rv['backward']),
+//                    'stop_time_cycle'=>array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),
+//                    'PI'=>array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),
+//                    'length'=>array_sum(array_column($rv['backward'],"length")),
+//                    'level'=>"A"
+//                ]
+//            ];
+
+        }
+
+        foreach ($roadInfos as $rk =>$rv){
+            $roadInfos[$rk]['quota_info'] = $flowQuota[$rv['road_id']];
+        }
+
+
+        return $roadInfos;
+
+    }
+
+    /**
      * 获取城市干线列表
      *
      * @param $params
@@ -159,7 +280,7 @@ class RoadService extends BaseService
     /**
      * 获取path的上下游路口
      * 高内聚函数，必须确保质量一般不会轻易动
-     * 
+     *
      * @param $params
      * @return array
      * @throws \Exception
@@ -501,7 +622,7 @@ class RoadService extends BaseService
         }
         array_multisort($sorter,SORT_NUMERIC,SORT_ASC,$base);
         $result["base"] = $base;
-        
+
 
         $result['info'] = [
             'road_name' => $roadName,
@@ -633,5 +754,48 @@ class RoadService extends BaseService
         ob_end_clean();
         $objWriter->save('php://output');
         exit();
+    }
+
+    public function cityRoadsOutter($params) {
+        $city_id = $params['city_id'];
+        $road_infos = $this->road_model->getRoadsByCityId($city_id);
+        $logic_junction_ids = [];
+        foreach ($road_infos as $key => $road_info) {
+            $road_infos[$key]['logic_junction_ids'] = explode(',', $road_info['logic_junction_ids']);
+            $logic_junction_ids = array_merge($logic_junction_ids, $road_infos[$key]['logic_junction_ids']);
+        }
+        $logic_junction_ids = array_unique($logic_junction_ids);
+        $junction_infos = $this->waymap_model->getJunctionInfo(implode(',', $logic_junction_ids));
+        $junction_infos_map = [];
+        foreach ($junction_infos as $junction_info) {
+            $junction_infos_map[$junction_info['logic_junction_id']] = $junction_info;
+        }
+
+        $data = [];
+        foreach ($road_infos as $road_info) {
+            $lngs = [];
+            $lats = [];
+            foreach ($road_info['logic_junction_ids'] as $logic_junction_id) {
+                if (isset($junction_infos_map[$logic_junction_id])) {
+                    $lngs[] = $junction_infos_map[$logic_junction_id]['lng'];
+                    $lats[] = $junction_infos_map[$logic_junction_id]['lat'];
+                }
+            }
+            if (empty($lngs) or empty($lats)) {
+                continue;
+            }
+            $lblng = min($lngs) - 0.00050;
+            $lblat = min($lats) - 0.00050;
+            $rtlng = max($lngs) + 0.00050;
+            $rtlat = max($lats) + 0.00050;
+
+            $data[$road_info['road_id']] = [
+                'lblng' => $lblng,
+                'lblat' => $lblat,
+                'rtlng' => $rtlng,
+                'rtlat' => $rtlat,
+            ];
+        }
+        return $data;
     }
 }

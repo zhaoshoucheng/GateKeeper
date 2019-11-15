@@ -459,7 +459,12 @@ class TimingAdaptionService extends BaseService
         //$baseInfo = []; //基准配时
         $baseInfo = json_decode($res['base_info'], true);
         $optStatus = json_decode($res['opt_status'], true);
-
+        $outOptStatus = [
+            "logic_junction_id"=>$optStatus["logic_junction_id"],
+            "msg"=>$optStatus["opt_msg"],
+            "status"=>$optStatus["opt_status"],
+            // "logic_junction_id"=>$optStatus["2017030116_73316467"],
+        ];
         // 获取路口配时成功下发时间
         // $currentResult = $this->getCurrentUpdateResult($logicJunctionId);
 
