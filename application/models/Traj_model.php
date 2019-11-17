@@ -87,6 +87,19 @@ class Traj_model extends CI_Model
     }
 
     /**
+     * 获取全城路口并附加pi信息
+     *
+     * @param array $data 请求的参数
+     * @return array
+     * @throws \Exception
+     */
+    public function getJunctionsWithPi($data)
+    {
+        $url = $this->its_interface . '/overview/junctionslist';
+        return $this->get($url, $data, 20000);
+    }
+
+    /**
      * 获取干线协调时空图
      *
      * @param array $data 请求的参数
