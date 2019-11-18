@@ -571,11 +571,16 @@ class Realtimewarning_model extends CI_Model
         //获取需要报警的全部路口ID
         $alarmJunctionIdArr = array_unique(array_column($realTimeAlarmsInfo, 'logic_junction_id'));
         asort($alarmJunctionIdArr);
-        $alarmJunctionIDs = implode(',', $alarmJunctionIdArr);
-
+        
         //获取需要报警的全部路口的全部方向的信息
+        $flowsInfo = [];
         try {
-            $flowsInfo = $this->waymap_model->getFlowsInfo($alarmJunctionIDs,true);
+            $chunkJunctions = array_chunk($alarmJunctionIdArr,100);
+            foreach ($chunkJunctions as $partJuncs) {
+                $alarmJunctionIDs = implode(',', $partJuncs);
+                $tmpInfo = $this->waymap_model->getFlowsInfo($alarmJunctionIDs,false);
+                $flowsInfo = array_merge($flowsInfo,$tmpInfo);
+            }
         } catch (\Exception $e) {
             $flowsInfo = [];
         }

@@ -97,7 +97,7 @@ class Alarmanalysis_model extends CI_Model
         $lastTime  = date('Y-m-d') . ' ' . $hour;
 
         // 组织ES接口所需DSL
-        $json = '{"from":0,"size":1000,"query":{"bool":{"must":{"bool":{"must":[';
+        $json = '{"from":0,"size":10000,"query":{"bool":{"must":{"bool":{"must":[';
 
         // where city_id
         $json .= '{"match":{"city_id":{"query":' . $cityId . ',"type":"phrase"}}}';

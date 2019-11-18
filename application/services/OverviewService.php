@@ -325,11 +325,14 @@ class OverviewService extends BaseService
             }
             $ambleNum = $res['amble_total'] ?? 0;
             $congestionNum = $res['congestion_total'] ?? 0;
+            $subHour=substr($hour,0,3);
+            if($subHour=="01:"){
+                continue;
+            }
             $jamList["list"][] = ["hour"=>$hour,"value"=>$congestionNum];
             $slowList["list"][] = ["hour"=>$hour,"value"=>$ambleNum];
             $unblockedList["list"][] = ["hour"=>$hour,"value"=>$junctionTotal - ($ambleNum + $congestionNum)];
         }
-        
         $jamList["list"] = $this->completionCurveDataGap($jamList["list"]);
         $slowList["list"] = $this->completionCurveDataGap($slowList["list"]);
         $unblockedList["list"] = $this->completionCurveDataGap($unblockedList["list"]);
