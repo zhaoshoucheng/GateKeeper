@@ -393,7 +393,7 @@ class Realtimewarning_model extends CI_Model
             // 缓存实时报警路口数据
             $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600);
             // 冗余缓存实时报警路口数据,每一个批次一份
-            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600);
+            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600); 
 
 
             // 缓存最新hour
@@ -591,7 +591,7 @@ class Realtimewarning_model extends CI_Model
                 $trajNum = 1;
             }
 
-            $alarmCategory = $this->config->item('flow_alarm_category');
+            $alarmCategory = $this->config->item('flow_alarm_categoryflow_alarm_category');
             $alarmInfo = [];
             $alarmFlowType = [];
             $flowList = [];
@@ -662,7 +662,7 @@ class Realtimewarning_model extends CI_Model
                     'is' => (int)!empty($alarmInfo),
                     'comment' => $alarmInfo,
                 ],
-                'status' => $this->getJunctionStatus($quota),
+                'status' => $this->getJunctionStatus($quota,$cityId),
             ];
         }
         $lngs = array_filter(array_column($dataList, 'lng'));
@@ -815,12 +815,28 @@ class Realtimewarning_model extends CI_Model
      *
      * @return array
      */
-    private function getJunctionStatus($quota)
+    function getJunctionStatus($quota,$cityId)
     {
+        //这里从db中读取信息
+        $res = $this->db->select("*")
+        ->from("optimized_parameter_config_limits")
+        ->where('city_id', $cityId)
+        ->order_by('id', 'DESC')
+        ->get();
+        $limit = $res instanceof CI_DB_result ? $res->row_array() : $res;
+        if(!empty($limit)){
+            $junctionStatusFormula = function ($val) {
+                if ($val >= $limit["cycle_optimization_limit"]) {
+                    return 3; // 拥堵
+                } elseif ($val < $limit["cycle_optimization_limit"] && $val >= $limit["cycle_optimization_lower_limit"]) {
+                    return 2; // 缓行
+                } else {
+                    return 1; // 畅通
+                }
+            };
+        }
         $junctionStatus = $this->config->item('junction_status');
-
         $junctionStatusFormula = $this->config->item('junction_status_formula');
-
         return $junctionStatus[$junctionStatusFormula($quota['stop_delay']['value'])];
     }
 

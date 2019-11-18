@@ -1109,7 +1109,7 @@ class OverviewService extends BaseService
         };
 
         //处理数据内容格式
-        $temp = array_map(function ($item) use ($junctionsInfo) {
+        $temp = array_map(function ($item) use ($junctionsInfo,$cityId) {
             return [
                 'jid' => $item['logic_junction_id'],
                 'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
@@ -1117,7 +1117,7 @@ class OverviewService extends BaseService
                 'lat' => $junctionsInfo[$item['logic_junction_id']]['lat'] ?? '',
                 'quota' => ($quota = $this->getFinalQuotaInfo($item)),
                 'alarm' => $this->getFinalAlarmInfo($item),
-                'status' => $this->getJunctionStatus($quota),
+                'status' => $this->getJunctionStatus($quota,$cityId),
             ];
         }, $temp);
 
@@ -1249,10 +1249,26 @@ class OverviewService extends BaseService
      */
     private function getJunctionStatus($quota)
     {
+        //这里从db中读取信息
+        $res = $this->db->select("*")
+        ->from("optimized_parameter_config_limits")
+        ->where('city_id', $cityId)
+        ->order_by('id', 'DESC')
+        ->get();
+        $limit = $res instanceof CI_DB_result ? $res->row_array() : $res;
+        if(!empty($limit)){
+            $junctionStatusFormula = function ($val) {
+                if ($val >= $limit["cycle_optimization_limit"]) {
+                    return 3; // 拥堵
+                } elseif ($val < $limit["cycle_optimization_limit"] && $val >= $limit["cycle_optimization_lower_limit"]) {
+                    return 2; // 缓行
+                } else {
+                    return 1; // 畅通
+                }
+            }
+        }
         $junctionStatus = $this->config->item('junction_status');
-
         $junctionStatusFormula = $this->config->item('junction_status_formula');
-
         return $junctionStatus[$junctionStatusFormula($quota['stop_delay']['value'])];
     }
 }
