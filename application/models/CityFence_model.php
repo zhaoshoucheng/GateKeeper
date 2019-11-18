@@ -31,13 +31,12 @@ class CityFence_model extends CI_Model{
      */
     public function getCityFence($cityID, $divisionID = 0)
     {
-        $req = $this->db->select("*")
+        $res = $this->db->select("*")
             ->from($this->tb)
-            ->where('city_id', $cityID);
-        if($divisionID !=0){
-            $req = $req->where("division_id",$divisionID);
-        }
-        $res = $req->get();
+            ->where('city_id', $cityID)
+            ->where('division_id',$divisionID)
+            ->get();
+
 
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;

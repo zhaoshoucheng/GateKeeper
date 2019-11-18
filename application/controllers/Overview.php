@@ -25,6 +25,56 @@ class Overview extends MY_Controller
         $this->overviewService = new OverviewService();
     }
 
+    //pi等级配置
+    public function piconfig(){
+        $data = [
+            [
+                'level'=>"E",
+                "to"=>99999,
+                "from"=>80
+            ],
+            [
+                'level'=>"D",
+                "to"=>80,
+                "from"=>60
+            ],
+            [
+                'level'=>"C",
+                "to"=>60,
+                "from"=>40
+            ],
+            [
+                'level'=>"B",
+                "to"=>40,
+                "from"=>20
+            ],
+            [
+                'level'=>"A",
+                "to"=>20,
+                "from"=>0
+            ],
+
+        ];
+        return $this->response($data);
+    }
+
+    //南京项目需求,附加pi和行政区划
+    public function junctionsListWithExt(){
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+//            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ]);
+
+        $data = $this->overviewService->junctionsListWithPI($params,$this->userPerm);
+
+        if(isset($params['division_id']) && $params['division_id']>0){
+            $data = $this->overviewService->addDivisionID($params['city_id'],$params['division_id'],$data);
+        }
+        $this->response($data);
+    }
+
     /**
      * 获取路口列表
      *
@@ -41,7 +91,17 @@ class Overview extends MY_Controller
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
 
+
         $data = $this->overviewService->junctionsList($params,$this->userPerm);
+        
+
+
+//        $data = json_decode($jsonStr,true);
+//        $data = $data['data'];
+        //新增基于行政区过滤功能
+//        if(isset($params['division_id']) && $params['division_id']>0){
+//            $data = $this->overviewService->addDivisionID($params['city_id'],$params['division_id'],$data);
+//        }
 
         $this->response($data);
     }
