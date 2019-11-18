@@ -13,6 +13,7 @@ namespace Services;
 class RealtimeQuotaService extends BaseService
 {
     private $helperService;
+    private $overviewService;
 
     public function __construct()
     {
@@ -23,6 +24,7 @@ class RealtimeQuotaService extends BaseService
         $this->load->model('common_model');
         $this->load->model('alarmanalysis_model');
         $this->helperService = new HelperService();
+        $this->overviewService = new OverviewService();
         $this->load->config("nconf");
     }
 
@@ -171,16 +173,16 @@ class RealtimeQuotaService extends BaseService
                     foreach ($alarm_list as $alarm) {
                         $alarm_list_map[$alarm['logic_flow_id']] = $alarm;
                     }
-                }
-                foreach ($newFlowList as $key => $value) {
-                    if (isset($alarm_list_map[$value['movement_id']])) {
-                        $newFlowList[$key]['is_alarm'] = 1;
-                        $newFlowList[$key]['type'] = $alarm_list_map[$value['movement_id']]['type'];
-                        $newFlowList[$key]['alarm_comment'] = $alarm_list_map[$value['alarm_comment']];
-                    } else {
-                        $newFlowList[$key]['is_alarm'] = 0;
-                        $newFlowList[$key]['type'] = 0;
-                        $newFlowList[$key]['alarm_comment'] = 0;
+                    foreach ($newFlowList as $key => $value) {
+                        if (isset($alarm_list_map[$value['movement_id']])) {
+                            $newFlowList[$key]['is_alarm'] = 1;
+                            $newFlowList[$key]['type'] = $alarm_list_map[$value['movement_id']]['type'];
+                            $newFlowList[$key]['alarm_comment'] = $alarm_list_map[$value['alarm_comment']];
+                        } else {
+                            $newFlowList[$key]['is_alarm'] = 0;
+                            $newFlowList[$key]['type'] = 0;
+                            $newFlowList[$key]['alarm_comment'] = 0;
+                        }
                     }
                 }
                 $movementList["today"] = $newFlowList;
