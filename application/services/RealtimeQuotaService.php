@@ -168,20 +168,22 @@ class RealtimeQuotaService extends BaseService
             $movementList[$date] = $newFlowList;
             if($date==date("Y-m-d")){
                 if ($with_alarm == 1) {
-                    $alarm_list = $this->overviewService->realTimeAlarmList(['city_id' => $cityId, 'date' => $data], $this->userPerm);
+                    $alarm_list = $this->overviewService->realTimeAlarmList(['city_id' => $cityId, 'date' => $date], $this->userPerm);
                     $alarm_list_map = [];
-                    foreach ($alarm_list as $alarm) {
+                    foreach ($alarm_list['dataList'] as $alarm) {
                         $alarm_list_map[$alarm['logic_flow_id']] = $alarm;
                     }
                     foreach ($newFlowList as $key => $value) {
                         if (isset($alarm_list_map[$value['movement_id']])) {
                             $newFlowList[$key]['is_alarm'] = 1;
                             $newFlowList[$key]['type'] = $alarm_list_map[$value['movement_id']]['type'];
-                            $newFlowList[$key]['alarm_comment'] = $alarm_list_map[$value['alarm_comment']];
+                            $newFlowList[$key]['junction_type'] = $alarm_list_map[$value['movement_id']]['junction_type'];
+                            $newFlowList[$key]['alarm_comment'] = $alarm_list_map[$value['movement_id']]['alarm_comment'];
                         } else {
                             $newFlowList[$key]['is_alarm'] = 0;
                             $newFlowList[$key]['type'] = 0;
-                            $newFlowList[$key]['alarm_comment'] = 0;
+                            $newFlowList[$key]['junction_type'] = 0;
+                            $newFlowList[$key]['alarm_comment'] = '';
                         }
                     }
                 }
