@@ -548,19 +548,36 @@ class RoadService extends BaseService
             ];
             //填充正向指标数据
             foreach ($roadConnect['forward_path_flows'] as $v){
-                $roadQuotaInfo[$dk]['quota_info'][] = [
-                    "logic_flow_id"=>$v['logic_flow']['logic_flow_id'],
-                    "start_junc_id"=>$v['start_junc_id'],
-                    "end_junc_id"=>$v['end_junc_id'],
-                    "forward_time"=>round($v['length']/$roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['speed'],2),
-                    "forward_stop_delay"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['stop_delay'],2),
-                    "forward_speed"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['speed'],2),
-                    "forward_stop_time_cycle"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['stop_time_cycle'],2),
-                    "backward_time"=>0,
-                    "backward_stop_delay"=>0,
-                    "backward_speed"=>0,
-                    "backward_stop_time_cycle"=>0,
-                ];
+                if(!isset($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']])){
+                    $roadQuotaInfo[$dk]['quota_info'][] = [
+                        "logic_flow_id"=>$v['logic_flow']['logic_flow_id'],
+                        "start_junc_id"=>$v['start_junc_id'],
+                        "end_junc_id"=>$v['end_junc_id'],
+                        "forward_time"=>0,
+                        "forward_stop_delay"=>0,
+                        "forward_speed"=>0,
+                        "forward_stop_time_cycle"=>0,
+                        "backward_time"=>0,
+                        "backward_stop_delay"=>0,
+                        "backward_speed"=>0,
+                        "backward_stop_time_cycle"=>0,
+                    ];
+                }else{
+                    $roadQuotaInfo[$dk]['quota_info'][] = [
+                        "logic_flow_id"=>$v['logic_flow']['logic_flow_id'],
+                        "start_junc_id"=>$v['start_junc_id'],
+                        "end_junc_id"=>$v['end_junc_id'],
+                        "forward_time"=>round($v['length']/$roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['speed'],2),
+                        "forward_stop_delay"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['stop_delay'],2),
+                        "forward_speed"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['speed'],2),
+                        "forward_stop_time_cycle"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['stop_time_cycle'],2),
+                        "backward_time"=>0,
+                        "backward_stop_delay"=>0,
+                        "backward_speed"=>0,
+                        "backward_stop_time_cycle"=>0,
+                    ];
+                }
+
             }
             //填充反向指标数据
             foreach (array_reverse($roadConnect['backward_path_flows']) as $backkey => $backv){
