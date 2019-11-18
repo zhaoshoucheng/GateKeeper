@@ -27,6 +27,7 @@ class RoadService extends BaseService
         $this->load->model('redis_model');
         $this->load->model('road_model');
         $this->load->model('flowDurationV6_model');
+        $this->load->model('traj_model');
 
         $this->load->config('evaluate_conf');
     }
@@ -479,6 +480,125 @@ class RoadService extends BaseService
             'center' => $center,
             'map_version' => $maxWaymapVersion,
         ];
+    }
+
+
+    /*
+     * 干线评估表格
+     * */
+    public function comparisonTable($params){
+        $roadId = $params['road_id'];
+        $cityId = $params['city_id'];
+        $baseStartDate = $params['base_start_date'];
+        $baseEndDate = $params['base_end_date'];
+        $timePoint = $params['time_point'];
+
+        // 获取干线路口数据
+        $select = 'road_name, logic_junction_ids';
+        $roadInfo = $this->road_model->getRoadByRoadId($roadId, $select);
+
+        // 获取干线数据失败
+        if (!$roadInfo) {
+            throw new \Exception('获取干线信息失败');
+        }
+
+        $roadName = $roadInfo['road_name'];
+
+        $junctionIdList = explode(',', $roadInfo['logic_junction_ids']);
+
+        // 最新路网版本
+        $newMapVersion = $this->waymap_model->getLastMapVersion();
+
+        // 调用路网接口获取干线路口信息
+        $roadConnect = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIdList);
+
+        $reqData  = [
+            'city_id'=>(int)$cityId,
+            'road_id'=>$roadId,
+            'hours'=>[$timePoint],
+            'dates'=>dateRange($baseStartDate, $baseEndDate)
+        ];
+        $retData  = $this->traj_model->getRoadQuotaInfo($reqData);
+
+        //数据合并处理
+
+        $roadQuotaInfo = [];
+
+        $roadQuotaMap=[];
+        foreach ($retData['hits']['hits'] as $v){
+            $dt = $v['_source']['dt'];
+            $logicFlowID = $v['_source']['logic_flow_id'];
+            if(!isset($roadQuotaMap[$dt])){
+                $roadQuotaMap[$dt] = [];
+            }
+            if(!isset($roadQuotaMap[$dt][$logicFlowID])){
+                $roadQuotaMap[$dt][$logicFlowID] = [];
+            }
+            //因为请求的时候只有一个时间点
+            $roadQuotaMap[$dt][$logicFlowID] = [
+                'speed'=> $v['_source']['speed'] * 3.6,
+                'stop_delay'=>$v['_source']['stop_delay'],
+                'stop_time_cycle'=>$v['_source']['stop_delay'],
+                'time'=>0
+            ];
+        }
+
+        foreach (dateRange($baseStartDate, $baseEndDate) as $dk => $dt){
+            $roadQuotaInfo[] = [
+                'date'=>$dt,
+                'quota_info'=>[]
+            ];
+            //填充正向指标数据
+            foreach ($roadConnect['forward_path_flows'] as $v){
+                $roadQuotaInfo[$dk]['quota_info'][] = [
+                    "logic_flow_id"=>$v['logic_flow']['logic_flow_id'],
+                    "start_junc_id"=>$v['start_junc_id'],
+                    "end_junc_id"=>$v['end_junc_id'],
+                    "forward_time"=>$v['length']/$roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['speed'],
+                    "forward_stop_delay"=>$roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['stop_delay'],
+                    "forward_speed"=>$roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['speed'],
+                    "forward_stop_time_cycle"=>$roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['stop_time_cycle'],
+                    "backward_time"=>0,
+                    "backward_stop_delay"=>0,
+                    "backward_speed"=>0,
+                    "backward_stop_time_cycle"=>0,
+                ];
+            }
+            //填充反向指标数据
+            foreach (array_reverse($roadConnect['backward_path_flows']) as $backkey => $backv){
+                if(!isset($roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']])){
+                    continue;
+                }
+                $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_stop_delay'] = $roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['stop_delay'];
+                $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_speed'] = $roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['speed'];
+                $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_stop_time_cycle'] = $roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['stop_time_cycle'];
+                $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_time'] = $backv['length']/$roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['speed'];
+            }
+        }
+
+        //计算平均值或求和
+        $svgFuc = function($r){
+            $length = count($r['quota_info']);
+            if($length>0){
+                $r['sum_avg']=[
+                    "forward_time"=>array_sum(array_column($r['quota_info'],'forward_time')),
+                    "forward_stop_delay"=>array_sum(array_column($r['quota_info'],'forward_stop_delay'))/$length,
+                    "forward_speed"=>array_sum(array_column($r['quota_info'],'forward_speed'))/$length,
+                    "forward_stop_time_cycle"=>array_sum(array_column($r['quota_info'],'forward_stop_time_cycle'))/$length,
+                    "backward_time"=>array_sum(array_column($r['quota_info'],'backward_time')),
+                    "backward_stop_delay"=>array_sum(array_column($r['quota_info'],'backward_stop_delay'))/$length,
+                    "backward_speed"=> array_sum(array_column($r['quota_info'],'backward_speed'))/$length,
+                    "backward_stop_time_cycle"=> array_sum(array_column($r['quota_info'],'backward_stop_time_cycle'))/$length,
+                ];
+            }
+
+            return $r;
+        };
+
+        $roadQuotaInfo = array_map($svgFuc,$roadQuotaInfo);
+
+        return $roadQuotaInfo;
+
     }
 
     /**

@@ -229,6 +229,27 @@ class Road extends MY_Controller
         $this->response($data);
     }
 
+    public function comparisonTable(){
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'road_id' => 'required|min_length[1]',
+//            'quota_key' => 'required|min_length[1]',
+            'base_start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'base_end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'time_point'=>'required'
+//            'evaluate_start_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+//            'evaluate_end_date' => 'required|exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+//            'direction' => 'required|in_list[1,2]'
+        ]);
+
+        $data = $this->roadService->comparisonTable($params);
+
+        $this->response($data);
+
+
+    }
+
     /**
      * 获取数据下载链接
      *

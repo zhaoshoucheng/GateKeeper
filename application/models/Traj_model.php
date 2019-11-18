@@ -37,6 +37,19 @@ class Traj_model extends CI_Model
     }
 
     /**
+     * 获取干线的flow离线指标信息
+     *
+     * @param array $data 请求的参数
+     * @return array
+     * @throws \Exception
+     */
+    public function getRoadQuotaInfo($data){
+        $url = $this->interface . '/road/offlinegreenwave';
+//        $url =  'http://127.0.0.1:8032/itstool/road/offlinegreenwave';
+        return $this->post($url, $data, 20000, "json");
+    }
+
+    /**
      * 获取时段划分方案
      *
      * @param array $data 请求的参数
