@@ -41,7 +41,7 @@ class RoadService extends BaseService
      */
     public function greenWaveAnalysis($cityID){
         //TODO 暂时写死
-        $roadIDs = ["f67d5bc1becbdcf98622b62649a264c5", "12beb023a415e27b0339f1300ba20d25"];
+        $roadIDs = ["f67d5bc1becbdcf98622b62649a264c5", "12beb023a415e27b0339f1300ba20d25","efcf36c50ab42f2d17c68edc338348dd"];
 
         //查询干线信息
         $roadInfos = [];
