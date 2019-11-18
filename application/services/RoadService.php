@@ -104,7 +104,7 @@ class RoadService extends BaseService
                         'stop_time_cycle'=>round(array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),2),
                         'PI'=>round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2),
                         'length'=>array_sum(array_column($rv['forward'],"length")),
-                        'level'=>"A"
+                        'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
                     ],
                 ];
                 $flowQuota[$rk]['forward']['time'] = $flowQuota[$rk]['forward']['length']/ $flowQuota[$rk]['forward']['speed'];
@@ -117,7 +117,7 @@ class RoadService extends BaseService
                         'stop_time_cycle'=>round(array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),2),
                         'PI'=>round(array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),2),
                         'length'=>array_sum(array_column($rv['backward'],"length")),
-                        'level'=>"A"
+                        'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
                     ]
                 ];
                 $flowQuota[$rk]['backward']['time'] = round($flowQuota[$rk]['backward']['length']/ $flowQuota[$rk]['backward']['speed'],2);
@@ -131,6 +131,23 @@ class RoadService extends BaseService
 
 
         return $roadInfos;
+
+    }
+    private function getPIlevel($pi){
+        if($pi>0 && $pi <20){
+            return "A";
+        }
+        if($pi>=20 && $pi <40){
+            return "B";
+        }
+        if($pi>=40 && $pi <60){
+            return "C";
+        }
+        if($pi>=60 && $pi <80){
+            return "D";
+        }
+
+        return "E";
 
     }
 
