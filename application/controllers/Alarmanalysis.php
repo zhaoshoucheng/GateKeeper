@@ -196,9 +196,10 @@ class Alarmanalysis extends MY_Controller
         $params = $this->input->post(null, true);
         $this->validate([
             'city_id'        => 'required|is_natural_no_zero',
-            'junction_id'  => 'required|trim', 
+            'junction_id'  => 'required|trim',
             'dates'        => 'is_array',
             'time'        => 'trim|regex_match[/\d{2}:\d{2}:\d{2}/]',
+            'with_alarm'  => 'is_natural'
         ]);
         $result = $this->realtimeQuotaService->junctionRealtimeFlowQuotaList($params);
         $this->response($result);

@@ -47,7 +47,7 @@ class RealtimeQuotaService extends BaseService
             $flowList = $this->realtime_model->getJunctionQuotaCurve($data,true);
             if($date==date("Y-m-d")){
                 if(strtotime(date("Y-m-d")." ".$endTime) > strtotime(date("Y-m-d")." ".$lastHour)){
-                   $endTime = $lastHour;                    
+                   $endTime = $lastHour;
                 }
             }
             $quotaList = $this->getQuotaValue($quotaKey, $flowList, $startTime, $endTime);
@@ -110,9 +110,10 @@ class RealtimeQuotaService extends BaseService
     public function junctionRealtimeFlowQuotaList($params){
         $junctionId = $params["junction_id"];
         $cityId = $params["city_id"];
+        $with_alarm = $params['with_alarm'];
         $hour = $this->helperService->getLastestHour($cityId);
         if(!empty($params["time"])){
-            $hour = $params["time"];            
+            $hour = $params["time"];
         }
         if(empty($params["dates"])){
             $params["dates"] = [date("Y-m-d")];
@@ -164,6 +165,24 @@ class RealtimeQuotaService extends BaseService
             $newFlowList = $this->sortFlowList($cityId,$junctionId,$newFlowList);
             $movementList[$date] = $newFlowList;
             if($date==date("Y-m-d")){
+                if ($with_alarm == 1) {
+                    $alarm_list = $this->overviewService->realTimeAlarmList(['city_id' => $cityId], $this->userPerm);
+                    $alarm_list_map = [];
+                    foreach ($alarm_list as $alarm) {
+                        $alarm_list_map[$alarm['logic_flow_id']] = $alarm;
+                    }
+                }
+                foreach ($newFlowList as $key => $value) {
+                    if (isset($alarm_list_map[$value['movement_id']])) {
+                        $newFlowList[$key]['is_alarm'] = 1;
+                        $newFlowList[$key]['type'] = $alarm_list_map[$value['movement_id']]['type'];
+                        $newFlowList[$key]['alarm_comment'] = $alarm_list_map[$value['alarm_comment']];
+                    } else {
+                        $newFlowList[$key]['is_alarm'] = 0;
+                        $newFlowList[$key]['type'] = 0;
+                        $newFlowList[$key]['alarm_comment'] = 0;
+                    }
+                }
                 $movementList["today"] = $newFlowList;
             }
         }
