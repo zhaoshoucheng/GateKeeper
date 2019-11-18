@@ -44,7 +44,7 @@ class Traj_model extends CI_Model
      * @throws \Exception
      */
     public function getRoadQuotaInfo($data){
-        $url = $this->interface . '/road/offlinegreenwave';
+        $url = $this->its_interface . '/road/offlinegreenwave';
 //        $url =  'http://127.0.0.1:8032/itstool/road/offlinegreenwave';
         return $this->post($url, $data, 20000, "json");
     }
