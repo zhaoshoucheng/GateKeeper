@@ -168,7 +168,7 @@ class RealtimeQuotaService extends BaseService
             $movementList[$date] = $newFlowList;
             if($date==date("Y-m-d")){
                 if ($with_alarm == 1) {
-                    $alarm_list = $this->overviewService->realTimeAlarmList(['city_id' => $cityId], $this->userPerm);
+                    $alarm_list = $this->overviewService->realTimeAlarmList(['city_id' => $cityId, 'date' => $data], $this->userPerm);
                     $alarm_list_map = [];
                     foreach ($alarm_list as $alarm) {
                         $alarm_list_map[$alarm['logic_flow_id']] = $alarm;
