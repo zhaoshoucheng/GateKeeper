@@ -191,6 +191,7 @@ class Common extends MY_Controller
             $junctionListKeyByAreaID[$value["area_id"]][] = $value["junction_id"];
         }
         $newAreaList = [];
+        $areaIdList[] = "-1";
         foreach ($areaIdList as $areaID){
             //获取某区域的配置
             $params = ["city_id"=>$cityId,"area_id"=>$areaID,"is_default"=>0,];
@@ -214,10 +215,12 @@ class Common extends MY_Controller
             $newAreaList[$areaID]["config"] = $hourParamList;
         }
 
-
         $newAreaList["default"]["junction_list"] = []; 
-        $defaultConfig = $this->config->item('alarm_param_offline_default');
-        $newAreaList["default"]["config"]["00:00-24:00"] = $defaultConfig;
+        $newAreaList["default"] = $newAreaList["-1"]??[];
+        if(empty($newAreaList["-1"])){
+            $defaultConfig = $this->config->item('alarm_param_offline_default');
+            $newAreaList["default"]["config"]["00:00-24:00"] = $defaultConfig;
+        }
         $this->response(["data"=>$newAreaList,"last_time"=>date("Y-m-d H:i:s")]);
     }
 
@@ -242,8 +245,7 @@ class Common extends MY_Controller
             $junctionListKeyByAreaID[$value["area_id"]][] = $value["junction_id"];
         }
         $newAreaList = [];
-
-
+        $areaIdList[] = "-1";
         foreach ($areaIdList as $areaID){
             //获取某区域的配置
             $params = ["city_id"=>$cityId,"area_id"=>$areaID,"is_default"=>0,];
@@ -266,80 +268,18 @@ class Common extends MY_Controller
             $newAreaList[$areaID]["junction_list"] = $junctionList;
             $newAreaList[$areaID]["config"] = $hourParamList;
         }
-        $newAreaList["default"]["junction_list"] = []; 
-        $defaultConfig = $this->config->item('alarm_param_realtime_default');
+        $newAreaList["default"]["junction_list"] = [];
+
+
+        //这里读取-1区域数据，如果没有则使用0-24数据
+        $newAreaList["default"] = $newAreaList["-1"]??[];
+        if(empty($newAreaList["-1"])){
+            $defaultConfig = $this->config->item('alarm_param_realtime_default');
         $newAreaList["default"]["config"]["00:00-24:00"] = $defaultConfig;
+        }
         $this->response(["data"=>$newAreaList,"last_time"=>date("Y-m-d H:i:s")]);
     }
-
-    /**
-     * 获取全城实时报警配置
-     *
-     * @param $params
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public function getCityAreaRealtimeAlarmConfigBAK()
-    {
-        $cityId = $this->input->get("city_id",true);
-        $lastTime = $this->input->get("last_time",true);
-        if(empty($cityId)){
-            throw new \Exception('city_id不能为空！', ERR_PARAMETERS);
-        }
-        $areaList  = $this->area_model->getAreasByCityId($cityId, 'id, area_name');
-        $areaCollection = Collection::make($areaList);
-        $areaIdList = $areaCollection->column('id')->get();
-        $areaJunctionList = [];
-        if(!empty($areaIdList)){
-            $areaJunctionList = $this->area_model->getAreaJunctionsByAreaIds($areaIdList);
-        }
-        $junctionListKeyByAreaID = [];
-        foreach ($areaJunctionList as $value) {
-            $junctionListKeyByAreaID[$value["area_id"]][] = $value["junction_id"];
-        }
-        
-        $areaParameterList = $this->realtimealarmconfig_model->getParameterLimit($cityId);
-        $areaParameterKeyByAreaID = [];
-        foreach ($areaParameterList as $key => $value) {
-            $tmp = $value;
-            unset($tmp["id"]);
-            unset($tmp["create_at"]);
-            unset($tmp["city_id"]);
-            unset($tmp["area_id"]);
-            unset($tmp["update_at"]);
-            $areaParameterList[$value["area_id"]][] = $tmp;
-        }
-
-        $newAreaList = [];
-        foreach ($areaIdList as $areaID){
-            $junctionList = $junctionListKeyByAreaID[$areaID] ?? [];
-            $param = $areaParameterList[$areaID] ?? [];
-            if(empty($param)){
-                continue;
-            }
-            // print_r($param);  
-            ksort($param);
-            // print_r($param);exit;
-            // print_r($paramList);
-            $hourParamList = [];
-            foreach ($param as $key => $value) {
-                $nowTimestamp = strtotime(date("Y-m-d"));
-                $hourTimestamp = $nowTimestamp+$key*3600;
-                $hourstring = date("H:i",$hourTimestamp);
-                $nexthourstring = date("H:i",$hourTimestamp+3600);
-                unset($value["hour"]);
-                $hourParamList[$hourstring."-".$nexthourstring] = json_encode($value);
-            }
-
-            $newAreaList[$areaID]["junction_list"] = $junctionList;
-            $newAreaList[$areaID]["config"] = $hourParamList;
-        }
-        $newAreaList["default"]["junction_list"] = []; 
-        $newAreaList["default"]["config"]["00:00-24:00"] = '{"overSatuTrailNumPara":"10","greenSlackTrailNumPara":"5","stopDelayPara":"40.0","multiStopUpperBound":"0.2","multiStopLowerBound":"0.05","noneStopUpperBound":"0.5","noneStopLowerBound":"0.2","queueLengthUpperBound":"120.0","queueLengthLowerBound":"70.0","queueRatioLowBound":"0.25","spilloverTrailNumPara":"8","spilloverRatioPara":"0.2","downstreamSpeedPara":"3.0"}';
-        $this->response(["data"=>$newAreaList,"last_time"=>date("Y-m-d H:i:s")]);
-    }
-
+    
     public function getJunctionInPolygon(){
         $params = $this->input->post(null, true);
         // 校验参数

@@ -30,35 +30,42 @@ class ParametermanageService extends BaseService
     public function realtimeAlarmParamList($params,$withoutDefault=0)
     {
         $dParams = json_decode($this->config->item('alarm_param_realtime_default'),true);
-        try {
-            $cityId = $params['city_id'];
-            $areaId = $params['area_id']??"";
-            $isDefault = $params['is_default'];
-            $data = $this->realtimealarmconfig_model->getParameterLimit($cityId, $areaId);
-            if($withoutDefault && empty($data)){
-                return [];
-            }
-            if($isDefault || empty($data)){
-                for($i=0;$i<24;$i++){
-                    $dParams['hour'] = $i;
-                    $data[$i] = $dParams;
-                }
-            }
-            foreach ($data as $key => $value) {
-                unset($data[$key]["id"]);
-                unset($data[$key]["create_at"]);
-                unset($data[$key]["update_at"]);
-                unset($data[$key]["city_id"]);
-                // unset($data[$key]["hour"]);
-                unset($data[$key]["area_id"]);
-            }
-            $temp['params'] = $data;
-            $temp['keys'] = $this->getRealtimeKeys();
-            return $temp;
-        } catch (Exception $e) {
-            throw $e;
+        $cityId = $params['city_id'];
+        $areaId = $params['area_id']??"";
+        $isDefault = $params['is_default']??0;
+        $data = $this->realtimealarmconfig_model->getParameterLimit($cityId, $areaId);
+        if($withoutDefault && empty($data)){
+            return [];
         }
-        return [];
+        if($isDefault || empty($data)){
+            for($i=0;$i<24;$i++){
+                $dParams['hour'] = $i;
+                $data[$i] = $dParams;
+            }
+        }
+
+        $keyMap = $this->TurnRealtimeKeys();
+        $rtKeys = array_keys($keyMap);
+        foreach ($data as $key => $value) {
+            //key转换
+            foreach ($value as $kk => $vv) {
+                $kk = isset($keyMap[$kk]) ?  $keyMap[$kk] : $kk;
+                $data[$key][$kk] = $vv;
+            }
+            foreach ($rtKeys as $rk) {
+                unset($data[$key][$rk]);
+            }
+
+            unset($data[$key]["id"]);
+            unset($data[$key]["create_at"]);
+            unset($data[$key]["update_at"]);
+            unset($data[$key]["city_id"]);
+            // unset($data[$key]["hour"]);
+            unset($data[$key]["area_id"]);
+        }
+        $temp['params'] = $data;
+        $temp['keys'] = $this->getRealtimeKeys();
+        return $temp;
     }
 
 
@@ -73,35 +80,49 @@ class ParametermanageService extends BaseService
     public function paramList($params,$withoutDefault=0)
     { 
         $dParams = json_decode($this->config->item('alarm_param_offline_default'),true);
-        try {
-            $cityId = $params['city_id'];
-            $areaId = $params['area_id']??"";
-            $isDefault = $params['is_default'];
-            $data = $this->parametermanage_model->getParameterByArea($cityId, $areaId);
-            if($withoutDefault && empty($data)){
-                return [];
-            }
-            if($isDefault || empty($data)){
-                for($i=0;$i<24;$i++){
-                    $dParams['hour'] = $i;
-                    $data[$i] = $dParams;
-                }
-            }
-            foreach ($data as $key => $value) {
-                unset($data[$key]["id"]);
-                unset($data[$key]["create_at"]);
-                unset($data[$key]["update_at"]);
-                unset($data[$key]["city_id"]);
-                // unset($data[$key]["hour"]);
-                unset($data[$key]["area_id"]);
-            }
-            $temp['params'] = $data;
-            $temp['keys'] = $this->getKeys();
-            return $temp;
-        } catch (Exception $e) {
-            throw $e;
+        $cityId = $params['city_id'];
+        $areaId = $params['area_id']??"";
+        $isDefault =$params['is_default']??0;
+        $data = $this->parametermanage_model->getParameterByArea($cityId, $areaId);
+        if($withoutDefault && empty($data)){
+            return [];
         }
-        return [];
+        if($isDefault || empty($data)){
+            for($i=0;$i<24;$i++){
+                $dParams['hour'] = $i;
+                $data[$i] = $dParams;
+            }
+        }
+        foreach ($data as $key => $value) {
+            unset($data[$key]["id"]);
+            unset($data[$key]["create_at"]);
+            unset($data[$key]["update_at"]);
+            unset($data[$key]["city_id"]);
+            // unset($data[$key]["hour"]);
+            unset($data[$key]["area_id"]);
+        }
+        $temp['params'] = $data;
+        $temp['keys'] = $this->getKeys();
+        return $temp;
+    }
+
+    public function TurnRealtimeKeys(){
+        return [
+            'oversatutrailnumpara'=>'overSatuTrailNumPara',
+            'stopdelaypara'=>'stopDelayPara',
+            'multistopupperbound'=>'multiStopUpperBound',
+            'nonestoplowerbound'=>'noneStopLowerBound',
+            'queuelengthupperbound'=>'queueLengthUpperBound',
+            'queueratiolowbound'=>'queueRatioLowBound',
+            'spillovertrailnumpara'=>'spilloverTrailNumPara',
+            'spilloveralarmtrailnumpara'=>'spilloverAlarmTrailNumPara',
+            'spilloverstopdelaypara'=>'spilloverStopDelayPara',
+            'queueratiopara'=>'queueRatioPara',
+            'greenslacktrailnumpara'=>'greenSlackTrailNumPara',
+            'multistoplowerbound'=>'multiStopLowerBound',
+            'nonestopupperbound'=>'noneStopUpperBound',
+            'queuelengthlowerbound'=>'queueLengthLowerBound',
+        ];
     }
 
     /**
