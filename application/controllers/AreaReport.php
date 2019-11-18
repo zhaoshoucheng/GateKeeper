@@ -289,9 +289,9 @@ class AreaReport extends MY_Controller
         ];
         //创建热力轨迹图
         $url = "http://100.90.164.31:8036/figure-service/create-task";
-//        $giftres = httpPOST($url,$reqdata,0,'json');
-        $giftres="";
-//        $ret = $this->areaReportService->saveThermograph($params,$giftres);
+        $giftres = httpPOST($url,$reqdata,0,'json');
+//        $giftres="";
+        $ret = $this->areaReportService->saveThermograph($params,$giftres);
         //创建热力视频
 
         $mp4url = "http://100.90.164.31:8036/video-service/create-task";
