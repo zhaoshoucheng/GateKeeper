@@ -536,7 +536,7 @@ class RoadService extends BaseService
             $roadQuotaMap[$dt][$logicFlowID] = [
                 'speed'=> $v['_source']['speed'] * 3.6,
                 'stop_delay'=>$v['_source']['stop_delay'],
-                'stop_time_cycle'=>$v['_source']['stop_delay'],
+                'stop_time_cycle'=>$v['_source']['stop_time_cycle'],
                 'time'=>0
             ];
         }
@@ -555,10 +555,12 @@ class RoadService extends BaseService
                         "end_junc_id"=>$v['end_junc_id'],
                         "forward_time"=>0,
                         "forward_stop_delay"=>0,
+                        "forward_length"=>0,
                         "forward_speed"=>0,
                         "forward_stop_time_cycle"=>0,
                         "backward_time"=>0,
                         "backward_stop_delay"=>0,
+                        "backward_length"=>0,
                         "backward_speed"=>0,
                         "backward_stop_time_cycle"=>0,
                     ];
@@ -567,12 +569,14 @@ class RoadService extends BaseService
                         "logic_flow_id"=>$v['logic_flow']['logic_flow_id'],
                         "start_junc_id"=>$v['start_junc_id'],
                         "end_junc_id"=>$v['end_junc_id'],
-                        "forward_time"=>round($v['length']/$roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['speed'],2),
+                        "forward_length"=>$v['length'],
+                        "forward_time"=>round($v['length']/$roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['speed']*3.6,2),
                         "forward_stop_delay"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['stop_delay'],2),
                         "forward_speed"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['speed'],2),
                         "forward_stop_time_cycle"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['stop_time_cycle'],2),
                         "backward_time"=>0,
                         "backward_stop_delay"=>0,
+                        "backward_length"=>0,
                         "backward_speed"=>0,
                         "backward_stop_time_cycle"=>0,
                     ];
@@ -587,7 +591,8 @@ class RoadService extends BaseService
                 $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_stop_delay'] = round($roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['stop_delay'],2);
                 $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_speed'] = round($roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['speed'],2);
                 $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_stop_time_cycle'] = round($roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['stop_time_cycle'],2);
-                $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_time'] = round($backv['length']/$roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['speed'],2);
+                $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_length'] = $backv['length'];
+                $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_time'] = round($backv['length']/$roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['speed']*3.6,2);
             }
         }
 
@@ -596,14 +601,14 @@ class RoadService extends BaseService
             $length = count($r['quota_info']);
             if($length>0){
                 $r['sum_avg']=[
-                    "forward_time"=>array_sum(array_column($r['quota_info'],'forward_time')),
-                    "forward_stop_delay"=>round(array_sum(array_column($r['quota_info'],'forward_stop_delay'))/$length,2),
-                    "forward_speed"=>round(array_sum(array_column($r['quota_info'],'forward_speed'))/$length,2),
-                    "forward_stop_time_cycle"=>round(array_sum(array_column($r['quota_info'],'forward_stop_time_cycle'))/$length,2),
-                    "backward_time"=>array_sum(array_column($r['quota_info'],'backward_time')),
-                    "backward_stop_delay"=>round(array_sum(array_column($r['quota_info'],'backward_stop_delay'))/$length,2),
-                    "backward_speed"=> round(array_sum(array_column($r['quota_info'],'backward_speed'))/$length,2),
-                    "backward_stop_time_cycle"=> round(array_sum(array_column($r['quota_info'],'backward_stop_time_cycle'))/$length,2),
+                    "forward_time"=>round(array_sum(array_column($r['quota_info'],'forward_time')),2),
+                    "forward_stop_delay"=>round(array_sum(array_column($r['quota_info'],'forward_stop_delay')),2),
+                    "forward_speed"=>round(array_sum(array_column($r['quota_info'],'forward_speed')),2),
+                    "forward_stop_time_cycle"=>round(array_sum(array_column($r['quota_info'],'forward_stop_time_cycle')),2),
+                    "backward_time"=>round(array_sum(array_column($r['quota_info'],'backward_time')),2),
+                    "backward_stop_delay"=>round(array_sum(array_column($r['quota_info'],'backward_stop_delay')),2),
+                    "backward_speed"=> round(array_sum(array_column($r['quota_info'],'backward_speed')),2),
+                    "backward_stop_time_cycle"=> round(array_sum(array_column($r['quota_info'],'backward_stop_time_cycle')),2),
                 ];
             }
 
