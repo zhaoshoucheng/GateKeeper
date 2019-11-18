@@ -27,6 +27,7 @@ class RoadService extends BaseService
         $this->load->model('redis_model');
         $this->load->model('road_model');
         $this->load->model('flowDurationV6_model');
+        $this->load->model('traj_model');
 
         $this->load->config('evaluate_conf');
     }
@@ -40,7 +41,7 @@ class RoadService extends BaseService
      */
     public function greenWaveAnalysis($cityID){
         //TODO 暂时写死
-        $roadIDs = ["f67d5bc1becbdcf98622b62649a264c5", "12beb023a415e27b0339f1300ba20d25"];
+        $roadIDs = ["f67d5bc1becbdcf98622b62649a264c5", "12beb023a415e27b0339f1300ba20d25","efcf36c50ab42f2d17c68edc338348dd"];
 
         //查询干线信息
         $roadInfos = [];
@@ -99,11 +100,11 @@ class RoadService extends BaseService
                 $flowQuota[$rk]=[
                     'forward'=>[
                         'time'=>0,
-                        'speed'=>array_sum(array_column($rv['forward'],"speed"))/count($rv['forward']),
-                        'stop_time_cycle'=>array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),
-                        'PI'=>array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),
+                        'speed'=>round(array_sum(array_column($rv['forward'],"speed"))/count($rv['forward']),2),
+                        'stop_time_cycle'=>round(array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),2),
+                        'PI'=>round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2),
                         'length'=>array_sum(array_column($rv['forward'],"length")),
-                        'level'=>"A"
+                        'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
                     ],
                 ];
                 $flowQuota[$rk]['forward']['time'] = $flowQuota[$rk]['forward']['length']/ $flowQuota[$rk]['forward']['speed'];
@@ -112,34 +113,15 @@ class RoadService extends BaseService
                 $flowQuota[$rk]=[
                     'backward'=>[
                         'time'=>0,
-                        'speed'=>array_sum(array_column($rv['backward'],"speed"))/count($rv['backward']),
-                        'stop_time_cycle'=>array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),
-                        'PI'=>array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),
+                        'speed'=>round(array_sum(array_column($rv['backward'],"speed"))/count($rv['backward']),2),
+                        'stop_time_cycle'=>round(array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),2),
+                        'PI'=>round(array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),2),
                         'length'=>array_sum(array_column($rv['backward'],"length")),
-                        'level'=>"A"
+                        'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
                     ]
                 ];
-                $flowQuota[$rk]['backward']['time'] = $flowQuota[$rk]['backward']['length']/ $flowQuota[$rk]['backward']['speed'];
+                $flowQuota[$rk]['backward']['time'] = round($flowQuota[$rk]['backward']['length']/ $flowQuota[$rk]['backward']['speed'],2);
             }
-
-//            $flowQuota[$rk]=[
-//                'forward'=>[
-//                    'time'=>0,
-//                    'speed'=>array_sum(array_column($rv['forward'],"speed"))/count($rv['forward']),
-//                    'stop_time_cycle'=>array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),
-//                    'PI'=>array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),
-//                    'length'=>array_sum(array_column($rv['forward'],"length")),
-//                    'level'=>"A"
-//                ],
-//                'backward'=>[
-//                    'time'=>0,
-//                    'speed'=>array_sum(array_column($rv['backward'],"speed"))/count($rv['backward']),
-//                    'stop_time_cycle'=>array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),
-//                    'PI'=>array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),
-//                    'length'=>array_sum(array_column($rv['backward'],"length")),
-//                    'level'=>"A"
-//                ]
-//            ];
 
         }
 
@@ -149,6 +131,23 @@ class RoadService extends BaseService
 
 
         return $roadInfos;
+
+    }
+    private function getPIlevel($pi){
+        if($pi>0 && $pi <20){
+            return "A";
+        }
+        if($pi>=20 && $pi <40){
+            return "B";
+        }
+        if($pi>=40 && $pi <60){
+            return "C";
+        }
+        if($pi>=60 && $pi <80){
+            return "D";
+        }
+
+        return "E";
 
     }
 
@@ -479,6 +478,125 @@ class RoadService extends BaseService
             'center' => $center,
             'map_version' => $maxWaymapVersion,
         ];
+    }
+
+
+    /*
+     * 干线评估表格
+     * */
+    public function comparisonTable($params){
+        $roadId = $params['road_id'];
+        $cityId = $params['city_id'];
+        $baseStartDate = $params['base_start_date'];
+        $baseEndDate = $params['base_end_date'];
+        $timePoint = $params['time_point'];
+
+        // 获取干线路口数据
+        $select = 'road_name, logic_junction_ids';
+        $roadInfo = $this->road_model->getRoadByRoadId($roadId, $select);
+
+        // 获取干线数据失败
+        if (!$roadInfo) {
+            throw new \Exception('获取干线信息失败');
+        }
+
+        $roadName = $roadInfo['road_name'];
+
+        $junctionIdList = explode(',', $roadInfo['logic_junction_ids']);
+
+        // 最新路网版本
+        $newMapVersion = $this->waymap_model->getLastMapVersion();
+
+        // 调用路网接口获取干线路口信息
+        $roadConnect = $this->waymap_model->getConnectPath($cityId, $newMapVersion, $junctionIdList);
+
+        $reqData  = [
+            'city_id'=>(int)$cityId,
+            'road_id'=>$roadId,
+            'hours'=>[$timePoint],
+            'dates'=>dateRange($baseStartDate, $baseEndDate)
+        ];
+        $retData  = $this->traj_model->getRoadQuotaInfo($reqData);
+
+        //数据合并处理
+
+        $roadQuotaInfo = [];
+
+        $roadQuotaMap=[];
+        foreach ($retData['hits']['hits'] as $v){
+            $dt = $v['_source']['dt'];
+            $logicFlowID = $v['_source']['logic_flow_id'];
+            if(!isset($roadQuotaMap[$dt])){
+                $roadQuotaMap[$dt] = [];
+            }
+            if(!isset($roadQuotaMap[$dt][$logicFlowID])){
+                $roadQuotaMap[$dt][$logicFlowID] = [];
+            }
+            //因为请求的时候只有一个时间点
+            $roadQuotaMap[$dt][$logicFlowID] = [
+                'speed'=> $v['_source']['speed'] * 3.6,
+                'stop_delay'=>$v['_source']['stop_delay'],
+                'stop_time_cycle'=>$v['_source']['stop_delay'],
+                'time'=>0
+            ];
+        }
+
+        foreach (dateRange($baseStartDate, $baseEndDate) as $dk => $dt){
+            $roadQuotaInfo[] = [
+                'date'=>$dt,
+                'quota_info'=>[]
+            ];
+            //填充正向指标数据
+            foreach ($roadConnect['forward_path_flows'] as $v){
+                $roadQuotaInfo[$dk]['quota_info'][] = [
+                    "logic_flow_id"=>$v['logic_flow']['logic_flow_id'],
+                    "start_junc_id"=>$v['start_junc_id'],
+                    "end_junc_id"=>$v['end_junc_id'],
+                    "forward_time"=>round($v['length']/$roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['speed'],2),
+                    "forward_stop_delay"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['stop_delay'],2),
+                    "forward_speed"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['speed'],2),
+                    "forward_stop_time_cycle"=>round($roadQuotaMap[$dt][$v['logic_flow']['logic_flow_id']]['stop_time_cycle'],2),
+                    "backward_time"=>0,
+                    "backward_stop_delay"=>0,
+                    "backward_speed"=>0,
+                    "backward_stop_time_cycle"=>0,
+                ];
+            }
+            //填充反向指标数据
+            foreach (array_reverse($roadConnect['backward_path_flows']) as $backkey => $backv){
+                if(!isset($roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']])){
+                    continue;
+                }
+                $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_stop_delay'] = round($roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['stop_delay'],2);
+                $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_speed'] = round($roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['speed'],2);
+                $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_stop_time_cycle'] = round($roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['stop_time_cycle'],2);
+                $roadQuotaInfo[$dk]['quota_info'][$backkey]['backward_time'] = round($backv['length']/$roadQuotaMap[$dt][$backv['logic_flow']['logic_flow_id']]['speed'],2);
+            }
+        }
+
+        //计算平均值或求和
+        $svgFuc = function($r){
+            $length = count($r['quota_info']);
+            if($length>0){
+                $r['sum_avg']=[
+                    "forward_time"=>array_sum(array_column($r['quota_info'],'forward_time')),
+                    "forward_stop_delay"=>round(array_sum(array_column($r['quota_info'],'forward_stop_delay'))/$length,2),
+                    "forward_speed"=>round(array_sum(array_column($r['quota_info'],'forward_speed'))/$length,2),
+                    "forward_stop_time_cycle"=>round(array_sum(array_column($r['quota_info'],'forward_stop_time_cycle'))/$length,2),
+                    "backward_time"=>array_sum(array_column($r['quota_info'],'backward_time')),
+                    "backward_stop_delay"=>round(array_sum(array_column($r['quota_info'],'backward_stop_delay'))/$length,2),
+                    "backward_speed"=> round(array_sum(array_column($r['quota_info'],'backward_speed'))/$length,2),
+                    "backward_stop_time_cycle"=> round(array_sum(array_column($r['quota_info'],'backward_stop_time_cycle'))/$length,2),
+                ];
+            }
+
+            return $r;
+        };
+
+        $roadQuotaInfo = array_map($svgFuc,$roadQuotaInfo);
+
+        return $roadQuotaInfo;
+
     }
 
     /**

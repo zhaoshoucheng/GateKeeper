@@ -30,12 +30,33 @@ class OverviewService extends BaseService
         $this->helperService = new HelperService();
 
         $this->load->model('redis_model');
+        $this->load->model('traj_model');
         $this->load->model('waymap_model');
         $this->load->model('realtime_model');
         $this->load->model('alarmanalysis_model');
         $this->load->model('timeAlarmRemarks_model');
 
         $this->config->load('realtime_conf');
+    }
+
+    /**
+     *
+     * 为所有路口附加行政区划信息
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function addDivisionID($cityID,$divisionID,$data){
+        $djuncs = $this->waymap_model->getJunctionFilterByDistrict($cityID,$divisionID);
+
+        foreach ($data['dataList'] as $k => $v){
+            if(in_array($v['jid'],$djuncs)){
+                $data['dataList'][$k]['division_id']=(int)$divisionID;
+            }else{
+                $data['dataList'][$k]['division_id']=0;
+            }
+        }
+        return $data;
     }
 
     /**
@@ -67,6 +88,11 @@ class OverviewService extends BaseService
         $result = json_decode($data, true);
 
         return $result;
+    }
+
+    public function junctionsListWithPI($parmas,$userPerm=[]){
+        $data = $this->traj_model->getJunctionsWithPi($parmas);
+        return $data;
     }
 
     /**
