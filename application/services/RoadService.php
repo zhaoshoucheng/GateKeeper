@@ -100,9 +100,9 @@ class RoadService extends BaseService
                 $flowQuota[$rk]=[
                     'forward'=>[
                         'time'=>0,
-                        'speed'=>array_sum(array_column($rv['forward'],"speed"))/count($rv['forward']),
-                        'stop_time_cycle'=>array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),
-                        'PI'=>array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),
+                        'speed'=>round(array_sum(array_column($rv['forward'],"speed"))/count($rv['forward']),2),
+                        'stop_time_cycle'=>round(array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),2),
+                        'PI'=>round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2),
                         'length'=>array_sum(array_column($rv['forward'],"length")),
                         'level'=>"A"
                     ],
@@ -113,34 +113,15 @@ class RoadService extends BaseService
                 $flowQuota[$rk]=[
                     'backward'=>[
                         'time'=>0,
-                        'speed'=>array_sum(array_column($rv['backward'],"speed"))/count($rv['backward']),
-                        'stop_time_cycle'=>array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),
-                        'PI'=>array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),
+                        'speed'=>round(array_sum(array_column($rv['backward'],"speed"))/count($rv['backward']),2),
+                        'stop_time_cycle'=>round(array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),2),
+                        'PI'=>round(array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),2),
                         'length'=>array_sum(array_column($rv['backward'],"length")),
                         'level'=>"A"
                     ]
                 ];
-                $flowQuota[$rk]['backward']['time'] = $flowQuota[$rk]['backward']['length']/ $flowQuota[$rk]['backward']['speed'];
+                $flowQuota[$rk]['backward']['time'] = round($flowQuota[$rk]['backward']['length']/ $flowQuota[$rk]['backward']['speed'],2);
             }
-
-//            $flowQuota[$rk]=[
-//                'forward'=>[
-//                    'time'=>0,
-//                    'speed'=>array_sum(array_column($rv['forward'],"speed"))/count($rv['forward']),
-//                    'stop_time_cycle'=>array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),
-//                    'PI'=>array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),
-//                    'length'=>array_sum(array_column($rv['forward'],"length")),
-//                    'level'=>"A"
-//                ],
-//                'backward'=>[
-//                    'time'=>0,
-//                    'speed'=>array_sum(array_column($rv['backward'],"speed"))/count($rv['backward']),
-//                    'stop_time_cycle'=>array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),
-//                    'PI'=>array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),
-//                    'length'=>array_sum(array_column($rv['backward'],"length")),
-//                    'level'=>"A"
-//                ]
-//            ];
 
         }
 
