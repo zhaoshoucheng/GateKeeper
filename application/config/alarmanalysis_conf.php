@@ -34,10 +34,10 @@ $config['junction_alarm_type'] = [
 
 //绿波优化工具参数&&TOP20延误阈值参数
 $config['tool_param_default'] = '{
-    "cycle_optimization_limit": "50",
-    "cycle_optimization_lower_limit": "40",
-    "congestion_level_lower_limit": "0",
-    "slow_down_level_lower_limit": "0"
+    "cycle_optimization_limit": "0",
+    "cycle_optimization_lower_limit": "0",
+    "congestion_level_lower_limit": "50",
+    "slow_down_level_lower_limit": "40"
 }';
 
 //默认在线报警参数
