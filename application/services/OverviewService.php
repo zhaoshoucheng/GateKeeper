@@ -33,9 +33,9 @@ class OverviewService extends BaseService
         $this->load->model('traj_model');
         $this->load->model('waymap_model');
         $this->load->model('realtime_model');
+        $this->load->model('realtimewarning_model');
         $this->load->model('alarmanalysis_model');
         $this->load->model('timeAlarmRemarks_model');
-
         $this->config->load('realtime_conf');
     }
 
@@ -1273,28 +1273,8 @@ class OverviewService extends BaseService
      *
      * @return mixed
      */
-    private function getJunctionStatus($quota)
+    private function getJunctionStatus($quota,$cityId)
     {
-        //这里从db中读取信息
-        $res = $this->db->select("*")
-        ->from("optimized_parameter_config_limits")
-        ->where('city_id', $cityId)
-        ->order_by('id', 'DESC')
-        ->get();
-        $limit = $res instanceof CI_DB_result ? $res->row_array() : $res;
-        if(!empty($limit)){
-            $junctionStatusFormula = function ($val) {
-                if ($val >= $limit["cycle_optimization_limit"]) {
-                    return 3; // 拥堵
-                } elseif ($val < $limit["cycle_optimization_limit"] && $val >= $limit["cycle_optimization_lower_limit"]) {
-                    return 2; // 缓行
-                } else {
-                    return 1; // 畅通
-                }
-            }
-        }
-        $junctionStatus = $this->config->item('junction_status');
-        $junctionStatusFormula = $this->config->item('junction_status_formula');
-        return $junctionStatus[$junctionStatusFormula($quota['stop_delay']['value'])];
+        $this->realtimewarning_model->getJunctionStatus($quota,$cityId);
     }
 }
