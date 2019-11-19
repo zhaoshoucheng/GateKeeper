@@ -29,6 +29,19 @@ class Pi_model extends CI_Model{
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
+    public function getGroupJuncPiWithDatesHours($city_id,$logic_junction_ids,$dates,$hours){
+        $res = $this->db
+            ->select('SUM(pi*traj_count)/SUM(traj_count) as pi,date,hour')
+            ->from($this->tb.$city_id)
+            ->where_in('logic_junction_id', $logic_junction_ids)
+            ->where_in('date', $dates)
+            ->where_in('hour', $hours)
+            ->group_by('date,hour')
+            ->get();
+//         var_dump($this->db->last_query());
+        return $res->result_array();
+    }
+
     public function getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $dates, $hours){
         $res = $this->db
             ->select('logic_junction_id, sum(pi * traj_count) / sum(traj_count) as pi')
