@@ -24,7 +24,6 @@ class City extends MY_Controller {
             $this->response([]);
         }
         foreach ($data as $k=>$v){
-
             $data[$k]['geojson'] = json_decode($v['geojson'],true);
         }
 

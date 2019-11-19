@@ -132,6 +132,7 @@ class JunctionReport extends MY_Controller
         //数据转图表
         $chartData = $this->junctionReportService->trans2Chart($flowQuota,$quotaData['flow_info']);
         $finalData = $this->junctionReportService->chartAnalysis($chartData);
+        $junctionInfo['versionMaps']=[]; //减少无用数据的传输
         $finalData = [
             "overview"=>"路口各个转向的运行指标(包括停车次数、停车延误、行驶速度、排队长度等指标)变化情况如下图所示。",
             "quotalist"=>$finalData,
