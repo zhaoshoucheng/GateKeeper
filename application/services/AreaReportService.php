@@ -573,7 +573,7 @@ class AreaReportService extends BaseService{
             'hours'=>$this->createHours(),
         ];
 //        $PiDatas = $this->traj_model->getJunctionsPiConcurr($reqData);
-        $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,explode(",",$junctionIDs),$dates,$this->createHours());
+        $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,$junctionIDs,$dates,$this->createHours());
 
 //        $PiDatas = [];
         //数据合并
