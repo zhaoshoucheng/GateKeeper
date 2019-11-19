@@ -16,12 +16,14 @@ use Didi\Cloud\Collection\Collection;
  */
 class RoadService extends BaseService
 {
+    protected  $greenwaves = [];
     /**
      * RoadService constructor.
      */
     public function __construct()
     {
         parent::__construct();
+        $this->greenwaves = ["a9ff0f8c6fabc79777e5426b80f118b7", "0bc6f81fd483b79f4b499581bee91672","775df757eb84ad1109753b7adf78b750","374a355a4948e7d3a5e0a92668275617","69bdf91ec8d467d3ee4159922d09a5b6"];
 
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
@@ -41,7 +43,7 @@ class RoadService extends BaseService
      */
     public function greenWaveAnalysis($cityID){
         //TODO 暂时写死
-        $roadIDs = ["f67d5bc1becbdcf98622b62649a264c5", "12beb023a415e27b0339f1300ba20d25","efcf36c50ab42f2d17c68edc338348dd"];
+        $roadIDs = $this->greenwaves;
 
         //查询干线信息
         $roadInfos = [];
@@ -901,8 +903,11 @@ class RoadService extends BaseService
         $road_infos = $this->road_model->getRoadsByCityId($city_id);
         $logic_junction_ids = [];
         foreach ($road_infos as $key => $road_info) {
-            $road_infos[$key]['logic_junction_ids'] = explode(',', $road_info['logic_junction_ids']);
-            $logic_junction_ids = array_merge($logic_junction_ids, $road_infos[$key]['logic_junction_ids']);
+            if(in_array($road_info['road_id'],$this->greenwaves)){
+                $road_infos[$key]['logic_junction_ids'] = explode(',', $road_info['logic_junction_ids']);
+                $logic_junction_ids = array_merge($logic_junction_ids, $road_infos[$key]['logic_junction_ids']);
+            }
+
         }
         $logic_junction_ids = array_unique($logic_junction_ids);
         $junction_infos = $this->waymap_model->getJunctionInfo(implode(',', $logic_junction_ids));
