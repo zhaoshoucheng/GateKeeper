@@ -423,16 +423,17 @@ class JunctionReportService extends BaseService{
         if(count($flowlist) == 0){
             return false;
         }
+        //每个时间点的桶
         $bucket=[];
         foreach ($flowlist as $f => $v){
             foreach ($v['chart']['series'][0]['data'] as $s){
                 if(!isset($bucket[$s['x']])){
                     $bucket[$s['x']] = [
-                        'flowname'=>$v['chart']['title'],
-                        'value'=>0
+                        'flowname'=>"",
+                        'value'=> 0
                     ];
                 }
-                if ($s['y'] > $bucket[$s['x']]['value']){
+                if ($s['y'] > $bucket[$s['x']]['value'] ){
                     $bucket[$s['x']] = [
                         'flowname'=>$v['chart']['title'],
                         'value'=>$s['y']
@@ -476,7 +477,7 @@ class JunctionReportService extends BaseService{
             foreach ($v['chart']['series'][0]['data'] as $s){
                 if(!isset($bucket[$s['x']])){
                     $bucket[$s['x']] = [
-                        'flowname'=>$v['chart']['title'],
+                        'flowname'=>"",
                         'value'=>999999
                     ];
                 }
