@@ -120,12 +120,12 @@ $config['menu'] = [
                                 'name' => '信控管理',
                                 'url'  => 'diagnose',
                             ],
-                        2 =>
+                        /*2 =>
                             [
                                 'name' => '参数管理',
                                 'url'  => 'argument',
-                            ],
-                        3 =>
+                            ],*/
+                        2 =>
                             [
                                 'name' => '任务管理',
                                 'url'  => 'task',
@@ -256,11 +256,11 @@ $config['menu'] = [
                                 'name' => '信控管理',
                                 'url'  => 'diagnose',
                             ],
-                        2 =>
+                        /*2 =>
                             [
                                 'name' => '参数管理',
                                 'url'  => 'argument',
-                            ],
+                            ],*/
                     ],
                 ],
         ],
@@ -439,11 +439,11 @@ $config['menu'] = [
                                 'name' => '信控管理',
                                 'url'  => 'diagnose',
                             ],
-                        2 =>
+                        /*2 =>
                             [
                                 'name' => '参数管理',
                                 'url'  => 'argument',
-                            ],
+                            ],*/
                     ],
                 ],
         ],

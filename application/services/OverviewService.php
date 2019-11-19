@@ -1034,11 +1034,24 @@ class OverviewService extends BaseService
             $alarmRemarksFlowKeyTypeValue = array_column($alarmRemarks, 'type', 'logic_flow_id');
         }
         asort($alarmJunctonIdArr);
-        $ids = implode(',', $alarmJunctonIdArr);
+        // $ids = implode(',', $alarmJunctonIdArr);
 
         // 获取路口相位信息
+        // try {
+            // $flowsInfo = $this->waymap_model->getFlowsInfo($ids,true);
+        // } catch (\Exception $e) {
+            // $flowsInfo = [];
+        // }
+
+        //获取需要报警的全部路口的全部方向的信息
+        $flowsInfo = [];
         try {
-            $flowsInfo = $this->waymap_model->getFlowsInfo($ids,true);
+            $chunkJunctions = array_chunk($alarmJunctonIdArr,100);
+            foreach ($chunkJunctions as $partJuncs) {
+                $alarmJunctionIDs = implode(',', $partJuncs);
+                $tmpInfo = $this->waymap_model->getFlowsInfo($alarmJunctionIDs,true);
+                $flowsInfo = array_merge($flowsInfo,$tmpInfo);
+            }
         } catch (\Exception $e) {
             $flowsInfo = [];
         }
