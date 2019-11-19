@@ -434,7 +434,6 @@ class RoadReportService extends BaseService{
 //        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,explode(",",$junctionIDs),$ctyID);
 
         $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,explode(",",$junctionIDs),$cityID);
-
 //        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
 
 //        $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID,$this->createHours());
@@ -444,12 +443,13 @@ class RoadReportService extends BaseService{
             'dates'=>$dates,
             'hours'=>$this->createHours(),
         ];
-        $PiDatas = $this->traj_model->getJunctionsPiConcurr($reqData);
-//        $PiDatas = $this->pi_model->getJunctionsPiByHours(11,explode(",",$junctionIDs),$dates);
+//        $PiDatas = [];
+//        $PiDatas = $this->traj_model->getJunctionsPiConcurr($reqData);
+        $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,explode(",",$junctionIDs),$dates,$this->createHours());
 
         //数据合并
-        $pd = $this->queryParamGroup($PiDatas,'pi','traj_count');
-        foreach ($pd as $p){
+//        $pd = $this->queryParamGroup($PiDatas,'pi','traj_count');
+        foreach ($PiDatas as $p){
             foreach ($roadQuotaData as $rk=>$rv){
                 if($p['date']==$rv['date'] && $p['hour']==$rv['hour']){
                     $roadQuotaData[$rk]['pi']=$p['pi'];
@@ -480,7 +480,7 @@ class RoadReportService extends BaseService{
             $avgData[$ak]['stop_delay'] = $av['stop_delay']/$datelen;
             $avgData[$ak]['stop_time_cycle'] = $av['stop_time_cycle']/$datelen;
             $avgData[$ak]['speed'] = $av['speed']/$datelen;
-            $avgData[$ak]['pi'] = $av['pi']/$datelen;
+            $avgData[$ak]['pi'] = $av['pi'];
         }
         return $avgData;
     }

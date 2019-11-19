@@ -152,10 +152,10 @@ class Area_model extends CI_Model
                     "traj_count"=>0,
                 ];
             }
-            $avgData[$v['_source']['dt']][$v['_source']['hour']]['speed']+=$v['_source']['speed']*$v['_source']['traj_count'];
-            $avgData[$v['_source']['dt']][$v['_source']['hour']]['stop_delay']+=$v['_source']['stop_delay']*$v['_source']['traj_count'];
-            $avgData[$v['_source']['dt']][$v['_source']['hour']]['stop_time_cycle']+=$v['_source']['stop_time_cycle']*$v['_source']['traj_count'];
-            $avgData[$v['_source']['dt']][$v['_source']['hour']]['traj_count']+=$v['_source']['traj_count'];
+            $avgData[$v['_source']['dt']][$v['_source']['hour']]['speed']+=$v['_source']['speed']*3.6;
+            $avgData[$v['_source']['dt']][$v['_source']['hour']]['stop_delay']+=$v['_source']['stop_delay'];
+            $avgData[$v['_source']['dt']][$v['_source']['hour']]['stop_time_cycle']+=$v['_source']['stop_time_cycle'];
+            $avgData[$v['_source']['dt']][$v['_source']['hour']]['traj_count']+=1;
         }
         //计算加权平均
         $finalRet=[];
@@ -164,9 +164,9 @@ class Area_model extends CI_Model
                $finalRet[] = [
                    "date"=> $dk,
                     "hour"=>$hk,
-                    "speed"=>round($hv['speed']/$hv['traj_count'],2),
-                    "stop_delay"=> round($hv['stop_delay']/$hv['traj_count'],2),
-                    "stop_time_cycle"=> round($hv['stop_time_cycle']/$hv['traj_count'],2)
+                    "speed"=>round($hv['speed'],2),
+                    "stop_delay"=> round($hv['stop_delay'],2),
+                    "stop_time_cycle"=> round($hv['stop_time_cycle'],2)
                ];
            }
        }

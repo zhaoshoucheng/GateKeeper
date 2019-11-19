@@ -572,10 +572,13 @@ class AreaReportService extends BaseService{
             'dates'=>$dates,
             'hours'=>$this->createHours(),
         ];
-        $PiDatas = $this->traj_model->getJunctionsPiConcurr($reqData);
+//        $PiDatas = $this->traj_model->getJunctionsPiConcurr($reqData);
+        $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,explode(",",$junctionIDs),$dates,$this->createHours());
+
+//        $PiDatas = [];
         //数据合并
-        $pd = $this->roadReportService->queryParamGroup($PiDatas,'pi','traj_count');
-        foreach ($pd as $p){
+//        $pd = $this->roadReportService->queryParamGroup($PiDatas,'pi','traj_count');
+        foreach ($PiDatas as $p){
             foreach ($roadQuotaData as $rk=>$rv){
                 if($p['date']==$rv['date'] && $p['hour']==$rv['hour']){
                     $roadQuotaData[$rk]['pi']=$p['pi'];
