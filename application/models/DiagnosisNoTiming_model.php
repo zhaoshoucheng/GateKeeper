@@ -164,10 +164,10 @@ class DiagnosisNoTiming_model extends CI_Model
                         foreach ($yv['hour']['buckets'] as $qv){
                             $qd[] = [
                                 "hour"=>$qv['key'],
-                                "speed"=>$qv['speed']['value']/$qv['total']['value'],
-                                "stop_delay"=>$qv['stop_delay']['value']/$qv['total']['value'],
-                                "stop_time_cycle"=>$qv['stop_time_cycle']['value']/$qv['total']['value'],
-                                "traj_count"=>$qv['total']['value'],
+                                "speed"=>$qv['speed']['value'],
+                                "stop_delay"=>$qv['stop_delay']['value'],
+                                "stop_time_cycle"=>$qv['stop_time_cycle']['value'],
+
                             ];
                         }
                         //TODO $qd 时间排序
