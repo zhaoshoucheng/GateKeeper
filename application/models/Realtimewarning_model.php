@@ -426,7 +426,7 @@ class Realtimewarning_model extends CI_Model
         //设置rediskey
         $avgStopDelayKey = "new_its_usergroup_realtime_avg_stop_delay_{$groupId}_{$cityId}_{$date}";
         $junctionSurveyKey = "new_its_usergroup_realtime_pretreat_junction_survey_{$groupId}_{$cityId}_{$date}_{$hour}";
-        $todayJamCurveKey = "new_its_usergroup_realtime_today_jam_curve_{$cityId}_{$date}";
+        $todayJamCurveKey = "new_its_usergroup_realtime_today_jam_curve_{$groupId}_{$cityId}_{$date}";
         $junctionListKey = "new_its_usergroup_realtime_pretreat_junction_list_{$groupId}_{$cityId}_{$date}_{$hour}";
         $realTimeAlarmRedisKey = "new_its_usergroup_realtime_alarm_{$groupId}_{$cityId}";
         $realTimeAlarmBakKey = "new_its_usergroup_realtime_alarm_{$groupId}_{$date}_{$hour}";
