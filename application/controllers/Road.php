@@ -117,6 +117,35 @@ class Road extends MY_Controller
         $this->response($data);
     }
 
+    //道路施工信息,暂时写死
+    public function queryConstructionInfo(){
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+        ]);
+
+
+        $data = [
+            'road_info'=>[],
+            "Point_info"=>[
+                [
+                    "lat"=> "32.00781",
+                    "lng"=> "118.73584",
+                    "detail"=> [
+                      "title"=> "占道封闭施工",
+                      "address"=> "汉中门大街西延的“浦江”至“清河”段",
+                      "time"=> "2019/10/20 - 2019/10/30",
+                      "company"=> "小桔科技",
+                      "tel"=> "18800006666"
+                    ]
+                ]
+            ]
+        ];
+        $this->response($data);
+
+    }
+
     /**
      * 删除干线
      *

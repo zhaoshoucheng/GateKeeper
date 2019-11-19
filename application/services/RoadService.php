@@ -909,6 +909,9 @@ class RoadService extends BaseService
             }
 
         }
+        if(empty($logic_junction_ids)){
+            return [];
+        }
         $logic_junction_ids = array_unique($logic_junction_ids);
         $junction_infos = $this->waymap_model->getJunctionInfo(implode(',', $logic_junction_ids));
         $junction_infos_map = [];
