@@ -954,4 +954,4 @@ $config['alarm_v2_city_ids'] = $alarm_v2_city_ids;
 $config['alarm_v2_client_ips'] = ["100.90.165.32","100.90.164.31",];    //默认沙盒触发
 
 //公交基础数据接口
-$config['businfo_interface'] = 'http://10.96.94.161:7300/mock/5d888001e0005c058044d1c1/pingan02/';
+$config['businfo_interface'] = 'http://10.96.94.161:7300/mock/5d888001e0005c058044d1c1/pingan02';

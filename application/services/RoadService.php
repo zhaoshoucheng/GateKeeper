@@ -377,13 +377,20 @@ class RoadService extends BaseService
             $res['road_id'] = $item['id'];
 
             //追加station信息和路口优先字段
-            $sjInfo = $this->priortybus_model->getStationJuncInfo($res['road_id']);
-            print_r($sjInfo);exit;
+            $sjInfo = $this->priortybus_model->getStationJuncInfoMock($res['road_id']);
             if(isset($sjInfo["station"])){
                 $res["station"] = $sjInfo["station"];              
             }
+            $juncprimap = [];
             if(isset($sjInfo["junctions_info"])){
-
+                foreach ($sjInfo["junctions_info"] as $key => $value) {
+                    $juncprimap[$value["logic_junction_id"]] = $value["is_priority"];                
+                }
+            }
+            if(isset($res["junctions_info"])){
+                foreach ($res["junctions_info"] as $key => $value) {
+                    $res["junctions_info"][$key]["is_priority"] = $juncprimap[$value["logic_junction_id"]] ?? 0;
+                }
             }
             $results[] = $res;
         }
