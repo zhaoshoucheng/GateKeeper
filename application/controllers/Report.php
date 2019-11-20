@@ -26,6 +26,73 @@ class Report extends MY_Controller
         $this->response($data);
     }
 
+
+
+    public function autoReport()
+    {
+        $params = $this->input->post(null, true);
+
+        //类型 日报,周报,月报   0,1,2
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'datetype' => 'required',
+        ]);
+        //相关区域干线暂时写死
+
+        $roadIDs = ["a9ff0f8c6fabc79777e5426b80f118b7", "0bc6f81fd483b79f4b499581bee91672", "775df757eb84ad1109753b7adf78b750", "374a355a4948e7d3a5e0a92668275617", "69bdf91ec8d467d3ee4159922d09a5b6"];
+
+        $areaIDs = [161];
+
+        $raname =  $this->reportService->queryRoadAndAreaName($params['city_id'],$roadIDs,$areaIDs);
+        $tasks=[];
+
+        $date = "";
+        if($params['datetype']==0){
+            $date = date('Y-m-d',strtotime("-1 day"));
+        }elseif ($params['datetype']==1){
+            $date = date('Y-m-d',strtotime("last Monday"))."~".date('Y-m-d',strtotime("last Sunday"));
+        }else{
+            $last= strtotime("-1 month", time());
+            $last_lastday = date("Y-m-t", $last);//上个月最后一天
+            $last_firstday = date('Y-m-01', $last);//上个月第一天
+            $date =$last_firstday."~".$last_lastday;
+        }
+
+        foreach ($roadIDs as $r){
+            $title=$raname['raod_map'][$r];
+            $task = [
+                'city_id'=>$params['city_id'],
+                'type'=>11,
+                'title'=>$title,
+                'time_range'=>$date,
+                'url'=>sprintf("type=11&dateType=%s&date=%s&indicator=runningStateComparison,runningIndicators,coordinate,trafficAnalysis,alarmSummary,indicatorsRanking,indicatorsAnalysis&id=%s&title=%s&system=1&city_id=%s&focusList=",$params['datetype'],$date,$r,$title,$params['city_id'])
+            ];
+            $tasks[] = $task;
+        }
+
+        foreach ($areaIDs as $a){
+            $title=$raname['area_map'][$a];
+            $task = [
+                'city_id'=>$params['city_id'],
+                'type'=>12,
+                'title'=>$title,
+                'time_range'=>$date,
+                'url'=>sprintf("type=12&dateType=%s&date=%s&indicator=runningStateComparison,runningIndicators,trajectory,trafficAnalysis,alarmSummary,indicatorsRanking,indicatorsAnalysis&id=%s&title=%s&system=1&city_id=%s&focusList=",$params['datetype'],$date,$a,$title,$params['city_id'])
+            ];
+            $tasks[] = $task;
+        }
+        $this->response($tasks);
+
+    }
+
+
+//        https://sts.didichuxing.com/nanjing/signalpro/report/preview?type=10&dateType=0&date=2019-11-19&indicator=runningStateComparison,runningIndicators,indicatorsAnalysis&id=2017030116_72600921&title=%E7%BB%8F%E5%85%AB%E8%B7%AF&system=1&city_id=11&focusList=
+//        city_id: 11
+//title: 经八路
+//type: 10
+//time_range: 2019-11-19
+//    }
+
     /**
      * @throws Exception
      */
