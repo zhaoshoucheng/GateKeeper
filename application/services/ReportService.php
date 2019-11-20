@@ -711,6 +711,9 @@ class ReportService extends BaseService
             if($_SERVER['REMOTE_ADDR']=="59.52.254.218"){
                 $hostName = "59.52.254.216:91";
             }
+            if(strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
+                $hostName = "sts.didichuxing.com/sg1/api/nanjing";
+            }
             $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
             $lastPos    = strrpos($currentUrl, '/');
             $baseUrl    = substr($currentUrl, 0, $lastPos);
