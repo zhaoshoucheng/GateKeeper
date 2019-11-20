@@ -46,12 +46,13 @@ class OverviewService extends BaseService
      * @return array
      * @throws \Exception
      */
-    public function addDivisionID($cityID,$divisionID,$data){
-        $djuncs = $this->waymap_model->getJunctionFilterByDistrict($cityID,$divisionID);
+    public function addDivisionID($cityID,$data){
+        //暂时只添加建邺区
+        $djuncs = $this->waymap_model->getJunctionFilterByDistrict($cityID,320105);
 
         foreach ($data['dataList'] as $k => $v){
             if(in_array($v['jid'],$djuncs)){
-                $data['dataList'][$k]['division_id']=(int)$divisionID;
+                $data['dataList'][$k]['division_id']=320105;
             }else{
                 $data['dataList'][$k]['division_id']=0;
             }

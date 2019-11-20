@@ -60,6 +60,28 @@ class ReportService extends BaseService
         return $evaluate->getJunctionDurationDelay($data, "start", "end");
     }
 
+    public function queryRoadAndAreaName($cityID,$roadIDs,$areaIDs){
+        $roadInfos = $this->road_model->getRoadsByCityId($cityID,"road_id,road_name");
+        $areaInfos = $this->area_model->getAreasByCityId($cityID,"id,area_name");
+        $road_map=[];
+        $area_map=[];
+        foreach ($roadInfos as $road){
+            if(in_array($road['road_id'],$roadIDs)){
+                $road_map[$road['road_id']] = $road['road_name'];
+            }
+        }
+        foreach ($areaInfos as $area){
+            if(in_array($area['id'],$areaIDs)){
+                $area_map[$area['id']] = $area['area_name'];
+            }
+        }
+
+        return [
+            'raod_map'=>$road_map,
+            'area_map'=>$area_map
+        ];
+    }
+
     /**
      * @param $params
      *
@@ -688,6 +710,9 @@ class ReportService extends BaseService
             $hostName = $_SERVER['HTTP_HOST'];
             if($_SERVER['REMOTE_ADDR']=="59.52.254.218"){
                 $hostName = "59.52.254.216:91";
+            }
+            if(strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
+                $hostName = "sts.didichuxing.com/sg1/api/nanjing";
             }
             $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
             $lastPos    = strrpos($currentUrl, '/');

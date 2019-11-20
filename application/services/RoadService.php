@@ -903,10 +903,10 @@ class RoadService extends BaseService
         $road_infos = $this->road_model->getRoadsByCityId($city_id);
         $logic_junction_ids = [];
         foreach ($road_infos as $key => $road_info) {
-            if(in_array($road_info['road_id'],$this->greenwaves)){
+            // if(in_array($road_info['road_id'],$this->greenwaves)){
                 $road_infos[$key]['logic_junction_ids'] = explode(',', $road_info['logic_junction_ids']);
                 $logic_junction_ids = array_merge($logic_junction_ids, $road_infos[$key]['logic_junction_ids']);
-            }
+            // }
 
         }
         if(empty($logic_junction_ids)){

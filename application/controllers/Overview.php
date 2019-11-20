@@ -69,9 +69,9 @@ class Overview extends MY_Controller
 
         $data = $this->overviewService->junctionsListWithPI($params,$this->userPerm);
 
-        if(isset($params['division_id']) && $params['division_id']>0){
-            $data = $this->overviewService->addDivisionID($params['city_id'],$params['division_id'],$data);
-        }
+//        if(isset($params['division_id']) && $params['division_id']>0){
+        $data = $this->overviewService->addDivisionID($params['city_id'],$data);
+//        }
         $this->response($data);
     }
 
@@ -93,15 +93,6 @@ class Overview extends MY_Controller
 
 
         $data = $this->overviewService->junctionsList($params,$this->userPerm);
-        
-
-
-//        $data = json_decode($jsonStr,true);
-//        $data = $data['data'];
-        //新增基于行政区过滤功能
-//        if(isset($params['division_id']) && $params['division_id']>0){
-//            $data = $this->overviewService->addDivisionID($params['city_id'],$params['division_id'],$data);
-//        }
 
         $this->response($data);
     }
@@ -277,7 +268,22 @@ class Overview extends MY_Controller
         ];
         $data = httpPOST($url,$reqData,0,'json');
         $data = json_decode($data,true);
-        $this->response($data['res']);
+        if(empty($data['res'])){
+            $this->response([]);
+        }
+        $data = $data['res'];
+        $ttiInfo = [];
+        foreach ($data[0]['tti_info'] as $ttk => $tti){
+            $hour = substr($ttk,8,2);
+            $min = substr($ttk,10,2);
+            if($min != '00' && $min != '30'){
+                continue;
+            }
+            $ttiInfo[$hour.":".$min] = $tti;
+        }
+        $data[0]['tti_info'] = $ttiInfo;
+        //过滤数据,只保留整点数据
+        $this->response($data);
     }
 
 
