@@ -279,6 +279,8 @@ class Overview extends MY_Controller
             if($min != '00' && $min != '30'){
                 continue;
             }
+            $tti[0] = round($tti[0],2);
+            $tti[1] = round($tti[1],2);
             $ttiInfo[$hour.":".$min] = $tti;
         }
         $data[0]['tti_info'] = $ttiInfo;

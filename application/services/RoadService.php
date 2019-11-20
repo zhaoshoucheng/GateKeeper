@@ -23,7 +23,7 @@ class RoadService extends BaseService
     public function __construct()
     {
         parent::__construct();
-        $this->greenwaves = ["a9ff0f8c6fabc79777e5426b80f118b7", "0bc6f81fd483b79f4b499581bee91672","775df757eb84ad1109753b7adf78b750","374a355a4948e7d3a5e0a92668275617","69bdf91ec8d467d3ee4159922d09a5b6"];
+        $this->greenwaves = ["a9ff0f8c6fabc79777e5426b80f118b7", "0bc6f81fd483b79f4b499581bee91672","775df757eb84ad1109753b7adf78b750"];
 
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
