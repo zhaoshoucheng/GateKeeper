@@ -33,9 +33,9 @@ class OverviewService extends BaseService
         $this->load->model('traj_model');
         $this->load->model('waymap_model');
         $this->load->model('realtime_model');
+        $this->load->model('realtimewarning_model');
         $this->load->model('alarmanalysis_model');
         $this->load->model('timeAlarmRemarks_model');
-
         $this->config->load('realtime_conf');
     }
 
@@ -339,11 +339,14 @@ class OverviewService extends BaseService
             }
             $ambleNum = $res['amble_total'] ?? 0;
             $congestionNum = $res['congestion_total'] ?? 0;
+            $subHour=substr($hour,0,3);
+            if($subHour=="01:"){
+                continue;
+            }
             $jamList["list"][] = ["hour"=>$hour,"value"=>$congestionNum];
             $slowList["list"][] = ["hour"=>$hour,"value"=>$ambleNum];
             $unblockedList["list"][] = ["hour"=>$hour,"value"=>$junctionTotal - ($ambleNum + $congestionNum)];
         }
-        
         $jamList["list"] = $this->completionCurveDataGap($jamList["list"]);
         $slowList["list"] = $this->completionCurveDataGap($slowList["list"]);
         $unblockedList["list"] = $this->completionCurveDataGap($unblockedList["list"]);
@@ -1045,11 +1048,24 @@ class OverviewService extends BaseService
             $alarmRemarksFlowKeyTypeValue = array_column($alarmRemarks, 'type', 'logic_flow_id');
         }
         asort($alarmJunctonIdArr);
-        $ids = implode(',', $alarmJunctonIdArr);
+        // $ids = implode(',', $alarmJunctonIdArr);
 
         // 获取路口相位信息
+        // try {
+            // $flowsInfo = $this->waymap_model->getFlowsInfo($ids,true);
+        // } catch (\Exception $e) {
+            // $flowsInfo = [];
+        // }
+
+        //获取需要报警的全部路口的全部方向的信息
+        $flowsInfo = [];
         try {
-            $flowsInfo = $this->waymap_model->getFlowsInfo($ids,true);
+            $chunkJunctions = array_chunk($alarmJunctonIdArr,100);
+            foreach ($chunkJunctions as $partJuncs) {
+                $alarmJunctionIDs = implode(',', $partJuncs);
+                $tmpInfo = $this->waymap_model->getFlowsInfo($alarmJunctionIDs,true);
+                $flowsInfo = array_merge($flowsInfo,$tmpInfo);
+            }
         } catch (\Exception $e) {
             $flowsInfo = [];
         }
@@ -1149,7 +1165,7 @@ class OverviewService extends BaseService
         };
 
         //处理数据内容格式
-        $temp = array_map(function ($item) use ($junctionsInfo) {
+        $temp = array_map(function ($item) use ($junctionsInfo,$cityId) {
             return [
                 'jid' => $item['logic_junction_id'],
                 'name' => $junctionsInfo[$item['logic_junction_id']]['name'] ?? '',
@@ -1157,7 +1173,7 @@ class OverviewService extends BaseService
                 'lat' => $junctionsInfo[$item['logic_junction_id']]['lat'] ?? '',
                 'quota' => ($quota = $this->getFinalQuotaInfo($item)),
                 'alarm' => $this->getFinalAlarmInfo($item),
-                'status' => $this->getJunctionStatus($quota),
+                'status' => $this->getJunctionStatus($quota,$cityId),
             ];
         }, $temp);
 
@@ -1287,12 +1303,8 @@ class OverviewService extends BaseService
      *
      * @return mixed
      */
-    private function getJunctionStatus($quota)
+    private function getJunctionStatus($quota,$cityId)
     {
-        $junctionStatus = $this->config->item('junction_status');
-
-        $junctionStatusFormula = $this->config->item('junction_status_formula');
-
-        return $junctionStatus[$junctionStatusFormula($quota['stop_delay']['value'])];
+        $this->realtimewarning_model->getJunctionStatus($quota,$cityId);
     }
 }

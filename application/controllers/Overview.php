@@ -151,7 +151,7 @@ class Overview extends MY_Controller
         $this->validate([
             'city_id'    => 'required|is_natural_no_zero',
         ]);
-        $data = $this->overviewService->todayJamCurve($params);
+        $data = $this->overviewService->todayJamCurve($params,$this->userPerm);
         $this->response($data);
     }
 

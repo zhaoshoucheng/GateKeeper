@@ -393,7 +393,7 @@ class Realtimewarning_model extends CI_Model
             // 缓存实时报警路口数据
             $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600);
             // 冗余缓存实时报警路口数据,每一个批次一份
-            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600);
+            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600); 
 
 
             // 缓存最新hour
@@ -426,7 +426,7 @@ class Realtimewarning_model extends CI_Model
         //设置rediskey
         $avgStopDelayKey = "new_its_usergroup_realtime_avg_stop_delay_{$groupId}_{$cityId}_{$date}";
         $junctionSurveyKey = "new_its_usergroup_realtime_pretreat_junction_survey_{$groupId}_{$cityId}_{$date}_{$hour}";
-        $todayJamCurveKey = "new_its_usergroup_realtime_today_jam_curve_{$cityId}_{$date}";
+        $todayJamCurveKey = "new_its_usergroup_realtime_today_jam_curve_{$groupId}_{$cityId}_{$date}";
         $junctionListKey = "new_its_usergroup_realtime_pretreat_junction_list_{$groupId}_{$cityId}_{$date}_{$hour}";
         $realTimeAlarmRedisKey = "new_its_usergroup_realtime_alarm_{$groupId}_{$cityId}";
         $realTimeAlarmBakKey = "new_its_usergroup_realtime_alarm_{$groupId}_{$date}_{$hour}";
@@ -571,11 +571,16 @@ class Realtimewarning_model extends CI_Model
         //获取需要报警的全部路口ID
         $alarmJunctionIdArr = array_unique(array_column($realTimeAlarmsInfo, 'logic_junction_id'));
         asort($alarmJunctionIdArr);
-        $alarmJunctionIDs = implode(',', $alarmJunctionIdArr);
-
+        
         //获取需要报警的全部路口的全部方向的信息
+        $flowsInfo = [];
         try {
-            $flowsInfo = $this->waymap_model->getFlowsInfo($alarmJunctionIDs,true);
+            $chunkJunctions = array_chunk($alarmJunctionIdArr,100);
+            foreach ($chunkJunctions as $partJuncs) {
+                $alarmJunctionIDs = implode(',', $partJuncs);
+                $tmpInfo = $this->waymap_model->getFlowsInfo($alarmJunctionIDs,false);
+                $flowsInfo = array_merge($flowsInfo,$tmpInfo);
+            }
         } catch (\Exception $e) {
             $flowsInfo = [];
         }
@@ -662,7 +667,7 @@ class Realtimewarning_model extends CI_Model
                     'is' => (int)!empty($alarmInfo),
                     'comment' => $alarmInfo,
                 ],
-                'status' => $this->getJunctionStatus($quota),
+                'status' => $this->getJunctionStatus($quota,$cityId),
             ];
         }
         $lngs = array_filter(array_column($dataList, 'lng'));
@@ -815,12 +820,28 @@ class Realtimewarning_model extends CI_Model
      *
      * @return array
      */
-    private function getJunctionStatus($quota)
+    function getJunctionStatus($quota,$cityId)
     {
         $junctionStatus = $this->config->item('junction_status');
-
         $junctionStatusFormula = $this->config->item('junction_status_formula');
-
+        //这里从db中读取信息
+        $res = $this->db->select("*")
+        ->from("optimized_parameter_config_limits")
+        ->where('city_id', $cityId)
+        ->order_by('id', 'DESC')
+        ->get();
+        $limit = $res instanceof CI_DB_result ? $res->row_array() : $res;
+        if(!empty($limit)){
+            $junctionStatusFormula = function ($val) use($limit){
+                if ($val >= $limit["congestion_level_lower_limit"]) {
+                    return 3; // 拥堵
+                } elseif ($val < $limit["congestion_level_lower_limit"] && $val >= $limit["slow_down_level_lower_limit"]) {
+                    return 2; // 缓行
+                } else {
+                    return 1; // 畅通
+                }
+            };
+        }
         return $junctionStatus[$junctionStatusFormula($quota['stop_delay']['value'])];
     }
 

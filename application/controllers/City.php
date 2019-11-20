@@ -8,7 +8,7 @@ class City extends MY_Controller {
         parent::__construct();
         $this->load->model("openCity_model");
         $this->load->model("cityFence_model");
-    }
+    } 
 
     //获取城市围栏
     public function fence(){

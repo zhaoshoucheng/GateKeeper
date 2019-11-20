@@ -30,35 +30,42 @@ class ParametermanageService extends BaseService
     public function realtimeAlarmParamList($params,$withoutDefault=0)
     {
         $dParams = json_decode($this->config->item('alarm_param_realtime_default'),true);
-        try {
-            $cityId = $params['city_id'];
-            $areaId = $params['area_id']??"";
-            $isDefault = $params['is_default'];
-            $data = $this->realtimealarmconfig_model->getParameterLimit($cityId, $areaId);
-            if($withoutDefault && empty($data)){
-                return [];
-            }
-            if($isDefault || empty($data)){
-                for($i=0;$i<24;$i++){
-                    $dParams['hour'] = $i;
-                    $data[$i] = $dParams;
-                }
-            }
-            foreach ($data as $key => $value) {
-                unset($data[$key]["id"]);
-                unset($data[$key]["create_at"]);
-                unset($data[$key]["update_at"]);
-                unset($data[$key]["city_id"]);
-                // unset($data[$key]["hour"]);
-                unset($data[$key]["area_id"]);
-            }
-            $temp['params'] = $data;
-            $temp['keys'] = $this->getRealtimeKeys();
-            return $temp;
-        } catch (Exception $e) {
-            throw $e;
+        $cityId = $params['city_id'];
+        $areaId = $params['area_id']??"";
+        $isDefault = $params['is_default']??0;
+        $data = $this->realtimealarmconfig_model->getParameterLimit($cityId, $areaId);
+        if($withoutDefault && empty($data)){
+            return [];
         }
-        return [];
+        if($isDefault || empty($data)){
+            for($i=0;$i<24;$i++){
+                $dParams['hour'] = $i;
+                $data[$i] = $dParams;
+            }
+        }
+
+        $keyMap = $this->TurnRealtimeKeys();
+        $rtKeys = array_keys($keyMap);
+        foreach ($data as $key => $value) {
+            //key转换
+            foreach ($value as $kk => $vv) {
+                $kk = isset($keyMap[$kk]) ?  $keyMap[$kk] : $kk;
+                $data[$key][$kk] = $vv;
+            }
+            foreach ($rtKeys as $rk) {
+                unset($data[$key][$rk]);
+            }
+
+            unset($data[$key]["id"]);
+            unset($data[$key]["create_at"]);
+            unset($data[$key]["update_at"]);
+            unset($data[$key]["city_id"]);
+            // unset($data[$key]["hour"]);
+            unset($data[$key]["area_id"]);
+        }
+        $temp['params'] = $data;
+        $temp['keys'] = $this->getRealtimeKeys();
+        return $temp;
     }
 
 
@@ -73,35 +80,49 @@ class ParametermanageService extends BaseService
     public function paramList($params,$withoutDefault=0)
     { 
         $dParams = json_decode($this->config->item('alarm_param_offline_default'),true);
-        try {
-            $cityId = $params['city_id'];
-            $areaId = $params['area_id']??"";
-            $isDefault = $params['is_default'];
-            $data = $this->parametermanage_model->getParameterByArea($cityId, $areaId);
-            if($withoutDefault && empty($data)){
-                return [];
-            }
-            if($isDefault || empty($data)){
-                for($i=0;$i<24;$i++){
-                    $dParams['hour'] = $i;
-                    $data[$i] = $dParams;
-                }
-            }
-            foreach ($data as $key => $value) {
-                unset($data[$key]["id"]);
-                unset($data[$key]["create_at"]);
-                unset($data[$key]["update_at"]);
-                unset($data[$key]["city_id"]);
-                // unset($data[$key]["hour"]);
-                unset($data[$key]["area_id"]);
-            }
-            $temp['params'] = $data;
-            $temp['keys'] = $this->getKeys();
-            return $temp;
-        } catch (Exception $e) {
-            throw $e;
+        $cityId = $params['city_id'];
+        $areaId = $params['area_id']??"";
+        $isDefault =$params['is_default']??0;
+        $data = $this->parametermanage_model->getParameterByArea($cityId, $areaId);
+        if($withoutDefault && empty($data)){
+            return [];
         }
-        return [];
+        if($isDefault || empty($data)){
+            for($i=0;$i<24;$i++){
+                $dParams['hour'] = $i;
+                $data[$i] = $dParams;
+            }
+        }
+        foreach ($data as $key => $value) {
+            unset($data[$key]["id"]);
+            unset($data[$key]["create_at"]);
+            unset($data[$key]["update_at"]);
+            unset($data[$key]["city_id"]);
+            // unset($data[$key]["hour"]);
+            unset($data[$key]["area_id"]);
+        }
+        $temp['params'] = $data;
+        $temp['keys'] = $this->getKeys();
+        return $temp;
+    }
+
+    public function TurnRealtimeKeys(){
+        return [
+            'oversatutrailnumpara'=>'overSatuTrailNumPara',
+            'stopdelaypara'=>'stopDelayPara',
+            'multistopupperbound'=>'multiStopUpperBound',
+            'nonestoplowerbound'=>'noneStopLowerBound',
+            'queuelengthupperbound'=>'queueLengthUpperBound',
+            'queueratiolowbound'=>'queueRatioLowBound',
+            'spillovertrailnumpara'=>'spilloverTrailNumPara',
+            'spilloveralarmtrailnumpara'=>'spilloverAlarmTrailNumPara',
+            'spilloverstopdelaypara'=>'spilloverStopDelayPara',
+            'queueratiopara'=>'queueRatioPara',
+            'greenslacktrailnumpara'=>'greenSlackTrailNumPara',
+            'multistoplowerbound'=>'multiStopLowerBound',
+            'nonestopupperbound'=>'noneStopUpperBound',
+            'queuelengthlowerbound'=>'queueLengthLowerBound',
+        ];
     }
 
     /**
@@ -225,77 +246,77 @@ class ParametermanageService extends BaseService
     {
         $res = [
             'over_saturation_traj_num'=>[
-                'name'=>'过饱和轨迹量',
+                'name'=>'过饱和轨迹数',
                 'key'=>'over_saturation_traj_num',
                 'union'=>'条',
                 'group'=>'过饱和',
                 'operator'=>'大于',
             ],
             'over_stop_delay_up'=>[
-                'name'=>'上游停车延误',
+                'name'=>'停车延误',
                 'key'=>'over_stop_delay_up',
                 'union'=>'s',
                 'group'=>'过饱和',
                 'operator'=>'大于',
             ],
             'over_saturation_multi_stop_ratio_up'=>[
-                'name'=>'过饱和上游二次停车比例',
+                'name'=>'多次停车比例',
                 'key'=>'over_saturation_multi_stop_ratio_up',
                 'union'=>'-',
                 'group'=>'过饱和',
                 'operator'=>'大于',
             ],
             'over_saturation_none_stop_ratio_up'=>[
-                'name'=>'过饱和上游无停车比例',
+                'name'=>'不停车比例',
                 'key'=>'over_saturation_none_stop_ratio_up',
                 'union'=>'-',
                 'group'=>'过饱和',
                 'operator'=>'小于',
             ],
             'over_saturation_queue_length_up'=>[
-                'name'=>'过饱和上游排队长度',
+                'name'=>'排队长度',
                 'key'=>'over_saturation_queue_length_up',
                 'union'=>'m',
                 'group'=>'过饱和',
                 'operator'=>'大于',
             ],
             'over_saturation_queue_rate_up'=>[
-                'name'=>'过饱和上游排队占比',
+                'name'=>'排队占比',
                 'key'=>'over_saturation_queue_rate_up',
                 'union'=>'-',
                 'group'=>'过饱和',
                 'operator'=>'大于',
             ],
             'spillover_traj_num'=>[
-                'name'=>'溢流轨迹量',
+                'name'=>'溢流轨迹数',
                 'key'=>'spillover_traj_num',
                 'union'=>'条',
                 'group'=>'溢流',
                 'operator'=>'大于',
             ],
             'spillover_rate_down'=>[
-                'name'=>'溢流下游溢流比率',
+                'name'=>'溢流比率',
                 'key'=>'spillover_rate_down',
                 'union'=>'-',
                 'group'=>'溢流',
                 'operator'=>'大于',
             ],
             'spillover_queue_rate_down'=>[
-                'name'=>'溢流下游排队占比',
+                'name'=>'溢流排队占比',
                 'key'=>'spillover_queue_rate_down',
                 'union'=>'-',
                 'group'=>'溢流',
                 'operator'=>'大于',
             ],
             'spillover_avg_speed_down'=>[
-                'name'=>'溢流下游平均速度',
+                'name'=>'下游速度',
                 'key'=>'spillover_avg_speed_down',
                 'union'=>'km/h',
                 'group'=>'溢流',
                 'operator'=>'小于',
             ],
             'unbalance_traj_num'=>[
-                'name'=>'失衡轨迹量',
+                'name'=>'绿损轨迹数',
                 'key'=>'unbalance_traj_num',
                 'union'=>'条',
                 'group'=>'空放',
@@ -324,21 +345,21 @@ class ParametermanageService extends BaseService
             ],
             */
             'unbalance_free_multi_stop_ratio_up'=>[
-                'name'=>'失衡空放上游二次停车比例',
+                'name'=>'多次停车比例',
                 'key'=>'unbalance_free_multi_stop_ratio_up',
                 'union'=>'-',
                 'group'=>'空放',
                 'operator'=>'小于',
             ],
             'unbalance_free_none_stop_ratio_up'=>[
-                'name'=>'失衡空放上游无停车比例',
+                'name'=>'不停车比例',
                 'key'=>'unbalance_free_none_stop_ratio_up',
                 'union'=>'-',
                 'group'=>'空放',
                 'operator'=>'大于',
             ],
             'unbalance_free_queue_length_up'=>[
-                'name'=>'失衡空放上游排队长度',
+                'name'=>'排队长度',
                 'key'=>'unbalance_free_queue_length_up',
                 'union'=>'-',
                 'group'=>'空放', 
