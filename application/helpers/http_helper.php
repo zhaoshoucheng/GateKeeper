@@ -56,6 +56,11 @@ if (!function_exists('httpGET')) {
             if(strpos($url,$ignoreRequest)!==false){
                 return false;
             }
+            //特殊请求的url不报警
+            $ignoreRequest = 'lite/api_online';
+            if(strpos($url,$ignoreRequest)!==false){
+                return false;
+            }
 
             //记录报警
             com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$originUrl, "args"=>http_build_query($query), 'proc_time'=> $totalTime));
@@ -76,6 +81,11 @@ if (!function_exists('httpGET')) {
             }
             //特殊请求的url不报警
             $ignoreRequest = 'profile/base/current';
+            if(strpos($url,$ignoreRequest)!==false){
+                return false;
+            }
+            //特殊请求的url不报警
+            $ignoreRequest = 'lite/api_online';
             if(strpos($url,$ignoreRequest)!==false){
                 return false;
             }
@@ -144,6 +154,11 @@ if (!function_exists('httpPOST')) {
             if(strpos($url,$ignoreRequest)!==false){
                 return false;
             }
+            //特殊请求的url不报警
+            $ignoreRequest = 'lite/api_online';
+            if(strpos($url,$ignoreRequest)!==false){
+                return false;
+            }
             com_log_warning("_com_http_failure", $errno, $errmsg, array("cspanid"=>$cSpanId, "url"=>$url, "args"=>$data, 'proc_time'=> $totalTime));
             return false;
         }
@@ -163,6 +178,11 @@ if (!function_exists('httpPOST')) {
             }
             //特殊请求的url不报警
             $ignoreRequest = 'profile/base/current';
+            if(strpos($url,$ignoreRequest)!==false){
+                return false;
+            }
+            //特殊请求的url不报警
+            $ignoreRequest = 'lite/api_online';
             if(strpos($url,$ignoreRequest)!==false){
                 return false;
             }

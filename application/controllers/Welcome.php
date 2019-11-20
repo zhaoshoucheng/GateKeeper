@@ -14,6 +14,7 @@ class Welcome extends CI_Controller
         $this->load->model('task_model');
         // $this->load->model('overview_model');
         $this->load->model('realtime_model');
+        $this->load->model('realtimewarning_model');
     }
 
 
@@ -93,6 +94,12 @@ class Welcome extends CI_Controller
         $jsonStr='{"errno":0,"errmsg":"","data":{}}';
         echo $jsonStr;
         exit; 
+    }
+
+    public function test_limit(){ 
+        $data["stop_delay"]["value"]="50";
+        $res = $this->realtimewarning_model->getJunctionStatus($data,12);
+        print_r($res);exit;
     }
 
     public function estest()

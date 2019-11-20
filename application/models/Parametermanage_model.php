@@ -33,6 +33,8 @@ class Parametermanage_model extends CI_Model
         $builder = $this->db->select('*')->from($this->tb)->where('city_id', $cityID);
         if(!empty($areaID)){
             $builder->where('area_id', $areaID);
+        }else{
+            $builder->where('area_id', "-1");
         }
         $res = $builder->order_by('hour asc')->get()->result_array();
         return $res;
