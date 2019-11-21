@@ -885,11 +885,13 @@ class ReportService extends BaseService
     // 早高峰开始结束时间
     public function getMorningPeekRange($city_id, $logic_junction_ids, $dates) {
         $hours = ['07:00', '07:30', '09:00', '09:30'];
-        $data = $this->dataService->call("/report/GetStopDelayByHour", [
+        $data = $this->dataService->call("/report/GetIndex", [
             'city_id' => $city_id,
             'dates' => $dates,
             'logic_junction_ids' => $logic_junction_ids,
             'hours' => $hours,
+            "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
+            "group_by" => "hour",
         ], "POST", 'json');
 
         $data = array_map(function($item) {
@@ -931,11 +933,13 @@ class ReportService extends BaseService
     // 晚高峰开始结束时间
     public function getEveningPeekRange($city_id, $logic_junction_ids, $dates) {
         $hours = ['07:00', '07:30', '09:00', '09:30'];
-        $data = $this->dataService->call("/report/GetStopDelayByHour", [
+        $data = $this->dataService->call("/report/GetIndex", [
             'city_id' => $city_id,
             'dates' => $dates,
             'logic_junction_ids' => $logic_junction_ids,
             'hours' => $hours,
+            "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
+            "group_by" => "hour",
         ], "POST", 'json');
 
         $data = array_map(function($item) {
