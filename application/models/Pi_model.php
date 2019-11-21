@@ -29,17 +29,43 @@ class Pi_model extends CI_Model{
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
-    public function getGroupJuncPiWithDatesHours($city_id,$logic_junction_ids,$dates,$hours){
-        $res = $this->db
-            ->select('SUM(pi*traj_count)/SUM(traj_count) as pi,date,hour')
-            ->from($this->tb.$city_id)
-            ->where_in('logic_junction_id', $logic_junction_ids)
-            ->where_in('date', $dates)
-            ->where_in('hour', $hours)
-            ->group_by('date,hour')
-            ->get();
-//         var_dump($this->db->last_query());
-        return $res->result_array();
+    public function getGroupJuncPiWithDatesHours($cityID,$logic_junction_ids,$dates,$hours){
+        //南京pi数据迁入es
+        if($cityID == 11){
+            $st = date('Ymd',strtotime($dates[0]));
+            $et = date('Ymd',strtotime($dates[count($dates)-1]));
+            $req = [
+                'city_id' => (int)$cityID,
+                'logic_junction_ids' => $logic_junction_ids,
+                'start_date' => (int)$st,
+                'end_date' => (int)$et,
+                'hours'=>$hours
+            ];
+
+            $url = $this->config->item('data_service_interface');
+
+
+            $res = httpPOST($url . '/report/GetPiByJunction', $req, 0, 'json');
+            $res = json_decode($res,true);
+            $hourPI = [];
+
+            foreach ($res['data'] as $v){
+                $hourPI[$v['hour']] = $v['pi'];
+            }
+            return $hourPI;
+        }
+//            $res = $this->db
+//                ->select('SUM(pi*traj_count)/SUM(traj_count) as pi,hour')
+//                ->from($this->tb.$city_id)
+//                ->where_in('logic_junction_id', $logic_junction_ids)
+//                ->where_in('date', $dates)
+//                ->where_in('hour', $hours)
+//                ->group_by('hour')
+//                ->get();
+////         var_dump($this->db->last_query());
+//            return $res->result_array();
+        return [];
+
     }
 
     public function getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $dates, $hours){
