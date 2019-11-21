@@ -100,7 +100,7 @@ class RoadService extends BaseService
         foreach ($data['RoadMap'] as $rk => $rv){
             if(count($rv['forward'])>0){
                 $flowQuota[$rk]=[
-                    'forward'=>[
+                    'forward_quota'=>[
                         'time'=>0,
                         'speed'=>round(array_sum(array_column($rv['forward'],"speed"))/count($rv['forward']),2),
                         'stop_time_cycle'=>round(array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),2),
@@ -109,11 +109,11 @@ class RoadService extends BaseService
                         'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
                     ],
                 ];
-                $flowQuota[$rk]['forward']['time'] = $flowQuota[$rk]['forward']['length']/ $flowQuota[$rk]['forward']['speed'];
+                $flowQuota[$rk]['forward_quota']['time'] = $flowQuota[$rk]['forward_quota']['length']/ $flowQuota[$rk]['forward_quota']['speed'];
             }
             if(count($rv['backward'])>0){
                 $flowQuota[$rk]=[
-                    'reverse'=>[
+                    'reverse_quota'=>[
                         'time'=>0,
                         'speed'=>round(array_sum(array_column($rv['backward'],"speed"))/count($rv['backward']),2),
                         'stop_time_cycle'=>round(array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),2),
@@ -122,7 +122,7 @@ class RoadService extends BaseService
                         'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
                     ]
                 ];
-                $flowQuota[$rk]['reverse']['time'] = round($flowQuota[$rk]['reverse']['length']/ $flowQuota[$rk]['reverse']['speed'],2);
+                $flowQuota[$rk]['reverse_quota']['time'] = round($flowQuota[$rk]['reverse_quota']['length']/ $flowQuota[$rk]['reverse_quota']['speed'],2);
             }
 
         }

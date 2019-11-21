@@ -149,7 +149,7 @@ class Area_model extends CI_Model
                     "speed"=>0,
                     "stop_delay"=>0,
                     "stop_time_cycle"=>0,
-                    "count"=>0,
+                    "traj_count"=>0,
                 ];
             }
             $avgData[$v['_source']['dt']][$v['_source']['hour']]['speed']+=$v['_source']['speed']*$v['_source']['traj_count']*3.6;
