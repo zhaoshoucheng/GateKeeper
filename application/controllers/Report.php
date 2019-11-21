@@ -50,7 +50,7 @@ class Report extends MY_Controller
         if($params['datetype']==0){
             $date = date('Y-m-d',strtotime("-1 day"));
         }elseif ($params['datetype']==1){
-            $date = date('Y-m-d',strtotime("last Monday"))."~".date('Y-m-d',strtotime("last Sunday"));
+            $date = date('Y-m-d', strtotime('-1 monday', time()))."~".date('Y-m-d', strtotime('-1 sunday', time()));
         }else{
             $last= strtotime("-1 month", time());
             $last_lastday = date("Y-m-t", $last);//上个月最后一天
