@@ -819,7 +819,20 @@ class TimingAdaptionAreaService extends BaseService
         // 获取相位配时信息
         $timingInfo = $this->getFlowTimingInfo($data);
         if (empty($timingInfo) || empty($timingInfo["green"])) {
-            return [];
+            //FIXME 填充数据
+            $timingInfo['cycle'] = 300;
+            $timingInfo['offset'] = 0;
+
+            $info32 = $this->waymap_model->getFlowInfo32($data['logic_junction_id']);
+            $flowMap = array_column($info32,"phase_name","logic_flow_id");
+            $comment = "";
+            if(isset($flowMap[$data['logic_flow_id']])){
+                $comment=$flowMap[$data['logic_flow_id']];
+            }
+            $timingInfo['green']=[];
+            $timingInfo['green'][]=["comment"=>$comment];
+
+//            return [];
         }
 
         //正常逻辑不变
@@ -932,6 +945,9 @@ class TimingAdaptionAreaService extends BaseService
     private function getAllFlowTimingInfo($data,$flowId="")
     {
         $resData = $this->getFlowTimingInfo($data);
+        if(empty($resData)){
+            return [];
+        }
         // 周期 相位差
         $res = [
             'cycle' => $resData['cycle'],

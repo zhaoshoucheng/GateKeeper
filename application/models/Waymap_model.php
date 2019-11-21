@@ -587,7 +587,8 @@ class Waymap_model extends CI_Model
         $url = $this->waymap_interface . '/signal-map/mapJunction/phase32';
         $res = $this->post($url, $data);
         // 调用相位接口出错
-        if (count($logic_junction_ids) > 0 && count($res) == 0) {
+
+        if (count($res) == 0) {
             com_log_warning('mapJunction_phase_empty', 0, "mapJunction_phase_empty",
                 ["junctionIds" => $logic_junction_ids, "res" => count($res),]);
         }
