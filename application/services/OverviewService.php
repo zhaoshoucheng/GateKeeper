@@ -94,7 +94,7 @@ class OverviewService extends BaseService
     }
 
     public function junctionsListWithPI($parmas,$userPerm=[]){
-        $cityId = $parmas['cityId'];
+        $cityId = $parmas['city_id'];
         $data = $this->traj_model->getJunctionsWithPi($parmas);
         if(!empty($userPerm)){
             $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
