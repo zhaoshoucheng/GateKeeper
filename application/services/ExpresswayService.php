@@ -18,7 +18,7 @@ class ExpresswayService extends BaseService
 
     public function queryOverview($cityID){
         //查询匝道信息
-//        $juncInfos  = $this->expressway_model->getQuickRoadMovement($cityID);
+        $juncInfos  = $this->expressway_model->getQuickRoadSegments($cityID);
 
         //TODO 路口过滤
 
@@ -26,14 +26,14 @@ class ExpresswayService extends BaseService
 
         //查询干线信息
 
-        $roadInfos = $this->expressway_model->getQuickRoadSegments($cityID);
+//        $roadInfos = $this->expressway_model->getQuickRoadMovement($cityID);
 
         $ret = [
             'junc_list'=>[],
             'road_list'=>[]
         ];
 
-        foreach ($roadInfos['junctions'] as $j){
+        foreach ($juncInfos['junctions'] as $j){
             $ret['junc_list'][] = [
                 "junction_id"=>$j['junction_id'],
                 "lng"=>$j['lng'],
@@ -42,14 +42,14 @@ class ExpresswayService extends BaseService
             ];
         }
 
-        foreach ($roadInfos['segments'] as $s){
+        foreach ($juncInfos['segments'] as $s){
             $ret['road_list'][] = [
                 "id"=>$s['segment_id'],
                 "start_junc"=>$s['start_junc_id'],
                 "end_junc"=>$s['end_junc_id'],
                 "length"=>$s['length'],
                 "name"=>$s['name'],
-                "geom"=>$s['gemo']
+                "geom"=>$s['geom']
             ];
         }
 
@@ -59,6 +59,10 @@ class ExpresswayService extends BaseService
     }
 
     public function queryStopDelayList(){
+
+    }
+
+    public function queryQuotaDetail(){
 
     }
 
