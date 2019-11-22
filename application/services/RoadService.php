@@ -24,7 +24,8 @@ class RoadService extends BaseService
     {
         parent::__construct();
         $this->greenwaves = ["a9ff0f8c6fabc79777e5426b80f118b7", "0bc6f81fd483b79f4b499581bee91672","775df757eb84ad1109753b7adf78b750"];
-
+//        $this->greenwaves = ["a9ff0f8c6fabc79777e5426b80f118b7"];
+//
         $this->load->model('waymap_model');
         $this->load->model('redis_model');
         $this->load->model('road_model');
@@ -82,6 +83,7 @@ class RoadService extends BaseService
 
 
         $url = $this->config->item('its_traj_interface') . '/road/greenwave';
+//        $url =  'http://127.0.0.1:8032/itstool/road/greenwave';
 
         $query = [
             'road_ids' => $roadIDs,
@@ -109,7 +111,9 @@ class RoadService extends BaseService
                         'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
                     ],
                 ];
-                $flowQuota[$rk]['forward_quota']['time'] = $flowQuota[$rk]['forward_quota']['length']/ $flowQuota[$rk]['forward_quota']['speed'];
+                if($flowQuota[$rk]['forward_quota']['speed']>0){
+                    $flowQuota[$rk]['forward_quota']['time'] = $flowQuota[$rk]['forward_quota']['length']/ $flowQuota[$rk]['forward_quota']['speed'];
+                }
             }
             if(count($rv['backward'])>0){
                 $flowQuota[$rk]=[
@@ -122,7 +126,9 @@ class RoadService extends BaseService
                         'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
                     ]
                 ];
-                $flowQuota[$rk]['reverse_quota']['time'] = round($flowQuota[$rk]['reverse_quota']['length']/ $flowQuota[$rk]['reverse_quota']['speed'],2);
+                if($flowQuota[$rk]['reverse_quota']['speed'] > 0){
+                    $flowQuota[$rk]['reverse_quota']['time'] = round(($flowQuota[$rk]['reverse_quota']['length']/ $flowQuota[$rk]['reverse_quota']['speed'])/60,1);
+                }
             }
 
         }
