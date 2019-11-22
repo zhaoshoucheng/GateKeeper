@@ -223,7 +223,7 @@ class Cron extends CI_Controller
     //缓存近7天路口总数方法
     public function getOfflineJunctionNum(){
         $cityIds = ["38"];
-        $cityValue = ["38"=>1007];
+        $cityValue = ["38"=>957];
         foreach ($cityIds as $cityId) {
             echo "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||message=begin getOfflineJunctionNum\n\r";
 
