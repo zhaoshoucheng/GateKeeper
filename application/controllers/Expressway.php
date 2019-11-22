@@ -57,7 +57,10 @@ class Expressway extends MY_Controller
             }
           
             // $linestring = new \GeoJson\Geometry\LINESTRING($linestrings);
-            $data['road_list'][$key]['geom'] = new \GeoJson\Geometry\LINESTRING($ls);
+            $data['road_list'][$key]['geom'] = [
+                'type'=>"LineString",
+                "coordinates"=>$ls
+            ];
         }
 
         $this->response($data);
