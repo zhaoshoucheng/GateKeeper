@@ -20,9 +20,7 @@ class FlowDurationV6_model extends CI_Model
     {
         parent::__construct();
         $this->load->config("nconf");
-
         $this->engine = $this->config->item('data_engine');
-
         $this->db = $this->load->database('default', true);
     }
 
