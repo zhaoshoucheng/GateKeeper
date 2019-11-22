@@ -112,7 +112,7 @@ class RoadService extends BaseService
                     ],
                 ];
                 if($flowQuota[$rk]['forward_quota']['speed']>0){
-                    $flowQuota[$rk]['forward_quota']['time'] = $flowQuota[$rk]['forward_quota']['length']/ $flowQuota[$rk]['forward_quota']['speed'];
+                    $flowQuota[$rk]['forward_quota']['time'] = round(($flowQuota[$rk]['forward_quota']['length']/ $flowQuota[$rk]['forward_quota']['speed'])/60,1);
                 }
             }
             if(count($rv['backward'])>0){
