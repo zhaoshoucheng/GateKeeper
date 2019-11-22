@@ -380,8 +380,9 @@ class MY_Controller extends CI_Controller
         if (!in_array(strtolower($uri),
             [
                 'task/updatetaskrate', 'task/updatetaskstatus',
-                'overview/verifytoken', 'task/areaflowprocess',
-                'task/mapversioncb'
+                'task/mapversioncb', 'task/areaflowprocess',
+                'overview/verifytoken',
+                'road/roadInfo',
             ]
         )) {
             return false;

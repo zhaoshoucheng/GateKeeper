@@ -6,6 +6,8 @@
  * Time: 上午11:47
  */
 
+use Services\DataService;
+
 class Pi_model extends CI_Model{
 
     private $tb = 'junction_duration_v6_';
@@ -15,7 +17,7 @@ class Pi_model extends CI_Model{
         parent::__construct();
 
         $this->db = $this->load->database('sts_index', true);
-
+        $this->dataService = new DataService();
     }
 
     public function getJunctionsPi($dates,$junctionIDs,$cityId,$hours){
@@ -69,27 +71,63 @@ class Pi_model extends CI_Model{
     }
 
     public function getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $dates, $hours){
-        $res = $this->db
-            ->select('logic_junction_id, sum(pi * traj_count) / sum(traj_count) as pi')
-            ->from($this->tb.$city_id)
-            ->where_in('logic_junction_id', $logic_junction_ids)
-            ->where_in('date', $dates)
-            ->where_in('hour', $hours)
-            ->group_by('logic_junction_id')
-            ->get();
-//         var_dump($this->db->last_query());
-        return $res->result_array();
+        if ($city_id == 11) {
+            $pi_data = $this->dataService->call("/report/GetPiIndex", [
+                'city_id' => $city_id,
+                'dates' => $dates,
+                'logic_junction_ids' => $logic_junction_ids,
+                'hours' => $hours,
+                'group_by' => 'logic_junction_id',
+            ], "POST", 'json');
+            $data = [];
+            foreach ($pi_data[2] as $value) {
+                $data[] = [
+                    'logic_junction_id' => $value['key'],
+                    'pi' => $value['traj_count']['value'] == 0 ? 0 : $value['pi']['value'] / $value['traj_count']['value'],
+                ];
+            }
+            return $data;
+        } else {
+            $res = $this->db
+                ->select('logic_junction_id, sum(pi * traj_count) / sum(traj_count) as pi')
+                ->from($this->tb.$city_id)
+                ->where_in('logic_junction_id', $logic_junction_ids)
+                ->where_in('date', $dates)
+                ->where_in('hour', $hours)
+                ->group_by('logic_junction_id')
+                ->get();
+    //         var_dump($this->db->last_query());
+            return $res->result_array();
+        }
+
     }
 
     public function getJunctionsPiByHours($city_id, $logic_junction_ids, $dates){
-        $res = $this->db
-            ->select('hour, sum(pi * traj_count) / sum(traj_count) as pi')
-            ->from($this->tb.$city_id)
-            ->where_in('logic_junction_id', $logic_junction_ids)
-            ->where_in('date', $dates)
-            ->group_by('hour')
-            ->get();
-//         var_dump($this->db->last_query());
-        return $res->result_array();
+        if ($city_id == 11) {
+            $pi_data = $this->dataService->call("/report/GetPiIndex", [
+                'city_id' => $city_id,
+                'dates' => $dates,
+                'logic_junction_ids' => $logic_junction_ids,
+                'group_by' => 'hour',
+            ], "POST", 'json');
+            $data = [];
+            foreach ($pi_data[2] as $value) {
+                $data[] = [
+                    'hour' => $value['key'],
+                    'pi' => $value['traj_count']['value'] == 0 ? 0 : $value['pi']['value'] / $value['traj_count']['value'],
+                ];
+            }
+            return $data;
+        } else {
+            $res = $this->db
+                ->select('hour, sum(pi * traj_count) / sum(traj_count) as pi')
+                ->from($this->tb.$city_id)
+                ->where_in('logic_junction_id', $logic_junction_ids)
+                ->where_in('date', $dates)
+                ->group_by('hour')
+                ->get();
+    //         var_dump($this->db->last_query());
+            return $res->result_array();
+        }
     }
 }
