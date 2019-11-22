@@ -946,4 +946,12 @@ class RoadService extends BaseService
         }
         return $data;
     }
+
+    public function roadInfo($params) {
+        $data = $this->road_model->getRoadInfo($params['road_id']);
+        if (!empty($data)) {
+            $data['logic_junction_ids'] = explode(',', $data['logic_junction_ids']);
+        }
+        return $data;
+    }
 }
