@@ -77,15 +77,19 @@ class JunctionReportService extends BaseService{
     	$last_start_date = $last_report_date['start_date'];
     	$last_end_date = $last_report_date['end_date'];
 
-    	$now_data = $this->dataService->call("/report/GetStopDelayByHour", [
+    	$now_data = $this->dataService->call("/report/GetIndex", [
     		'city_id' => $city_id,
     		'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
     		'logic_junction_ids' => [$logic_junction_id],
+            "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
+            "group_by" => "hour",
     	], "POST", 'json');
-    	$last_data = $this->dataService->call("/report/GetStopDelayByHour", [
+    	$last_data = $this->dataService->call("/report/GetIndex", [
     		'city_id' => $city_id,
     		'dates' => $this->reportService->getDatesFromRange($last_start_date, $last_end_date),
     		'logic_junction_ids' => [$logic_junction_id],
+            "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
+            "group_by" => "hour",
     	], "POST", 'json');
 
     	$now_data = array_map(function($item) {
@@ -159,10 +163,12 @@ class JunctionReportService extends BaseService{
     	$evening_peek_hours = $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']);
     	$peek_hours = array_merge($morning_peek_hours, $evening_peek_hours);
 
-    	$index_data = $this->dataService->call("/report/GetIndexByHour", [
+    	$index_data = $this->dataService->call("/report/GetIndex", [
     		'city_id' => $city_id,
     		'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
     		'logic_junction_ids' => [$logic_junction_id],
+            "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(stop_time_cycle * traj_count) AS stop_time_cycle, sum(speed * traj_count) AS speed, sum(traj_count) as traj_count",
+            "group_by" => "hour",
     	], "POST", 'json');
     	$index_data = $index_data[2];
     	usort($index_data, function($a, $b) {

@@ -49,7 +49,9 @@ class OverviewService extends BaseService
     public function addDivisionID($cityID,$data){
         //暂时只添加建邺区
         $djuncs = $this->waymap_model->getJunctionFilterByDistrict($cityID,320105);
-
+        if(empty($data)){
+            return $data;
+        }
         foreach ($data['dataList'] as $k => $v){
             if(in_array($v['jid'],$djuncs)){
                 $data['dataList'][$k]['division_id']=320105;
@@ -92,7 +94,20 @@ class OverviewService extends BaseService
     }
 
     public function junctionsListWithPI($parmas,$userPerm=[]){
+        $cityId = $parmas['city_id'];
         $data = $this->traj_model->getJunctionsWithPi($parmas);
+        if(!empty($userPerm)){
+            $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
+            $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
+            if(in_array($cityId,$cityIds)){
+                $junctionIds = [];
+            }
+            if(!in_array($cityId,$cityIds) && empty($junctionIds)){
+                return [];
+            }
+        }
+
+
         return $data;
     }
 
