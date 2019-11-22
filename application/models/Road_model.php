@@ -37,6 +37,25 @@ class Road_model extends CI_Model
     }
 
     /**
+     * 根据 城市ID 获取公交干线列表
+     *
+     * @param $cityId
+     * @param string $select
+     * @return array
+     */
+    public function getBusRoadsByCityId($cityId, $select = '*')
+    {
+        $res = $this->db->select($select)
+            ->from($this->tb)
+            ->where('city_id', $cityId)
+            ->where('is_delete', 0)
+            ->where('type', 1)
+            ->order_by('created_at desc')
+            ->get();
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
+
+    /**
      * 根据 城市ID 获取干线列表
      *
      * @param $cityId

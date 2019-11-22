@@ -19,6 +19,7 @@
 		"guzzlehttp/guzzle": "^6.3",
 		"illuminate/database" : "5.5.44",
 		"illuminate/contracts" : "5.5.44"
+
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"
