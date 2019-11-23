@@ -23,13 +23,18 @@ class Priortybus_model extends CI_Model
 
     public function getStationJuncInfo($roadID)
     {
-        $params = [ 
-            'road_id'=>$roadID,
-        ];
+        
         $businfoInterface = $this->config->item('businfo_interface');
-        $url = $businfoInterface . '/priorityBus/stationjuncInfo';
-        $resBody = httpGET($url,$params);
+        $routeMap = $this->config->item('businfo_roadid_dataid_map');
+        $routeID = $routeMap[$roadID];
+        $params = [ 
+            'city_id'=>"11",
+            'route_id'=>$routeID,
+        ];
+        $url = $businfoInterface . '/priorityBus/stationJuncInfo';
+        $resBody = httpPOST($url,$params,0,"json");
         $res = json_decode($resBody, true);
+        $retData = $res["data"]??[];
         return $res["data"]??[];
     }
 
