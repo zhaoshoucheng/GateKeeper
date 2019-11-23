@@ -382,7 +382,7 @@ class MY_Controller extends CI_Controller
                 'task/updatetaskrate', 'task/updatetaskstatus',
                 'task/mapversioncb', 'task/areaflowprocess',
                 'overview/verifytoken',
-                'road/roadInfo',
+                'road/roadinfo',
             ]
         )) {
             return false;
