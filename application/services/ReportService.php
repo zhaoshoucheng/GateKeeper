@@ -765,7 +765,7 @@ class ReportService extends BaseService
             $end_month = date('m', $end_time);
             if (date('Y-m-d', strtotime("$start_date +1 month -1 day")) == $end_date) {
                 return 3;
-            } elseif (date('Y-m-d', strtotime("$start_date +4 month -1 day")) == $end_date) {
+            } elseif (date('Y-m-d', strtotime("$start_date +3 month -1 day")) == $end_date) {
                 return 4;
             }
         }
