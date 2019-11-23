@@ -117,12 +117,20 @@ class ExpresswayService extends BaseService
         $res = httpPOST($url . '/report/GetExpresswayQuotaDetail', $req, 0, 'json');
         if (!empty($res)) {
             $res = json_decode($res, true);
-            return [
+            $ret = [
                 "speed"=>round($res['data']['data_list'][0]['avg_speed']*3.6,2),
                 "stop_delay"=>round($res['data']['data_list'][0]['delay'],2),
                 "across_time"=>round($res['data']['data_list'][0]['travel_time'],2),
                 "type"=>1
             ];
+            if($ret['speed']/20 <= 1){
+                $ret['type'] = 1;
+            }elseif($ret['speed']/20 >= 2){
+                $ret['type'] = 2;
+            }else{
+                $ret['type'] = 3;
+            }
+            return $ret;
         } else {
             return [];
         }
