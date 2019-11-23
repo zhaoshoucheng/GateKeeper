@@ -111,7 +111,7 @@ class RoadService extends BaseService
                         'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
                 ];
                 if($flowQuota[$rk]['forward_quota']['speed']>0){
-                    $flowQuota[$rk]['forward_quota']['time'] = round(($flowQuota[$rk]['forward_quota']['length']/ $flowQuota[$rk]['forward_quota']['speed'])/60,1);
+                    $flowQuota[$rk]['forward_quota']['time'] = round(($flowQuota[$rk]['forward_quota']['length']/ $flowQuota[$rk]['forward_quota']['speed'] * 3.6)/60,1);
                 }
             }
             if(count($rv['backward'])>0){
@@ -124,7 +124,7 @@ class RoadService extends BaseService
                         'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
                 ];
                 if($flowQuota[$rk]['reverse_quota']['speed'] > 0){
-                    $flowQuota[$rk]['reverse_quota']['time'] = round(($flowQuota[$rk]['reverse_quota']['length']/ $flowQuota[$rk]['reverse_quota']['speed'])/60,1);
+                    $flowQuota[$rk]['reverse_quota']['time'] = round(($flowQuota[$rk]['reverse_quota']['length']/ $flowQuota[$rk]['reverse_quota']['speed'] * 3.6)/60,1);
                 }
             }
 
