@@ -356,12 +356,15 @@ class RoadService extends BaseService
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
         $roadList = $this->road_model->getBusRoadsByCityId($cityId, $select);
         $results = [];
+        // $force = 1;
+        // echo $force;exit;
         foreach ($roadList as $item) {
             $roadId = $item['road_id'];
             $res = $this->redis_model->getData($pre_key . $roadId);
             if ($force) {
                 $res = [];
             }
+            // $res = [];
             if (!$res) {
                 $data = [
                     'city_id' => $cityId,
@@ -371,6 +374,7 @@ class RoadService extends BaseService
                 try {
                     $res = $this->getRoadDetail($data);
                 } catch (\Exception $e) {
+                    com_log_warning("getBusRoadList", "1", "", array("err"=>json_encode($e)));
                     $res = [];
                 }
                 // 将数据刷新到 Redis
@@ -382,16 +386,22 @@ class RoadService extends BaseService
             $res['road_id'] = $item['id'];
 
             //追加station信息和路口优先字段
-            $sjInfo = $this->priortybus_model->getStationJuncInfoMock($res['road_id']);
+            $sjInfo = $this->priortybus_model->getStationJuncInfo($res['road_id']);
             if(isset($sjInfo["station"])){
+                foreach($sjInfo["station"] as $sk=>$st){
+                    $sjInfo["station"][$sk]["lng"] = (string)$sjInfo["station"][$sk]["lng"];
+                    $sjInfo["station"][$sk]["lat"] = (string)$sjInfo["station"][$sk]["lat"];
+                }
                 $res["station"] = $sjInfo["station"];              
             }
+            // print_r($sjInfo);exit;
             $juncprimap = [];
             if(isset($sjInfo["junctions_info"])){
                 foreach ($sjInfo["junctions_info"] as $key => $value) {
                     $juncprimap[$value["logic_junction_id"]] = $value["is_priority"];                
                 }
             }
+            // print_r($juncprimap);exit;
             if(isset($res["junctions_info"])){
                 foreach ($res["junctions_info"] as $key => $value) {
                     $res["junctions_info"][$key]["is_priority"] = $juncprimap[$value["logic_junction_id"]] ?? 0;
