@@ -355,12 +355,15 @@ class RoadService extends BaseService
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
         $roadList = $this->road_model->getBusRoadsByCityId($cityId, $select);
         $results = [];
+        // $force = 1;
+        // echo $force;exit;
         foreach ($roadList as $item) {
             $roadId = $item['road_id'];
             $res = $this->redis_model->getData($pre_key . $roadId);
             if ($force) {
                 $res = [];
             }
+            // $res = [];
             if (!$res) {
                 $data = [
                     'city_id' => $cityId,
@@ -370,6 +373,7 @@ class RoadService extends BaseService
                 try {
                     $res = $this->getRoadDetail($data);
                 } catch (\Exception $e) {
+                    com_log_warning("getBusRoadList", "1", "", array("err"=>json_encode($e)));
                     $res = [];
                 }
                 // 将数据刷新到 Redis

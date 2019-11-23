@@ -117,11 +117,11 @@ if ($development == 2) {
     $report_proxy_url = "https://sts.didichuxing.com/sg1/api/signalpro/api";
 } else {
     // 路网接口服务器地址
-    $waymap_server = '100.90.164.31';
+    $waymap_server = '100.69.238.11';
     // 路网接口服务器端口
-    $waymap_port = '8001';
+    $waymap_port = '8000';
     // 路网接口前缀
-    $waymap_ext = '';
+    $waymap_ext = '/its';
 
     // 配时接口服务器地址
     $timing_server = '100.90.164.31';
