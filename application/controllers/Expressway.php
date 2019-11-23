@@ -53,9 +53,9 @@ class Expressway extends MY_Controller
             $lineArray = explode(",", $str);
             $ls = [];
             foreach ($lineArray as $lv) {
-                $ls[] =array_map('floatval', explode(" ", $lv)); 
+                $ls[] =array_map('floatval', explode(" ", $lv));
             }
-          
+
             // $linestring = new \GeoJson\Geometry\LINESTRING($linestrings);
             $data['road_list'][$key]['geom'] = [
                 'type'=>"LineString",
@@ -105,11 +105,32 @@ class Expressway extends MY_Controller
     /*
      * 快速路报警列表
      * */
-    public function alarmlist(){
+    public function alarmlist() {
+        $params = $this->input->post(null, true);
 
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+        ]);
+        //查询路口列表
+        $data = $this->expresswayService->alarmlist($params['city_id']);
+
+        $this->response($data);
     }
 
 
+    /*
+     * 快速路路况
+     * */
+    public function condition() {
+        $params = $this->input->post(null, true);
 
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+        ]);
+        //查询路口列表
+        $data = $this->expresswayService->condition($params['city_id']);
+
+        $this->response($data);
+    }
 
 }
