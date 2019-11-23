@@ -31,7 +31,7 @@ class RoadService extends BaseService
         $this->load->model('road_model');
         $this->load->model('flowDurationV6_model');
         $this->load->model('traj_model');
-
+        $this->load->model('priortybus_model');
         $this->load->config('evaluate_conf');
     }
 
@@ -61,6 +61,7 @@ class RoadService extends BaseService
                 'road_id'=>$r,
                 'road_name'=>$rinfo['road_name'],
                 'road_info'=>$data['road_info'],
+                'junctions_info'=>$data['junctions_info'],
                 'quota_info'=>[
                     'forward_quota'=>[
                         'time'=>0,
@@ -338,6 +339,67 @@ class RoadService extends BaseService
         }
 
         return $junctionIdList;
+    }
+
+
+    /**
+     * 获取公交线路
+     * @param $params ['city_id'] int 城市ID
+     * @return array
+     */
+    public function getBusRoadList($params)
+    {
+        $cityId = $params['city_id'];
+        $show_type = $params['show_type'];
+        $force = $params['force'] ?? 0 ;
+        $pre_key = $show_type ? 'Road_extend_' : 'Road_';
+        $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
+        $roadList = $this->road_model->getBusRoadsByCityId($cityId, $select);
+        $results = [];
+        foreach ($roadList as $item) {
+            $roadId = $item['road_id'];
+            $res = $this->redis_model->getData($pre_key . $roadId);
+            if ($force) {
+                $res = [];
+            }
+            if (!$res) {
+                $data = [
+                    'city_id' => $cityId,
+                    'road_id' => $roadId,
+                    'show_type' => $show_type,
+                ];
+                try {
+                    $res = $this->getRoadDetail($data);
+                } catch (\Exception $e) {
+                    $res = [];
+                }
+                // 将数据刷新到 Redis
+                $this->redis_model->setEx($pre_key . $roadId, json_encode($res), 86400);
+            } else {
+                $res = json_decode($res, true);
+            }
+            $res['road'] = $item;
+            $res['road_id'] = $item['id'];
+
+            //追加station信息和路口优先字段
+            $sjInfo = $this->priortybus_model->getStationJuncInfoMock($res['road_id']);
+            if(isset($sjInfo["station"])){
+                $res["station"] = $sjInfo["station"];              
+            }
+            $juncprimap = [];
+            if(isset($sjInfo["junctions_info"])){
+                foreach ($sjInfo["junctions_info"] as $key => $value) {
+                    $juncprimap[$value["logic_junction_id"]] = $value["is_priority"];                
+                }
+            }
+            if(isset($res["junctions_info"])){
+                foreach ($res["junctions_info"] as $key => $value) {
+                    $res["junctions_info"][$key]["is_priority"] = $juncprimap[$value["logic_junction_id"]] ?? 0;
+                }
+            }
+            $results[] = $res;
+        }
+        return $results;
     }
 
     /**

@@ -81,6 +81,7 @@ class Expressway_model extends CI_Model
         ];
 
         $url = $this->waymap_interface . '/signal-map/quickroad/movements';
+        $url = 'http://10.86.108.35:8031/signal-map/quickroad/movements';
 
         $result = $this->waymap_model->get($url, $data);
 
@@ -90,14 +91,57 @@ class Expressway_model extends CI_Model
     //提取快速路路段信息
     public function getQuickRoadSegments($cityID){
         $data = [
-            'city_id'=>$cityID,
+            'city_id'=>(int)$cityID,
         ];
 
         $url = $this->waymap_interface . '/signal-map/quickroad/segments';
+        $url = "http://10.86.108.35:8031/signal-map/quickroad/segments";
+
 
         $result = $this->waymap_model->post($url, $data,0,'json');
 
         return $result;
+    }
+
+
+    //查询快速路的指标
+    public function getOnlineExpresswayQuotaList($cityID,$startJuncID,$endJuncID){
+        $req = [
+            'city_id' => $cityID,
+            'upstream_id' => $startJuncID,
+            'downstream_id' => $endJuncID,
+        ];
+        if (!empty($userPerm['junction_id'])) {
+            $req['junction_ids'] = $userPerm['junction_id'];
+        }
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetJunctionAlarmDataByJunctionAVG', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            return $res['data'];
+        } else {
+            return [];
+        }
+    }
+
+    //查询快速路的指标详情
+    public function getExpresswayQuotaDetail(){
+        $req = [
+            'city_id' => $city_id,
+            'dates' => $dates,
+            'hour' => $hour,
+        ];
+        if (!empty($userPerm['junction_id'])) {
+            $req['junction_ids'] = $userPerm['junction_id'];
+        }
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetJunctionAlarmDataByJunctionAVG', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            return $res['data'];
+        } else {
+            return [];
+        }
     }
 
 
