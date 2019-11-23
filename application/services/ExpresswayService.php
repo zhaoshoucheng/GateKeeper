@@ -128,5 +128,11 @@ class ExpresswayService extends BaseService
         }
     }
 
+    public function alarmlist($params) {
 
+    }
+
+    public function condition($params) {
+
+    }
 }
