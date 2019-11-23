@@ -61,6 +61,7 @@ class RoadService extends BaseService
                 'road_id'=>$r,
                 'road_name'=>$rinfo['road_name'],
                 'road_info'=>$data['road_info'],
+                'junctions_info'=>$data['junctions_info'],
                 'quota_info'=>[
                     'forward_quota'=>[
                         'time'=>0,

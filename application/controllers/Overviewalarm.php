@@ -44,6 +44,10 @@ class Overviewalarm extends MY_Controller
         $params['date']       = $params['date'] ?? date('Y-m-d');
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
+        //针对行政区进行路口过滤
+        if(isset($params['division_id']) && $params['division_id']>0 && empty($this->userPerm['junction_id'])) {
+            $this->userPerm['junction_id'] = $this->overviewService->getJuncsByDivision($params['city_id'],$params['division_id']);
+        }
         $data = $this->overviewService->todayAlarmInfo($params,$this->userPerm);
         com_log_notice('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_data', compact("params","data"));
         $this->response($data);
@@ -71,6 +75,11 @@ class Overviewalarm extends MY_Controller
         $params['date']       = $params['date'] ?? date('Y-m-d');
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
+        //针对行政区进行路口过滤
+        if(isset($params['division_id']) && $params['division_id']>0 && empty($this->userPerm['junction_id'])) {
+            $this->userPerm['junction_id'] = $this->overviewService->getJuncsByDivision($params['city_id'],$params['division_id']);
+        }
+
         $data = $this->overviewService->sevenDaysAlarmChange($params,$this->userPerm);
 
         $this->response($data);
@@ -97,6 +106,10 @@ class Overviewalarm extends MY_Controller
         $params['date']       = $params['date'] ?? date('Y-m-d');
         $params['time_point'] = $params['time_point'] ?? date('H:i:s');
 
+        //针对行政区进行路口过滤
+        if(isset($params['division_id']) && $params['division_id']>0 && empty($this->userPerm['junction_id'])) {
+            $this->userPerm['junction_id'] = $this->overviewService->getJuncsByDivision($params['city_id'],$params['division_id']);
+        }
         $result = $this->overviewService->realTimeAlarmList($params,$this->userPerm);
 
         return $this->response($result);

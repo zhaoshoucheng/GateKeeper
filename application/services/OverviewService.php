@@ -39,6 +39,15 @@ class OverviewService extends BaseService
         $this->config->load('realtime_conf');
     }
 
+    /*
+     * 对数据按照行政区进行过滤
+     * */
+    public function getJuncsByDivision($cityID,$divisionID){
+         return $this->waymap_model->getJunctionFilterByDistrict($cityID,$divisionID);
+    }
+
+
+
     /**
      *
      * 为所有路口附加行政区划信息
