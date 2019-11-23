@@ -41,14 +41,23 @@ class Expressway extends MY_Controller
         ];
         $data['upramp']=0;
         $data['downramp']=0;
+        $juncTypeMap = [];
         foreach ($data['junc_list'] as  $jc) {
+            $juncTypeMap[$jc['junction_id']] = $jc['type'];
             if($jc['type']==1){
                 $data['upramp']+=1;
             }elseif ($jc['type']==2) {
                 $data['downramp']+=1;
             }
         }
+        $juncNameMap = [];
         foreach ($data['road_list'] as $key => $value) {
+            if(isset($juncTypeMap[$value['start_junc']]) && $juncTypeMap[$value['start_junc']] == 1){
+                $juncNameMap[$value['start_junc']] = $value['name']."上匝道";
+            }elseif (isset($juncTypeMap[$value['end_junc']]) && $juncTypeMap[$value['end_junc']] == 2) {
+                $juncNameMap[$value['end_junc']] = $value['name']."下匝道";
+            }
+            
             $str = substr($value['geom'],12,-1);
             $lineArray = explode(",", $str);
             $ls = [];
@@ -62,12 +71,13 @@ class Expressway extends MY_Controller
                 "coordinates"=>$ls
             ];
         }
+        foreach ($data['junc_list'] as $jk => $jc) {
+            if(isset($juncNameMap[$jc['junction_id']])){
+                $data['junc_list'][$jk]['name'] = $juncNameMap[$jc['junction_id']];
+            }
+        }
 
         $this->response($data);
-    }
-
-    public function transLinestring2Geojson($str){
-
     }
 
     /*
@@ -80,7 +90,7 @@ class Expressway extends MY_Controller
             'city_id' => 'required|is_natural_no_zero',
         ]);
         //查询路口列表
-        $data = $this->expresswayService->queryOverview($params['city_id']);
+        $data = $this->expresswayService->queryStopDelayList($params['city_id']);
 
         $this->response($data);
     }
