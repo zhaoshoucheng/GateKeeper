@@ -114,6 +114,11 @@ class Overview extends MY_Controller
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
 
+        //根据行政区,更改用户权限
+        if(isset($params['division_id']) && $params['division_id']>0){
+            $this->userPerm['group_id'] = 424;
+        }
+
         $data = $this->overviewService->operationCondition($params,$this->userPerm);
 
         $this->response($data);
@@ -136,6 +141,11 @@ class Overview extends MY_Controller
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
 
+        //根据行政区划,更改权限 424
+        if(isset($params['division_id']) && $params['division_id']>0){
+            $this->userPerm['group_id'] = 424;
+        }
+
         $data = $this->overviewService->junctionSurvey($params,$this->userPerm);
         if($params['city_id'] == 12){   //济南项目,概览页路口总数暂时写死,与济南本地化项目(traj_service)数值保持一致
             $data['junction_total'] = 1589;
@@ -151,6 +161,12 @@ class Overview extends MY_Controller
         $this->validate([
             'city_id'    => 'required|is_natural_no_zero',
         ]);
+
+        //根据行政区划,更改权限 424
+        if(isset($params['division_id']) && $params['division_id']>0){
+            $this->userPerm['group_id'] = 424;
+        }
+
         $data = $this->overviewService->todayJamCurve($params,$this->userPerm);
         $this->response($data);
     }
@@ -241,6 +257,17 @@ class Overview extends MY_Controller
         ];
         $data = httpPOST($url,$reqData,0,'json');
         $data = json_decode($data,true);
+
+        //针对行政区进行过滤,暂时只处理建邺区
+        if(isset($params['division_id']) && $params['division_id']==320105){
+            foreach ($data['res']['data'] as $d){
+                if($d['obj_name'] == '建邺区'){
+                    $data['res']['data'] = [$d];
+                }
+            }
+        }
+
+
         $this->response($data['res']);
     }
 
@@ -256,22 +283,49 @@ class Overview extends MY_Controller
             throw new \Exception('暂时不支持此城市！', ERR_PARAMETERS);
         }
         $url = "http://sts.didichuxing.com/api/tti/get_tti_info_by_citytype?token=8b6a3fa13729ff63b4e6f66e2981ee5a";
-        $reqData = [
-            "cityname"=>"南京市",
-            "grain"=>"minute",
-            "obj_type"=>1,
-            "pagenumber"=>1,
-            "pagesize"=>10,
-            "has_geo"=>0,
-            "stime"=> date("Ymd")."0000",
-            "etime"=> date("YmdHi")
-        ];
-        $data = httpPOST($url,$reqData,0,'json');
-        $data = json_decode($data,true);
-        if(empty($data['res'])){
-            $this->response([]);
+        //针对行政区进行过滤
+        if(isset($params['division_id']) && $params['division_id']==320105){
+            $reqData = [
+                "cityname"=>"南京市",
+                "grain"=>"minute",
+                "obj_type"=>2,
+                "pagenumber"=>1,
+                "pagesize"=>10,
+                "has_geo"=>0,
+                "stime"=> date("Ymd")."0000",
+                "etime"=> date("YmdHi")
+            ];
+            $data = httpPOST($url,$reqData,0,'json');
+            $data = json_decode($data,true);
+            if(empty($data['res'])){
+                $this->response([]);
+            }
+            $data = $data['res'];
+            foreach ($data as $d){
+                if($d['obj_name'] == '建邺区'){
+                    $data = [$d];
+                }
+            }
+        }else{
+            $reqData = [
+                "cityname"=>"南京市",
+                "grain"=>"minute",
+                "obj_type"=>1,
+                "pagenumber"=>1,
+                "pagesize"=>10,
+                "has_geo"=>0,
+                "stime"=> date("Ymd")."0000",
+                "etime"=> date("YmdHi")
+            ];
+            $data = httpPOST($url,$reqData,0,'json');
+            $data = json_decode($data,true);
+            if(empty($data['res'])){
+                $this->response([]);
+            }
+            $data = $data['res'];
         }
-        $data = $data['res'];
+
+
         $ttiInfo = [];
         foreach ($data[0]['tti_info'] as $ttk => $tti){
             $hour = substr($ttk,8,2);
