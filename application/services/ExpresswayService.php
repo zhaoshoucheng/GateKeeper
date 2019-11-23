@@ -58,12 +58,74 @@ class ExpresswayService extends BaseService
         return $ret;
     }
 
-    public function queryStopDelayList(){
+    public function queryStopDelayList($cityID){
+        $req = [
+            'city_id' => (int)$cityID,
+            'upstream_id'=>"",
+            'downstream_id'=>"",
+            'hms'=>date("Y-m-d H:i:s",strtotime("-5 minute")),
 
+        ];
+
+        $url = $this->config->item('data_service_interface');
+//        $url = "http://127.0.0.1:8093";
+        $res = httpPOST($url . '/report/GetExpresswayQuota', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+
+            $ret = [];
+
+            foreach ($res['data']['data_list'] as $v){
+                $ret[] = [
+                    "time"=>$res['data']['hms'],
+                    "junction_id"=>$v['downstream_ramp'],
+                    "junction_name"=>"",
+                    "stop_delay"=>round($v['delay'],2),
+                    "quota_unit"=>"秒"
+                ];
+            }
+
+            $junctionIDs = array_column($ret,'junction_id');
+            $junctionInfos = $juncInfos  = $this->expressway_model->getQuickRoadSegments($cityID,$junctionIDs);
+            $juncNameMap = [];
+            foreach ($junctionInfos['junctions'] as $j){
+                $juncNameMap[$j['junction_id']] = $j['name'];
+            }
+            foreach ($ret as $rk => $rv){
+                if(isset($juncNameMap[$rv['junction_id']])){
+                    $ret[$rk]['junction_name']=$juncNameMap[$rv['junction_id']];
+                }
+
+            }
+
+            return $ret;
+        } else {
+            return [];
+        }
     }
 
-    public function queryQuotaDetail(){
+    public function queryQuotaDetail($params){
+        $req = [
+            'city_id' => (int)$params['city_id'],
+            'upstream_id'=>"",
+            'downstream_id'=>$params['end_junc_id'],
+            'hms'=>$params['time'],
+        ];
 
+        $url = $this->config->item('data_service_interface');
+//        $url = "http://127.0.0.1:8093";
+        $res = httpPOST($url . '/report/GetExpresswayQuotaDetail', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            return [
+                "speed"=>round($res['data']['data_list'][0]['avg_speed']*3.6,2),
+                "stop_delay"=>round($res['data']['data_list'][0]['delay'],2),
+                "across_time"=>round($res['data']['data_list'][0]['travel_time'],2),
+                "type"=>1
+            ];
+        } else {
+            return [];
+        }
     }
 
 

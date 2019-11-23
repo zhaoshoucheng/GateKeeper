@@ -89,10 +89,13 @@ class Expressway_model extends CI_Model
     }
 
     //提取快速路路段信息
-    public function getQuickRoadSegments($cityID){
+    public function getQuickRoadSegments($cityID,$junctionIDs = []){
         $data = [
             'city_id'=>(int)$cityID,
         ];
+        if(!empty($junctionIDs)){
+            $data['junction_ids'] = $junctionIDs;
+        }
 
         $url = $this->waymap_interface . '/signal-map/quickroad/segments';
         $url = "http://10.86.108.35:8031/signal-map/quickroad/segments";
