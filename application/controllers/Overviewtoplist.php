@@ -41,6 +41,11 @@ class Overviewtoplist extends MY_Controller
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['pagesize'] = $params['pagesize'] ?? 20;
+        //针对行政区进行路口过滤
+        if(isset($params['division_id']) && $params['division_id']>0 && empty($this->userPerm['junction_id'])) {
+            $this->userPerm['junction_id'] = $this->overviewService->getJuncsByDivision($params['city_id'],$params['division_id']);
+            $this->userPerm['force_change'] = 1;
+        }
         $data = $this->overviewService->stopDelayTopList($params,$this->userPerm);
         $data = !empty($data) ? $data : [];
         $this->response($data);
@@ -65,7 +70,11 @@ class Overviewtoplist extends MY_Controller
 
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['pagesize'] = $params['pagesize'] ?? 20;
-
+        //针对行政区进行路口过滤
+        if(isset($params['division_id']) && $params['division_id']>0 && empty($this->userPerm['junction_id'])) {
+            $this->userPerm['junction_id'] = $this->overviewService->getJuncsByDivision($params['city_id'],$params['division_id']);
+            $this->userPerm['force_change'] = 1;
+        }
         $data = $this->overviewService->stopTimeCycleTopList($params,$this->userPerm);
         $data = !empty($data) ? $data : [];
         $this->response($data);

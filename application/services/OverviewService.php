@@ -608,7 +608,7 @@ class OverviewService extends BaseService
         if(!empty($userPerm)){
             $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
             $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
-            if(in_array($cityId,$cityIds)){
+            if(in_array($cityId,$cityIds) && !isset($userPerm['force_change']) ){
                 $junctionIds = [];
             }
             if(!in_array($cityId,$cityIds) && empty($junctionIds)){
@@ -662,7 +662,7 @@ class OverviewService extends BaseService
         if(!empty($userPerm)){
             $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
             $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
-            if(in_array($cityId,$cityIds)){
+            if(in_array($cityId,$cityIds) && !isset($userPerm['force_change']) ){
                 $junctionIds = [];
             }
             if(!in_array($cityId,$cityIds) && empty($junctionIds)){
@@ -801,7 +801,7 @@ class OverviewService extends BaseService
 
         $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
         $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
-        if(in_array($cityId,$cityIds)){
+        if(in_array($cityId,$cityIds) && !isset($userPerm['force_change'])){
             $junctionIds = [];
         }
         //用户登陆,但没有数据权限
@@ -969,7 +969,7 @@ class OverviewService extends BaseService
         //权限逻辑开始
         $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
         $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
-        if(in_array($cityId,$cityIds)){
+        if(in_array($cityId,$cityIds) && !isset($userPerm['force_change'])){
             $junctionIds = [];
         }
         //权限不为空 且 无城市权限 且 无路口数据
@@ -1036,7 +1036,7 @@ class OverviewService extends BaseService
         if(!empty($userPerm)){
             $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
             $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
-            if(in_array($cityId,$cityIds)){
+            if(in_array($cityId,$cityIds) && !isset($userPerm['force_change'])){
                 $junctionIds = [];
             }
             if(!in_array($cityId,$cityIds) && empty($junctionIds)){

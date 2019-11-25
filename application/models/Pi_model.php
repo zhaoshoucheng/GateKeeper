@@ -50,7 +50,9 @@ class Pi_model extends CI_Model{
             $res = httpPOST($url . '/report/GetPiByJunction', $req, 0, 'json');
             $res = json_decode($res,true);
             $hourPI = [];
-
+            if(empty($res)){
+                return [];
+            }
             foreach ($res['data'] as $v){
                 $hourPI[$v['hour']] = $v['pi'];
             }

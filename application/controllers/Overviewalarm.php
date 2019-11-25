@@ -47,6 +47,7 @@ class Overviewalarm extends MY_Controller
         //针对行政区进行路口过滤
         if(isset($params['division_id']) && $params['division_id']>0 && empty($this->userPerm['junction_id'])) {
             $this->userPerm['junction_id'] = $this->overviewService->getJuncsByDivision($params['city_id'],$params['division_id']);
+            $this->userPerm['force_change'] = 1;
         }
         $data = $this->overviewService->todayAlarmInfo($params,$this->userPerm);
         com_log_notice('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_data', compact("params","data"));
@@ -78,6 +79,7 @@ class Overviewalarm extends MY_Controller
         //针对行政区进行路口过滤
         if(isset($params['division_id']) && $params['division_id']>0 && empty($this->userPerm['junction_id'])) {
             $this->userPerm['junction_id'] = $this->overviewService->getJuncsByDivision($params['city_id'],$params['division_id']);
+            $this->userPerm['force_change'] = 1;
         }
 
         $data = $this->overviewService->sevenDaysAlarmChange($params,$this->userPerm);
@@ -109,6 +111,7 @@ class Overviewalarm extends MY_Controller
         //针对行政区进行路口过滤
         if(isset($params['division_id']) && $params['division_id']>0 && empty($this->userPerm['junction_id'])) {
             $this->userPerm['junction_id'] = $this->overviewService->getJuncsByDivision($params['city_id'],$params['division_id']);
+            $this->userPerm['force_change'] = 1;
         }
         $result = $this->overviewService->realTimeAlarmList($params,$this->userPerm);
 
