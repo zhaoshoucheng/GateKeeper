@@ -6,6 +6,9 @@ namespace Services;
  * Class ExpresswayService
  * @package Services
  */
+
+use Services\DataService;
+
 class ExpresswayService extends BaseService
 {
 
@@ -14,6 +17,9 @@ class ExpresswayService extends BaseService
     {
         parent::__construct();
         $this->load->model('expressway_model');
+        $this->load->model('waymap_model');
+
+        $this->dataService = new DataService();
     }
 
     public function queryOverview($cityID){
@@ -58,19 +64,140 @@ class ExpresswayService extends BaseService
         return $ret;
     }
 
-    public function queryStopDelayList(){
+    public function queryStopDelayList($cityID){
+        $req = [
+            'city_id' => (int)$cityID,
+            'upstream_id'=>"",
+            'downstream_id'=>"",
+            'hms'=>date("Y-m-d H:i:s",strtotime("-5 minute")),
 
+        ];
+
+        $url = $this->config->item('data_service_interface');
+//        $url = "http://127.0.0.1:8093";
+        $res = httpPOST($url . '/report/GetExpresswayQuota', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            $ret = [];
+            if(empty($res['data']['data_list'])){
+                return $ret;
+            }
+            foreach ($res['data']['data_list'] as $v){
+                $ret[] = [
+                    "time"=>$res['data']['hms'],
+                    "junction_id"=>$v['downstream_ramp'],
+                    "junction_name"=>"",
+                    "stop_delay"=>round($v['delay'],2),
+                    "quota_unit"=>"秒"
+                ];
+            }
+
+            $junctionIDs = array_column($ret,'junction_id');
+            $junctionInfos = $juncInfos  = $this->expressway_model->getQuickRoadSegments($cityID,$junctionIDs);
+            $juncNameMap = [];
+            foreach ($junctionInfos['junctions'] as $j){
+                $juncNameMap[$j['junction_id']] = $j['name'];
+            }
+            foreach ($ret as $rk => $rv){
+                if(isset($juncNameMap[$rv['junction_id']])){
+                    $ret[$rk]['junction_name']=$juncNameMap[$rv['junction_id']];
+                }
+
+            }
+
+            return $ret;
+        } else {
+            return [];
+        }
     }
 
-    public function queryQuotaDetail(){
+    public function queryQuotaDetail($params){
+        $req = [
+            'city_id' => (int)$params['city_id'],
+            'upstream_id'=>"",
+            'downstream_id'=>$params['end_junc_id'],
+            'hms'=>$params['time'],
+        ];
 
+        $url = $this->config->item('data_service_interface');
+
+        $res = httpPOST($url . '/report/GetExpresswayQuotaDetail', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            $ret = [
+                "speed"=>round($res['data']['data_list'][0]['avg_speed']*3.6,2),
+                "stop_delay"=>round($res['data']['data_list'][0]['delay'],2),
+                "across_time"=>round($res['data']['data_list'][0]['travel_time'],2),
+                "type"=>1
+            ];
+            if($ret['speed']/20 <= 1){
+                $ret['type'] = 1;
+            }elseif($ret['speed']/20 >= 2){
+                $ret['type'] = 2;
+            }else{
+                $ret['type'] = 3;
+            }
+            return $ret;
+        } else {
+            return [];
+        }
     }
 
     public function alarmlist($params) {
+    	$city_id = $params['city_id'];
+    	$es_data = $this->dataService->call("/expressway/Condition", [
+    		'city_id' => $city_id,
+    	], "POST", 'json');
+    	var_dump($es_data);
 
+    	$link_ids = array_column($es_data['list'], 'link_id');
+    	$version =$this->waymap_model->getLastMapVersion();
+    	$link_infos = $this->waymap_model->getLinksGeoInfos($link_ids, $version, true);
+    	return $link_infos;
+    	// $link_infos_map = [];
+    	// foreach ($link_info as $link_info) {
+
+    	// }
+
+    	// $ret = [
+    	// 	"trafficList" => [],
+    	// ];
+    	// foreach ($variable as $key => $value) {
+    	// 	# code...
+    	// }
     }
 
     public function condition($params) {
+    	$city_id = intval($params['city_id']);
+    	$es_data = $this->dataService->call("/expressway/Condition", [
+    		'city_id' => $city_id,
+    	], "POST", 'json');
 
+    	$list = $es_data[2]['list'];
+    	$link_ids = array_column($list, 'link_id');
+    	$version =$this->waymap_model->getLastMapVersion();
+    	$link_infos = $this->waymap_model->getLinksGeoInfos($link_ids, $version, true);
+    	$link_geom_map = [];
+    	foreach ($link_infos['features'] as $link_info) {
+    		if (in_array($link_info['properties']['id'], $link_ids)) {
+    			$link_geom_map[$link_info['properties']['id']] = $link_info['geometry'];
+    		}
+    	}
+
+
+    	foreach ($list as $key => $value) {
+    		if (isset($link_geom_map[$value['link_id']])) {
+    			$list[$key]['geom'] = $link_geom_map[$value['link_id']];
+    		} else {
+    			$list[$key]['geom'] = [
+    				"coordinates" => [],
+    				"type" => "LineString",
+    			];
+    		}
+    	}
+    	return [
+    		'trafficList' => $list,
+    		'hms' => $es_data[2]['hms'],
+    	];
     }
 }
