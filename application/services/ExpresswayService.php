@@ -50,6 +50,7 @@ class ExpresswayService extends BaseService
                 "junction_id"=>$j['junction_id'],
                 "lng"=>$j['lng'],
                 "lat"=>$j['lat'],
+                "name"=>$j['name'],
                 "type"=>$j['type']
             ];
         }
