@@ -26,7 +26,7 @@ class ExpresswayService extends BaseService
 
         $juncNames=[];
         if($cityID == 11){
-            $juncNames = ["宁洛","栖霞","水吉","长江","郑和","下关"];
+            $juncNames = ["宁洛","栖霞","水吉","长江","郑和","下关","内环","玄武","扬子江","定淮","江东","应天","沪蓉","扬子江","凤台","机场","卡子门","双龙"];
         }
         //TODO 路口过滤
         //查询匝道信息
