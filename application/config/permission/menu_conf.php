@@ -9,7 +9,7 @@ $config['menu'] = [
         if(isset($_REQUEST['city_id']) && $_REQUEST['city_id']=="85"){
             return 3;
         }
-        if(isset($_REQUEST['city_id']) && $_REQUEST['city_id']=="11"){
+        if(isset($_REQUEST['city_id']) && $_REQUEST['city_id']=="11" && strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
             return 6;
         }
         //南昌本地化
@@ -508,6 +508,11 @@ $config['menu'] = [
                                 [
                                     'name' => '干线协调优化',
                                     'url'  => 'coordinate',
+                                ],
+                            3 =>
+                                [
+                                    'name' => '公交优先',
+                                    'url'  => 'bus-priority',
                                 ],
                         ],
                 ],
