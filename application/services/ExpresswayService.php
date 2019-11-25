@@ -78,9 +78,10 @@ class ExpresswayService extends BaseService
         $res = httpPOST($url . '/report/GetExpresswayQuota', $req, 0, 'json');
         if (!empty($res)) {
             $res = json_decode($res, true);
-
             $ret = [];
-
+            if(empty($res['data']['data_list'])){
+                return $ret;
+            }
             foreach ($res['data']['data_list'] as $v){
                 $ret[] = [
                     "time"=>$res['data']['hms'],
@@ -119,7 +120,7 @@ class ExpresswayService extends BaseService
         ];
 
         $url = $this->config->item('data_service_interface');
-//        $url = "http://127.0.0.1:8093";
+
         $res = httpPOST($url . '/report/GetExpresswayQuotaDetail', $req, 0, 'json');
         if (!empty($res)) {
             $res = json_decode($res, true);
