@@ -23,10 +23,16 @@ class ExpresswayService extends BaseService
     }
 
     public function queryOverview($cityID){
-        //查询匝道信息
-        $juncInfos  = $this->expressway_model->getQuickRoadSegments($cityID);
 
+        $juncNames=[];
+        if($cityID == 11){
+            $juncNames = ["宁洛","栖霞","水吉","长江","郑和","下关"];
+        }
         //TODO 路口过滤
+        //查询匝道信息
+        $juncInfos  = $this->expressway_model->getQuickRoadSegments($cityID,$juncNames);
+
+
 
 //        $movements = $juncInfos['movements'];
 
