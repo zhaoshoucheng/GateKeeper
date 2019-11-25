@@ -99,9 +99,9 @@ class ExpresswayService extends BaseService
             }
 
             $junctionIDs = array_column($ret,'junction_id');
-            $junctionInfos = $juncInfos  = $this->expressway_model->getQuickRoadSegments($cityID,$junctionIDs);
+            $junctionInfos = $juncInfos  = $this->expressway_model->getQuickRoadSegmentsByJunc($cityID,$junctionIDs);
             $juncNameMap = [];
-            if(empty($junctionInfos)){
+            if(empty($junctionInfos) || empty($junctionInfos['junctions'])){
                 return [];
             }
             foreach ($junctionInfos['junctions'] as $j){
