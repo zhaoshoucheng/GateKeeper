@@ -173,6 +173,19 @@ class ExpresswayService extends BaseService
     	], "POST", 'json');
 
     	$list = $es_data[2]['list'];
+    	// 阈值 35 50，过滤掉50以上的，降低数据量
+    	// 拥堵程度 3 > 2 > 1
+    	foreach ($list as $key => $value) {
+    		$speed = $value['avg_speed'] * 3.6;
+    		if ($speed < 30) {
+    			$list[$key]['type'] = 3;
+    		} elseif ($speed < 50) {
+    			$list[$key]['type'] = 2;
+    		} else {
+    			$list[$key]['type'] = 1;
+    			unset($list[$key]);
+    		}
+    	}
     	$link_ids = array_column($list, 'link_id');
     	$version =$this->waymap_model->getLastMapVersion();
     	$link_infos = $this->waymap_model->getLinksGeoInfos($link_ids, $version, true);
