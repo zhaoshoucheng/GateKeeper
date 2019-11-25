@@ -102,26 +102,28 @@ class RoadService extends BaseService
 
         foreach ($data['RoadMap'] as $rk => $rv){
             if(count($rv['forward'])>0){
+                $speed = round(array_sum(array_column($rv['forward'],"speed"))/count($rv['forward'])*3.6,2);
                 $flowQuota[$rk]['forward_quota']=[
                         'time'=>0,
-                        'speed'=>round(array_sum(array_column($rv['forward'],"speed"))/count($rv['forward'])*3.6,2),
+                        'speed'=>$speed,
                         'stop_time_cycle'=>round(array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),2),
                         'PI'=>round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2),
                         'length'=>array_sum(array_column($rv['forward'],"length")),
-                        'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
+                        'level'=>$this->getSpeedLevel($speed)
                 ];
                 if($flowQuota[$rk]['forward_quota']['speed']>0){
                     $flowQuota[$rk]['forward_quota']['time'] = round(($flowQuota[$rk]['forward_quota']['length']/ $flowQuota[$rk]['forward_quota']['speed'] * 3.6)/60,1);
                 }
             }
             if(count($rv['backward'])>0){
+                $speed = round(array_sum(array_column($rv['backward'],"speed"))/count($rv['backward'])*3.6,2);
                 $flowQuota[$rk]['reverse_quota']=[
                         'time'=>0,
-                        'speed'=>round(array_sum(array_column($rv['backward'],"speed"))/count($rv['backward'])*3.6,2),
+                        'speed'=>$speed,
                         'stop_time_cycle'=>round(array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),2),
                         'PI'=>round(array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),2),
                         'length'=>array_sum(array_column($rv['backward'],"length")),
-                        'level'=>$this->getPIlevel(round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2))
+                        'level'=>$this->getSpeedLevel($speed)
                 ];
                 if($flowQuota[$rk]['reverse_quota']['speed'] > 0){
                     $flowQuota[$rk]['reverse_quota']['time'] = round(($flowQuota[$rk]['reverse_quota']['length']/ $flowQuota[$rk]['reverse_quota']['speed'] * 3.6)/60,1);
@@ -153,7 +155,22 @@ class RoadService extends BaseService
         }
 
         return "E";
+    }
+    private function getSpeedLevel($speed){
+        if($speed>0 && $speed <20){
+            return "E";
+        }
+        if($speed>=20 && $speed <40){
+            return "D";
+        }
+        if($speed>=40 && $speed <60){
+            return "C";
+        }
+        if($speed>=60 && $speed <80){
+            return "B";
+        }
 
+        return "A";
     }
 
     /**
