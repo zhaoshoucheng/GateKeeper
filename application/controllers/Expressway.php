@@ -56,7 +56,7 @@ class Expressway extends MY_Controller
             }elseif (isset($juncTypeMap[$value['end_junc']]) && $juncTypeMap[$value['end_junc']] == 2) {
                 $juncNameMap[$value['end_junc']] = $value['name']."下匝道";
             }
-            
+
             $str = substr($value['geom'],12,-1);
             $lineArray = explode(",", $str);
             $ls = [];
@@ -122,7 +122,7 @@ class Expressway extends MY_Controller
             'city_id' => 'required|is_natural_no_zero',
         ]);
         //查询路口列表
-        $data = $this->expresswayService->alarmlist($params['city_id']);
+        $data = $this->expresswayService->alarmlist($params);
 
         $this->response($data);
     }
@@ -138,7 +138,7 @@ class Expressway extends MY_Controller
             'city_id' => 'required|is_natural_no_zero',
         ]);
         //查询路口列表
-        $data = $this->expresswayService->condition($params['city_id']);
+        $data = $this->expresswayService->condition($params);
 
         $this->response($data);
     }
