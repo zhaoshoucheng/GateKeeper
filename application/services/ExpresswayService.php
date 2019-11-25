@@ -187,6 +187,7 @@ class ExpresswayService extends BaseService
     			unset($list[$key]);
     		}
     	}
+    	$list = array_values($list);
     	$link_ids = array_column($list, 'link_id');
     	$version =$this->waymap_model->getLastMapVersion();
     	$link_infos = $this->waymap_model->getLinksGeoInfos($link_ids, $version, true);
