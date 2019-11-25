@@ -608,7 +608,7 @@ class OverviewService extends BaseService
         if(!empty($userPerm)){
             $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
             $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
-            if(in_array($cityId,$cityIds)){
+            if(in_array($cityId,$cityIds) && !isset($userPerm['force_change']) ){
                 $junctionIds = [];
             }
             if(!in_array($cityId,$cityIds) && empty($junctionIds)){
@@ -662,7 +662,7 @@ class OverviewService extends BaseService
         if(!empty($userPerm)){
             $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
             $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
-            if(in_array($cityId,$cityIds)){
+            if(in_array($cityId,$cityIds) && !isset($userPerm['force_change']) ){
                 $junctionIds = [];
             }
             if(!in_array($cityId,$cityIds) && empty($junctionIds)){
