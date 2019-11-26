@@ -453,43 +453,45 @@ $config['menu'] = [
         6 => [
             0 =>
                 [
-                    'name'   => '概览',
-                    'url'    => '/overview',
-                    'remark' => 'signal',
-                ],
-            1 =>
-                [
-                    'name'   => '诊断',
-                    'url'    => '/diagnose/tendency',
-                    'remark' => 'signal',
-                ],
-            2 =>
-                [
-                    'name'   => '评估',
-                    'url'    => '/assessment/',
+                    'name'   => '实时监测',
+                    'url'    => '/',
                     'remark' => 'signal',
                     'son'    =>
                         [
                             0 =>
                                 [
-                                    'name' => '路口评估',
-                                    'url'  => 'junction',
+                                    'name' => '路口概览',
+                                    'url'  => 'overview',
                                 ],
                             1 =>
                                 [
-                                    'name' => '干线评估',
-                                    'url'  => 'road',
+                                    'name' => '快速路监测',
+                                    'url'  => 'expressway',
                                 ],
                             2 =>
                                 [
-                                    'name' => '区域评估',
-                                    'url'  => 'area',
+                                    'name' => '大屏可视化',
+                                    'url'  => 'screen',
                                 ],
                         ],
                 ],
-            3 =>
+            1 =>
                 [
-                    'name'   => '优化',
+                    'name'   => '辅助决策',
+                    'url'    => '/',
+                    'remark' => 'signal',
+                    'son'    =>
+                        [
+                            0 =>
+                                [
+                                    'name' => '路口诊断',
+                                    'url'  => 'diagnose/tendency',
+                                ],
+                        ],
+                ],
+            2 =>
+                [
+                    'name'   => '问题治理',
                     'url'    => '/optimize/',
                     'remark' => 'signal',
                     'son'    =>
@@ -516,18 +518,49 @@ $config['menu'] = [
                                 ],
                         ],
                 ],
+            3 =>
+                [
+                    'name'   => '效益评价',
+                    'url'    => '/assessment/',
+                    'remark' => 'signal',
+                    'son'    =>
+                        [
+                            0 =>
+                                [
+                                    'name' => '路口评估',
+                                    'url'  => 'junction',
+                                ],
+                            1 =>
+                                [
+                                    'name' => '干线评估',
+                                    'url'  => 'road',
+                                ],
+                            2 =>
+                                [
+                                    'name' => '区域评估',
+                                    'url'  => 'area',
+                                ],
+                        ],
+                ],
             4 =>
                 [
-                    'name' => '自适应',
-                    'url'  => '/adaptive',
+                    'name'   => '报告',
+                    'url'    => '/',
+                    'remark' => 'signal',
+                    'son'    => [
+                        0 =>
+                            [
+                                'name' => '路口报告',
+                                'url'  => 'report',
+                            ],
+                        1 =>
+                            [
+                                'name' => '工单类报告',
+                                'url'  => 'worksheet',
+                            ], 
+                    ],
                 ],
             5 =>
-                [
-                    'name'   => '报告',
-                    'url'    => '/report',
-                    'remark' => 'signal',
-                ],
-            6 =>
                 [
                     'name'   => '管理',
                     'url'    => '/manage/',
@@ -550,8 +583,8 @@ $config['menu'] = [
                             ],
                         3 =>
                             [
-                                'name' => '任务管理',
-                                'url'  => 'task',
+                                'name' => '工单管理',
+                                'url'  => 'worksheet',
                             ],
                     ],
                 ],
