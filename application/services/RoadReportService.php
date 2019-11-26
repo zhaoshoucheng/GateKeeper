@@ -443,58 +443,24 @@ class RoadReportService extends BaseService{
         $road_info = $this->road_model->getRoadInfo($roadID);
         $junctionIDs = $road_info['logic_junction_ids'];
         $dates = $this->getDateFromRange($start_time,$end_time);
-//        $roadQuotaData = $this->area_model->getJunctionsAllQuota($dates,explode(",",$junctionIDs),$ctyID);
+
 
         $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,explode(",",$junctionIDs),$cityID);
-//        $dates = ['2019-01-01','2019-01-02','2019-01-03'];
 
-//        $PiDatas = $this->pi_model->getJunctionsPi($dates,explode(",",$junctionIDs),$ctyID,$this->createHours());
-        $reqData = [
-            'city_id'=>(int)$cityID,
-            'logic_junction_ids'=>explode(",",$junctionIDs),
-            'dates'=>$dates,
-            'hours'=>$this->createHours(),
-        ];
-//        $PiDatas = [];
-//        $PiDatas = $this->traj_model->getJunctionsPiConcurr($reqData);
         $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,explode(",",$junctionIDs),$dates,$this->createHours());
 
         //数据合并
-//        $pd = $this->queryParamGroup($PiDatas,'pi','traj_count');
-        foreach ($PiDatas as $p){
+
+        foreach ($PiDatas as $pk =>$pv){
             foreach ($roadQuotaData as $rk=>$rv){
-                if($p['date']==$rv['date'] && $p['hour']==$rv['hour']){
-                    $roadQuotaData[$rk]['pi']=$p['pi'];
+                if($pk==$rv['hour']){
+                    $roadQuotaData[$rk]['pi']=$pv;
                     break;
                 }
             }
         }
-        //将天级别的数据处理为全部的数据的均值
-        $avgData=[];
-        foreach($roadQuotaData as $r){
-            if(!isset($avgData[$r['hour']])){
-                $avgData[$r['hour']]=[
-                    'stop_delay'=>0,
-                    'stop_time_cycle'=>0,
-                    'speed'=>0,
-                    'pi'=>0
-                ];
-            }
-            $avgData[$r['hour']]['stop_delay']+=$r['stop_delay'];
-            $avgData[$r['hour']]['stop_time_cycle']+=$r['stop_time_cycle'];
-            $avgData[$r['hour']]['speed']+=$r['speed'];
-            if(isset($r['pi'])){
-                $avgData[$r['hour']]['pi']+=$r['pi'];
-            }
-        }
-        $datelen = count($dates);
-        foreach ($avgData as $ak=>$av){
-            $avgData[$ak]['stop_delay'] = $av['stop_delay']/$datelen;
-            $avgData[$ak]['stop_time_cycle'] = $av['stop_time_cycle']/$datelen;
-            $avgData[$ak]['speed'] = $av['speed']/$datelen;
-            $avgData[$ak]['pi'] = $av['pi']/$datelen;
-        }
-        return $avgData;
+
+        return $roadQuotaData;
     }
 
     //将结果路口运行情况查询结果转换为前端需要的表格
@@ -526,19 +492,19 @@ class RoadReportService extends BaseService{
         $piChart=[];
         foreach ($data as $h => $v){
             $stopTimeCycleChart[] = [
-                "x"=>$h,
+                "x"=>$v['hour'],
                 "y"=>round($v['stop_time_cycle'],2)
             ];
             $speedCycleChart[] = [
-                "x"=>$h,
+                "x"=>$v['hour'],
                 "y"=>round($v['speed'],2)
             ];
             $stopDelayCycleChart[] = [
-                "x"=>$h,
+                "x"=>$v['hour'],
                 "y"=>round($v['stop_delay'],2)
             ];
             $piChart[] = [
-                "x"=>$h,
+                "x"=>$v['hour'],
                 "y"=>round($v['pi'],2)
             ];
         }

@@ -37,6 +37,7 @@ class Expressway_model extends CI_Model
         $this->getLastMapVersion();
 
         $this->waymap_interface = $this->config->item('waymap_interface');
+        $this->quickroad_waymap_interface = $this->config->item('quickroad_waymap_interface');
 
     }
     /**
@@ -80,8 +81,8 @@ class Expressway_model extends CI_Model
             'version'=>self::$lastMapVersion
         ];
 
-        $url = $this->waymap_interface . '/signal-map/quickroad/movements';
-        $url = 'http://10.86.108.35:8031/signal-map/quickroad/movements';
+        $url = $this->quickroad_waymap_interface . '/signal-map/quickroad/movements';
+//        $url = 'http://10.86.108.35:8031/signal-map/quickroad/movements';
 
         $result = $this->waymap_model->get($url, $data);
 
@@ -96,8 +97,8 @@ class Expressway_model extends CI_Model
             $data['junction_ids'] = $juncs;
         }
 
-        $url = $this->waymap_interface . '/signal-map/quickroad/segments';
-        $url = "http://10.86.108.35:8031/signal-map/quickroad/segments";
+        $url = $this->quickroad_waymap_interface . '/signal-map/quickroad/segments';
+//        $url = "http://10.86.108.35:8031/signal-map/quickroad/segments";
 
 
         $result = $this->waymap_model->post($url, $data,0,'json');
@@ -115,8 +116,8 @@ class Expressway_model extends CI_Model
             $data['names'] = $names;
         }
 
-        $url = $this->waymap_interface . '/signal-map/quickroad/segments';
-        $url = "http://10.86.108.35:8031/signal-map/quickroad/segments";
+        $url = $this->quickroad_waymap_interface . '/signal-map/quickroad/segments';
+//        $url = "http://10.86.108.35:8031/signal-map/quickroad/segments";
 
 
         $result = $this->waymap_model->post($url, $data,0,'json');
