@@ -88,13 +88,31 @@ class Expressway_model extends CI_Model
         return $result;
     }
 
-    //提取快速路路段信息
-    public function getQuickRoadSegments($cityID,$junctionIDs = []){
+    public function getQuickRoadSegmentsByJunc($cityID,$juncs = []){
         $data = [
             'city_id'=>(int)$cityID,
         ];
-        if(!empty($junctionIDs)){
-            $data['junction_ids'] = $junctionIDs;
+        if(!empty($juncs)){
+            $data['junction_ids'] = $juncs;
+        }
+
+        $url = $this->waymap_interface . '/signal-map/quickroad/segments';
+        $url = "http://10.86.108.35:8031/signal-map/quickroad/segments";
+
+
+        $result = $this->waymap_model->post($url, $data,0,'json');
+
+        return $result;
+    }
+
+
+    //提取快速路路段信息
+    public function getQuickRoadSegments($cityID,$names = []){
+        $data = [
+            'city_id'=>(int)$cityID,
+        ];
+        if(!empty($names)){
+            $data['names'] = $names;
         }
 
         $url = $this->waymap_interface . '/signal-map/quickroad/segments';

@@ -60,11 +60,14 @@ class ReportService extends BaseService
         return $evaluate->getJunctionDurationDelay($data, "start", "end");
     }
 
-    public function queryRoadAndAreaName($cityID,$roadIDs,$areaIDs){
+    public function queryRoadAndAreaName($cityID,$roadIDs,$areaIDs,$juncIDs){
         $roadInfos = $this->road_model->getRoadsByCityId($cityID,"road_id,road_name");
         $areaInfos = $this->area_model->getAreasByCityId($cityID,"id,area_name");
+        $JuncInfos = $this->waymap_model->getJunctionInfo(implode(",",$juncIDs));
+//        var_dump($JuncInfos);
         $road_map=[];
         $area_map=[];
+        $junc_map=[];
         foreach ($roadInfos as $road){
             if(in_array($road['road_id'],$roadIDs)){
                 $road_map[$road['road_id']] = $road['road_name'];
@@ -75,10 +78,16 @@ class ReportService extends BaseService
                 $area_map[$area['id']] = $area['area_name'];
             }
         }
+        foreach ($JuncInfos as  $junc){
+            if(in_array($junc['logic_junction_id'],$juncIDs)){
+                $junc_map[$junc['logic_junction_id']] = $junc['name'];
+            }
+        }
 
         return [
             'raod_map'=>$road_map,
-            'area_map'=>$area_map
+            'area_map'=>$area_map,
+            'junc_map'=>$junc_map
         ];
     }
 

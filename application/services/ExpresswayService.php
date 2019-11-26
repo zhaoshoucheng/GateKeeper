@@ -23,16 +23,18 @@ class ExpresswayService extends BaseService
     }
 
     public function queryOverview($cityID){
-        //查询匝道信息
-        $juncInfos  = $this->expressway_model->getQuickRoadSegments($cityID);
 
+        $juncNames=[];
+        $skipJunc=[];
+        if($cityID == 11){
+            $juncNames = ["宁洛","水吉","长江","郑和","下关","内环","玄武","扬子江","定淮","江东","应天","沪蓉","扬子江","凤台","卡子门"];
+            $skipJunc = ["72978335","72978326","72978327","89103480","3852948","4023026","72978339","3870579","3888594","3888593","3888595","3888596","3876608","3897615","3879469","3882371","3885459","3879472","3876614","3885455","3972937","3973026","4023024","4023023","4023025","4005651"];
+        }
         //TODO 路口过滤
+        //查询匝道信息
+        $juncInfos  = $this->expressway_model->getQuickRoadSegments($cityID,$juncNames);
 
-//        $movements = $juncInfos['movements'];
 
-        //查询干线信息
-
-//        $roadInfos = $this->expressway_model->getQuickRoadMovement($cityID);
 
         $ret = [
             'junc_list'=>[],
@@ -40,21 +42,32 @@ class ExpresswayService extends BaseService
         ];
 
         foreach ($juncInfos['junctions'] as $j){
+            if(in_array($j['junction_id'],$skipJunc)){
+                continue;
+            }
             $ret['junc_list'][] = [
                 "junction_id"=>$j['junction_id'],
                 "lng"=>$j['lng'],
                 "lat"=>$j['lat'],
+                "name"=>$j['name'],
                 "type"=>$j['type']
             ];
         }
 
         foreach ($juncInfos['segments'] as $s){
+            if(in_array($s['start_junc_id'],$skipJunc)){
+                continue;
+            }
+            if(in_array($s['end_junc_id'],$skipJunc)){
+                continue;
+            }
             $ret['road_list'][] = [
                 "id"=>$s['segment_id'],
                 "start_junc"=>$s['start_junc_id'],
                 "end_junc"=>$s['end_junc_id'],
                 "length"=>$s['length'],
                 "name"=>$s['name'],
+                "link_ids"=>$s['link_ids'],
                 "geom"=>$s['geom']
             ];
         }
@@ -93,8 +106,11 @@ class ExpresswayService extends BaseService
             }
 
             $junctionIDs = array_column($ret,'junction_id');
-            $junctionInfos = $juncInfos  = $this->expressway_model->getQuickRoadSegments($cityID,$junctionIDs);
+            $junctionInfos = $juncInfos  = $this->expressway_model->getQuickRoadSegmentsByJunc($cityID,$junctionIDs);
             $juncNameMap = [];
+            if(empty($junctionInfos) || empty($junctionInfos['junctions'])){
+                return [];
+            }
             foreach ($junctionInfos['junctions'] as $j){
                 $juncNameMap[$j['junction_id']] = $j['name'];
             }
@@ -130,9 +146,9 @@ class ExpresswayService extends BaseService
                 "across_time"=>round($res['data']['data_list'][0]['travel_time'],2),
                 "type"=>1
             ];
-            if($ret['speed']/20 <= 1){
+            if($ret['speed'] <= 30){
                 $ret['type'] = 1;
-            }elseif($ret['speed']/20 >= 2){
+            }elseif($ret['speed'] <= 50){
                 $ret['type'] = 2;
             }else{
                 $ret['type'] = 3;
