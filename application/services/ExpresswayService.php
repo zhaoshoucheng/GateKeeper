@@ -194,6 +194,7 @@ class ExpresswayService extends BaseService
     	// 拥堵程度 3 > 2 > 1
     	foreach ($list as $key => $value) {
     		$speed = round($value['avg_speed'] * 3.6, 2);
+    		$list[$key]['avg_speed'] = $speed;
     		if ($speed < 30) {
     			$list[$key]['type'] = 3;
     		} elseif ($speed < 50) {
