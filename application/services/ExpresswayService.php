@@ -193,7 +193,7 @@ class ExpresswayService extends BaseService
     	// 阈值 35 50，过滤掉50以上的，降低数据量
     	// 拥堵程度 3 > 2 > 1
     	foreach ($list as $key => $value) {
-    		$speed = $value['avg_speed'] * 3.6;
+    		$speed = round($value['avg_speed'] * 3.6, 2);
     		if ($speed < 30) {
     			$list[$key]['type'] = 3;
     		} elseif ($speed < 50) {
@@ -203,6 +203,21 @@ class ExpresswayService extends BaseService
     			unset($list[$key]);
     		}
     	}
+
+    	// 过滤link
+    	$overview = $this->queryOverview($city_id);
+    	$ids = [];
+    	foreach ($overview['road_list'] as $value) {
+    		$ids = array_merge($ids, explode(',', $value['link_ids']));
+    	}
+    	// var_dump(count($list));
+    	foreach ($list as $key => $value) {
+    		if (!in_array($value['link_id'], $ids)) {
+    			unset($list[$key]);
+    		}
+    	}
+    	// var_dump(count($list));
+
     	$list = array_values($list);
     	$link_ids = array_column($list, 'link_id');
     	$version =$this->waymap_model->getLastMapVersion();
