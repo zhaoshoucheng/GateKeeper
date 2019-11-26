@@ -39,11 +39,13 @@ class Report extends MY_Controller
         ]);
         //相关区域干线暂时写死
 
-        $roadIDs = ["a9ff0f8c6fabc79777e5426b80f118b7", "0bc6f81fd483b79f4b499581bee91672", "775df757eb84ad1109753b7adf78b750"];
+        $roadIDs = ["a9ff0f8c6fabc79777e5426b80f118b7", "0bc6f81fd483b79f4b499581bee91672", "775df757eb84ad1109753b7adf78b750","e0cf9a8956abf65d69545d55fb427dd4"];
 
         $areaIDs = [161];
 
-        $raname =  $this->reportService->queryRoadAndAreaName($params['city_id'],$roadIDs,$areaIDs);
+        $juncIDs = ["2017030116_10973786"];
+
+        $raname =  $this->reportService->queryRoadAndAreaName($params['city_id'],$roadIDs,$areaIDs,$juncIDs);
         $tasks=[];
 
         $date = "";
@@ -78,6 +80,17 @@ class Report extends MY_Controller
                 'title'=>$title,
                 'time_range'=>$date,
                 'url'=>sprintf("type=12&dateType=%s&date=%s&indicator=runningStateComparison,runningIndicators,trajectory,trafficAnalysis,alarmSummary,indicatorsRanking,indicatorsAnalysis&id=%s&title=%s&system=1&city_id=%s&focusList=",$params['datetype'],$date,$a,$title,$params['city_id'])
+            ];
+            $tasks[] = $task;
+        }
+        foreach ($juncIDs as $j){
+            $title=$raname['junc_map'][$j];
+            $task = [
+                'city_id'=>$params['city_id'],
+                'type'=>10,
+                'title'=>$title,
+                'time_range'=>$date,
+                'url'=>sprintf("?type=10&dateType=%s&date=%s&indicator=runningStateComparison,runningIndicators,indicatorsAnalysis&id=%s&title=%s&system=1&city_id=%s&focusList=",$params['datetype'],$date,$j,$title,$params['city_id'])
             ];
             $tasks[] = $task;
         }
