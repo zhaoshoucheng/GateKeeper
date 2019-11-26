@@ -52,6 +52,24 @@ class Arterialjunction_model extends CI_Model
             }
         }
 
+        //检查选择的路口是否可以联通
+        $selectJunctions = [];
+        foreach($data['q']['selected_path'] as $pk=>$pv){
+            $selectJunctions[] = $pv["start_junc_id"];
+        }
+        $selectJunctions[] = $data['q']['selected_junctionid'];
+        if(count($selectJunctions)>=2){
+            try{
+                $ret = $this->waymap_model->getConnectPath($data['q']['city_id'],$data['q']['map_version'],$selectJunctions);
+                if(!isset($ret['forward_path_flows'])){
+                    throw new \Exception("!isset(ret['forward_path_flows'])");
+                }
+            }catch(\Exception $e){
+                com_log_warning("getConnectPath", "", "", array("error"=>$e->getMessage()));
+                throw new \Exception("当前干线无法联通，请选择其他线路。");
+            }
+        }
+        
         $adjJunctions = $this->waymap_model->getConnectionAdjJunctions($data['q']['map_version'], $data['q']['city_id'], $data['q']['selected_junctionid'], $data['q']['selected_path']);
 
         //获取一个方向的links
