@@ -510,8 +510,11 @@ class Waymap_model extends CI_Model
         if($map_version==0){
             $map_version = self::$lastMapVersion;
         }
-        $data = compact('city_id', 'map_version', 'selected_junctionids');
+        
+        $force_reverse_connect = 0;
 
+        $data = compact('city_id', 'map_version', 'selected_junctionids', 'force_reverse_connect');
+        
         $url = $this->waymap_interface . '/signal-map/connect/path';
 
         return $this->post($url, $data, 0, 'json');

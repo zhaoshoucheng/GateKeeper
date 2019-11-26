@@ -126,7 +126,7 @@ class Area_model extends CI_Model
         ];
         $url = $this->config->item('data_service_interface');
 
-        $res = httpPOST($url . '/GetJunctionQuotaDataByAlarm', $data, 0, 'json');
+        $res = httpPOST($url . '/GetJunctionQuotaData', $data, 0, 'json');
         if (!$res) {
             return [];
         }
@@ -138,40 +138,16 @@ class Area_model extends CI_Model
         //格式化为mysql的返回格式
 
         $retData = $res['data'];
-        $avgData = [];
 
-        foreach ($retData['hits'] as $v){
-            if(!isset($avgData[$v['_source']['dt']])){
-                $avgData[$v['_source']['dt']]=[];
-            }
-            if(!isset($avgData[$v['_source']['dt']][$v['_source']['hour']])){
-                $avgData[$v['_source']['dt']][$v['_source']['hour']]=[
-                    "speed"=>0,
-                    "stop_delay"=>0,
-                    "stop_time_cycle"=>0,
-                    "traj_count"=>0,
-                ];
-            }
-            $avgData[$v['_source']['dt']][$v['_source']['hour']]['speed']+=$v['_source']['speed']*$v['_source']['traj_count']*3.6;
-            $avgData[$v['_source']['dt']][$v['_source']['hour']]['stop_delay']+=$v['_source']['stop_delay']*$v['_source']['traj_count'];
-            $avgData[$v['_source']['dt']][$v['_source']['hour']]['stop_time_cycle']+=$v['_source']['stop_time_cycle']*$v['_source']['traj_count'];
-            $avgData[$v['_source']['dt']][$v['_source']['hour']]['traj_count']+=$v['_source']['traj_count'];
-        }
-        //速度求平均,其他求和
         $finalRet=[];
-       foreach ($avgData as $dk=>$dv){
-           foreach ($dv as $hk=>$hv){
-               $finalRet[] = [
-                   "date"=> $dk,
-                    "hour"=>$hk,
-                   "speed"=>round($hv['speed']/$hv['traj_count'],2),
-                   "stop_delay"=> round($hv['stop_delay']/$hv['traj_count'],2),
-                   "stop_time_cycle"=> round($hv['stop_time_cycle']/$hv['traj_count'],2)
+        foreach ($retData['hour']['buckets'] as  $hv){
+            $finalRet[] = [
+                    "hour"=>$hv['key'],
+                   "speed"=>round($hv['speed']['value']/$hv['traj_count']['value']*3.6,2),
+                   "stop_delay"=>round($hv['stop_delay']['value']/$hv['traj_count']['value'],2),
+                   "stop_time_cycle"=> round($hv['stop_time_cycle']['value']/$hv['traj_count']['value'],2),
                ];
-           }
-       }
-
-
+        }
 
         return $finalRet;
 
