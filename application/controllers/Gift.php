@@ -29,6 +29,25 @@ class Gift extends MY_Controller
         return $this->response(["list"=>$data]);
     }
 
+    public function Uploads()
+    {
+        $params = $this->input->post();
+        // print_r(array_keys($_FILES));exit;
+        $list = [];
+        foreach (array_keys($_FILES) as $fieldName) {
+            try{
+                $data = $this->gift_model->Upload("file");
+                $list[$fieldName] = $data;
+            }catch (\Exception $e){
+                com_log_warning('_itstool_'.__CLASS__.'_'.__FUNCTION__.'_error', 0, $e->getMessage(), compact("params","data"));
+                $this->errno = ERR_HTTP_FAILED;
+                $this->errmsg = $e->getMessage();
+                return;
+            }
+        }
+        return $this->response(["list"=>$list]);
+    }
+
     public function getResourceKeyUrl()
     {
         $params = $this->input->post();

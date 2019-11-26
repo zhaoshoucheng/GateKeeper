@@ -576,33 +576,18 @@ class AreaReportService extends BaseService{
         $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,$junctionIDs,$cityID);
 
 
-        $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,$junctionIDs,$dates,$this->createHours());
+        $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,explode(",",$junctionIDs),$dates,$this->createHours());
+        foreach ($PiDatas as $pk =>$pv){
+            foreach ($roadQuotaData as $rk=>$rv){
+                if($pk==$rv['hour']){
+                    $roadQuotaData[$rk]['pi']=$pv;
+                    break;
+                }
+            }
+        }
 
-        //将天级别的数据处理为全部的数据的均值
-        $avgData=[];
-        foreach($roadQuotaData as $r){
-            if(!isset($avgData[$r['hour']])){
-                $avgData[$r['hour']]=[
-                    'stop_delay'=>0,
-                    'stop_time_cycle'=>0,
-                    'speed'=>0,
-                    'pi'=>0
-                ];
-            }
-            $avgData[$r['hour']]['stop_delay']+=$r['stop_delay'];
-            $avgData[$r['hour']]['stop_time_cycle']+=$r['stop_time_cycle'];
-            $avgData[$r['hour']]['speed']+=$r['speed'];
-        }
-        $datelen = count($dates);
-        foreach ($avgData as $ak=>$av){
-            $avgData[$ak]['stop_delay'] = $av['stop_delay']/$datelen;
-            $avgData[$ak]['stop_time_cycle'] = $av['stop_time_cycle']/$datelen;
-            $avgData[$ak]['speed'] = $av['speed']/$datelen;
-            if(isset($PiDatas[$ak])){
-                $avgData[$ak]['pi'] = $PiDatas[$ak];
-            }
-        }
-        return $avgData;
+
+        return $roadQuotaData;
     }
 
     public function saveThermograph($data,$res){

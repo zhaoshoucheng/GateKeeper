@@ -400,6 +400,13 @@ class DiagnosisNoTiming_model extends CI_Model
             $v = $this->adjustPhase($v);
             return $v;
         }, $flowsMovement);
+        $flowsUpDownJunction = [];
+        foreach ($flowsMovement as $value) {
+            $flowsUpDownJunction[$value["logic_flow_id"]] = [
+                "upstream_junction_id"=>$value["upstream_junction_id"],
+                "downstream_junction_id"=>$value["downstream_junction_id"],
+            ];
+        }
         $movements = [];
         if (empty($flows)) {
             return [];
@@ -455,6 +462,9 @@ class DiagnosisNoTiming_model extends CI_Model
                     }
                 }
 
+                $movementInfo["downstream_junction_id"] = $flowsUpDownJunction[$flowId]["downstream_junction_id"]??"";
+                $movementInfo["upstream_junction_id"] = $flowsUpDownJunction[$flowId]["upstream_junction_id"]??""; 
+
                 //追加alarm信息
                 $movementInfo["is_empty"] = 0;
                 $movementInfo["is_oversaturation"] = 0;
@@ -493,18 +503,7 @@ class DiagnosisNoTiming_model extends CI_Model
             $info32 = $this->waymap_model->getFlowInfo32($logicJunctionID);
             $flowPhases = array_column($info32,"phase_name","logic_flow_id");
         }
-
-
-        //相位与上下游路口映射
-        $flowsMovement = $this->waymap_model->getFlowMovement($cityID, $logicJunctionID, "all", 1);
-        $flowsUpDownJunction = [];
-        foreach ($flowsMovement as $value) {
-            $flowsUpDownJunction[$value["logic_flow_id"]] = [
-                "upstream_junction_id"=>$value["upstream_junction_id"],
-                "downstream_junction_id"=>$value["downstream_junction_id"],
-            ];
-        }
-
+        
         // 路网相位信息
         $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionID, array_keys($flowPhases));
         $uniqueDirections = [];
@@ -529,12 +528,9 @@ class DiagnosisNoTiming_model extends CI_Model
                 }
                 $uniqueDirections[] = $phaseWord;
 
-                $result['dataList'][$k]['upstream_junction_id'] = $flowsUpDownJunction[$v['logic_flow_id']]["upstream_junction_id"] ?? "";
-                $result['dataList'][$k]['downstream_junction_id'] = $flowsUpDownJunction[$v['logic_flow_id']]["downstream_junction_id"] ?? "";
-                
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
                 $result['dataList'][$k]['flow_label'] = $phaseWord;
-
+                
                 $result['dataList'][$k]['lng'] = $v['flows'][0][0];
                 $result['dataList'][$k]['lat'] = $v['flows'][0][1];
             }
