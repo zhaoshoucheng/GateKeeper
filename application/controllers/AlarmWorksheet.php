@@ -25,11 +25,12 @@ class AlarmWorksheet extends MY_Controller
             'flow_alarm_type' => 'required|trim',
             'junction_alarm_type' => 'required|trim',
             'alarm_batch_num' => 'required|trim',
-            'create_time' => 'required|trim',
+            'from_group' => 'required|trim',
+            'from_user' => 'required|trim',
             'deadline_time' => 'required|trim',
-            'problem_desc' => 'required|trim',
-            'problem_pics' => 'required|trim',
-            'problem_suggest' => 'required|trim',
+            'problem_desc' => 'trim',
+            'problem_pics' => 'trim',
+            'problem_suggest' => 'trim',
             'to_group'=> 'required|trim',
         ]);
         $this->alarmWorksheetService->submit($params);
@@ -84,7 +85,7 @@ class AlarmWorksheet extends MY_Controller
         $this->validate([
             'id' => 'required|trim',
             'deal_desc' => 'required|trim',
-            'deal_pics' => 'required|trim',
+            'deal_pics' => 'trim',
             'deal_time' => 'required|trim',
         ]);
         $this->alarmWorksheetService->deal($params);

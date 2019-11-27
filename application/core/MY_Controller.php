@@ -26,6 +26,7 @@ class MY_Controller extends CI_Controller
     public $templates = [];
     public $routerUri = '';
     public $username = 'unknown';
+    public $passportInfo = [];
     public $userPerm = [];
     public $permCitys = [];
 
@@ -150,7 +151,15 @@ class MY_Controller extends CI_Controller
             $accessUser = $_COOKIE['username'] ?? "unkown";
         }
         $this->username = $accessUser;
-
+        
+        //从网关获取用户名
+        if(!empty($_SERVER["HTTP_DIDI_HEADER_USERNAME"])){
+            $this->username = $_SERVER["HTTP_DIDI_HEADER_USERNAME"];
+        }
+        if(!empty($_SERVER["HTTP_DIDI_HEADER_PASSPORTINFO"])){
+            $this->passportInfo = json_decode($_SERVER["HTTP_DIDI_HEADER_PASSPORTINFO"],true);
+        }
+        
         //客户端ip与city_id绑定校验:联通定制版
         if($_SERVER["REMOTE_ADDR"]=="123.124.255.72"
             && isset($_REQUEST['city_id'])
