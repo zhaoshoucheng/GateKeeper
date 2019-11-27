@@ -79,7 +79,7 @@ class AlarmWorksheetService extends BaseService
             'deal_user' => $this->username,
             'status' => 5,
             'update_time' => date("Y-m-d H:i:s"),
-        ];
+        ]; 
         $params = array_merge($ext,$params);
         $sheetID = $this->alarmworksheet_model->update($params);
         return $sheetID;
@@ -87,7 +87,7 @@ class AlarmWorksheetService extends BaseService
 
     public function valuation($params)
     {
-        $ext = [
+        $ext = [ 
             'update_time' => date("Y-m-d H:i:s"),
         ];
         $params = array_merge($ext,$params);
