@@ -34,9 +34,8 @@ class AlarmWorksheetService extends BaseService
     public function submit($params)
     {
         $ext = [
-            'from_group' => $this->userPerm["group_id"]??"",
-            'from_user' => $this->username,
             'create_time' => date("Y-m-d H:i:s"),
+            'update_time' => date("Y-m-d H:i:s"),
         ];
         $params = array_merge($ext,$params);
         $sheetID = $this->alarmworksheet_model->insert($params);

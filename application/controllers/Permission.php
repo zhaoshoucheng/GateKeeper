@@ -21,6 +21,7 @@ class Permission extends MY_Controller
 
     public function getMenuList()
     {
+        // print_r($this->userPerm);exit;
         $menu = $this->config->item('menu');
         $menuType = $menu['check']($this->username);
         if($menuType!=1){

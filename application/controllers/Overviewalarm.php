@@ -98,7 +98,7 @@ class Overviewalarm extends MY_Controller
     public function realTimeAlarmList()
     {
         $params = $this->input->post(null, true);
-
+        // print_r($this->passportInfo);exit;
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
             'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
@@ -114,7 +114,7 @@ class Overviewalarm extends MY_Controller
             $this->userPerm['force_change'] = 1;
         }
         $result = $this->overviewService->realTimeAlarmList($params,$this->userPerm);
-
+        $result["passport_class_id"] = $this->passportInfo["class_id"] ?? "";
         return $this->response($result);
     }
 }
