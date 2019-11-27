@@ -218,9 +218,9 @@ class ExpresswayService extends BaseService
     	foreach ($list as $key => $value) {
     		$speed = round($value['avg_speed'] * 3.6, 2);
     		$list[$key]['avg_speed'] = $speed;
-    		if ( $speed < 30 && $speed > 0 ) {
+    		if ( $speed < 20 && $speed > 0 ) {
     			$list[$key]['type'] = 3;
-    		} elseif ($speed < 50 && $speed > 0 ) {
+    		} elseif ($speed < 40 && $speed > 0 ) {
     			$list[$key]['type'] = 2;
     		} else {
     			$list[$key]['type'] = 1;
