@@ -225,6 +225,9 @@ $data_service_prot = !empty($data_service_prot) ? ':' . $data_service_prot : '';
 //报告代理回主域名使用
 $config['report_proxy'] = $report_proxy_url;
 
+// 路网快速路接口
+$config['quickroad_waymap_interface'] = 'http://10.86.108.35:8081';
+
 // 路网接口地址
 $config['waymap_interface'] = 'http://' . $waymap_server . $temp_waymap_port . $waymap_ext;
 // 路网接口token
@@ -954,7 +957,4 @@ $config['alarm_v2_city_ids'] = $alarm_v2_city_ids;
 $config['alarm_v2_client_ips'] = ["100.90.165.32","100.90.164.31",];    //默认沙盒触发
 
 //公交基础数据接口
-$config['businfo_interface'] = 'http://100.90.164.31:8083';
-$config['businfo_roadid_dataid_map'] = [
-    "1331"=>"85路",
-];
+$config['businfo_interface'] = 'http://10.96.94.161:7300/mock/5d888001e0005c058044d1c1/pingan02';
