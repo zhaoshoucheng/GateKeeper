@@ -123,7 +123,7 @@ class JunctionReport extends MY_Controller
                         ];
                     }
                     $flowQuota[$qk][$d['hour']]['traj_count']+=$d['traj_count'];
-                    $flowQuota[$qk][$d['hour']]['speed']+=$d['speed']*$d['traj_count'];
+                    $flowQuota[$qk][$d['hour']]['speed']+=$d['speed']*$d['traj_count']*3.6;
                     $flowQuota[$qk][$d['hour']]['stop_delay']+=$d['stop_delay']*$d['traj_count'];
                     $flowQuota[$qk][$d['hour']]['stop_time_cycle']+=$d['stop_time_cycle']*$d['traj_count'];
                 }
