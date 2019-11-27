@@ -117,14 +117,16 @@ class ExpresswayService extends BaseService
             foreach ($junctionInfos['junctions'] as $j){
                 $juncNameMap[$j['junction_id']] = $j['name'];
             }
+            $finalRet = [];
             foreach ($ret as $rk => $rv){
                 if(isset($juncNameMap[$rv['junction_id']])){
                     $ret[$rk]['junction_name']=$juncNameMap[$rv['junction_id']];
+                    $finalRet[] = $ret[$rk];
                 }
 
             }
 
-            return $ret;
+            return $finalRet;
         } else {
             return [];
         }
