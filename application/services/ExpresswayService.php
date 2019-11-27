@@ -103,28 +103,33 @@ class ExpresswayService extends BaseService
                     "time"=>$res['data']['hms'],
                     "junction_id"=>$v['downstream_ramp'],
                     "junction_name"=>"",
-                    "stop_delay"=>round($v['delay'],2),
-                    "quota_unit"=>"秒"
+                    "stop_delay"=>round($v['delay']/60,2),
+                    "quota_unit"=>"分钟"
                 ];
             }
 
             $junctionIDs = array_column($ret,'junction_id');
-            $junctionInfos = $juncInfos  = $this->expressway_model->getQuickRoadSegmentsByJunc($cityID,$junctionIDs);
+            $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc($cityID,$junctionIDs);
             $juncNameMap = [];
             if(empty($junctionInfos) || empty($junctionInfos['junctions'])){
                 return [];
             }
             foreach ($junctionInfos['junctions'] as $j){
+                if($j['type']!=1 && $j['type']!=2){
+                    continue;
+                }
                 $juncNameMap[$j['junction_id']] = $j['name'];
             }
+            $finalRet = [];
             foreach ($ret as $rk => $rv){
                 if(isset($juncNameMap[$rv['junction_id']])){
                     $ret[$rk]['junction_name']=$juncNameMap[$rv['junction_id']];
+                    $finalRet[] = $ret[$rk];
                 }
 
             }
 
-            return $ret;
+            return $finalRet;
         } else {
             return [];
         }
@@ -141,6 +146,7 @@ class ExpresswayService extends BaseService
         $url = $this->config->item('data_service_interface');
 
         $res = httpPOST($url . '/report/GetExpresswayQuotaDetail', $req, 0, 'json');
+
         if (!empty($res)) {
             $res = json_decode($res, true);
             $ret = [
@@ -150,12 +156,22 @@ class ExpresswayService extends BaseService
                 "type"=>1
             ];
             if($ret['speed'] == 0){
+                $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc($req['city_id'],[$req['downstream_id']]);
+                $length = 0;
+                foreach ($junctionInfos['segments'] as $s){
+                    if($s['start_junc_id'] === $params['start_junc_id']){
+                        $length = $s['length'];
+                        break;
+                    }
+                }
                 $num = 55 + mt_rand() / mt_getrandmax() * (65 - 55);
                 $ret['speed'] = sprintf("%.2f", $num);
+
+                $ret['across_time'] =round($length/$ret['speed']*3.6,2);
             }
-            if($ret['speed'] <= 20){
+            if($ret['speed'] <= 15){
                 $ret['type'] = 3;
-            }elseif($ret['speed'] <= 40){
+            }elseif($ret['speed'] <= 35){
                 $ret['type'] = 2;
             }else{
                 $ret['type'] = 1;
