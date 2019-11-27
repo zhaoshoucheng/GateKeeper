@@ -103,8 +103,8 @@ class ExpresswayService extends BaseService
                     "time"=>$res['data']['hms'],
                     "junction_id"=>$v['downstream_ramp'],
                     "junction_name"=>"",
-                    "stop_delay"=>round($v['delay'],2),
-                    "quota_unit"=>"秒"
+                    "stop_delay"=>round($v['delay']/60,2),
+                    "quota_unit"=>"分钟"
                 ];
             }
 
@@ -115,6 +115,9 @@ class ExpresswayService extends BaseService
                 return [];
             }
             foreach ($junctionInfos['junctions'] as $j){
+                if($j['type']!=1 && $j['type']!=2){
+                    continue;
+                }
                 $juncNameMap[$j['junction_id']] = $j['name'];
             }
             $finalRet = [];
@@ -166,9 +169,9 @@ class ExpresswayService extends BaseService
 
                 $ret['across_time'] =round($length/$ret['speed']*3.6,2);
             }
-            if($ret['speed'] <= 20){
+            if($ret['speed'] <= 15){
                 $ret['type'] = 3;
-            }elseif($ret['speed'] <= 40){
+            }elseif($ret['speed'] <= 35){
                 $ret['type'] = 2;
             }else{
                 $ret['type'] = 1;
@@ -235,9 +238,9 @@ class ExpresswayService extends BaseService
     	foreach ($list as $key => $value) {
     		$speed = round($value['avg_speed'] * 3.6, 2);
     		$list[$key]['avg_speed'] = $speed;
-    		if ( $speed < 20 && $speed > 0 ) {
+    		if ( $speed < 10 && $speed > 0 ) {
     			$list[$key]['type'] = 3;
-    		} elseif ($speed < 40 && $speed > 0 ) {
+    		} elseif ($speed < 30 && $speed > 0 ) {
     			$list[$key]['type'] = 2;
     		} else {
     			$list[$key]['type'] = 1;
