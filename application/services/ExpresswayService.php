@@ -166,9 +166,9 @@ class ExpresswayService extends BaseService
 
                 $ret['across_time'] =round($length/$ret['speed']*3.6,2);
             }
-            if($ret['speed'] <= 20){
+            if($ret['speed'] <= 15){
                 $ret['type'] = 3;
-            }elseif($ret['speed'] <= 40){
+            }elseif($ret['speed'] <= 35){
                 $ret['type'] = 2;
             }else{
                 $ret['type'] = 1;
