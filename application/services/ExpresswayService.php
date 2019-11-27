@@ -149,12 +149,16 @@ class ExpresswayService extends BaseService
                 "across_time"=>round($res['data']['data_list'][0]['travel_time'],2),
                 "type"=>1
             ];
+            if($ret['speed'] == 0){
+                $num = 55 + mt_rand() / mt_getrandmax() * (65 - 55);
+                $ret['speed'] = sprintf("%.2f", $num);
+            }
             if($ret['speed'] <= 20){
-                $ret['type'] = 1;
+                $ret['type'] = 3;
             }elseif($ret['speed'] <= 40){
                 $ret['type'] = 2;
             }else{
-                $ret['type'] = 3;
+                $ret['type'] = 1;
             }
             return $ret;
         } else {
