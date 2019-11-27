@@ -34,7 +34,7 @@ class DataService extends BaseService
     // 错误信息通过Exception形式抛出
     public function call($apiUrl, $params, $method = "GET", $contentType='x-www-form-urlencoded')
     {
-        $timeout = 1000;
+        $timeout = 5000;
 
         $url = "{$this->url}{$apiUrl}";
         if ($method == self::METHOD_GET) {

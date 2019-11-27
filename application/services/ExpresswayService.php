@@ -4,6 +4,8 @@ namespace Services;
 
 /**
  * Class ExpresswayService
+ * @property \Waymap_model $waymap_model
+ * @property \Expressway_model $expressway_model
  * @package Services
  */
 
@@ -18,6 +20,7 @@ class ExpresswayService extends BaseService
         parent::__construct();
         $this->load->model('expressway_model');
         $this->load->model('waymap_model');
+        $this->load->model('redis_model');
 
         $this->dataService = new DataService();
     }
@@ -27,8 +30,8 @@ class ExpresswayService extends BaseService
         $juncNames=[];
         $skipJunc=[];
         if($cityID == 11){
-            $juncNames = ["宁洛","水吉","长江","郑和","下关","内环","玄武","扬子江","定淮","江东","应天","沪蓉","扬子江","凤台","卡子门"];
-            $skipJunc = ["72978335","72978326","72978327","89103480","3852948","4023026","72978339","3870579","3888594","3888593","3888595","3888596","3876608","3897615","3879469","3882371","3885459","3879472","3876614","3885455","3972937","3973026","4023024","4023023","4023025","4005651"];
+            $juncNames = ["宁洛","水吉","长江","郑和","下关","内环","玄武","扬子江","定淮","江东","应天","沪蓉","扬子江","凤台","卡子门","栖霞"];
+            $skipJunc = ["3888566","3891510","72978335","72978326","72978327","89103480","3852948","4023026","72978339","3870579","3888594","3888593","3888595","3888596","3876608","3897615","3879469","3882371","3885459","3879472","3876614","3885455","3972937","3973026","4023024","4023023","4023025","4005651"];
         }
         //TODO 路口过滤
         //查询匝道信息
@@ -146,9 +149,9 @@ class ExpresswayService extends BaseService
                 "across_time"=>round($res['data']['data_list'][0]['travel_time'],2),
                 "type"=>1
             ];
-            if($ret['speed'] <= 30){
+            if($ret['speed'] <= 20){
                 $ret['type'] = 1;
-            }elseif($ret['speed'] <= 50){
+            }elseif($ret['speed'] <= 40){
                 $ret['type'] = 2;
             }else{
                 $ret['type'] = 3;
@@ -161,26 +164,46 @@ class ExpresswayService extends BaseService
 
     public function alarmlist($params) {
     	$city_id = $params['city_id'];
-    	$es_data = $this->dataService->call("/expressway/Condition", [
-    		'city_id' => $city_id,
-    	], "POST", 'json');
-    	var_dump($es_data);
 
-    	$link_ids = array_column($es_data['list'], 'link_id');
-    	$version =$this->waymap_model->getLastMapVersion();
-    	$link_infos = $this->waymap_model->getLinksGeoInfos($link_ids, $version, true);
-    	return $link_infos;
-    	// $link_infos_map = [];
-    	// foreach ($link_info as $link_info) {
+    	$alarmlist = $this->redis_model->getData('ramp_alarm_history');
+    	if (empty($alarmlist)) {
+    		return [
+	    		"trafficList" => [],
+	    	];
+    	} else {
+    		$alarmlist = json_decode($alarmlist, true);
+    	}
 
-    	// }
+    	// 过滤junction
+    	$overview = $this->queryOverview($city_id);
+    	$ids = [];
+    	foreach ($overview['junc_list'] as $value) {
+    		if (!empty($value['name'])) {
+    			$ids[$value['junction_id']] = $value;
+    		}
+    	}
+    	$list = [];
+    	foreach ($alarmlist as $value) {
+    		if (isset($ids[$value['ramp_id']])) {
+    			$list[] = [
+					"start_time"=> $value['start'],
+		            "duration_time"=> $value['last'],
+		            "junction_id"=> $value['ramp_id'],
+		            "junction_name"=> $ids[$value['ramp_id']]['name'],
+		            "lng"=> $ids[$value['ramp_id']]['lng'],
+		            "lat"=> $ids[$value['ramp_id']]['lat'],
+		            "alarm_comment"=> "过饱和",
+		            "alarm_type"=> 1,
+    			];
+    		}
+    	}
+    	usort($list, function($a, $b) {
+            return ($a['duration_time'] < $b['duration_time']) ? 1 : -1;
+        });
 
-    	// $ret = [
-    	// 	"trafficList" => [],
-    	// ];
-    	// foreach ($variable as $key => $value) {
-    	// 	# code...
-    	// }
+    	return [
+    		"trafficList" => $list,
+    	];
     }
 
     public function condition($params) {
@@ -193,7 +216,8 @@ class ExpresswayService extends BaseService
     	// 阈值 35 50，过滤掉50以上的，降低数据量
     	// 拥堵程度 3 > 2 > 1
     	foreach ($list as $key => $value) {
-    		$speed = $value['avg_speed'] * 3.6;
+    		$speed = round($value['avg_speed'] * 3.6, 2);
+    		$list[$key]['avg_speed'] = $speed;
     		if ($speed < 30) {
     			$list[$key]['type'] = 3;
     		} elseif ($speed < 50) {
@@ -203,6 +227,21 @@ class ExpresswayService extends BaseService
     			unset($list[$key]);
     		}
     	}
+
+    	// 过滤link
+    	$overview = $this->queryOverview($city_id);
+    	$ids = [];
+    	foreach ($overview['road_list'] as $value) {
+    		$ids = array_merge($ids, explode(',', $value['link_ids']));
+    	}
+    	// var_dump(count($list));
+    	foreach ($list as $key => $value) {
+    		if (!in_array($value['link_id'], $ids)) {
+    			unset($list[$key]);
+    		}
+    	}
+    	// var_dump(count($list));
+
     	$list = array_values($list);
     	$link_ids = array_column($list, 'link_id');
     	$version =$this->waymap_model->getLastMapVersion();
