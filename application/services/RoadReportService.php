@@ -568,9 +568,9 @@ class RoadReportService extends BaseService{
         $d = $chart['series']['data'];
         foreach ($d as $k => $v){
             if ($v["x"]=="07:00"){
-                $suma = $d[$k]+$d[$k+1]+$d[$k+2]+$d[$k+3];
-                $sumb = $d[$k+1]+$d[$k+2]+$d[$k+3]+$d[$k+4];
-                $sumc = $d[$k+2]+$d[$k+3]+$d[$k+4]+$d[$k+5];
+                $suma = $d[$k]['y']+$d[$k+1]['y']+$d[$k+2]['y']+$d[$k+3]['y'];
+                $sumb = $d[$k+1]['y']+$d[$k+2]['y']+$d[$k+3]['y']+$d[$k+4]['y'];
+                $sumc = $d[$k+2]['y']+$d[$k+3]['y']+$d[$k+4]['y']+$d[$k+5]['y'];
                 break;
             }
         }
@@ -594,9 +594,9 @@ class RoadReportService extends BaseService{
         $d = $chart['series']['data'];
         foreach ($d as $k => $v){
             if ($v["x"]=="17:00"){
-                $suma = $d[$k]+$d[$k+1]+$d[$k+2]+$d[$k+3];
-                $sumb = $d[$k+1]+$d[$k+2]+$d[$k+3]+$d[$k+4];
-                $sumc = $d[$k+2]+$d[$k+3]+$d[$k+4]+$d[$k+5];
+                $suma = $d[$k]['y']+$d[$k+1]['y']+$d[$k+2]['y']+$d[$k+3]['y'];
+                $sumb = $d[$k+1]['y']+$d[$k+2]['y']+$d[$k+3]['y']+$d[$k+4]['y'];
+                $sumc = $d[$k+2]['y']+$d[$k+3]['y']+$d[$k+4]['y']+$d[$k+5]['y'];
                 break;
             }
         }
