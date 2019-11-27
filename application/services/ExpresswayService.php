@@ -103,8 +103,8 @@ class ExpresswayService extends BaseService
                     "time"=>$res['data']['hms'],
                     "junction_id"=>$v['downstream_ramp'],
                     "junction_name"=>"",
-                    "stop_delay"=>round($v['delay'],2),
-                    "quota_unit"=>"秒"
+                    "stop_delay"=>round($v['delay']/60,2),
+                    "quota_unit"=>"分钟"
                 ];
             }
 
