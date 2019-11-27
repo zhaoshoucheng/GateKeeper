@@ -86,6 +86,7 @@ class AlarmWorksheet extends MY_Controller
             'id' => 'required|trim',
             'deal_desc' => 'required|trim',
             'deal_pics' => 'trim',
+            'deal_valuation' => 'trim',
             'deal_time' => 'required|trim',
         ]);
         $this->alarmWorksheetService->deal($params);
