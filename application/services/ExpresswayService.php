@@ -170,6 +170,8 @@ class ExpresswayService extends BaseService
     		return [
 	    		"trafficList" => [],
 	    	];
+    	} else {
+    		$alarmlist = json_decode($alarmlist, true);
     	}
 
     	// 过滤junction
