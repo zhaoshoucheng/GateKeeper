@@ -183,10 +183,8 @@ class ExpresswayService extends BaseService
     		}
     	}
     	$list = [];
-    	foreach ($alarmlist as $key => $value) {
-    		if (!isset($ids[$value['ramp_id']])) {
-    			unset($list[$key]);
-    		} else {
+    	foreach ($alarmlist as $value) {
+    		if (isset($ids[$value['ramp_id']])) {
     			$list[] = [
 					"start_time"=> $value['start'],
 		            "duration_time"=> $value['last'],
@@ -203,7 +201,7 @@ class ExpresswayService extends BaseService
             return ($a['duration_time'] < $b['duration_time']) ? -1 : 1;
         });
 
-    	$ret = [
+    	return [
     		"trafficList" => $list,
     	];
     }
