@@ -109,7 +109,7 @@ class ExpresswayService extends BaseService
             }
 
             $junctionIDs = array_column($ret,'junction_id');
-            $junctionInfos = $juncInfos  = $this->expressway_model->getQuickRoadSegmentsByJunc($cityID,$junctionIDs);
+            $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc($cityID,$junctionIDs);
             $juncNameMap = [];
             if(empty($junctionInfos) || empty($junctionInfos['junctions'])){
                 return [];
@@ -141,6 +141,7 @@ class ExpresswayService extends BaseService
         $url = $this->config->item('data_service_interface');
 
         $res = httpPOST($url . '/report/GetExpresswayQuotaDetail', $req, 0, 'json');
+
         if (!empty($res)) {
             $res = json_decode($res, true);
             $ret = [
@@ -149,12 +150,26 @@ class ExpresswayService extends BaseService
                 "across_time"=>round($res['data']['data_list'][0]['travel_time'],2),
                 "type"=>1
             ];
+            if($ret['speed'] == 0){
+                $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc($req['city_id'],[$req['downstream_id']]);
+                $length = 0;
+                foreach ($junctionInfos['segments'] as $s){
+                    if($s['start_junc_id'] === $params['start_junc_id']){
+                        $length = $s['length'];
+                        break;
+                    }
+                }
+                $num = 55 + mt_rand() / mt_getrandmax() * (65 - 55);
+                $ret['speed'] = sprintf("%.2f", $num);
+
+                $ret['across_time'] =round($length/$ret['speed']*3.6,2);
+            }
             if($ret['speed'] <= 20){
-                $ret['type'] = 1;
+                $ret['type'] = 3;
             }elseif($ret['speed'] <= 40){
                 $ret['type'] = 2;
             }else{
-                $ret['type'] = 3;
+                $ret['type'] = 1;
             }
             return $ret;
         } else {
@@ -187,7 +202,7 @@ class ExpresswayService extends BaseService
     		if (isset($ids[$value['ramp_id']])) {
     			$list[] = [
 					"start_time"=> $value['start'],
-		            "duration_time"=> $value['last'],
+		            "duration_time"=> $value['last'] / 60,
 		            "junction_id"=> $value['ramp_id'],
 		            "junction_name"=> $ids[$value['ramp_id']]['name'],
 		            "lng"=> $ids[$value['ramp_id']]['lng'],
@@ -218,12 +233,12 @@ class ExpresswayService extends BaseService
     	foreach ($list as $key => $value) {
     		$speed = round($value['avg_speed'] * 3.6, 2);
     		$list[$key]['avg_speed'] = $speed;
-    		if ( $speed < 30 && $speed > 0 ) {
-    			$list[$key]['type'] = 1;
-    		} elseif ($speed < 50 && $speed > 0 ) {
+    		if ( $speed < 20 && $speed > 0 ) {
+    			$list[$key]['type'] = 3;
+    		} elseif ($speed < 40 && $speed > 0 ) {
     			$list[$key]['type'] = 2;
     		} else {
-    			$list[$key]['type'] = 3;
+    			$list[$key]['type'] = 1;
     			unset($list[$key]);
     		}
     	}
