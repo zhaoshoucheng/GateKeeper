@@ -811,9 +811,9 @@ class ReportService extends BaseService
         $s2 = (empty($last)) ? 0.00: array_sum($last) / count($last);
         if ($s2 == 0) {
             $text[] = "基本持平";
-        } elseif ($s1 / $s2 - $s2 >= 0.01) {
+        } elseif ($s1 / $s2 - 1 >= 0.1) {
             $text[] = "更加严重";
-        } elseif ($s1 / $s2 - $s2 <= -0.01) {
+        } elseif ($s1 / $s2 - 1 <= -0.1) {
             $text[] = "得到缓解";
         } else {
             $text[] = "基本持平";
