@@ -197,6 +197,9 @@ class ExpresswayService extends BaseService
     			];
     		}
     	}
+    	usort($list, function($a, $b) {
+            return ($a['duration_time'] < $b['duration_time']) ? -1 : 1;
+        });
 
     	$ret = [
     		"trafficList" => $list,
