@@ -187,7 +187,7 @@ class ExpresswayService extends BaseService
     		if (isset($ids[$value['ramp_id']])) {
     			$list[] = [
 					"start_time"=> $value['start'],
-		            "duration_time"=> $value['last'],
+		            "duration_time"=> $value['last'] / 60,
 		            "junction_id"=> $value['ramp_id'],
 		            "junction_name"=> $ids[$value['ramp_id']]['name'],
 		            "lng"=> $ids[$value['ramp_id']]['lng'],
