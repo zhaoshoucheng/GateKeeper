@@ -99,9 +99,6 @@ class ExpresswayService extends BaseService
                 return $ret;
             }
             foreach ($res['data']['data_list'] as $v){
-                if($v['type'] != 1 && $v['type']!=2){
-                    continue;
-                }
                 $ret[] = [
                     "time"=>$res['data']['hms'],
                     "junction_id"=>$v['downstream_ramp'],
@@ -118,6 +115,9 @@ class ExpresswayService extends BaseService
                 return [];
             }
             foreach ($junctionInfos['junctions'] as $j){
+                if($j['type']!=1 && $j['type']!=2){
+                    continue;
+                }
                 $juncNameMap[$j['junction_id']] = $j['name'];
             }
             $finalRet = [];
