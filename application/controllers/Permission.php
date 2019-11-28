@@ -34,7 +34,7 @@ class Permission extends MY_Controller
                 $data = $menu['menuList'][1];
             }
         }
-        $this->response($data);
+        $this->response($data); 
     }
 
     public function getPermissionList()
@@ -42,5 +42,14 @@ class Permission extends MY_Controller
         $service = new PermissionService();
         $result = $service->getUserPermissions();
         $this->response($result);
+    }
+
+    public function getPassport()
+    {
+        $passport = $this->passportInfo;
+        if(empty($passport)){
+            $passport = ["phone"=>"0","class_id"=>"0","special_type"=>"0","upm_group_id"=>"0",];
+        }
+        $this->response($passport);
     }
 }

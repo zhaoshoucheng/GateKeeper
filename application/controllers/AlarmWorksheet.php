@@ -38,7 +38,7 @@ class AlarmWorksheet extends MY_Controller
     }
 
     //问题列表，（管理员、对应大队） 
-    public function adminList()
+    public function adminList() 
     {
         $this->convertJsonToPost();
         $params = $this->input->post(NULL,true);
@@ -47,6 +47,7 @@ class AlarmWorksheet extends MY_Controller
             'page_size' => 'required|trim',
             'page_num' => 'required|trim',
         ]);
+        unset($params["to_group"]);
         $data=$this->alarmWorksheetService->getList($params);
         return $this->response($data);
     }
@@ -86,6 +87,7 @@ class AlarmWorksheet extends MY_Controller
             'id' => 'required|trim',
             'deal_desc' => 'required|trim',
             'deal_pics' => 'trim',
+            'deal_valuation' => 'trim',
             'deal_time' => 'required|trim',
         ]);
         $this->alarmWorksheetService->deal($params);
