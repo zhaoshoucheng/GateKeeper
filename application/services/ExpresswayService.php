@@ -138,7 +138,7 @@ class ExpresswayService extends BaseService
     public function queryQuotaDetail($params){
         $req = [
             'city_id' => (int)$params['city_id'],
-            'upstream_id'=>"",
+            'upstream_id'=>$params['start_junc_id'],
             'downstream_id'=>$params['end_junc_id'],
             'hms'=>$params['time'],
         ];
