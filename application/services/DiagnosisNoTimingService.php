@@ -122,6 +122,7 @@ class DiagnosisNoTimingService extends BaseService
                         "offset"=>(string) 2,
                     ],
                 ],
+                "city_id"=>$params['city_id'],
                 "task_id"=>"1", //不能为空
                 "time_point"=> $params['time_range'],
                 "method"=>"1",

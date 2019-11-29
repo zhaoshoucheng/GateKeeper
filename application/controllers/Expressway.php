@@ -104,6 +104,7 @@ class Expressway extends MY_Controller
             'city_id' => 'required|is_natural_no_zero',
             'start_junc_id' => 'required',
             'end_junc_id' => 'required',
+            'id'=>'required',
             'time'=>'required',
         ]);
         //查询路口列表

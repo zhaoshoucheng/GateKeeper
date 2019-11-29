@@ -98,7 +98,16 @@ class ExpresswayService extends BaseService
             if(empty($res['data']['data_list'])){
                 return $ret;
             }
+
+            $juncList  = $this->queryOverview($cityID);
+
+            $jlist = array_column($juncList,"junction_id");
+
+
             foreach ($res['data']['data_list'] as $v){
+                if(!in_array($v['downstream_ramp'],$jlist)){
+                    continue;
+                }
                 $ret[] = [
                     "time"=>$res['data']['hms'],
                     "junction_id"=>$v['downstream_ramp'],
