@@ -258,12 +258,15 @@ class PeriodReportService extends BaseService
         $predateList = self::getDateFromRange($prelastTime['start_time'], $prelastTime['end_time']);
 
         if ($timeType == self::ALLDAY) {
+            for($i=0;$i<48;$i++){
+                $hour[] = date("H:i",(strtotime(date("Y-m-d"))+$i*30*60));
+            }
             if ($type == self::WEEK) {
-                $lastData    = $this->period_model->getDistrictWeekData($cityId, $distictCodeList, $lastTime['start_time']);
-                $prelastData = $this->period_model->getDistrictWeekData($cityId, $distictCodeList, $prelastTime['start_time']);
+                $lastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, $dateList, $hour);
+                $prelastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, $predateList, $hour);
             } else {
-                $lastData    = $this->period_model->getDistrictMonthData($cityId, $distictCodeList, explode('-', $lastTime['start_time'])[0], explode('-', $lastTime['start_time'])[1]);
-                $prelastData = $this->period_model->getDistrictMonthData($cityId, $distictCodeList, explode('-', $prelastTime['start_time'])[0], explode('-', $prelastTime['start_time'])[1]);
+                $lastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, [current($dateList)], $hour);
+                $prelastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, [current($predateList)], $hour);
             }
         } elseif ($timeType == self::MORNING) {
             $hour     = self::getMorningHours();
