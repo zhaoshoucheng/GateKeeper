@@ -52,7 +52,11 @@ class Report extends MY_Controller
         if($params['datetype']==0){
             $date = date('Y-m-d',strtotime("-1 day"));
         }elseif ($params['datetype']==1){
-            $date = date('Y-m-d', strtotime('-1 monday', time()))."~".date('Y-m-d', strtotime('-1 sunday', time()));
+            if(date('w',time()) == "1"){
+                $date = date('Y-m-d', strtotime('-1 monday', time()))."~".date('Y-m-d', strtotime('-1 sunday', time()));
+            }else{
+                $date = date('Y-m-d', strtotime('-2 monday', time()))."~".date('Y-m-d', strtotime('-1 sunday', time()));
+            }
         }else{
             $last= strtotime("-1 month", time());
             $last_lastday = date("Y-m-t", $last);//上个月最后一天
@@ -61,6 +65,9 @@ class Report extends MY_Controller
         }
 
         foreach ($roadIDs as $r){
+            if(!isset($raname['raod_map'][$r])){
+                continue;
+            }
             $title=$raname['raod_map'][$r];
             $task = [
                 'city_id'=>$params['city_id'],
