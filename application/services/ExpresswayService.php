@@ -140,6 +140,7 @@ class ExpresswayService extends BaseService
             'city_id' => (int)$params['city_id'],
             'upstream_id'=>$params['start_junc_id'],
             'downstream_id'=>$params['end_junc_id'],
+            'segment_id'=>$params['id'],
             'hms'=>$params['time'],
         ];
 
