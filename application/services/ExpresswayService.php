@@ -101,7 +101,7 @@ class ExpresswayService extends BaseService
 
             $juncList  = $this->queryOverview($cityID);
 
-            $jlist = array_column($juncList,"junction_id");
+            $jlist = array_column($juncList['junc_list'],"junction_id");
 
 
             foreach ($res['data']['data_list'] as $v){
