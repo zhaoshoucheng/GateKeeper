@@ -156,6 +156,9 @@ class ExpresswayService extends BaseService
                 "type"=>0
             ];
             if($ret['speed'] == 0){
+                $ret['speed'] = "-";
+                $ret['stop_delay'] = "-";
+                $ret['across_time'] = "-";
                 return $ret;
             }
 
