@@ -153,25 +153,15 @@ class ExpresswayService extends BaseService
                 "speed"=>round($res['data']['data_list'][0]['avg_speed']*3.6,2),
                 "stop_delay"=>round($res['data']['data_list'][0]['delay'],2),
                 "across_time"=>round($res['data']['data_list'][0]['travel_time'],2),
-                "type"=>1
+                "type"=>0
             ];
             if($ret['speed'] == 0){
-                $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc($req['city_id'],[$req['downstream_id']]);
-                $length = 0;
-                foreach ($junctionInfos['segments'] as $s){
-                    if($s['start_junc_id'] === $params['start_junc_id']){
-                        $length = $s['length'];
-                        break;
-                    }
-                }
-                $num = 55 + mt_rand() / mt_getrandmax() * (65 - 55);
-                $ret['speed'] = sprintf("%.2f", $num);
-
-                $ret['across_time'] =round($length/$ret['speed']*3.6,2);
+                return $ret;
             }
-            if($ret['speed'] <= 15){
+
+            if($ret['speed'] <= 15 ){
                 $ret['type'] = 3;
-            }elseif($ret['speed'] <= 35){
+            }elseif($ret['speed'] <= 35 ){
                 $ret['type'] = 2;
             }else{
                 $ret['type'] = 1;
