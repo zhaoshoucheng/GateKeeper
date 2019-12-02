@@ -33,7 +33,7 @@ $config['flow_quota_key'] = [
         'name' => '置信度',
         'unit' => '',
     ],
-    'pi' => [
+    'pi_rate' => [
         'name' => '指标评价',
         'unit' => '',
     ],
