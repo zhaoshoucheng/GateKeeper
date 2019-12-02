@@ -265,9 +265,20 @@ class PeriodReportService extends BaseService
                 $lastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, $dateList, $hour);
                 $prelastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, $predateList, $hour);
             } else {
-                $lastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, [current($dateList)], $hour);
-                $prelastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, [current($predateList)], $hour);
+                $lastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, $dateList, $hour);
+                $prelastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, $predateList, $hour);
             }
+            /*
+            if ($type == self::WEEK) {
+                //周报使用 district_hour_report 做数据聚合
+                $lastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, $dateList, $hour);
+                $prelastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, $predateList, $hour);
+            } else {
+                //月报使用 district_month_report 做数据聚合
+                $lastData    = $this->period_model->getDistrictMonthData($cityId, $distictCodeList, explode('-', $lastTime['start_time'])[0], explode('-', $lastTime['start_time'])[1]);
+                $prelastData = $this->period_model->getDistrictMonthData($cityId, $distictCodeList, explode('-', $prelastTime['start_time'])[0], explode('-', $prelastTime['start_time'])[1]);
+            }
+            */
         } elseif ($timeType == self::MORNING) {
             $hour     = self::getMorningHours();
             $lastData = $this->period_model->getDistrictHourData($cityId, $distictCodeList, $dateList, $hour);
