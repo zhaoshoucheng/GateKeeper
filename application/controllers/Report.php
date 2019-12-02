@@ -39,7 +39,7 @@ class Report extends MY_Controller
         ]);
         //相关区域干线暂时写死
 
-        $roadIDs = ["a9ff0f8c6fabc79777e5426b80f118b7", "0bc6f81fd483b79f4b499581bee91672", "775df757eb84ad1109753b7adf78b750","e0cf9a8956abf65d69545d55fb427dd4"];
+        $roadIDs = ["7a40ba9df1926586b917177dae3335c0"];
 
         $areaIDs = [161];
 
