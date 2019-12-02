@@ -43,7 +43,7 @@ class Report extends MY_Controller
 
         $areaIDs = [161];
 
-        $juncIDs = ["2017030116_10973786"];
+        $juncIDs = ["2017030116_3498695"];
 
         $raname =  $this->reportService->queryRoadAndAreaName($params['city_id'],$roadIDs,$areaIDs,$juncIDs);
         $tasks=[];
