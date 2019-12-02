@@ -98,7 +98,16 @@ class ExpresswayService extends BaseService
             if(empty($res['data']['data_list'])){
                 return $ret;
             }
+
+            $juncList  = $this->queryOverview($cityID);
+
+            $jlist = array_column($juncList['junc_list'],"junction_id");
+
+
             foreach ($res['data']['data_list'] as $v){
+                if(!in_array($v['downstream_ramp'],$jlist)){
+                    continue;
+                }
                 $ret[] = [
                     "time"=>$res['data']['hms'],
                     "junction_id"=>$v['downstream_ramp'],
@@ -138,8 +147,9 @@ class ExpresswayService extends BaseService
     public function queryQuotaDetail($params){
         $req = [
             'city_id' => (int)$params['city_id'],
-            'upstream_id'=>"",
+            'upstream_id'=>$params['start_junc_id'],
             'downstream_id'=>$params['end_junc_id'],
+            'segment_id'=>$params['id'],
             'hms'=>$params['time'],
         ];
 
@@ -153,25 +163,18 @@ class ExpresswayService extends BaseService
                 "speed"=>round($res['data']['data_list'][0]['avg_speed']*3.6,2),
                 "stop_delay"=>round($res['data']['data_list'][0]['delay'],2),
                 "across_time"=>round($res['data']['data_list'][0]['travel_time'],2),
-                "type"=>1
+                "type"=>0
             ];
             if($ret['speed'] == 0){
-                $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc($req['city_id'],[$req['downstream_id']]);
-                $length = 0;
-                foreach ($junctionInfos['segments'] as $s){
-                    if($s['start_junc_id'] === $params['start_junc_id']){
-                        $length = $s['length'];
-                        break;
-                    }
-                }
-                $num = 55 + mt_rand() / mt_getrandmax() * (65 - 55);
-                $ret['speed'] = sprintf("%.2f", $num);
-
-                $ret['across_time'] =round($length/$ret['speed']*3.6,2);
+                $ret['speed'] = "-";
+                $ret['stop_delay'] = "-";
+                $ret['across_time'] = "-";
+                return $ret;
             }
-            if($ret['speed'] <= 15){
+
+            if($ret['speed'] <= 15 ){
                 $ret['type'] = 3;
-            }elseif($ret['speed'] <= 35){
+            }elseif($ret['speed'] <= 35 ){
                 $ret['type'] = 2;
             }else{
                 $ret['type'] = 1;

@@ -26,6 +26,23 @@ class Junction extends MY_Controller
         $this->dianosisService = new DiagnosisNoTimingService();
     }
 
+
+
+    public function bayonet(){
+        $params = $this->input->post(null, true);
+
+        $data = [
+            "city_id"=>"11",
+            "junction_id"=>"2017030116_62627551"
+        ];
+
+        $url = 'http://100.90.164.31:8083/bayonet/flowInfo';
+
+        $res = httpPOST($url, $data, 0, 'json');
+        $res = json_decode($res,true);
+        $this->response($res['data']);
+    }
+
     /**
      * 评估-获取全城路口指标信息
      * @param $params['task_id']     int       Y 任务ID
