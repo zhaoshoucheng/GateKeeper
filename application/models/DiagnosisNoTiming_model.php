@@ -289,7 +289,7 @@ class DiagnosisNoTiming_model extends CI_Model
             'logic_junction_id' => $logicJunctionID,
             'hour' => $hour,
             'dt' => $dt,
-        ]; 
+        ];
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetFlowDiagnosisAlarm', $req, 0, 'json');
         if (!empty($res)) {
@@ -463,7 +463,7 @@ class DiagnosisNoTiming_model extends CI_Model
                 }
 
                 $movementInfo["downstream_junction_id"] = $flowsUpDownJunction[$flowId]["downstream_junction_id"]??"";
-                $movementInfo["upstream_junction_id"] = $flowsUpDownJunction[$flowId]["upstream_junction_id"]??""; 
+                $movementInfo["upstream_junction_id"] = $flowsUpDownJunction[$flowId]["upstream_junction_id"]??"";
 
                 //追加alarm信息
                 $movementInfo["is_empty"] = 0;
@@ -477,7 +477,92 @@ class DiagnosisNoTiming_model extends CI_Model
                 $movements[] = $movementInfo;
             }
         }
+
+        $movements_pi = $this->cal_movement_pi($flowList);
+        foreach ($movements as $key => $value) {
+            if (isset($movements_pi[$value['movement_id']])) {
+                $movements[$key]['pi'] = $movements_pi[$value['movement_id']]['pi'];
+                $movements[$key]['pi_rate'] = $movements_pi[$value['movement_id']]['pi_rate'];
+            } else {
+                $movements[$key]['pi'] = -1;
+                $movements[$key]['pi_rate'] = 'C';
+            }
+        }
         return $movements;
+    }
+
+    // 计算flow pi及等级，返回map
+    // A <=10 B <=30 C <=60 D <=80 E
+    private function cal_movement_pi($flowList) {
+        $movements_pi = [];
+
+        $m = [];
+        foreach ($flowList as $value) {
+            if (!isset($m[$value['logic_flow_id']])) {
+                $m[$value['logic_flow_id']] = [];
+            }
+            $m[$value['logic_flow_id']][] = $value;
+        }
+
+        foreach ($m as $values) {
+            $traj_count = 0;
+            $nonsaturation_traj_count = 0;
+            $oversaturation_traj_count = 0;
+            $spillover_traj_count = 0;
+
+            $nonsaturation_pi_sum = 0.0;
+            $oversaturation_pi_sum = 0.0;
+            $spillover_pi_sum = 0.0;
+
+            foreach ($values as $value) {
+                $traj_count += $value['traj_count'];
+                $nonsaturation_traj_count += $value['nonsaturation_traj_count'];
+                $oversaturation_traj_count += $value['oversaturation_traj_count'];
+                $spillover_traj_count += $value['spillover_traj_count'];
+
+                $nonsaturation_pi_sum += $value['nonsaturation_delay'] + 10 * $value['nonsaturation_stop_frequency'];
+                $oversaturation_pi_sum += $value['oversaturation_delay'] + 10 * $value['oversaturation_stop_frequency'];
+                $spillover_pi_sum += $value['spillover_delay'] + 10 * $value['spillover_stop_frequency'];
+            }
+
+            $nonsaturation_ratio = 1.0 * $nonsaturation_traj_count / $traj_count;
+            $oversaturation_ratio = 1.0 * $oversaturation_traj_count / $traj_count;
+            $spillover_ratio = 1.0 * $spillover_traj_count / $traj_count;
+
+            $nonsaturation_pi =0.0;
+            if ($nonsaturation_traj_count != 0) {
+                $nonsaturation_pi = $nonsaturation_pi_sum / $nonsaturation_traj_count;
+            }
+            $oversaturation_pi =0.0;
+            if ($oversaturation_traj_count != 0) {
+                $oversaturation_pi = $oversaturation_pi_sum / $oversaturation_traj_count;
+            }
+            $spillover_pi =0.0;
+            if ($spillover_traj_count != 0) {
+                $spillover_pi = $spillover_pi_sum / $spillover_traj_count;
+            }
+
+            $pi = 1*$nonsaturation_ratio*$nonsaturation_pi + 5*$oversaturation_ratio*$oversaturation_pi + 10*$spillover_ratio*$spillover_pi;
+
+            if ($pi <= 10) {
+                $pi_rate = 'A';
+            } elseif ($pi <= 30) {
+                $pi_rate = 'B';
+            } elseif ($pi <= 60) {
+                $pi_rate = 'C';
+            } elseif ($pi <= 80) {
+                $pi_rate = 'D';
+            } else {
+                $pi_rate = 'E';
+            }
+
+            $movements_pi[$values[0]['logic_flow_id']] = [
+                'pi' => $pi,
+                'pi_rate' => $pi_rate,
+            ];
+        }
+
+        return $movements_pi;
     }
 
     /**
@@ -503,7 +588,7 @@ class DiagnosisNoTiming_model extends CI_Model
             $info32 = $this->waymap_model->getFlowInfo32($logicJunctionID);
             $flowPhases = array_column($info32,"phase_name","logic_flow_id");
         }
-        
+
         // 路网相位信息
         $ret = $this->waymap_model->getJunctionFlowLngLat($newMapVersion, $logicJunctionID, array_keys($flowPhases));
         $uniqueDirections = [];
@@ -530,7 +615,7 @@ class DiagnosisNoTiming_model extends CI_Model
 
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
                 $result['dataList'][$k]['flow_label'] = $phaseWord;
-                
+
                 $result['dataList'][$k]['lng'] = $v['flows'][0][0];
                 $result['dataList'][$k]['lat'] = $v['flows'][0][1];
             }
@@ -630,7 +715,7 @@ class DiagnosisNoTiming_model extends CI_Model
             return [];
         }
     }
-    
+
     public function GetLastAlarmDateByCityID($cityID){
         $url = $this->config->item('data_service_interface');
         $res = httpGET($url . '/GetLastAlarmDateByCityID?city_id='.$cityID, [], 0);
@@ -676,7 +761,7 @@ class DiagnosisNoTiming_model extends CI_Model
         $date = $params["date"];
         $logicJunctionID = $params["logic_junction_id"];
         $timePoint = $params["hour"];
-        $alarmList = $this->getFlowDiagnosisAlarm($cityID, $logicJunctionID, $timePoint, $date); 
+        $alarmList = $this->getFlowDiagnosisAlarm($cityID, $logicJunctionID, $timePoint, $date);
         return $alarmList;
     }
 }
