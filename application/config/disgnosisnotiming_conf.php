@@ -33,6 +33,10 @@ $config['flow_quota_key'] = [
         'name' => '置信度',
         'unit' => '',
     ],
+    'pi' => [
+        'name' => '指标评价',
+        'unit' => '',
+    ],
 ];
 
 // 诊断详情flow指标
