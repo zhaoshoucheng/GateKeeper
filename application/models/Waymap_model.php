@@ -128,18 +128,24 @@ class Waymap_model extends CI_Model
         $data['user_id'] = $this->userid;
 
         $res = httpGET($url, $data, $timeout, $header);
-
         if (!$res) {
+        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception('路网数据获取失败', ERR_REQUEST_WAYMAP_API);
         }
 
         $res = json_decode($res, true);
-
         if (!$res) {
+        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception('路网数据格式错误', ERR_REQUEST_WAYMAP_API);
         }
 
-        if ($res['errorCode'] != 0) {
+        if (isset($res['errno']) && $res['errno'] != 0) {
+        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+            throw new \Exception($res['errmsg'], $res['errno']);
+        }
+
+        if (isset($res['errorCode']) && $res['errorCode'] != 0) {
+        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception($res['errorMsg'], $res['errorCode']);
         }
 
@@ -200,7 +206,7 @@ class Waymap_model extends CI_Model
         if (empty($result)) {
             $data = compact('logic_ids', 'version');
             $url = $this->waymap_interface . '/signal-map/map/many';
-            
+
             $res = $this->post($url, $data);
             $this->redis_model->setEx($redis_key, json_encode($res), 600);
             return $res;
@@ -354,7 +360,7 @@ class Waymap_model extends CI_Model
         $redisResult = $cached ? $this->redis_model->getData($redis_key) : [];
         if (!$redisResult) {
             // print_r($redisResult);exit;
-            $data = compact('link_ids', 'version'); 
+            $data = compact('link_ids', 'version');
             $url = $this->waymap_interface . '/signal-map/mapFlow/linkInfo';
             $res = $this->get($url, $data);
             $linksInfo = !empty($res['links_info']) ? $res['links_info'] : [];
@@ -473,22 +479,24 @@ class Waymap_model extends CI_Model
         $data = array_merge($data, $query);
 
         $res = httpPOST($url, $data, $timeout, $contentType, $header);
-
         if (!$res) {
+        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception($url . '接口请求失败', ERR_REQUEST_WAYMAP_API);
         }
 
         $res = json_decode($res, true);
-
         if (!$res) {
+        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception('接口请求失败', ERR_REQUEST_WAYMAP_API);
         }
 
         if (isset($res['errno']) && $res['errno'] != 0) {
+        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception($res['errmsg'], $res['errno']);
         }
 
         if (isset($res['errorCode']) && $res['errorCode'] != 0) {
+        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception($res['errorMsg'], $res['errorCode']);
         }
 
@@ -510,11 +518,11 @@ class Waymap_model extends CI_Model
         if($map_version==0){
             $map_version = self::$lastMapVersion;
         }
-        
+
         $force_reverse_connect = 0;
 
         $data = compact('city_id', 'map_version', 'selected_junctionids', 'force_reverse_connect');
-        
+
         $url = $this->waymap_interface . '/signal-map/connect/path';
 
         return $this->post($url, $data, 0, 'json');

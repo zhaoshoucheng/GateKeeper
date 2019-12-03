@@ -34,13 +34,14 @@ class Pi_model extends CI_Model{
     public function getGroupJuncPiWithDatesHours($cityID,$logic_junction_ids,$dates,$hours){
         //南京pi数据迁入es
         if($cityID == 11){
-            $st = date('Ymd',strtotime($dates[0]));
-            $et = date('Ymd',strtotime($dates[count($dates)-1]));
+//            $st = date('Ymd',strtotime($dates[0]));
+//            $et = date('Ymd',strtotime($dates[count($dates)-1]));
             $req = [
                 'city_id' => (int)$cityID,
                 'logic_junction_ids' => $logic_junction_ids,
-                'start_date' => (int)$st,
-                'end_date' => (int)$et,
+                "dates" => $dates,
+//                'start_date' => (int)$st,
+//                'end_date' => (int)$et,
                 'hours'=>$hours
             ];
 
