@@ -14,6 +14,7 @@ define('ERR_PARAMETERS', 100400);         // 参数传递错误码
 define('ERR_REQUEST_TIMING_API', 200001); // 请求配时API出错
 define('ERR_REQUEST_WAYMAP_API', 200002); // 请求路网API出错
 define('ERR_REQUEST_TRAJ_API', 200003); // 请求轨迹API出错
+define('ERR_REQUEST_DATASERVICE_API', 200004); // 请求轨迹API出错
 define('ERR_UNKNOWN', 900001); // 未知错误
 
 

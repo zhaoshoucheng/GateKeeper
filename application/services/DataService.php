@@ -40,13 +40,29 @@ class DataService extends BaseService
         if ($method == self::METHOD_GET) {
             $ret = httpGET($url, $params, $timeout);
         } else if ($method == self::METHOD_POST) {
-            $ret = httpPOST("{$this->url}{$apiUrl}", $params, $timeout, $contentType);
+            $ret = httpPOST($url, $params, $timeout, $contentType);
+        }
+
+        if (!$ret) {
+            com_log_warning('dataservice_api_error', ERR_REQUEST_DATASERVICE_API, "dataService错误", compact("url", "method", "params", "timeout", "ret"));
+            throw new Exception("dataservice调用失败");
         }
 
         $ret = json_decode($ret, true);
+        if (!$ret) {
+            com_log_warning('dataservice_api_error', ERR_REQUEST_DATASERVICE_API, "dataservice错误", compact("url", "method", "params", "timeout", "ret"));
+            throw new Exception("dataservice格式错误");
+        }
+
         // 返回的结构体是['errno', 'errmsg', 'data'];
         if (!isset($ret['errno']) || (!isset($ret['errmsg'])) || (!isset($ret['data']))) {
-            throw new Exception("调用dataService服务返回错误");
+            com_log_warning('dataservice_api_error', ERR_REQUEST_DATASERVICE_API, "dataservice错误", compact("url", "method", "params", "timeout", "ret"));
+            throw new Exception("调用dataservice服务返回错误");
+        }
+
+        if ($res['errno'] != 0) {
+            com_log_warning('dataservice_api_error', ERR_REQUEST_DATASERVICE_API, "dataservice错误", compact("url", "method", "params", "timeout", "ret"));
+            throw new \Exception($res['errmsg'], $res['errno']);
         }
 
         extract($ret);
