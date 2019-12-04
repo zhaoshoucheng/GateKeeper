@@ -133,7 +133,7 @@ class RealtimeQuota extends MY_Controller
         $res = $this->redis_model->getData("zk_realtime_quota_".$params["logic_junction_id"]);
         if(!empty($res)){
             $this->response([],1000,"单路口请求频率太快");
-            return
+            return;
         }
         $this->redis_model->setEx("zk_realtime_quota_".$params["logic_junction_id"], 1, 10);
 
