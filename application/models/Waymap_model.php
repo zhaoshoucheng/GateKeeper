@@ -122,7 +122,7 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function get($url, $data, $timeout = 40000, $header = [])
+    public function get($url, $data, $timeout = 10000, $header = [])
     {
         $data['token']   = $this->token;
         $data['user_id'] = $this->userid;
@@ -469,7 +469,7 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function post($url, $data, $timeout = 0, $contentType = 'x-www-form-urlencoded', $header = [])
+    public function post($url, $data, $timeout = 10000, $contentType = 'x-www-form-urlencoded', $header = [])
     {
         $query['token']   = $this->token;
         $query['user_id'] = $this->userid;
