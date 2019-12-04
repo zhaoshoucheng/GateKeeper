@@ -36,6 +36,7 @@ class OverviewService extends BaseService
         $this->load->model('realtimewarning_model');
         $this->load->model('alarmanalysis_model');
         $this->load->model('timeAlarmRemarks_model');
+        $this->load->model('timing_model');
         $this->config->load('realtime_conf');
     }
 
@@ -148,6 +149,22 @@ class OverviewService extends BaseService
             }
         }
 
+        // 获取配时
+        $timingModel = new Timing_model();
+        $timing = $timingModel->queryTimingStatus(
+            [
+                'city_id' => $cityId,
+                'source' => 0,
+            ]
+        );
+        $hasTiming = [];
+        foreach ($timing as $item) {
+            if ($item['status'] == 1) {
+                $hasTiming[] = $item['logic_junction_id'];
+            }
+        }
+        $mapHasTiming = array_flip($hasTiming);
+
         $params['date'] = $params['date'] ?? date('Y-m-d');
         $params['pagesize'] = $params['pagesize'] ?? 20;
         if(empty($this->userPerm['group_id']) || $cityId==38) {
@@ -181,6 +198,12 @@ class OverviewService extends BaseService
                 if(isset($newCycleList[$item["jid"]])){
                     $data["dataList"][$key]["quota"]["stop_time_cycle"]["value"] = $newCycleList[$item["jid"]];
                 }
+
+                $flag = 0;
+                if(isset($mapHasTiming[$value['logic_junction_id']])){
+                    $flag = 1;
+                }
+                $data["dataList"][$key]['timing_status'] = $flag;
             }
             $data["dataList"] = array_values($data["dataList"]);
             $lngs = array_filter(array_column($data["dataList"], 'lng'));
@@ -282,7 +305,7 @@ class OverviewService extends BaseService
         }
         $currentItem = current($newResult);
         $newResult = array_merge($padMapList,$newResult);
-        // print_r($newResult);exit; 
+        // print_r($newResult);exit;
         foreach ($newResult as $key => $value) {
             if(empty($value)){
                 $newResult[$key] = [$currentItem[0],$key];
@@ -290,7 +313,7 @@ class OverviewService extends BaseService
                 $currentItem = $value;
             }
         }
-        // print_r($newResult);exit; 
+        // print_r($newResult);exit;
 
         //数据抽样及格式化
         $newMapList = [];
@@ -342,7 +365,7 @@ class OverviewService extends BaseService
         //格式化
         $unblockedList = ["key"=>0,"name"=>"畅通","list"=>[]];
         $slowList = ["key"=>1,"name"=>"缓行","list"=>[]];
-        $jamList = ["key"=>2,"name"=>"拥堵","list"=>[]]; 
+        $jamList = ["key"=>2,"name"=>"拥堵","list"=>[]];
         foreach($todayJamCurveArr as $hour=>$res){
             $junctionTotal = $res['junction_total'] ?? 0;
             if ($junctionTotal < 1) {
@@ -363,7 +386,7 @@ class OverviewService extends BaseService
         $unblockedList["list"] = $this->completionCurveDataGap($unblockedList["list"]);
         return [$jamList,$slowList,$unblockedList];
     }
-    
+
     //平滑、补全、采样 曲线数据空缺
     private function completionCurveDataGap($jamList){
         //以hour为key生成map
@@ -389,7 +412,7 @@ class OverviewService extends BaseService
                 $rangeHours = range($pretime + 5 * 60, $nowTime - 5 * 60, 5 * 60);
                 $rangemap = array_flip($rangeHours);
                 $rangeavg = ($nowValue-$preValue)/count($rangemap);
-                
+
                 $addMapList = [];
                 foreach ($rangemap as $rk=>$rv){
                     $addMapList[date('H:i:s', $rk)] = ["hour"=>date('H:i:s', $rk),"value"=>round($preValue+$rv*$rangeavg, 0)];
