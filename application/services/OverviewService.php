@@ -150,10 +150,9 @@ class OverviewService extends BaseService
         }
 
         // 获取配时
-        $timingModel = new Timing_model();
-        $timing = $timingModel->queryTimingStatus(
+        $timing = $this->timing_model->queryTimingStatus(
             [
-                'city_id' => $cityId,
+                'city_id' => intval($cityId),
                 'source' => 0,
             ]
         );
@@ -200,7 +199,7 @@ class OverviewService extends BaseService
                 }
 
                 $flag = 0;
-                if(isset($mapHasTiming[$value['logic_junction_id']])){
+                if(isset($mapHasTiming[$item['jid']])){
                     $flag = 1;
                 }
                 $data["dataList"][$key]['timing_status'] = $flag;
