@@ -539,11 +539,13 @@ class Waymap_model extends CI_Model
      */
     public function getFlowsInfo($logic_junction_ids,$cached=false)
     {
+        if(empty($logic_junction_ids)){
+            return [];
+        }
         $this->load->helper('phase');
 
         $this->load->model('redis_model');
         $version = self::$lastMapVersion;
-
 
         $redis_key = 'getFlowsInfo_cache_' . $version . '_' . md5($logic_junction_ids);
 

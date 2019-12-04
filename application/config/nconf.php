@@ -24,9 +24,9 @@ if ($development == 2) {
     //线上及预发环境配置
 
     // 路网接口服务器地址
-    $waymap_server = '100.69.238.11';
+    $waymap_server = '10.85.128.137';
     // 路网接口服务器端口
-    $waymap_port = '8000';
+    $waymap_port = '80';
     // 路网接口前缀
     $waymap_ext = '/its';
 

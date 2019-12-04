@@ -138,9 +138,9 @@ class Realtime_model extends CI_Model
         ];
         $res = $this->searchQuota($data);
         if (empty($res['result']['quotaResults'][0]['quotaMap'])) {
-            throw new \Exception('获取实时数据最新批次hour失败！', ERR_DEFAULT);
+            return "00:00:00";
+            // throw new \Exception('获取实时数据最新批次hour失败！', ERR_DEFAULT);
         }
-
         $lastHour = date('H:i:s', strtotime($res['result']['quotaResults'][0]['quotaMap']['dayTime']));
         return $lastHour;
     }
