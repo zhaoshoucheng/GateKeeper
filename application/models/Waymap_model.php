@@ -637,12 +637,13 @@ class Waymap_model extends CI_Model
      * @return array|mixed
      * @throws \Exception
      */
-    public function getFlowMovement($city_id, $logic_junction_id, $logic_flow_id="all", $juncMovements = 0)
+    public function getFlowMovement($city_id, $logic_junction_id, $logic_flow_id="all", $juncMovements = 0, $version="")
     {
-        $data = compact('city_id', 'logic_junction_id', 'logic_flow_id');
-
+        if($version == ""){
+            $version = $this->getLastMapVersion();
+        }
+        $data = compact('city_id', 'logic_junction_id', 'logic_flow_id', 'version');
         $url   = $this->waymap_interface . '/signal-map/flow/movement';
-
         $res = $this->get($url, $data);
         if ($juncMovements == 1) {
             return $res['juncMovements'] ?? [];
