@@ -395,7 +395,13 @@ class DiagnosisNoTiming_model extends CI_Model
         }
 
         //相位信息
-        $flowsMovement = $this->waymap_model->getFlowMovement($cityID, $logicJunctionID, "all", 1);
+        $dateVersions = $this->waymap_model->getDateVersion($dates??[date("Y-m-d",strtotime("-1 day"))]);
+        $firstDataVersion = "";
+        if(!empty($dateVersions)){
+            $firstDataVersion = current($dateVersions);
+        }
+        // print_r($firstDataVersion);exit;
+        $flowsMovement = $this->waymap_model->getFlowMovement($cityID, $logicJunctionID, "all", 1, $firstDataVersion);
         $flows = array_map(function ($v) {
             $v = $this->adjustPhase($v);
             return $v;

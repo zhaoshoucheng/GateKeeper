@@ -102,10 +102,11 @@ class CI_Exceptions {
 	public function log_exception($severity, $message, $filepath, $line)
 	{
 		$severity = isset($this->levels[$severity]) ? $this->levels[$severity] : $severity;
-        $message = 'Severity: '.$severity.' --> '.$message.' '.$filepath.' '.$line;
+        $fullMessage = 'Severity: '.$severity.' --> '.$message.' '.$filepath.' '.$line;
         if(function_exists('com_log_warning')){
             $backtrace = debug_backtrace();
-            com_log_warning('exception', 0, $message, $backtrace);
+            $message = str_replace(['Exception: ','=',',',':','@'],' ',$message);
+            com_log_warning($message, 0, $fullMessage, $backtrace);
         }else{
             log_message('error', 'Severity: '.$severity.' --> '.$message.' '.$filepath.' '.$line);
         }
