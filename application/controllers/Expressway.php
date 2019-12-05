@@ -105,10 +105,20 @@ class Expressway extends MY_Controller
             'start_junc_id' => 'required',
             'end_junc_id' => 'required',
             'id'=>'required',
-            'time'=>'required',
+//            'time'=>'required',
         ]);
-        //查询路口列表
-        $data = $this->expresswayService->queryQuotaDetail($params);
+        if(!isset($params['time'])){
+            $data =   [
+                "speed"=>"-",
+                "stop_delay"=>"-",
+                "across_time"=>"-",
+                "type"=>0
+            ];
+        }else{
+            //查询路口列表
+            $data = $this->expresswayService->queryQuotaDetail($params);
+
+        }
 
         $this->response($data);
     }
