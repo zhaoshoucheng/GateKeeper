@@ -17,10 +17,2840 @@ tags:
   - name: "开放平台"
   - name: "南昌本地化"
   - name: "中控SaaS"
+  - name: "南京建邺区项目"
 schemes:
 - http
 - https
 paths:
+  /overview/ttioverview:
+    post:
+      summary: 大屏运行指标
+      description: 大屏运行指标
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: integer
+          description: 城市id
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: "大屏运行指数概览"
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "pagecnt"
+                  - "totalcnt"
+                  - "data"
+                properties: 
+                  pagecnt: 
+                    type: "number"
+                  totalcnt: 
+                    type: "number"
+                  data: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        city: 
+                          type: "string"
+                        obj_type: 
+                          type: "number"
+                        obj_id: 
+                          type: "number"
+                        number: 
+                          type: "number"
+                        obj_name: 
+                          type: "string"
+                          description: "区域名称"
+                        avg_tti: 
+                          type: "array"
+                          items: 
+                            type: "number"
+                            description: "一共5个值，第一个TTI实时信息，第二个TTI的值"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /overview/getttiinfo:
+    post:
+      summary: tti详情
+      description: tti详情
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: string
+          description: "数据所属城市"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: "tti详情"
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                type: "array"
+                items: 
+                  type: "object"
+                  properties: 
+                    city: 
+                      type: "string"
+                    obj_type: 
+                      type: "number"
+                    obj_id: 
+                      type: "number"
+                    tti_info: 
+                      required: 
+                        - "00:00"
+                      properties: 
+                        00:00: 
+                          type: "array"
+                          items: 
+                            type: "number"
+                            description: "两个数字，第一个是tti，第二个是速度"
+                      type: "object"
+                    obj_name: 
+                      type: "string"
+                    avg_tti: 
+                      type: "array"
+                      items: 
+                        type: "number"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /Overview/todayJamCurve:
+    post:
+      summary: 今日拥堵概览
+      description: 今日拥堵概览 
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: string
+          description: "数据所属城市"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: 今日拥堵概览
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                type: "array"
+                items: 
+                  type: "object"
+                  properties: 
+                    key: 
+                      type: "number"
+                      description: "0,畅通 1,缓行 2,拥堵"
+                    name: 
+                      type: "string"
+                    list: 
+                      type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          hour: 
+                            type: "string"
+                          value: 
+                            type: "number"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"         
+  /City/fence:
+    post:
+      summary: 获取城市行政区边界
+      description: 获取城市行政区边界
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: integer
+          description: "数据所属城市"
+          required: true
+        - name: division_id
+          in: formData
+          type: integer
+          description: "行政区编号"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: "获取城市行政区边界"
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                type: "array"
+                items: 
+                  type: "object"
+                  properties: 
+                    id: 
+                      type: "string"
+                    city_id: 
+                      type: "string"
+                    division_id: 
+                      type: "string"
+                    division_name: 
+                      type: "string"
+                    geojson: 
+                      required: []
+                      properties: {}
+                      description: "标准geojson格式"
+                      type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string" 
+  /Road/greenWaveAnalysis:
+    post:
+      summary: 绿波带监控
+      description: 绿波带监控
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: integer
+          description: "数据所属城市"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: "绿波带监控"
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                type: "array"
+                items: 
+                  type: "object"
+                  properties: 
+                    road_id: 
+                      type: "string"
+                    road_name: 
+                      type: "string"
+                    road_info: 
+                      type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          start_junc_id: 
+                            type: "string"
+                          end_junc_id: 
+                            type: "string"
+                          links: 
+                            type: "string"
+                          forward_geo: 
+                            description: 干线正向geojson
+                            required: 
+                              - "features"
+                              - "type"
+                            properties: 
+                              features: 
+                                type: "array"
+                                items: 
+                                  type: "object"
+                                  properties: 
+                                    geometry: 
+                                      required: 
+                                        - "coordinates"
+                                        - "type"
+                                      properties: 
+                                        coordinates: 
+                                          type: "array"
+                                          items: 
+                                            type: "number"
+                                        type: 
+                                          type: "string"
+                                      type: "object"
+                                    properties: 
+                                      required: 
+                                        - "id"
+                                      properties: 
+                                        id: 
+                                          type: "number"
+                                      type: "object"
+                                    type: 
+                                      type: "string"
+                              type: 
+                                type: "string"
+                            type: "object"
+                          reverse_geo: 
+                            type: "array"
+                            description: 干线反向geojson
+                            items: 
+                              type: "undefined"
+                    junctions_info: 
+                      type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          logic_junction_id: 
+                            type: "string"
+                          junction_name: 
+                            type: "string"
+                          lng: 
+                            type: "string"
+                          lat: 
+                            type: "string"
+                          node_ids: 
+                            type: "array"
+                            items: 
+                              type: "string"
+                    quota_info: 
+                      required: 
+                        - "forward_quota"
+                        - "reverse_quota"
+                      properties: 
+                        forward_quota: 
+                          required: 
+                            - "time"
+                            - "speed"
+                            - "stop_time_cycle"
+                            - "PI"
+                            - "length"
+                            - "level"
+                          properties: 
+                            time: 
+                              type: "number"
+                            speed: 
+                              type: "number"
+                            stop_time_cycle: 
+                              type: "number"
+                            PI: 
+                              type: "number"
+                            length: 
+                              type: "number"
+                            level: 
+                              type: "string"
+                          type: "object"
+                        reverse_quota: 
+                          required: 
+                            - "time"
+                            - "speed"
+                            - "stop_time_cycle"
+                            - "PI"
+                            - "length"
+                            - "level"
+                          properties: 
+                            time: 
+                              type: "number"
+                            speed: 
+                              type: "number"
+                            stop_time_cycle: 
+                              type: "number"
+                            PI: 
+                              type: "number"
+                            length: 
+                              type: "number"
+                            level: 
+                              type: "string"
+                          type: "object"
+                      type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /expressway/overview:
+    post:
+      summary: 快速路概览
+      description: 快速路概览
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: 快速路概览
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "center"
+                  - "junc_list"
+                  - "road_list"
+                properties: 
+                  center: 
+                    required: []
+                    properties: {}
+                    type: "object"
+                  junc_list: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        junction_id: 
+                          type: "string"
+                          description: 匝道口
+                        lng: 
+                          type: "number"
+                        lat: 
+                          type: "number"
+                        type: 
+                          type: "number"
+                          description: "0,交叉口 1，上匝道 2，下匝道 3，红绿灯"
+                  road_list: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        id: 
+                          type: "string"
+                        start_junc: 
+                          type: "string"
+                        end_junc: 
+                          type: "string"
+                        length: 
+                          type: "number"
+                        name: 
+                          type: "string"
+                        geom: 
+                          required: []
+                          properties: {}
+                          type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"        
+  /expressway/stopDelayTopList:
+    post:
+      summary: 快速路拥堵排名
+      description: 快速路拥堵排名
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: integer
+          description: "数据所属城市"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: 快速路拥堵排名
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                type: "array"
+                items: 
+                  type: "object"
+                  properties: 
+                    time: 
+                      type: "string"
+                    junction_id: 
+                      type: "string"
+                    junction_name: 
+                      type: "string"
+                    stop_delay: 
+                      type: "string"
+                    quota_unit: 
+                      type: "string"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /expressway/detail:
+    post:
+      summary: 快速路详情
+      description: 快速路详情
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: integer
+          description: "数据所属城市"
+          required: true
+        - name: start_junc_id
+          in: formData
+          type: integer
+          description: "上匝道id"
+          required: true
+        - name: end_junc_id
+          in: formData
+          type: integer
+          description: "下匝道id"
+          required: true
+        - name: id
+          in: formData
+          type: integer
+          description: "快速路id"
+          required: true
+        - name: time
+          in: formData
+          type: integer
+          description: "批次时间，从拥堵排名的接口中获取"
+          required: true
+        responses:
+          200:
+            description: 成功
+            schema:
+              description: 快速路详情
+              type: object
+              required: 
+                - "errno"
+                - "errmsg"
+                - "data"
+                - "traceid"
+                - "username"
+                - "time"
+              properties: 
+                errno: 
+                  type: "number"
+                errmsg: 
+                  type: "string"
+                data: 
+                  required: 
+                    - "update_time"
+                    - "speed"
+                    - "stop_delay"
+                    - "across_time"
+                    - "type"
+                  properties: 
+                    update_time: 
+                      type: "string"
+                    speed: 
+                      type: "number"
+                    stop_delay: 
+                      type: "number"
+                    across_time: 
+                      type: "string"
+                    type: 
+                      type: "number"
+                  type: "object"
+                traceid: 
+                  type: "string"
+                username: 
+                  type: "string"
+  /expressway/alarmlist:
+    post:
+      summary: 快速路报警列表
+      description: 快速路报警列表
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: string
+          description: "数据所属城市"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: 快速路报警列表
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "juncList"
+                properties: 
+                  juncList: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        start_time: 
+                          type: "string"
+                        duration_time: 
+                          type: "number"
+                        junction_id: 
+                          type: "string"
+                        junction_name: 
+                          type: "string"
+                        alarm_comment: 
+                          type: "string"
+                        alarm_type: 
+                          type: "number"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /expressway/condition:
+    post:
+      summary: 快速路路况
+      description: 快速路路况
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: string
+          description: "数据所属城市"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: 快速路路况
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "juncList"
+                properties: 
+                  juncList: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        start_time: 
+                          type: "string"
+                        duration_time: 
+                          type: "number"
+                        junction_id: 
+                          type: "string"
+                        junction_name: 
+                          type: "string"
+                        alarm_comment: 
+                          type: "string"
+                        alarm_type: 
+                          type: "number"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"   
+  /priorityBus/getAllRoadList:
+    post:
+      summary: 公交优先
+      description: 公交优先
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: string
+          description: "数据所属城市"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: 公交优先
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                type: "array"
+                items: 
+                  type: "object"
+                  properties: 
+                    road_info: 
+                      type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          start_junc_id: 
+                            type: "string"
+                          end_junc_id: 
+                            type: "string"
+                          links: 
+                            type: "string"
+                          forward_geo: 
+                            required: []
+                            properties: {}
+                            type: "object"
+                          reverse_geo: 
+                            type: "array"
+                            items: 
+                              type: "undefined"
+                    junctions_info: 
+                      type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          logic_junction_id: 
+                            type: "string"
+                          junction_name: 
+                            type: "string"
+                          lng: 
+                            type: "string"
+                          lat: 
+                            type: "string"
+                          is_priority: 
+                            type: "string"
+                          node_ids: 
+                            type: "array"
+                            items: 
+                              type: "string"
+                    station: 
+                      type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          station_id: 
+                            type: "string"
+                          station_name: 
+                            type: "string"
+                          lng: 
+                            type: "string"
+                          lat: 
+                            type: "string"
+                    center: 
+                      required: 
+                        - "lng"
+                        - "lat"
+                      properties: 
+                        lng: 
+                          type: "number"
+                        lat: 
+                          type: "number"
+                      type: "object"
+                    map_version: 
+                      type: "number"
+                    road: 
+                      required: 
+                        - "id"
+                        - "road_id"
+                        - "logic_junction_ids"
+                        - "road_name"
+                        - "road_direction"
+                      properties: 
+                        id: 
+                          type: "string"
+                        road_id: 
+                          type: "string"
+                        logic_junction_ids: 
+                          type: "string"
+                        road_name: 
+                          type: "string"
+                        road_direction: 
+                          type: "string"
+                      type: "object"
+                    road_id: 
+                      type: "string"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /priorityBus/roadRealtimeInfo:
+    post:
+      summary: 获取公交实时信息
+      description: 获取公交实时信息
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: integer
+          description: "数据所属城市"
+          required: true
+        - name: road_id
+          in: formData
+          type: string
+          description: "干线ID"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: 获取公交实时信息
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "bus_info"
+                  - "junc_info"
+                properties: 
+                  bus_info: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        bus_id: 
+                          type: "string"
+                        lat: 
+                          type: "string"
+                        lng: 
+                          type: "string"
+                        speed: 
+                          type: "string"
+                        flow_id: 
+                          type: "string"
+                        distance: 
+                          type: "string"
+                  junc_info: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        junction_id: 
+                          type: "string"
+                        junction_name: 
+                          type: "string"
+                        request_info: 
+                          type: "array"
+                          items: 
+                            type: "object"
+                            properties: 
+                              bus_id: 
+                                type: "string"
+                              road_name: 
+                                type: "string"
+                              control_strategy: 
+                                type: "string"
+                              phase_name: 
+                                type: "string"
+                              phase_len: 
+                                type: "string"
+                              opt_time: 
+                                type: "string"
+                        timing: 
+                          required: 
+                            - "start_time"
+                            - "end_time"
+                            - "cycle"
+                            - "offset"
+                            - "current_stage"
+                            - "stage"
+                          properties: 
+                            start_time: 
+                              type: "string"
+                            end_time: 
+                              type: "string"
+                            cycle: 
+                              type: "string"
+                            offset: 
+                              type: "string"
+                            current_stage: 
+                              required: 
+                                - "stage_name"
+                                - "stage_len"
+                                - "start_len"
+                              properties: 
+                                stage_name: 
+                                  type: "string"
+                                stage_len: 
+                                  type: "string"
+                                start_len: 
+                                  type: "string"
+                              type: "object"
+                            stage: 
+                              required: 
+                                - "0"
+                              properties: 
+                                0: 
+                                  type: "array"
+                                  items: 
+                                    type: "object"
+                                    properties: 
+                                      flow_id: 
+                                        type: "string"
+                                      len: 
+                                        type: "string"
+                                      phase_num: 
+                                        type: "string"
+                                      phase_name: 
+                                        type: "string"
+                              type: "object"
+                          type: "object"
+                type: "object"
+              trace_id: 
+                type: "string"
+  /JunctionReport/introduction:
+    get:
+      summary: 路口分析报告简介
+      description: 路口分析报告简介
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "desc"
+                  - "junction_info"
+                properties: 
+                  desc: 
+                    type: "string"
+                  junction_info: 
+                    description: 路网路口基础信息
+                    properties: 
+                      logic_junction_id: 
+                        type: "string"
+                      logic_show_id: 
+                        type: "string"
+                      lng: 
+                        type: "string"
+                      lat: 
+                        type: "string"
+                      city_id: 
+                        type: "number"
+                      name: 
+                        type: "string"
+                      is_manual: 
+                        type: "boolean"
+                      is_traffic: 
+                        type: "boolean"
+                      is_complex: 
+                        type: "boolean"
+                      is_pedestrian: 
+                        type: "boolean"
+                      start_version: 
+                        type: "number"
+                      end_version: 
+                        type: "number"
+                      created_at: 
+                        type: "string"
+                      updated_at: 
+                        type: "string"
+                      district_code: 
+                        type: "number"
+                      district_name: 
+                        type: "string"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /JunctionReport/queryJuncDataComparison:
+    get:
+      summary: 路口平均延误对比
+      description: 路口平均延误对比
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "info"
+                  - "chart"
+                properties: 
+                  info: 
+                    required: 
+                      - "desc"
+                    properties: 
+                      desc: 
+                        type: "string"
+                    type: "object"
+                  chart: 
+                    required: 
+                      - "title"
+                      - "scale_title"
+                      - "series"
+                    properties: 
+                      title: 
+                        type: "string"
+                      scale_title: 
+                        type: "string"
+                      series: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            name: 
+                              type: "string"
+                            data: 
+                              type: "array"
+                              items: 
+                                type: "object"
+                                properties: 
+                                  x: 
+                                    type: "string"
+                                  y: 
+                                    type: "number"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /JunctionReport/queryJuncQuotaData:
+    post:
+      summary: 路口运行情况
+      description: 停车次数，停车延误，行驶速度，PI
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "info"
+                  - "charts"
+                properties: 
+                  info: 
+                    required: 
+                      - "desc"
+                      - "instructions"
+                    properties: 
+                      desc: 
+                        type: "string"
+                      instructions: 
+                        type: "string"
+                    type: "object"
+                  charts: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        title: 
+                          type: "string"
+                        scale_title: 
+                          type: "string"
+                        series: 
+                          required: 
+                            - "name"
+                            - "data"
+                          properties: 
+                            name: 
+                              type: "string"
+                            data: 
+                              type: "array"
+                              items: 
+                                type: "object"
+                                properties: 
+                                  x: 
+                                    type: "string"
+                                  y: 
+                                    type: "number"
+                          type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /RoadReport/introduction:
+    get:
+      summary: 干线报告分析概况
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                properties: 
+                  desc: 
+                    type: "string"
+                  road_info: 
+                    properties: 
+                      road_info: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            start_junc_id: 
+                              type: "string"
+                            end_junc_id: 
+                              type: "string"
+                            links: 
+                              type: "string"
+                            forward_geo: 
+                              required: 
+                                - "features"
+                                - "type"
+                              properties: 
+                                features: 
+                                  type: "array"
+                                  items: 
+                                    type: "object"
+                                    properties: 
+                                      geometry: 
+                                        required: 
+                                          - "coordinates"
+                                          - "type"
+                                        properties: 
+                                          coordinates: 
+                                            type: "array"
+                                            items: 
+                                              type: "number"
+                                          type: 
+                                            type: "string"
+                                        type: "object"
+                                      properties: 
+                                        required: 
+                                          - "id"
+                                        properties: 
+                                          id: 
+                                            type: "number"
+                                        type: "object"
+                                      type: 
+                                        type: "string"
+                                type: 
+                                  type: "string"
+                              type: "object"
+                            reverse_geo: 
+                              type: "array"
+                              items: 
+                                type: "undefined"
+                      junctions_info: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            logic_junction_id: 
+                              type: "string"
+                            junction_name: 
+                              type: "string"
+                            lng: 
+                              type: "string"
+                            lat: 
+                              type: "string"
+                            node_ids: 
+                              type: "array"
+                              items: 
+                                type: "string"
+                      center: 
+                        required: 
+                          - "lng"
+                          - "lat"
+                        properties: 
+                          lng: 
+                            type: "number"
+                          lat: 
+                            type: "number"
+                        type: "object"
+                      map_version: 
+                        type: "number"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /RoadReport/queryRoadDataComparison:
+    get:
+      summary: 干线运行状况对比
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "info"
+                  - "chart"
+                properties: 
+                  info: 
+                    required: 
+                      - "desc"
+                    properties: 
+                      desc: 
+                        type: "string"
+                    type: "object"
+                  chart: 
+                    required: 
+                      - "title"
+                      - "scale_title"
+                      - "series"
+                    properties: 
+                      title: 
+                        type: "string"
+                      scale_title: 
+                        type: "string"
+                      series: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            name: 
+                              type: "string"
+                            data: 
+                              type: "array"
+                              items: 
+                                type: "object"
+                                properties: 
+                                  x: 
+                                    type: "string"
+                                  y: 
+                                    type: "number"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /RoadReport/queryRoadQuotaData:
+    get:
+      summary: 干线运行情况
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "info"
+                  - "charts"
+                properties: 
+                  info: 
+                    required: 
+                      - "instructions"
+                      - "desc"
+                      - "morning_rush_time"
+                      - "evening_rush_time"
+                    properties: 
+                      instructions: 
+                        type: "string"
+                      desc: 
+                        type: "string"
+                      morning_rush_time: 
+                        type: "string"
+                      evening_rush_time: 
+                        type: "string"
+                    type: "object"
+                  charts: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        title: 
+                          type: "string"
+                        scale_title: 
+                          type: "string"
+                        series: 
+                          required: 
+                            - "name"
+                            - "data"
+                          properties: 
+                            name: 
+                              type: "string"
+                            data: 
+                              type: "array"
+                              items: 
+                                type: "object"
+                                properties: 
+                                  x: 
+                                    type: "string"
+                                  y: 
+                                    type: "number"
+                          type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /RoadReport/queryRoadCoordination:
+    get:
+      summary: 干线协调效果
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                type: "array"
+                items: 
+                  type: "object"
+                  properties: 
+                    info: 
+                      required: 
+                        - "desc"
+                      properties: 
+                        desc: 
+                          type: "string"
+                      type: "object"
+                    chart_list: 
+                      type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          title: 
+                            type: "string"
+                          scale_title: 
+                            type: "string"
+                          series: 
+                            type: "array"
+                            items: 
+                              type: "object"
+                              properties: 
+                                name: 
+                                  type: "string"
+                                avg: 
+                                  type: "number"
+                                max: 
+                                  type: "number"
+                                data: 
+                                  type: "array"
+                                  items: 
+                                    type: "object"
+                                    properties: 
+                                      x: 
+                                        type: "string"
+                                      y: 
+                                        type: "number"
+                                max_key: 
+                                  type: "string"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /RoadReport/queryRoadCongestion:
+    get:
+      summary: 干线拥堵情况分析
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "morning_peek"
+                  - "evenint_peek"
+                properties: 
+                  morning_peek: 
+                    description: 早高峰数据
+                    required: 
+                      - "info"
+                      - "center"
+                      - "chart"
+                    properties: 
+                      info: 
+                        required: 
+                          - "desc"
+                        properties: 
+                          desc: 
+                            type: "string"
+                        type: "object"
+                      center: 
+                        required: 
+                          - "lng"
+                          - "lat"
+                        properties: 
+                          lng: 
+                            type: "number"
+                          lat: 
+                            type: "number"
+                        type: "object"
+                      chart: 
+                        required: 
+                          - "title"
+                          - "scale_title"
+                          - "series"
+                        properties: 
+                          title: 
+                            type: "string"
+                          scale_title: 
+                            type: "string"
+                          series: 
+                            required: 
+                              - "name"
+                              - "data"
+                            properties: 
+                              name: 
+                                type: "string"
+                              data: 
+                                type: "array"
+                                items: 
+                                  type: "object"
+                                  properties: 
+                                    x: 
+                                      type: "string"
+                                    y: 
+                                      type: "number"
+                                    name: 
+                                      type: "string"
+                                    lng: 
+                                      type: "string"
+                                    lat: 
+                                      type: "string"
+                            type: "object"
+                        type: "object"
+                    type: "object"
+                  evenint_peek: 
+                    description: 晚高峰数据
+                    required: 
+                      - "info"
+                      - "center"
+                      - "chart"
+                    properties: 
+                      info: 
+                        required: 
+                          - "desc"
+                        properties: 
+                          desc: 
+                            type: "string"
+                        type: "object"
+                      center: 
+                        required: 
+                          - "lng"
+                          - "lat"
+                        properties: 
+                          lng: 
+                            type: "number"
+                          lat: 
+                            type: "number"
+                        type: "object"
+                      chart: 
+                        required: 
+                          - "title"
+                          - "scale_title"
+                          - "series"
+                        properties: 
+                          title: 
+                            type: "string"
+                          scale_title: 
+                            type: "string"
+                          series: 
+                            required: 
+                              - "name"
+                              - "data"
+                            properties: 
+                              name: 
+                                type: "string"
+                              data: 
+                                type: "array"
+                                items: 
+                                  type: "object"
+                                  properties: 
+                                    x: 
+                                      type: "string"
+                                    y: 
+                                      type: "number"
+                                    name: 
+                                      type: "string"
+                                    lng: 
+                                      type: "string"
+                                    lat: 
+                                      type: "string"
+                            type: "object"
+                        type: "object"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /RoadReport/queryRoadAlarm:
+    get:
+      summary: 干线报警总结
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                type: "array"
+                items: 
+                  type: "object"
+                  properties: 
+                    desc: 
+                      type: "string"
+                    chart: 
+                      required: 
+                        - "title"
+                        - "scale"
+                        - "one_dimensional"
+                        - "two_dimensional"
+                        - "data"
+                      properties: 
+                        title: 
+                          type: "string"
+                        scale: 
+                          required: 
+                            - "min"
+                            - "max"
+                          properties: 
+                            min: 
+                              type: "number"
+                            max: 
+                              type: "number"
+                          type: "object"
+                        one_dimensional: 
+                          type: "array"
+                          items: 
+                            type: "string"
+                        two_dimensional: 
+                          type: "array"
+                          items: 
+                            type: "string"
+                        data: 
+                          type: "array"
+                          items: 
+                            type: "undefined"
+                      type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+  /RoadReport/queryQuotaRank:
+    get:
+      summary: 干线路口运行指数排名
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "morning_peek"
+                  - "evening_peek"
+                properties: 
+                  morning_peek: 
+                    required: 
+                      - "quota_table_desc"
+                      - "quota_table_data"
+                    properties: 
+                      quota_table_desc: 
+                        type: "string"
+                      quota_table_data: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            logic_junction_id: 
+                              type: "string"
+                            name: 
+                              type: "string"
+                            last_rank: 
+                              type: "number"
+                            stop_delay: 
+                              type: "number"
+                            stop_time_cycle: 
+                              type: "number"
+                            speed: 
+                              type: "number"
+                            PI: 
+                              type: "number"
+                    type: "object"
+                  evening_peek: 
+                    required: 
+                      - "quota_table_desc"
+                      - "quota_table_data"
+                    properties: 
+                      quota_table_desc: 
+                        type: "string"
+                      quota_table_data: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            logic_junction_id: 
+                              type: "string"
+                            name: 
+                              type: "string"
+                            last_rank: 
+                              type: "number"
+                            stop_delay: 
+                              type: "number"
+                            stop_time_cycle: 
+                              type: "number"
+                            speed: 
+                              type: "number"
+                            PI: 
+                              type: "number"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                  s: 
+                    type: "string"
+                type: "object"
+  /AreaReport/introduction:
+    get:
+      summary: 区域分析报告概览
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "desc"
+                  - "area_info"
+                properties: 
+                  desc: 
+                    type: "string"
+                  area_info: 
+                    required: 
+                      - "center_lat"
+                      - "center_lng"
+                      - "area_id"
+                      - "area_name"
+                      - "junction_list"
+                    properties: 
+                      center_lat: 
+                        type: "number"
+                      center_lng: 
+                        type: "number"
+                      area_id: 
+                        type: "string"
+                      area_name: 
+                        type: "string"
+                      junction_list: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            logic_junction_id: 
+                              type: "string"
+                            logic_show_id: 
+                              type: "string"
+                            lng: 
+                              type: "string"
+                            lat: 
+                              type: "string"
+                            city_id: 
+                              type: "number"
+                            name: 
+                              type: "string"
+                            is_manual: 
+                              type: "boolean"
+                            is_traffic: 
+                              type: "boolean"
+                            is_complex: 
+                              type: "boolean"
+                            is_pedestrian: 
+                              type: "boolean"
+                            start_version: 
+                              type: "number"
+                            end_version: 
+                              type: "number"
+                            created_at: 
+                              type: "string"
+                            updated_at: 
+                              type: "string"
+                            district_code: 
+                              type: "number"
+                            district_name: 
+                              type: "string"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                  s: 
+                    type: "string"
+                type: "object"
+  /AreaReport/queryAreaDataComparison:
+    get:
+      summary: 区域运行情况对比
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+          required: 
+            - "errno"
+            - "errmsg"
+            - "data"
+            - "traceid"
+            - "username"
+            - "time"
+          properties: 
+            errno: 
+              type: "number"
+            errmsg: 
+              type: "string"
+            data: 
+              required: 
+                - "info"
+                - "chart"
+              properties: 
+                info: 
+                  required: 
+                    - "desc"
+                  properties: 
+                    desc: 
+                      type: "string"
+                  type: "object"
+                chart: 
+                  required: 
+                    - "title"
+                    - "scale_title"
+                    - "series"
+                  properties: 
+                    title: 
+                      type: "string"
+                    scale_title: 
+                      type: "string"
+                    series: 
+                      type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          name: 
+                            type: "string"
+                          data: 
+                            type: "array"
+                            items: 
+                              type: "object"
+                              properties: 
+                                x: 
+                                  type: "string"
+                                y: 
+                                  type: "number"
+                  type: "object"
+              type: "object"
+            traceid: 
+              type: "string"
+            username: 
+              type: "string"
+            time: 
+              required: 
+                - "a"
+                - "s"
+              properties: 
+                a: 
+                  type: "string"
+                s: 
+                  type: "string"
+              type: "object"
+  /AreaReport/queryAreaQuotaData:
+    get:
+      summary: 区域运行情况 
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "info"
+                  - "charts"
+                properties: 
+                  info: 
+                    required: 
+                      - "instructions"
+                      - "desc"
+                      - "morning_rush_time"
+                      - "evening_rush_time"
+                    properties: 
+                      instructions: 
+                        type: "string"
+                      desc: 
+                        type: "string"
+                      morning_rush_time: 
+                        type: "string"
+                      evening_rush_time: 
+                        type: "string"
+                    type: "object"
+                  charts: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        title: 
+                          type: "string"
+                        scale_title: 
+                          type: "string"
+                        series: 
+                          required: 
+                            - "name"
+                            - "data"
+                          properties: 
+                            name: 
+                              type: "string"
+                            data: 
+                              type: "array"
+                              items: 
+                                type: "object"
+                                properties: 
+                                  x: 
+                                    type: "string"
+                                  y: 
+                                    type: "number"
+                          type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                  s: 
+                    type: "string"
+                type: "object"
+  /AreaReport/queryAreaThermograph:
+    get:
+      summary: 热力轨迹查询
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "png"
+                  - "mp4"
+                  - "info"
+                properties: 
+                  png: 
+                    type: "array"
+                    items: 
+                      type: "string"
+                  mp4: 
+                    type: "array"
+                    items: 
+                      type: "string"
+                  info: 
+                    required: 
+                      - "png_info"
+                      - "mp4_info"
+                    properties: 
+                      png_info: 
+                        type: "string"
+                      mp4_info: 
+                        type: "string"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                  s: 
+                    type: "string"
+                type: "object"
+  /AreaReport/queryAreaCongestion:
+    get:
+      summary: 区域拥堵分析
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "morning_peek"
+                  - "evenint_peek"
+                properties: 
+                  morning_peek: 
+                    required: 
+                      - "info"
+                      - "center"
+                      - "chart"
+                    properties: 
+                      info: 
+                        required: 
+                          - "desc"
+                        properties: 
+                          desc: 
+                            type: "string"
+                        type: "object"
+                      center: 
+                        required: 
+                          - "lng"
+                          - "lat"
+                        properties: 
+                          lng: 
+                            type: "number"
+                          lat: 
+                            type: "number"
+                        type: "object"
+                      chart: 
+                        required: 
+                          - "title"
+                          - "scale_title"
+                          - "series"
+                        properties: 
+                          title: 
+                            type: "string"
+                          scale_title: 
+                            type: "string"
+                          series: 
+                            required: 
+                              - "name"
+                              - "data"
+                            properties: 
+                              name: 
+                                type: "string"
+                              data: 
+                                type: "array"
+                                items: 
+                                  type: "object"
+                                  properties: 
+                                    x: 
+                                      type: "string"
+                                    y: 
+                                      type: "number"
+                                    name: 
+                                      type: "string"
+                                    lng: 
+                                      type: "string"
+                                    lat: 
+                                      type: "string"
+                            type: "object"
+                        type: "object"
+                    type: "object"
+                  evenint_peek: 
+                    required: 
+                      - "info"
+                      - "center"
+                      - "chart"
+                    properties: 
+                      info: 
+                        required: 
+                          - "desc"
+                        properties: 
+                          desc: 
+                            type: "string"
+                        type: "object"
+                      center: 
+                        required: 
+                          - "lng"
+                          - "lat"
+                        properties: 
+                          lng: 
+                            type: "number"
+                          lat: 
+                            type: "number"
+                        type: "object"
+                      chart: 
+                        required: 
+                          - "title"
+                          - "scale_title"
+                          - "series"
+                        properties: 
+                          title: 
+                            type: "string"
+                          scale_title: 
+                            type: "string"
+                          series: 
+                            required: 
+                              - "name"
+                              - "data"
+                            properties: 
+                              name: 
+                                type: "string"
+                              data: 
+                                type: "array"
+                                items: 
+                                  type: "object"
+                                  properties: 
+                                    x: 
+                                      type: "string"
+                                    y: 
+                                      type: "number"
+                                    name: 
+                                      type: "string"
+                                    lng: 
+                                      type: "string"
+                                    lat: 
+                                      type: "string"
+                            type: "object"
+                        type: "object"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                  s: 
+                    type: "string"
+                type: "object"
+  /AreaReport/queryAreaAlarm:
+    get:
+      summary: 区域报警总结
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "morning_peek"
+                  - "evenint_peek"
+                properties: 
+                  morning_peek: 
+                    required: 
+                      - "info"
+                      - "center"
+                      - "chart"
+                    properties: 
+                      info: 
+                        required: 
+                          - "desc"
+                        properties: 
+                          desc: 
+                            type: "string"
+                        type: "object"
+                      center: 
+                        required: 
+                          - "lng"
+                          - "lat"
+                        properties: 
+                          lng: 
+                            type: "number"
+                          lat: 
+                            type: "number"
+                        type: "object"
+                      chart: 
+                        required: 
+                          - "title"
+                          - "scale_title"
+                          - "series"
+                        properties: 
+                          title: 
+                            type: "string"
+                          scale_title: 
+                            type: "string"
+                          series: 
+                            required: 
+                              - "name"
+                              - "data"
+                            properties: 
+                              name: 
+                                type: "string"
+                              data: 
+                                type: "array"
+                                items: 
+                                  type: "object"
+                                  properties: 
+                                    x: 
+                                      type: "string"
+                                    y: 
+                                      type: "number"
+                                    name: 
+                                      type: "string"
+                                    lng: 
+                                      type: "string"
+                                    lat: 
+                                      type: "string"
+                            type: "object"
+                        type: "object"
+                    type: "object"
+                  evenint_peek: 
+                    required: 
+                      - "info"
+                      - "center"
+                      - "chart"
+                    properties: 
+                      info: 
+                        required: 
+                          - "desc"
+                        properties: 
+                          desc: 
+                            type: "string"
+                        type: "object"
+                      center: 
+                        required: 
+                          - "lng"
+                          - "lat"
+                        properties: 
+                          lng: 
+                            type: "number"
+                          lat: 
+                            type: "number"
+                        type: "object"
+                      chart: 
+                        required: 
+                          - "title"
+                          - "scale_title"
+                          - "series"
+                        properties: 
+                          title: 
+                            type: "string"
+                          scale_title: 
+                            type: "string"
+                          series: 
+                            required: 
+                              - "name"
+                              - "data"
+                            properties: 
+                              name: 
+                                type: "string"
+                              data: 
+                                type: "array"
+                                items: 
+                                  type: "object"
+                                  properties: 
+                                    x: 
+                                      type: "string"
+                                    y: 
+                                      type: "number"
+                                    name: 
+                                      type: "string"
+                                    lng: 
+                                      type: "string"
+                                    lat: 
+                                      type: "string"
+                            type: "object"
+                        type: "object"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                  s: 
+                    type: "string"
+                type: "object"
+  /AreaReport/queryQuotaRank:
+    get:
+      summary: 区域路口运行指数排名
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          schema:
+            type: object
+            required: 
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "morning_peek"
+                  - "evening_peek"
+                properties: 
+                  morning_peek: 
+                    required: 
+                      - "quota_table_desc"
+                      - "quota_table_data"
+                    properties: 
+                      quota_table_desc: 
+                        type: "string"
+                      quota_table_data: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            logic_junction_id: 
+                              type: "string"
+                            name: 
+                              type: "string"
+                            last_rank: 
+                              type: "number"
+                            stop_delay: 
+                              type: "number"
+                            stop_time_cycle: 
+                              type: "number"
+                            speed: 
+                              type: "number"
+                            PI: 
+                              type: "number"
+                    type: "object"
+                  evening_peek: 
+                    required: 
+                      - "quota_table_desc"
+                      - "quota_table_data"
+                    properties: 
+                      quota_table_desc: 
+                        type: "string"
+                      quota_table_data: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            logic_junction_id: 
+                              type: "string"
+                            name: 
+                              type: "string"
+                            last_rank: 
+                              type: "number"
+                            stop_delay: 
+                              type: "number"
+                            stop_time_cycle: 
+                              type: "number"
+                            speed: 
+                              type: "number"
+                            PI: 
+                              type: "number"
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+              username: 
+                type: "string"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                  s: 
+                    type: "string"
+                type: "object"
   /diagnosisNoTiming/GetQuotaFlowData:
     post:
       summary: 路口离线相位指标数据
@@ -260,7 +3090,6 @@ paths:
                           value: 
                             type: "number"
                             example: 4            
-
   /Alarmanalysis/realtimeSingleQuotaCurve:
     post:
       summary: 实时单指标曲线图

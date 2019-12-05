@@ -438,8 +438,8 @@ class Splitoptimize extends MY_Controller
             'dates'       => $params['dates'],
             'junction_id' => strip_tags(trim($params['junction_id'])),
             'time_range'  => strip_tags(trim($params['task_time_range'])),
-            'yellowLight' => $this->yellowLight,
-            'timingType'  => $this->timingType,
+            // 'yellowLight' => $this->yellowLight,
+            // 'timingType'  => $this->timingType,
         ];
 
         $timing = $this->timing_model->getTimingPlan($data);

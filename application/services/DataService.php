@@ -60,9 +60,9 @@ class DataService extends BaseService
             throw new Exception("调用dataservice服务返回错误");
         }
 
-        if ($res['errno'] != 0) {
+        if ($ret['errno'] != 0) {
             com_log_warning('dataservice_api_error', ERR_REQUEST_DATASERVICE_API, "dataservice错误", compact("url", "method", "params", "timeout", "ret"));
-            throw new \Exception($res['errmsg'], $res['errno']);
+            throw new \Exception($ret['errmsg'], $ret['errno']);
         }
 
         extract($ret);
