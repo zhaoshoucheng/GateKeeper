@@ -224,7 +224,7 @@ class Timing_model extends CI_Model
 //        $timing = $this->getTimingData($data);
         $timing = $this->getNewTimingInfo($data);
         if (!empty($timing)) {
-            $result = $this->formatTimingDataByOptimizeSplit($timing, $data['yellowLight']);
+            $result = $this->formatTimingDataByOptimizeSplit($timing);
         }
         return $result;
     }
@@ -232,10 +232,9 @@ class Timing_model extends CI_Model
     /**
      * 格式化配时数据，返回绿信比优化所需数据结构
      * @param $data        array    配时数据
-     * @param $yellowLight int      黄灯时长
      * @return array
      */
-    private function formatTimingDataByOptimizeSplit($data, $yellowLight)
+    private function formatTimingDataByOptimizeSplit($data)
     {
         $result = [];
 
@@ -258,8 +257,13 @@ class Timing_model extends CI_Model
                     ];
                     $result[$k]['movements'][$vvv['flow_logic']['logic_flow_id']]['signal'][$kkk] = [
                         'g_start_time'  => intval($vvv['start_time']),
-                        'g_duration'    => intval($vvv['duration']) - $yellowLight,
-                        'yellowLight' => intval($yellowLight),
+                        'g_duration'    => intval($vvv['duration']),
+                        'green'    => intval($vvv['green']),
+                        'yellow'    => intval($vvv['yellow']),
+                        'red_clearance'    => intval($vvv['red_clearance']),
+                        'green_flash'    => intval($vvv['green_flash']),
+                        // 兼容老的前端格式，新版使用yellow字段
+                        'yellowLight' => intval($vvv['yellow']),
                     ];
                 }
             }
@@ -683,10 +687,11 @@ class Timing_model extends CI_Model
                         $plan['plan_detail']['movement_timing'][$mk][] = [
                             "movement_id" => $mk,
                             'start_time' => $sv['start_time'],
-                            'duration' => $sv['green'] + $sv['yellow'] + $sv['red_clearance'],
+                            'duration' => $sv['green'] + $sv['yellow'] + $sv['red_clearance'] + $sv['green_flash'],
                             'green'    => $sv['green'],
                             'yellow'   => $sv['yellow'],
                             'red_clearance'=> $sv['red_clearance'],
+                            'green_flash'=> $sv['green_flash'],
                             'state' => 1,
                             'flow_logic' => [
                                 'comment' => $comment,
