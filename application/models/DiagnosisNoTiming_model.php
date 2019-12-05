@@ -419,6 +419,9 @@ class DiagnosisNoTiming_model extends CI_Model
         }
 
         $info32 = $this->waymap_model->getFlowInfo32($logicJunctionID);
+        if(empty($info32)){
+            return [];
+        }
         $flowMap = array_column($info32,"phase_name","logic_flow_id");
         //使用flow备注名称统一处理名称
         $keys = [];
