@@ -80,9 +80,7 @@
 			<tr>
 				<td><a target="_blank" href="http://bamai.xiaojukeji.com/search/trace?key=<?php echo $row["trace_id"]?>&index=bamai-biz-zhuanche&tagtype=requesttopo"><?php echo $row["trace_id"]?></a></td>
 				<td><?php echo $row["dltag"]?></td>
-				<td><textarea style="width: 600px;height: 50px;">
-<?php echo $row["log"]?>
-					</textarea></td>
+				<td><textarea style="width: 400px;height: 100px;"><?php print_r($row["log"]);?></textarea></td>
 				<td><?php echo $row["log_time"]?></td>
 				<td><?php echo $row["created_at"]?></td>
 			</tr>

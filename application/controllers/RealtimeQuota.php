@@ -132,7 +132,8 @@ class RealtimeQuota extends MY_Controller
         //10分钟一个路口只能调用一次
         $res = $this->redis_model->getData("zk_realtime_quota_".$params["logic_junction_id"]);
         if(!empty($res)){
-            throw new \Exception("单路口请求频率太快");
+            $this->response([],1000,"单路口请求频率太快");
+            return;
         }
         $this->redis_model->setEx("zk_realtime_quota_".$params["logic_junction_id"], 1, 10);
 

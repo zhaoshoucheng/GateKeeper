@@ -180,7 +180,7 @@ class EvaluateService extends BaseService
         // 获取最近时间
         $hour = $this->helperService->getLastestHour($cityId);
         $dayTime = date('Y-m-d') . ' ' . $hour;
-
+        
         //轨迹数
         $trajNum = 5;
         if($cityId==175){
