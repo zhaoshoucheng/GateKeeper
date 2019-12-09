@@ -548,7 +548,7 @@ class Waymap_model extends CI_Model
         $version = self::$lastMapVersion;
 
         $redis_key = 'getFlowsInfo_cache_' . $version . '_' . md5($logic_junction_ids);
-
+        $cached = false;    //todo 这里防止redis爆掉不写入缓存了
         $result = $cached ? $this->redis_model->getData($redis_key) : [];
         if (!$result) {
             $data = compact('logic_junction_ids', 'version');
