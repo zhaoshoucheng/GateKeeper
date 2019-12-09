@@ -37,6 +37,7 @@ class OverviewService extends BaseService
         $this->load->model('alarmanalysis_model');
         $this->load->model('timeAlarmRemarks_model');
         $this->load->model('timing_model');
+        $this->load->model('area_model');
         $this->config->load('realtime_conf');
     }
 
@@ -58,10 +59,14 @@ class OverviewService extends BaseService
      */
     public function addDivisionID($cityID,$data){
         //暂时只添加建邺区
-        $djuncs = $this->waymap_model->getJunctionFilterByDistrict($cityID,320105);
+//        $djuncs = $this->waymap_model->getJunctionFilterByDistrict($cityID,320105);
+        //建邺区改为采用自定义区域
+        $djuncs = $this->area_model->getJunctionsByAreaId(175,"junction_id");
+
         if(empty($data)){
             return $data;
         }
+        $djuncs = array_column($djuncs,'junction_id');
         foreach ($data['dataList'] as $k => $v){
             if(in_array($v['jid'],$djuncs)){
                 $data['dataList'][$k]['division_id']=320105;

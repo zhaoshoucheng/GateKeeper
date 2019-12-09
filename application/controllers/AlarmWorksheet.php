@@ -87,13 +87,13 @@ class AlarmWorksheet extends MY_Controller
             'id' => 'required|trim',
             'deal_desc' => 'required|trim',
             'deal_pics' => 'trim',
-            'deal_valuation' => 'trim',
+            // 'deal_valuation' => 'trim',
             'deal_time' => 'required|trim',
         ]);
         $this->alarmWorksheetService->deal($params);
         return $this->response("");
     }
-
+    
     //评价问题 
     public function valuation()
     {
@@ -101,7 +101,8 @@ class AlarmWorksheet extends MY_Controller
         $params = $this->input->post(NULL,true);
         $this->validate([
             'id' => 'required|trim',
-            'deal_valuation' => 'required|trim',
+            'deal_valuation' => 'trim',
+            'valuation_pics' => 'trim',
         ]);
         $this->alarmWorksheetService->valuation($params);
         return $this->response("");

@@ -294,7 +294,7 @@ class Redis_model extends CI_Model
         // 设置Redis缓存
         $d = $this->setData($key, json_encode($data));
 
-        $e = $this->setExpire($key, 30 * 60);
+        $e = $this->setExpire($key, 10 * 60);
 
         return $d && $e;
     }

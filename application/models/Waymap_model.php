@@ -208,7 +208,8 @@ class Waymap_model extends CI_Model
             $url = $this->waymap_interface . '/signal-map/map/many';
 
             $res = $this->post($url, $data);
-            $this->redis_model->setEx($redis_key, json_encode($res), 600);
+
+            $this->redis_model->setEx($redis_key, json_encode($res), 30);
             return $res;
         }
         return json_decode($result, true);
@@ -293,7 +294,7 @@ class Waymap_model extends CI_Model
 
             $res = $this->get($url, $data);
 
-            $this->redis_model->setEx($redis_key, json_encode($res), 10 * 3600);
+            $this->redis_model->setEx($redis_key, json_encode($res), 2 * 3600);
 
             return $res;
         }
@@ -333,7 +334,7 @@ class Waymap_model extends CI_Model
 
             $res = $this->get($url, $data);
 
-            $this->redis_model->setEx($redis_key, json_encode($res), 24 * 3600);
+            $this->redis_model->setEx($redis_key, json_encode($res), 1 * 3600);
 
             return $res;
         }
@@ -427,7 +428,7 @@ class Waymap_model extends CI_Model
                 'type' => 'FeatureCollection',
             ];
             if($cached){
-                $this->redis_model->setEx($redis_key, json_encode($res), 12000);
+                $this->redis_model->setEx($redis_key, json_encode($res), 120);
             }
             return $res;
         }
@@ -548,7 +549,7 @@ class Waymap_model extends CI_Model
         $version = self::$lastMapVersion;
 
         $redis_key = 'getFlowsInfo_cache_' . $version . '_' . md5($logic_junction_ids);
-
+        //$cached = false;    //todo 这里防止redis爆掉不写入缓存了
         $result = $cached ? $this->redis_model->getData($redis_key) : [];
         if (!$result) {
             $data = compact('logic_junction_ids', 'version');
@@ -566,7 +567,7 @@ class Waymap_model extends CI_Model
             }
 
             if($cached){
-                $this->redis_model->setEx($redis_key, json_encode($res), 60);
+                $this->redis_model->setEx($redis_key, json_encode($res), 30);
             }
             return $res;
         }
@@ -777,7 +778,7 @@ class Waymap_model extends CI_Model
         }
         if (empty($result)) {
             $res = $this->getRestrictJunction($cityId);
-            $this->redis_model->setEx($redis_key, json_encode($res), 10 * 3600);
+            $this->redis_model->setEx($redis_key, json_encode($res), 240);
             return $res;
         }
         return json_decode($result, true);

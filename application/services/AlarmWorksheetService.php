@@ -54,10 +54,10 @@ class AlarmWorksheetService extends BaseService
     {
         $ret = $this->alarmworksheet_model->pageList($params);
         foreach ($ret["list"] as $key => $value) {
-            $ret["list"][$key]["v_status"] = "1";    
-            if($value["deal_valuation"]==""){
-                $ret["list"][$key]["v_status"] = "0";
-            }
+            // $ret["list"][$key]["v_status"] = "1";    
+            // if($value["deal_valuation"]==""){
+                // $ret["list"][$key]["v_status"] = "0";
+            // }
             if($value["status"]=="1" && time()>strtotime($value["deadline_time"])){
                 $ret["list"][$key]["status"] = "2";
             }
@@ -89,6 +89,7 @@ class AlarmWorksheetService extends BaseService
     {
         $ext = [ 
             'update_time' => date("Y-m-d H:i:s"),
+            'v_status' => 1,
         ];
         $params = array_merge($ext,$params);
         $sheetID = $this->alarmworksheet_model->update($params);
