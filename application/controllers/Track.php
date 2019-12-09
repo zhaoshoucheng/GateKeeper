@@ -350,10 +350,13 @@ class Track extends MY_Controller
             'min'=>9999999
         ];
         foreach ($dataList as $dk=>$dv){
+            if(empty($dv)){
+                continue;
+            } 
             foreach ($dv as $k => $v){
                 if($v[0]>$info['x']['max']){
                     $info['x']['max']=$v[0];
-                }
+                } 
                 if($v[0]<$info['x']['min']){
                     $info['x']['min']=$v[0];
                 }

@@ -758,6 +758,9 @@ class Realtimewarning_model extends CI_Model
             $params["quota_key"] = "stop_delay";
             $sortList = $this->realtime_model->getJunctionQuotaSortList($params);
             $sortList = $sortList["dataList"];
+            if(empty($sortList)){
+                return $this->cityQuotaList;
+            }
             $sortList = array_column($sortList,null,"logic_junction_id");
             $this->cityQuotaList["stop_delay"] = $sortList;
 

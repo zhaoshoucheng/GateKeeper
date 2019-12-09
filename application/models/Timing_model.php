@@ -862,4 +862,22 @@ class Timing_model extends CI_Model
         }
         return $timing['data'];
     }
+    
+    // 查询路口通道号
+    public function queryFlowChannel($data) 
+    {
+        $timing = httpGET($this->config->item('signal_timing_flowchannel'), $data);
+        $timing = json_decode($timing, true);
+        if (isset($timing['errno']) && $timing['errno'] != 0) {
+            return [];
+        }
+        if (empty($timing['data'])) {
+            return [];
+        }
+        $flowChannelMap = [];
+        foreach($timing['data'] as $dv){
+            $flowChannelMap[$dv["logic_flow_id"]] = $dv["sg_num"];
+        }
+        return $flowChannelMap;
+    }
 }
