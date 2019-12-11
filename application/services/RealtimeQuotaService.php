@@ -128,7 +128,7 @@ class RealtimeQuotaService extends BaseService
 
             //获取相位关联通道ID
             $flowChannel = $this->timing_model->queryFlowChannel(["logic_junction_id"=>$params["junction_id"]]);
-            // print_r($flowChannel);exit;
+            $spotID = $this->timing_model->getHaixinSpotID(["logic_junction_id"=>$params["junction_id"]]);
             $flowList = $this->realtime_model->getRealTimeJunctionsQuota($cityId, $date, $hour, $inputJunctionIds, 0);
             // print_r($flowList);exit;
             $result = [];
@@ -169,6 +169,7 @@ class RealtimeQuotaService extends BaseService
                     $newFlowList[$key]['route_length'] = $flowLengths[$newFlowList[$key]["movement_id"]] ?? "";
                 }
                 $newFlowList[$key]['sg_num'] = $flowChannel[$newFlowList[$key]["movement_id"]]??"";
+                $newFlowList[$key]['spot_id'] = $spotID;
             }
             //newFlowList排序
             $newFlowList = $this->sortFlowList($cityId,$junctionId,$newFlowList);

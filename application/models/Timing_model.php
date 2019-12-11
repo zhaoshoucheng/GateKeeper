@@ -863,6 +863,40 @@ class Timing_model extends CI_Model
         return $timing['data'];
     }
     
+
+    // 查询海信路口
+    public function getHaixinJunctionID($spotID) 
+    {
+        //查询海信平台通道号，并生成映射map
+        $this->timing_db = $this->load->database('traffic_timing_solve', true);
+        $res = $this->timing_db
+            ->from("signaller_ext")
+            ->where('signaller_id', $spotID)
+            ->where('city_id', "38")
+            ->get();
+        $spotArr = $res instanceof CI_DB_result ? $res->result_array() : $res;
+        if(empty($spotArr)){
+            return "";
+        }
+        return $spotArr[0]["logic_junction_id"];
+    }
+
+    // 查询海信路口
+    public function getHaixinSpotID($data) 
+    {
+        //查询海信平台通道号，并生成映射map
+        $this->timing_db = $this->load->database('traffic_timing_solve', true);
+        $res = $this->timing_db
+            ->from("haixin_channel_map")
+            ->where('junction_id', $data["logic_junction_id"])
+            ->get();
+        $spotArr = $res instanceof CI_DB_result ? $res->result_array() : $res;
+        if(empty($spotArr)){
+            return "";
+        }
+        return $spotArr[0]["spot_id"];
+    }
+
     // 查询路口通道号
     public function queryFlowChannel($data) 
     {
@@ -880,7 +914,6 @@ class Timing_model extends CI_Model
         foreach ($channelMap as $key => $value) {
             $hxcMap[$value["sg_num"]] = $value["hx_num"];
         }
-
 
         $timing = httpGET($this->config->item('signal_timing_flowchannel'), $data);
         $timing = json_decode($timing, true);
