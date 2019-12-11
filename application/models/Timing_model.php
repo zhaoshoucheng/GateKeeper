@@ -866,6 +866,22 @@ class Timing_model extends CI_Model
     // 查询路口通道号
     public function queryFlowChannel($data) 
     {
+        //查询海信平台通道号，并生成映射map
+        $this->timing_db = $this->load->database('traffic_timing_solve', true);
+        $res = $this->timing_db
+            ->from("haixin_channel_map")
+            ->where('junction_id', $data["logic_junction_id"])
+            ->get();
+        $channelMap = $res instanceof CI_DB_result ? $res->result_array() : $res;
+        if(empty($channelMap)){
+            return [];
+        }
+        $hxcMap = [];
+        foreach ($channelMap as $key => $value) {
+            $hxcMap[$value["sg_num"]] = $value["hx_num"];
+        }
+
+
         $timing = httpGET($this->config->item('signal_timing_flowchannel'), $data);
         $timing = json_decode($timing, true);
         if (isset($timing['errno']) && $timing['errno'] != 0) {
@@ -876,8 +892,12 @@ class Timing_model extends CI_Model
         }
         $flowChannelMap = [];
         foreach($timing['data'] as $dv){
-            $flowChannelMap[$dv["logic_flow_id"]] = $dv["sg_num"];
+            if(isset($hxcMap[$dv["sg_num"]])){
+                $flowChannelMap[$dv["logic_flow_id"]] = $hxcMap[$dv["sg_num"]];
+            }
         }
         return $flowChannelMap;
     }
+
+
 }

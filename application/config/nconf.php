@@ -59,7 +59,7 @@ if ($development == 2) {
     $signal_timing_releasehistory = "http://10.85.128.81:30357/signal-control/signalprofile/releasehistory";
     // 配时通道
     $signal_timing_flowchannel = "http://10.85.128.81:30357/signal-control/signalopt/queryflowchannel";
-    // $signal_timing_flowchannel = "http://100.90.164.31:8016/signal-control/signalopt/queryflowchannel"; 
+    // $signal_timing_flowchannel = "http://100.90.164.31:8016/signal-control/signalopt/queryflowchannel";
 
     // 路口配时状态
     $signal_timing_status_url = "http://10.85.128.81:30357/signal-control/signalprofile/timingstatusbatch";

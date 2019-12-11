@@ -12,6 +12,7 @@ class Demo extends MY_Controller{
     {
         parent::__construct();
         $this->load->config('nconf');
+        $this->load->helper('phase');
         $this->load->helper('http');
     }
 
@@ -73,7 +74,36 @@ class Demo extends MY_Controller{
 
     }
 
-    public function test(){
+    public function testPhase(){
+        $flow = ["in_degree"=>"89.727165","out_degree"=>"87.510447"];
+        print_r("input:");
+        print_r($flow);
+        $phaseId = adjustPhase($flow);
+        print_r("output:");
+        print_r($phaseId);
+        exit;
+    }
+
+    public function testHaixin(){
+        $tarr=(json_decode("",true));
+        // print_r($tarr);exit;
+        $channelMap = [];
+        $junctionID = "2017030116_13719010";
+        foreach($tarr["AscPlan"] as $key=>$value){
+            foreach($value["Channel"] as $vv){
+                if(!isset($channelMap[$vv["CD"]])){
+                    $sql = "INSERT INTO `haixin_channel_map` (`id`, `junction_id`, `sg_num`, `hx_num`, `updated_at`) VALUES (NULL, '".$junctionID."','".$vv["CD"]."', '".$vv["CN"]."', CURRENT_TIMESTAMP);";
+                    $channelMap[$vv["CD"]] = $vv["CN"];
+                    print_r($sql);
+                    print_r("<br/>");
+                    // exit;
+                }
+            }
+        }
+        exit;
+    }
+
+    public function districtsTest(){
         $url="http://100.90.164.31:8001/signal-map/map/getList?city_id=11&offset=100&count=10000&districts=320105";
         $jsonData  = httpPOST($url,[]);
         // $jsonData = json_decode($ret,true);
