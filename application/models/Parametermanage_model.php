@@ -48,11 +48,18 @@ class Parametermanage_model extends CI_Model
      */
     public function getParameterLimit($cityId)
     {
-        $res = $this->db->select('*')
-                    ->from($this->parameterLimitTB)
-                    ->where('city_id', $cityId)
-                    ->get()->result_array();
-        return $res;
+        $this->load->model('redis_model');
+        $redis_key = 'getParameterLimit' . $cityID;
+        $result = $this->redis_model->getData($redis_key);
+        if (empty($result)) {
+            $res = $this->db->select('*')
+                        ->from($this->parameterLimitTB)
+                        ->where('city_id', $cityId)
+                        ->get()->result_array();
+            $this->redis_model->setEx($redis_key, json_encode($res), 60);
+            return $res;
+        }
+        return json_decode($result, true);
     }
 
     /**

@@ -44,6 +44,7 @@ class Realtimewarning_model extends CI_Model
         $this->load->model('realtime_model');
         $this->load->model('userperm_model');
         $this->load->model('adapt_model');
+        $this->load->model('parametermanage_model');
     }
 
     public function process($cityId, $date, $hour, $traceId)
@@ -827,14 +828,9 @@ class Realtimewarning_model extends CI_Model
     {
         $junctionStatus = $this->config->item('junction_status');
         $junctionStatusFormula = $this->config->item('junction_status_formula');
-        //这里从db中读取信息
-        $res = $this->db->select("*")
-        ->from("optimized_parameter_config_limits")
-        ->where('city_id', $cityId)
-        ->order_by('id', 'DESC')
-        ->get();
-        $limit = $res instanceof CI_DB_result ? $res->row_array() : $res;
+        $limit = $this->parametermanage_model->getParameterLimit($cityId);
         if(!empty($limit)){
+            $limit = $limit[0];
             $junctionStatusFormula = function ($val) use($limit){
                 if ($val >= $limit["congestion_level_lower_limit"]) {
                     return 3; // 拥堵
