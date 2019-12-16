@@ -379,7 +379,7 @@ class Realtimewarning_model extends CI_Model
         } elseif ($ctype == 0) {
             // 路口概览数据
             $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 6 * 3600);
-            // 当日拥堵概览曲线 
+            // 当日拥堵概览曲线
             $todayJamCurve = [];
             $todayJamCurveData = $this->redis_model->getData($todayJamCurveKey);
             if(!empty($todayJamCurveData)){

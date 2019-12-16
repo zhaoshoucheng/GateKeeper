@@ -359,7 +359,6 @@ class OverviewService extends BaseService
         }else{
             $redisKey = 'new_its_realtime_today_jam_curve_' . $cityId . '_' . $date;
         }
-
         $todayJamCurveData = $this->redis_model->getData($redisKey);
         if (!$todayJamCurveData) {
             return [];
@@ -402,16 +401,12 @@ class OverviewService extends BaseService
             // $mapList[substr($value["hour"],0,5)] = ["hour"=>substr($value["hour"],0,5),"value"=>$value["value"]];
         }
 
-        //数据平滑处理
-        $pretime = strtotime($jamList[0]["hour"] ?? '00:00');
-        $preValue = intval($jamList[0]["value"]);
-        for($i=1;$i<count($jamList);$i++){
+        //数据平滑处理（如果有超过30分钟没数据的，则补全）
+        $pretime = strtotime($jamList[0]["hour"] ?? '00:00');   //第一个点时间
+        $preValue = intval($jamList[0]["value"]);               //第一个点数据
+        for($i=1;$i<count($jamList);$i++){  //遍历从第二个开始 
             $nowTime = strtotime($jamList[$i]["hour"] ?? '00:00');
             $nowValue = intval($jamList[$i]["value"]);
-            // if (($nowTime - $pretime) < 2 * 60) {
-            //     unset($mapList[$jamList[$i]["hour"]]);
-            //     continue;
-            // }
             if (($nowTime - $pretime) >= 30 * 60) {
                 $rangeHours = range($pretime + 5 * 60, $nowTime - 5 * 60, 5 * 60);
                 $rangemap = array_flip($rangeHours);
@@ -426,24 +421,25 @@ class OverviewService extends BaseService
             $pretime = $nowTime;
         }
         ksort($mapList);
-
-        //数据补全成分钟级
+        
+        //将数据补全成分钟级
         $padMapList = [];
-        $nowMin = round((strtotime(date("Y-m-d H:i:s"))-strtotime(date("Y-m-d")))/60);  //当天所有分钟数
+        $nowMin = round((strtotime(date("Y-m-d H:i:s"))-strtotime(date("Y-m-d")))/60);  
+        //当天所有分钟数
         for ($i=0; $i < $nowMin; $i++) {
             $padHour = date("H:i:s",strtotime(date("Y-m-d"))+$i*60);
             $padMapList[$padHour] = 0;
         }
         $currentItem = current($mapList);
         $mapList = array_merge($padMapList,$mapList);
+        ksort($mapList);
         foreach ($mapList as $key => $value) {
             if(empty($value)){
-                $mapList[$key] = ["hour"=>$key,"value"=>$currentItem["value"]];
-            }else{
-                $currentItem = $value;
+                $mapList[$key] = ["hour1122"=>$key,"value"=>$currentItem["value"]];
             }
+            $currentItem = $value;
         }
-
+        
         //数据抽样及格式化
         $newMapList = [];
         $copyList = array_values($mapList);
@@ -459,7 +455,6 @@ class OverviewService extends BaseService
             $newMapList[substr($nowHour,0,5)] = ["hour"=>substr($nowHour,0,5),"value"=>$nowValue];
             $pretime = $nowTime;
         }
-        // print_r(array_values($newMapList));exit;
         return array_values($newMapList);
     }
 
