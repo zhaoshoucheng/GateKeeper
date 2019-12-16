@@ -202,14 +202,15 @@ class Waymap_model extends CI_Model
         $version = self::$lastMapVersion;
         $this->load->model('redis_model');
         $redis_key = 'getJunctionInfo_' . $version . '_' . md5($logic_ids);
+        $withCache = false;
         $result = $this->redis_model->getData($redis_key);
         if (empty($result)) {
             $data = compact('logic_ids', 'version');
             $url = $this->waymap_interface . '/signal-map/map/many';
-
             $res = $this->post($url, $data);
-
-            $this->redis_model->setEx($redis_key, json_encode($res), 30);
+            if($withCache){
+                $this->redis_model->setEx($redis_key, json_encode($res), 30);
+            }
             return $res;
         }
         return json_decode($result, true);
@@ -294,7 +295,7 @@ class Waymap_model extends CI_Model
 
             $res = $this->get($url, $data);
 
-            $this->redis_model->setEx($redis_key, json_encode($res), 2 * 3600);
+            $this->redis_model->setEx($redis_key, json_encode($res), 6 * 3600);
 
             return $res;
         }
@@ -334,7 +335,7 @@ class Waymap_model extends CI_Model
 
             $res = $this->get($url, $data);
 
-            $this->redis_model->setEx($redis_key, json_encode($res), 1 * 3600);
+            $this->redis_model->setEx($redis_key, json_encode($res), 6 * 3600);
 
             return $res;
         }
@@ -428,7 +429,7 @@ class Waymap_model extends CI_Model
                 'type' => 'FeatureCollection',
             ];
             if($cached){
-                $this->redis_model->setEx($redis_key, json_encode($res), 120);
+                $this->redis_model->setEx($redis_key, json_encode($res), 3600);
             }
             return $res;
         }
@@ -495,12 +496,12 @@ class Waymap_model extends CI_Model
         	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception($res['errmsg'], $res['errno']);
         }
-
         if (isset($res['errorCode']) && $res['errorCode'] != 0) {
-        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
-            throw new \Exception($res['errorMsg'], $res['errorCode']);
+            if(strpos($res['errorMsg'],"logic flow is empty")===false){
+            	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+                throw new \Exception($res['errorMsg'], $res['errorCode']);
+            }
         }
-
         return $res['data'] ?? [];
     }
 
@@ -778,7 +779,7 @@ class Waymap_model extends CI_Model
         }
         if (empty($result)) {
             $res = $this->getRestrictJunction($cityId);
-            $this->redis_model->setEx($redis_key, json_encode($res), 240);
+            $this->redis_model->setEx($redis_key, json_encode($res), 6 * 3600);
             return $res;
         }
         return json_decode($result, true);

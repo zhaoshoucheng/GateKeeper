@@ -421,7 +421,7 @@ class OverviewService extends BaseService
             $pretime = $nowTime;
         }
         ksort($mapList);
-        
+
         //将数据补全成分钟级
         $padMapList = [];
         $nowMin = round((strtotime(date("Y-m-d H:i:s"))-strtotime(date("Y-m-d")))/60);  
@@ -435,11 +435,12 @@ class OverviewService extends BaseService
         ksort($mapList);
         foreach ($mapList as $key => $value) {
             if(empty($value)){
-                $mapList[$key] = ["hour1122"=>$key,"value"=>$currentItem["value"]];
+                $mapList[$key] = ["hour"=>$key,"value"=>$currentItem["value"]];
+            }else{
+                $currentItem = $value;
             }
-            $currentItem = $value;
         }
-        
+
         //数据抽样及格式化
         $newMapList = [];
         $copyList = array_values($mapList);
