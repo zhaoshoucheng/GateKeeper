@@ -320,6 +320,9 @@ class Track extends MY_Controller
         }
         $cnt = 0;
         foreach ($dataList as $k=>$v){
+            if($cycle==0){
+                continue;
+            }
             $pts = $this->timingAdaptionAreaService->getTrajsInOneCycle($v
                 , $cycle
                 , ($offset + $clockShift) % $cycle);
