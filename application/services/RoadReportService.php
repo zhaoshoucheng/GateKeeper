@@ -161,15 +161,15 @@ class RoadReportService extends BaseService{
     	$road_id = $params['road_id'];
     	$start_date = $params['start_date'];
     	$end_date = $params['end_date'];
-
+        if(empty($city_id)){
+            return [];
+        }
     	// $city_info = $this->openCity_model->getCityInfo($city_id);
     	// if (empty($city_info)) {
-
     	// }
-
     	$road_info = $this->road_model->getRoadInfo($road_id);
     	if (empty($road_info)) {
-
+            return [];
     	}
     	$logic_junction_ids = $road_info['logic_junction_ids'];
 
