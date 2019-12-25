@@ -99,6 +99,9 @@ class Pi_model extends CI_Model{
                 ->where_in('hour', $hours)
                 ->group_by('logic_junction_id')
                 ->get();
+                if(empty($res)){
+                    return [];
+                }
     //         var_dump($this->db->last_query());
             return $res->result_array();
         }
