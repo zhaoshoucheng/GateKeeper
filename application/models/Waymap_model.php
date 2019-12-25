@@ -152,6 +152,25 @@ class Waymap_model extends CI_Model
         return $res['data'] ?? [];
     }
 
+    public function getNoCheck($url, $data, $timeout = 10000, $header = [])
+    {
+        $data['token']   = $this->token;
+        $data['user_id'] = $this->userid;
+
+        $res = httpGET($url, $data, $timeout, $header);
+        if (!$res) {
+            com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+            throw new \Exception('路网数据获取失败', ERR_REQUEST_WAYMAP_API);
+        }
+
+        $res = json_decode($res, true);
+        if (!$res) {
+            com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+            throw new \Exception('路网数据格式错误', ERR_REQUEST_WAYMAP_API);
+        }
+        return $res['data'] ?? [];
+    }
+
     /**
      * 根据关键词获取路口信息
      *
@@ -169,7 +188,7 @@ class Waymap_model extends CI_Model
 
         $url = $this->waymap_interface . '/signal-map/mapJunction/suggest';
 
-        return $this->get($url, $data);
+        return $this->getNoCheck($url, $data);
     }
 
     /**
