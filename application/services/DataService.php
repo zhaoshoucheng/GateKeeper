@@ -56,6 +56,9 @@ class DataService extends BaseService
 
         // 返回的结构体是['errno', 'errmsg', 'data'];
         if (!isset($ret['errno']) || (!isset($ret['errmsg'])) || (!isset($ret['data']))) {
+            if(isset($params["city_id"]) && $params["city_id"]==0){
+                return [0,"",[]];
+            }
             com_log_warning('dataservice_api_error', ERR_REQUEST_DATASERVICE_API, "dataservice错误", compact("url", "method", "params", "timeout", "ret"));
             throw new Exception("调用dataservice服务返回错误");
         }
