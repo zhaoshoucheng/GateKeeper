@@ -188,8 +188,32 @@ class OperateLog_model extends CI_Model
             ->limit($params["page_size"], $offset)
             ->forceMaster()
             ->order_by("operation_time desc,id desc")
-            ->get()
-            ->result_array();
+            ->get();
+        $result = !empty($result)? $result->result_array():[];
+        foreach($result as $rk=>$rt){
+            $requestIN = json_decode($rt["request_in"],true);
+            if(!empty($requestIN["REQUEST"])){
+                $requestIN = $requestIN["REQUEST"];
+            }
+            if(!empty($requestIN["REQUEST"])){
+                $requestIN = $requestIN["REQUEST"];
+            }
+            if(!is_array($requestIN)){
+                $requestIN = json_decode($requestIN,true);
+            }
+            $requestFormat = "";
+            if(!empty($requestIN)){
+                foreach ($requestIN as $key => $value) {
+                    if(empty($requestFormat)){
+                        $requestFormat=$key."=".json_encode($value);
+                    }else{
+                        $requestFormat=$requestFormat."||".$key."=".json_encode($value);                        
+                    }
+                }
+            }
+            $result[$rk]["request_in"] = "【".$result[$rk]["action"]."】 ".$requestFormat;
+            // var_dump(json_decode($rt["request_in"],true));exit;
+        }
         return ["total"=>$total,"list"=>$result];
     }
 }

@@ -1301,7 +1301,7 @@ class JunctionsService extends BaseService
             "cityID"=>$cityID,
             "junctionName"=>$junctionName,
             "user_name"=>$this->user->getUserName(),
-            "client_ip"=>$_SERVER["HTTP_X_REAL_IP"]??"",
+            "client_ip"=>$_SERVER["HTTP_X_REAL_IP"]??"", 
             "log_time"=>date("Y-m-d H:i:s"),
         ];
         $logFormat = function($logData){
