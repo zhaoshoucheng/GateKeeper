@@ -10,6 +10,7 @@ class Parametermanage_model extends CI_Model
     private $tb = 'optimized_offline_alarm_config';
     private $parameterLimitTB = 'optimized_parameter_config_limits';
     private $db = '';
+    private $parameterMap = [];
 
     public function __construct()
     {
@@ -51,12 +52,16 @@ class Parametermanage_model extends CI_Model
         $this->load->model('redis_model');
         $redis_key = 'getParameterLimit_' . $cityId;
         $result = $this->redis_model->getData($redis_key);
+        if(isset($this->parameterMap[$cityId])){
+            return $this->parameterMap[$cityId];
+        }
         if (empty($result)) {
             $res = $this->db->select('*')
                         ->from($this->parameterLimitTB)
                         ->where('city_id', $cityId)
                         ->get()->result_array();
             $this->redis_model->setEx($redis_key, json_encode($res), 60);
+            $this->parameterMap[$cityId] = $res;
             return $res;
         }
         return json_decode($result, true);
