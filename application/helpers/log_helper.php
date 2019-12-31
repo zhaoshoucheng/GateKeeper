@@ -414,7 +414,8 @@ if( ! function_exists('com_log_warning'))
         ];
         $CI =& get_instance();
         $CI->load->model('adapt_model');
-        if(!in_array($dltag,["downgrade_model_getUrlCache","downgradeWrite_error"])){
+        if(!in_array($dltag,["downgrade_model_getUrlCache","downgradeWrite_error"])
+            && !empty($CI->adapt_model)){
             $CI->adapt_model->insertAdaptLog($params);
         }
         

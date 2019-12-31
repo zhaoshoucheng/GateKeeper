@@ -19,6 +19,7 @@ class RealtimeQuotaService extends BaseService
     {
         parent::__construct();
         $this->load->model('realtime_model');
+        $this->load->model('timing_model');
         $this->load->model('waymap_model');
         $this->load->helper('http_helper');
         $this->load->model('common_model');
@@ -124,7 +125,12 @@ class RealtimeQuotaService extends BaseService
         foreach ($dates as $date) {
             $movementList = [];
             $inputJunctionIds[] = $params["junction_id"];
+
+            //获取相位关联通道ID
+            $flowChannel = $this->timing_model->queryFlowChannel(["logic_junction_id"=>$params["junction_id"]]);
+            $spotID = $this->timing_model->getHaixinSpotID(["logic_junction_id"=>$params["junction_id"]]);
             $flowList = $this->realtime_model->getRealTimeJunctionsQuota($cityId, $date, $hour, $inputJunctionIds, 0);
+            // print_r($flowList);exit;
             $result = [];
             $result["flow_quota_all"] = [
                 "route_length"=>["name"=>"路段长度","unit"=>"米",],
@@ -162,6 +168,8 @@ class RealtimeQuotaService extends BaseService
                     $newFlowList[$key]['comment'] = $phaseNames[$newFlowList[$key]["movement_id"]] ?? "";
                     $newFlowList[$key]['route_length'] = $flowLengths[$newFlowList[$key]["movement_id"]] ?? "";
                 }
+                $newFlowList[$key]['sg_num'] = $flowChannel[$newFlowList[$key]["movement_id"]]??"";
+                $newFlowList[$key]['spot_id'] = $spotID;
             }
             //newFlowList排序
             $newFlowList = $this->sortFlowList($cityId,$junctionId,$newFlowList);

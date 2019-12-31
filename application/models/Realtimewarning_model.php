@@ -44,6 +44,7 @@ class Realtimewarning_model extends CI_Model
         $this->load->model('realtime_model');
         $this->load->model('userperm_model');
         $this->load->model('adapt_model');
+        $this->load->model('parametermanage_model');
     }
 
     public function process($cityId, $date, $hour, $traceId)
@@ -379,7 +380,7 @@ class Realtimewarning_model extends CI_Model
         } elseif ($ctype == 0) {
             // 路口概览数据
             $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 6 * 3600);
-            // 当日拥堵概览曲线 
+            // 当日拥堵概览曲线
             $todayJamCurve = [];
             $todayJamCurveData = $this->redis_model->getData($todayJamCurveKey);
             if(!empty($todayJamCurveData)){
@@ -758,6 +759,9 @@ class Realtimewarning_model extends CI_Model
             $params["quota_key"] = "stop_delay";
             $sortList = $this->realtime_model->getJunctionQuotaSortList($params);
             $sortList = $sortList["dataList"];
+            if(empty($sortList)){
+                return $this->cityQuotaList;
+            }
             $sortList = array_column($sortList,null,"logic_junction_id");
             $this->cityQuotaList["stop_delay"] = $sortList;
 
@@ -824,14 +828,9 @@ class Realtimewarning_model extends CI_Model
     {
         $junctionStatus = $this->config->item('junction_status');
         $junctionStatusFormula = $this->config->item('junction_status_formula');
-        //这里从db中读取信息
-        $res = $this->db->select("*")
-        ->from("optimized_parameter_config_limits")
-        ->where('city_id', $cityId)
-        ->order_by('id', 'DESC')
-        ->get();
-        $limit = $res instanceof CI_DB_result ? $res->row_array() : $res;
+        $limit = $this->parametermanage_model->getParameterLimit($cityId);
         if(!empty($limit)){
+            $limit = $limit[0];
             $junctionStatusFormula = function ($val) use($limit){
                 if ($val >= $limit["congestion_level_lower_limit"]) {
                     return 3; // 拥堵

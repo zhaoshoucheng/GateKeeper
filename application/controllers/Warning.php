@@ -26,6 +26,7 @@ class Warning extends MY_Controller
                 'step' => 10,
             ]
         ];
+        return $this->response("");
         try {
             $ret = httpPOST('http://collect.odin.xiaojukeji.com/api/v1/collector/push?ns=collect.hna.web.its-tool.ipd-cloud.didi.com', $data, 0, "json");
             $ret = json_decode($ret, true);

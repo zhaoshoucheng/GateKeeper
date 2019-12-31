@@ -320,6 +320,9 @@ class Track extends MY_Controller
         }
         $cnt = 0;
         foreach ($dataList as $k=>$v){
+            if($cycle==0){
+                continue;
+            }
             $pts = $this->timingAdaptionAreaService->getTrajsInOneCycle($v
                 , $cycle
                 , ($offset + $clockShift) % $cycle);
@@ -350,10 +353,13 @@ class Track extends MY_Controller
             'min'=>9999999
         ];
         foreach ($dataList as $dk=>$dv){
+            if(empty($dv)){
+                continue;
+            } 
             foreach ($dv as $k => $v){
                 if($v[0]>$info['x']['max']){
                     $info['x']['max']=$v[0];
-                }
+                } 
                 if($v[0]<$info['x']['min']){
                     $info['x']['min']=$v[0];
                 }

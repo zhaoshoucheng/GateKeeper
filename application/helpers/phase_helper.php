@@ -167,7 +167,7 @@ if(!function_exists('phase_name')) {
             "30" => "东南掉头",
             "31" => "西南掉头",
             "32" => "西北掉头",
-        ];
+        ]; 
 
         return $phaseNames[$phaseId] ?? 0;
     }

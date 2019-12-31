@@ -12,7 +12,9 @@ class Demo extends MY_Controller{
     {
         parent::__construct();
         $this->load->config('nconf');
+        $this->load->helper('phase');
         $this->load->helper('http');
+        $this->load->model('timing_model');
     }
 
     /*http://data.sts.didichuxing.com/signal-map/mapJunction/suggest?keyword=%E6%96%87%E5%8C%96&type=didi&city_id=12&token=0faa6ca90df19d26635391c511d124a1&user_id=roadNet*/
@@ -73,7 +75,53 @@ class Demo extends MY_Controller{
 
     }
 
-    public function test(){
+    public function testPhase(){
+        $flow = ["in_degree"=>"89.727165","out_degree"=>"87.510447"];
+        print_r("input:");
+        print_r($flow);
+        $phaseId = adjustPhase($flow);
+        print_r("output:");
+        print_r($phaseId);
+        exit;
+    }
+
+    public function testHaixin(){
+        //获取目录下所有php结尾的文件列表
+        $list = glob('all_json/*.json');
+        foreach ($list as $key => $filepath) {
+            $filecontent = file_get_contents($filepath, true);
+            $tarr=(json_decode($filecontent,true));
+            $channelMap = [];
+            $spotID = $tarr["Spot"];
+            $junctionID = $this->timing_model->getHaixinJunctionID($spotID);
+            // print_r($spotID);
+            // print_r("<br>");
+            if(empty($junctionID)){
+                continue;
+            }
+            // print_r($junctionID);
+            print_r('"'.$junctionID.'": "'.$spotID.'",');
+            print_r("<br>");
+            foreach($tarr["AscPlan"] as $key=>$value){
+                foreach($value["Channel"] as $vv){
+                    if(!isset($channelMap[$vv["CD"]])){
+                        $sql = "INSERT INTO `haixin_channel_map` (`id`, `junction_id`, `spot_id`, `sg_num`, `hx_num`, `updated_at`) VALUES (NULL, '".$junctionID."', '".$spotID."','".$vv["CD"]."', '".$vv["CN"]."', CURRENT_TIMESTAMP);";
+                        $channelMap[$vv["CD"]] = $vv["CN"];
+                        // print_r($sql);
+                        // print_r("<br/>");
+                        // exit;
+                    }
+                }
+            }
+            // exit;
+            // exit;
+        }
+        exit;
+
+        
+    }
+
+    public function districtsTest(){
         $url="http://100.90.164.31:8001/signal-map/map/getList?city_id=11&offset=100&count=10000&districts=320105";
         $jsonData  = httpPOST($url,[]);
         // $jsonData = json_decode($ret,true);

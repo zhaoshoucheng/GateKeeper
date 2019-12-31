@@ -744,7 +744,7 @@ class DiagnosisNoTiming_model extends CI_Model
             'hour' => $hour,
         ];
         if (!empty($userPerm['junction_id'])) {
-            $req['junction_ids'] = $userPerm['junction_id'];
+            $req['junction_ids'] = array_values($userPerm['junction_id']);
         }
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetJunctionAlarmDataByJunctionAVG', $req, 0, 'json');
