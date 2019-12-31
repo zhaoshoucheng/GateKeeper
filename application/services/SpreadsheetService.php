@@ -78,7 +78,7 @@ class SpreadsheetService extends BaseService{
 
         $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
         $drawing->setPath($FILE["file"]["tmp_name"]);
-        $drawing->setCoordinates('A'.count($Obj['opt_rets']+6));
+        $drawing->setCoordinates('A'.(count($Obj['opt_rets'])+6));
         $drawing->setWorksheet($worksheet);
 
         $filename = '单点时段优化结果.xlsx';
@@ -120,7 +120,7 @@ class SpreadsheetService extends BaseService{
 
         $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
         $drawing->setPath($FILE["file"]["tmp_name"]);
-        $drawing->setCoordinates('A'.count($Obj['opt_rets']+$lineNum));
+        $drawing->setCoordinates('A'.(count($Obj['opt_rets'])+$lineNum));
         $drawing->setWorksheet($worksheet);
 
 
