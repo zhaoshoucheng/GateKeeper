@@ -137,8 +137,8 @@ class SpreadsheetService extends BaseService{
         $worksheet = $spreadsheet->getActiveSheet();
         $worksheet->setTitle('干线协调优化');
 
-        $worksheet->setCellValueByColumnAndRow(1, 1, '干线名称');
-        $worksheet->setCellValueByColumnAndRow(2, 1, $Obj['road_name']);
+//        $worksheet->setCellValueByColumnAndRow(1, 1, '干线名称');
+//        $worksheet->setCellValueByColumnAndRow(2, 1, $Obj['road_name']);
 
         $line = 2;
         foreach ($Obj['opt_rets'] as $key => $value){
