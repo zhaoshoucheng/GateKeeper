@@ -18,7 +18,9 @@
 		"elasticsearch/elasticsearch": "6.0.1",
 		"guzzlehttp/guzzle": "^6.3",
 		"illuminate/database" : "5.5.44",
-		"illuminate/contracts" : "5.5.44"
+		"illuminate/contracts" : "5.5.44",
+		"phpoffice/phpword": "^0.17.0",
+		"phpoffice/phpspreadsheet":"1.5.0"
 
 	},
 	"suggest": {
