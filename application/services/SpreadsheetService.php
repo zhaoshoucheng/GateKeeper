@@ -87,6 +87,7 @@ class SpreadsheetService extends BaseService{
         header('Cache-Control: max-age=0');
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
+        exit;
     }
 
     public function SingleGreenOptSpreadsheet($FILE,$Obj){
@@ -130,6 +131,7 @@ class SpreadsheetService extends BaseService{
         header('Cache-Control: max-age=0');
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
+        exit;
     }
 
     public function RoadTrafficOptSpreadsheet($FILE,$Obj){
@@ -172,6 +174,7 @@ class SpreadsheetService extends BaseService{
         header('Cache-Control: max-age=0');
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
+        exit;
     }
 
 }
