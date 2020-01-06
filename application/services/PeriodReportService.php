@@ -130,8 +130,8 @@ class PeriodReportService extends BaseService
     private function getLastMonth($t = 1)
     {
         return [
-            'start_time' => date('Y-m-01', strtotime((($t) * -1) . ' month')),
-            'end_time' => date('Y-m-t', strtotime((($t) * -1) . ' month')),
+            'start_time' => date('Y-m-01', strtotime(date('Y-m-01') . (($t) * -1) . ' month')),
+            'end_time' => date('Y-m-t', strtotime(date('Y-m-01') . (($t) * -1) . ' month')),
         ];
     }
 
@@ -486,7 +486,7 @@ class PeriodReportService extends BaseService
             }
         }
         // print_r($predata);exit;
-        if (empty($data) && empty($predata)) {
+        if (empty($data) || empty($predata)) {
             return [];
         }
 
