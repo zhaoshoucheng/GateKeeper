@@ -280,7 +280,7 @@ class DiagnosisNoTimingService extends BaseService
         $dates = $params['dates'];
         $data = $this->diagnosisNoTiming_model->getJunctionAlarmDataByHour($city_id, $dates, $userPerm);
 
-        if($city_id == 12){
+        if($city_id == 12 && isset($userPerm['group_id']) && $userPerm['group_id'] == 484){
             $conf_rule = $this->config->item('conf_rule_12');
         }else{
             $conf_rule = $this->config->item('conf_rule');
@@ -365,7 +365,7 @@ class DiagnosisNoTimingService extends BaseService
 
         $ret = [];
 
-        if($city_id == 12){
+        if($city_id == 12 && isset($userPerm['group_id']) && $userPerm['group_id'] == 484){
             $conf_rule = $this->config->item('conf_rule_12');
         }else{
             $conf_rule = $this->config->item('conf_rule');
