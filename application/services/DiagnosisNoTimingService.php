@@ -364,7 +364,14 @@ class DiagnosisNoTimingService extends BaseService
         }
 
         $ret = [];
-        $conf_rule = $this->config->item('conf_rule');
+
+        if($city_id == 12){
+            $conf_rule = $this->config->item('conf_rule_12');
+        }else{
+            $conf_rule = $this->config->item('conf_rule');
+        }
+
+
         $frequency_threshold = $conf_rule['frequency_threshold'];
         $alarm_types = $conf_rule['alarm_types'];
         $alarm_quotas = $conf_rule['alarm_quotas'];
