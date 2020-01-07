@@ -39,11 +39,20 @@ class Report extends MY_Controller
         ]);
         //相关区域干线暂时写死
 
-        $roadIDs = ["7a40ba9df1926586b917177dae3335c0"];
+        $roadIDs = [];
+        $areaIDs = [];
+        $juncIDs = [];
 
-        $areaIDs = [161];
-
-        $juncIDs = ["2017030116_3498695"];
+        //济南的请求
+        if ($params['city_id'] == 12){
+            $roadIDs = ["d258043fac91fc72b960a528b948f2ab"];
+            $areaIDs = [55];
+            $juncIDs = ["2017030116_5546361"];
+        }elseif($params['city_id'] == 11){
+            $roadIDs = ["7a40ba9df1926586b917177dae3335c0"];
+            $areaIDs = [161];
+            $juncIDs = ["2017030116_3498695"];
+        }
 
         $raname =  $this->reportService->queryRoadAndAreaName($params['city_id'],$roadIDs,$areaIDs,$juncIDs);
         $tasks=[];
