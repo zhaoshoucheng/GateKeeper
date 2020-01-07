@@ -145,8 +145,10 @@ class Waymap_model extends CI_Model
         }
 
         if (isset($res['errorCode']) && $res['errorCode'] != 0) {
-        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
-            throw new \Exception($res['errorMsg'], $res['errorCode']);
+            if(strpos($res['errorMsg'],"不存在该路口")===false){
+                com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+                throw new \Exception($res['errorMsg'], $res['errorCode']);
+            }
         }
 
         return $res['data'] ?? [];

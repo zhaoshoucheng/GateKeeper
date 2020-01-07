@@ -127,12 +127,12 @@ class Realtimewarning extends Inroute_Controller
      * @return bool
      */
     private function alarmV2Auth($cityID){
-        $cityIDs = $this->config->item('alarm_v2_city_ids');
-        $clientIPs = $this->config->item('alarm_v2_client_ips');
-        $remoteIP = $_SERVER["REMOTE_ADDR"];
-        if(in_array($cityID,$cityIDs) && !in_array($remoteIP,$clientIPs)){
-            return false;
-        }
+        // $cityIDs = $this->config->item('alarm_v2_city_ids');
+        // $clientIPs = $this->config->item('alarm_v2_client_ips');
+        // $remoteIP = $_SERVER["REMOTE_ADDR"];
+        // if(in_array($cityID,$cityIDs) && !in_array($remoteIP,$clientIPs)){
+        //     return false;
+        // }
         return true;
     }
 
@@ -142,12 +142,13 @@ class Realtimewarning extends Inroute_Controller
      * @return string
      */
     private function getAlarmFuncName($cityID){
-        $cityIDs = $this->config->item('alarm_v2_city_ids');
-        if(in_array($cityID,$cityIDs)){
-            return "esworker";
-        }else{
-            return "prepare";
-        }
+        return "esworker";
+        // $cityIDs = $this->config->item('alarm_v2_city_ids');
+        // if(in_array($cityID,$cityIDs)){
+        //     return "esworker";
+        // }else{
+        //     return "prepare";
+        // }
     }
 
     public function escallback()
