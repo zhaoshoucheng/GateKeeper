@@ -26,7 +26,7 @@ class Overview extends MY_Controller
     }
 
     //南京自定义标题
-    public function nanjing_title(){
+    public function nanjingTitle(){
         if($this->username == "13051117370"){
             $data = [
                 'title'=>"远程交通信号优化配时中心",
