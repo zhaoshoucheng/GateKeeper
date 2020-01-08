@@ -23,4 +23,13 @@ class OperateLogService extends BaseService
         }
         return $result;
     }
+
+    public function insertLog($params)
+    {
+        $result = $this->operateLog_model->insertLog($params);
+        if (!$result) {
+            throw new \Exception('插入日志数据失败', ERR_DATABASE);
+        }
+        return $result;
+    }
 }
