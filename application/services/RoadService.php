@@ -409,13 +409,13 @@ class RoadService extends BaseService
                     $sjInfo["station"][$sk]["lng"] = (string)$sjInfo["station"][$sk]["lng"];
                     $sjInfo["station"][$sk]["lat"] = (string)$sjInfo["station"][$sk]["lat"];
                 }
-                $res["station"] = $sjInfo["station"];              
+                $res["station"] = $sjInfo["station"];
             }
             // print_r($sjInfo);exit;
             $juncprimap = [];
             if(isset($sjInfo["junctions_info"])){
                 foreach ($sjInfo["junctions_info"] as $key => $value) {
-                    $juncprimap[$value["logic_junction_id"]] = $value["is_priority"];                
+                    $juncprimap[$value["logic_junction_id"]] = $value["is_priority"];
                 }
             }
             // print_r($juncprimap);exit;
@@ -822,6 +822,37 @@ class RoadService extends BaseService
             return [];
         }
 
+        // 计算平均值
+        $avg = [
+            'base' => [],
+            'evaluate' => [],
+        ];
+        foreach ($hours as $hour) {
+            $avg['base'][$hour] = [];
+            $avg["evaluate"][$hour] = [];
+        }
+        foreach ($result as $value) {
+            if (in_array($value['date'], $baseDates)) {
+                $avg['base'][$value['hour']][] = $value['quota_value'];
+            } else {
+                $avg['evaluate'][$value['hour']][] = $value['quota_value'];
+            }
+        }
+        foreach ($avg['base'] as $hour => $values) {
+            if (empty($values)) {
+                $avg['base'][$hour] = null;
+            } else {
+                $avg['base'][$hour] = round(array_sum($values) / count($values), 2);
+            }
+        }
+        foreach ($avg['evaluate'] as $hour => $values) {
+            if (empty($values)) {
+                $avg['evaluate'][$hour] = null;
+            } else {
+                $avg['evaluate'][$hour] = round(array_sum($values) / count($values), 2);
+            }
+        }
+
         // 将数据按照 日期（基准 和 评估）进行分组的键名函数
         $baseOrEvaluateCallback = function ($item) use ($baseDates) {
             return in_array($item['date'], $baseDates) ? 'base' : 'evaluate';
@@ -855,6 +886,8 @@ class RoadService extends BaseService
         }
         array_multisort($sorter,SORT_NUMERIC,SORT_ASC,$base);
         $result["base"] = $base;
+
+        $result['avg'] = $avg;
 
 
         $result['info'] = [
