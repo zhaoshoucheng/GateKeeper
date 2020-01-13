@@ -589,47 +589,47 @@ paths:
           type: integer
           description: "批次时间，从拥堵排名的接口中获取"
           required: true
-        responses:
-          200:
-            description: 成功
-            schema:
-              description: 快速路详情
-              type: object
-              required:
-                - "errno"
-                - "errmsg"
-                - "data"
-                - "traceid"
-                - "username"
-                - "time"
-              properties:
-                errno:
-                  type: "number"
-                errmsg:
-                  type: "string"
-                data:
-                  required:
-                    - "update_time"
-                    - "speed"
-                    - "stop_delay"
-                    - "across_time"
-                    - "type"
-                  properties:
-                    update_time:
-                      type: "string"
-                    speed:
-                      type: "number"
-                    stop_delay:
-                      type: "number"
-                    across_time:
-                      type: "string"
-                    type:
-                      type: "number"
-                  type: "object"
-                traceid:
-                  type: "string"
-                username:
-                  type: "string"
+          responses:
+            200:
+              description: 成功
+              schema:
+                description: 快速路详情
+                type: object
+                required:
+                  - "errno"
+                  - "errmsg"
+                  - "data"
+                  - "traceid"
+                  - "username"
+                  - "time"
+                properties:
+                  errno:
+                    type: "number"
+                  errmsg:
+                    type: "string"
+                  data:
+                    required:
+                      - "update_time"
+                      - "speed"
+                      - "stop_delay"
+                      - "across_time"
+                      - "type"
+                    properties:
+                      update_time:
+                        type: "string"
+                      speed:
+                        type: "number"
+                      stop_delay:
+                        type: "number"
+                      across_time:
+                        type: "string"
+                      type:
+                        type: "number"
+                    type: "object"
+                  traceid:
+                    type: "string"
+                  username:
+                    type: "string"
   /expressway/alarmlist:
     post:
       summary: 快速路报警列表
@@ -3035,61 +3035,7 @@ paths:
               traceid:
                 type: "string"
                 example: "645aa41f5d9f5d5c776d5d92143babb0"
-  /Overview/todayJamCurve:
-    post:
-      summary: 当日拥堵概览曲线
-      description: 当日拥堵概览曲线
-      tags:
-        - 概览
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      parameters:
-        - name: city_id
-          in: formData
-          type: string
-          description: "数据所属城市：济南 12"
-          required: true
-      responses:
-        200:
-          description: 成功
-          schema:
-            description: "实时单指标曲线图数据"
-            type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-            properties:
-              errno:
-                type: "number"
-                example: 0
-              errmsg:
-                type: "string"
-                example: ""
-              data:
-                type: "array"
-                items:
-                  type: "object"
-                  properties:
-                    key:
-                      type: "number"
-                      example: 2
-                    name:
-                      type: "string"
-                      example: "拥堵"
-                    list:
-                      type: "array"
-                      items:
-                        type: "object"
-                        properties:
-                          hour:
-                            type: "string"
-                            example: "00:00:00"
-                          value:
-                            type: "number"
-                            example: 4
+  
   /Alarmanalysis/realtimeSingleQuotaCurve:
     post:
       summary: 实时单指标曲线图
