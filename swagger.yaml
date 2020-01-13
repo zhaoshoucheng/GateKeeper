@@ -6218,6 +6218,105 @@ paths:
                 type: string
                 description: 用户名
                 example: unknown
+  /OperateLog/pageList:
+    get:
+      summary: 实时报警分析
+      description: 实时报警分析
+      tags:
+        - 管理
+      parameters:
+        - name: city_id
+          in: query
+          description: '城市id 示例: 12'
+          required: true
+          type: string
+        - name: page_size
+          in : query
+          description: '每页个数'
+          required: true
+          type: string
+        - name: page_num
+          in : query
+          description: '当前第几页'
+          required: true
+          type: string
+        - name: module
+          in : query
+          description: '模块名'
+          required: true
+          type: string
+        - name: action_type
+          in : query
+          description: '操作类型'
+          required: true
+          type: string
+        - name: action
+          in : query
+          description: '操作名称'
+          required: true
+          type: string
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: ""
+            properties: 
+              errno: 
+                type: "number"
+              errmsg: 
+                type: "string"
+              data: 
+                required: 
+                  - "total"
+                  - "list"
+                properties: 
+                  total: 
+                    type: "number"
+                  list: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        id: 
+                          type: "string"
+                        city_id: 
+                          type: "string"
+                        user_name: 
+                          type: "string"
+                        app_id: 
+                          type: "string"
+                        group_id: 
+                          type: "string"
+                        virtual_group_id: 
+                          type: "string"
+                        url: 
+                          type: "string"
+                        action: 
+                          type: "string"
+                        action_type: 
+                          type: "string"
+                        module: 
+                          type: "string"
+                        request_in: 
+                          type: "string"
+                        request_out: 
+                          type: "string"
+                        action_log: 
+                          type: "string"
+                        client_ip: 
+                          type: "string"
+                        content_diff: 
+                          type: "string"
+                        ext1: 
+                          type: "string"
+                        ext2: 
+                          type: "string"
+                        ext3: 
+                          type: "string"
+                        operation_time: 
+                          type: "string"
+                type: "object"
   /Area/getQuotas:
     post:
       summary: 评估页-区域评估-获取区域评估指标列表
