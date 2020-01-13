@@ -46,6 +46,14 @@ class Optroadtask extends MY_Controller
             $this->errno = -1;
             $this->errmsg = "操作失败";
         }
+        if(empty($params["task_id"])){
+            $params["task_id"] = $data;
+            $actionLog = sprintf("任务ID：%s，任务名称：%s",$params["task_id"],$params["task_name"]);
+            $this->insertLog("任务管理","新增干线优化任务","新增",$params,$actionLog);
+        }else{
+            $actionLog = sprintf("任务ID：%s，任务名称：%s",$params["task_id"],$params["task_name"]);
+            $this->insertLog("任务管理","编辑干线优化任务","编辑",$params,$actionLog);
+        }
         $this->response("");
     }
 

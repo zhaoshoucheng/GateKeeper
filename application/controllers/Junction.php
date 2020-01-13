@@ -503,7 +503,7 @@ class Junction extends MY_Controller
         $version = $waymapModel::$lastMapVersion;
         $waymapModel->getAllCityJunctions($params["city_id"], $version, 1);
 
-        //操作日志
+        //操作日志 
         $actionLog = sprintf("路口ID：%s，路口名称修改为：%s",$params["junction_id"],$params["junction_name"]);
         $this->insertLog("路口管理","编辑路口名称","编辑",$params,$actionLog);
         $this->response($result);

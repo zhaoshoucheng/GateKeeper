@@ -480,6 +480,11 @@ class RoadService extends BaseService
 
         return $results;
     }
+    
+    public function getRoadInfo($roadID){
+        $roadInfo = $this->road_model->getRoadByRoadId($roadID);
+        return $roadInfo;
+    }
 
     /**
      * 获取干线详情
