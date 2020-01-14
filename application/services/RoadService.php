@@ -855,6 +855,9 @@ class RoadService extends BaseService
             $avg["evaluate"][$hour] = [];
         }
         foreach ($result as $value) {
+            if ($value == null) {
+                continue;
+            }
             if (in_array($value['date'], $baseDates)) {
                 $avg['base'][$value['hour']][] = $value['quota_value'];
             } else {

@@ -342,6 +342,40 @@ class AreaService extends BaseService
             return  [];
         }
 
+        // 计算平均值
+        $avg = [
+            'base' => [],
+            'evaluate' => [],
+        ];
+        foreach ($hours as $hour) {
+            $avg['base'][$hour] = [];
+            $avg["evaluate"][$hour] = [];
+        }
+        foreach ($resultList as $value) {
+            if ($value == null) {
+                continue;
+            }
+            if (in_array($value['date'], $baseDates)) {
+                $avg['base'][$value['hour']][] = $value[$quotaKey];
+            } else {
+                $avg['evaluate'][$value['hour']][] = $value[$quotaKey];
+            }
+        }
+        foreach ($avg['base'] as $hour => $values) {
+            if (empty($values)) {
+                $avg['base'][$hour] = null;
+            } else {
+                $avg['base'][$hour] = round(array_sum($values) / count($values), 2);
+            }
+        }
+        foreach ($avg['evaluate'] as $hour => $values) {
+            if (empty($values)) {
+                $avg['evaluate'][$hour] = null;
+            } else {
+                $avg['evaluate'][$hour] = round(array_sum($values) / count($values), 2);
+            }
+        }
+
         $resultCollection = Collection::make($resultList);
 
         // 将数据按照 日期（基准 和 评估）进行分组的键名函数
@@ -369,6 +403,8 @@ class AreaService extends BaseService
             ->groupBy([$baseOrEvaluateCallback, 'date'], $groupByItemFormatCallback)
             ->get();
 
+        $result['avg'] = $avg;
+
         $result['info'] = [
             'area_name' => $areaInfo['area_name'],
             'quota_name' => $nameMaps[$quotaKey] ?? '',
@@ -382,7 +418,6 @@ class AreaService extends BaseService
         $result['info']['download_id'] = $downloadId;
 
         $this->redis_model->setComparisonDownloadData($downloadId, $result);
-
         return $result;
     }
 
