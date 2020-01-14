@@ -74,6 +74,29 @@ class Opttask extends MY_Controller
             $this->errno = -1;
             $this->errmsg = "操作失败";
         }
-        $this->response("");
+
+        //log
+        if(in_array($params["action"], [0,1])){
+            $taskInfo = $this->opttaskService->TaskInfo($params);
+            $taskName = $taskInfo["task_name"] ?? "";
+            $taskAction = "";
+            if($params["action"]==0){
+                $taskAction = "开始";
+            }
+            if($params["action"]==1){
+                $taskAction = "暂停";
+            }
+            $actionLog = sprintf("任务ID：%s，任务名称：%s，任务状态：%s",$params["task_id"],$taskName,$taskAction);
+            $this->insertLog("任务管理","修改任务状态","编辑",$params,$actionLog);
+            $this->response("");
+        }
+        if(in_array($params["action"], [2])){
+            $taskInfo = $this->opttaskService->TaskInfo($params);
+            $taskName = $taskInfo["task_name"] ?? "";
+            $taskAction = "";
+            $actionLog = sprintf("任务ID：%s，任务名称：%s",$params["task_id"],$taskName);
+            $this->insertLog("任务管理","删除任务","编辑",$params,$actionLog);
+            $this->response("");
+        }
     }
 }

@@ -402,33 +402,41 @@ class ParametermanageService extends BaseService
         try {
             $cityID = $param['city_id'];
             $areaID = $param['area_id'];
+            $paramLimitChanged = $rtAlarmChanged = $paramChanged = false;
             if (isset($param['param_limits'])) {
-                if (!$this->parametermanage_model->updateParameterLimit($cityID, $param['param_limits'])) {
-                    return false;
+                list($status,$paramLimitChanged) = $this->parametermanage_model->updateParameterLimit($cityID, $param['param_limits']);
+                if (!$status) {
+                    return [false,$paramLimitChanged,$paramChanged,$rtAlarmChanged];
                 }
             }
             if (isset($param['params'])) {
                 $data = $param['params'];
                 if (empty($data)) {
-                    return true;
+                    return [true,$paramLimitChanged,$paramChanged,$rtAlarmChanged];
                 }
                 foreach ($data as $temp) {
-                    $this->parametermanage_model->updateParameter($cityID, $areaID, $temp);
+                    list($status,$tmpChanged) = $this->parametermanage_model->updateParameter($cityID, $areaID, $temp);
+                    if($tmpChanged){
+                        $paramChanged = true;
+                    }
                 }
             }
             if (isset($param['realtime_alarm_params'])) {
                 $data = $param['realtime_alarm_params'];
                 if (empty($data)) {
-                    return true;
+                    return [true,$paramLimitChanged,$paramChanged,$rtAlarmChanged];
                 }
                 foreach ($data as $temp) {
-                    $this->realtimealarmconfig_model->updateParameter($cityID, $areaID, $temp);
+                    list($status,$tmpChanged) = $this->realtimealarmconfig_model->updateParameter($cityID, $areaID, $temp);
+                    if($tmpChanged){
+                        $rtAlarmChanged = true;
+                    }
                 }
             }
-            return true;
+            return [true,$paramLimitChanged,$paramChanged,$rtAlarmChanged];
         } catch (Exception $e) {
             throw $e;
         }
-        return false;
+        return [false,$paramLimitChanged,$paramChanged,$rtAlarmChanged];
     }
 }

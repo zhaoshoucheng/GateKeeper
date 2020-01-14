@@ -20,6 +20,7 @@ class Road extends MY_Controller
     {
         parent::__construct();
         $this->load->model('road_model');
+        $this->load->model('waymap_model');
         $this->load->config('junctioncomparison_conf');
         $this->load->config('evaluate_conf');
 
@@ -89,6 +90,10 @@ class Road extends MY_Controller
             throw new Exception('干线创建失败', ERR_DATABASE);
         }
 
+        //操作日志
+        $juncNames = $this->waymap_model->getJunctionNames(implode(",",$params["junction_ids"]));
+        $actionLog = sprintf("干线ID:%s 干线名称：%s，路口名称列表：%s",$res,$params["road_name"],implode(",",$juncNames));
+        $this->insertLog("路口管理","新增干线","新增",$params,$actionLog);
         $this->response($res);
     }
 
@@ -100,20 +105,38 @@ class Road extends MY_Controller
     public function editRoad()
     {
         $params = $this->input->post(null, true);
-
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
             'road_name' => 'required|trim|min_length[1]',
             'road_id' => 'required|trim|min_length[1]',
             'junction_ids[]' => 'required',
         ]);
-
         if (count($params['junction_ids']) < 2) {
             throw new \Exception('请至少选择2个路口做为干线', ERR_PARAMETERS);
         }
 
+        //操作日志
+        $roadInfo = $this->roadService->getRoadInfo($params["road_id"]);
+        $oldJuncIds = explode(",",$roadInfo["logic_junction_ids"]);
+        $newJuncIds = $params["junction_ids"];
+        $interJuncIds=array_intersect($oldJuncIds,$newJuncIds);
+        $delJuncIds = [];
+        $addJuncIds = [];
+        foreach($oldJuncIds as $oldJuncId){
+            if(!in_array($oldJuncId,$newJuncIds)){
+                $delJuncIds[] = $oldJuncId;
+            }
+        }
+        foreach($newJuncIds as $newJuncId){
+            if(!in_array($newJuncId,$oldJuncIds)){
+                $addJuncIds[] = $oldJuncId;
+            }
+        }
+        $addJuncNames = $this->waymap_model->getJunctionNames(implode($addJuncIds));
+        $delJuncNames = $this->waymap_model->getJunctionNames(implode($delJuncIds));
+        $actionLog = sprintf("干线ID：%s，干线名称：%s，新增路口：%s，删除路口：%s",$params["road_id"],$roadInfo["road_name"],implode(",",$addJuncNames),implode(",",$delJuncNames));
+        $this->insertLog("路口管理","编辑干线路口","编辑",$params,$actionLog);
         $data = $this->roadService->updateRoad($params);
-
         $this->response($data);
     }
 
@@ -159,8 +182,12 @@ class Road extends MY_Controller
             'road_id' => 'required|min_length[1]'
         ]);
 
-        $data = $this->roadService->deleteRoad($params);
+        //操作日志
+        $roadInfo = $this->roadService->getRoadInfo($params["road_id"]);
+        $actionLog = sprintf("干线ID：%s，干线名称：%s",$params["road_id"],$roadInfo["road_name"]);
+        $this->insertLog("路口管理","删除干线","删除",$params,$actionLog);
 
+        $data = $this->roadService->deleteRoad($params);
         $this->response($data);
     }
 

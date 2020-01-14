@@ -33,7 +33,11 @@ class AlarmWorksheet extends MY_Controller
             'problem_suggest' => 'trim',
             'to_group'=> 'required|trim',
         ]);
-        $this->alarmWorksheetService->submit($params);
+        $sheetID = $this->alarmWorksheetService->submit($params);
+        
+        //log
+        $actionLog = sprintf("工单ID：%s",$sheetID);
+        $this->insertLog("工单管理","新增工单","新增",$params,$actionLog);
         return $this->response("");
     }
 
@@ -91,6 +95,10 @@ class AlarmWorksheet extends MY_Controller
             'deal_time' => 'required|trim',
         ]);
         $this->alarmWorksheetService->deal($params);
+
+        //log
+        $actionLog = sprintf("工单ID：%s",$sheetID);
+        $this->insertLog("工单管理","反馈工单","新增",$params,$actionLog);
         return $this->response("");
     }
     
@@ -105,6 +113,10 @@ class AlarmWorksheet extends MY_Controller
             'valuation_pics' => 'trim',
         ]);
         $this->alarmWorksheetService->valuation($params);
+        
+        //log
+        $actionLog = sprintf("工单ID：%s",$sheetID);
+        $this->insertLog("工单管理","评价工单","新增",$params,$actionLog);
         return $this->response("");
     }
 
