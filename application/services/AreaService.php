@@ -375,6 +375,12 @@ class AreaService extends BaseService
                 $avg['evaluate'][$hour] = round(array_sum($values) / count($values), 2);
             }
         }
+        $avg['base'] = array_map(function($k, $v) {
+            return [$k, $v];
+        }, array_keys($avg['base']), $avg['base']);
+        $avg['evaluate'] = array_map(function($k, $v) {
+            return [$k, $v];
+        }, array_keys($avg['evaluate']), $avg['evaluate']);
 
         $resultCollection = Collection::make($resultList);
 
