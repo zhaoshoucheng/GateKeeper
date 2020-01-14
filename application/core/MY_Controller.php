@@ -556,13 +556,14 @@ class MY_Controller extends CI_Controller
      * @param $actionLog 动作日志  
      */
     protected function insertLog($module,$action,$actionType,$params,$actionLog){
+        $cityID = $_COOKIE['city_id'] ?? $_REQUEST['city_id']??"";
         $data = [
             "module"=> $module,
             "action"=> $action,
             "action_type"=> $actionType,
             "request_in"=> json_encode($params),
             "action_log"=> $actionLog,
-            "city_id"=> $_REQUEST['city_id']??"",
+            "city_id"=> $cityID,
             "user_name"=> $this->username,
             "group_id"=> $_SERVER['HTTP_DIDI_HEADER_USERGROUP']??"",
             "client_ip"=> $_SERVER["REMOTE_ADDR"]??"",

@@ -176,7 +176,8 @@ class OperateLog_model extends CI_Model
                     }
                 }
             }
-            $result[$rk]["request_in"] = "【".$result[$rk]["action"]."】 ".$requestFormat;
+            // $result[$rk]["request_in"] = "【".$result[$rk]["action"]."】 ".$requestFormat;
+            $result[$rk]["request_in"] = "【".$result[$rk]["action"]."】 ".$result[$rk]["action_log"];
             // var_dump(json_decode($rt["request_in"],true));exit;
         }
         return ["total"=>$total,"list"=>$result];
