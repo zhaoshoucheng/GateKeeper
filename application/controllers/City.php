@@ -40,12 +40,18 @@ class City extends MY_Controller {
             $this->errmsg = "获取开城城市列表失败";
             return;
         }
+
         $permCitys = $this->permCitys;
+        $accessControlPerm = false;
+        if(empty($this->userPerm['group_id']) && empty($permCitys)){
+            //特殊权限绕行：ip白名单、host白名单
+            $accessControlPerm = true;
+        }
         $data = [];
         $pinyinService = new Pinyin('Overtrue\Pinyin\MemoryFileDictLoader');
         foreach ($cityInfos as $info) {
             $cityId = intval($info['city_id']);
-            if (needValidPerm() && !in_array($cityId, $permCitys)) {
+            if (needValidPerm() && !in_array($cityId, $permCitys) && !$accessControlPerm) {
                 continue;
             }
             $center = $info['center_point'];

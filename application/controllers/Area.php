@@ -20,7 +20,7 @@ class Area extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-
+        $this->load->model('waymap_model');
         $this->areaService = new AreaService();
     }
 
@@ -40,7 +40,10 @@ class Area extends MY_Controller
         ]);
 
         $data = $this->areaService->addArea($params);
-
+        //操作日志
+        $juncNames = $this->waymap_model->getJunctionNames(implode(",",$params["junction_ids"]));
+        $actionLog = sprintf("区域ID：%s，区域名称：%s，区域路口列表：%s",$data,$params["area_name"],implode(",",$juncNames));
+        $this->insertLog("路口管理","新增区域","新增",$params,$actionLog);
         $this->response($data);
     }
 
@@ -59,8 +62,36 @@ class Area extends MY_Controller
             'junction_ids[]' => 'required',
         ]);
 
-        $data = $this->areaService->updateArea($params);
+        //操作日志
+        $areaInfo = $this->areaService->getAreaDetail($params);
 
+        $oldJuncIds = array_column($areaInfo["junction_list"],"logic_junction_id");
+        $newJuncIds = $params["junction_ids"];
+        // print_r($areaInfo);exit;
+        // print_r($newJuncIds);
+        // exit;
+        $interJuncIds=array_intersect($oldJuncIds,$newJuncIds);
+        $delJuncIds = [];
+        $addJuncIds = [];
+        foreach($oldJuncIds as $oldJuncId){
+            if(!in_array($oldJuncId,$newJuncIds)){
+                $delJuncIds[] = $oldJuncId;
+            }
+        }
+        foreach($newJuncIds as $newJuncId){
+            if(!in_array($newJuncId,$oldJuncIds)){
+                $addJuncIds[] = $newJuncId;
+            }
+        }
+        
+        $addJuncNames = $this->waymap_model->getJunctionNames(implode(",",$addJuncIds));
+        $delJuncNames = $this->waymap_model->getJunctionNames(implode(",",$delJuncIds));
+        // print_r($delJuncIds);
+        // print_r($delJuncNames);exit; 
+        $actionLog = sprintf("区域ID：%s，区域名称：%s，新增路口：%s，删除路口：%s",$params["area_id"],$params["area_name"],implode(",",$addJuncNames),implode(",",$delJuncNames));
+        $this->insertLog("路口管理","编辑区域路口","编辑",$params,$actionLog);
+
+        $data = $this->areaService->updateArea($params);
         $this->response($data);
     }
 
@@ -77,8 +108,12 @@ class Area extends MY_Controller
             'area_id' => 'required|is_natural_no_zero',
         ]);
 
-        $data = $this->areaService->deleteArea($params);
+        //操作日志
+        $areaInfo = $this->areaService->getAreaDetail($params);
+        $actionLog = sprintf("区域ID：%s，区域名称：%s",$params["area_id"],$areaInfo["area_name"]);
+        $this->insertLog("路口管理","删除区域","删除",$params,$actionLog);
 
+        $data = $this->areaService->deleteArea($params);
         $this->response($data);
     }
 

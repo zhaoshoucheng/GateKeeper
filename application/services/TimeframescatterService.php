@@ -70,6 +70,7 @@ class TimeframescatterService extends BaseService
         $info = [
             "comment"=>$timing["info"]["comment"],
             "id"=>$timing["info"]["logic_flow_id"],
+            "quota_unit"=>"秒",
             "x"=>[
                 "min"=>$timeArr[0].":00",
                 "max"=>$timeArr[1].":00",

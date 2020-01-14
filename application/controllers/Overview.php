@@ -25,6 +25,23 @@ class Overview extends MY_Controller
         $this->overviewService = new OverviewService();
     }
 
+    //南京自定义标题
+    public function nanjingTitle(){
+        if($this->username == "13051117370"){
+            $data = [
+                'title'=>"远程交通信号优化配时中心",
+                'style'=>1
+            ];
+        }else{
+            $data = [
+                'title'=>"南京城市大脑",
+                'style'=>2
+            ];
+        }
+        return $this->response($data);
+
+    }
+
     //pi等级配置
     public function piconfig(){
         $data = [

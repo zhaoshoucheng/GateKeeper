@@ -8,15 +8,17 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Services\ParametermanageService;
+use Services\CommonService;
 
 class Parametermanage extends MY_Controller
 {
     protected $parametermanageService;
+    protected $commonService;
 
     public function __construct()
     {
         parent::__construct();
-
+        $this->commonService = new commonService();
         $this->parametermanageService = new parametermanageService();
     }
 
@@ -75,7 +77,24 @@ class Parametermanage extends MY_Controller
 		$json = $this->security->xss_clean($json);
 
         try {
-            $this->parametermanageService->updateParam($json);
+            list($upateResult,$paramLimitChanged,$offlineParamChanged,$rtParamChanged)=$this->parametermanageService->updateParam($json);
+
+            //操作日志
+            $areaList = $this->commonService->getAllCustomAreaByCityId($json["city_id"]);
+            $areaMap = array_column($areaList,"areaName","areaId");
+            $changeValues = [];
+            if($paramLimitChanged){
+                $changeValues[] = "路口延误阀值";
+            }
+            if($offlineParamChanged){
+                $changeValues[] = "诊断评估指标阈值";
+            }
+            if($rtParamChanged){
+                $changeValues[] = "实时概览指标阈值";
+            }
+            $areaName = $areaMap[$json["area_id"]] ?? "全城";
+            $actionLog = sprintf("区域ID： %s，区域名称：%s，变更信息： %s",$json["area_id"],$areaName,implode(",",$changeValues));
+            $this->insertLog("参数管理","编辑参数","编辑",$params,$actionLog);
             $this->response('');
         } catch (Exception $e) {
             $this->response('', 500, $e);

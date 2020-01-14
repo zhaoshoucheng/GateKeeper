@@ -103,13 +103,14 @@ class RoadService extends BaseService
         foreach ($data['RoadMap'] as $rk => $rv){
             if(count($rv['forward'])>0){
                 $speed = round(array_sum(array_column($rv['forward'],"speed"))/count($rv['forward'])*3.6,2);
+                $stopTimeCycle = round(array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),2);
                 $flowQuota[$rk]['forward_quota']=[
                         'time'=>0,
                         'speed'=>$speed,
-                        'stop_time_cycle'=>round(array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),2),
+                        'stop_time_cycle'=>$stopTimeCycle,
                         'PI'=>round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2),
                         'length'=>array_sum(array_column($rv['forward'],"length")),
-                        'level'=>$this->getSpeedLevel($speed)
+                        'level'=>$this->getStopTimeLevel($stopTimeCycle)
                 ];
                 if($flowQuota[$rk]['forward_quota']['speed']>0){
                     $flowQuota[$rk]['forward_quota']['time'] = round(($flowQuota[$rk]['forward_quota']['length']/ $flowQuota[$rk]['forward_quota']['speed'] * 3.6)/60,1);
@@ -117,13 +118,14 @@ class RoadService extends BaseService
             }
             if(count($rv['backward'])>0){
                 $speed = round(array_sum(array_column($rv['backward'],"speed"))/count($rv['backward'])*3.6,2);
+                $stopTimeCycle = round(array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),2);
                 $flowQuota[$rk]['reverse_quota']=[
                         'time'=>0,
                         'speed'=>$speed,
-                        'stop_time_cycle'=>round(array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),2),
+                        'stop_time_cycle'=>$stopTimeCycle,
                         'PI'=>round(array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),2),
                         'length'=>array_sum(array_column($rv['backward'],"length")),
-                        'level'=>$this->getSpeedLevel($speed)
+                        'level'=>$this->getStopTimeLevel($stopTimeCycle)
                 ];
                 if($flowQuota[$rk]['reverse_quota']['speed'] > 0){
                     $flowQuota[$rk]['reverse_quota']['time'] = round(($flowQuota[$rk]['reverse_quota']['length']/ $flowQuota[$rk]['reverse_quota']['speed'] * 3.6)/60,1);
@@ -167,6 +169,22 @@ class RoadService extends BaseService
             return "C";
         }
         if($speed>=60 && $speed <80){
+            return "B";
+        }
+
+        return "A";
+    }
+    private function getStopTimeLevel($stopTime){
+        if ($stopTime > 0.9){
+            return "E";
+        }
+        if ($stopTime <= 0.9 && $stopTime > 0.7){
+            return "D";
+        }
+        if ($stopTime <= 0.7 && $stopTime > 0.5){
+            return "C";
+        }
+        if ($stopTime <= 0.5 && $stopTime > 0.3){
             return "B";
         }
 
@@ -409,13 +427,13 @@ class RoadService extends BaseService
                     $sjInfo["station"][$sk]["lng"] = (string)$sjInfo["station"][$sk]["lng"];
                     $sjInfo["station"][$sk]["lat"] = (string)$sjInfo["station"][$sk]["lat"];
                 }
-                $res["station"] = $sjInfo["station"];              
+                $res["station"] = $sjInfo["station"];
             }
             // print_r($sjInfo);exit;
             $juncprimap = [];
             if(isset($sjInfo["junctions_info"])){
                 foreach ($sjInfo["junctions_info"] as $key => $value) {
-                    $juncprimap[$value["logic_junction_id"]] = $value["is_priority"];                
+                    $juncprimap[$value["logic_junction_id"]] = $value["is_priority"];
                 }
             }
             // print_r($juncprimap);exit;
@@ -479,6 +497,11 @@ class RoadService extends BaseService
         }
 
         return $results;
+    }
+
+    public function getRoadInfo($roadID){
+        $roadInfo = $this->road_model->getRoadByRoadId($roadID);
+        return $roadInfo;
     }
 
     /**
@@ -822,6 +845,46 @@ class RoadService extends BaseService
             return [];
         }
 
+        // 计算平均值
+        $avg = [
+            'base' => [],
+            'evaluate' => [],
+        ];
+        foreach ($hours as $hour) {
+            $avg['base'][$hour] = [];
+            $avg["evaluate"][$hour] = [];
+        }
+        foreach ($result as $value) {
+            if ($value == null) {
+                continue;
+            }
+            if (in_array($value['date'], $baseDates)) {
+                $avg['base'][$value['hour']][] = $value['quota_value'];
+            } else {
+                $avg['evaluate'][$value['hour']][] = $value['quota_value'];
+            }
+        }
+        foreach ($avg['base'] as $hour => $values) {
+            if (empty($values)) {
+                $avg['base'][$hour] = null;
+            } else {
+                $avg['base'][$hour] = round(array_sum($values) / count($values), 2);
+            }
+        }
+        foreach ($avg['evaluate'] as $hour => $values) {
+            if (empty($values)) {
+                $avg['evaluate'][$hour] = null;
+            } else {
+                $avg['evaluate'][$hour] = round(array_sum($values) / count($values), 2);
+            }
+        }
+        $avg['base'] = array_map(function($k, $v) {
+            return [$k, $v];
+        }, array_keys($avg['base']), $avg['base']);
+        $avg['evaluate'] = array_map(function($k, $v) {
+            return [$k, $v];
+        }, array_keys($avg['evaluate']), $avg['evaluate']);
+
         // 将数据按照 日期（基准 和 评估）进行分组的键名函数
         $baseOrEvaluateCallback = function ($item) use ($baseDates) {
             return in_array($item['date'], $baseDates) ? 'base' : 'evaluate';
@@ -855,6 +918,8 @@ class RoadService extends BaseService
         }
         array_multisort($sorter,SORT_NUMERIC,SORT_ASC,$base);
         $result["base"] = $base;
+
+        $result['avg'] = $avg;
 
 
         $result['info'] = [

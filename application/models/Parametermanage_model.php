@@ -88,10 +88,17 @@ class Parametermanage_model extends CI_Model
                     ->where('area_id', $areaID)
                     ->where('hour', $hour)
                     ->get()->result_array();
-        if (empty($res)) {
-            return $this->db->insert($this->tb, $data);
+        $changed = false;
+        if(empty($res)){
+            $changed = true;
         }
-        return $this->db->where('id', $res[0]['id'])->update($this->tb, $data);
+        if (empty($res)) {
+            return [$this->db->insert($this->tb, $data),$changed];
+        }
+        if(!compareArrayKeysEqual($res[0],$data,["over_saturation_traj_num","over_stop_delay_up","over_saturation_multi_stop_ratio_up","over_saturation_none_stop_ratio_up","over_saturation_queue_length_up","over_saturation_queue_rate_up","spillover_traj_num","spillover_rate_down","spillover_queue_rate_down","spillover_avg_speed_down","unbalance_traj_num","unbalance_free_multi_stop_ratio_up","unbalance_free_none_stop_ratio_up","unbalance_free_queue_length_up","unbalance_over_saturation_multi_stop_ratio_up","unbalance_over_saturation_none_stop_ratio_up","unbalance_over_saturation_queue_length_up",])){
+            $changed = true;
+        }
+        return [$this->db->where('id', $res[0]['id'])->update($this->tb, $data),$changed];
     }
 
     /**
@@ -111,11 +118,17 @@ class Parametermanage_model extends CI_Model
                     ->from($this->parameterLimitTB)
                     ->where('city_id', $cityID)
                     ->get()->result_array();
-        // print_r($res);exit;
+
+        $changed = false;
         if(empty($res)){
-            // print_r($data);exit;
-            return $this->db->insert($this->parameterLimitTB, $data);
+            $changed = true;
         }
-        return $this->db->where('id', $res[0]['id'])->update($this->parameterLimitTB, $data);
+        if($data['city_id']!=$res[0]['city_id'] || $data['cycle_optimization_limit']!=$res[0]['cycle_optimization_limit'] || $data['cycle_optimization_lower_limit']!=$res[0]['cycle_optimization_lower_limit'] || $data['congestion_level_lower_limit']!=$res[0]['congestion_level_lower_limit'] || $data['slow_down_level_lower_limit']!=$res[0]['slow_down_level_lower_limit']){
+            $changed = true;
+        }
+        if(empty($res)){
+            return [$this->db->insert($this->parameterLimitTB, $data),$changed];
+        }
+        return [$this->db->where('id', $res[0]['id'])->update($this->parameterLimitTB, $data),$changed];
     }
 }

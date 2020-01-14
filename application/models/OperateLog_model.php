@@ -2,16 +2,9 @@
 class OperateLog_model extends CI_Model
 {
     private $tb = 'user_operate_log';
+    private $db;
+    private $urlMap;
 
-    /**
-     * @var \CI_DB_query_builder
-     */
-    protected $db;
-
-    /**
-     * OperateLog_model constructor.
-     * @throws \Exception
-     */
     public function __construct()
     {
         parent::__construct();
@@ -20,6 +13,48 @@ class OperateLog_model extends CI_Model
         if (!$isExisted) {
             throw new \Exception('数据表不存在', ERR_DATABASE);
         }
+
+        $this->urlMap = [
+            //路口管理
+            "junction/saveJunctionName"=>["修改路口名称","路口管理"],
+            "Road/addRoad"=>["新增干线","路口管理"],
+            "Road/editRoad"=>["修改干线","路口管理"],
+            "Road/delete"=>["删除干线","路口管理"],
+            "Area/addAreaWithJunction"=>["新增区域","路口管理"],
+            "Area/updateAreaWithJunction"=>["修改区域","路口管理"],
+            "Area/delete"=>["删除区域","路口管理"],
+            "AdpArea/addAreaWithJunction"=>["新增自适应区域","路口管理"],
+            "AdpArea/updateAreaWithJunction"=>["修改自适应区域","路口管理"],
+            "AdpArea/delete"=>["删除自适应区域","路口管理"],
+
+            //flow管理
+            "Mapflow/editFlow"=>["编辑flow名称","flow管理"],
+
+            //配时管理
+            "signal-control/signal-control/signalinout/import"=>["配时导入","配时管理"],
+            "signal-control/signal-control/signalinout/export"=>["配时导出","配时管理"],
+            "signal-control/signal-control/signalversion/releasetiming"=>["配时发布","配时管理"],
+
+            //用户管理
+            "passport-service/login/nanjing_loginout"=>["退出","用户管理"],
+            "passport-service/login/login"=>["登陆","用户管理"],
+            "passport-service/login/adminlogin"=>["管理员登陆","用户管理"],
+
+            //参数管理
+            "parametermanage/editparam"=>["编辑参数","用户管理"],
+
+            //报告
+            "signalpro-report/api/report/create"=>["新增","报告"],
+
+            //任务管理
+            "optroadtask/update"=>["新增、修改干线协调优化任务","任务管理"],
+            "opttask/action"=>["更新状态","任务管理"],
+
+            //工单管理
+            "alarmWorksheet/submit"=>["新增","报告"],
+            "alarmWorksheet/deal"=>["工单处理","报告"],
+            "alarmWorksheet/valuation"=>["工单评价","报告"],
+        ];
     }
 
     /**
@@ -49,84 +84,14 @@ class OperateLog_model extends CI_Model
     }
 
     /**
-     * 写入日志
+     * add log
      *
      * @param $data array Y 字段键值对
      * @return bool
      */
     public function insertLog($params)
-    { 
-        $data = [
-            'operation_time' => date("Y-m-d H:i:s"),
-        ];
-        $data = array_merge($params,$data);
-
-        //设置要过滤的url
-        $filterURL = [
-
-            //路口管理
-            "junction/saveJunctionName"=>["修改路口名称","路口管理"],
-            "Road/addRoad"=>["新增干线","路口管理"],
-            "Road/editRoad"=>["修改干线","路口管理"],
-            "Road/delete"=>["删除干线","路口管理"],
-            "Area/addAreaWithJunction"=>["新增区域","路口管理"],
-            "Area/updateAreaWithJunction"=>["修改区域","路口管理"],
-            "Area/delete"=>["删除区域","路口管理"],
-            "AdpArea/addAreaWithJunction"=>["新增自适应区域","路口管理"],
-            "AdpArea/updateAreaWithJunction"=>["修改自适应区域","路口管理"],
-            "AdpArea/delete"=>["删除自适应区域","路口管理"],
-
-            "Mapflow/editFlow"=>["编辑flow名称","flow管理"],
-
-            //配时管理
-            "signal-control/signal-control/signalinout/import"=>["配时导入","配时管理"],
-            "signal-control/signal-control/signalinout/export"=>["配时导出","配时管理"],
-            "signal-control/signal-control/signalversion/releasetiming"=>["配时发布","配时管理"],
-
-            //用户管理
-            "passport-service/login/nanjing_loginout"=>["退出","用户管理"],
-            "passport-service/login/login"=>["登陆","用户管理"],
-            "passport-service/login/adminlogin"=>["管理员登陆","用户管理"],
-
-            //参数管理
-            "parametermanage/editparam"=>["编辑参数","用户管理"],
-
-            //报告
-            "signalpro-report/api/report/create"=>["新增","报告"],
-
-            //任务管理
-            "optroadtask/update"=>["新增、修改干线协调优化任务","任务管理"],
-            "opttask/action"=>["更新状态","任务管理"],
-
-            //工单管理
-            "alarmWorksheet/submit"=>["新增","报告"],
-            "alarmWorksheet/deal"=>["工单处理","报告"],
-            "alarmWorksheet/valuation"=>["工单评价","报告"],
-            
-            // "signal-control/signal-control/signaledit/group/update"=>["保存灯组信息","配时管理"],
-            // "signal-control/signal-control/signaledit/updateConstraint"=>["删除自适应区域","配时管理"],
-            // "signal-control/signal-control/signaledit/updateConstraint"=>["删除自适应区域","配时管理"],
-            // "signal-control/signal-control/signaledit/updateconflictphase"=>["删除自适应区域","配时管理"],
-            // "signal-control/signal-control/signaledit/updateConstraint"=>["删除自适应区域","配时管理"],
-            // "signal-control/signal-control/signaledit/updateringinfo"=>["删除自适应区域","配时管理"],
-            // "signal-control/signal-control/signaledit/updateConstraint"=>["删除自适应区域","配时管理"],
-            // "signal-control/signal-control/signaledit/scheduleinfoupdate"=>["删除自适应区域","配时管理"],
-        ];
-        $filterArr = [];
-        foreach($filterURL as $k=>$f){
-            $filterArr[] = [
-                "url"=>$k,
-                "module"=>$f[1],
-                "action"=>$f[0],
-            ];
-        }
-        print_r(json_encode($filterArr));exit;
-        if(!isset($filterURL[$params["url"]])){
-            return;
-        }
-        $data["action"] = $filterURL[$params["url"]][0];
-        $data["module"] = $filterURL[$params["url"]][1];
-        return $this->db->insert($this->tb, $data);
+    {
+        return $this->db->insert($this->tb, $params);
     }
 
     /**
@@ -211,7 +176,8 @@ class OperateLog_model extends CI_Model
                     }
                 }
             }
-            $result[$rk]["request_in"] = "【".$result[$rk]["action"]."】 ".$requestFormat;
+            // $result[$rk]["request_in"] = "【".$result[$rk]["action"]."】 ".$requestFormat;
+            $result[$rk]["request_in"] = "【".$result[$rk]["action"]."】 ".$result[$rk]["action_log"];
             // var_dump(json_decode($rt["request_in"],true));exit;
         }
         return ["total"=>$total,"list"=>$result];

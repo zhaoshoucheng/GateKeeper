@@ -8,6 +8,9 @@
 include_once "Inroute_Controller.php";
 include_once "AsyncTask_Controller.php";
 
+
+use \Services\OperateLogService;
+
 /**
  * Class MY_Controller
  *
@@ -26,6 +29,7 @@ class MY_Controller extends CI_Controller
     public $templates = [];
     public $routerUri = '';
     public $username = 'unknown';
+    public $userapp = '';
     public $passportInfo = [];
     public $userPerm = [];
     public $permCitys = [];
@@ -37,7 +41,7 @@ class MY_Controller extends CI_Controller
 
     protected $debug = false;
     protected $timingType = 1; // 0，全部；1，人工；2，配时反推；3，信号机上报
-
+    protected $operateLogService;
 
     public function __construct()
     {
@@ -53,6 +57,7 @@ class MY_Controller extends CI_Controller
         $escapeSso = $this->config->item('white_escape_sso');
         $escapeClient = $this->config->item('white_token_clientip_escape');
         $escapeToken = $this->config->item('white_token_escape');
+        $this->operateLogService = new OperateLogService();
 
         $this->load->config('nconf');
         $this->routerUri = $this->uri->ruri_string();
@@ -155,6 +160,10 @@ class MY_Controller extends CI_Controller
         //从网关获取用户名
         if(!empty($_SERVER["HTTP_DIDI_HEADER_USERNAME"])){
             $this->username = $_SERVER["HTTP_DIDI_HEADER_USERNAME"];
+        }
+        //从网关获取app租户名称
+        if(!empty($_SERVER["HTTP_DIDI_HEADER_USERAPP"])){
+            $this->userapp = $_SERVER["HTTP_DIDI_HEADER_USERAPP"];
         }
         if(!empty($_SERVER["HTTP_DIDI_HEADER_PASSPORTINFO"])){
             $this->passportInfo = json_decode($_SERVER["HTTP_DIDI_HEADER_PASSPORTINFO"],true);
@@ -540,5 +549,32 @@ class MY_Controller extends CI_Controller
         if(!empty(json_decode($params,true))){
             $_POST = json_decode($params,true);
         }
+    }
+
+    /**
+     * 插入日志
+     * 
+     * @param $module 模块
+     * @param $action 操作名  
+     * @param $actionType 操作类型  
+     * @param $params 请求参数  
+     * @param $actionLog 动作日志  
+     */
+    protected function insertLog($module,$action,$actionType,$params,$actionLog){
+        $cityID = $_COOKIE['city_id'] ?? $_REQUEST['city_id']??"";
+        $data = [
+            "module"=> $module,
+            "action"=> $action,
+            "action_type"=> $actionType,
+            "request_in"=> json_encode($params),
+            "action_log"=> $actionLog,
+            "city_id"=> $cityID,
+            "user_name"=> $this->username,
+            "group_id"=> $_SERVER['HTTP_DIDI_HEADER_USERGROUP']??"",
+            "client_ip"=> $_SERVER["REMOTE_ADDR"]??"",
+            "url"=> $this->routerUri,
+            "operation_time"=> date("Y-m-d H:i:s"),
+        ];
+        $this->operateLogService->insertLog($data);
     }
 }

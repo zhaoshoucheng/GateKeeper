@@ -20,6 +20,7 @@ class Mapflow extends MY_Controller
 
         $this->load->helper('http');
         $this->load->config('nconf');
+        $this->load->model('waymap_model');
         $this->mapFlowService = new MapFlowService();
     }
 
@@ -87,6 +88,12 @@ class Mapflow extends MY_Controller
             return sprintf("[INFO] [%s] _editFlow_log||log=%s",date("Y-m-d H:i:s"),json_encode($logData));
         };
         file_put_contents("/home/xiaoju/php7/logs/cloud/itstool/editFlow.log", $logFormat($logData).PHP_EOL, FILE_APPEND);
+        
+        //操作日志
+        $juncNames = $this->waymap_model->getJunctionNames($params["logic_junction_id"]);
+        // print_r($juncNames);exit;
+        $actionLog = sprintf("路口ID：%s，路口名称：%s，flowID：%s，flow描述：%s，flow状态：%s",$params["logic_junction_id"],implode(",",$juncNames),$params["logic_flow_id"],$params["phase_name"],$params["is_hidden"]?"隐藏":"显示");
+        $this->insertLog("flow管理","修改flow描述","编辑",$params,$actionLog);
         $this->response([]);
     }
 }

@@ -385,3 +385,33 @@ if (!function_exists('splitTimeDurationToPoints')) {
         return $timePoints;
     }
 }
+
+//比较两个数组的所有key是否相等
+if (!function_exists('compareArrayKeysEqual')) {
+    function compareArrayKeysEqual($array1, $array2, $compareKeys, $ignoreCase=true){
+        if($ignoreCase){
+            foreach($array2 as $k=>$v){
+                $array2[strtolower($k)] = $v;
+            }
+            foreach($array1 as $k=>$v){
+                $array1[strtolower($k)] = $v;
+            }
+        }
+        foreach($compareKeys as $key){
+            if($ignoreCase){
+                $key = strtolower($key);
+            }
+            if(!isset($array1[$key]) || !isset($array2[$key])){
+                return false;
+            }
+            if($ignoreCase){
+                $array1[$key] = strtolower($array1[$key]);   
+                $array2[$key] = strtolower($array2[$key]);   
+            }
+            if($array1[$key]!=$array2[$key]){
+                return false;
+            }
+        }
+        return true;
+    }
+}

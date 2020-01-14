@@ -54,9 +54,17 @@ class Realtimealarmconfig_model extends CI_Model
                     ->where('area_id', $areaID)
                     ->where('hour', $hour)
                     ->get()->result_array();
-        if (empty($res)) {
-            return $this->db->insert($this->tb, $data);
+        $changed = false;
+        if(empty($res)){
+            $changed = true;
         }
-        return $this->db->where('id', $res[0]['id'])->update($this->tb, $data);
+        if (empty($res)) {
+            return [$this->db->insert($this->tb, $data),$changed];
+        }
+
+        if(!compareArrayKeysEqual($res[0],$data,["oversatutrailnumpara","greenslacktrailnumpara","stopdelaypara","multistopupperbound","multistoplowerbound","nonestopupperbound","nonestoplowerbound","queuelengthupperbound","queuelengthlowerbound","queueratiolowbound","spillovertrailnumpara","queueratiopara","spilloveralarmtrailnumpara","spilloverstopdelaypara"])){
+            $changed = true;
+        }
+        return [$this->db->where('id', $res[0]['id'])->update($this->tb, $data),$changed];
     }
 }
