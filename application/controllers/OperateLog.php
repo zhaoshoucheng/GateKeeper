@@ -29,7 +29,13 @@ class OperateLog extends MY_Controller
             // 'module' => 'required|trim',
             // 'action'     => 'required|trim',
             // 'action_type'       => 'required|trim',
-        ],$params);
+        ],$params); 
+
+        $passportInfo = $_SERVER['HTTP_DIDI_HEADER_PASSPORTINFO'] ?? "";
+        $passportArr = json_decode($passportInfo,true);
+        if($passportArr["level"]!=9){
+            $params["user_name"] = $passportArr["phone"];
+        }
         $data = $this->operateLogService->pageList($params);
         $this->response($data);
     }

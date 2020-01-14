@@ -209,7 +209,17 @@ class Waymap_model extends CI_Model
 
         return $this->get($url, $data);
     }
-
+    
+    public function getJunctionNames($logic_ids)
+    {
+        $juncInfo = $this->getJunctionInfo($logic_ids);
+        $juncNames = [];
+        foreach($juncInfo as $eachJunc){
+            $juncNames[] = $eachJunc["name"];
+        }
+        return $juncNames;
+    }
+    
     /**
      * 根据路口ID串获取路口名称
      *
