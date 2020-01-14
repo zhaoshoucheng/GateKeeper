@@ -29,6 +29,7 @@ class MY_Controller extends CI_Controller
     public $templates = [];
     public $routerUri = '';
     public $username = 'unknown';
+    public $userapp = '';
     public $passportInfo = [];
     public $userPerm = [];
     public $permCitys = [];
@@ -159,6 +160,10 @@ class MY_Controller extends CI_Controller
         //从网关获取用户名
         if(!empty($_SERVER["HTTP_DIDI_HEADER_USERNAME"])){
             $this->username = $_SERVER["HTTP_DIDI_HEADER_USERNAME"];
+        }
+        //从网关获取app租户名称
+        if(!empty($_SERVER["HTTP_DIDI_HEADER_USERAPP"])){
+            $this->userapp = $_SERVER["HTTP_DIDI_HEADER_USERAPP"];
         }
         if(!empty($_SERVER["HTTP_DIDI_HEADER_PASSPORTINFO"])){
             $this->passportInfo = json_decode($_SERVER["HTTP_DIDI_HEADER_PASSPORTINFO"],true);
