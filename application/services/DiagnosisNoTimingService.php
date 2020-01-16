@@ -70,6 +70,26 @@ class DiagnosisNoTimingService extends BaseService
         return $result;
     }
 
+    public function getRealtimeFlowQuotas($params)
+    {
+        $time_range = explode('-', $params['time_range']);
+        $result = [];
+
+        //定义路口问题阈值规则
+        $result["junction_question"] = [];
+
+        //定义指标名称及注释
+        $quotaKey = $this->config->item('realtime_flow_quota_key');
+        $result["flow_quota_all"] = $quotaKey;
+
+        //movements从路网获取方向信息
+        $result["movements"] = $this->diagnosisNoTiming_model->getRealtimeMovementQuota(
+            $params['city_id'], $params['junction_id'], $time_range[0], $time_range[1], $params['dates'][0]);
+
+        $result["junction_id"] = $params["junction_id"];
+        return $result;
+    }
+
     /**
      * 获取路口所有方向信息(相位、方向、坐标)
      * @param array $data 请求参数

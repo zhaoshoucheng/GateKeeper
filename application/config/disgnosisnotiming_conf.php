@@ -39,6 +39,37 @@ $config['flow_quota_key'] = [
     ],
 ];
 
+$config['realtime_flow_quota_key'] = [
+    'route_length' => [
+        'name' => '路段长度', // 中文名称
+        'unit' => '米'       // 单位
+    ],
+    'stop_delay_up' => [
+        'name' => '停车延误',
+        'unit' => '秒',
+    ],
+    'avg_stop_num_up' => [
+        'name' => '停车次数',
+        'unit' => '',
+    ],
+    'spillover_rate_up' => [
+        'name' => '溢流比率',
+        'unit' => '',
+    ],
+    'stop_rate' => [
+        'name' => '停车比率',
+        'unit' => '',
+    ],
+    'confidence' => [
+        'name' => '置信度',
+        'unit' => '',
+    ],
+    'pi_rate' => [
+        'name' => '指标评价',
+        'unit' => '',
+    ],
+];
+
 // 诊断详情flow指标
 $config['flow_quota_round'] = [
     'queue_length' => [
@@ -66,12 +97,27 @@ $config['flow_quota_round'] = [
             return round($val, 2);
         },
     ],
+    'stop_delay_up' => [
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+    ],
     'stop_time_cycle' => [
         'round' => function ($val) {
             return round($val, 2);
         },
     ],
+    'avg_stop_num_up' => [
+        'round' => function ($val) {
+            return round($val, 2);
+        },
+    ],
     'spillover_rate' => [
+        'round' => function ($val) {
+            return round($val, 4);
+        },
+    ],
+    'spillover_rate_up' => [
         'round' => function ($val) {
             return round($val, 4);
         },
