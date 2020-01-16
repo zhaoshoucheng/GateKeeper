@@ -595,8 +595,7 @@ class DiagnosisNoTiming_model extends CI_Model
 
     // 诊断 实时指标
     // A <=10 B <=30 C <=60 D <=80 E
-    public function getRealtimeMovementQuota($cityID, $logicJunctionID, $start_hour, $end_hour, $date)
-    {
+    public function getRealtimeMovementQuota($cityID, $logicJunctionID, $start_hour, $end_hour, $date) {
         $flowList = $this->getRealtimeFlowQuotaList($cityID, $logicJunctionID, $date, $start_hour, $end_hour);
 
         $itemTrajSum = [];
@@ -689,23 +688,15 @@ class DiagnosisNoTiming_model extends CI_Model
                 $movementInfo["sort_key"] = $item["sort_key"];
 
                 //防御性代码处理
-                if(isset($movementInfo["queue_length"])
-                    && isset($movementInfo["route_length"])
-                    && isset($movementInfo["spillover_rate"])
+                if(isset($movementInfo["spillover_rate_up"])
                     && isset($movementInfo["stop_rate"])
                     && isset($movementInfo["free_flow_speed"])
                 ){
-                    if(intval($movementInfo["queue_length"])>intval($movementInfo["route_length"])){
-                        $movementInfo["queue_length"] = $movementInfo["route_length"];
-                    }
-                    if($movementInfo["spillover_rate"]>1){
-                        $movementInfo["spillover_rate"] = 1;
+                    if($movementInfo["spillover_rate_up"]>1){
+                        $movementInfo["spillover_rate_up"] = 1;
                     }
                     if($movementInfo["stop_rate"]>1){
                         $movementInfo["stop_rate"] = 1;
-                    }
-                    if($movementInfo["free_flow_speed"]>80){
-                        $movementInfo["free_flow_speed"] = 80;
                     }
                 }
 
