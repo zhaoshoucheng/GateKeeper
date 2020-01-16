@@ -91,7 +91,8 @@ class Mapflow extends MY_Controller
         
         //操作日志
         $juncNames = $this->waymap_model->getJunctionNames($params["logic_junction_id"]);
-        $actionLog = sprintf("路口ID：%s，路口名称：%s，flowID：%s，flow描述：%s，flow状态：%s",$params["logic_junction_id"],explode(",",$juncNames),$params["logic_flow_id"],$params["phase_name"],$params["is_hidden"]?"显示":"隐藏");
+        // print_r($juncNames);exit;
+        $actionLog = sprintf("路口ID：%s，路口名称：%s，flowID：%s，flow描述：%s，flow状态：%s",$params["logic_junction_id"],implode(",",$juncNames),$params["logic_flow_id"],$params["phase_name"],$params["is_hidden"]?"隐藏":"显示");
         $this->insertLog("flow管理","修改flow描述","编辑",$params,$actionLog);
         $this->response([]);
     }

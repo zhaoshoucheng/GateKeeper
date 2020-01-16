@@ -198,6 +198,7 @@ class AreaService extends BaseService
             'center_lng' => $centerLng,
             'area_id' => $areaId,
             'area_name' => $areaInfo['area_name'] ?? '',
+            'city_id' => $areaInfo['city_id'] ?? '',
             'junction_list' => $junctionInfoList,
         ];
     }

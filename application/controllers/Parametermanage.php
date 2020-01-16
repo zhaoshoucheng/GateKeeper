@@ -87,8 +87,7 @@ class Parametermanage extends MY_Controller
                 $changeValues[] = "路口延误阀值";
             }
             if($offlineParamChanged){
-                $changeValues[] = "诊断评估指标阈值
-";
+                $changeValues[] = "诊断评估指标阈值";
             }
             if($rtParamChanged){
                 $changeValues[] = "实时概览指标阈值";
