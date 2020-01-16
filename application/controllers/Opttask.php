@@ -68,6 +68,7 @@ class Opttask extends MY_Controller
             'action' => 'required|is_natural',
         ]);
 
+        $taskInfo = $this->opttaskService->TaskInfo($params);
         $data = $this->opttaskService->UpdateTaskStatus($params);
 
         if ($data != true) {
@@ -77,7 +78,6 @@ class Opttask extends MY_Controller
 
         //log
         if(in_array($params["action"], [0,1])){
-            $taskInfo = $this->opttaskService->TaskInfo($params);
             $taskName = $taskInfo["task_name"] ?? "";
             $taskAction = "";
             if($params["action"]==0){
@@ -91,7 +91,6 @@ class Opttask extends MY_Controller
             $this->response("");
         }
         if(in_array($params["action"], [2])){
-            $taskInfo = $this->opttaskService->TaskInfo($params);
             $taskName = $taskInfo["task_name"] ?? "";
             $taskAction = "";
             $actionLog = sprintf("任务ID：%s，任务名称：%s",$params["task_id"],$taskName);

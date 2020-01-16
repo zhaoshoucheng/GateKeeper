@@ -65,7 +65,7 @@ class AdpArea extends MY_Controller
 
         //操作日志
         $areaInfo = $this->areaService->getAreaDetail($params);
-        $oldJuncIds = $areaInfo["junction_list"];
+        $oldJuncIds = array_column($areaInfo["junction_list"],"logic_junction_id");
         $newJuncIds = $params["junction_ids"];
         $interJuncIds=array_intersect($oldJuncIds,$newJuncIds);
         $delJuncIds = [];
@@ -77,12 +77,12 @@ class AdpArea extends MY_Controller
         }
         foreach($newJuncIds as $newJuncId){
             if(!in_array($newJuncId,$oldJuncIds)){
-                $addJuncIds[] = $oldJuncId;
+                $addJuncIds[] = $newJuncId;
             }
         }
-        $addJuncNames = $this->waymap_model->getJunctionNames(implode($addJuncIds));
-        $delJuncNames = $this->waymap_model->getJunctionNames(implode($delJuncIds));
-        $actionLog = sprintf("区域ID：%s，区域名称：%s，新增路口：%s，删除路口：%s",$params["road_id"],$roadInfo["road_name"],implode(",",$addJuncNames),implode(",",$delJuncNames));
+        $addJuncNames = $this->waymap_model->getJunctionNames(implode(",",$addJuncIds));
+        $delJuncNames = $this->waymap_model->getJunctionNames(implode(",",$delJuncIds));
+        $actionLog = sprintf("区域ID：%s，区域名称：%s，新增路口：%s，删除路口：%s",$params["area_id"],$params["area_name"],implode(",",$addJuncNames),implode(",",$delJuncNames));
         $this->insertLog("路口管理","编辑自适应区域路口","编辑",$params,$actionLog);
 
         $data = $this->areaService->updateArea($params);

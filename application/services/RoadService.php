@@ -498,7 +498,7 @@ class RoadService extends BaseService
 
         return $results;
     }
-    
+
     public function getRoadInfo($roadID){
         $roadInfo = $this->road_model->getRoadByRoadId($roadID);
         return $roadInfo;
@@ -878,6 +878,12 @@ class RoadService extends BaseService
                 $avg['evaluate'][$hour] = round(array_sum($values) / count($values), 2);
             }
         }
+        $avg['base'] = array_map(function($k, $v) {
+            return [$k, $v];
+        }, array_keys($avg['base']), $avg['base']);
+        $avg['evaluate'] = array_map(function($k, $v) {
+            return [$k, $v];
+        }, array_keys($avg['evaluate']), $avg['evaluate']);
 
         // 将数据按照 日期（基准 和 评估）进行分组的键名函数
         $baseOrEvaluateCallback = function ($item) use ($baseDates) {

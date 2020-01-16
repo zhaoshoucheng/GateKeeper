@@ -274,6 +274,25 @@ class DiagnosisNoTiming_model extends CI_Model
         }
     }
 
+    public function getRealtimeFlowQuotaList($cityID, $logicJunctionID, $date, $start_hour, $end_hour)
+    {
+        $req = [
+            'city_id' => intval($cityID),
+            'logic_junction_id' => $logicJunctionID,
+            'date' => $date,
+            'start_hour' => $start_hour . ':00',
+            'end_hour' => $end_hour . ':00',
+        ];
+        $url = $this->config->item('data_service_interface');
+        $res = httpPOST($url . '/GetRealtimeJunctionDataBetween', $req, 0, 'json');
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            return $res['data'];
+        } else {
+            return [];
+        }
+    }
+
     /**
      * 获取相位报警数据
      * @param $cityID
@@ -552,6 +571,178 @@ class DiagnosisNoTiming_model extends CI_Model
             }
 
             $pi = 1*$nonsaturation_ratio*$nonsaturation_pi + 5*$oversaturation_ratio*$oversaturation_pi + 10*$spillover_ratio*$spillover_pi;
+
+            if ($pi <= 10) {
+                $pi_rate = 'A';
+            } elseif ($pi <= 30) {
+                $pi_rate = 'B';
+            } elseif ($pi <= 60) {
+                $pi_rate = 'C';
+            } elseif ($pi <= 80) {
+                $pi_rate = 'D';
+            } else {
+                $pi_rate = 'E';
+            }
+
+            $movements_pi[$values[0]['logic_flow_id']] = [
+                'pi' => $pi,
+                'pi_rate' => $pi_rate,
+            ];
+        }
+
+        return $movements_pi;
+    }
+
+    // 诊断 实时指标
+    // A <=10 B <=30 C <=60 D <=80 E
+    public function getRealtimeMovementQuota($cityID, $logicJunctionID, $start_hour, $end_hour, $date) {
+        $flowList = $this->getRealtimeFlowQuotaList($cityID, $logicJunctionID, $date, $start_hour, $end_hour);
+
+        $itemTrajSum = [];
+        foreach ($flowList as $item){
+            $item['stop_rate'] = $item['one_stop_ratio_up'] + $item['multi_stop_ratio_up'];
+            //计算权重
+            if(!isset($quotaWeightSum[$item['logic_flow_id']]["flowWeight"])){
+                $quotaWeightSum[$item['logic_flow_id']]["flowWeight"] = 0;
+            }
+            $quotaWeightSum[$item['logic_flow_id']]["flowWeight"]+=$item["traj_num"];
+
+            foreach ($item as $quotaKey => $quotaValue) {
+                if (!in_array($quotaKey, ["stop_delay_up", "avg_stop_num_up", "spillover_rate_up", "stop_rate"])) {
+                    continue;
+                }
+                if(!isset($itemTrajSum[$item['logic_flow_id']][$quotaKey])){
+                    $itemTrajSum[$item['logic_flow_id']][$quotaKey] = 0;
+                }
+
+                $itemTrajSum[$item['logic_flow_id']][$quotaKey] += $quotaValue*$item["traj_num"];
+            }
+        }
+
+        //计算运算
+        $result = [];
+        $quotaRound = $this->config->item('flow_quota_round');
+        foreach ($itemTrajSum as $flowID=>$itemSum){
+            foreach ($itemSum as $quotaKey => $quotaValue){
+                $avgValue = $quotaWeightSum[$flowID]["flowWeight"]>0 ?
+                $quotaValue/$quotaWeightSum[$flowID]["flowWeight"] : 0;
+                $result[$flowID][$quotaKey] = isset($quotaRound[$quotaKey]['round'])
+                    ? $quotaRound[$quotaKey]['round']($avgValue) : $avgValue;
+            }
+        }
+
+        //相位信息
+        $dateVersions = $this->waymap_model->getDateVersion([date("Y-m-d",strtotime("-1 day"))]);
+        $firstDataVersion = "";
+        if(!empty($dateVersions)){
+            $firstDataVersion = current($dateVersions);
+        }
+        // print_r($firstDataVersion);exit;
+        $flowsMovement = $this->waymap_model->getFlowMovement($cityID, $logicJunctionID, "all", 1, $firstDataVersion);
+        $flows = array_map(function ($v) {
+            $v = $this->adjustPhase($v);
+            return $v;
+        }, $flowsMovement);
+        $flowsUpDownJunction = [];
+        foreach ($flowsMovement as $value) {
+            $flowsUpDownJunction[$value["logic_flow_id"]] = [
+                "upstream_junction_id"=>$value["upstream_junction_id"],
+                "downstream_junction_id"=>$value["downstream_junction_id"],
+            ];
+        }
+        $movements = [];
+        if (empty($flows)) {
+            return [];
+        }
+
+        $info32 = $this->waymap_model->getFlowInfo32($logicJunctionID);
+        if(empty($info32)){
+            return [];
+        }
+        $flowMap = array_column($info32,"phase_name","logic_flow_id");
+        //使用flow备注名称统一处理名称
+        $keys = [];
+        foreach ($flows as $idx => $flow) {
+            $keys[$idx] = $flow['sort_key'];
+        }
+        array_multisort($keys, SORT_NUMERIC, SORT_ASC, $flows);
+        foreach ($flows as $item) {
+            $flowId = $item["logic_flow_id"];
+            $comment = $item["phase_name"];
+            if(isset($flowMap[$flowId])){
+                $comment=$flowMap[$flowId];
+            }
+            $movementInfo = [
+                "confidence" => $flowId,
+                "movement_id" => $flowId,
+                "comment" => $comment,
+                "route_length" => $item["in_link_length"],
+            ];
+
+
+            if (isset($result[$flowId])) {
+                $movementInfo = array_merge($movementInfo, $result[$flowId]);
+                $movementInfo["confidence"] = $quotaRound["confidence"]['round']($quotaWeightSum[$flowId]["flowWeight"]);
+
+
+                $movementInfo["sort_key"] = $item["sort_key"];
+
+                //防御性代码处理
+                if(isset($movementInfo["spillover_rate_up"])
+                    && isset($movementInfo["stop_rate"])
+                    && isset($movementInfo["free_flow_speed"])
+                ){
+                    if($movementInfo["spillover_rate_up"]>1){
+                        $movementInfo["spillover_rate_up"] = 1;
+                    }
+                    if($movementInfo["stop_rate"]>1){
+                        $movementInfo["stop_rate"] = 1;
+                    }
+                }
+
+                $movementInfo["downstream_junction_id"] = $flowsUpDownJunction[$flowId]["downstream_junction_id"]??"";
+                $movementInfo["upstream_junction_id"] = $flowsUpDownJunction[$flowId]["upstream_junction_id"]??"";
+
+                $movements[] = $movementInfo;
+            }
+        }
+
+        $movements_pi = $this->cal_realtime_movement_pi($flowList);
+        foreach ($movements as $key => $value) {
+            if (isset($movements_pi[$value['movement_id']])) {
+                $movements[$key]['pi'] = $movements_pi[$value['movement_id']]['pi'];
+                $movements[$key]['pi_rate'] = $movements_pi[$value['movement_id']]['pi_rate'];
+            } else {
+                $movements[$key]['pi'] = -1;
+                $movements[$key]['pi_rate'] = 'C';
+            }
+        }
+        return $movements;
+    }
+
+    // 计算flow pi及等级，返回map
+    // A <=10 B <=30 C <=60 D <=80 E
+    private function cal_realtime_movement_pi($flowList) {
+        $movements_pi = [];
+
+        $m = [];
+        foreach ($flowList as $value) {
+            if (!isset($m[$value['logic_flow_id']])) {
+                $m[$value['logic_flow_id']] = [];
+            }
+            $m[$value['logic_flow_id']][] = $value;
+        }
+
+        foreach ($m as $values) {
+            $pi_sum = 0;
+            $traj_count = 0;
+
+            foreach ($values as $value) {
+                $traj_count += $value['traj_num'];
+                $pi_sum += (1*$value['one_stop_ratio_up']*$value['one_stop_pi_up']+5*$value['multi_stop_ratio_up']*$value['multi_stop_pi_up']+10*$value['spillover_rate_down']*$value['spillover_pi_down']) * $value['traj_num'];
+            }
+
+            $pi = $traj_count == 0 ? 0 : round($pi_sum / $traj_count, 2);
 
             if ($pi <= 10) {
                 $pi_rate = 'A';

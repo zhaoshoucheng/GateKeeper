@@ -18,7 +18,7 @@ class OperateLog extends MY_Controller
     }
 
     public function pageList() {
-        $params = $this->input->get(null, true);
+        $params = $this->input->post(null);
         $this->get_validate([
             'city_id' => 'required|trim',
             'page_size' => 'required|trim',
