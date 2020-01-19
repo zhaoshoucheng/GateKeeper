@@ -254,6 +254,9 @@ class Report extends MY_Controller
             'page_size' => 'required',
         ]);
 
+        $params['userapp'] = $this->userapp;
+
+
         $data = $this->reportService->getReportList($params);
 
         $this->response($data);
