@@ -31,9 +31,41 @@ class Pi_model extends CI_Model{
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
+    public function getGroupJuncAvgPiWithDates($cityID,$logic_junction_ids,$dates,$hours){
+
+            $req = [
+                'city_id' => (int)$cityID,
+                'logic_junction_ids' => $logic_junction_ids,
+                "dates" => $dates,
+                'hours'=>$hours
+            ];
+
+            $url = $this->config->item('data_service_interface');
+
+
+            $res = httpPOST($url . '/report/GetPiByJunction', $req, 0, 'json');
+            $res = json_decode($res,true);
+            if(empty($res)){
+                return [];
+            }
+//            var_dump($req);
+            $trajSum = 0;
+            $piSum = 0;
+            foreach ($res['data'] as $v){
+                $trajSum += $v['traj_count'];
+                $piSum += $v['pi']*$v['traj_count'];
+            }
+            if($trajSum>0){
+                return $piSum/$trajSum;
+            }
+            return 0;
+
+
+    }
+
     public function getGroupJuncPiWithDatesHours($cityID,$logic_junction_ids,$dates,$hours){
-        //南京pi数据迁入es
-        if($cityID == 11){
+        //南京,济南pi数据迁入es
+        if($cityID == 11 || $cityID == 12){
 //            $st = date('Ymd',strtotime($dates[0]));
 //            $et = date('Ymd',strtotime($dates[count($dates)-1]));
             $req = [

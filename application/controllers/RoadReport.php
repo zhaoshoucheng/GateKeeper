@@ -29,6 +29,7 @@ class RoadReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        $params['userapp'] = $this->userapp;
 
         $data = $this->roadReportService->introduction($params);
         $this->response($data);
