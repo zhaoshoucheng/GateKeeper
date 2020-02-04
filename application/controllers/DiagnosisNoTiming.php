@@ -261,6 +261,7 @@ class DiagnosisNoTiming extends MY_Controller
             }
         }
         $res = $this->dianosisService->getJunctionAlarmDataByHour($params, $this->userPerm);
+        
         $this->response($res);
     }
 
