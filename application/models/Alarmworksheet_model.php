@@ -37,7 +37,8 @@ class Alarmworksheet_model extends CI_Model
      */
     public function insert($params)
     {
-        return $this->db->insert('alarm_worksheet', $params);
+        $this->db->insert('alarm_worksheet', $params);
+        return $this->db->insert_id();
     }
 
     public function find($params)
