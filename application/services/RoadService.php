@@ -104,13 +104,15 @@ class RoadService extends BaseService
             if(count($rv['forward'])>0){
                 $speed = round(array_sum(array_column($rv['forward'],"speed"))/count($rv['forward'])*3.6,2);
                 $stopTimeCycle = round(array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),2);
+                $stopRate = round(array_sum(array_column($rv['forward'],"one_stop_ratio_up"))/count($rv['forward']),2) + round(array_sum(array_column($rv['forward'],"multi_stop_ratio_up"))/count($rv['forward']),2);
                 $flowQuota[$rk]['forward_quota']=[
                         'time'=>0,
                         'speed'=>$speed,
                         'stop_time_cycle'=>$stopTimeCycle,
                         'PI'=>round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2),
+                        'stop_ratid'=>$stopRate,
                         'length'=>array_sum(array_column($rv['forward'],"length")),
-                        'level'=>$this->getStopTimeLevel($stopTimeCycle)
+                        'level'=>$this->getStopTimeLevel($stopRate)
                 ];
                 if($flowQuota[$rk]['forward_quota']['speed']>0){
                     $flowQuota[$rk]['forward_quota']['time'] = round(($flowQuota[$rk]['forward_quota']['length']/ $flowQuota[$rk]['forward_quota']['speed'] * 3.6)/60,1);
@@ -119,13 +121,15 @@ class RoadService extends BaseService
             if(count($rv['backward'])>0){
                 $speed = round(array_sum(array_column($rv['backward'],"speed"))/count($rv['backward'])*3.6,2);
                 $stopTimeCycle = round(array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),2);
+                $stopRate = round(array_sum(array_column($rv['backward'],"one_stop_ratio_up"))/count($rv['backward']),2) + round(array_sum(array_column($rv['backward'],"multi_stop_ratio_up"))/count($rv['backward']),2);
                 $flowQuota[$rk]['reverse_quota']=[
                         'time'=>0,
                         'speed'=>$speed,
                         'stop_time_cycle'=>$stopTimeCycle,
                         'PI'=>round(array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),2),
+                        'stop_ratid'=>$stopRate,
                         'length'=>array_sum(array_column($rv['backward'],"length")),
-                        'level'=>$this->getStopTimeLevel($stopTimeCycle)
+                        'level'=>$this->getStopTimeLevel($stopRate)
                 ];
                 if($flowQuota[$rk]['reverse_quota']['speed'] > 0){
                     $flowQuota[$rk]['reverse_quota']['time'] = round(($flowQuota[$rk]['reverse_quota']['length']/ $flowQuota[$rk]['reverse_quota']['speed'] * 3.6)/60,1);

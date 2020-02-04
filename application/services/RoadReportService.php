@@ -54,6 +54,12 @@ class RoadReportService extends BaseService{
 
     	}
     	$junctions_name = implode('、', array_column($junctions_info, 'name'));
+//        if(true){
+        if($params['userapp'] == 'jinanits'){
+            $dates = $this->getDateFromRange($start_date,$end_date);
+            $pi = $this->pi_model->getGroupJuncAvgPiWithDates($city_id,explode(",",$logic_junction_ids) ,$dates,$this->createHours());
+            $tpl = "%s干线位于%s市%s，承担较大的交通压力，整体运行水平PI值为".round($pi,2).",干线包含%s等重要路口。本次报告根据%s~%s数据对该干线进行分析。";
+        }
 
     	$desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, date('Y年m月d日', strtotime($start_date)), date('Y年m月d日', strtotime($end_date)));
 

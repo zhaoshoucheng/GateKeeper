@@ -45,7 +45,7 @@ class DiagnosisNoTiming extends MY_Controller
     public function getJunctionQuotaDetail()
     {
         $this->convertJsonToPost();
-        
+
         // 校验参数
         $this->validate([
             'time_range' => 'required|trim|regex_match[/\d{2}:\d{2}-\d{2}:\d{2}/]',
@@ -80,7 +80,7 @@ class DiagnosisNoTiming extends MY_Controller
                 if ($w >= 1 && $w <= 5) {
                     $params["dates"][] = $date;
                 }
-            } 
+            }
         } else if ($params["data_type"] == 2) {
             $params["dates"] = [];
             foreach ($tmpDates as $date) {
@@ -93,8 +93,15 @@ class DiagnosisNoTiming extends MY_Controller
             $params["dates"] = $tmpDates;
         }
 
-        // 获取路口指标详情
-        $res = $this->dianosisService->getFlowQuotas($params);
+        if (count($params["dates"]) == 1 and $params["dates"][0] == date('Y-m-d')) {
+            // 实时
+            $res = $this->dianosisService->getRealtimeFlowQuotas($params);
+        } else  {
+            // 离线
+            // 获取路口指标详情
+            $res = $this->dianosisService->getFlowQuotas($params);
+        }
+
         $this->response($res);
     }
 
@@ -324,7 +331,7 @@ class DiagnosisNoTiming extends MY_Controller
         $params["date"] = $this->input->post("date", true);
         $params["logic_junction_id"] = $this->input->post("logic_junction_id", true);
         $params["hour"] = $this->input->post("hour", true);
-        
+
         $bList = $this->dianosisService->GetBaseQuotaFlowData($params);
         $dList = $this->dianosisService->GetDiagnosisFlowData($params);
         $dMap = [];
