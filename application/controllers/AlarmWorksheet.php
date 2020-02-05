@@ -97,7 +97,7 @@ class AlarmWorksheet extends MY_Controller
         $this->alarmWorksheetService->deal($params);
 
         //log
-        $actionLog = sprintf("工单ID：%s",$sheetID);
+        $actionLog = sprintf("工单ID：%s",$params["id"]);
         $this->insertLog("工单管理","反馈工单","新增",$params,$actionLog);
         return $this->response("");
     }
@@ -115,7 +115,7 @@ class AlarmWorksheet extends MY_Controller
         $this->alarmWorksheetService->valuation($params);
         
         //log
-        $actionLog = sprintf("工单ID：%s",$sheetID);
+        $actionLog = sprintf("工单ID：%s",$params["id"]);
         $this->insertLog("工单管理","评价工单","新增",$params,$actionLog);
         return $this->response("");
     }
