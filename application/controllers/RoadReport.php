@@ -30,6 +30,9 @@ class RoadReport extends MY_Controller
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
         $params['userapp'] = $this->userapp;
+        if($params['city_id'] == 12){
+            $params['userapp']  = 'jinanits';
+        }
 
         $data = $this->roadReportService->introduction($params);
         $this->response($data);

@@ -317,7 +317,18 @@ class DiagnosisNoTimingService extends BaseService
             $sum = [];
             $cnt = 0;
             foreach ($dates as $date) {
-                $ret[$key]['index'][$date] = [];
+                //这里构造一下数据，为防止数据为空。这里先构造一下空数据
+                $dateZeroTime = strtotime(date("Y-m-d"));
+                $indexTmpValue = [];
+                for($i=0;$i<48;$i++){
+                    $indexTmpValue[date("H:i",$dateZeroTime+$i*30*60)] = [
+                        "hour"=>date("H:i",$dateZeroTime+$i*30*60),
+                        "num"=>0,
+                        "percent"=>"0%",
+                    ];
+                }
+                $ret[$key]['index'][$date] = $indexTmpValue;
+
                 if (isset($data['all'][$date])) {
                     $cnt ++;
                     foreach ($data['all'][$date] as $hour => $v) {
@@ -357,6 +368,7 @@ class DiagnosisNoTimingService extends BaseService
                 }
             }
         }
+
         return $ret;
     }
 

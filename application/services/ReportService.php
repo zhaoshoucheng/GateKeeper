@@ -700,13 +700,18 @@ class ReportService extends BaseService
         $pageNum = $params['page_no'];
         $pageSize = $params['page_size'];
 
+        $userapp = $params['userapp'];
+        if(isset($params['local']) && $params['local'] == 'jinan'){
+            $userapp = 'jinanits';
+        }
+
+
         $namespace = 'itstool_private';
 
         $statRow = $this->report_model->getCountJoinUploadFile($cityId, $type, $pageNum, $pageSize, $namespace);
 
         $result = $this->report_model->getSelectJoinUploadFile($cityId, $type, $pageNum, $pageSize, $namespace);
-
-        $formatResult = function ($result) use ($statRow, $namespace, $pageNum, $pageSize) {
+        $formatResult = function ($result) use ($userapp,$statRow, $namespace, $pageNum, $pageSize) {
             $resourceKeys = array_reduce($result, function ($carry, $item) {
                 if (!empty($item["file_key"])) {
                     $carry[] = $item["file_key"];
@@ -720,7 +725,7 @@ class ReportService extends BaseService
             if($_SERVER['REMOTE_ADDR']=="59.52.254.218"){
                 $hostName = "59.52.254.216:91";
             }
-            if(strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
+            if(isset($_SERVER["HTTP_REFERER"]) && strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
                 $hostName = "sts.didichuxing.com/sg1/api/nanjing";
             }
             $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
@@ -731,8 +736,12 @@ class ReportService extends BaseService
                 $itemInfo = $this->gift_model->getResourceUrlList($resourceKeys, $namespace);
                 if (!empty($itemInfo[$item["file_key"]])) {
                     $result[$key]['url']      = $itemInfo[$item["file_key"]]['download_url'];
-//                    $result[$key]['url']      = $baseUrl."/Report/reportProxy?url=".base64_encode($itemInfo[$item["file_key"]]['download_url']);
                     $result[$key]['down_url'] = $baseUrl . "/downReport?key=" . $item["file_key"];
+                    if($userapp == "jinanits"){
+                        $result[$key]['url']  = str_replace("img-hxy022.didistatic.com","172.54.0.136:8886",$result[$key]['url']);
+                        $result[$key]['down_url']  = str_replace("sts.didichuxing.com","172.54.1.214:8088/sg1/api",$result[$key]['url']);
+                    }
+//                    $result[$key]['url']      = $baseUrl."/Report/reportProxy?url=".base64_encode($itemInfo[$item["file_key"]]['download_url']);
                 }
             }
             return [

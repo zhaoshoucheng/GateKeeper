@@ -15,6 +15,9 @@ $config['menu'] = [
         if(isset($_REQUEST['city_id']) && $_REQUEST['city_id']=="11" && strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
             return 6;
         }
+        if(isset($_REQUEST['city_id']) && isset($_REQUEST['from']) && $_REQUEST['city_id']=="11" && $_REQUEST['from']=="nanjing"){
+            return 6;
+        }
         //南昌本地化
         if(isset($_REQUEST['city_id'])
             && isset($_REQUEST['conf'])
