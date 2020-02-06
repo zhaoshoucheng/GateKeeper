@@ -132,7 +132,7 @@ class Road extends MY_Controller
                 $addJuncIds[] = $newJuncId;
             }
         }
-        
+
         // print_r($addJuncIds);
         $addJuncNames = $this->waymap_model->getJunctionNames(implode(",",$addJuncIds));
         $delJuncNames = $this->waymap_model->getJunctionNames(implode(",",$delJuncIds));
@@ -378,6 +378,22 @@ class Road extends MY_Controller
         ]);
 
         $data = $this->roadService->greenWaveAnalysis($params['city_id']);
+
+        $this->response($data);
+    }
+
+    /*
+     * 干线绿波分析,干线详情
+     *
+     * */
+    public function greenWaveAnalysisDetail(){
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'road_id' => 'required|min_length[1]',
+        ]);
+
+        $data = $this->roadService->greenWaveAnalysisDetail($params['city_id'], $params['road_id']);
 
         $this->response($data);
     }
