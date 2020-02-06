@@ -429,6 +429,117 @@ paths:
                 type: "string"
               username:
                 type: "string"
+  /road/greenWaveAnalysisDetail:
+    post:
+      summary: 绿波带监控详情
+      description: 绿波带监控详情
+      tags:
+        - 南京建邺区项目
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: integer
+          description: 城市id
+          required: true
+        - name: road_id
+          in: formData
+          type: string
+          description: 干线id
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: "绿波带监控详情"
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                required:
+                  - "forward_quota"
+                  - "reverse_quota"
+                properties:
+                  forward_quota:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        start_junc_name:
+                          type: "string"
+                        end_junc_name:
+                          type: "string"
+                        start_junc_id:
+                          type: "string"
+                        end_junc_id:
+                          type: "string"
+                        time:
+                          type: "number"
+                        speed:
+                          type: "number"
+                        stop_time_cycle:
+                          type: "number"
+                        stop_ratio:
+                          type: "number"
+                        PI:
+                          type: "number"
+                        length:
+                          type: "number"
+                        level:
+                          type: "string"
+                  reverse_quota:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        start_junc_name:
+                          type: "string"
+                        end_junc_name:
+                          type: "string"
+                        start_junc_id:
+                          type: "string"
+                        end_junc_id:
+                          type: "string"
+                        time:
+                          type: "number"
+                        speed:
+                          type: "number"
+                        stop_time_cycle:
+                          type: "number"
+                        stop_ratio:
+                          type: "number"
+                        PI:
+                          type: "number"
+                        length:
+                          type: "number"
+                        level:
+                          type: "string"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                  s:
+                    type: "string"
+                type: "object"
   /expressway/overview:
     post:
       summary: 快速路概览
@@ -3035,7 +3146,7 @@ paths:
               traceid:
                 type: "string"
                 example: "645aa41f5d9f5d5c776d5d92143babb0"
-  
+
   /Alarmanalysis/realtimeSingleQuotaCurve:
     post:
       summary: 实时单指标曲线图
@@ -6207,60 +6318,60 @@ paths:
           schema:
             type: object
             description: ""
-            properties: 
-              errno: 
+            properties:
+              errno:
                 type: "number"
-              errmsg: 
+              errmsg:
                 type: "string"
-              data: 
-                required: 
+              data:
+                required:
                   - "total"
                   - "list"
-                properties: 
-                  total: 
+                properties:
+                  total:
                     type: "number"
-                  list: 
+                  list:
                     type: "array"
-                    items: 
+                    items:
                       type: "object"
-                      properties: 
-                        id: 
+                      properties:
+                        id:
                           type: "string"
-                        city_id: 
+                        city_id:
                           type: "string"
-                        user_name: 
+                        user_name:
                           type: "string"
-                        app_id: 
+                        app_id:
                           type: "string"
-                        group_id: 
+                        group_id:
                           type: "string"
-                        virtual_group_id: 
+                        virtual_group_id:
                           type: "string"
-                        url: 
+                        url:
                           type: "string"
-                        action: 
+                        action:
                           type: "string"
-                        action_type: 
+                        action_type:
                           type: "string"
-                        module: 
+                        module:
                           type: "string"
-                        request_in: 
+                        request_in:
                           type: "string"
-                        request_out: 
+                        request_out:
                           type: "string"
-                        action_log: 
+                        action_log:
                           type: "string"
-                        client_ip: 
+                        client_ip:
                           type: "string"
-                        content_diff: 
+                        content_diff:
                           type: "string"
-                        ext1: 
+                        ext1:
                           type: "string"
-                        ext2: 
+                        ext2:
                           type: "string"
-                        ext3: 
+                        ext3:
                           type: "string"
-                        operation_time: 
+                        operation_time:
                           type: "string"
                 type: "object"
   /Area/getQuotas:
