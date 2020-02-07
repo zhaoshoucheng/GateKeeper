@@ -6,25 +6,32 @@
  * Time: 下午3:09
  */
 
+use Services\WordreportService;
+
 class Wordreport extends CI_Controller{
 
     public function __construct()
     {
         parent::__construct();
+        $this->wordreportService = new WordreportService();
 
     }
 
 //    public function TemplateWord(){
 //        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor('./template.docx');
-//        $templateProcessor->setValue('title1','测试题目1');
+//        $templateProcessor->setValue('subtitle1','测试题目1');
 //        $templateProcessor->setValue('answer1','测试答案1');
 //        $templateProcessor->setValue('title2','测试题目2');
 //        $templateProcessor->setValue('answer2','测试答案2');
 //        $img  = array("path" => './123.jpg', "width" => 300, "height" => 300);
 //        $templateProcessor->setImageValue('img1',$img);
 //        $templateProcessor->setValue('img2',"");
-//        $templateProcessor->deleteBlock("img3");
-//        $templateProcessor->cloneBlock("img1",1,false);
+//
+//
+////        $templateProcessor->deleteBlock("B_BLOCK");
+//        $templateProcessor->cloneBlock("B_BLOCK",0);
+////        $templateProcessor->cloneBlock("A_BLOCK",1);
+////        $templateProcessor->cloneBlock("B1",0);
 //
 //
 //        $file = '中文test.docx';
@@ -176,12 +183,34 @@ class Wordreport extends CI_Controller{
      * */
     public function CreateJuncDoc(){
 
+        $params = $this->input->post(null, true);
+
+        $this->wordreportService->checkFile($_FILES);
+
+        //图片添加水印
+        $newFiles = $this->wordreportService->addWatermark($_FILES,"滴滴智慧交通");
+
+        //生成word文件
+        $this->wordreportService->createJuncDoc($params,$newFiles);
+
+        //销毁水印图片
+        $this->wordreportService->clearWatermark($newFiles);
+
+        exit;
+
+
+
     }
 
     /*
      * 创建干线报告word
      * */
     public function CreateRoadDoc(){
+
+
+
+
+
 
     }
 
