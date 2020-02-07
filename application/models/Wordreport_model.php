@@ -36,7 +36,7 @@ class Wordreport_model extends CI_Model{
     }
 
     public function queryWordReport($taskID){
-        $ret = $this->db->where('task_id',$taskID)->get()->result_array();
+        $ret = $this->db->from($this->_table)->where('task_id',$taskID)->get()->result_array();
         return $ret;
     }
 

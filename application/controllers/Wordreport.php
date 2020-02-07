@@ -53,6 +53,7 @@ class Wordreport extends MY_Controller{
             'time_range' =>"required",
 
         ]);
+        $params['user_info'] = $this->username;
 
         $this->wordreportService->createTask($params['task_id'],$params);
 
