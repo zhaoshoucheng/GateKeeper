@@ -10,6 +10,10 @@ class WordreportService extends BaseService{
         $this->load->model('wordreport_model');
     }
 
+    public function getUUID(){
+        return gen_uuid();
+    }
+
     public function checkFile($FILES){
         if(count($FILES) == 0 ){
             return;

@@ -22,7 +22,9 @@ class Wordreport extends MY_Controller{
      * 获得唯一ID
      * */
     public function GetUUID(){
-
+        $uuid = $this->wordreportService->getUUID();
+        $data = ['uuid' => $uuid];
+        $this->response($data);
     }
 
     /*
