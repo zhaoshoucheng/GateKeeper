@@ -269,4 +269,19 @@ class Gift_model extends CI_Model
         com_log_warning('_itstool_' . __CLASS__ . '_' . __FUNCTION__ . '_uploadError', 0, "uploadError", compact("command", "output"));
         return [];
     }
+
+    /*
+     * 上传word文件
+     * */
+    public function uploadDoc($docName,$docPath){
+        $publicOut = [];
+        //参数强制校验,防止任意代码执行
+        if (!preg_match('/[\/\d\s]+/ims', $docPath)) {
+            throw new \Exception("tmp_name invalid.");
+        }
+        $nconf    = $this->config->item('gift');
+        $commandLine = sprintf("curl %s/%s -X POST -F filecontent=@%s", $nconf['upload']['itstool_public'], $docName, $docPath);
+        exec($commandLine, $publicOut);
+        return  $this->formatUpload($docName, $commandLine, $publicOut);
+    }
 }

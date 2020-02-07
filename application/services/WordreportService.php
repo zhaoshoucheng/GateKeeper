@@ -6,6 +6,8 @@ class WordreportService extends BaseService{
 
     public function __construct(){
         parent::__construct();
+        $this->load->model('gift_model');
+        $this->load->model('wordreport_model');
     }
 
     public function checkFile($FILES){
@@ -138,13 +140,45 @@ class WordreportService extends BaseService{
 
 
 
-        $file = $params['title'].'.docx';
-        header("Content-Description: File Transfer");
-        header('Content-Disposition: attachment; filename="' . $file . '"');
-        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        header('Content-Transfer-Encoding: binary');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Expires: 0');
-        $templateProcessor->saveAs("php://output");
+//        $file = $params['title'].'.docx';
+//        header("Content-Description: File Transfer");
+//        header('Content-Disposition: attachment; filename="' . $file . '"');
+//        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+//        header('Content-Transfer-Encoding: binary');
+//        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+//        header('Expires: 0');
+//        $templateProcessor->saveAs("php://output");
+        return $templateProcessor->save();
+    }
+
+    /*
+     * 保存word文件至gift
+     * */
+    public function saveDoc($docPath){
+        $docName = $fileName = date("YmdHis") . mt_rand(1000, 9999) . "." . "doc";
+        $ret = $this->gift_model->uploadDoc($docName,$docPath);
+        return $ret;
+    }
+
+    /*
+     * 创建任务
+     * */
+    public function createTask($taskID,$params){
+
+        $ret = $this->wordreport_model->queryWordReport($taskID);
+        if(count($ret) >0){
+            return;
+        }
+
+        $this->wordreport_model->createWordReport($params);
+
+    }
+
+    /*
+     * 更新任务
+     * */
+    public function updateTask($taskID,$status){
+        $this->wordreport_model->updateWordReport($taskID,$status);
+
     }
 }
