@@ -29,14 +29,20 @@ class Alarmanalysis_model extends CI_Model
     /**
      * 报警es查询接口
      * @param $body json 查询DSL
+     * @param $sType int 查询方式 0=dsl 1=sql
      * @return array
      */
-    public function search($body)
+    public function search($body,$sType=0)
     {
         $hosts = $this->config->item('alarm_es_interface');
         $index = $this->config->item('alarm_es_index');
-        $queryUrl = sprintf('http://%s/%s/type/_search?%s',$hosts[0],$index['flow'],$index['flow']);
-        $response = httpPOST($queryUrl, json_decode($body,true), 0, 'json');
+        if($sType){
+            $queryUrl = sprintf('http://%s/_sql',$hosts[0]); 
+            $response = httpPOST($queryUrl, $body, 8000, 'raw');
+        }else{
+            $queryUrl = sprintf('http://%s/%s/type/_search?%s',$hosts[0],$index['flow'],$index['flow']);
+            $response = httpPOST($queryUrl, json_decode($body,true), 0, 'json');
+        }
         if (!$response) {
             return [];
         }
