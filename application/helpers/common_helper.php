@@ -2,7 +2,7 @@
 
 if (!function_exists('needValidPerm')) {
     /**
-     * 是否需要验证权限   
+     * 是否需要验证权限
      */
     function needValidPerm(){
         if(ENVIRONMENT=="development" || gethostname()=="ipd-cloud-preweb00.gz01"){
@@ -405,13 +405,27 @@ if (!function_exists('compareArrayKeysEqual')) {
                 return false;
             }
             if($ignoreCase){
-                $array1[$key] = strtolower($array1[$key]);   
-                $array2[$key] = strtolower($array2[$key]);   
+                $array1[$key] = strtolower($array1[$key]);
+                $array2[$key] = strtolower($array2[$key]);
             }
             if($array1[$key]!=$array2[$key]){
                 return false;
             }
         }
         return true;
+    }
+}
+
+if (!function_exists('gen_uuid')) {
+    function gen_uuid() {
+        $uuid = sprintf(
+            '%04x%04x%04x%04x%04x%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
+        return $uuid;
     }
 }
