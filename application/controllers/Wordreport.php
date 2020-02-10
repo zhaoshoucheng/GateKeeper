@@ -72,7 +72,8 @@ class Wordreport extends MY_Controller{
             'city_id'    => 'required|is_natural_no_zero',
             'task_id'    => 'required',
         ]);
-        //TODO taskid确认
+        //taskid确认
+        $this->wordreportService->checkTaskID($params['task_id']);
 
         $this->wordreportService->checkFile($_FILES);
 
@@ -94,7 +95,6 @@ class Wordreport extends MY_Controller{
         }else{
             $this->wordreportService->updateTask($params['task_id'],"",2);
         }
-
 
         $this->response($ret['url']);
     }
