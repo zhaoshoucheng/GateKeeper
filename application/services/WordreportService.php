@@ -46,7 +46,7 @@ class WordreportService extends BaseService{
     }
 
     public function addWatermark($FILES,$content){
-        //TOOD 添加水印
+        //添加水印
         foreach ($FILES as $k => $f){
 
             $file =$f['tmp_name'];
@@ -186,8 +186,15 @@ class WordreportService extends BaseService{
     /*
      * 更新任务
      * */
-    public function updateTask($taskID,$status){
-        $this->wordreport_model->updateWordReport($taskID,$status);
+    public function updateTask($taskID,$filePath,$status){
+        $this->wordreport_model->updateWordReport($taskID,$filePath,$status);
+    }
+
+    public function checkTaskID($taskID){
+        $ret = $this->wordreport_model->queryWordReport($taskID);
+        if(empty($ret)){
+            throw new \Exception('Unregistered taskID',ERR_DEFAULT);
+        }
 
     }
 }
