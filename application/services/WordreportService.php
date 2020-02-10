@@ -177,8 +177,8 @@ class WordreportService extends BaseService{
     /*
      * 更新任务
      * */
-    public function updateTask($taskID,$status){
-        $this->wordreport_model->updateWordReport($taskID,$status);
+    public function updateTask($taskID,$filePath,$status){
+        $this->wordreport_model->updateWordReport($taskID,$filePath,$status);
 
     }
 }

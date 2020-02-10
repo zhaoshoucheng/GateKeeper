@@ -88,9 +88,9 @@ class Wordreport extends MY_Controller{
 
         //数据入库
         if(isset($ret['url'])){
-            $this->wordreportService->updateTask($params['task_id'],1);
+            $this->wordreportService->updateTask($params['task_id'],$ret['resource_key'],1);
         }else{
-            $this->wordreportService->updateTask($params['task_id'],2);
+            $this->wordreportService->updateTask($params['task_id'],"",2);
         }
 
 

@@ -20,10 +20,11 @@ class Wordreport_model extends CI_Model{
      * status 任务状态
      * user_info 提交用户
      * */
-    public function updateWordReport($taskID,$status){
+    public function updateWordReport($taskID,$filePath,$status){
         return $this->db->where('task_id', $taskID)
             ->update($this->_table, array(
-                'status'=>$status
+                'status'=>$status,
+                'file_path'=>$filePath
             ));
     }
 
