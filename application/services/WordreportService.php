@@ -80,7 +80,8 @@ class WordreportService extends BaseService{
     }
 
     public function createJuncDoc($params,$FILES){
-        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor('application/static/junc_template.docx');
+//        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor('application/static/junc_template.docx');
+        $templateProcessor = new TemplateProcessorMod('application/static/junc_template.docx');
         $templateProcessor->setValue('title',$params['title']);
         $templateProcessor->setValue('subtitle1',$params['subtitle1']);
         $templateProcessor->setValue('subtitle2',$params['subtitle2']);
