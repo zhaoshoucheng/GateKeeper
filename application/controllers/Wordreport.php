@@ -32,7 +32,19 @@ class Wordreport extends MY_Controller{
      * 包含pdf&word，分页比较麻烦。。。
      * */
     public function GetReportList(){
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'type' => 'required',
+            'page_no' => 'required',
+            'page_size' => 'required',
+        ]);
 
+
+        $params['userapp'] = $this->userapp;
+        $data = $this->wordreportService->getReportList($params);
+
+        $this->response($data);
     }
 
     /*
