@@ -27,26 +27,48 @@ class Alarmanalysis_model extends CI_Model
     }
 
     /**
-     * 报警es查询接口
+     * 报警es查询接口，改造版本支持滚动
      * @param $body json 查询DSL
      * @param $sType int 查询方式 0=dsl 1=sql
+     * @param $isScroll int 是否滚动查询 0=不滚动 1=滚动
      * @return array
      */
-    public function search($body,$sType=0)
+    public function search($body,$sType=0,$isScroll=0)
     {
         $hosts = $this->config->item('alarm_es_interface');
         $index = $this->config->item('alarm_es_index');
+        $scrollInfo = "";
+        if($isScroll){
+            $scrollInfo = "scroll=5m";
+        }
         if($sType){
-            $queryUrl = sprintf('http://%s/_sql',$hosts[0]); 
+            $queryUrl = sprintf('http://%s/_sql?%s',$hosts[0],$scrollInfo); 
             $response = httpPOST($queryUrl, $body, 8000, 'raw');
         }else{
-            $queryUrl = sprintf('http://%s/%s/type/_search?%s',$hosts[0],$index['flow'],$index['flow']);
+            $queryUrl = sprintf('http://%s/%s/type/_search?%s',$hosts[0],$index['flow'],$scrollInfo);
             $response = httpPOST($queryUrl, json_decode($body,true), 0, 'json');
         }
         if (!$response) {
             return [];
         }
-        return json_decode($response,true);
+        $resPart = json_decode($response,true);
+        if(!$isScroll){
+            return $resPart;
+        }
+        $hits = $resPart["hits"]["hits"];
+        while(count($resPart["hits"]["hits"])>0){
+            $scrollID = $resPart["_scroll_id"];
+            $qBody = [
+                "scroll_id"=>$scrollID,
+                "scroll"=>"1m",
+            ];
+            $queryUrl = sprintf('http://%s/_search/scroll',$hosts[0]);
+            $response = httpPOST($queryUrl, $qBody, 0, 'json');
+            $resPart = json_decode($response,true);
+            $hits = array_merge($hits,$resPart["hits"]["hits"]);
+        }
+        $resPart["hits"]["hits"] = $hits;
+        return $resPart;
     }
 
     /**

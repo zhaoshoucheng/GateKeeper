@@ -51,6 +51,145 @@ class AlarmanalysisService extends BaseService
     }
 
     /**
+     * 路口报警分析 - 数据详情下载
+     * @param $params['city_id']           int    Y 城市ID
+     * @param $params['logic_junction_id'] string Y 逻辑路口ID
+     * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
+     * @param $params['start_time']        string Y 查询开始日期 yyyy-mm-dd
+     * @param $params['end_time']          string Y 查询结束日期 yyyy-mm-dd 开始日期与结束日期一致认为查询当天从0点到当前整点的数据
+     * @param $params['alarm_type']           int    N 报警类型
+     * @return array
+     */
+    public function junctionDataDownload($params)
+    {
+        if (empty($params)) {
+            return (object)[];
+        }
+        $result = $this->getjunctionDownloadData($params);
+
+        $fp=fopen('php://memory','w+');
+        $convertedRow=array();
+        foreach($result as $row){
+            $convertedRow=array();
+            foreach($row as $val){
+                // $convertedRow[]=iconv('utf-8','gbk//TRANSLIT',$val)."\t";
+                $convertedRow[]=$val."\t";
+            }
+            fputcsv($fp,$convertedRow);
+        }
+        rewind($fp); 
+        $csvFile=stream_get_contents($fp);
+        fclose($fp);
+        ob_clean();
+        $fileName = 'card_port_'.date('YmdHis').'.csv';
+        header('Content-Type: text/csv; charset=utf-8');
+        header("Content-Transfer-Encoding: binary ");
+        header("Content-Type: application/force-download");
+        header('Content-Length: '.strlen($csvFile));
+        header('Content-Disposition: attachment; filename="'.$fileName.'"');
+        echo "\xEF\xBB\xBF";
+        echo ($csvFile);exit;
+    }
+
+    /**
+     * 获取路口报警分析
+     * @param $params['city_id']           int    Y 城市ID
+     * @param $params['logic_junction_id'] string N 逻辑路口ID 当：不为空时，按路口报警分析查询;为空时，按城市报警分析查询
+     * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
+     * @param $params['alarm_type']        int    Y  路口报警问题
+     * @param $params['start_time']        string Y 查询开始日期 yyyy-mm-dd
+     * @param $params['end_time']          string Y 查询结束日期 yyyy-mm-dd
+     * @return array
+     */
+    private function getjunctionDownloadData($params)
+    {
+        $size = 10000;
+        // 组织DSL所需json
+        $json = '{"from":0,"size":'.$size.',"query":{"bool":{"must":{"bool":{"must":[';
+
+        // where city_id
+        $json .= '{"match":{"city_id":{"query":' . (int)$params['city_id'] . ',"type":"phrase"}}}';
+        
+        // where alarm_type
+        if(!empty($params['alarm_type'])){
+            $json .= ',{"match":{"type":{"query":' . (int)$params['alarm_type'] . ',"type":"phrase"}}}';
+        }
+
+        // where date >= start_time
+        $json .= ',{"range":{"date":{"from":"' . trim($params['start_time']) . '","to":null,"include_lower":true,"include_upper":true}}}';
+
+        // where date <= end_time
+        $json .= ',{"range":{"date":{"from":null,"to":"' . trim($params['end_time']) . '","include_lower":true,"include_upper":true}}}';
+
+        // 当按路口报警分析查询时
+        if (!empty($params['logic_junction_id'])) {
+            // where logic_junction_id
+            $json .= ',{"match":{"logic_junction_id":{"query":"' . trim($params['logic_junction_id']) . '","type":"phrase"}}}';
+        }
+
+        // 当选择了报警频率时
+        if ($params['frequency_type'] != 0
+            && array_key_exists($params['frequency_type'], $this->config->item('frequency_type'))) {
+            // where frequency_type
+            $json .= ',{"match":{"frequency_type":{"query":'. (int)$params['frequency_type'] .',"type":"phrase"}}}';
+        }
+
+        $json .= ']}}}},"_source":{"excludes":[]},"fields":["date","type","frequency_type","type"],"sort":[{"created_at":{"order":"asc"}}]}';
+        $result = $this->alarmanalysis_model->search($json,0,1);
+
+        //准备相位信息
+        $tempRes = [];
+        $junctionAlarmType = $this->config->item('junction_alarm_type');
+        $waymapPhase = $this->waymap_model->getFlowInfo32($params['logic_junction_id']);
+        if(empty($waymapPhase)){
+            return [];
+        }
+        if(!empty($waymapPhase)){
+            $flowPhases = array_column($waymapPhase,"phase_name","logic_flow_id");
+        }
+        $detailList = [];
+        $frequencyType = $this->config->item('frequency_type');
+        $alarmType = $this->config->item('junction_alarm_type');
+        foreach($result["hits"]["hits"] as $source){
+            $source["_source"]["phase_name"] = $flowPhases[$source["_source"]["logic_flow_id"]]??"";
+            $source["_source"]["start_hour"] = date("H:i",strtotime($source["_source"]["start_time"]));
+            $durationTime = (strtotime($source["_source"]['last_time']) - strtotime($source["_source"]['start_time'])) / 60;
+            if ($durationTime == 0) {
+                $durationTime = 1;
+            }
+            $source["_source"]["duration_time"] = round($durationTime)."min";
+            $source["_source"]["frequency_type_name"] = $frequencyType[$source["_source"]["frequency_type"]]??"";
+            $source["_source"]["type_name"] = $alarmType[$source["_source"]["type"]]??"";
+            $detailList[] = $source["_source"];
+        }
+
+        //format即可
+        $waymapJuncInfo = $this->waymap_model->getJunctionInfo($params['logic_junction_id']);
+        $juncName = $waymapJuncInfo[0]["name"]??"";
+        $timeRange = date("Y.m.d",strtotime($params["start_time"]))."-".date("Y.m.d",strtotime($params["end_time"]));
+        $frequencyTypeName = $frequencyType[$params['frequency_type']]??"全部";
+        $alarmTypeName = $alarmType[$params['alarm_type']]??"全部";
+        $downData = [
+            ["路口名称：".$juncName],
+            ["时间范围：".$timeRange],
+            ["常偶发报警：".$frequencyTypeName],
+            ["报警类型：".$alarmTypeName],
+            ["日期","报警开始时间","持续时间","报警流向","报警类型","常发／偶发"],
+        ];
+        foreach ($detailList as $key => $detail) {
+            $downData[] = [
+                $detail["date"],
+                $detail["start_hour"],
+                $detail["duration_time"],
+                $detail["phase_name"],
+                $detail["type_name"],
+                $detail["frequency_type_name"]
+            ];
+        }
+        return $downData;
+    } 
+
+    /**
      * 获取当天报警分析
      * @param $params['city_id']           int    Y 城市ID
      * @param $params['logic_junction_id'] string N 逻辑路口ID 当：不为空时，按路口报警分析查询;为空时，按城市报警分析查询
@@ -381,7 +520,7 @@ class AlarmanalysisService extends BaseService
         }
         // 组织DSL所需json
         $json = '{"from":0,"size":'.$size.',"query":{"bool":{"must":{"bool":{"must":[';
-        
+
         // where city_id
         $json .= '{"match":{"city_id":{"query":' . (int)$params['city_id'] . ',"type":"phrase"}}}';
         

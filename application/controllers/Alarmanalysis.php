@@ -73,6 +73,40 @@ class Alarmanalysis extends MY_Controller
     }
 
     /**
+     * 路口报警分析 - 数据详情下载
+     * @param $params['city_id']           int    Y 城市ID
+     * @param $params['logic_junction_id'] string Y 逻辑路口ID
+     * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
+     * @param $params['start_time']        string Y 查询开始日期 yyyy-mm-dd
+     * @param $params['end_time']          string Y 查询结束日期 yyyy-mm-dd 开始日期与结束日期一致认为查询当天从0点到当前整点的数据
+     * @param $params['alarm_type']        int    N 报警问题 0=全部 1=过饱和 2=溢流 3=失衡，默认全部
+     * @return json
+     */
+    public function junctionDataDownload()
+    {
+        $params = $this->input->get(null, true);
+
+        // 校验参数
+        $this->get_validate([
+            'city_id'        => 'required|is_natural_no_zero',
+            'logic_junction_id'     => 'required|trim',
+            'frequency_type' => 'required|in_list[' . implode(',', array_keys($this->config->item('frequency_type'))) . ']',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'alarm_type'        => 'is_natural',
+        ], $params);
+        // $params['alarm_type'] = 3;
+        $params['logic_junction_id'] = !empty($params['logic_junction_id'])
+                                        ? strip_tags(trim($params['logic_junction_id']))
+                                        : '';
+        if (strtotime($params['end_time']) - strtotime($params['start_time']) < 0) {
+            throw new \Exception('结束日期需大于等于开始日期！', ERR_PARAMETERS);
+        }
+        $result = $this->alarmanalysisService->junctionDataDownload($params);
+        $this->response($result);
+    }
+
+    /**
      * 城市报警分析----报警路口TOP50排名
      * @param $params['city_id']           int    Y 城市ID
      * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发

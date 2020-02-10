@@ -430,8 +430,10 @@ class DiagnosisNoTimingService extends BaseService
             $lats += $v['lat'];
 
             foreach ($alarm_types as $alarm_type => $detail) {
+                //超过阈值
                 if (1.0 * $v[$alarm_type] / $v['count'] >= $frequency_threshold) {
                     $v[$alarm_type] = 1;
+                    //这里有bug没有做排序
                     $ret['rankList'][$alarm_types[$alarm_type]['index']][] = [
                         "junction_id"=> $k,
                         "junction_label"=> $v['name'],
