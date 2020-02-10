@@ -14,6 +14,11 @@ class WordreportService extends BaseService{
         return gen_uuid();
     }
 
+    // word itstool_public
+    public function downReport($params){
+        $this->gift_model->downPrivateResource($params["key"], 'itstool_public');
+    }
+
     public function checkFile($FILES){
         if(count($FILES) == 0 ){
             return;

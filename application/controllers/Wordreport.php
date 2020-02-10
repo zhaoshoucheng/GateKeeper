@@ -29,6 +29,7 @@ class Wordreport extends MY_Controller{
 
     /*
      * 获取报告列表
+     * 包含pdf&word，分页比较麻烦。。。
      * */
     public function GetReportList(){
 
@@ -38,7 +39,12 @@ class Wordreport extends MY_Controller{
      * 报告下载
      * */
     public function Download(){
+        $params = $this->input->get(null, true);
+        if (empty($params['key'])) {
+            throw new \Exception('key不能为空！', ERR_PARAMETERS);
+        }
 
+        $this->wordreportService->downReport($params);
     }
 
     /*

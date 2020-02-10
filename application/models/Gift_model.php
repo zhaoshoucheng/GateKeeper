@@ -18,6 +18,8 @@ class Gift_model extends CI_Model
 
         $this->db = $this->load->database('default', true);
 
+        $this->load->helper('http');
+
         $this->load->config('nconf');
     }
 
