@@ -212,6 +212,8 @@ class WordreportService extends BaseService{
             $templateProcessor->setImageValue("runningIndicator_chart_2",$img);
             $img['path'] = $FILES["runningIndicator_chart_3"]['tmp_watermark'];
             $templateProcessor->setImageValue("runningIndicator_chart_3",$img);
+            $img['path'] = $FILES["runningIndicator_chart_4"]['tmp_watermark'];
+            $templateProcessor->setImageValue("runningIndicator_chart_4",$img);
         }else{
             $templateProcessor->cloneBlock("C_BLOCK",0);
         }
@@ -322,9 +324,12 @@ class WordreportService extends BaseService{
                     }
                 }
 
-            }elseif (strpos($pk,"runningAnalysic")!==false){
+            }
+            if (strpos($pk,"runningAnalysic")!==false){
+
                 if(strpos($pk,"chart")!==false){
                     $jsonArr = json_decode($pv,true);
+
                     foreach ($jsonArr['arr'] as $jk => $jv){
                         foreach ($jv['options'] as $ok=>$ov){
                             $newParams["runningAnalysic_chart_".($jk+1)."_".($ok+1)] = json_encode(array(
@@ -336,8 +341,10 @@ class WordreportService extends BaseService{
                     $jsonArr = json_decode($pv,true);
                     if($jsonArr){
                         foreach ($jsonArr['arr'] as $jk => $jv){
-                            $newParams[$pk.($jk+1)] = $jv;
+                            $newParams[$pk."_".($jk+1)] = $jv;
                         }
+                    }else{
+                        $newParams[$pk] = $pv;
                     }
 
                 }
@@ -348,7 +355,7 @@ class WordreportService extends BaseService{
 //                        $newParams["runningAnalysic_sub_content_".($rk+1)."_".($rck+1)] = $rcv;
 //                    }
 //                }
-            }else{
+            }elseif(strpos($pk,"chart")===false){
                 $newParams[$pk] = $pv;
             }
 
@@ -372,6 +379,7 @@ class WordreportService extends BaseService{
 //                $files[$pk]['tmp_watermark'] = $filePath;
                 //生成水印图片
                 $font = 'application/static/ht.TTF';
+                var_dump($pk);
                 $img = imagecreatefromstring(file_get_contents($filePath));
                 $red = imagecolorallocatealpha($img,220, 220, 220,100);
                 $font_angle = 30;
