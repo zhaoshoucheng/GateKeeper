@@ -41,7 +41,45 @@ class Wordreport_model extends CI_Model{
         return $ret;
     }
 
+    /**
+     * @param $cityId
+     * @param $type
+     * @param $pageNum
+     * @param $pageSize
+     *
+     * @return array
+     */
+    public function getCountUploadFile($cityId, $type, $pageNum, $pageSize)
+    {
+        $res = $this->db->select('count(*) as num')
+            ->from('word_report')
+            ->where('deleted_at', "1970-01-01 00:00:00")
+            ->where('city_id', $cityId)
+            ->where('type', $type)
+            ->get();
+        return $res instanceof CI_DB_result ? $res->row_array() : $res;
+    }
 
+    /**
+     * @param $cityId
+     * @param $type
+     * @param $pageNum
+     * @param $pageSize
+     * @param $namespace
+     *
+     * @return array
+     */
+    public function getSelectUploadFile($cityId, $type, $pageNum, $pageSize)
+    {
+        $res = $this->db->select('title, create_at, time_range, file_path')
+            ->from('word_report')
+            ->where('deleted_at', "1970-01-01 00:00:00")
+            ->where('city_id', $cityId)
+            ->where('type', $type)
+            ->order_by('id', 'DESC')
+            ->limit($pageSize, ($pageNum - 1) * $pageSize)
+            ->get();
 
-
+        return $res instanceof CI_DB_result ? $res->result_array() : $res;
+    }
 }

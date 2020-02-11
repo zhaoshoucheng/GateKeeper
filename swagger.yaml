@@ -22,6 +22,187 @@ schemes:
 - http
 - https
 paths:
+  /Wordreport/GetUUID:
+    get:
+      summary: 获取任务id
+      description: 获取任务id
+      tags:
+        - 报告
+      produces:
+        - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: integer
+          description: 城市id
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: "获取任务id"
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "uuid"
+                properties:
+                  uuid:
+                    type: "string"
+                    example: "56ef34e837db463295d733e78f7adb90"
+                type: "object"
+              traceid:
+                type: "string"
+                example: "a534303452d0498cbcfb946838a34945"
+              username:
+                type: "string"
+                example: "unknown"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                    example: "1.7689秒"
+                  s:
+                    type: "string"
+                    example: "0.1358秒"
+                type: "object"
+  /Wordreport/GetReportList:
+    post:
+      summary: 获取报告列表
+      description: 获取报告列表
+      tags:
+        - 报告
+      produces:
+        - application/json
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 134'
+        required: false
+        type: string
+      - name: type
+        in: formData
+        description: '示例: 1'
+        required: false
+        type: string
+      - name: page_size
+        in: formData
+        description: '每页数量，默认5 示例: 5'
+        required: false
+        type: string
+      - name: page_no
+        in: formData
+        description: '页码，默认1 示例: 1'
+        required: false
+        type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: "获取报告列表"
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "list"
+                  - "total"
+                  - "page_no"
+                  - "page_size"
+                properties:
+                  list:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        title:
+                          type: "string"
+                          example: "江苏路_西桥"
+                        time_range:
+                          type: "string"
+                          example: "2019-11-10"
+                        url:
+                          type: "string"
+                          example: "http://img-hxy022.didistatic.com/static/itstool_private/report/xEQdxqXB1c1573480436937.pdf?expire=1581937212&signiture=M9r6N3Up-1Hv1S7U0nGBJjpStmbRBMYfKwt4XBr24hk="
+                        down_url:
+                          type: "string"
+                          example: "http://127.0.0.1:8088/itstool/Report/downReport?key=report/xEQdxqXB1c1573480436937.pdf"
+                        doc_type:
+                          type: "string"
+                          example: "pdf"
+                        create_at:
+                          type: "string"
+                          example: "2019-11-11 21:54:00"
+                  total:
+                    type: "number"
+                    example: 29
+                  page_no:
+                    type: "string"
+                    example: "2"
+                  page_size:
+                    type: "string"
+                    example: "5"
+                type: "object"
+              traceid:
+                type: "string"
+                example: "8cabf5a75f7a4204a22836ca666fa584"
+              username:
+                type: "string"
+                example: "unknown"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                    example: "11.3640秒"
+                  s:
+                    type: "string"
+                    example: "9.6602秒"
+                type: "object"
+  /Wordreport/Download:
+    get:
+      summary: 下载报告
+      description: 下载报告
+      tags:
+        - 报告
+      produces:
+        - application/json
+      parameters:
+        - name: key
+          in: query
+          type: string
+          description: gift key
+          required: true
   /overview/ttioverview:
     post:
       summary: 大屏运行指标

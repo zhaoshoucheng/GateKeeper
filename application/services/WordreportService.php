@@ -2,12 +2,16 @@
 
 namespace Services;
 
+use Services\ReportService;
+
 class WordreportService extends BaseService{
 
     public function __construct(){
         parent::__construct();
         $this->load->model('gift_model');
         $this->load->model('wordreport_model');
+
+        $this->reportService = new ReportService();
     }
 
     public function getUUID(){
@@ -17,6 +21,97 @@ class WordreportService extends BaseService{
     // word itstool_public
     public function downReport($params){
         $this->gift_model->downPrivateResource($params["key"], 'itstool_public');
+    }
+
+    // word & pdf list
+    public function getReportList($params) {
+        $pageNum = $params['page_no'];
+        $pageSize = $params['page_size'];
+        $params['page_no'] = 1;
+        $params['page_size'] = $pageNum * $pageSize;
+
+        $pdf_data = $this->reportService->getReportList($params);
+        $pdf_data['list'] = array_map(function ($item) {
+            return [
+                'title' => $item['title'],
+                'time_range' => $item['time_range'],
+                'url' => $item['url'],
+                'down_url' => str_replace('Wordreport', 'Report', $item['down_url']),
+                'doc_type' => 'pdf',
+                'create_at' => $item['create_at'],
+            ];
+        }, $pdf_data['list']);
+
+        $word_data = $this->getWordReportList($params);
+        $word_data['list'] = array_map(function ($item) {
+            return [
+                'title' => $item['title'],
+                'time_range' => $item['time_range'],
+                'url' => '',
+                'down_url' => $item['down_url'],
+                'doc_type' => 'word',
+                'create_at' => $item['create_at'],
+            ];
+        }, $word_data['list']);
+
+        // var_dump($pdf_data);
+        // var_dump($word_data);
+        $merge_data_list = array_merge($pdf_data['list'], $word_data['list']);
+        usort($merge_data_list, function($a, $b) {
+            return ($a['create_at'] > $b['create_at']) ? -1 : 1;
+        });
+
+        return [
+            'list' => array_slice($merge_data_list, ($pageNum - 1) * $pageSize, $pageSize),
+            'total' => $pdf_data['total'] + $word_data['total'],
+            "page_no" => $pageNum,
+            "page_size" => $pageSize,
+        ];
+    }
+
+    public function getWordReportList($params) {
+        $cityId = $params['city_id'];
+        $type = $params['type'];
+        $pageNum = $params['page_no'];
+        $pageSize = $params['page_size'];
+
+        $userapp = $params['userapp'];
+        if(isset($params['local']) && $params['local'] == 'jinan'){
+            $userapp = 'jinanits';
+        }
+
+        $namespace = 'itstool_public';
+
+        $statRow = $this->wordreport_model->getCountUploadFile($cityId, $type, $pageNum, $pageSize);
+
+        $result = $this->wordreport_model->getSelectUploadFile($cityId, $type, $pageNum, $pageSize);
+        $formatResult = function ($result) use ($userapp, $statRow, $namespace, $pageNum, $pageSize) {
+            $protocol   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+
+            $hostName = $_SERVER['HTTP_HOST'];
+            if($_SERVER['REMOTE_ADDR']=="59.52.254.218"){
+                $hostName = "59.52.254.216:91";
+            }
+            if(isset($_SERVER["HTTP_REFERER"]) && strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
+                $hostName = "sts.didichuxing.com/sg1/api/nanjing";
+            }
+            $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
+            $lastPos    = strrpos($currentUrl, '/');
+            $baseUrl    = substr($currentUrl, 0, $lastPos);
+            foreach ($result as $key => $item) {
+                $result[$key]['down_url'] = $baseUrl . "/Download?key=" . $item["file_path"];
+                if($userapp == "jinanits"){
+                    $result[$key]['down_url']  = str_replace("sts.didichuxing.com","172.54.1.214:8088/sg1/api",$result[$key]['down_url']);
+                }
+            }
+            return [
+                "list" => $result,
+                "total" => $statRow['num'],
+                "page_no" => $pageNum,
+                "page_size" => $pageSize,
+            ];
+        };
+        return $formatResult($result);
     }
 
     public function checkFile($FILES){
