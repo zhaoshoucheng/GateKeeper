@@ -295,6 +295,34 @@ class WordreportService extends BaseService{
     }
 
 
+    //格式化前端上送的数据为模板对应的格式
+    public function formartJuncImgKeyValue($params){
+        $newParams=[];
+        foreach ($params as $pk => $pv){
+            if(strpos($pk,"chart")!==false){
+                $jsonArr = json_decode($pv,true);
+                foreach ($jsonArr['arr'] as $jk => $jv){
+
+                    if(isset($jv['options'][0])){
+                        foreach ($jv['options'] as $ok=>$ov){
+                            $newParams[$pk."_".($jk+1)."_".($ok+1)] = json_encode(array(
+                                'infile'=>$ov['options']
+                            ));
+                        }
+                    }else{
+                        $newParams[$pk."_".($jk+1)] = json_encode(array(
+                            'infile'=>$jv['options']
+                        ));
+                    }
+                }
+
+            }else{
+                $newParams[$pk] = $pv;
+            }
+        }
+        return $newParams;
+
+    }
     //生成临时图表文件
     public function generateChartImg($params,$content){
 
@@ -305,18 +333,15 @@ class WordreportService extends BaseService{
             if(strpos($pk,"chart")!==false){
                 //下载图片
                 $filePath = $this->wordreport_model->generateChartImg($pv);
-
                 //生成水印图片
                 $font = 'application/static/ht.TTF';
                 $img = imagecreatefromstring(file_get_contents($filePath));
                 $red = imagecolorallocatealpha($img,220, 220, 220,100);
-
                 $font_angle = 30;
                 $font_size = 30;
                 $img_array = getimagesize($filePath);
                 $img_width = $img_array[0];
                 $img_height =$img_array[1];
-
                 for ($i=0;$i<=$img_width;$i+=350){
                     for ($j=0;$j<=$img_height;$j+=200){
                         imagettftext($img, $font_size, $font_angle, $i, $j, $red, $font, $content);

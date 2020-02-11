@@ -95,6 +95,10 @@ class Wordreport extends MY_Controller{
 
         $this->wordreportService->checkFile($_FILES);
 
+        //前端数据转换成模板对应的格式
+        $params = $this->wordreportService->formartJuncImgKeyValue($params);
+//        var_dump($params);
+
         //生成chart水印图片
         $tmpFiles = $this->wordreportService->generateChartImg($params,"滴滴智慧交通");
 
