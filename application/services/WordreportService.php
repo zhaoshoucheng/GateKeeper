@@ -180,7 +180,7 @@ class WordreportService extends BaseService{
         }
     }
 
-    public function createJuncDoc($params,$FILES){
+    public function createJuncDoc($params,$FILES,$fileName){
 //        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor('application/static/junc_template.docx');
         $templateProcessor = new TemplateProcessorMod('application/static/junc_template.docx');
         $templateProcessor->setValue('title',$params['title']);
@@ -253,7 +253,9 @@ class WordreportService extends BaseService{
 //        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 //        header('Expires: 0');
 //        $templateProcessor->saveAs("php://output");
-        return $templateProcessor->save();
+        $savePath = sys_get_temp_dir().$fileName.".doc";
+        $templateProcessor->saveAs($savePath);
+        return $savePath;
     }
 
     /*
@@ -286,11 +288,13 @@ class WordreportService extends BaseService{
         $this->wordreport_model->updateWordReport($taskID,$filePath,$status);
     }
 
-    public function checkTaskID($taskID){
+    public function queryByTaskID($taskID){
         $ret = $this->wordreport_model->queryWordReport($taskID);
+
         if(empty($ret)){
             throw new \Exception('Unregistered taskID',ERR_DEFAULT);
         }
+        return $ret[0];
 
     }
 
@@ -333,6 +337,7 @@ class WordreportService extends BaseService{
             if(strpos($pk,"chart")!==false){
                 //下载图片
                 $filePath = $this->wordreport_model->generateChartImg($pv);
+//                $files[$pk]['tmp_watermark'] = $filePath;
                 //生成水印图片
                 $font = 'application/static/ht.TTF';
                 $img = imagecreatefromstring(file_get_contents($filePath));

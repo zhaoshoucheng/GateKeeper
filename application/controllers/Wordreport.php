@@ -91,13 +91,13 @@ class Wordreport extends MY_Controller{
             'task_id'    => 'required',
         ]);
         //taskid确认
-        $this->wordreportService->checkTaskID($params['task_id']);
+        $taskInfo = $this->wordreportService->queryByTaskID($params['task_id']);
+
 
         $this->wordreportService->checkFile($_FILES);
 
         //前端数据转换成模板对应的格式
         $params = $this->wordreportService->formartJuncImgKeyValue($params);
-//        var_dump($params);
 
         //生成chart水印图片
         $tmpFiles = $this->wordreportService->generateChartImg($params,"滴滴智慧交通");
@@ -108,7 +108,7 @@ class Wordreport extends MY_Controller{
         $newFiles = array_merge($tmpFiles,$newFiles);
 
         //生成word文件
-        $docFile = $this->wordreportService->createJuncDoc($params,$newFiles);
+        $docFile = $this->wordreportService->createJuncDoc($params,$newFiles,$taskInfo['title']);
 
         //销毁水印图片
         $this->wordreportService->clearWatermark($newFiles);
