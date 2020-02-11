@@ -881,47 +881,47 @@ paths:
           type: integer
           description: "批次时间，从拥堵排名的接口中获取"
           required: true
-          responses:
-            200:
-              description: 成功
-              schema:
-                description: 快速路详情
-                type: object
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: 快速路详情
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
                 required:
-                  - "errno"
-                  - "errmsg"
-                  - "data"
-                  - "traceid"
-                  - "username"
-                  - "time"
+                  - "update_time"
+                  - "speed"
+                  - "stop_delay"
+                  - "across_time"
+                  - "type"
                 properties:
-                  errno:
+                  update_time:
+                    type: "string"
+                  speed:
                     type: "number"
-                  errmsg:
+                  stop_delay:
+                    type: "number"
+                  across_time:
                     type: "string"
-                  data:
-                    required:
-                      - "update_time"
-                      - "speed"
-                      - "stop_delay"
-                      - "across_time"
-                      - "type"
-                    properties:
-                      update_time:
-                        type: "string"
-                      speed:
-                        type: "number"
-                      stop_delay:
-                        type: "number"
-                      across_time:
-                        type: "string"
-                      type:
-                        type: "number"
-                    type: "object"
-                  traceid:
-                    type: "string"
-                  username:
-                    type: "string"
+                  type:
+                    type: "number"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
   /expressway/alarmlist:
     post:
       summary: 快速路报警列表
@@ -1489,6 +1489,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1570,6 +1571,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1695,6 +1697,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1774,6 +1777,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1861,6 +1865,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1943,6 +1948,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -2106,6 +2112,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -2185,6 +2192,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
@@ -2301,6 +2309,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
@@ -2419,73 +2428,74 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
-          required:
-            - "errno"
-            - "errmsg"
-            - "data"
-            - "traceid"
-            - "username"
-            - "time"
-          properties:
-            errno:
-              type: "number"
-            errmsg:
-              type: "string"
-            data:
-              required:
-                - "info"
-                - "chart"
-              properties:
-                info:
-                  required:
-                    - "desc"
-                  properties:
-                    desc:
-                      type: "string"
-                  type: "object"
-                chart:
-                  required:
-                    - "title"
-                    - "scale_title"
-                    - "series"
-                  properties:
-                    title:
-                      type: "string"
-                    scale_title:
-                      type: "string"
-                    series:
-                      type: "array"
-                      items:
-                        type: "object"
-                        properties:
-                          name:
-                            type: "string"
-                          data:
-                            type: "array"
-                            items:
-                              type: "object"
-                              properties:
-                                x:
-                                  type: "string"
-                                y:
-                                  type: "number"
-                  type: "object"
-              type: "object"
-            traceid:
-              type: "string"
-            username:
-              type: "string"
-            time:
-              required:
-                - "a"
-                - "s"
-              properties:
-                a:
-                  type: "string"
-                s:
-                  type: "string"
-              type: "object"
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                required:
+                  - "info"
+                  - "chart"
+                properties:
+                  info:
+                    required:
+                      - "desc"
+                    properties:
+                      desc:
+                        type: "string"
+                    type: "object"
+                  chart:
+                    required:
+                      - "title"
+                      - "scale_title"
+                      - "series"
+                    properties:
+                      title:
+                        type: "string"
+                      scale_title:
+                        type: "string"
+                      series:
+                        type: "array"
+                        items:
+                          type: "object"
+                          properties:
+                            name:
+                              type: "string"
+                            data:
+                              type: "array"
+                              items:
+                                type: "object"
+                                properties:
+                                  x:
+                                    type: "string"
+                                  y:
+                                    type: "number"
+                    type: "object"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                  s:
+                    type: "string"
+                type: "object"
   /AreaReport/queryAreaQuotaData:
     get:
       summary: 区域运行情况
@@ -2514,6 +2524,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
@@ -2618,6 +2629,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
@@ -2699,6 +2711,7 @@ paths:
           required: true
       responses:
         200:
+          description: "成功"
           schema:
             type: object
             required:
@@ -2877,6 +2890,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
@@ -3055,6 +3069,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
