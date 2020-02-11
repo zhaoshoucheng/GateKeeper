@@ -245,7 +245,6 @@ class WordreportService extends BaseService{
         }
 
 
-
 //        $file = $params['title'].'.docx';
 //        header("Content-Description: File Transfer");
 //        header('Content-Disposition: attachment; filename="' . $file . '"');
@@ -255,8 +254,10 @@ class WordreportService extends BaseService{
 //        header('Expires: 0');
 //        $templateProcessor->saveAs("php://output");
         $savePath = sys_get_temp_dir().$fileName.".doc";
-        $templateProcessor->saveAs($savePath);
-        return $savePath;
+//        var_dump($savePath);exit;
+//        $templateProcessor->saveAs($savePath);
+        return $templateProcessor->save();
+//        return $savePath;
     }
 
     /*
