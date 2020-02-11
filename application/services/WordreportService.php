@@ -54,8 +54,6 @@ class WordreportService extends BaseService{
             ];
         }, $word_data['list']);
 
-        // var_dump($pdf_data);
-        // var_dump($word_data);
         $merge_data_list = array_merge($pdf_data['list'], $word_data['list']);
         usort($merge_data_list, function($a, $b) {
             return ($a['create_at'] > $b['create_at']) ? -1 : 1;
@@ -218,12 +216,15 @@ class WordreportService extends BaseService{
             $templateProcessor->cloneBlock("C_BLOCK",0);
         }
 
-        if(isset($params['runningAnalysic_content_1'])){
+//        $templateProcessor->cloneBlock("D_BLOCK",0);
+
+
+        if(isset($params['runningAnalysic_sub_content_1'])){
             $templateProcessor->cloneBlock("D_BLOCK",1);
-            $templateProcessor->setValue("runningAnalysic_content_1",$params['runningAnalysic_content_1']);
-            $templateProcessor->setValue("runningAnalysic_content_2",$params['runningAnalysic_content_2']);
-            $templateProcessor->setValue("runningAnalysic_content_3",$params['runningAnalysic_content_3']);
-            $templateProcessor->setValue("runningAnalysic_content_4",$params['runningAnalysic_content_4']);
+            $templateProcessor->setValue("runningAnalysic_sub_content_1",$params['runningAnalysic_sub_content_1']);
+            $templateProcessor->setValue("runningAnalysic_1_1",$params['runningAnalysic_1_1']);
+            $templateProcessor->setValue("runningAnalysic_1_2",$params['runningAnalysic_1_2']);
+            $templateProcessor->setValue("runningAnalysic_1_3",$params['runningAnalysic_1_3']);
             $img  = array("path" => $FILES["runningAnalysic_img_1"]['tmp_watermark'], "width" => 450, "height" => 450);
             $templateProcessor->setImageValue("runningAnalysic_img_1",$img);
 
@@ -306,13 +307,13 @@ class WordreportService extends BaseService{
             if(strpos($pk,"chart")!==false){
                 $jsonArr = json_decode($pv,true);
                 foreach ($jsonArr['arr'] as $jk => $jv){
-
                     if(isset($jv['options'][0])){
-                        foreach ($jv['options'] as $ok=>$ov){
-                            $newParams[$pk."_".($jk+1)."_".($ok+1)] = json_encode(array(
-                                'infile'=>$ov['options']
-                            ));
-                        }
+                        continue;
+//                        foreach ($jv['options'] as $ok=>$ov){
+//                            $newParams[$pk."_".($jk+1)."_".($ok+1)] = json_encode(array(
+//                                'infile'=>$ov['options']
+//                            ));
+//                        }
                     }else{
                         $newParams[$pk."_".($jk+1)] = json_encode(array(
                             'infile'=>$jv['options']
@@ -320,10 +321,37 @@ class WordreportService extends BaseService{
                     }
                 }
 
+            }elseif (strpos($pk,"runningAnalysic")!==false){
+                if(strpos($pk,"chart")!==false){
+                    $jsonArr = json_decode($pv,true);
+                    foreach ($jsonArr['arr'] as $jk => $jv){
+                        foreach ($jv['options'] as $ok=>$ov){
+                            $newParams["runningAnalysic_chart_".($jk+1)."_".($ok+1)] = json_encode(array(
+                                'infile'=>$ov['options']
+                            ));
+                        }
+                    }
+                }else{
+                    $jsonArr = json_decode($pv,true);
+                    foreach ($jsonArr['arr'] as $jk => $jv){
+                        $newParams[$pk.($jk+1)] = $jv;
+                    }
+                }
+//                foreach ($pv as $rk => $rv){
+//                    $newParams["runningAnalysic_content_".($rk+1)] = $rv['runningAnalysic_content'];
+//                    $newParams["runningAnalysic_img_".($rk+1)] = $rv['runningAnalysic_img'];
+//                    foreach ($rv['runningAnalysic_sub_content'] as $rck => $rcv){
+//                        $newParams["runningAnalysic_sub_content_".($rk+1)."_".($rck+1)] = $rcv;
+//                    }
+//                }
             }else{
                 $newParams[$pk] = $pv;
             }
+
+
         }
+
+
         return $newParams;
 
     }
