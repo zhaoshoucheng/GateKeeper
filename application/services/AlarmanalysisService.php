@@ -8,9 +8,11 @@
 namespace Services;
 
 use Didi\Cloud\Collection\Collection;
+use Services\CommonService;
 
 class AlarmanalysisService extends BaseService
 {
+    protected $commonService;
     public function __construct()
     {
         parent::__construct();
@@ -20,6 +22,7 @@ class AlarmanalysisService extends BaseService
         $this->load->model('timing_model');
         $this->config->load('realtime_conf');
         $this->load->model('waymap_model');
+        $this->commonService = new CommonService();
     }
 
     /**
@@ -69,32 +72,104 @@ class AlarmanalysisService extends BaseService
         return $result;
     }
 
-
-    /**
-     * 路口报警分析 - 数据详情下载
-     * @param $params['city_id']           int    Y 城市ID
-     * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
-     * @param $params['start_time']        string Y 查询开始日期 yyyy-mm-dd
-     * @param $params['end_time']          string Y 查询结束日期 yyyy-mm-dd
-     * @param $params['start_hour']        string Y 选中的开始时间，全天传 0:00
-     * @param $params['end_hour']          string Y 选中的结束时间，全天传 24:00
-     * @param $params['alarm_type']        int    Y 报警问题 0=全部 1=过饱和 2=溢流 3=失衡，默认全部
-     * @param $params['top_num']        int    N 报警数top，不传则默认50
-     * @return binary
-     */
-    public function cityDataDownload($params)
+    // 多天城市数据下载
+    public function manyDayCityDataDownload($params)
     {
         if (empty($params)) {
             return (object)[];
         }
 
-        //hourList
-        if($params['start_time']==$params['end_time']){
-            $hourList = $this->getDailyAlarmAnalysis($params);
-        }else{
-            $hourList = $this->getTimeAlarmAnalysis($params);
+        //日期统计
+        $downData = [];
+
+        //dateAlarm，日期所有数据不划分时段
+        $dataALarmParams = $params;
+        $dataALarmParams["start_hour"] = "00:00:00"; //设置为一天  
+        $dataALarmParams["end_hour"] = "23:59:59"; //设置为一天
+        $hourList = $this->getTimeAlarmAnalysis($dataALarmParams);
+
+        //junctionTop，选中当天的排行
+        $juncTopParams = $params;
+        $juncTopParams["start_time"] = $juncTopParams["select_time"]; //设置为一天
+        $juncTopParams["end_time"] = $juncTopParams["select_time"]; //设置为一天
+        $juncTopParams["start_hour"] = "00:00:00";
+        $juncTopParams["end_hour"] = "23:59:59";
+        if(empty($juncTopParams["top_num"])){
+            $juncTopParams["top_num"] = 50;
         }
-        // print_r($hourList);exit;
+        $junctionTop = $this->alarmJunctionTop($juncTopParams);
+
+        //cityName
+        $cityName = $this->waymap_model->getCityName($params['city_id']);
+        $timeRange = date("Y.m.d",strtotime($params["start_time"]))."-".date("Y.m.d",strtotime($params["end_time"]));
+        $frequencyType = $this->config->item('frequency_type');
+        $alarmType = $this->config->item('junction_alarm_type');
+        $frequencyTypeName = $frequencyType[$params['frequency_type']]??"全部";
+        $alarmTypeName = $alarmType[$params['alarm_type']]??"全部";
+
+        //小时数据格式
+        $hourFormatList = [];
+        foreach($hourList as $hour=>$hourAlarmList){
+            $fullStartTime = date("Y-m-d")." ".$hour.":00";
+            if($params['start_time']==$params['end_time']){
+                $hourRange = date("H:i",strtotime($fullStartTime))."-".date("H:i",strtotime($fullStartTime)+60*60);
+            }else{
+                $hourRange = date("Y.m.d",strtotime($hour));
+            }   
+            $hourCount = [];
+            $hourCount["total"] = $hourAlarmList["count"];
+            if(!empty($hourAlarmList["list"])){
+                foreach($hourAlarmList["list"] as $alarmStat){
+                    $hourCount[$alarmStat["key"]] = $alarmStat["value"];
+                }
+            }
+            if($params['alarm_type']>0){
+                $hourFormatList[] = [
+                    $hourRange,
+                    $hourCount[$params['alarm_type']]??0,
+                ];
+            }else{
+                $hourFormatList[] = [
+                    $hourRange,
+                    $hourCount["total"]??0,
+                    $hourCount["2"]??0,
+                    $hourCount["1"]??0,
+                    $hourCount["3"]??0,
+                ];
+            }
+        }
+        $downData = [
+            ["城市：".$cityName],
+            ["时间范围：".$timeRange],
+            ["常偶发报警：".$frequencyTypeName],
+            ["报警类型：".$alarmTypeName],
+        ];
+        if($params['alarm_type']>0){
+            $downData[] = ["日期",$alarmTypeName."次数"];
+        }else{
+            $downData[] = ["日期","总报警次数","溢流次数","过饱和次数","失衡次数"];
+        }
+        $downData = array_merge($downData,$hourFormatList);
+        
+        //top信息格式
+        $topTimeRange = date("Y.m.d",strtotime($params["select_time"]));
+        $downData[] = ["日期：".$topTimeRange];
+        $downData[] = ["报警路口TOP".$params["top_num"]."排名"];
+        $downData[] = ["序号","路口名称","报警次数"];
+        foreach ($junctionTop as $topIndex => $juncStat) {
+            $downData[] = [++$topIndex,$juncStat["junction_name"],$juncStat["alarm_count"]];
+        }
+        $excelData[] = ["sheet_name"=>"城市报警发生日期统计","data"=>$downData,];
+
+
+        //时段统计
+        $downData = [];
+
+        //时段统计为全天
+        $hourALarmParams = $params;
+        $hourALarmParams["start_hour"] = "00:00:00"; //设置为一天  
+        $hourALarmParams["end_hour"] = "23:59:59"; //设置为一天
+        $hourList = $this->getDailyAlarmAnalysis($hourALarmParams);
 
         //junctionTop
         $juncTopParams = $params;
@@ -124,7 +199,7 @@ class AlarmanalysisService extends BaseService
                 $hourRange = date("H:i",strtotime($fullStartTime))."-".date("H:i",strtotime($fullStartTime)+60*60);
             }else{
                 $hourRange = $hour;
-            }
+            }   
             $hourCount = [];
             $hourCount["total"] = $hourAlarmList["count"];
             if(!empty($hourAlarmList["list"])){
@@ -168,28 +243,112 @@ class AlarmanalysisService extends BaseService
         foreach ($junctionTop as $topIndex => $juncStat) {
             $downData[] = [++$topIndex,$juncStat["junction_name"],$juncStat["alarm_count"]];
         }
-        $fp=fopen('php://memory','w+');
-        $convertedRow=array();
-        foreach($downData as $row){
-            $convertedRow=array();
-            foreach($row as $val){
-                $convertedRow[]=$val."\t";
-            }
-            fputcsv($fp,$convertedRow);
+        $excelData[] = ["sheet_name"=>"城市报警发生时段统计","data"=>$downData,];
+        
+        $this->commonService->excelDownload($excelData);
+    }
+
+    /**
+     * 路口报警分析 - 数据详情下载
+     * @param $params['city_id']           int    Y 城市ID
+     * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
+     * @param $params['start_time']        string Y 查询开始日期 yyyy-mm-dd
+     * @param $params['end_time']          string Y 查询结束日期 yyyy-mm-dd
+     * @param $params['start_hour']        string Y 选中的开始时间，全天传 0:00
+     * @param $params['end_hour']          string Y 选中的结束时间，全天传 24:00
+     * @param $params['alarm_type']        int    Y 报警问题 0=全部 1=过饱和 2=溢流 3=失衡，默认全部
+     * @param $params['top_num']        int    N 报警数top，不传则默认50
+     * @return binary
+     */
+    public function cityDataDownload($params)
+    {
+        if (empty($params)) {
+            return (object)[];
         }
-        fputcsv($fp,[]);
-        rewind($fp); 
-        $csvFile=stream_get_contents($fp);
-        fclose($fp);
-        ob_clean();
-        $fileName = date('YmdHis').'.csv';
-        header('Content-Type: text/csv; charset=utf-8');
-        header("Content-Transfer-Encoding: binary ");
-        header("Content-Type: application/force-download");
-        header('Content-Length: '.strlen($csvFile));
-        header('Content-Disposition: attachment; filename="'.$fileName.'"');
-        echo "\xEF\xBB\xBF";
-        echo ($csvFile);exit;
+
+        if($params['start_time']!=$params['end_time']){
+            return $this->manyDayCityDataDownload($params);
+        }
+
+        //时段统计
+        //hourList，不需要时段查询
+        $hourList = $this->getDailyAlarmAnalysis($params);
+        //junctionTop，需要时段查询
+        $juncTopParams = $params;
+        $juncTopParams["start_hour"] = $juncTopParams["start_hour"].":00";
+        $juncTopParams["end_hour"] = $juncTopParams["end_hour"].":00";
+        if($juncTopParams["end_hour"]=="24:00:00"){
+            $juncTopParams["end_hour"] = "23:59:59";
+        }
+        if(empty($juncTopParams["top_num"])){
+            $juncTopParams["top_num"] = 50;
+        }
+        $junctionTop = $this->alarmJunctionTop($juncTopParams);
+
+        //cityName
+        $cityName = $this->waymap_model->getCityName($params['city_id']);
+        $timeRange = date("Y.m.d",strtotime($params["start_time"]))."-".date("Y.m.d",strtotime($params["end_time"]));
+        $frequencyType = $this->config->item('frequency_type');
+        $alarmType = $this->config->item('junction_alarm_type');
+        $frequencyTypeName = $frequencyType[$params['frequency_type']]??"全部";
+        $alarmTypeName = $alarmType[$params['alarm_type']]??"全部";
+
+        //小时数据格式
+        $hourFormatList = [];
+        foreach($hourList as $hour=>$hourAlarmList){
+            $fullStartTime = date("Y-m-d")." ".$hour.":00";
+            if($params['start_time']==$params['end_time']){
+                $hourRange = date("H:i",strtotime($fullStartTime))."-".date("H:i",strtotime($fullStartTime)+60*60);
+            }else{
+                $hourRange = $hour;
+            }   
+            $hourCount = [];
+            $hourCount["total"] = $hourAlarmList["count"];
+            if(!empty($hourAlarmList["list"])){
+                foreach($hourAlarmList["list"] as $alarmStat){
+                    $hourCount[$alarmStat["key"]] = $alarmStat["value"];
+                }
+            }
+            if($params['alarm_type']>0){
+                $hourFormatList[] = [
+                    $hourRange,
+                    $hourCount[$params['alarm_type']]??0,
+                ];
+            }else{
+                $hourFormatList[] = [
+                    $hourRange,
+                    $hourCount["total"]??0,
+                    $hourCount["2"]??0,
+                    $hourCount["1"]??0,
+                    $hourCount["3"]??0,
+                ];
+            }
+        }
+        $downData = [
+            ["城市：".$cityName],
+            ["时间范围：".$timeRange],
+            ["常偶发报警：".$frequencyTypeName],
+            ["报警类型：".$alarmTypeName],
+        ];
+        if($params['alarm_type']>0){
+            $downData[] = ["时刻",$alarmTypeName."次数"];
+        }else{
+            $downData[] = ["时刻","总报警次数","溢流次数","过饱和次数","失衡次数"];
+        }
+        $downData = array_merge($downData,$hourFormatList);
+        
+        //top信息格式
+        $topTimeRange = $params["start_hour"]."-".$params["end_hour"];
+        $downData[] = ["时刻：".$topTimeRange];
+        $downData[] = ["报警路口TOP".$params["top_num"]."排名"];
+        $downData[] = ["序号","路口名称","报警次数"];
+        foreach ($junctionTop as $topIndex => $juncStat) {
+            $downData[] = [++$topIndex,$juncStat["junction_name"],$juncStat["alarm_count"]];
+        }
+
+        $this->commonService->excelDownload([
+            ["sheet_name"=>"路口报警发生时段统计","data"=>$downData,],
+        ]);
     }
 
     /**
@@ -208,28 +367,29 @@ class AlarmanalysisService extends BaseService
             return (object)[];
         }
         $result = $this->getjunctionDownloadData($params);
-
-        $fp=fopen('php://memory','w+');
-        $convertedRow=array();
-        foreach($result as $row){
-            $convertedRow=array();
-            foreach($row as $val){
-                $convertedRow[]=$val."\t";
-            }
-            fputcsv($fp,$convertedRow);
-        }
-        rewind($fp); 
-        $csvFile=stream_get_contents($fp);
-        fclose($fp);
-        ob_clean();
-        $fileName = date('YmdHis').'.csv';
-        header('Content-Type: text/csv; charset=utf-8');
-        header("Content-Transfer-Encoding: binary ");
-        header("Content-Type: application/force-download");
-        header('Content-Length: '.strlen($csvFile));
-        header('Content-Disposition: attachment; filename="'.$fileName.'"');
-        echo "\xEF\xBB\xBF";
-        echo ($csvFile);exit;
+        $excelData[] = ["sheet_name"=>"路口报警发生时段统计","data"=>$result,];
+        $this->commonService->excelDownload($excelData);
+        // $fp=fopen('php://memory','w+');
+        // $convertedRow=array();
+        // foreach($result as $row){
+        //     $convertedRow=array();
+        //     foreach($row as $val){
+        //         $convertedRow[]=$val."\t";
+        //     }
+        //     fputcsv($fp,$convertedRow);
+        // }
+        // rewind($fp); 
+        // $csvFile=stream_get_contents($fp);
+        // fclose($fp);
+        // ob_clean();
+        // $fileName = date('YmdHis').'.csv';
+        // header('Content-Type: text/csv; charset=utf-8');
+        // header("Content-Transfer-Encoding: binary ");
+        // header("Content-Type: application/force-download");
+        // header('Content-Length: '.strlen($csvFile));
+        // header('Content-Disposition: attachment; filename="'.$fileName.'"');
+        // echo "\xEF\xBB\xBF";
+        // echo ($csvFile);exit;
     }
 
     /**
@@ -331,7 +491,7 @@ class AlarmanalysisService extends BaseService
     } 
 
     /**
-     * 获取当天报警分析
+     * 获取当天报警分析(不牵扯时段查询)
      * @param $params['city_id']           int    Y 城市ID
      * @param $params['logic_junction_id'] string N 逻辑路口ID 当：不为空时，按路口报警分析查询;为空时，按城市报警分析查询
      * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
@@ -509,7 +669,6 @@ class AlarmanalysisService extends BaseService
                 }
             }
         }
-        // print_r($resultData);exit;
         return $resultData;
     }
 
