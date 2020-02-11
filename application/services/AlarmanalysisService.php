@@ -39,15 +39,157 @@ class AlarmanalysisService extends BaseService
         }
 
         if ($params['start_time'] == $params['end_time']) {
-            // 获取当天报警分析
+            // 获取小时为纬度聚合
             return $this->getDailyAlarmAnalysis($params);
         }else if(isset($params['time_range'])){
             //济南需求,新增过滤逻辑
             return $this->getNewTimeAlarmAnalysis($params);
         } else {
-            // 按时间段获取报警分析
+            // 获取天为纬度聚合
             return $this->getTimeAlarmAnalysis($params);
         }
+    }
+
+
+    /**
+     * 城市报警分析----多天报警发生时段分布（柱状）
+     * @param $params['city_id']           int    Y 城市ID
+     * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
+     * @param $params['start_time']        string Y 查询开始日期 yyyy-mm-dd
+     * @param $params['end_time']          string Y 查询结束日期 yyyy-mm-dd 开始日期与结束日期一致认为查询当天从0点到当前整点的数据
+     * @param $params['alarm_type']        int    N 报警问题 0=全部 1=过饱和 2=溢流 3=失衡，默认全部
+     * @return array
+     */
+    public function manyDayAlarmTimeDistribution($params)
+    {
+        if (empty($params)) {
+            return (object)[];
+        }
+        $result = $this->getDailyAlarmAnalysis($params);
+        return $result;
+    }
+
+
+    /**
+     * 路口报警分析 - 数据详情下载
+     * @param $params['city_id']           int    Y 城市ID
+     * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
+     * @param $params['start_time']        string Y 查询开始日期 yyyy-mm-dd
+     * @param $params['end_time']          string Y 查询结束日期 yyyy-mm-dd
+     * @param $params['start_hour']        string Y 选中的开始时间，全天传 0:00
+     * @param $params['end_hour']          string Y 选中的结束时间，全天传 24:00
+     * @param $params['alarm_type']        int    Y 报警问题 0=全部 1=过饱和 2=溢流 3=失衡，默认全部
+     * @param $params['top_num']        int    N 报警数top，不传则默认50
+     * @return binary
+     */
+    public function cityDataDownload($params)
+    {
+        if (empty($params)) {
+            return (object)[];
+        }
+
+        //hourList
+        if($params['start_time']==$params['end_time']){
+            $hourList = $this->getDailyAlarmAnalysis($params);
+        }else{
+            $hourList = $this->getTimeAlarmAnalysis($params);
+        }
+        // print_r($hourList);exit;
+
+        //junctionTop
+        $juncTopParams = $params;
+        $juncTopParams["start_hour"] = $juncTopParams["start_hour"].":00";
+        $juncTopParams["end_hour"] = $juncTopParams["end_hour"].":00";
+        if($juncTopParams["end_hour"]=="24:00:00"){
+            $juncTopParams["end_hour"] = "23:59:59";
+        }
+        if(empty($juncTopParams["top_num"])){
+            $juncTopParams["top_num"] = 50;
+        }
+        $junctionTop = $this->alarmJunctionTop($juncTopParams);
+
+        //cityName
+        $cityName = $this->waymap_model->getCityName($params['city_id']);
+        $timeRange = date("Y.m.d",strtotime($params["start_time"]))."-".date("Y.m.d",strtotime($params["end_time"]));
+        $frequencyType = $this->config->item('frequency_type');
+        $alarmType = $this->config->item('junction_alarm_type');
+        $frequencyTypeName = $frequencyType[$params['frequency_type']]??"全部";
+        $alarmTypeName = $alarmType[$params['alarm_type']]??"全部";
+
+        //小时数据格式
+        $hourFormatList = [];
+        foreach($hourList as $hour=>$hourAlarmList){
+            $fullStartTime = date("Y-m-d")." ".$hour.":00";
+            if($params['start_time']==$params['end_time']){
+                $hourRange = date("H:i",strtotime($fullStartTime))."-".date("H:i",strtotime($fullStartTime)+60*60);
+            }else{
+                $hourRange = $hour;
+            }
+            $hourCount = [];
+            $hourCount["total"] = $hourAlarmList["count"];
+            if(!empty($hourAlarmList["list"])){
+                foreach($hourAlarmList["list"] as $alarmStat){
+                    $hourCount[$alarmStat["key"]] = $alarmStat["value"];
+                }
+            }
+            if($params['alarm_type']>0){
+                $hourFormatList[] = [
+                    $hourRange,
+                    $hourCount[$params['alarm_type']]??0,
+                ];
+            }else{
+                $hourFormatList[] = [
+                    $hourRange,
+                    $hourCount["total"]??0,
+                    $hourCount["2"]??0,
+                    $hourCount["1"]??0,
+                    $hourCount["3"]??0,
+                ];
+            }
+        }
+        $downData = [
+            ["城市：".$cityName],
+            ["时间范围：".$timeRange],
+            ["常偶发报警：".$frequencyTypeName],
+            ["报警类型：".$alarmTypeName],
+        ];
+        if($params['alarm_type']>0){
+            $downData[] = ["时刻",$alarmTypeName."次数"];
+        }else{
+            $downData[] = ["时刻","总报警次数","溢流次数","过饱和次数","失衡次数"];
+        }
+        $downData = array_merge($downData,$hourFormatList);
+        
+        //top信息格式
+        $topTimeRange = $params["start_hour"]."-".$params["end_hour"];
+        $downData[] = ["时刻：".$topTimeRange];
+        $downData[] = ["报警路口TOP".$params["top_num"]."排名"];
+        $downData[] = ["序号","路口名称","报警次数"];
+        foreach ($junctionTop as $topIndex => $juncStat) {
+            $downData[] = [++$topIndex,$juncStat["junction_name"],$juncStat["alarm_count"]];
+        }
+        $fp=fopen('php://memory','w+');
+        $convertedRow=array();
+        foreach($downData as $row){
+            $convertedRow=array();
+            foreach($row as $val){
+                $convertedRow[]=$val."\t";
+            }
+            fputcsv($fp,$convertedRow);
+        }
+        fputcsv($fp,[]);
+        rewind($fp); 
+        $csvFile=stream_get_contents($fp);
+        fclose($fp);
+        ob_clean();
+        $fileName = date('YmdHis').'.csv';
+        header('Content-Type: text/csv; charset=utf-8');
+        header("Content-Transfer-Encoding: binary ");
+        header("Content-Type: application/force-download");
+        header('Content-Length: '.strlen($csvFile));
+        header('Content-Disposition: attachment; filename="'.$fileName.'"');
+        echo "\xEF\xBB\xBF";
+        echo ($csvFile);exit;
     }
 
     /**
@@ -72,7 +214,6 @@ class AlarmanalysisService extends BaseService
         foreach($result as $row){
             $convertedRow=array();
             foreach($row as $val){
-                // $convertedRow[]=iconv('utf-8','gbk//TRANSLIT',$val)."\t";
                 $convertedRow[]=$val."\t";
             }
             fputcsv($fp,$convertedRow);
@@ -81,7 +222,7 @@ class AlarmanalysisService extends BaseService
         $csvFile=stream_get_contents($fp);
         fclose($fp);
         ob_clean();
-        $fileName = 'card_port_'.date('YmdHis').'.csv';
+        $fileName = date('YmdHis').'.csv';
         header('Content-Type: text/csv; charset=utf-8');
         header("Content-Transfer-Encoding: binary ");
         header("Content-Type: application/force-download");
@@ -214,9 +355,12 @@ class AlarmanalysisService extends BaseService
         if(!empty($params['alarm_type'])){
             $json .= ',{"match":{"type":{"query":' . (int)$params['alarm_type'] . ',"type":"phrase"}}}';
         }
-                
-        // where date
-        $json .= ',{"match":{"date":{"query":"' . trim($params['start_time']) . '","type":"phrase"}}}';
+
+        // where date >= start_time
+        $json .= ',{"range":{"date":{"from":"' . trim($params['start_time']) . '","to":null,"include_lower":true,"include_upper":true}}}';
+
+        // where date <= end_time
+        $json .= ',{"range":{"date":{"from":null,"to":"' . trim($params['end_time']) . '","include_lower":true,"include_upper":true}}}';
 
         if (!empty($params['logic_junction_id'])) { // 单路口报警分析查询
             // where logic_junction_id
@@ -233,6 +377,7 @@ class AlarmanalysisService extends BaseService
         /*新的数据处理逻辑--开始*/
         if(!empty($params['logic_junction_id'])){
             $json .= ']}}}},"_source":{"excludes":[]},"fields":["hour","type","frequency_type"]}';
+            // print_r($json);exit;
             $result = $this->alarmanalysis_model->search($json);
             if (empty($result["hits"]["hits"])) {
                 return (object)[];

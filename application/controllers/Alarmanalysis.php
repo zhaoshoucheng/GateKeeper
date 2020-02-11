@@ -58,7 +58,7 @@ class Alarmanalysis extends MY_Controller
     }
 
     /**
-     * 城市、路口报警分析----多天报警发生时段分布（柱状）
+     * 城市报警分析----多天报警发生时段分布（柱状）
      * @param $params['city_id']           int    Y 城市ID
      * @param $params['logic_junction_id'] string N 逻辑路口ID 当：不为空时，按路口报警分析查询;为空时，按城市报警分析查询
      * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
@@ -69,7 +69,57 @@ class Alarmanalysis extends MY_Controller
      */
     public function manyDayAlarmTimeDistribution()
     {
-        return $this->alarmAnalysis();
+        $params = $this->input->post(null, true);
+
+        // 校验参数
+        $this->validate([
+            'frequency_type' => 'required|in_list[' . implode(',', array_keys($this->config->item('frequency_type'))) . ']',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'city_id'        => 'required|is_natural_no_zero',
+            'alarm_type'        => 'is_natural',
+        ]);
+        // $params['alarm_type'] = 3; 
+        if (strtotime($params['end_time']) - strtotime($params['start_time']) < 0) {
+            throw new \Exception('结束日期需大于等于开始日期！', ERR_PARAMETERS);
+        }
+        $result = $this->alarmanalysisService->manyDayAlarmTimeDistribution($params);
+        $this->response($result);
+    }
+
+    /**
+     * 城市报警分析 - 数据详情下载
+     * @param $params['city_id']           int    Y 城市ID
+     * @param $params['frequency_type']    int    Y 频率类型 0：全部 1：常发 2：偶发
+     * @param $params['start_time']        string Y 查询开始日期 yyyy-mm-dd
+     * @param $params['end_time']          string Y 查询结束日期 yyyy-mm-dd
+     * @param $params['start_hour']        string Y 选中的开始时间，全天传 0:00
+     * @param $params['end_hour']          string Y 选中的结束时间，全天传 24:00
+     * @param $params['alarm_type']        int    Y 报警问题 0=全部 1=过饱和 2=溢流 3=失衡，默认全部
+     * @param $params['top_num']        int    N 报警数top，不传则默认50
+     * @return json
+     */
+    public function cityDataDownload()
+    {
+        $params = $this->input->get(null, true);
+
+        // 校验参数
+        $this->get_validate([
+            'city_id'        => 'required|is_natural_no_zero',
+            'frequency_type' => 'required|in_list[' . implode(',', array_keys($this->config->item('frequency_type'))) . ']',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'start_hour'     => 'required|trim|regex_match[/\d{2}\:\d{2}/]',
+            'end_hour'       => 'required|trim|regex_match[/\d{2}\:\d{2}/]',
+            'alarm_type'     => 'required|is_natural',
+            'top_num'        => 'is_natural',
+        ], $params);
+        $params['top_num'] = $params['top_num']??50;
+        if (strtotime($params['end_time']) - strtotime($params['start_time']) < 0) {
+            throw new \Exception('结束日期需大于等于开始日期！', ERR_PARAMETERS);
+        }
+        $result = $this->alarmanalysisService->cityDataDownload($params);
+        $this->response($result);
     }
 
     /**
