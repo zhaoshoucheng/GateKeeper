@@ -83,11 +83,11 @@ class Wordreport_model extends CI_Model{
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
     //生成chart图片
-    public function generateChartImg($data){
+    public function generateChartImg($jsonStr){
 //        $temp = tmpfile();
         $temp_file = tempnam(sys_get_temp_dir(), 'chart');
 
-        $jsonStr = json_encode($data);
+//        $jsonStr = json_encode($data);
 //        $jsonStr = "{\"infile\":{\"title\": {\"text\": \"Steep Chart\"}, \"xAxis\": {\"categories\": [\"Jan\", \"Feb\", \"Mar\"]}, \"series\": [{\"data\": [29.9, 71.5, 106.4]}]}}";
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_POST, 1);
