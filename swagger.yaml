@@ -18,10 +18,670 @@ tags:
   - name: "南昌本地化"
   - name: "中控SaaS"
   - name: "南京建邺区项目"
+  - name: "南昌报警接口"
 schemes:
 - http
 - https
 paths:
+  /Alarmanalysis/cityDataDownload:
+    get:
+      summary: 城市报警分析----数据详情下载
+      description: 城市报警分析----数据详情下载
+      tags:
+        - 南昌报警接口
+      consumes: []
+      produces:
+      - application/vnd.ms-excel
+      parameters:
+      - name: city_id
+        in: query
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: query
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: start_time
+        in: query
+        description: '开始日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: end_time
+        in: query
+        description: '结束日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: start_hour
+        in: query
+        description: '开始时间，全天开始传 0:00'
+        required: true
+        type: string
+      - name: end_hour
+        in: query
+        description: '结束时间，全天结束时传 24:00'
+        required: true
+        type: string
+      - name: alarm_type
+        in: query
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: true
+        type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+  /Alarmanalysis/junctionDataDownload:
+    get:
+      summary: 路口报警分析----数据详情下载
+      description: 路口报警分析----数据详情下载
+      tags:
+        - 南昌报警接口
+      consumes: []
+      produces:
+      - application/vnd.ms-excel
+      parameters:
+      - name: city_id
+        in: query
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: query
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: logic_junction_id
+        in: query
+        description: '路口ID，不传此参数则为城市分析'
+        required: false
+        type: string
+      - name: start_time
+        in: query
+        description: '开始日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: end_time
+        in: query
+        description: '结束日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: alarm_type
+        in: query
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: true
+        type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+  /Alarmanalysis/manyDayAlarmTimeDistribution:
+    post:
+      summary: 城市、路口报警分析----多天报警发生时段分布
+      description: 城市、路口报警分析----多天报警发生时段分布
+      tags:
+        - 南昌报警接口
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: formData
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: logic_junction_id
+        in: formData
+        description: '路口ID，不传此参数则为城市分析'
+        required: false
+        type: string
+      - name: start_time
+        in: formData
+        description: '开始日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: end_time
+        in: formData
+        description: '结束日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: alarm_type
+        in: formData
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: false
+        type: string
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: "OK"
+            properties: 
+              errno: 
+                type: "number"
+                example: 0
+              errmsg: 
+                type: "string"
+                example: ""
+              data: 
+                type: "object"
+                properties:
+                  "0:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "1:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "2:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "3:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "4:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "5:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "6:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "7:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "8:00": 
+                    required: 
+                      - "list"
+                      - "count"
+                    properties: 
+                      list: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            name: 
+                              type: "string"
+                              example: "失衡"
+                            value: 
+                              type: "number"
+                              example: 2
+                            key: 
+                              type: "number"
+                              example: 3
+                            phase_list: 
+                              type: "array"
+                              items: 
+                                type: "object"
+                                properties: 
+                                  phase_name: 
+                                    type: "string"
+                                    example: "北左"
+                                  count: 
+                                    type: "number"
+                                    example: 1
+                      count: 
+                        type: "number"
+                        example: 3
+                    type: "object"
+              traceid: 
+                type: "string"
+                example: "a41c6275e311497ab733e8e37510a49a"
+              username: 
+                type: "string"
+                example: "unkown"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                    example: "0.1688秒"
+                  s: 
+                    type: "string"
+                    example: "0.0987秒"
+                type: "object"
+  /Alarmanalysis/alarmJunctionTop:
+    post:
+      summary: 城市报警分析----报警路口TOP50排名
+      description: 城市报警分析----报警路口TOP50排名
+      tags:
+        - 南昌报警接口
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: formData
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: start_time
+        in: formData
+        description: '开始日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: end_time
+        in: formData
+        description: '结束日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: start_hour
+        in: formData
+        description: '开始时间，全天开始传 0:00'
+        required: true
+        type: string
+      - name: end_hour
+        in: formData
+        description: '结束时间，全天结束时传 24:00'
+        required: true
+        type: string
+      - name: alarm_type
+        in: formData
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: true
+        type: string
+      - name: top_num
+        in: formData
+        description: '报警数top，不传则默认50'
+        required: false
+        type: string
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: ""
+            properties: 
+              errno: 
+                type: "number"
+                example: 0
+              errmsg: 
+                type: "string"
+                example: ""
+              data: 
+                type: "array"
+                items: 
+                  type: "object"
+                  properties: 
+                    junction_id: 
+                      type: "string"
+                      example: "2017030116_4858433"
+                    alarm_count: 
+                      type: "number"
+                      example: 11
+                    junction_name: 
+                      type: "string"
+                      example: "新泺大街_崇华路"
+              traceid: 
+                type: "string"
+                example: "1de7b1a4b6c947b791c17ebc110fbc1d"
+              username: 
+                type: "string"
+                example: "unkown"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                    example: "0.1847秒"
+                  s: 
+                    type: "string"
+                    example: "0.1169秒"
+                type: "object"
+  /Alarmanalysis/alarmTimeDistribution:
+    post:
+      summary: 城市、路口报警分析----报警发生时段分布
+      description: 城市、路口报警分析----报警发生时段分布
+      tags:
+        - 南昌报警接口
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: formData
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: logic_junction_id
+        in: formData
+        description: '路口ID，不传此参数则为城市分析'
+        required: false
+        type: string
+      - name: start_time
+        in: formData
+        description: '开始日期 如：2020-02-06'
+        required: false
+        type: string
+      - name: end_time
+        in: formData
+        description: '结束日期 如：2020-02-06'
+        required: false
+        type: string
+      - name: alarm_type
+        in: formData
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: false
+        type: string
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: ""
+            properties: 
+              errno: 
+                type: "number"
+                example: 0
+              errmsg: 
+                type: "string"
+                example: ""
+              data: 
+                required: 
+                  - "dataList"
+                  - "topInfo"
+                properties: 
+                  dataList: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        hour: 
+                          type: "number"
+                          example: 0
+                        value: 
+                          type: "number"
+                          example: 0
+                  topInfo: 
+                    type: "array"
+                    example: []
+                type: "object"
+              traceid: 
+                type: "string"
+                example: "0cbd175a49d14cd68baa8e40c3a52531"
+              username: 
+                type: "string"
+                example: "unkown"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                    example: "0.0878秒"
+                  s: 
+                    type: "string"
+                    example: "0.0200秒"
+                type: "object"
+  /Alarmanalysis/sevenDayAlarmMeanValue:
+    post:
+      summary: 城市、路口报警分析----7日报警平均值（曲线）
+      description: 城市、路口报警分析----7日报警平均值（曲线）
+      tags:
+        - 南昌报警接口
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/x-www-form-urlencoded
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: formData
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: logic_junction_id
+        in: formData
+        description: '路口ID，不传此参数则为城市分析'
+        required: false
+        type: string
+      - name: alarm_type
+        in: formData
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: false
+        type: string
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: ""
+            properties: 
+              errno: 
+                type: "number"
+                example: 0
+              errmsg: 
+                type: "string"
+                example: ""
+              data: 
+                required: 
+                  - "dataList"
+                properties: 
+                  dataList: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        hour: 
+                          type: "string"
+                          example: "0:00"
+                        value: 
+                          type: "number"
+                          example: 0
+                type: "object"
+              traceid: 
+                type: "string"
+                example: "6493f9063eb34f00be08cccbfefb0ae0"
+              username: 
+                type: "string"
+                example: "unkown"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                    example: "0.1163秒"
+                  s: 
+                    type: "string"
+                    example: "0.0479秒"
+                type: "object"
+  /Alarmanalysis/alarmAnalysis:
+    post:
+      summary: 城市、路口报警分析-----报警信息统计表接口（柱状图）
+      description: 城市、路口报警分析-----报警信息统计表接口（柱状图）
+      tags:
+        - 南昌报警接口
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: formData
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: logic_junction_id
+        in: formData
+        description: '路口ID，不传此参数则为城市分析'
+        required: false
+        type: string
+      - name: start_time
+        in: formData
+        description: '开始日期 示例: 2020-02-06'
+        required: true
+        type: string
+      - name: end_time
+        in: formData
+        description: '结束日期 示例: 2020-02-06'
+        required: true
+        type: string
+      - name: alarm_type
+        in: formData
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: false
+        type: string
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: ""
+            properties: 
+              errno: 
+                type: "number"
+                example: 0
+              errmsg: 
+                type: "string"
+                example: ""
+              data: 
+                properties: 
+                  "0:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "1:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "2:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "3:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "4:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "5:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "6:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "7:00": 
+                    type: "array"
+                    items: 
+                      type: "undefined"
+                    example: []
+                  "8:00": 
+                    required: 
+                      - "list"
+                      - "count"
+                    properties: 
+                      list: 
+                        type: "array"
+                        items: 
+                          type: "object"
+                          properties: 
+                            name: 
+                              type: "string"
+                              example: "失衡"
+                            value: 
+                              type: "number"
+                              example: 2
+                            key: 
+                              type: "number"
+                              example: 3
+                            phase_list: 
+                              type: "array"
+                              items: 
+                                type: "object"
+                                properties: 
+                                  phase_name: 
+                                    type: "string"
+                                    example: "北左"
+                                  count: 
+                                    type: "number"
+                                    example: 1
+                      count: 
+                        type: "number"
+                        example: 3
+                    type: "object"
+                type: "object"
+              traceid: 
+                type: "string"
+                example: "79f075e462bb465fa2c17f6245878514"
+              username: 
+                type: "string"
+                example: "unkown"
+              time: 
+                required: 
+                  - "a"
+                  - "s"
+                properties: 
+                  a: 
+                    type: "string"
+                    example: "0.1691秒"
+                  s: 
+                    type: "string"
+                    example: "0.0998秒"
+                type: "object"
   /Wordreport/GetUUID:
     get:
       summary: 获取任务id
