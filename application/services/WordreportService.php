@@ -333,9 +333,12 @@ class WordreportService extends BaseService{
                     }
                 }else{
                     $jsonArr = json_decode($pv,true);
-                    foreach ($jsonArr['arr'] as $jk => $jv){
-                        $newParams[$pk.($jk+1)] = $jv;
+                    if($jsonArr){
+                        foreach ($jsonArr['arr'] as $jk => $jv){
+                            $newParams[$pk.($jk+1)] = $jv;
+                        }
                     }
+
                 }
 //                foreach ($pv as $rk => $rv){
 //                    $newParams["runningAnalysic_content_".($rk+1)] = $rv['runningAnalysic_content'];
