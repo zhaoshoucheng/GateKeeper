@@ -95,8 +95,13 @@ class Wordreport extends MY_Controller{
 
         $this->wordreportService->checkFile($_FILES);
 
+        //生成chart水印图片
+        $tmpFiles = $this->wordreportService->generateChartImg($params,"滴滴智慧交通");
+
         //图片添加水印
         $newFiles = $this->wordreportService->addWatermark($_FILES,"滴滴智慧交通");
+
+        $newFiles = array_merge($tmpFiles,$newFiles);
 
         //生成word文件
         $docFile = $this->wordreportService->createJuncDoc($params,$newFiles);

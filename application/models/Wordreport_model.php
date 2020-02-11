@@ -82,4 +82,30 @@ class Wordreport_model extends CI_Model{
 
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
+    //生成chart图片
+    public function generateChartImg($jsonStr){
+//        $temp = tmpfile();
+        $temp_file = tempnam(sys_get_temp_dir(), 'chart');
+
+//        $jsonStr = json_encode($data);
+//        $jsonStr = "{\"infile\":{\"title\": {\"text\": \"Steep Chart\"}, \"xAxis\": {\"categories\": [\"Jan\", \"Feb\", \"Mar\"]}, \"series\": [{\"data\": [29.9, 71.5, 106.4]}]}}";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_URL, "http://100.90.164.31:8085");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonStr);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json; charset=utf-8',
+                'Content-Length: ' . strlen($jsonStr)
+            )
+        );
+        $response = curl_exec($ch);
+
+        curl_close($ch);
+        $fp2 = @fopen($temp_file, "a");
+        fwrite($fp2, $response);//向当前目录写入图片文件，并重新命名
+        fclose($fp2);
+        return $temp_file;
+
+    }
 }
