@@ -69,7 +69,7 @@ class CommonService extends BaseService
             foreach($sheetData["data"] as $key=>$data){
                 $maxLen = count($data)>$maxLen?count($data):$maxLen;
             }
-            if($i>0){
+            if($sheetIndex>0){
                 $objPHPExcel->createSheet();
             }
             $objPHPExcel->setActiveSheetIndex($sheetIndex);

@@ -170,7 +170,7 @@ class AlarmanalysisService extends BaseService
         $hourALarmParams["start_hour"] = "00:00:00"; //设置为一天  
         $hourALarmParams["end_hour"] = "23:59:59"; //设置为一天
         $hourList = $this->getDailyAlarmAnalysis($hourALarmParams);
-
+        // print_r($hourList);exit;
         //junctionTop
         $juncTopParams = $params;
         $juncTopParams["start_hour"] = $juncTopParams["start_hour"].":00";
@@ -201,7 +201,7 @@ class AlarmanalysisService extends BaseService
                 $hourRange = $hour;
             }   
             $hourCount = [];
-            $hourCount["total"] = $hourAlarmList["count"];
+            $hourCount["total"] = $hourAlarmList["count"]??0;
             if(!empty($hourAlarmList["list"])){
                 foreach($hourAlarmList["list"] as $alarmStat){
                     $hourCount[$alarmStat["key"]] = $alarmStat["value"];
