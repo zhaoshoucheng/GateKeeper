@@ -253,7 +253,7 @@ class WordreportService extends BaseService{
 //        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 //        header('Expires: 0');
 //        $templateProcessor->saveAs("php://output");
-        $savePath = sys_get_temp_dir().$fileName.".doc";
+        //$savePath = sys_get_temp_dir().$fileName.".doc";
 //        var_dump($savePath);exit;
 //        $templateProcessor->saveAs($savePath);
         return $templateProcessor->save();
