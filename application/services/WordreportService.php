@@ -171,6 +171,7 @@ class WordreportService extends BaseService{
         return $FILES;
     }
 
+
     public function clearWatermark($FILES){
         foreach ($FILES as $k => $f){
             if(file_exists($f['tmp_watermark'])){
@@ -186,51 +187,50 @@ class WordreportService extends BaseService{
         $templateProcessor->setValue('subtitle1',$params['subtitle1']);
         $templateProcessor->setValue('subtitle2',$params['subtitle2']);
 
-        if(isset($params['content1_1'])){
+        if(isset($params['overview_content_1'])){
             $templateProcessor->cloneBlock("A_BLOCK",1);
-            $templateProcessor->setValue("content1_1",$params['content1_1']);
-            $img  = array("path" => $FILES["img1_1"]['tmp_watermark'], "width" => 450, "height" => 450);
-            $templateProcessor->setImageValue("img1_1",$img);
+            $templateProcessor->setValue("overview_content_1",$params['overview_content_1']);
+            $img  = array("path" => $FILES["overview_img_1"]['tmp_watermark'], "width" => 450, "height" => 450);
+            $templateProcessor->setImageValue("overview_img_1",$img);
         }else{
             $templateProcessor->cloneBlock("A_BLOCK",0);
         }
 
-        if(isset($params['content2_1'])){
+        if(isset($params['runningState_content_1'])){
             $templateProcessor->cloneBlock("B_BLOCK",1);
-            $templateProcessor->setValue("content2_1",$params['content2_1']);
-            $img  = array("path" => $FILES["img2_1"]['tmp_watermark'], "width" => 450, "height" => 450);
-            $templateProcessor->setImageValue("img2_1",$img);
+            $templateProcessor->setValue("runningState_content_1",$params['runningState_content_1']);
+            $img  = array("path" => $FILES["runningState_chart_1"]['tmp_watermark'], "width" => 450, "height" => 450);
+            $templateProcessor->setImageValue("runningState_chart_1",$img);
         }else{
             $templateProcessor->cloneBlock("B_BLOCK",0);
         }
 
-        if(isset($params['content3_1'])){
+        if(isset($params['runningIndicator_content_1'])){
             $templateProcessor->cloneBlock("C_BLOCK",1);
-            $templateProcessor->setValue("content3_1",$params['content3_1']);
-            $img  = array("path" => $FILES["img3_1"]['tmp_watermark'], "width" => 450, "height" => 450);
-            $templateProcessor->setImageValue("img3_1",$img);
-            $img['path'] = $FILES["img3_2"]['tmp_watermark'];
-            $templateProcessor->setImageValue("img3_2",$img);
-            $img['path'] = $FILES["img3_3"]['tmp_watermark'];
-            $templateProcessor->setImageValue("img3_3",$img);
+            $templateProcessor->setValue("runningIndicator_content_1",$params['runningIndicator_content_1']);
+            $img  = array("path" => $FILES["runningIndicator_chart_1"]['tmp_watermark'], "width" => 450, "height" => 450);
+            $templateProcessor->setImageValue("runningIndicator_chart_1",$img);
+            $img['path'] = $FILES["runningIndicator_chart_2"]['tmp_watermark'];
+            $templateProcessor->setImageValue("runningIndicator_chart_2",$img);
+            $img['path'] = $FILES["runningIndicator_chart_3"]['tmp_watermark'];
+            $templateProcessor->setImageValue("runningIndicator_chart_3",$img);
         }else{
             $templateProcessor->cloneBlock("C_BLOCK",0);
         }
 
-        if(isset($params['content4_1'])){
+        if(isset($params['runningAnalysic_content_1'])){
             $templateProcessor->cloneBlock("D_BLOCK",1);
-            $templateProcessor->setValue("listing4_1",$params['listing4_1']);
-            $templateProcessor->setValue("content4_1",$params['content4_1']);
-            $templateProcessor->setValue("content4_2",$params['content4_2']);
-            $templateProcessor->setValue("content4_3",$params['content4_3']);
-            $templateProcessor->setValue("content4_4",$params['content4_4']);
-            $img  = array("path" => $FILES["img4_1"]['tmp_watermark'], "width" => 450, "height" => 450);
-            $templateProcessor->setImageValue("img4_1",$img);
+            $templateProcessor->setValue("runningAnalysic_content_1",$params['runningAnalysic_content_1']);
+            $templateProcessor->setValue("runningAnalysic_content_2",$params['runningAnalysic_content_2']);
+            $templateProcessor->setValue("runningAnalysic_content_3",$params['runningAnalysic_content_3']);
+            $templateProcessor->setValue("runningAnalysic_content_4",$params['runningAnalysic_content_4']);
+            $img  = array("path" => $FILES["runningAnalysic_img_1"]['tmp_watermark'], "width" => 450, "height" => 450);
+            $templateProcessor->setImageValue("runningAnalysic_img_1",$img);
 
             //按照规律循环添加,多余的置空
-            for ($i=0;$i<5;$i++){
-                for ($j=0;$j<20;$j++){
-                    $imgName = "img4_".$i."_".$j;
+            for ($i=1;$i<5;$i++){
+                for ($j=1;$j<=20;$j++){
+                    $imgName = "runningAnalysic_chart_".$i."_".$j;
                     if(isset($FILES[$imgName])){
                         $tmpimg  = array("path" => $FILES[$imgName]['tmp_watermark'], "width" => 450, "height" => 450);
                         $templateProcessor->setImageValue($imgName,$tmpimg);
@@ -291,6 +291,48 @@ class WordreportService extends BaseService{
         if(empty($ret)){
             throw new \Exception('Unregistered taskID',ERR_DEFAULT);
         }
+
+    }
+
+
+    //生成临时图表文件
+    public function generateChartImg($params,$content){
+
+        $files = [];
+
+        foreach ($params as $pk => $pv){
+
+            if(strpos($pk,"chart")!==false){
+                //下载图片
+                $filePath = $this->wordreport_model->generateChartImg($pv);
+
+                //生成水印图片
+                $font = 'application/static/ht.TTF';
+                $img = imagecreatefromstring(file_get_contents($filePath));
+                $red = imagecolorallocatealpha($img,220, 220, 220,100);
+
+                $font_angle = 30;
+                $font_size = 30;
+                $img_array = getimagesize($filePath);
+                $img_width = $img_array[0];
+                $img_height =$img_array[1];
+
+                for ($i=0;$i<=$img_width;$i+=350){
+                    for ($j=0;$j<=$img_height;$j+=200){
+                        imagettftext($img, $font_size, $font_angle, $i, $j, $red, $font, $content);
+                    }
+                }
+                $files[$pk]=[];
+                $newFile = tempnam(sys_get_temp_dir(), 'watermark');
+                $files[$pk]['tmp_watermark']=$newFile;
+
+                imagejpeg($img,$newFile);
+                $files[$pk]['tmp_watermark'] = $newFile;
+                imagedestroy($img);
+
+            }
+        }
+        return $files;
 
     }
 }
