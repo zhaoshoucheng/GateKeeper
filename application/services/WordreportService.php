@@ -22,7 +22,7 @@ class WordreportService extends BaseService{
     public function downReport($params){
         $info = $this->wordreport_model->queryWordReportByID($params['id']);
         if (!empty($info)) {
-            $this->gift_model->downPrivateResource($info[0]['file_path'], 'itstool_public',$info[0]['title']."doc");
+            $this->gift_model->downPrivateResource($info[0]['file_path'], 'itstool_public',$info[0]['title'].".doc");
         }
     }
 
