@@ -80,7 +80,7 @@ class Gift_model extends CI_Model
      * @return array|void
      * @throws Exception
      */
-    public function downPrivateResource($resourceKey, $namespace)
+    public function downPrivateResource($resourceKey, $namespace,$name='')
     {
         $itemInfo = $this->getResourceUrlList([$resourceKey], $namespace);
 
@@ -100,7 +100,12 @@ class Gift_model extends CI_Model
         Header("Content-type: application/octet-stream");
         Header("Accept-Ranges: bytes");
         Header("Accept-Length: " . $file_filesize);
-        Header("Content-Disposition: attachment; filename=" . $resourceKey);
+        if($name != ""){
+            Header("Content-Disposition: attachment; filename=" . $name);
+
+        }else{
+            Header("Content-Disposition: attachment; filename=" . $resourceKey);
+        }
         echo fread($file, $file_filesize);
         fclose($file);
         exit;
