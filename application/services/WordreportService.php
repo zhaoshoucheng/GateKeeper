@@ -191,7 +191,7 @@ class WordreportService extends BaseService{
         if(isset($params['overview_content_1'])){
             $templateProcessor->cloneBlock("A_BLOCK",1);
             $templateProcessor->setValue("overview_content_1",$params['overview_content_1']);
-            $img  = array("path" => $FILES["overview_img_1"]['tmp_watermark'], "width" => 450, "height" => 450);
+            $img  = array("path" => $FILES["overview_img_1"]['tmp_watermark'], "width" => 420, "height" => 420);
             $templateProcessor->setImageValue("overview_img_1",$img);
         }else{
             $templateProcessor->cloneBlock("A_BLOCK",0);
@@ -200,7 +200,7 @@ class WordreportService extends BaseService{
         if(isset($params['runningState_content_1'])){
             $templateProcessor->cloneBlock("B_BLOCK",1);
             $templateProcessor->setValue("runningState_content_1",$params['runningState_content_1']);
-            $img  = array("path" => $FILES["runningState_chart_1"]['tmp_watermark'], "width" => 450, "height" => 450);
+            $img  = array("path" => $FILES["runningState_chart_1"]['tmp_watermark'], "width" => 420, "height" => 420);
             $templateProcessor->setImageValue("runningState_chart_1",$img);
         }else{
             $templateProcessor->cloneBlock("B_BLOCK",0);
@@ -209,7 +209,7 @@ class WordreportService extends BaseService{
         if(isset($params['runningIndicator_content_1'])){
             $templateProcessor->cloneBlock("C_BLOCK",1);
             $templateProcessor->setValue("runningIndicator_content_1",$params['runningIndicator_content_1']);
-            $img  = array("path" => $FILES["runningIndicator_chart_1"]['tmp_watermark'], "width" => 450, "height" => 450);
+            $img  = array("path" => $FILES["runningIndicator_chart_1"]['tmp_watermark'], "width" => 420, "height" => 420);
             $templateProcessor->setImageValue("runningIndicator_chart_1",$img);
             $img['path'] = $FILES["runningIndicator_chart_2"]['tmp_watermark'];
             $templateProcessor->setImageValue("runningIndicator_chart_2",$img);
@@ -230,7 +230,7 @@ class WordreportService extends BaseService{
             $templateProcessor->setValue("runningAnalysic_1_1",$params['runningAnalysic_1_1']);
             $templateProcessor->setValue("runningAnalysic_1_2",$params['runningAnalysic_1_2']);
             $templateProcessor->setValue("runningAnalysic_1_3",$params['runningAnalysic_1_3']);
-            $img  = array("path" => $FILES["runningAnalysic_img_1"]['tmp_watermark'], "width" => 450, "height" => 450);
+            $img  = array("path" => $FILES["runningAnalysic_img_1"]['tmp_watermark'], "width" => 420, "height" => 420);
             $templateProcessor->setImageValue("runningAnalysic_img_1",$img);
 
             //按照规律循环添加,多余的置空
@@ -238,7 +238,7 @@ class WordreportService extends BaseService{
                 for ($j=1;$j<=20;$j++){
                     $imgName = "runningAnalysic_chart_".$i."_".$j;
                     if(isset($FILES[$imgName])){
-                        $tmpimg  = array("path" => $FILES[$imgName]['tmp_watermark'], "width" => 450, "height" => 450);
+                        $tmpimg  = array("path" => $FILES[$imgName]['tmp_watermark'], "width" => 210, "height" => 210);
                         $templateProcessor->setImageValue($imgName,$tmpimg);
                     }else{
                         $templateProcessor->setValue($imgName,"");
