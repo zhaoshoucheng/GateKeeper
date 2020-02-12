@@ -436,7 +436,8 @@ paths:
                           example: 0
                   topInfo:
                     type: "array"
-                    example: []
+                    items:
+                      type: "string"
                 type: "object"
               traceid:
                 type: "string"
@@ -4060,6 +4061,8 @@ paths:
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
+          items:
+            type: "string"
         - name: junction_id
           in: formData
           type: string
@@ -4162,6 +4165,8 @@ paths:
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
+          items:
+            type: "string"
         - name: junction_id
           in: formData
           type: string
@@ -4437,6 +4442,8 @@ paths:
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
+          items:
+            type: "string"
         - name: junction_id
           in: formData
           type: string
