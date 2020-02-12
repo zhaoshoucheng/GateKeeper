@@ -181,7 +181,7 @@ class WordreportService extends BaseService{
         }
     }
 
-    public function createJuncDoc($params,$FILES,$fileName){
+    public function createJuncDoc($params,$FILES){
 //        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor('application/static/junc_template.docx');
         $templateProcessor = new TemplateProcessorMod('application/static/junc_template.docx');
         $templateProcessor->setValue('title',$params['title']);
@@ -382,7 +382,7 @@ class WordreportService extends BaseService{
 //                $files[$pk]['tmp_watermark'] = $filePath;
                 //生成水印图片
                 $font = 'application/static/ht.TTF';
-                var_dump($pk);
+
                 $img = imagecreatefromstring(file_get_contents($filePath));
                 $red = imagecolorallocatealpha($img,220, 220, 220,100);
                 $font_angle = 30;

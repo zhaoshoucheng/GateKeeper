@@ -91,7 +91,7 @@ class Wordreport extends MY_Controller{
             'task_id'    => 'required',
         ]);
         //taskid确认
-        $taskInfo = $this->wordreportService->queryByTaskID($params['task_id']);
+        $this->wordreportService->queryByTaskID($params['task_id']);
 
 
         $this->wordreportService->checkFile($_FILES);
@@ -108,7 +108,7 @@ class Wordreport extends MY_Controller{
         $newFiles = array_merge($tmpFiles,$newFiles);
 
         //生成word文件
-        $docFile = $this->wordreportService->createJuncDoc($params,$newFiles,$taskInfo['title']);
+        $docFile = $this->wordreportService->createJuncDoc($params,$newFiles);
 
         //销毁水印图片
         $this->wordreportService->clearWatermark($newFiles);
