@@ -88,15 +88,16 @@ class WordreportService extends BaseService{
         $result = $this->wordreport_model->getSelectUploadFile($cityId, $type, $pageNum, $pageSize);
         $formatResult = function ($result) use ($userapp, $statRow, $namespace, $pageNum, $pageSize) {
             $protocol   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-
-            $hostName = $_SERVER['HTTP_HOST'];
-            if($_SERVER['REMOTE_ADDR']=="59.52.254.218"){
-                $hostName = "59.52.254.216:91";
-            }
-            if(isset($_SERVER["HTTP_REFERER"]) && strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
-                $hostName = "sts.didichuxing.com/sg1/api/nanjing";
-            }
-            $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
+//
+//            $hostName = $_SERVER['HTTP_HOST'];
+//
+//            if($_SERVER['REMOTE_ADDR']=="59.52.254.218"){
+//                $hostName = "59.52.254.216:91";
+//            }
+//            if(isset($_SERVER["HTTP_REFERER"]) && strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
+//                $hostName = "sts.didichuxing.com/sg1/api/nanjing";
+//            }
+            $currentUrl = $protocol . $_SERVER['SERVER_NAME'].":".$_SERVER['SERVER_PORT'] . $_SERVER['REQUEST_URI'];
             $lastPos    = strrpos($currentUrl, '/');
             $baseUrl    = substr($currentUrl, 0, $lastPos);
             foreach ($result as $key => $item) {

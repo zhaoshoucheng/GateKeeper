@@ -728,7 +728,9 @@ class ReportService extends BaseService
             if(isset($_SERVER["HTTP_REFERER"]) && strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
                 $hostName = "sts.didichuxing.com/sg1/api/nanjing";
             }
-            $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
+//            $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
+            $currentUrl = $protocol . $_SERVER['SERVER_NAME'].":".$_SERVER['SERVER_PORT'] . $_SERVER['REQUEST_URI'];
+
             $lastPos    = strrpos($currentUrl, '/');
             $baseUrl    = substr($currentUrl, 0, $lastPos);
 //            $baseUrl    = $this->report_proxy;
