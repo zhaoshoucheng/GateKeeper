@@ -165,105 +165,105 @@ paths:
           schema:
             type: object
             description: "OK"
-            properties: 
-              errno: 
+            properties:
+              errno:
                 type: "number"
                 example: 0
-              errmsg: 
+              errmsg:
                 type: "string"
                 example: ""
-              data: 
+              data:
                 type: "object"
                 properties:
-                  "0:00": 
+                  "0:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "1:00": 
+                  "1:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "2:00": 
+                  "2:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "3:00": 
+                  "3:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "4:00": 
+                  "4:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "5:00": 
+                  "5:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "6:00": 
+                  "6:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "7:00": 
+                  "7:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "8:00": 
-                    required: 
+                  "8:00":
+                    required:
                       - "list"
                       - "count"
-                    properties: 
-                      list: 
+                    properties:
+                      list:
                         type: "array"
-                        items: 
+                        items:
                           type: "object"
-                          properties: 
-                            name: 
+                          properties:
+                            name:
                               type: "string"
                               example: "失衡"
-                            value: 
+                            value:
                               type: "number"
                               example: 2
-                            key: 
+                            key:
                               type: "number"
                               example: 3
-                            phase_list: 
+                            phase_list:
                               type: "array"
-                              items: 
+                              items:
                                 type: "object"
-                                properties: 
-                                  phase_name: 
+                                properties:
+                                  phase_name:
                                     type: "string"
                                     example: "北左"
-                                  count: 
+                                  count:
                                     type: "number"
                                     example: 1
-                      count: 
+                      count:
                         type: "number"
                         example: 3
                     type: "object"
-              traceid: 
+              traceid:
                 type: "string"
                 example: "a41c6275e311497ab733e8e37510a49a"
-              username: 
+              username:
                 type: "string"
                 example: "unkown"
-              time: 
-                required: 
+              time:
+                required:
                   - "a"
                   - "s"
-                properties: 
-                  a: 
+                properties:
+                  a:
                     type: "string"
                     example: "0.1688秒"
-                  s: 
+                  s:
                     type: "string"
                     example: "0.0987秒"
                 type: "object"
@@ -324,42 +324,42 @@ paths:
           schema:
             type: object
             description: ""
-            properties: 
-              errno: 
+            properties:
+              errno:
                 type: "number"
                 example: 0
-              errmsg: 
+              errmsg:
                 type: "string"
                 example: ""
-              data: 
+              data:
                 type: "array"
-                items: 
+                items:
                   type: "object"
-                  properties: 
-                    junction_id: 
+                  properties:
+                    junction_id:
                       type: "string"
                       example: "2017030116_4858433"
-                    alarm_count: 
+                    alarm_count:
                       type: "number"
                       example: 11
-                    junction_name: 
+                    junction_name:
                       type: "string"
                       example: "新泺大街_崇华路"
-              traceid: 
+              traceid:
                 type: "string"
                 example: "1de7b1a4b6c947b791c17ebc110fbc1d"
-              username: 
+              username:
                 type: "string"
                 example: "unkown"
-              time: 
-                required: 
+              time:
+                required:
                   - "a"
                   - "s"
-                properties: 
-                  a: 
+                properties:
+                  a:
                     type: "string"
                     example: "0.1847秒"
-                  s: 
+                  s:
                     type: "string"
                     example: "0.1169秒"
                 type: "object"
@@ -411,48 +411,49 @@ paths:
           schema:
             type: object
             description: ""
-            properties: 
-              errno: 
+            properties:
+              errno:
                 type: "number"
                 example: 0
-              errmsg: 
+              errmsg:
                 type: "string"
                 example: ""
-              data: 
-                required: 
+              data:
+                required:
                   - "dataList"
                   - "topInfo"
-                properties: 
-                  dataList: 
+                properties:
+                  dataList:
                     type: "array"
-                    items: 
+                    items:
                       type: "object"
-                      properties: 
-                        hour: 
+                      properties:
+                        hour:
                           type: "number"
                           example: 0
-                        value: 
+                        value:
                           type: "number"
                           example: 0
-                  topInfo: 
+                  topInfo:
                     type: "array"
-                    example: []
+                    items:
+                      type: "string"
                 type: "object"
-              traceid: 
+              traceid:
                 type: "string"
                 example: "0cbd175a49d14cd68baa8e40c3a52531"
-              username: 
+              username:
                 type: "string"
                 example: "unkown"
-              time: 
-                required: 
+              time:
+                required:
                   - "a"
                   - "s"
-                properties: 
-                  a: 
+                properties:
+                  a:
                     type: "string"
                     example: "0.0878秒"
-                  s: 
+                  s:
                     type: "string"
                     example: "0.0200秒"
                 type: "object"
@@ -494,44 +495,44 @@ paths:
           schema:
             type: object
             description: ""
-            properties: 
-              errno: 
+            properties:
+              errno:
                 type: "number"
                 example: 0
-              errmsg: 
+              errmsg:
                 type: "string"
                 example: ""
-              data: 
-                required: 
+              data:
+                required:
                   - "dataList"
-                properties: 
-                  dataList: 
+                properties:
+                  dataList:
                     type: "array"
-                    items: 
+                    items:
                       type: "object"
-                      properties: 
-                        hour: 
+                      properties:
+                        hour:
                           type: "string"
                           example: "0:00"
-                        value: 
+                        value:
                           type: "number"
                           example: 0
                 type: "object"
-              traceid: 
+              traceid:
                 type: "string"
                 example: "6493f9063eb34f00be08cccbfefb0ae0"
-              username: 
+              username:
                 type: "string"
                 example: "unkown"
-              time: 
-                required: 
+              time:
+                required:
                   - "a"
                   - "s"
-                properties: 
-                  a: 
+                properties:
+                  a:
                     type: "string"
                     example: "0.1163秒"
-                  s: 
+                  s:
                     type: "string"
                     example: "0.0479秒"
                 type: "object"
@@ -583,105 +584,105 @@ paths:
           schema:
             type: object
             description: ""
-            properties: 
-              errno: 
+            properties:
+              errno:
                 type: "number"
                 example: 0
-              errmsg: 
+              errmsg:
                 type: "string"
                 example: ""
-              data: 
-                properties: 
-                  "0:00": 
+              data:
+                properties:
+                  "0:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "1:00": 
+                  "1:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "2:00": 
+                  "2:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "3:00": 
+                  "3:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "4:00": 
+                  "4:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "5:00": 
+                  "5:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "6:00": 
+                  "6:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "7:00": 
+                  "7:00":
                     type: "array"
-                    items: 
+                    items:
                       type: "undefined"
                     example: []
-                  "8:00": 
-                    required: 
+                  "8:00":
+                    required:
                       - "list"
                       - "count"
-                    properties: 
-                      list: 
+                    properties:
+                      list:
                         type: "array"
-                        items: 
+                        items:
                           type: "object"
-                          properties: 
-                            name: 
+                          properties:
+                            name:
                               type: "string"
                               example: "失衡"
-                            value: 
+                            value:
                               type: "number"
                               example: 2
-                            key: 
+                            key:
                               type: "number"
                               example: 3
-                            phase_list: 
+                            phase_list:
                               type: "array"
-                              items: 
+                              items:
                                 type: "object"
-                                properties: 
-                                  phase_name: 
+                                properties:
+                                  phase_name:
                                     type: "string"
                                     example: "北左"
-                                  count: 
+                                  count:
                                     type: "number"
                                     example: 1
-                      count: 
+                      count:
                         type: "number"
                         example: 3
                     type: "object"
                 type: "object"
-              traceid: 
+              traceid:
                 type: "string"
                 example: "79f075e462bb465fa2c17f6245878514"
-              username: 
+              username:
                 type: "string"
                 example: "unkown"
-              time: 
-                required: 
+              time:
+                required:
                   - "a"
                   - "s"
-                properties: 
-                  a: 
+                properties:
+                  a:
                     type: "string"
                     example: "0.1691秒"
-                  s: 
+                  s:
                     type: "string"
                     example: "0.0998秒"
                 type: "object"
@@ -695,7 +696,7 @@ paths:
         - application/json
       parameters:
         - name: city_id
-          in: formData
+          in: query
           type: integer
           description: 城市id
           required: true
@@ -751,6 +752,8 @@ paths:
       description: 获取报告列表
       tags:
         - 报告
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -866,12 +869,17 @@ paths:
           type: string
           description: gift key
           required: true
+      responses:
+        200:
+          description: 成功
   /overview/ttioverview:
     post:
       summary: 大屏运行指标
       description: 大屏运行指标
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -940,6 +948,8 @@ paths:
       description: tti详情
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -1003,6 +1013,8 @@ paths:
       description: 今日拥堵概览
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -1058,6 +1070,8 @@ paths:
       description: 获取城市行政区边界
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -1116,6 +1130,8 @@ paths:
       description: 绿波带监控
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -1279,6 +1295,8 @@ paths:
       description: 绿波带监控详情
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -1465,6 +1483,8 @@ paths:
       description: 快速路拥堵排名
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -1516,6 +1536,8 @@ paths:
       description: 快速路详情
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -1591,6 +1613,8 @@ paths:
       description: 快速路报警列表
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -1649,6 +1673,8 @@ paths:
       description: 快速路路况
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -1707,6 +1733,8 @@ paths:
       description: 公交优先
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -1831,6 +1859,8 @@ paths:
       description: 获取公交实时信息
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -3827,6 +3857,8 @@ paths:
       description: 路口离线相位指标数据
       tags:
         - 中控SaaS
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -3919,6 +3951,8 @@ paths:
       description: 路口实时相位指标数据
       tags:
         - 中控SaaS
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -4012,6 +4046,8 @@ paths:
       description: 实时单指标曲线图数据
       tags:
         - 南昌本地化
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -4025,6 +4061,8 @@ paths:
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
+          items:
+            type: "string"
         - name: junction_id
           in: formData
           type: string
@@ -4112,6 +4150,8 @@ paths:
       description: 路口实时flow指标列表
       tags:
         - 南昌本地化
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -4125,6 +4165,8 @@ paths:
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
+          items:
+            type: "string"
         - name: junction_id
           in: formData
           type: string
@@ -4137,7 +4179,6 @@ paths:
           required: false
       responses:
         200:
-          type: object
           description: 成功
           schema:
             description: "实时单指标曲线图数据"
@@ -4386,6 +4427,8 @@ paths:
       description: 路口报警处置记录
       tags:
         - 南昌本地化
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -4399,6 +4442,8 @@ paths:
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
+          items:
+            type: "string"
         - name: junction_id
           in: formData
           type: string
