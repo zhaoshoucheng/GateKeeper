@@ -732,7 +732,10 @@ class ReportService extends BaseService
                 if ($_SERVER['HTTP_REFERER'] == 'http://test.sts.xiaojukeji.com/signalpro/report') {
                     $hostName    = "test.sts.xiaojukeji.com/sg1/api";
                 }
-                if ($_SERVER['HTTP_REFERER'] == 'http://test.sts.xiaojukeji.com/signalpro/report') {
+                if ($_SERVER['HTTP_REFERER'] == 'http://sts.xiaojukeji.com/signalpro/report') {
+                    $hostName    = "sts.didichuxing.com/sg1/api";
+                }
+                if ($_SERVER['HTTP_REFERER'] == 'https://sts.xiaojukeji.com/signalpro/report') {
                     $hostName    = "sts.didichuxing.com/sg1/api";
                 }
             }
