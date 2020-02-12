@@ -41,6 +41,11 @@ class Wordreport_model extends CI_Model{
         return $ret;
     }
 
+    public function queryWordReportByID($id){
+        $ret = $this->db->from($this->_table)->where('id',$id)->get()->result_array();
+        return $ret;
+    }
+
     /**
      * @param $cityId
      * @param $type
@@ -56,6 +61,7 @@ class Wordreport_model extends CI_Model{
             ->where('deleted_at', "1970-01-01 00:00:00")
             ->where('city_id', $cityId)
             ->where('type', $type)
+            ->where('status', 1)
             ->get();
         return $res instanceof CI_DB_result ? $res->row_array() : $res;
     }
@@ -71,11 +77,12 @@ class Wordreport_model extends CI_Model{
      */
     public function getSelectUploadFile($cityId, $type, $pageNum, $pageSize)
     {
-        $res = $this->db->select('title, create_at, time_range, file_path')
+        $res = $this->db->select('id, title, create_at, time_range')
             ->from('word_report')
             ->where('deleted_at', "1970-01-01 00:00:00")
             ->where('city_id', $cityId)
             ->where('type', $type)
+            ->where('status', 1)
             ->order_by('id', 'DESC')
             ->limit($pageSize, ($pageNum - 1) * $pageSize)
             ->get();

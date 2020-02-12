@@ -20,7 +20,10 @@ class WordreportService extends BaseService{
 
     // word itstool_public
     public function downReport($params){
-        $this->gift_model->downPrivateResource($params["key"], 'itstool_public');
+        $info = $this->wordreport_model->queryWordReportByID($params['id']);
+        if (!empty($info)) {
+            $this->gift_model->downPrivateResource($info[0]['file_path'], 'itstool_public');
+        }
     }
 
     // word & pdf list
@@ -97,7 +100,7 @@ class WordreportService extends BaseService{
             $lastPos    = strrpos($currentUrl, '/');
             $baseUrl    = substr($currentUrl, 0, $lastPos);
             foreach ($result as $key => $item) {
-                $result[$key]['down_url'] = $baseUrl . "/Download?key=" . $item["file_path"];
+                $result[$key]['down_url'] = $baseUrl . "/Download?id=" . $item["id"];
                 if($userapp == "jinanits"){
                     $result[$key]['down_url']  = str_replace("sts.didichuxing.com","172.54.1.214:8088/sg1/api",$result[$key]['down_url']);
                 }

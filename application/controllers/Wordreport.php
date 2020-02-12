@@ -52,8 +52,8 @@ class Wordreport extends MY_Controller{
      * */
     public function Download(){
         $params = $this->input->get(null, true);
-        if (empty($params['key'])) {
-            throw new \Exception('key不能为空！', ERR_PARAMETERS);
+        if (empty($params['id'])) {
+            throw new \Exception('id不能为空！', ERR_PARAMETERS);
         }
 
         $this->wordreportService->downReport($params);
