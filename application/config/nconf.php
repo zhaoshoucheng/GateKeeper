@@ -123,11 +123,11 @@ if ($development == 2) {
     $chart_generate_url = "https://sts.didichuxing.com/signalpro-report/api/chart/exporter";
 } else {
     // 路网接口服务器地址
-    $waymap_server = '100.90.164.31';
+    $waymap_server = '100.69.238.11';
     // 路网接口服务器端口
-    $waymap_port = '8001';
+    $waymap_port = '8000';
     // 路网接口前缀
-    $waymap_ext = '';
+    $waymap_ext = '/its';
     
     // // 路网接口服务器地址
     // $waymap_server = '10.85.128.137';
