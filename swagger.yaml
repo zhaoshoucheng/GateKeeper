@@ -19,10 +19,320 @@ tags:
   - name: "中控SaaS"
   - name: "南京建邺区项目"
   - name: "南昌报警接口"
+  - name: "word版本报告"
 schemes:
 - http
 - https
 paths:
+  /Wordreport/GetUUID:
+    get:
+      summary: 获取任务id
+      description: 获取任务id,唯一id
+      tags:
+        - word版本报告
+      consumes: []
+      parameters:
+      - name: city_id
+        in: query
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                properties:
+                  uuid:
+                    type: "string"
+                    example: "abc"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                properties:
+                  a:
+                    type: "string"
+                    example: "14.2997秒"
+                  s:
+                    type: "string"
+                    example: "11.4874秒"
+                type: "object"
+  /Wordreport/GetReportList:
+    post:
+      summary: 获取任务id
+      description: 获取任务id,唯一id
+      tags:
+        - word版本报告
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: type
+        in: formData
+        description: '报告类型：10，路口；11，干线；12，区域'
+        required: true
+        type: integer
+      - name: page_size
+        in: formData
+        description: '每页返回数量'
+        required: true
+        type: integer
+      - name: page_no
+        in: formData
+        description: '页码'
+        required: true
+        type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                properties:
+                  list:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        title:
+                          type: "string"
+                        time_range:
+                          type: "string"
+                        url:
+                          type: "string"
+                        down_url:
+                          type: "string"
+                        doc_type:
+                          type: "string"
+                        create_at:
+                          type: "string"
+                  total:
+                    type: "number"
+                  page_no:
+                    type: "number"
+                  page_size:
+                    type: "number"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                properties:
+                  a:
+                    type: "string"
+                  s:
+                    type: "string"
+                type: "object"
+  /Wordreport/Download:
+    get:
+      summary: 下载报告文件
+      description: 下载报告文件，word文档
+      tags:
+        - word版本报告
+      produces:
+      - application/msword
+      parameters:
+      - name: city_id
+        in: query
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: id
+        in: query
+        description: '报告id'
+        required: true
+        type: integer
+      responses:
+        200:
+          description: 成功,返回word文件
+  /Wordreport/CreateTask:
+    post:
+      summary: 创建任务
+      description: 创建生成word的任务
+      tags:
+        - word版本报告
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: task_id
+        in: formData
+        description: '前面getUUID时获取'
+        required: true
+        type: string
+      - name: title
+        in: formData
+        description: '文件名'
+        required: true
+        type: string
+      - name: type
+        in: formData
+        description: '文件类型：10，路口报告，11，干线报告，12，区域报告'
+        required: true
+        type: integer
+      - name: time_range
+        in: formData
+        description: '报告分析的时间段 例如：2020-01-06~2020-01-12'
+        required: true
+        type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                example: "success"
+                type: "string"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                properties:
+                  a:
+                    type: "string"
+                    example: "14.2997秒"
+                  s:
+                    type: "string"
+                    example: "11.4874秒"
+                type: "object"
+  /Wordreport/CreateJuncDoc:
+    post:
+      summary: 创建任务
+      description: 创建生成word的任务
+      tags:
+        - word版本报告
+      consumes:
+        - multipart/form-data
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: task_id
+        in: formData
+        description: '任务id'
+        required: true
+        type: string
+      - name: subtitle1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: subtitle2
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningState_chart
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningState_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningIndicator_chart
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningIndicator_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_sub_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_chart_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: overview_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_img_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: file
+      - name: overview_img_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: file
+      responses:
+        200:
+          description: "成功"
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                type: "string"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                  s:
+                    type: "string"
+                type: "object"
   /Alarmanalysis/cityDataDownload:
     get:
       summary: 城市报警分析----数据详情下载
