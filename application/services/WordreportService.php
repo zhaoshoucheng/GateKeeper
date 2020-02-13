@@ -2,7 +2,6 @@
 
 namespace Services;
 
-use Services\ReportService;
 
 class WordreportService extends BaseService{
 
@@ -259,21 +258,8 @@ class WordreportService extends BaseService{
         }else{
             $templateProcessor->cloneBlock("D_BLOCK",0);
         }
-
-
-//        $file = $params['title'].'.docx';
-//        header("Content-Description: File Transfer");
-//        header('Content-Disposition: attachment; filename="' . $file . '"');
-//        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-//        header('Content-Transfer-Encoding: binary');
-//        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-//        header('Expires: 0');
-//        $templateProcessor->saveAs("php://output");
-        //$savePath = sys_get_temp_dir().$fileName.".doc";
-//        var_dump($savePath);exit;
-//        $templateProcessor->saveAs($savePath);
         return $templateProcessor->save();
-//        return $savePath;
+
     }
 
     /*
@@ -362,13 +348,7 @@ class WordreportService extends BaseService{
                     }
 
                 }
-//                foreach ($pv as $rk => $rv){
-//                    $newParams["runningAnalysic_content_".($rk+1)] = $rv['runningAnalysic_content'];
-//                    $newParams["runningAnalysic_img_".($rk+1)] = $rv['runningAnalysic_img'];
-//                    foreach ($rv['runningAnalysic_sub_content'] as $rck => $rcv){
-//                        $newParams["runningAnalysic_sub_content_".($rk+1)."_".($rck+1)] = $rcv;
-//                    }
-//                }
+
             }elseif(strpos($pk,"chart")===false){
                 $newParams[$pk] = $pv;
             }
