@@ -720,7 +720,7 @@ class RoadReportService extends BaseService{
         foreach ($chartList[0]['chart']['two_dimensional'] as $k=>$v){
             $morningIndex[$v] = $k;
         }
-        foreach ($chartList[3]['chart']['two_dimensional'] as $k=>$v){
+        foreach ($chartList[4]['chart']['two_dimensional'] as $k=>$v){
             $eveningIndex[$v] = $k;
         }
         $morningmaxscale=0;
@@ -738,14 +738,14 @@ class RoadReportService extends BaseService{
                         $morningdata[$juncIndex[$k]][$morningIndex[$time]]=0;
                     }
                     $morningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
-                }elseif(isset($eveningdata[$time])){
+                }elseif(isset($eveningIndex[$time])){
                     if(!isset($eveningdata[$juncIndex[$k]])){
                         $eveningdata[$juncIndex[$k]]=[];
                     }
-                    if(!isset($eveningdata[$juncIndex[$k]][$eveningdata[$time]])){
-                        $eveningdata[$juncIndex[$k]][$eveningdata[$time]]=0;
+                    if(!isset($eveningdata[$juncIndex[$k]][$eveningIndex[$time]])){
+                        $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]=0;
                     }
-                    $eveningdata[$juncIndex[$k]][$eveningdata[$time]]+=1;
+                    $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]+=1;
                 }
             }
         }
@@ -761,28 +761,6 @@ class RoadReportService extends BaseService{
                 }
             }
             $mcd['chart']['scale']['max']=$morningmaxscale+5;
-//            if(count($morningdata)>count($juncName)*0.1){
-//                $mcd['desc'].="整体失衡问题严重。其中排名靠前的";
-//            }else{
-//                $mcd['desc'].="整体失衡问题较轻。其中排名靠前的";
-//            }
-//            //排名前三的路口名
-//            $sd = $mcd['chart']['data'];
-//            $last_names = array_column($sd,2);
-//            array_multisort($last_names,SORT_DESC,$sd);
-//            $sortJunc = [];
-//            foreach ($sd as $s){
-//                $sortJunc[$mcd['chart']['one_dimensional'][$s[1]]]=1;
-//            }
-//            $i=0;
-//            foreach ($sortJunc as $sjk=>$sjv){
-//                $mcd['desc'].= $sjk." ";
-//                $i+=1;
-//                if($i>=2){
-//                    break;
-//                }
-//            }
-//            $mcd['desc'].="在早高峰失衡情况最严重。";
 
         }
         if(!empty($eveningdata)){
@@ -797,28 +775,6 @@ class RoadReportService extends BaseService{
                 }
             }
             $ecd['chart']['scale']['max']=$eveningmaxscale+5;
-//            if(count($eveningdata)>count($juncName)*0.1){
-//                $ecd['desc'].="整体失衡问题严重。其中排名靠前的";
-//            }else{
-//                $ecd['desc'].="整体失衡问题较轻。其中排名靠前的";
-//            }
-//            //排名前三的路口名
-//            $sd = $ecd['chart']['data'];
-//            $last_names = array_column($sd,2);
-//            array_multisort($last_names,SORT_DESC,$sd);
-//            $sortJunc = [];
-//            foreach ($sd as $s){
-//                $sortJunc[$ecd['chart']['one_dimensional'][$s[1]]]=1;
-//            }
-//            $i=0;
-//            foreach ($sortJunc as $sjk=>$sjv){
-//                $ecd['desc'].= $sjk." ";
-//                $i+=1;
-//                if($i>=2){
-//                    break;
-//                }
-//            }
-//            $ecd['desc'].="在晚高峰失衡情况最严重。";
         }
         //TODO 后续三段合成一段
         $morningmaxscale=0;
@@ -836,14 +792,14 @@ class RoadReportService extends BaseService{
                         $morningdata[$juncIndex[$k]][$morningIndex[$time]]=0;
                     }
                     $morningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
-                }elseif(isset($eveningdata[$time])){
+                }elseif(isset($eveningIndex[$time])){
                     if(!isset($eveningdata[$juncIndex[$k]])){
                         $eveningdata[$juncIndex[$k]]=[];
                     }
-                    if(!isset($eveningdata[$juncIndex[$k]][$eveningdata[$time]])){
-                        $eveningdata[$juncIndex[$k]][$eveningdata[$time]]=0;
+                    if(!isset($eveningdata[$juncIndex[$k]][$eveningIndex[$time]])){
+                        $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]=0;
                     }
-                    $eveningdata[$juncIndex[$k]][$eveningdata[$time]]+=1;
+                    $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]+=1;
                 }
             }
         }
@@ -859,29 +815,6 @@ class RoadReportService extends BaseService{
                 }
             }
             $mcd['chart']['scale']['max']=$morningmaxscale+5;
-//            if(count($morningdata)>count($juncName)*0.1){
-//                $mcd['desc'].="整体过饱和问题严重。其中排名靠前的";
-//            }else{
-//                $mcd['desc'].="整体过饱和问题较轻。其中排名靠前的";
-//            }
-//            //排名前三的路口名
-//            $sd = $mcd['chart']['data'];
-//            $last_names = array_column($sd,2);
-//            array_multisort($last_names,SORT_DESC,$sd);
-//            $sortJunc = [];
-//            foreach ($sd as $s){
-//                $sortJunc[$mcd['chart']['one_dimensional'][$s[1]]]=1;
-//            }
-//            $i=0;
-//            foreach ($sortJunc as $sjk=>$sjv){
-//                $mcd['desc'].= $sjk." ";
-//                $i+=1;
-//                if($i>=2){
-//                    break;
-//                }
-//            }
-//            $mcd['desc'].="在早高峰过饱和情况最严重。";
-
         }
         if(!empty($eveningdata)){
             $ecd=&$chartList[4];
@@ -895,28 +828,6 @@ class RoadReportService extends BaseService{
                 }
             }
             $ecd['chart']['scale']['max']=$eveningmaxscale+5;
-//            if(count($eveningdata)>count($juncName)*0.1){
-//                $ecd['desc'].="整体过饱和问题严重。其中排名靠前的";
-//            }else{
-//                $ecd['desc'].="整体过饱和问题较轻。其中排名靠前的";
-//            }
-//            //排名前三的路口名
-//            $sd = $ecd['chart']['data'];
-//            $last_names = array_column($sd,2);
-//            array_multisort($last_names,SORT_DESC,$sd);
-//            $sortJunc = [];
-//            foreach ($sd as $s){
-//                $sortJunc[$ecd['chart']['one_dimensional'][$s[1]]]=1;
-//            }
-//            $i=0;
-//            foreach ($sortJunc as $sjk=>$sjv){
-//                $ecd['desc'].= $sjk." ";
-//                $i+=1;
-//                if($i>=2){
-//                    break;
-//                }
-//            }
-//            $ecd['desc'].="在晚高峰过饱和情况最严重。";
         }
         //TODO 后续三段合成一段
         $morningmaxscale=0;
@@ -934,14 +845,14 @@ class RoadReportService extends BaseService{
                         $morningdata[$juncIndex[$k]][$morningIndex[$time]]=0;
                     }
                     $morningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
-                }elseif(isset($eveningdata[$time])){
+                }elseif(isset($eveningIndex[$time])){
                     if(!isset($eveningdata[$juncIndex[$k]])){
                         $eveningdata[$juncIndex[$k]]=[];
                     }
-                    if(!isset($eveningdata[$juncIndex[$k]][$eveningdata[$time]])){
-                        $eveningdata[$juncIndex[$k]][$eveningdata[$time]]=0;
+                    if(!isset($eveningdata[$juncIndex[$k]][$eveningIndex[$time]])){
+                        $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]=0;
                     }
-                    $eveningdata[$juncIndex[$k]][$eveningdata[$time]]+=1;
+                    $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]+=1;
                 }
             }
         }
@@ -957,29 +868,6 @@ class RoadReportService extends BaseService{
                 }
             }
             $mcd['chart']['scale']['max']=$morningmaxscale+5;
-//            if(count($morningdata)>count($juncName)*0.1){
-//                $mcd['desc'].="整体溢流问题严重。其中排名靠前的";
-//            }else{
-//                $mcd['desc'].="整体溢流问题较轻。其中排名靠前的";
-//            }
-//            //排名前三的路口名
-//            $sd = $mcd['chart']['data'];
-//            $last_names = array_column($sd,2);
-//            array_multisort($last_names,SORT_DESC,$sd);
-//            $sortJunc = [];
-//            foreach ($sd as $s){
-//                $sortJunc[$mcd['chart']['one_dimensional'][$s[1]]]=1;
-//            }
-//            $i=0;
-//            foreach ($sortJunc as $sjk=>$sjv){
-//                $mcd['desc'].= $sjk." ";
-//                $i+=1;
-//                if($i>=2){
-//                    break;
-//                }
-//            }
-//            $mcd['desc'].="在早高峰溢流情况最严重。";
-
         }
         if(!empty($eveningdata)){
             $ecd=&$chartList[5];
@@ -993,28 +881,6 @@ class RoadReportService extends BaseService{
                 }
             }
             $ecd['chart']['scale']['max']=$eveningmaxscale+5;
-//            if(count($eveningdata)>count($juncName)*0.1){
-//                $ecd['desc'].="整体溢流问题严重。其中排名靠前的";
-//            }else{
-//                $ecd['desc'].="整体失衡问题较轻。其中排名靠前的";
-//            }
-//            //排名前三的路口名
-//            $sd = $ecd['chart']['data'];
-//            $last_names = array_column($sd,2);
-//            array_multisort($last_names,SORT_DESC,$sd);
-//            $sortJunc = [];
-//            foreach ($sd as $s){
-//                $sortJunc[$ecd['chart']['one_dimensional'][$s[1]]]=1;
-//            }
-//            $i=0;
-//            foreach ($sortJunc as $sjk=>$sjv){
-//                $ecd['desc'].= $sjk." ";
-//                $i+=1;
-//                if($i>=2){
-//                    break;
-//                }
-//            }
-//            $ecd['desc'].="在晚高峰溢流情况最严重。";
         }
 
         return $this->shortenChart($chartList);
