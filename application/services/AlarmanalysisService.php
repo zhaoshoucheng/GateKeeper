@@ -303,7 +303,7 @@ class AlarmanalysisService extends BaseService
                 $hourRange = $hour;
             }   
             $hourCount = [];
-            $hourCount["total"] = $hourAlarmList["count"];
+            $hourCount["total"] = $hourAlarmList["count"]??0;
             if(!empty($hourAlarmList["list"])){
                 foreach($hourAlarmList["list"] as $alarmStat){
                     $hourCount[$alarmStat["key"]] = $alarmStat["value"];
