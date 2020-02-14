@@ -117,7 +117,7 @@ class AlarmanalysisService extends BaseService
                 $hourRange = date("Y.m.d",strtotime($hour));
             }   
             $hourCount = [];
-            $hourCount["total"] = $hourAlarmList["count"];
+            $hourCount["total"] = $hourAlarmList["count"]??0;
             if(!empty($hourAlarmList["list"])){
                 foreach($hourAlarmList["list"] as $alarmStat){
                     $hourCount[$alarmStat["key"]] = $alarmStat["value"];
@@ -195,11 +195,16 @@ class AlarmanalysisService extends BaseService
         $hourFormatList = [];
         foreach($hourList as $hour=>$hourAlarmList){
             $fullStartTime = date("Y-m-d")." ".$hour.":00";
-            if($params['start_time']==$params['end_time']){
-                $hourRange = date("H:i",strtotime($fullStartTime))."-".date("H:i",strtotime($fullStartTime)+60*60);
-            }else{
-                $hourRange = $hour;
-            }   
+            // if($params['start_time']==$params['end_time']){
+            //     $hourRange = date("H:i",strtotime($fullStartTime))."-".date("H:i",strtotime($fullStartTime)+60*60);
+            // }else{
+            //     $hourRange = $hour;
+            // }
+            $hourEnd = date("H:i",strtotime($fullStartTime)+60*60);
+            if($hourEnd=="00:00"){
+                $hourEnd = "24:00";
+            }
+            $hourRange = date("H:i",strtotime($fullStartTime))."-".$hourEnd;
             $hourCount = [];
             $hourCount["total"] = $hourAlarmList["count"]??0;
             if(!empty($hourAlarmList["list"])){
@@ -229,15 +234,15 @@ class AlarmanalysisService extends BaseService
             ["报警类型：".$alarmTypeName],
         ];
         if($params['alarm_type']>0){
-            $downData[] = ["时刻",$alarmTypeName."次数"];
+            $downData[] = ["时段",$alarmTypeName."次数"];
         }else{
-            $downData[] = ["时刻","总报警次数","溢流次数","过饱和次数","失衡次数"];
+            $downData[] = ["时段","总报警次数","溢流次数","过饱和次数","失衡次数"];
         }
         $downData = array_merge($downData,$hourFormatList);
         
         //top信息格式
         $topTimeRange = $params["start_hour"]."-".$params["end_hour"];
-        $downData[] = ["时刻：".$topTimeRange];
+        $downData[] = ["时段：".$topTimeRange];
         $downData[] = ["报警路口TOP".$params["top_num"]."排名"];
         $downData[] = ["序号","路口名称","报警次数"];
         foreach ($junctionTop as $topIndex => $juncStat) {
@@ -298,10 +303,15 @@ class AlarmanalysisService extends BaseService
         foreach($hourList as $hour=>$hourAlarmList){
             $fullStartTime = date("Y-m-d")." ".$hour.":00";
             if($params['start_time']==$params['end_time']){
-                $hourRange = date("H:i",strtotime($fullStartTime))."-".date("H:i",strtotime($fullStartTime)+60*60);
+                $hourEnd = date("H:i",strtotime($fullStartTime)+60*60);
+                if($hourEnd=="00:00"){
+                    $hourEnd = "24:00";
+                }
+                $hourRange = date("H:i",strtotime($fullStartTime))."-".$hourEnd;
+                // $hourRange = date("H:i",strtotime($fullStartTime))."-".date("H:i",strtotime($fullStartTime)+60*60);
             }else{
                 $hourRange = $hour;
-            }   
+            }
             $hourCount = [];
             $hourCount["total"] = $hourAlarmList["count"]??0;
             if(!empty($hourAlarmList["list"])){
@@ -331,15 +341,15 @@ class AlarmanalysisService extends BaseService
             ["报警类型：".$alarmTypeName],
         ];
         if($params['alarm_type']>0){
-            $downData[] = ["时刻",$alarmTypeName."次数"];
+            $downData[] = ["时段",$alarmTypeName."次数"];
         }else{
-            $downData[] = ["时刻","总报警次数","溢流次数","过饱和次数","失衡次数"];
+            $downData[] = ["时段","总报警次数","溢流次数","过饱和次数","失衡次数"];
         }
         $downData = array_merge($downData,$hourFormatList);
         
         //top信息格式
         $topTimeRange = $params["start_hour"]."-".$params["end_hour"];
-        $downData[] = ["时刻：".$topTimeRange];
+        $downData[] = ["时段：".$topTimeRange];
         $downData[] = ["报警路口TOP".$params["top_num"]."排名"];
         $downData[] = ["序号","路口名称","报警次数"];
         foreach ($junctionTop as $topIndex => $juncStat) {
@@ -475,7 +485,7 @@ class AlarmanalysisService extends BaseService
             ["时间范围：".$timeRange],
             ["常偶发报警：".$frequencyTypeName],
             ["报警类型：".$alarmTypeName],
-            ["日期","报警开始时间","持续时间","报警流向","报警类型","常发／偶发"],
+            ["日期","开始时间","持续时间","报警流向","报警类型","常发／偶发"], 
         ];
         foreach ($detailList as $key => $detail) {
             $downData[] = [
