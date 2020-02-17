@@ -497,6 +497,9 @@ class RoadReportService extends BaseService{
         $stopDelayCycleChart = [];
         $piChart=[];
         foreach ($data as $h => $v){
+            if(!isset($v['pi'])){
+                $v['pi'] = 0;
+            }
             $stopTimeCycleChart[] = [
                 "x"=>$v['hour'],
                 "y"=>round($v['stop_time_cycle'],2)
