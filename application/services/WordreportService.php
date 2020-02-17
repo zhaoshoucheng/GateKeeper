@@ -97,13 +97,13 @@ class WordreportService extends BaseService{
                 $hostName = "sts.didichuxing.com/sg1/api/nanjing";
             }
             if (isset($_SERVER['HTTP_REFERER'])) {
-                if ($_SERVER['HTTP_REFERER'] == 'http://test.sts.xiaojukeji.com/signalpro/report') {
+                if (strpos($_SERVER['HTTP_REFERER'], 'http://test.sts.xiaojukeji.com/signalpro/report')) {
                     $hostName    = "test.sts.xiaojukeji.com/sg1/api";
                 }
-                if ($_SERVER['HTTP_REFERER'] == 'http://sts.xiaojukeji.com/signalpro/report') {
+                if (strpos($_SERVER['HTTP_REFERER'], 'http://sts.xiaojukeji.com/signalpro/report')) {
                     $hostName    = "sts.didichuxing.com/sg1/api";
                 }
-                if ($_SERVER['HTTP_REFERER'] == 'https://sts.xiaojukeji.com/signalpro/report') {
+                if (strpos($_SERVER['HTTP_REFERER'], 'https://sts.xiaojukeji.com/signalpro/report')) {
                     $hostName    = "sts.didichuxing.com/sg1/api";
                 }
             }
