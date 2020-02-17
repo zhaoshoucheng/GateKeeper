@@ -19,10 +19,320 @@ tags:
   - name: "中控SaaS"
   - name: "南京建邺区项目"
   - name: "南昌报警接口"
+  - name: "word版本报告"
 schemes:
 - http
 - https
 paths:
+  /Wordreport/GetUUID:
+    get:
+      summary: 获取任务id
+      description: 获取任务id,唯一id
+      tags:
+        - word版本报告
+      consumes: []
+      parameters:
+      - name: city_id
+        in: query
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                properties:
+                  uuid:
+                    type: "string"
+                    example: "abc"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                properties:
+                  a:
+                    type: "string"
+                    example: "14.2997秒"
+                  s:
+                    type: "string"
+                    example: "11.4874秒"
+                type: "object"
+  /Wordreport/GetReportList:
+    post:
+      summary: 获取任务id
+      description: 获取任务id,唯一id
+      tags:
+        - word版本报告
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: type
+        in: formData
+        description: '报告类型：10，路口；11，干线；12，区域'
+        required: true
+        type: integer
+      - name: page_size
+        in: formData
+        description: '每页返回数量'
+        required: true
+        type: integer
+      - name: page_no
+        in: formData
+        description: '页码'
+        required: true
+        type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                properties:
+                  list:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        title:
+                          type: "string"
+                        time_range:
+                          type: "string"
+                        url:
+                          type: "string"
+                        down_url:
+                          type: "string"
+                        doc_type:
+                          type: "string"
+                        create_at:
+                          type: "string"
+                  total:
+                    type: "number"
+                  page_no:
+                    type: "number"
+                  page_size:
+                    type: "number"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                properties:
+                  a:
+                    type: "string"
+                  s:
+                    type: "string"
+                type: "object"
+  /Wordreport/Download:
+    get:
+      summary: 下载报告文件
+      description: 下载报告文件，word文档
+      tags:
+        - word版本报告
+      produces:
+      - application/msword
+      parameters:
+      - name: city_id
+        in: query
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: id
+        in: query
+        description: '报告id'
+        required: true
+        type: integer
+      responses:
+        200:
+          description: 成功,返回word文件
+  /Wordreport/CreateTask:
+    post:
+      summary: 创建任务
+      description: 创建生成word的任务
+      tags:
+        - word版本报告
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: task_id
+        in: formData
+        description: '前面getUUID时获取'
+        required: true
+        type: string
+      - name: title
+        in: formData
+        description: '文件名'
+        required: true
+        type: string
+      - name: type
+        in: formData
+        description: '文件类型：10，路口报告，11，干线报告，12，区域报告'
+        required: true
+        type: integer
+      - name: time_range
+        in: formData
+        description: '报告分析的时间段 例如：2020-01-06~2020-01-12'
+        required: true
+        type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                example: "success"
+                type: "string"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                properties:
+                  a:
+                    type: "string"
+                    example: "14.2997秒"
+                  s:
+                    type: "string"
+                    example: "11.4874秒"
+                type: "object"
+  /Wordreport/CreateJuncDoc:
+    post:
+      summary: 创建任务
+      description: 创建生成word的任务
+      tags:
+        - word版本报告
+      consumes:
+        - multipart/form-data
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: task_id
+        in: formData
+        description: '任务id'
+        required: true
+        type: string
+      - name: subtitle1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: subtitle2
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningState_chart
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningState_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningIndicator_chart
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningIndicator_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_sub_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_chart_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: overview_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_img_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: file
+      - name: overview_img_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: file
+      responses:
+        200:
+          description: "成功"
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                type: "string"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                  s:
+                    type: "string"
+                type: "object"
   /Alarmanalysis/cityDataDownload:
     get:
       summary: 城市报警分析----数据详情下载
@@ -178,47 +488,44 @@ paths:
                   "0:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "1:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "2:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "3:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "4:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "5:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "6:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "7:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "8:00":
-                    required:
-                      - "list"
-                      - "count"
                     properties:
                       list:
                         type: "array"
@@ -256,9 +563,6 @@ paths:
                 type: "string"
                 example: "unkown"
               time:
-                required:
-                  - "a"
-                  - "s"
                 properties:
                   a:
                     type: "string"
@@ -596,47 +900,44 @@ paths:
                   "0:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "1:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "2:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "3:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "4:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "5:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "6:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "7:00":
                     type: "array"
                     items:
-                      type: "undefined"
+                      type: "object"
                     example: []
                   "8:00":
-                    required:
-                      - "list"
-                      - "count"
                     properties:
                       list:
                         type: "array"
@@ -675,9 +976,6 @@ paths:
                 type: "string"
                 example: "unkown"
               time:
-                required:
-                  - "a"
-                  - "s"
                 properties:
                   a:
                     type: "string"
@@ -686,192 +984,6 @@ paths:
                     type: "string"
                     example: "0.0998秒"
                 type: "object"
-  /Wordreport/GetUUID:
-    get:
-      summary: 获取任务id
-      description: 获取任务id
-      tags:
-        - 报告
-      produces:
-        - application/json
-      parameters:
-        - name: city_id
-          in: query
-          type: integer
-          description: 城市id
-          required: true
-      responses:
-        200:
-          description: 成功
-          schema:
-            description: "获取任务id"
-            type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
-            properties:
-              errno:
-                type: "number"
-                example: 0
-              errmsg:
-                type: "string"
-                example: ""
-              data:
-                required:
-                  - "uuid"
-                properties:
-                  uuid:
-                    type: "string"
-                    example: "56ef34e837db463295d733e78f7adb90"
-                type: "object"
-              traceid:
-                type: "string"
-                example: "a534303452d0498cbcfb946838a34945"
-              username:
-                type: "string"
-                example: "unknown"
-              time:
-                required:
-                  - "a"
-                  - "s"
-                properties:
-                  a:
-                    type: "string"
-                    example: "1.7689秒"
-                  s:
-                    type: "string"
-                    example: "0.1358秒"
-                type: "object"
-  /Wordreport/GetReportList:
-    post:
-      summary: 获取报告列表
-      description: 获取报告列表
-      tags:
-        - 报告
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      parameters:
-      - name: city_id
-        in: formData
-        description: '城市id 示例: 134'
-        required: false
-        type: string
-      - name: type
-        in: formData
-        description: '示例: 1'
-        required: false
-        type: string
-      - name: page_size
-        in: formData
-        description: '每页数量，默认5 示例: 5'
-        required: false
-        type: string
-      - name: page_no
-        in: formData
-        description: '页码，默认1 示例: 1'
-        required: false
-        type: string
-      responses:
-        200:
-          description: 成功
-          schema:
-            description: "获取报告列表"
-            type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
-            properties:
-              errno:
-                type: "number"
-                example: 0
-              errmsg:
-                type: "string"
-                example: ""
-              data:
-                required:
-                  - "list"
-                  - "total"
-                  - "page_no"
-                  - "page_size"
-                properties:
-                  list:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        title:
-                          type: "string"
-                          example: "江苏路_西桥"
-                        time_range:
-                          type: "string"
-                          example: "2019-11-10"
-                        url:
-                          type: "string"
-                          example: "http://img-hxy022.didistatic.com/static/itstool_private/report/xEQdxqXB1c1573480436937.pdf?expire=1581937212&signiture=M9r6N3Up-1Hv1S7U0nGBJjpStmbRBMYfKwt4XBr24hk="
-                        down_url:
-                          type: "string"
-                          example: "http://127.0.0.1:8088/itstool/Report/downReport?key=report/xEQdxqXB1c1573480436937.pdf"
-                        doc_type:
-                          type: "string"
-                          example: "pdf"
-                        create_at:
-                          type: "string"
-                          example: "2019-11-11 21:54:00"
-                  total:
-                    type: "number"
-                    example: 29
-                  page_no:
-                    type: "string"
-                    example: "2"
-                  page_size:
-                    type: "string"
-                    example: "5"
-                type: "object"
-              traceid:
-                type: "string"
-                example: "8cabf5a75f7a4204a22836ca666fa584"
-              username:
-                type: "string"
-                example: "unknown"
-              time:
-                required:
-                  - "a"
-                  - "s"
-                properties:
-                  a:
-                    type: "string"
-                    example: "11.3640秒"
-                  s:
-                    type: "string"
-                    example: "9.6602秒"
-                type: "object"
-  /Wordreport/Download:
-    get:
-      summary: 下载报告
-      description: 下载报告
-      tags:
-        - 报告
-      produces:
-        - application/json
-      parameters:
-        - name: key
-          in: query
-          type: string
-          description: gift key
-          required: true
-      responses:
-        200:
-          description: 成功
   /overview/ttioverview:
     post:
       summary: 大屏运行指标
@@ -894,23 +1006,12 @@ paths:
           schema:
             description: "大屏运行指数概览"
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "pagecnt"
-                  - "totalcnt"
-                  - "data"
                 properties:
                   pagecnt:
                     type: "number"
@@ -964,13 +1065,6 @@ paths:
           schema:
             description: "tti详情"
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
@@ -1091,12 +1185,6 @@ paths:
           schema:
             description: "获取城市行政区边界"
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
             properties:
               errno:
                 type: "number"
@@ -1116,8 +1204,6 @@ paths:
                     division_name:
                       type: "string"
                     geojson:
-                      required: []
-                      properties: {}
                       description: "标准geojson格式"
                       type: "object"
               traceid:
@@ -1180,9 +1266,6 @@ paths:
                             type: "string"
                           forward_geo:
                             description: 干线正向geojson
-                            required:
-                              - "features"
-                              - "type"
                             properties:
                               features:
                                 type: "array"
@@ -1217,7 +1300,7 @@ paths:
                             type: "array"
                             description: 干线反向geojson
                             items:
-                              type: "undefined"
+                              type: "object"
                     junctions_info:
                       type: "array"
                       items:
@@ -1416,27 +1499,14 @@ paths:
           schema:
             description: 快速路概览
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "center"
-                  - "junc_list"
-                  - "road_list"
                 properties:
                   center:
-                    required: []
-                    properties: {}
                     type: "object"
                   junc_list:
                     type: "array"
@@ -1469,8 +1539,6 @@ paths:
                         name:
                           type: "string"
                         geom:
-                          required: []
-                          properties: {}
                           type: "object"
                 type: "object"
               traceid:
@@ -1499,13 +1567,6 @@ paths:
           schema:
             description: 快速路拥堵排名
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
@@ -1572,25 +1633,12 @@ paths:
           schema:
             description: 快速路详情
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "update_time"
-                  - "speed"
-                  - "stop_delay"
-                  - "across_time"
-                  - "type"
                 properties:
                   update_time:
                     type: "string"
@@ -1629,13 +1677,6 @@ paths:
           schema:
             description: 快速路报警列表
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
@@ -1689,21 +1730,12 @@ paths:
           schema:
             description: 快速路路况
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "juncList"
                 properties:
                   juncList:
                     type: "array"
@@ -1749,12 +1781,6 @@ paths:
           schema:
             description: 公交优先
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
             properties:
               errno:
                 type: "number"
@@ -1777,13 +1803,12 @@ paths:
                           links:
                             type: "string"
                           forward_geo:
-                            required: []
-                            properties: {}
+
                             type: "object"
                           reverse_geo:
                             type: "array"
                             items:
-                              type: "undefined"
+                              type: "object"
                     junctions_info:
                       type: "array"
                       items:
@@ -1817,9 +1842,6 @@ paths:
                           lat:
                             type: "string"
                     center:
-                      required:
-                        - "lng"
-                        - "lat"
                       properties:
                         lng:
                           type: "number"
@@ -1829,12 +1851,6 @@ paths:
                     map_version:
                       type: "number"
                     road:
-                      required:
-                        - "id"
-                        - "road_id"
-                        - "logic_junction_ids"
-                        - "road_name"
-                        - "road_direction"
                       properties:
                         id:
                           type: "string"
@@ -1880,20 +1896,12 @@ paths:
           schema:
             description: 获取公交实时信息
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "trace_id"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "bus_info"
-                  - "junc_info"
                 properties:
                   bus_info:
                     type: "array"
@@ -1939,13 +1947,6 @@ paths:
                               opt_time:
                                 type: "string"
                         timing:
-                          required:
-                            - "start_time"
-                            - "end_time"
-                            - "cycle"
-                            - "offset"
-                            - "current_stage"
-                            - "stage"
                           properties:
                             start_time:
                               type: "string"
@@ -2326,7 +2327,7 @@ paths:
                             reverse_geo:
                               type: "array"
                               items:
-                                type: "undefined"
+                                type: "object"
                       junctions_info:
                         type: "array"
                         items:
@@ -2851,7 +2852,7 @@ paths:
                         data:
                           type: "array"
                           items:
-                            type: "undefined"
+                            type: "object"
                       type: "object"
               traceid:
                 type: "string"

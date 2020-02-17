@@ -120,7 +120,7 @@ if ($development == 2) {
 
     $report_proxy_url = "https://sts.didichuxing.com/sg1/api/signalpro/api";
 
-    $chart_generate_url = "http://100.90.164.31:8085";
+    $chart_generate_url = "https://sts.didichuxing.com/signalpro-report/api/chart/exporter";
 } else {
     // 路网接口服务器地址
     $waymap_server = '100.69.238.11';
@@ -128,6 +128,13 @@ if ($development == 2) {
     $waymap_port = '8000';
     // 路网接口前缀
     $waymap_ext = '/its';
+    
+    // // 路网接口服务器地址
+    // $waymap_server = '10.85.128.137';
+    // // 路网接口服务器端口
+    // $waymap_port = '80';
+    // // 路网接口前缀
+    // $waymap_ext = '/its';    
 
     // 配时接口服务器地址
     $timing_server = '100.90.164.31';

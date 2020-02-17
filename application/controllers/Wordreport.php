@@ -99,11 +99,28 @@ class Wordreport extends MY_Controller{
         //前端数据转换成模板对应的格式
         $params = $this->wordreportService->formartJuncImgKeyValue($params);
 
+
         //生成chart水印图片
-        $tmpFiles = $this->wordreportService->generateChartImg($params,"滴滴智慧交通");
+        try{
+            $tmpFiles = $this->wordreportService->generateChartImg($params,"滴滴智慧交通");
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
 
         //图片添加水印
-        $newFiles = $this->wordreportService->addWatermark($_FILES,"滴滴智慧交通");
+        try{
+            $newFiles = $this->wordreportService->addWatermark($_FILES,"滴滴智慧交通");
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
 
         $newFiles = array_merge($tmpFiles,$newFiles);
 
@@ -113,8 +130,17 @@ class Wordreport extends MY_Controller{
         //销毁水印图片
         $this->wordreportService->clearWatermark($newFiles);
 
-        //文件上传至gift
-        $ret  = $this->wordreportService->saveDoc($docFile);
+        try{
+            //文件上传至gift
+            $ret  = $this->wordreportService->saveDoc($docFile);
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+
 
         //数据入库
         if(isset($ret['url'])){
