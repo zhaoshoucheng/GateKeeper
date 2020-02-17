@@ -56,6 +56,14 @@ class Waymap_model extends CI_Model
         return array_keys($result['filter_juncs']);
     }
 
+    public function getCityName($cityID)
+    {
+        $url = $this->waymap_interface . '/signal-map/map/citys';
+        $result = $this->get($url,[]);
+        $cityID2Name = array_column($result,"city_name","city_id");
+        return $cityID2Name[$cityID]??"";
+    }
+
 
     /**
      * 获取最新的路网版本

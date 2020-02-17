@@ -28,6 +28,74 @@ class CommonService extends BaseService
     }
 
 
+    /*
+     *  excel下载封装
+     *  @param $params['logic_junction_id'] array Y $excelDatas = [
+     *  [
+     *      "sheet_name"=>"城市报警发生日期统计",
+     *      "data"=>[
+     *              array('王城',),
+     *              array('李飞虹', '男', '21', '1994-06-13', '159481838924'),
+     *              array('王芸', '女', '18', '1997-03-13', '18648313924'),
+     *              array('郭瑞', '男', '17', '1998-04-13', '15543248924'),
+     *              array('李晓霞', '女', '19', '1996-06-13', '18748348924'),
+     *       ],
+     *   ];
+     *   @return binary
+    */
+    public function excelDownload($excelDatas){
+        // print_r($excelDatas);exit;
+        $num2letter = [
+            "1"=>"A",
+            "2"=>"B",
+            "3"=>"C",
+            "4"=>"D",
+            "5"=>"E",
+            "6"=>"F",
+            "7"=>"G",
+            "8"=>"H",
+            "9"=>"i",
+            "10"=>"J",
+            "11"=>"K",
+            "12"=>"L",
+            "13"=>"M",
+        ];
+        
+        $objPHPExcel = new \PHPExcel();
+        $objPHPExcel->getProperties()->setCreator("itstool")->setLastModifiedBy("itstool")->settitle("itstool")->setSubject("itstool")->setDescription("itstool")->setKeywords("itstool")->setCategory("itstool");
+
+        foreach($excelDatas as $sheetIndex=>$sheetData){
+            $maxLen = 0;
+            foreach($sheetData["data"] as $key=>$data){
+                $maxLen = count($data)>$maxLen?count($data):$maxLen;
+            }
+            if($sheetIndex>0){
+                $objPHPExcel->createSheet();
+            }
+            $objPHPExcel->setActiveSheetIndex($sheetIndex);
+            $objPHPExcel->getActiveSheet()->settitle($sheetData["sheet_name"]);
+            foreach($sheetData["data"] as $skey=>$sdata){
+                $sdata = array_pad($sdata,$maxLen,"");
+                $i = $skey+1;
+                foreach ($sdata as $dkey => $dvalue) {
+                    $objPHPExcel->getActiveSheet()->setCellValue($num2letter[$dkey+1] . $i, $dvalue);
+                }
+            }
+        }
+        $filename = date('YmdHis');
+        ob_end_clean();//清除缓冲区,避免乱码 
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="'.$filename.'.xls"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+        $objWriter = new \PHPExcel_Writer_Excel5($objPHPExcel);
+        $objWriter->save('php://output');
+    }
+
     /**
      * 获取路口所属行政区域及交叉节点信息
      * @param $params ['city_id']           int    Y 城市ID
