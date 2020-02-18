@@ -119,6 +119,8 @@ if ($development == 2) {
     $alarm_v2_city_ids = [12, 23];
 
     $report_proxy_url = "https://sts.didichuxing.com/sg1/api/signalpro/api";
+
+    $chart_generate_url = "https://sts.didichuxing.com/signalpro-report/api/chart/exporter";
 } else {
     // 路网接口服务器地址
     $waymap_server = '100.69.238.11';
@@ -126,6 +128,13 @@ if ($development == 2) {
     $waymap_port = '8000';
     // 路网接口前缀
     $waymap_ext = '/its';
+    
+    // // 路网接口服务器地址
+    // $waymap_server = '10.85.128.137';
+    // // 路网接口服务器端口
+    // $waymap_port = '80';
+    // // 路网接口前缀
+    // $waymap_ext = '/its';    
 
     // 配时接口服务器地址
     $timing_server = '100.90.164.31';
@@ -218,6 +227,8 @@ if ($development == 2) {
     $alarm_v2_city_ids = [1,5,10,12,23,134];
 
     $report_proxy_url = "http://10.179.148.73/sg1/api/signalpro/api";
+
+    $chart_generate_url = "http://100.90.164.31:8085";
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
@@ -229,6 +240,9 @@ $alarm_port        = !empty($alarm_port) ? ":" . $alarm_port : "";
 $data_service_prot = !empty($data_service_prot) ? ':' . $data_service_prot : '';
 //报告代理回主域名使用
 $config['report_proxy'] = $report_proxy_url;
+
+//前端chart生成图片
+$config['chart_img'] = $chart_generate_url;
 
 // 路网快速路接口
 $config['quickroad_waymap_interface'] = 'http://10.86.108.35:8081';
@@ -889,6 +903,7 @@ $config['gift'] = [
         'itstool_private' => 'http://100.69.238.37:8000/batch/resource/itstool_private',
     ],
 ];
+
 
 //配置
 $config['inroute'] = [

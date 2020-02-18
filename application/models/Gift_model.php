@@ -18,6 +18,8 @@ class Gift_model extends CI_Model
 
         $this->db = $this->load->database('default', true);
 
+        $this->load->helper('http');
+
         $this->load->config('nconf');
     }
 
@@ -78,7 +80,7 @@ class Gift_model extends CI_Model
      * @return array|void
      * @throws Exception
      */
-    public function downPrivateResource($resourceKey, $namespace)
+    public function downPrivateResource($resourceKey, $namespace,$name='')
     {
         $itemInfo = $this->getResourceUrlList([$resourceKey], $namespace);
 
@@ -98,7 +100,12 @@ class Gift_model extends CI_Model
         Header("Content-type: application/octet-stream");
         Header("Accept-Ranges: bytes");
         Header("Accept-Length: " . $file_filesize);
-        Header("Content-Disposition: attachment; filename=" . $resourceKey);
+        if($name != ""){
+            Header("Content-Disposition: attachment; filename=" . $name);
+
+        }else{
+            Header("Content-Disposition: attachment; filename=" . $resourceKey);
+        }
         echo fread($file, $file_filesize);
         fclose($file);
         exit;
@@ -268,5 +275,20 @@ class Gift_model extends CI_Model
         }
         com_log_warning('_itstool_' . __CLASS__ . '_' . __FUNCTION__ . '_uploadError', 0, "uploadError", compact("command", "output"));
         return [];
+    }
+
+    /*
+     * 上传word文件
+     * */
+    public function uploadDoc($docName,$docPath){
+        $publicOut = [];
+        //参数强制校验,防止任意代码执行
+        if (!preg_match('/[\/\d\s]+/ims', $docPath)) {
+            throw new \Exception("tmp_name invalid.");
+        }
+        $nconf    = $this->config->item('gift');
+        $commandLine = sprintf("curl %s/%s -X POST -F filecontent=@%s", $nconf['upload']['itstool_public'], $docName, $docPath);
+        exec($commandLine, $publicOut);
+        return  $this->formatUpload($docName, $commandLine, $publicOut);
     }
 }

@@ -6,162 +6,57 @@
  * Time: 下午3:09
  */
 
-class Wordreport extends CI_Controller{
+use Services\WordreportService;
+
+class Wordreport extends MY_Controller{
 
     public function __construct()
     {
         parent::__construct();
+        $this->wordreportService = new WordreportService();
 
     }
 
-//    public function TemplateWord(){
-//        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor('./template.docx');
-//        $templateProcessor->setValue('title1','测试题目1');
-//        $templateProcessor->setValue('answer1','测试答案1');
-//        $templateProcessor->setValue('title2','测试题目2');
-//        $templateProcessor->setValue('answer2','测试答案2');
-//        $img  = array("path" => './123.jpg', "width" => 300, "height" => 300);
-//        $templateProcessor->setImageValue('img1',$img);
-//        $templateProcessor->setValue('img2',"");
-//        $templateProcessor->deleteBlock("img3");
-//        $templateProcessor->cloneBlock("img1",1,false);
-//
-//
-//        $file = '中文test.docx';
-//        header("Content-Description: File Transfer");
-//        header('Content-Disposition: attachment; filename="' . $file . '"');
-//        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-//        header('Content-Transfer-Encoding: binary');
-//        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-//        header('Expires: 0');
-//        $templateProcessor->saveAs("php://output");
-//        exit;
-//    }
-//
-//    public function TextWord(){
-//        $title = "test";
-//        $num = 1;
-//        $mean = 1;
-//        $phpWord = new \PhpOffice\PhpWord\PhpWord();
-//
-//        $section = $phpWord->addSection();
-//        $phpWord->addTitleStyle(2, array('bold' => true, 'size' => 14, 'name' => 'Arial', 'Color' => '333'), array('align' => 'center'));
-//        $section->addTitle("$title", 2);
-//        $section->addTextBreak(1);
-//        $section->addText("姓名：题量： 1：");
-//        $tableStyle = array(
-//            'borderSize' => 6,
-//            'borderColor' => '006699'
-//        );
-//        $table = $section->addTable($tableStyle);
-//        $fancyTableCellStyle = array('valign' => 'center');
-//        $cellRowSpan = array('vMerge' => 'restart', 'valign' => 'center');
-//        $cellRowContinue = array('vMerge' => 'continue');
-//        $fontStyle['name'] = 'Arial';
-//        $fontStyle['size'] = 14;
-//        $thStyle['name'] = 'Arial';
-//        $thStyle['size'] = 12;
-//        $thStyle['bold'] = true;
-//        $paraStyle['align'] = 'center';
-//        $table->addRow(500);
-//        $table->addCell(3500, $fancyTableCellStyle)->addText('答题区', $thStyle, $paraStyle);
-//        $table->addCell(1000, $fancyTableCellStyle)->addText('批改区', $thStyle, $paraStyle);
-//        $table->addCell(3500, $fancyTableCellStyle)->addText('答题区', $thStyle, $paraStyle);
-//        $table->addCell(1000, $fancyTableCellStyle)->addText('批改区', $thStyle, $paraStyle);
-//        $len = ceil($num / 2);
-//        for ($i = 0; $i < $len; $i++) {
-//            $table->addRow(500);
-//            $table->addCell(3500, $fancyTableCellStyle)->addText(($i * 2 + 1) . '.' . $mean[$i * 2], $fontStyle);
-//            $table->addCell(1000, $cellRowSpan)->addText(' ');
-//            if ($num % 2 != 0 && $i == $len - 1) {
-//                $table->addCell(3500, $fancyTableCellStyle)->addText('');
-//            } else {
-//                $table->addCell(3500, $fancyTableCellStyle)->addText(($i * 2 + 2) . '.' . $mean[$i * 2 + 1], $fontStyle);
-//            }
-//            $table->addCell(1000, $cellRowSpan)->addText(' ');
-//            $table->addRow(1000);
-//            $table->addCell(3500, $fancyTableCellStyle)->addText('答案:');
-//            $table->addCell(null, $cellRowContinue);
-//            if ($num % 2 != 0 && $i == $len - 1) {
-//                $table->addCell(3500, $fancyTableCellStyle)->addText('');
-//            } else {
-//                $table->addCell(3500, $fancyTableCellStyle)->addText('答案:');
-//            }
-//
-//            $table->addCell(null, $cellRowContinue);
-//        }
-//        $file = './123.jpg';
-//        $font = './ht.TTF';
-//        $img_array = getimagesize($file);
-//        $img_width = $img_array[0];
-//        $img_height =$img_array[1];
-//        $img = imagecreatefromjpeg($file);
-//
-//        $red = imagecolorallocatealpha($img, 255, 0, 0,100);
-//
-//        $font_angle = 20;
-//        $font_size = 40;
-//        $x = 100;
-//        $y = 180;
-//        $str = "智慧交通";
-//        imagettftext($img, $font_size, $font_angle, $x, $y, $red, $font, $str);
-//        imagettftext($img, $font_size, $font_angle, $x+100, $y+100, $red, $font, $str);
-//
-//
-////        header("content-type:image/jpeg");
-//        imagejpeg($img,"./tt.jpg");
-//        $section->addImage("./tt.jpg");
-//        imagedestroy($img);
-//
-//        $file = '中文test.docx';
-//        header("Content-Description: File Transfer");
-//        header('Content-Disposition: attachment; filename="' . $file . '"');
-//        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-//        header('Content-Transfer-Encoding: binary');
-//        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-//        header('Expires: 0');
-//        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-//        $objWriter->save("php://output");
-//
-//        exit;
-//    }
-//
-//    public function Watermark(){
-//        $file = './123.jpg';
-//        $font = './s.ttf';
-//
-//        $im = imagecreatefromstring(file_get_contents($file));
-//        $black = imagecolorallocate($im, 255, 255, 255);
-//        imagefttext($im, 60, 0, 170, 510, $black, $font, '智慧交通');
-//
-//
-//
-//        header("content-type:image/jpeg");
-//        imagejpeg($im);
-//
-//
-//        imagedestroy($im);
-//    }
 
     /*
      * 获得唯一ID
      * */
     public function GetUUID(){
-
+        $uuid = $this->wordreportService->getUUID();
+        $data = ['uuid' => $uuid];
+        $this->response($data);
     }
 
     /*
      * 获取报告列表
+     * 包含pdf&word，分页比较麻烦。。。
      * */
     public function GetReportList(){
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'type' => 'required',
+            'page_no' => 'required',
+            'page_size' => 'required',
+        ]);
 
+
+        $params['userapp'] = $this->userapp;
+        $data = $this->wordreportService->getReportList($params);
+
+        $this->response($data);
     }
 
     /*
      * 报告下载
      * */
     public function Download(){
+        $params = $this->input->get(null, true);
+        if (empty($params['id'])) {
+            throw new \Exception('id不能为空！', ERR_PARAMETERS);
+        }
 
+        $this->wordreportService->downReport($params);
     }
 
     /*
@@ -169,6 +64,20 @@ class Wordreport extends CI_Controller{
      * */
     public function CreateTask(){
 
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id'    => 'required|is_natural_no_zero',
+            'task_id'    => 'required',
+            'title'      => 'required',
+            'type'       =>'required',
+            'time_range' =>"required",
+
+        ]);
+        $params['user_info'] = $this->username;
+
+        $this->wordreportService->createTask($params['task_id'],$params);
+
+        $this->response("success");
     }
 
     /*
@@ -176,12 +85,82 @@ class Wordreport extends CI_Controller{
      * */
     public function CreateJuncDoc(){
 
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id'    => 'required|is_natural_no_zero',
+            'task_id'    => 'required',
+        ]);
+        //taskid确认
+        $this->wordreportService->queryByTaskID($params['task_id']);
+
+
+        $this->wordreportService->checkFile($_FILES);
+
+        //前端数据转换成模板对应的格式
+        $params = $this->wordreportService->formartJuncImgKeyValue($params);
+
+
+        //生成chart水印图片
+        try{
+            $tmpFiles = $this->wordreportService->generateChartImg($params,"滴滴智慧交通");
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+
+        //图片添加水印
+        try{
+            $newFiles = $this->wordreportService->addWatermark($_FILES,"滴滴智慧交通");
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+
+        $newFiles = array_merge($tmpFiles,$newFiles);
+
+        //生成word文件
+        $docFile = $this->wordreportService->createJuncDoc($params,$newFiles);
+
+        //销毁水印图片
+        $this->wordreportService->clearWatermark($newFiles);
+
+        try{
+            //文件上传至gift
+            $ret  = $this->wordreportService->saveDoc($docFile);
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+
+
+        //数据入库
+        if(isset($ret['url'])){
+            $this->wordreportService->updateTask($params['task_id'],$ret['resource_key'],1);
+        }else{
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+        }
+
+        $this->response($ret['url']);
     }
 
     /*
      * 创建干线报告word
      * */
     public function CreateRoadDoc(){
+
+
+
+
+
 
     }
 

@@ -728,6 +728,17 @@ class ReportService extends BaseService
             if(isset($_SERVER["HTTP_REFERER"]) && strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
                 $hostName = "sts.didichuxing.com/sg1/api/nanjing";
             }
+            if (isset($_SERVER['HTTP_REFERER'])) {
+                if (strpos($_SERVER['HTTP_REFERER'], 'http://test.sts.xiaojukeji.com/signalpro/report') !== false) {
+                    $hostName    = "test.sts.xiaojukeji.com/sg1/api";
+                }
+                if (strpos($_SERVER['HTTP_REFERER'], 'http://sts.xiaojukeji.com/signalpro/report') !== false) {
+                    $hostName    = "sts.didichuxing.com/sg1/api";
+                }
+                if (strpos($_SERVER['HTTP_REFERER'], 'https://sts.xiaojukeji.com/signalpro/report') !== false) {
+                    $hostName    = "sts.didichuxing.com/sg1/api";
+                }
+            }
             $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
             $lastPos    = strrpos($currentUrl, '/');
             $baseUrl    = substr($currentUrl, 0, $lastPos);
@@ -739,7 +750,7 @@ class ReportService extends BaseService
                     $result[$key]['down_url'] = $baseUrl . "/downReport?key=" . $item["file_key"];
                     if($userapp == "jinanits"){
                         $result[$key]['url']  = str_replace("img-hxy022.didistatic.com","172.54.0.136:8886",$result[$key]['url']);
-                        $result[$key]['down_url']  = str_replace("sts.didichuxing.com","172.54.1.214:8088/sg1/api",$result[$key]['url']);
+                        $result[$key]['down_url']  = str_replace("sts.didichuxing.com","172.54.1.214:8088/sg1/api",$result[$key]['down_url']);
                     }
 //                    $result[$key]['url']      = $baseUrl."/Report/reportProxy?url=".base64_encode($itemInfo[$item["file_key"]]['download_url']);
                 }

@@ -18,16 +18,980 @@ tags:
   - name: "南昌本地化"
   - name: "中控SaaS"
   - name: "南京建邺区项目"
+  - name: "南昌报警接口"
+  - name: "word版本报告"
 schemes:
 - http
 - https
 paths:
+  /Wordreport/GetUUID:
+    get:
+      summary: 获取任务id
+      description: 获取任务id,唯一id
+      tags:
+        - word版本报告
+      consumes: []
+      parameters:
+      - name: city_id
+        in: query
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                properties:
+                  uuid:
+                    type: "string"
+                    example: "abc"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                properties:
+                  a:
+                    type: "string"
+                    example: "14.2997秒"
+                  s:
+                    type: "string"
+                    example: "11.4874秒"
+                type: "object"
+  /Wordreport/GetReportList:
+    post:
+      summary: 获取任务id
+      description: 获取任务id,唯一id
+      tags:
+        - word版本报告
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: type
+        in: formData
+        description: '报告类型：10，路口；11，干线；12，区域'
+        required: true
+        type: integer
+      - name: page_size
+        in: formData
+        description: '每页返回数量'
+        required: true
+        type: integer
+      - name: page_no
+        in: formData
+        description: '页码'
+        required: true
+        type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                properties:
+                  list:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        title:
+                          type: "string"
+                        time_range:
+                          type: "string"
+                        url:
+                          type: "string"
+                        down_url:
+                          type: "string"
+                        doc_type:
+                          type: "string"
+                        create_at:
+                          type: "string"
+                  total:
+                    type: "number"
+                  page_no:
+                    type: "number"
+                  page_size:
+                    type: "number"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                properties:
+                  a:
+                    type: "string"
+                  s:
+                    type: "string"
+                type: "object"
+  /Wordreport/Download:
+    get:
+      summary: 下载报告文件
+      description: 下载报告文件，word文档
+      tags:
+        - word版本报告
+      produces:
+      - application/msword
+      parameters:
+      - name: city_id
+        in: query
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: id
+        in: query
+        description: '报告id'
+        required: true
+        type: integer
+      responses:
+        200:
+          description: 成功,返回word文件
+  /Wordreport/CreateTask:
+    post:
+      summary: 创建任务
+      description: 创建生成word的任务
+      tags:
+        - word版本报告
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: task_id
+        in: formData
+        description: '前面getUUID时获取'
+        required: true
+        type: string
+      - name: title
+        in: formData
+        description: '文件名'
+        required: true
+        type: string
+      - name: type
+        in: formData
+        description: '文件类型：10，路口报告，11，干线报告，12，区域报告'
+        required: true
+        type: integer
+      - name: time_range
+        in: formData
+        description: '报告分析的时间段 例如：2020-01-06~2020-01-12'
+        required: true
+        type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                example: "success"
+                type: "string"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                properties:
+                  a:
+                    type: "string"
+                    example: "14.2997秒"
+                  s:
+                    type: "string"
+                    example: "11.4874秒"
+                type: "object"
+  /Wordreport/CreateJuncDoc:
+    post:
+      summary: 创建任务
+      description: 创建生成word的任务
+      tags:
+        - word版本报告
+      consumes:
+        - multipart/form-data
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: integer
+      - name: task_id
+        in: formData
+        description: '任务id'
+        required: true
+        type: string
+      - name: subtitle1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: subtitle2
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningState_chart
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningState_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningIndicator_chart
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningIndicator_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_sub_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_chart_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: overview_content_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: string
+      - name: runningAnalysic_img_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: file
+      - name: overview_img_1
+        in: formData
+        description: '对应word模板'
+        required: true
+        type: file
+      responses:
+        200:
+          description: "成功"
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                type: "string"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                  s:
+                    type: "string"
+                type: "object"
+  /Alarmanalysis/cityDataDownload:
+    get:
+      summary: 城市报警分析----数据详情下载
+      description: 城市报警分析----数据详情下载
+      tags:
+        - 南昌报警接口
+      consumes: []
+      produces:
+      - application/vnd.ms-excel
+      parameters:
+      - name: city_id
+        in: query
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: query
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: start_time
+        in: query
+        description: '开始日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: end_time
+        in: query
+        description: '结束日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: start_hour
+        in: query
+        description: '开始时间，全天开始传 0:00'
+        required: true
+        type: string
+      - name: end_hour
+        in: query
+        description: '结束时间，全天结束时传 24:00'
+        required: true
+        type: string
+      - name: alarm_type
+        in: query
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: true
+        type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+  /Alarmanalysis/junctionDataDownload:
+    get:
+      summary: 路口报警分析----数据详情下载
+      description: 路口报警分析----数据详情下载
+      tags:
+        - 南昌报警接口
+      consumes: []
+      produces:
+      - application/vnd.ms-excel
+      parameters:
+      - name: city_id
+        in: query
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: query
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: logic_junction_id
+        in: query
+        description: '路口ID，不传此参数则为城市分析'
+        required: false
+        type: string
+      - name: start_time
+        in: query
+        description: '开始日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: end_time
+        in: query
+        description: '结束日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: alarm_type
+        in: query
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: true
+        type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+  /Alarmanalysis/manyDayAlarmTimeDistribution:
+    post:
+      summary: 城市、路口报警分析----多天报警发生时段分布
+      description: 城市、路口报警分析----多天报警发生时段分布
+      tags:
+        - 南昌报警接口
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: formData
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: logic_junction_id
+        in: formData
+        description: '路口ID，不传此参数则为城市分析'
+        required: false
+        type: string
+      - name: start_time
+        in: formData
+        description: '开始日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: end_time
+        in: formData
+        description: '结束日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: alarm_type
+        in: formData
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: false
+        type: string
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: "OK"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                type: "object"
+                properties:
+                  "0:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "1:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "2:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "3:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "4:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "5:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "6:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "7:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "8:00":
+                    properties:
+                      list:
+                        type: "array"
+                        items:
+                          type: "object"
+                          properties:
+                            name:
+                              type: "string"
+                              example: "失衡"
+                            value:
+                              type: "number"
+                              example: 2
+                            key:
+                              type: "number"
+                              example: 3
+                            phase_list:
+                              type: "array"
+                              items:
+                                type: "object"
+                                properties:
+                                  phase_name:
+                                    type: "string"
+                                    example: "北左"
+                                  count:
+                                    type: "number"
+                                    example: 1
+                      count:
+                        type: "number"
+                        example: 3
+                    type: "object"
+              traceid:
+                type: "string"
+                example: "a41c6275e311497ab733e8e37510a49a"
+              username:
+                type: "string"
+                example: "unkown"
+              time:
+                properties:
+                  a:
+                    type: "string"
+                    example: "0.1688秒"
+                  s:
+                    type: "string"
+                    example: "0.0987秒"
+                type: "object"
+  /Alarmanalysis/alarmJunctionTop:
+    post:
+      summary: 城市报警分析----报警路口TOP50排名
+      description: 城市报警分析----报警路口TOP50排名
+      tags:
+        - 南昌报警接口
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: formData
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: start_time
+        in: formData
+        description: '开始日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: end_time
+        in: formData
+        description: '结束日期 如：2020-02-06'
+        required: true
+        type: string
+      - name: start_hour
+        in: formData
+        description: '开始时间，全天开始传 0:00'
+        required: true
+        type: string
+      - name: end_hour
+        in: formData
+        description: '结束时间，全天结束时传 24:00'
+        required: true
+        type: string
+      - name: alarm_type
+        in: formData
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: true
+        type: string
+      - name: top_num
+        in: formData
+        description: '报警数top，不传则默认50'
+        required: false
+        type: string
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    junction_id:
+                      type: "string"
+                      example: "2017030116_4858433"
+                    alarm_count:
+                      type: "number"
+                      example: 11
+                    junction_name:
+                      type: "string"
+                      example: "新泺大街_崇华路"
+              traceid:
+                type: "string"
+                example: "1de7b1a4b6c947b791c17ebc110fbc1d"
+              username:
+                type: "string"
+                example: "unkown"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                    example: "0.1847秒"
+                  s:
+                    type: "string"
+                    example: "0.1169秒"
+                type: "object"
+  /Alarmanalysis/alarmTimeDistribution:
+    post:
+      summary: 城市、路口报警分析----报警发生时段分布
+      description: 城市、路口报警分析----报警发生时段分布
+      tags:
+        - 南昌报警接口
+        - 概览
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: formData
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: logic_junction_id
+        in: formData
+        description: '路口ID，不传此参数则为城市分析'
+        required: false
+        type: string
+      - name: start_time
+        in: formData
+        description: '开始日期 如：2020-02-06'
+        required: false
+        type: string
+      - name: end_time
+        in: formData
+        description: '结束日期 如：2020-02-06'
+        required: false
+        type: string
+      - name: alarm_type
+        in: formData
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: false
+        type: string
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "dataList"
+                  - "topInfo"
+                properties:
+                  dataList:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        hour:
+                          type: "number"
+                          example: 0
+                        value:
+                          type: "number"
+                          example: 0
+                  topInfo:
+                    type: "array"
+                    items:
+                      type: "string"
+                type: "object"
+              traceid:
+                type: "string"
+                example: "0cbd175a49d14cd68baa8e40c3a52531"
+              username:
+                type: "string"
+                example: "unkown"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                    example: "0.0878秒"
+                  s:
+                    type: "string"
+                    example: "0.0200秒"
+                type: "object"
+  /Alarmanalysis/sevenDayAlarmMeanValue:
+    post:
+      summary: 城市、路口报警分析----7日报警平均值（曲线）
+      description: 城市、路口报警分析----7日报警平均值（曲线）
+      tags:
+        - 南昌报警接口
+        - 概览
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/x-www-form-urlencoded
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: formData
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: logic_junction_id
+        in: formData
+        description: '路口ID，不传此参数则为城市分析'
+        required: false
+        type: string
+      - name: alarm_type
+        in: formData
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: false
+        type: string
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "dataList"
+                properties:
+                  dataList:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        hour:
+                          type: "string"
+                          example: "0:00"
+                        value:
+                          type: "number"
+                          example: 0
+                type: "object"
+              traceid:
+                type: "string"
+                example: "6493f9063eb34f00be08cccbfefb0ae0"
+              username:
+                type: "string"
+                example: "unkown"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                    example: "0.1163秒"
+                  s:
+                    type: "string"
+                    example: "0.0479秒"
+                type: "object"
+  /Alarmanalysis/alarmAnalysis:
+    post:
+      summary: 城市、路口报警分析-----报警信息统计表接口（柱状图）
+      description: 城市、路口报警分析-----报警信息统计表接口（柱状图）
+      tags:
+        - 南昌报警接口
+        - 概览
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      parameters:
+      - name: city_id
+        in: formData
+        description: '城市id 示例: 11'
+        required: true
+        type: string
+      - name: frequency_type
+        in: formData
+        description: '0=全部 1=常发 2=偶发'
+        required: true
+        type: string
+      - name: logic_junction_id
+        in: formData
+        description: '路口ID，不传此参数则为城市分析'
+        required: false
+        type: string
+      - name: start_time
+        in: formData
+        description: '开始日期 示例: 2020-02-06'
+        required: true
+        type: string
+      - name: end_time
+        in: formData
+        description: '结束日期 示例: 2020-02-06'
+        required: true
+        type: string
+      - name: alarm_type
+        in: formData
+        description: '报警问题 0=全部 1=过饱和 2=溢流 3=失衡'
+        required: false
+        type: string
+      responses:
+        200:
+          description: 请求成功
+          schema:
+            type: object
+            description: ""
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                properties:
+                  "0:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "1:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "2:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "3:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "4:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "5:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "6:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "7:00":
+                    type: "array"
+                    items:
+                      type: "object"
+                    example: []
+                  "8:00":
+                    properties:
+                      list:
+                        type: "array"
+                        items:
+                          type: "object"
+                          properties:
+                            name:
+                              type: "string"
+                              example: "失衡"
+                            value:
+                              type: "number"
+                              example: 2
+                            key:
+                              type: "number"
+                              example: 3
+                            phase_list:
+                              type: "array"
+                              items:
+                                type: "object"
+                                properties:
+                                  phase_name:
+                                    type: "string"
+                                    example: "北左"
+                                  count:
+                                    type: "number"
+                                    example: 1
+                      count:
+                        type: "number"
+                        example: 3
+                    type: "object"
+                type: "object"
+              traceid:
+                type: "string"
+                example: "79f075e462bb465fa2c17f6245878514"
+              username:
+                type: "string"
+                example: "unkown"
+              time:
+                properties:
+                  a:
+                    type: "string"
+                    example: "0.1691秒"
+                  s:
+                    type: "string"
+                    example: "0.0998秒"
+                type: "object"
   /overview/ttioverview:
     post:
       summary: 大屏运行指标
       description: 大屏运行指标
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -42,23 +1006,12 @@ paths:
           schema:
             description: "大屏运行指数概览"
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "pagecnt"
-                  - "totalcnt"
-                  - "data"
                 properties:
                   pagecnt:
                     type: "number"
@@ -96,6 +1049,8 @@ paths:
       description: tti详情
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -110,13 +1065,6 @@ paths:
           schema:
             description: "tti详情"
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
@@ -159,6 +1107,8 @@ paths:
       description: 今日拥堵概览
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -214,6 +1164,8 @@ paths:
       description: 获取城市行政区边界
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -233,12 +1185,6 @@ paths:
           schema:
             description: "获取城市行政区边界"
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
             properties:
               errno:
                 type: "number"
@@ -258,8 +1204,6 @@ paths:
                     division_name:
                       type: "string"
                     geojson:
-                      required: []
-                      properties: {}
                       description: "标准geojson格式"
                       type: "object"
               traceid:
@@ -272,6 +1216,8 @@ paths:
       description: 绿波带监控
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -320,9 +1266,6 @@ paths:
                             type: "string"
                           forward_geo:
                             description: 干线正向geojson
-                            required:
-                              - "features"
-                              - "type"
                             properties:
                               features:
                                 type: "array"
@@ -357,7 +1300,7 @@ paths:
                             type: "array"
                             description: 干线反向geojson
                             items:
-                              type: "undefined"
+                              type: "object"
                     junctions_info:
                       type: "array"
                       items:
@@ -435,6 +1378,8 @@ paths:
       description: 绿波带监控详情
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -554,27 +1499,14 @@ paths:
           schema:
             description: 快速路概览
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "center"
-                  - "junc_list"
-                  - "road_list"
                 properties:
                   center:
-                    required: []
-                    properties: {}
                     type: "object"
                   junc_list:
                     type: "array"
@@ -607,8 +1539,6 @@ paths:
                         name:
                           type: "string"
                         geom:
-                          required: []
-                          properties: {}
                           type: "object"
                 type: "object"
               traceid:
@@ -621,6 +1551,8 @@ paths:
       description: 快速路拥堵排名
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -635,13 +1567,6 @@ paths:
           schema:
             description: 快速路拥堵排名
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
@@ -672,6 +1597,8 @@ paths:
       description: 快速路详情
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -700,53 +1627,42 @@ paths:
           type: integer
           description: "批次时间，从拥堵排名的接口中获取"
           required: true
-          responses:
-            200:
-              description: 成功
-              schema:
-                description: 快速路详情
-                type: object
-                required:
-                  - "errno"
-                  - "errmsg"
-                  - "data"
-                  - "traceid"
-                  - "username"
-                  - "time"
+      responses:
+        200:
+          description: 成功
+          schema:
+            description: 快速路详情
+            type: object
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
                 properties:
-                  errno:
+                  update_time:
+                    type: "string"
+                  speed:
                     type: "number"
-                  errmsg:
+                  stop_delay:
+                    type: "number"
+                  across_time:
                     type: "string"
-                  data:
-                    required:
-                      - "update_time"
-                      - "speed"
-                      - "stop_delay"
-                      - "across_time"
-                      - "type"
-                    properties:
-                      update_time:
-                        type: "string"
-                      speed:
-                        type: "number"
-                      stop_delay:
-                        type: "number"
-                      across_time:
-                        type: "string"
-                      type:
-                        type: "number"
-                    type: "object"
-                  traceid:
-                    type: "string"
-                  username:
-                    type: "string"
+                  type:
+                    type: "number"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
   /expressway/alarmlist:
     post:
       summary: 快速路报警列表
       description: 快速路报警列表
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -761,13 +1677,6 @@ paths:
           schema:
             description: 快速路报警列表
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
@@ -805,6 +1714,8 @@ paths:
       description: 快速路路况
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -819,21 +1730,12 @@ paths:
           schema:
             description: 快速路路况
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "juncList"
                 properties:
                   juncList:
                     type: "array"
@@ -863,6 +1765,8 @@ paths:
       description: 公交优先
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -877,12 +1781,6 @@ paths:
           schema:
             description: 公交优先
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
             properties:
               errno:
                 type: "number"
@@ -905,13 +1803,12 @@ paths:
                           links:
                             type: "string"
                           forward_geo:
-                            required: []
-                            properties: {}
+
                             type: "object"
                           reverse_geo:
                             type: "array"
                             items:
-                              type: "undefined"
+                              type: "object"
                     junctions_info:
                       type: "array"
                       items:
@@ -945,9 +1842,6 @@ paths:
                           lat:
                             type: "string"
                     center:
-                      required:
-                        - "lng"
-                        - "lat"
                       properties:
                         lng:
                           type: "number"
@@ -957,12 +1851,6 @@ paths:
                     map_version:
                       type: "number"
                     road:
-                      required:
-                        - "id"
-                        - "road_id"
-                        - "logic_junction_ids"
-                        - "road_name"
-                        - "road_direction"
                       properties:
                         id:
                           type: "string"
@@ -987,6 +1875,8 @@ paths:
       description: 获取公交实时信息
       tags:
         - 南京建邺区项目
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -1006,20 +1896,12 @@ paths:
           schema:
             description: 获取公交实时信息
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "trace_id"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "bus_info"
-                  - "junc_info"
                 properties:
                   bus_info:
                     type: "array"
@@ -1065,13 +1947,6 @@ paths:
                               opt_time:
                                 type: "string"
                         timing:
-                          required:
-                            - "start_time"
-                            - "end_time"
-                            - "cycle"
-                            - "offset"
-                            - "current_stage"
-                            - "stage"
                           properties:
                             start_time:
                               type: "string"
@@ -1308,6 +2183,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1389,6 +2265,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1450,7 +2327,7 @@ paths:
                             reverse_geo:
                               type: "array"
                               items:
-                                type: "undefined"
+                                type: "object"
                       junctions_info:
                         type: "array"
                         items:
@@ -1514,6 +2391,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1593,6 +2471,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1680,6 +2559,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1762,6 +2642,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1925,6 +2806,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             properties:
@@ -1970,7 +2852,7 @@ paths:
                         data:
                           type: "array"
                           items:
-                            type: "undefined"
+                            type: "object"
                       type: "object"
               traceid:
                 type: "string"
@@ -2004,6 +2886,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
@@ -2120,6 +3003,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
@@ -2238,73 +3122,74 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
-          required:
-            - "errno"
-            - "errmsg"
-            - "data"
-            - "traceid"
-            - "username"
-            - "time"
-          properties:
-            errno:
-              type: "number"
-            errmsg:
-              type: "string"
-            data:
-              required:
-                - "info"
-                - "chart"
-              properties:
-                info:
-                  required:
-                    - "desc"
-                  properties:
-                    desc:
-                      type: "string"
-                  type: "object"
-                chart:
-                  required:
-                    - "title"
-                    - "scale_title"
-                    - "series"
-                  properties:
-                    title:
-                      type: "string"
-                    scale_title:
-                      type: "string"
-                    series:
-                      type: "array"
-                      items:
-                        type: "object"
-                        properties:
-                          name:
-                            type: "string"
-                          data:
-                            type: "array"
-                            items:
-                              type: "object"
-                              properties:
-                                x:
-                                  type: "string"
-                                y:
-                                  type: "number"
-                  type: "object"
-              type: "object"
-            traceid:
-              type: "string"
-            username:
-              type: "string"
-            time:
-              required:
-                - "a"
-                - "s"
-              properties:
-                a:
-                  type: "string"
-                s:
-                  type: "string"
-              type: "object"
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "traceid"
+              - "username"
+              - "time"
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                required:
+                  - "info"
+                  - "chart"
+                properties:
+                  info:
+                    required:
+                      - "desc"
+                    properties:
+                      desc:
+                        type: "string"
+                    type: "object"
+                  chart:
+                    required:
+                      - "title"
+                      - "scale_title"
+                      - "series"
+                    properties:
+                      title:
+                        type: "string"
+                      scale_title:
+                        type: "string"
+                      series:
+                        type: "array"
+                        items:
+                          type: "object"
+                          properties:
+                            name:
+                              type: "string"
+                            data:
+                              type: "array"
+                              items:
+                                type: "object"
+                                properties:
+                                  x:
+                                    type: "string"
+                                  y:
+                                    type: "number"
+                    type: "object"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                  s:
+                    type: "string"
+                type: "object"
   /AreaReport/queryAreaQuotaData:
     get:
       summary: 区域运行情况
@@ -2333,6 +3218,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
@@ -2437,6 +3323,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
@@ -2518,6 +3405,7 @@ paths:
           required: true
       responses:
         200:
+          description: "成功"
           schema:
             type: object
             required:
@@ -2696,6 +3584,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
@@ -2874,6 +3763,7 @@ paths:
           required: true
       responses:
         200:
+          description: 成功
           schema:
             type: object
             required:
@@ -2968,6 +3858,8 @@ paths:
       description: 路口离线相位指标数据
       tags:
         - 中控SaaS
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -3060,6 +3952,8 @@ paths:
       description: 路口实时相位指标数据
       tags:
         - 中控SaaS
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -3153,6 +4047,8 @@ paths:
       description: 实时单指标曲线图数据
       tags:
         - 南昌本地化
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -3166,6 +4062,8 @@ paths:
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
+          items:
+            type: "string"
         - name: junction_id
           in: formData
           type: string
@@ -3253,6 +4151,8 @@ paths:
       description: 路口实时flow指标列表
       tags:
         - 南昌本地化
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -3266,6 +4166,8 @@ paths:
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
+          items:
+            type: "string"
         - name: junction_id
           in: formData
           type: string
@@ -3278,7 +4180,6 @@ paths:
           required: false
       responses:
         200:
-          type: object
           description: 成功
           schema:
             description: "实时单指标曲线图数据"
@@ -3527,6 +4428,8 @@ paths:
       description: 路口报警处置记录
       tags:
         - 南昌本地化
+      consumes:
+        - application/x-www-form-urlencoded
       produces:
         - application/json
       parameters:
@@ -3540,6 +4443,8 @@ paths:
           type: array
           description: "数据产生日期，为空表示当日"
           required: false
+          items:
+            type: "string"
         - name: junction_id
           in: formData
           type: string
@@ -4992,660 +5897,6 @@ paths:
               username:
                 type: string
                 description: 用户名
-                example: unknown
-  /Alarmanalysis/alarmAnalysis:
-    post:
-      summary: 概览详情-城市/路口报警分析接口
-      description: 概览详情-城市/路口报警分析接口
-      tags:
-        - 概览
-      consumes:
-      - application/x-www-form-urlencoded
-      produces:
-      - application/json
-      parameters:
-      - name: city_id
-        in: formData
-        description: '示例: 23'
-        required: false
-        type: string
-      - name: frequency_type
-        in: formData
-        description: '示例: 0'
-        required: false
-        type: string
-      - name: start_time
-        in: formData
-        description: '示例: 2019-07-10'
-        required: false
-        type: string
-      - name: end_time
-        in: formData
-        description: '示例: 2019-07-10'
-        required: false
-        type: string
-      responses:
-        200:
-          description: 请求成功
-          schema:
-            type: object
-            description: ""
-            properties:
-              data:
-                type: object
-                description: ""
-                properties:
-                  "0:00":
-                    type: array
-                    description: ""
-                    items:
-                      type: object
-                      description: ""
-                  "1:00":
-                    type: array
-                    description: ""
-                    items:
-                      type: object
-                      description: ""
-                  "2:00":
-                    type: array
-                    description: ""
-                    items:
-                      type: object
-                      description: ""
-                  "3:00":
-                    type: array
-                    description: ""
-                    items:
-                      type: object
-                      description: ""
-                  "4:00":
-                    type: array
-                    description: ""
-                    items:
-                      type: object
-                      description: ""
-                  "5:00":
-                    type: array
-                    description: ""
-                    items:
-                      type: object
-                      description: ""
-                  "6:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 9
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 3
-                            name:
-                              type: string
-                              description: ""
-                              example: 失衡
-                            value:
-                              type: integer
-                              description: ""
-                              example: 6
-                  "7:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 133
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 3
-                            name:
-                              type: string
-                              description: ""
-                              example: 失衡
-                            value:
-                              type: integer
-                              description: ""
-                              example: 66
-                  "8:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 444
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 1
-                            name:
-                              type: string
-                              description: ""
-                              example: 过饱和
-                            value:
-                              type: integer
-                              description: ""
-                              example: 250
-                  "9:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 196
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 1
-                            name:
-                              type: string
-                              description: ""
-                              example: 过饱和
-                            value:
-                              type: integer
-                              description: ""
-                              example: 105
-                  "10:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 111
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 3
-                            name:
-                              type: string
-                              description: ""
-                              example: 失衡
-                            value:
-                              type: integer
-                              description: ""
-                              example: 67
-                  "11:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 42
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 3
-                            name:
-                              type: string
-                              description: ""
-                              example: 失衡
-                            value:
-                              type: integer
-                              description: ""
-                              example: 23
-                  "12:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 35
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 3
-                            name:
-                              type: string
-                              description: ""
-                              example: 失衡
-                            value:
-                              type: integer
-                              description: ""
-                              example: 17
-                  "13:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 59
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 3
-                            name:
-                              type: string
-                              description: ""
-                              example: 失衡
-                            value:
-                              type: integer
-                              description: ""
-                              example: 30
-                  "14:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 70
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 3
-                            name:
-                              type: string
-                              description: ""
-                              example: 失衡
-                            value:
-                              type: integer
-                              description: ""
-                              example: 40
-                  "15:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 59
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 1
-                            name:
-                              type: string
-                              description: ""
-                              example: 过饱和
-                            value:
-                              type: integer
-                              description: ""
-                              example: 29
-                  "16:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 47
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 1
-                            name:
-                              type: string
-                              description: ""
-                              example: 过饱和
-                            value:
-                              type: integer
-                              description: ""
-                              example: 22
-                  "17:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 258
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 1
-                            name:
-                              type: string
-                              description: ""
-                              example: 过饱和
-                            value:
-                              type: integer
-                              description: ""
-                              example: 138
-                  "18:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 352
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 1
-                            name:
-                              type: string
-                              description: ""
-                              example: 过饱和
-                            value:
-                              type: integer
-                              description: ""
-                              example: 187
-                  "19:00":
-                    type: object
-                    description: ""
-                    properties:
-                      count:
-                        type: integer
-                        description: ""
-                        example: 3
-                      list:
-                        type: array
-                        description: ""
-                        items:
-                          type: object
-                          description: ""
-                          properties:
-                            key:
-                              type: integer
-                              description: ""
-                              example: 1
-                            name:
-                              type: string
-                              description: ""
-                              example: 过饱和
-                            value:
-                              type: integer
-                              description: ""
-                              example: 3
-              errmsg:
-                type: string
-                description: ""
-                example: ""
-              errno:
-                type: integer
-                description: ""
-                example: 0
-              time:
-                type: object
-                description: ""
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.0167秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.0127秒
-              traceid:
-                type: string
-                description: ""
-                example: 645acf405d25c58d26756fc8265b2602
-              username:
-                type: string
-                description: ""
-                example: unknown
-  /Alarmanalysis/alarmTimeDistribution:
-    post:
-      summary: 概览详情-城市/路口报警时段分布接口
-      description: 概览详情-城市/路口报警时段分布接口
-      tags:
-        - 概览
-      consumes:
-      - application/x-www-form-urlencoded
-      produces:
-      - application/json
-      parameters:
-      - name: city_id
-        in: formData
-        description: '示例: 23'
-        required: false
-        type: string
-      - name: frequency_type
-        in: formData
-        description: '示例: 0'
-        required: false
-        type: string
-      - name: start_time
-        in: formData
-        description: '示例: 2019-07-10'
-        required: false
-        type: string
-      - name: end_time
-        in: formData
-        description: '示例: 2019-07-10'
-        required: false
-        type: string
-      responses:
-        200:
-          description: 请求成功
-          schema:
-            type: object
-            description: ""
-            properties:
-              data:
-                type: object
-                description: ""
-                properties:
-                  dataList:
-                    type: array
-                    description: ""
-                    items:
-                      type: object
-                      description: ""
-                      properties:
-                        hour:
-                          type: integer
-                          description: ""
-                          example: 0
-                        value:
-                          type: integer
-                          description: ""
-                          example: 0
-                  topInfo:
-                    type: array
-                    description: ""
-                    items:
-                      type: array
-                      description: ""
-                      items:
-                        type: string
-                        description: ""
-                        example: "7"
-              errmsg:
-                type: string
-                description: ""
-                example: ""
-              errno:
-                type: integer
-                description: ""
-                example: 0
-              time:
-                type: object
-                description: ""
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.0141秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.0103秒
-              traceid:
-                type: string
-                description: ""
-                example: 645acf295d25c58d14ef754026abf902
-              username:
-                type: string
-                description: ""
-                example: unknown
-  /Alarmanalysis/sevenDayAlarmMeanValue:
-    post:
-      summary: 概览详情-七日报警均值
-      description: 概览详情-七日报警均值
-      tags:
-        - 概览
-      consumes:
-      - application/x-www-form-urlencoded
-      produces:
-      - application/json
-      parameters:
-      - name: city_id
-        in: formData
-        description: '示例: 23'
-        required: false
-        type: string
-      - name: frequency_type
-        in: formData
-        description: '示例: 0'
-        required: false
-        type: string
-      responses:
-        200:
-          description: 请求成功
-          schema:
-            type: object
-            description: ""
-            properties:
-              data:
-                type: object
-                description: ""
-                properties:
-                  dataList:
-                    type: array
-                    description: ""
-                    items:
-                      type: object
-                      description: ""
-                      properties:
-                        hour:
-                          type: string
-                          description: ""
-                          example: "0:00"
-                        value:
-                          type: integer
-                          description: ""
-                          example: 5
-              errmsg:
-                type: string
-                description: ""
-                example: ""
-              errno:
-                type: integer
-                description: ""
-                example: 0
-              time:
-                type: object
-                description: ""
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.0190秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.0150秒
-              traceid:
-                type: string
-                description: ""
-                example: 64594b135d25c58d01f3a940248ae702
-              username:
-                type: string
-                description: ""
                 example: unknown
   /Area/comparison:
     post:
