@@ -21837,7 +21837,7 @@ paths:
                 type: "string"
                 example: "64594b125e4cdfe033a9a7f008295202"
   /signal-control/signalversion/queryversionlist:
-    post:
+    get:
       summary: 版本列表
       description: 版本列表
       tags:
@@ -21848,22 +21848,22 @@ paths:
         - application/json
       parameters:
         - name: logic_junction_id
-          in: formData
+          in: query
           description: 路口id
           required: true
           type: string
         - name: source
-          in: formData
+          in: query
           description: 配时类型，1人工2信号机3优化
           required: true
           type: string
         - name: page
-          in: formData
+          in: query
           description: 分页page
           required: true
           type: string
         - name: pageSize
-          in: formData
+          in: query
           description: 分页size
           required: true
           type: integer
@@ -21930,7 +21930,7 @@ paths:
                 type: "string"
                 example: "64457c115e4cdfe04ea284e808189502"
   /signal-control/signalversion/group/all:
-    post:
+    get:
       summary: 查询 灯组相位表
       description: 查询 灯组相位表
       tags:
@@ -22123,7 +22123,7 @@ paths:
                 type: "string"
                 example: "6445b81e5e4cebfe2c991abc08302d02"
   /signal-control/signalversion/stage/all:
-    post:
+    get:
       summary: 查询 阶段表
       description: 查询 阶段表
       tags:
@@ -22286,7 +22286,7 @@ paths:
                 type: "string"
                 example: "6445bb0e5e4cf5c50bea1175085e8a02"
   /signal-control/signalversion/scheduleinfo:
-    post:
+    get:
       summary: 查询 时段调度
       description: 查询 时段调度
       tags:
@@ -22424,7 +22424,7 @@ paths:
                 type: "string"
                 example: "645a421f5e4d034c9e0e3c9408863a02"
   /signal-control/signalversion/queryringinfo:
-    post:
+    get:
       summary: 查询 相序绿信比
       description: 查询 相序绿信比
       tags:
@@ -22549,7 +22549,7 @@ paths:
                 type: "string"
                 example: "645acf295e4cfe1d7bf0725c08778302"
   /signal-control/signalversion/getringgraph:
-    post:
+    get:
       summary: 查询 环图
       description: 查询 环图
       tags:
