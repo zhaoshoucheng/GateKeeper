@@ -6341,17 +6341,17 @@ paths:
                     example: 柳东片区
                   center_lat:
                     type: number
-                    description: ""
+                    description: "lat"
                     example: 24.383667
                     format: float
                   center_lng:
                     type: number
-                    description: ""
+                    description: "lng"
                     example: 109.554008
                     format: float
                   junction_list:
                     type: array
-                    description: ""
+                    description: "区域路口列表"
                     items:
                       type: object
                       description: ""
@@ -6366,7 +6366,7 @@ paths:
                           example: "2018-04-02 12:18:37"
                         district_code:
                           type: integer
-                          description: ""
+                          description: "行政区code"
                           example: 450203
                         district_name:
                           type: string
@@ -6374,23 +6374,23 @@ paths:
                           example: 鱼峰区
                         is_complex:
                           type: boolean
-                          description: ""
+                          description: "是否复杂路口"
                           example: false
                         is_manual:
                           type: boolean
-                          description: ""
+                          description: "是否人工编辑路口"
                           example: false
                         is_traffic:
                           type: boolean
-                          description: ""
+                          description: "是否交通路口"
                           example: true
                         lat:
                           type: string
-                          description: ""
+                          description: "lat"
                           example: "24.38784"
                         lng:
                           type: string
-                          description: ""
+                          description: "lng"
                           example: "109.56516"
                         logic_junction_id:
                           type: string
@@ -6496,7 +6496,7 @@ paths:
                           example: "2019-03-01 09:44:36"
                         user_id:
                           type: string
-                          description: ""
+                          description: "操作人，目前没用"
                           example: "0"
               errmsg:
                 type: string
@@ -12219,73 +12219,65 @@ paths:
                     description: ""
                     example: 2.019070918e+09
                   road_info:
-                    type: array
-                    description: ""
+                    type: "array"
                     items:
-                      type: object
-                      description: ""
+                      type: "object"
                       properties:
+                        start_junc_id:
+                          type: "string"
+                          example: "2017030116_504948"
                         end_junc_id:
-                          type: string
-                          description: ""
-                          example: "2017030116_1308844"
+                          type: "string"
+                          example: "2017030116_504937"
+                        links:
+                          type: "string"
+                          example: "862083950,713696010,713696020,401951570,90000884277040,90000884182370,778730510,778730520,90000320515730,90000320515720,90000468401570,90000468401530,713695960,713695930,778730680,778730690"
                         forward_geo:
-                          type: object
-                          description: ""
+                          required:
+                            - "features"
+                            - "type"
                           properties:
                             features:
-                              type: array
-                              description: ""
+                              type: "array"
                               items:
-                                type: object
-                                description: ""
+                                type: "object"
                                 properties:
                                   geometry:
-                                    type: object
-                                    description: ""
+                                    required:
+                                      - "coordinates"
+                                      - "type"
                                     properties:
                                       coordinates:
-                                        type: array
-                                        description: ""
+                                        type: "array"
                                         items:
-                                          type: number
-                                          description: ""
-                                          example: 109.4369
-                                          format: float
+                                          type: "number"
+                                        example:
+                                          - 116.6513
+                                          - 40.12992
                                       type:
-                                        type: string
-                                        description: ""
-                                        example: Point
+                                        type: "string"
+                                        example: "Point"
+                                    type: "object"
                                   properties:
-                                    type: object
-                                    description: ""
+                                    required:
+                                      - "id"
                                     properties:
                                       id:
-                                        type: integer
-                                        description: ""
+                                        type: "number"
                                         example: 0
+                                    type: "object"
                                   type:
-                                    type: string
-                                    description: ""
-                                    example: Feature
+                                    type: "string"
+                                    example: "Feature"
                             type:
-                              type: string
-                              description: ""
-                              example: FeatureCollection
-                        links:
-                          type: string
-                          description: ""
-                          example: 244102360,457686170,457686180,146999060,742476270,742476280,648627850,648627860
+                              type: "string"
+                              example: "FeatureCollection"
+                          type: "object"
                         reverse_geo:
-                          type: array
-                          description: ""
+                          type: "array"
                           items:
-                            type: object
-                            description: ""
-                        start_junc_id:
-                          type: string
-                          description: ""
-                          example: "2017030116_1308840"
+                            type: "undefined"
+                          example: []
               errmsg:
                 type: string
                 description: 错误信息，当errno非0的时候有内容，可直接在页面显示
@@ -22605,6 +22597,7 @@ paths:
                       type: "array"
                       items:
                         type: "number"
+                        description: "1人工，2信号机"
                       example:
                         - 1
                         - 2
