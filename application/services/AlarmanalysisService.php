@@ -645,10 +645,10 @@ class AlarmanalysisService extends BaseService
         }else{
             $nowHour = 24;
         }
-        for ($i = 0; $i < $nowHour; $i++) {
+        for ($i = 0; $i <= $nowHour; $i++) {
             $continuousHour[$i . ':00'] = [];
         }
-
+        
         // 平铺数组
         $temp = Collection::make($tempRes)->collapse()->get();
         foreach ($temp as $k=>$v) {

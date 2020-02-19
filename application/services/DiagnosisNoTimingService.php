@@ -368,7 +368,7 @@ class DiagnosisNoTimingService extends BaseService
                 }
             }
         }
-        $ret["has_data"] = isset($data["all"][current($dates)]["00:00"])?1:0;
+        // $ret["has_data"] = isset($data["all"][current($dates)]["00:00"])?1:0;
         return $ret;
     }
 
