@@ -312,12 +312,10 @@ class WordreportService extends BaseService{
                 foreach ($jsonArr['arr'] as $jk => $jv){
                     if(isset($jv['options'][0])){
                         continue;
-//                        foreach ($jv['options'] as $ok=>$ov){
-//                            $newParams[$pk."_".($jk+1)."_".($ok+1)] = json_encode(array(
-//                                'infile'=>$ov['options']
-//                            ));
-//                        }
                     }else{
+                        if(empty($jv['options'])){
+                            continue;
+                        }
                         $newParams[$pk."_".($jk+1)] = json_encode(array(
                             'infile'=>$jv['options']
                         ));
@@ -326,10 +324,8 @@ class WordreportService extends BaseService{
 
             }
             if (strpos($pk,"runningAnalysic")!==false){
-
                 if(strpos($pk,"chart")!==false){
                     $jsonArr = json_decode($pv,true);
-
                     foreach ($jsonArr['arr'] as $jk => $jv){
                         foreach ($jv['options'] as $ok=>$ov){
                             $newParams["runningAnalysic_chart_".($jk+1)."_".($ok+1)] = json_encode(array(
