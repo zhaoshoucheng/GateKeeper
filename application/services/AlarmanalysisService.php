@@ -991,7 +991,7 @@ class AlarmanalysisService extends BaseService
      */
     public function alarmJunctionTop($params)
     {
-
+        $index = $this->config->item('alarm_es_index');
         // $sql='select count(id) as cnt from online_its_alarm_movement_month_202002 where start_time>="2020-02-01 00:00:00" and start_time<="2020-02-08 00:00:00" and type=1 and frequency_type=1 and city_id=1 group by logic_junction_id order by cnt desc limit 50';
         $startTime = $params['start_time']." ".$params['start_hour'];
         $endTime = $params['end_time']." ".$params['end_hour'];
@@ -1003,9 +1003,9 @@ class AlarmanalysisService extends BaseService
         if(!empty($params["frequency_type"])){
             $frequencyType = " and frequency_type=".$params["frequency_type"];
         }
-
-        $sql='select count(id) as cnt from online_its_alarm_movement_month_* where city_id=%s and start_time>="%s" and start_time<="%s" %s %s group by logic_junction_id order by cnt desc limit %s';
-        $sql = sprintf($sql,$params["city_id"],$startTime,$endTime,$alarmType,$frequencyType,$params["top_num"]);
+        
+        $sql='select count(id) as cnt from %s where city_id=%s and start_time>="%s" and start_time<="%s" %s %s group by logic_junction_id order by cnt desc limit %s';
+        $sql = sprintf($sql,$index["flow"],$params["city_id"],$startTime,$endTime,$alarmType,$frequencyType,$params["top_num"]);
         $result = $this->alarmanalysis_model->search($sql,1);
         if (empty($result["aggregations"]["logic_junction_id"]["buckets"])) {
             return (object)[];
