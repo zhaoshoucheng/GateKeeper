@@ -45,20 +45,25 @@ paths:
             properties:
               errno:
                 type: "number"
+                description: "错误码，0代表正常"
                 example: 0
               errmsg:
                 type: "string"
+                description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
                 example: ""
               data:
                 properties:
                   uuid:
                     type: "string"
+                    description: "唯一id"
                     example: "abc"
                 type: "object"
               traceid:
                 type: "string"
+                description: "链路ID，追查错误使用"
               username:
                 type: "string"
+                description: "用户名"
               time:
                 properties:
                   a:
@@ -105,8 +110,10 @@ paths:
             properties:
               errno:
                 type: "number"
+                description: "错误码，0代表正常"
               errmsg:
                 type: "string"
+                description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
               data:
                 properties:
                   list:
@@ -116,27 +123,38 @@ paths:
                       properties:
                         title:
                           type: "string"
+                          description: "标题"
                         time_range:
                           type: "string"
+                          description: "报告统计时间"
                         url:
                           type: "string"
+                          description: "预览地址"
                         down_url:
                           type: "string"
+                          description: "下载地址"
                         doc_type:
                           type: "string"
+                          description: "文件类型"
                         create_at:
                           type: "string"
+                          description: "创建时间"
                   total:
                     type: "number"
+                    description: "总数"
                   page_no:
                     type: "number"
+                    description: "页码"
                   page_size:
                     type: "number"
+                    description: "每页返回数量"
                 type: "object"
               traceid:
                 type: "string"
+                description: "链路ID，追查错误使用"
               username:
                 type: "string"
+                description: "用户名"
               time:
                 properties:
                   a:
@@ -4561,11 +4579,11 @@ paths:
                       example: "23"
                     lat:
                       type: string
-                      description: ""
+                      description: "纬度"
                       example: "31.27516"
                     lng:
                       type: string
-                      description: ""
+                      description: "经度"
                       example: "120.72473"
                     logic_junction_id:
                       type: string
@@ -4573,11 +4591,11 @@ paths:
                       example: "2017030116_3478718"
                     name:
                       type: string
-                      description: ""
+                      description: "路口名称"
                       example: 星湖街_仁爱路
                     name_sim:
                       type: integer
-                      description: ""
+                      description: "匹配度"
                       example: 100
               errmsg:
                 type: string
@@ -5427,18 +5445,23 @@ paths:
                     properties:
                       lat:
                         type: number
+                        description: "纬度"
                         example: 36.669197210611
                       lng:
                         type: number
+                        description: "经度"
                         example: 117.03854901929
                   junc_total:
                     type: integer
+                    description: "路口总数"
                     example: 2448
                   model_total:
                     type: integer
+                    description: "路口模型总数"
                     example: 590
                   avi_total:
                     type: integer
+                    description: "流量路口总数"
                     example: 223
                   junc_list:
                     type: array
@@ -5447,24 +5470,31 @@ paths:
                       properties:
                         jid:
                           type: string
+                          description: "路口ID"
                           example: 2017030116_53551019
                         name:
                           type: string
+                          description: "路口名称"
                           example: "测试路口"
                         lat:
                           type: number
+                          description: "纬度"
                           example: 36.045006
                         lng:
                           type: number
+                          description: "经度"
                           example: 117.44765
                         has_model:
                           type: integer
+                          description: "是否拥有模型"
                           example: 0
                         has_avi:
                           type: integer
+                          description: "是否管理卡口信息"
                           example: 0
                         update_time:
                           type: string
+                          description: "更新时间"
                           example: "2019-05-31 02:41:14"
               errmsg:
                 type: string
@@ -5615,6 +5645,7 @@ paths:
                           properties:
                             dname:
                               type: string
+                              description: "方向"
                               example: 南
                             channel_list:
                               type: array
@@ -5628,12 +5659,15 @@ paths:
                                       properties:
                                         start_time:
                                           type: string
+                                          description: "开始时间"
                                           example: "00:00"
                                         end_time:
                                           type: string
+                                          description: "结束时间"
                                           example: "01:00"
                                         value:
                                           type: integer
+                                          description: "通道号"
                                           example: 72
               errmsg:
                 type: string
@@ -5725,21 +5759,21 @@ paths:
                     example: "56"
                   area_name:
                     type: string
-                    description: ""
+                    description: "区域名称"
                     example: 柳州城区
                   center_lat:
                     type: number
-                    description: ""
+                    description: "纬度"
                     example: 109.447885
                     format: float
                   center_lng:
                     type: number
-                    description: ""
+                    description: "经度"
                     example: 24.350116
                     format: float
                   junction_list:
                     type: array
-                    description: ""
+                    description: "路口列表"
                     items:
                       type: object
                       description: ""
@@ -5750,51 +5784,51 @@ paths:
                           example: 134
                         created_at:
                           type: string
-                          description: ""
+                          description: "创建时间"
                           example: "2019-02-19 14:29:48"
                         district_code:
                           type: integer
-                          description: ""
+                          description: "行政区编号"
                           example: 450205
                         district_name:
                           type: string
-                          description: ""
+                          description: "行政区名称"
                           example: 柳北区
                         is_complex:
                           type: boolean
-                          description: ""
+                          description: "是否是复杂路口"
                           example: false
                         is_manual:
                           type: boolean
-                          description: ""
+                          description: "是否人工编辑路口"
                           example: true
                         is_traffic:
                           type: boolean
-                          description: ""
+                          description: "是否是交通路口"
                           example: true
                         lat:
                           type: string
-                          description: ""
+                          description: "纬度"
                           example: "24.42625"
                         lng:
                           type: string
-                          description: ""
+                          description: "经度"
                           example: "109.3845"
                         logic_junction_id:
                           type: string
-                          description: ""
+                          description: "逻辑路口ID"
                           example: 0518faf8992b22001a3f8eba8ae79076
                         logic_show_id:
                           type: string
-                          description: ""
+                          description: "展示id"
                           example: 724fe97f6f95270d8465cd1687729e99
                         name:
                           type: string
-                          description: ""
+                          description: "路口名称"
                           example: 柳长路-古灵大道
                         updated_at:
                           type: string
-                          description: ""
+                          description: "更新时间"
                           example: "2019-02-19 14:29:58"
               errmsg:
                 type: string
@@ -5853,14 +5887,14 @@ paths:
                 properties:
                   list:
                     type: array
-                    description: ""
+                    description: "区域列表"
                     items:
                       type: object
                       description: ""
                       properties:
                         area_name:
                           type: string
-                          description: ""
+                          description: "区域名称"
                           example: 柳州城区
                         city_id:
                           type: string
@@ -5868,7 +5902,7 @@ paths:
                           example: "134"
                         id:
                           type: string
-                          description: ""
+                          description: "区域id"
                           example: "56"
               errmsg:
                 type: string
@@ -5911,37 +5945,37 @@ paths:
       parameters:
       - name: city_id
         in: formData
-        description: '示例: 23'
+        description: '城市id，示例: 23'
         required: false
         type: string
       - name: area_id
         in: formData
-        description: '示例: 79'
+        description: '区域id，示例: 79'
         required: false
         type: string
       - name: quota_key
         in: formData
-        description: '示例: speed'
+        description: '指标关键字 ，示例: speed'
         required: false
         type: string
       - name: base_start_date
         in: formData
-        description: '示例: 2019-07-01'
+        description: '评估开始时间，示例: 2019-07-01'
         required: false
         type: string
       - name: base_end_date
         in: formData
-        description: '示例: 2019-07-05'
+        description: '评估结束时间，示例: 2019-07-05'
         required: false
         type: string
       - name: evaluate_start_date
         in: formData
-        description: '示例: 2019-07-08'
+        description: '对比开始时间，示例: 2019-07-08'
         required: false
         type: string
       - name: evaluate_end_date
         in: formData
-        description: '示例: 2019-07-10'
+        description: '对比结束时间，示例: 2019-07-10'
         required: false
         type: string
       responses:
@@ -5961,84 +5995,25 @@ paths:
                     properties:
                       "2019-07-01":
                         type: array
-                        description: ""
+                        description: "评估日期"
                         items:
                           type: array
-                          description: ""
+                          description: "评估时间列表，小时为单位"
                           items:
                             type: string
                             description: ""
                             example: "00:00"
-                      "2019-07-02":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
-                            example: "00:00"
-                      "2019-07-03":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
-                            example: "00:00"
-                      "2019-07-04":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
-                            example: "00:00"
-                      "2019-07-05":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
-                            example: "00:00"
+                      
                   evaluate:
                     type: object
                     description: ""
                     properties:
                       "2019-07-08":
                         type: array
-                        description: ""
+                        description: "评估对比日期"
                         items:
                           type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
-                            example: "00:00"
-                      "2019-07-09":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
-                            example: "00:00"
-                      "2019-07-10":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
+                          description: "评估对比时间列表，小时为单位"
                           items:
                             type: string
                             description: ""
@@ -6049,33 +6024,33 @@ paths:
                     properties:
                       area_name:
                         type: string
-                        description: ""
+                        description: "区域名称"
                         example: 0613test
                       base_time:
                         type: array
-                        description: ""
+                        description: "基准时间"
                         items:
                           type: string
                           description: ""
                           example: "2019-07-01"
                       download_id:
                         type: string
-                        description: ""
+                        description: "下载文件使用的id"
                         example: eb585ab594b2cc08ab6d92cb3ca25ae3
                       evaluate_time:
                         type: array
-                        description: ""
+                        description: "对比时间"
                         items:
                           type: string
                           description: ""
                           example: "2019-07-08"
                       quota_name:
                         type: string
-                        description: ""
+                        description: "指标名称"
                         example: 区域平均速度
                       quota_unit:
                         type: string
-                        description: ""
+                        description: "指标单位"
                         example: 千米／小时
               errmsg:
                 type: string
@@ -6083,11 +6058,11 @@ paths:
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "为0表示成功"
                 example: 0
               time:
                 type: object
-                description: ""
+                description: "服务请求时间"
                 properties:
                   a:
                     type: string
@@ -6099,11 +6074,11 @@ paths:
                     example: 0.2228秒
               traceid:
                 type: string
-                description: ""
+                description: "链路追踪ID"
                 example: 645acf405d26a53f6b220c5d039baa02
               username:
                 type: string
-                description: ""
+                description: "用户名"
                 example: unknown
   /Area/downloadEvaluateData:
     post:
@@ -8770,42 +8745,12 @@ paths:
         type: string
       - name: type
         in: formData
-        description: '示例: 1'
+        description: '报告类型，示例: 1'
         required: false
         type: string
-      - name: week%5B0%5D
+      - name: week[0]
         in: formData
-        description: '示例: 1'
-        required: false
-        type: string
-      - name: week%5B1%5D
-        in: formData
-        description: '示例: 2'
-        required: false
-        type: string
-      - name: week%5B2%5D
-        in: formData
-        description: '示例: 3'
-        required: false
-        type: string
-      - name: week%5B3%5D
-        in: formData
-        description: '示例: 4'
-        required: false
-        type: string
-      - name: week%5B4%5D
-        in: formData
-        description: '示例: 5'
-        required: false
-        type: string
-      - name: week%5B5%5D
-        in: formData
-        description: '示例: 6'
-        required: false
-        type: string
-      - name: week%5B6%5D
-        in: formData
-        description: '示例: 0'
+        description: '星期几，示例: 1'
         required: false
         type: string
       - name: quota_key
@@ -8830,116 +8775,22 @@ paths:
                     properties:
                       7ec88ed3bd63dd59f687df3b0446bfb8:
                         type: array
-                        description: ""
+                        description: "路口指标详情"
                         items:
                           type: array
-                          description: ""
+                          description: "数组，两个数据，前面一个指标数，后面一个时间点"
                           items:
                             type: integer
                             description: ""
                             example: 76
-                      9b5a45f3055c28df4779ee763f88a81c:
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: integer
-                            description: ""
-                            example: 41
-                      9b833efd4983af06696beb10b110cff0:
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: object
-                            description: ""
-                      9f46d12d666e5f6709a58eb5c63ee87b:
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: object
-                            description: ""
-                      044992c1a1808d5142e72c424fc50014:
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: object
-                            description: ""
-                      6086054eb533ba8e8b45664e1ad8d349:
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: integer
-                            description: ""
-                            example: 81
-                      bac3b8cfa0d9ae5151d25adca94caa84:
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: object
-                            description: ""
-                      d5a3de464a86ec6a45a714e8df618c31:
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: integer
-                            description: ""
-                            example: 44
-                      e40fb56c6195a159911959718167db9b:
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: integer
-                            description: ""
-                            example: 14
-                      f7bd8dbcb2c84d2f65d63d8e00c574ef:
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: integer
-                            description: ""
-                            example: 54
-                      fcb1e28e419d6098946290afd10240c3:
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: object
-                            description: ""
+                      
                   info:
                     type: object
                     description: ""
                     properties:
                       base_time_box:
                         type: object
-                        description: ""
+                        description: "特殊方框标注的时间段"
                         properties:
                           6086054eb533ba8e8b45664e1ad8d349:
                             type: object
@@ -8947,19 +8798,19 @@ paths:
                             properties:
                               end_time:
                                 type: string
-                                description: ""
+                                description: "结束时间"
                                 example: "19:30"
                               length:
                                 type: integer
-                                description: ""
+                                description: "长度"
                                 example: 8
                               start_time:
                                 type: string
-                                description: ""
+                                description: "开始时间"
                                 example: "16:00"
                       describe_info:
                         type: string
-                        description: ""
+                        description: "总结信息"
                         example: 文昌路-康顺路路口在评估日期内东直方向最大排队长度最长，其中16:00-19:30时段时段排队长度最长，需要重点关注。
                       flow_info:
                         type: object
@@ -8967,163 +8818,44 @@ paths:
                         properties:
                           7ec88ed3bd63dd59f687df3b0446bfb8:
                             type: object
-                            description: ""
+                            description: "flow_id为key"
                             properties:
                               highlight:
                                 type: integer
-                                description: ""
+                                description: "是否高亮 0,否；1，是"
                                 example: 0
                               name:
                                 type: string
-                                description: ""
+                                description: "相位名称"
                                 example: 南左
-                          9b5a45f3055c28df4779ee763f88a81c:
-                            type: object
-                            description: ""
-                            properties:
-                              highlight:
-                                type: integer
-                                description: ""
-                                example: 0
-                              name:
-                                type: string
-                                description: ""
-                                example: 北右
-                          9b833efd4983af06696beb10b110cff0:
-                            type: object
-                            description: ""
-                            properties:
-                              highlight:
-                                type: integer
-                                description: ""
-                                example: 0
-                              name:
-                                type: string
-                                description: ""
-                                example: 南右
-                          9f46d12d666e5f6709a58eb5c63ee87b:
-                            type: object
-                            description: ""
-                            properties:
-                              highlight:
-                                type: integer
-                                description: ""
-                                example: 0
-                              name:
-                                type: string
-                                description: ""
-                                example: 西右
-                          044992c1a1808d5142e72c424fc50014:
-                            type: object
-                            description: ""
-                            properties:
-                              highlight:
-                                type: integer
-                                description: ""
-                                example: 0
-                              name:
-                                type: string
-                                description: ""
-                                example: 北直
-                          6086054eb533ba8e8b45664e1ad8d349:
-                            type: object
-                            description: ""
-                            properties:
-                              highlight:
-                                type: integer
-                                description: ""
-                                example: 1
-                              name:
-                                type: string
-                                description: ""
-                                example: 东直(max)
-                          bac3b8cfa0d9ae5151d25adca94caa84:
-                            type: object
-                            description: ""
-                            properties:
-                              highlight:
-                                type: integer
-                                description: ""
-                                example: 0
-                              name:
-                                type: string
-                                description: ""
-                                example: 北左
-                          d5a3de464a86ec6a45a714e8df618c31:
-                            type: object
-                            description: ""
-                            properties:
-                              highlight:
-                                type: integer
-                                description: ""
-                                example: 0
-                              name:
-                                type: string
-                                description: ""
-                                example: 西直
-                          e40fb56c6195a159911959718167db9b:
-                            type: object
-                            description: ""
-                            properties:
-                              highlight:
-                                type: integer
-                                description: ""
-                                example: 0
-                              name:
-                                type: string
-                                description: ""
-                                example: 东右
-                          f7bd8dbcb2c84d2f65d63d8e00c574ef:
-                            type: object
-                            description: ""
-                            properties:
-                              highlight:
-                                type: integer
-                                description: ""
-                                example: 0
-                              name:
-                                type: string
-                                description: ""
-                                example: 西直
-                          fcb1e28e419d6098946290afd10240c3:
-                            type: object
-                            description: ""
-                            properties:
-                              highlight:
-                                type: integer
-                                description: ""
-                                example: 0
-                              name:
-                                type: string
-                                description: ""
-                                example: 西左
+                          
                       junction_lat:
                         type: string
-                        description: ""
+                        description: "路口纬度"
                         example: "24.32352"
                       junction_lng:
                         type: string
-                        description: ""
+                        description: "路口经度"
                         example: "109.44626"
                       junction_name:
                         type: string
-                        description: ""
+                        description: "路口名称"
                         example: 文昌路-康顺路
                       quota_desc:
                         type: string
-                        description: ""
+                        description: "指标中文描述"
                         example: 各方向最大排队长度时间变化规律
                       quota_name:
                         type: string
-                        description: ""
+                        description: "指标名称"
                         example: 排队长度
                       quota_unit:
                         type: string
-                        description: ""
+                        description: "指标单位"
                         example: 米
                       summary_info:
                         type: string
-                        description: ""
+                        description: "描述信息"
                         example: 16:00-19:30时段东直方向最大排队长度最长
               errmsg:
                 type: string
@@ -10251,27 +9983,27 @@ paths:
                     properties:
                       last_period:
                         type: array
-                        description: ""
+                        description: "上个周期"
                         items:
                           type: array
-                          description: ""
+                          description: "数组形式，前面一个是数值，后面一个是时间"
                           items:
                             type: string
                             description: ""
                             example: "06:30"
                       period:
                         type: array
-                        description: ""
+                        description: "本周期"
                         items:
                           type: array
-                          description: ""
+                          description: "数组形式，前面一个是数值，后面一个是时间"
                           items:
                             type: string
                             description: ""
                             example: "06:30"
                   summary:
                     type: string
-                    description: ""
+                    description: "总结信息"
                     example: 本月早高峰平均延误为18秒,环比上周减少2.47%。
               errmsg:
                 type: string
@@ -10348,33 +10080,33 @@ paths:
                     description: ""
                     items:
                       type: object
-                      description: ""
+                      description: "行政区列表"
                       properties:
                         district_id:
                           type: string
-                          description: ""
+                          description: "行政区编号"
                           example: "450202"
                         district_name:
                           type: string
-                          description: ""
+                          description: "行政区名称"
                           example: 城中区
                         speed:
                           type: number
-                          description: ""
+                          description: "速度"
                           example: 25.06
                           format: float
                         stop_delay:
                           type: number
-                          description: ""
+                          description: "停车延误"
                           example: 17.28
                           format: float
                   end_time:
                     type: string
-                    description: ""
+                    description: "结束时间"
                     example: "2019-06-30"
                   start_time:
                     type: string
-                    description: ""
+                    description: "开始时间"
                     example: "2019-06-01"
                   summary:
                     type: string
@@ -10447,15 +10179,15 @@ paths:
                 properties:
                   end_time:
                     type: string
-                    description: ""
+                    description: "结束时间"
                     example: 2019.06.30
                   start_time:
                     type: string
-                    description: ""
+                    description: "开始时间"
                     example: 2019.06.01
                   summary:
                     type: string
-                    description: ""
+                    description: "概述信息"
                     example: 本月柳州区拥堵程度相对严重，市区整体平均延误18.3秒，环比上月减少0.9%。溢流路口共149路口次，环比减少89.97%。过饱和路口4468路口次，环比上月问题增长1.22%。
               errmsg:
                 type: string
@@ -10539,52 +10271,52 @@ paths:
                 properties:
                   junction_list:
                     type: array
-                    description: ""
+                    description: "路口列表"
                     items:
                       type: object
                       description: ""
                       properties:
                         MoM:
                           type: number
-                          description: ""
+                          description: "环比增长"
                           example: 0.4431
                           format: float
                         junction_name:
                           type: string
-                          description: ""
+                          description: "路口名称"
                           example: 屏山大道-西江路口
                         last_rank:
                           type: integer
-                          description: ""
+                          description: "上周排名"
                           example: 1
                         logic_junction_id:
                           type: string
-                          description: ""
+                          description: "路口ID"
                           example: "2017030116_1219214"
                         rank:
                           type: integer
-                          description: ""
+                          description: "本周排名"
                           example: 1
                         stop_delay:
                           type: number
-                          description: ""
+                          description: "停车延误"
                           example: 67.75
                           format: float
                   quota_desc:
                     type: string
-                    description: ""
+                    description: "描述详情"
                     example: 本月平均延误时间最大的20个路口展示
                   quota_name:
                     type: string
-                    description: ""
+                    description: "指标中文描述"
                     example: 平均延误时间
                   quota_title:
                     type: string
-                    description: ""
+                    description: "标题"
                     example: 平均延误时间top20路口分析
                   summary:
                     type: string
-                    description: ""
+                    description: "总结"
                     example: 其中屏山大道-西江路口本月平均延误时间最大。在2019-06-24平均延误时间最大，达到68.78。环比上月新民路_安泰路恶化情况最严重，由上个月165名，变化至本月43名，下个月需要重点关注延误变大原因
               errmsg:
                 type: string
@@ -10662,27 +10394,27 @@ paths:
                     properties:
                       last_period:
                         type: array
-                        description: ""
+                        description: "上周数据"
                         items:
                           type: array
-                          description: ""
+                          description: "数组形式，前面一个是数值，后面一个是时间"
                           items:
                             type: string
                             description: ""
                             example: "06:30"
                       period:
                         type: array
-                        description: ""
+                        description: "本周数据"
                         items:
                           type: array
-                          description: ""
+                          description: "数组形式，前面一个是数值，后面一个是时间"
                           items:
                             type: string
                             description: ""
                             example: "06:30"
                   summary:
                     type: string
-                    description: ""
+                    description: "总结信息"
                     example: 本月早高峰平均运行速度为26.32km/h,环比上周增加0.37%。
               errmsg:
                 type: string
@@ -10755,20 +10487,20 @@ paths:
                     properties:
                       last_period:
                         type: array
-                        description: ""
+                        description: "上周数据"
                         items:
                           type: array
-                          description: ""
+                          description: "数组形式，前面一个是数值，后面一个是时间"
                           items:
                             type: string
                             description: ""
                             example: "00:00"
                       period:
                         type: array
-                        description: ""
+                        description: "本周数据"
                         items:
                           type: array
-                          description: ""
+                          description: "数组形式，前面一个是数值，后面一个是时间"
                           items:
                             type: string
                             description: ""
@@ -10779,11 +10511,11 @@ paths:
                     properties:
                       end_time:
                         type: string
-                        description: ""
+                        description: "结束时间"
                         example: "2019-06-30"
                       start_time:
                         type: string
-                        description: ""
+                        description: "开始日期"
                         example: "2019-06-01"
               errmsg:
                 type: string
@@ -10841,7 +10573,7 @@ paths:
         type: string
       - name: type
         in: formData
-        description: '示例: 4'
+        description: '报告类型，1，路口分析报告；2，路口优化对比报告；3，城市分析报告（周报）；4，城市分析报告（月报）示例: 4'
         required: false
         type: string
       - name: file
@@ -10862,11 +10594,11 @@ paths:
                 properties:
                   resource_key:
                     type: string
-                    description: ""
+                    description: "下载使用的key"
                     example: 201907111106083090.pdf
                   url:
                     type: string
-                    description: ""
+                    description: "下载地址"
                     example: http://img-hxy022.didistatic.com/static/itstool_private/201907111106083090.pdf?expire=1563419168&signiture=zeTXCj1L-vslmXZwgD0lnLzbYpA4DPVRwC__Zy3FceY=
               errmsg:
                 type: string
@@ -10947,31 +10679,31 @@ paths:
                       properties:
                         create_at:
                           type: string
-                          description: ""
+                          description: "创建时间"
                           example: "2019-04-22 19:39:45"
                         down_url:
                           type: string
-                          description: ""
+                          description: "下载链接"
                           example: http://100.90.163.52:8000/signalpro/api/Report/downReport?key=201904221939451002.pdf
                         file_key:
                           type: string
-                          description: ""
+                          description: "文件关键key"
                           example: 201904221939451002.pdf
                         id:
                           type: string
-                          description: ""
+                          description: "主键id"
                           example: "267"
                         namespace:
                           type: string
-                          description: ""
+                          description: "保存的空间名"
                           example: itstool_private
                         title:
                           type: string
-                          description: ""
+                          description: "标题"
                           example: 锦绣路_白沙路
                         url:
                           type: string
-                          description: ""
+                          description: "访问url"
                           example: http://img-hxy022.didistatic.com/static/itstool_private/201904221939451002.pdf?expire=1563419030&signiture=Iw_4h_qRDgpUf_O6InDnps8hxvd_Qp1ojaNzONrRP-Y=
                   page_no:
                     type: string
@@ -11046,7 +10778,7 @@ paths:
                     properties:
                       desc:
                         type: string
-                        description: ""
+                        description: "描述"
                         example: 包括扫描路口在于路网中的区位
                       items:
                         type: array
@@ -11061,19 +10793,19 @@ paths:
                               example: 平均各个日期各个方向最大排队长度在24小时中的随时间变化规律
                             id:
                               type: integer
-                              description: ""
+                              description: "主键id"
                               example: 1
                             quota_key:
                               type: string
-                              description: ""
+                              description: "指标类型"
                               example: queue_length
                             title:
                               type: string
-                              description: ""
+                              description: "路口概览"
                               example: 各方向最大排队长度时间变化规律
                       title:
                         type: string
-                        description: ""
+                        description: "路口概览"
                         example: 路口概览
                   schedule:
                     type: array
@@ -11092,11 +10824,11 @@ paths:
                           example: 1
                         quota_key:
                           type: string
-                          description: ""
+                          description: "指标类型"
                           example: queue_length
                         title:
                           type: string
-                          description: ""
+                          description: "各方向最大排队长度分析"
                           example: 各方向最大排队长度分析
               errmsg:
                 type: string
@@ -11167,19 +10899,19 @@ paths:
                       example: "23"
                     lat:
                       type: string
-                      description: ""
+                      description: "纬度"
                       example: "31.27516"
                     lng:
                       type: string
-                      description: ""
+                      description: "经度"
                       example: "120.72473"
                     logic_junction_id:
                       type: string
-                      description: ""
+                      description: "逻辑路口ID"
                       example: "2017030116_3478718"
                     name:
                       type: string
-                      description: ""
+                      description: "路口名称"
                       example: 星湖街_仁爱路
                     name_sim:
                       type: integer
@@ -12781,7 +12513,7 @@ paths:
         type: string
       - name: is_open
         in: formData
-        description: '示例: 1'
+        description: '是否开启下发，示例: 1'
         required: false
         type: string
       responses:
@@ -12797,23 +12529,23 @@ paths:
                 properties:
                   adapte_time:
                     type: string
-                    description: ""
+                    description: "优化方案生成时间"
                     example: "11:03:04"
                   get_current_plan_time:
                     type: string
-                    description: ""
+                    description: "方案获取时间"
                     example: '-'
                   last_upload_time:
                     type: string
-                    description: ""
+                    description: "上次下发时间"
                     example: "11:01:05"
                   message:
                     type: string
-                    description: ""
+                    description: "文案"
                     example: 正在进行自适应控制
                   next_upload_time:
                     type: string
-                    description: ""
+                    description: "预计下次下发时间"
                     example: "11:05:04"
                   opt_status:
                     type: object
@@ -12829,15 +12561,15 @@ paths:
                         example: "2017030116_1237814"
                       msg:
                         type: string
-                        description: ""
+                        description: "控制状态信息"
                         example: unbalance_control
                       status:
                         type: string
-                        description: ""
+                        description: "控制状态"
                         example: 失衡控制
                   status:
                     type: integer
-                    description: ""
+                    description: "1,//状态，1，正在优化；2，正在进行自适应控制；3，正在切换基准配时方案"
                     example: 2
                   tmp:
                     type: string
@@ -12845,11 +12577,11 @@ paths:
                     example: b
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码，0代表正常"
                 example: 0
               time:
                 type: object
@@ -12865,11 +12597,11 @@ paths:
                     example: 0.0526秒
               traceid:
                 type: string
-                description: ""
+                description: "链路ID，追查错误使用"
                 example: 645a441f5d26a6ec132559f3035fdf02
               username:
                 type: string
-                description: ""
+                description: "用户名"
                 example: unknown
   /TimingAdaptation/getCurrentTimingInfo:
     post:
@@ -12904,127 +12636,127 @@ paths:
                     example: "2017030116_1237814"
                   overlap:
                     type: object
-                    description: ""
+                    description: "追溯相位"
                   phase_bind:
                     type: object
-                    description: ""
+                    description: "相位绑定"
                   phase_conflict:
                     type: object
-                    description: ""
+                    description: "相位冲突"
                   phase_follow:
                     type: object
-                    description: ""
+                    description: "相位跟随"
                   schedule:
                     type: array
-                    description: ""
+                    description: "调度周期"
                     items:
                       type: object
                       description: ""
                       properties:
                         day:
                           type: array
-                          description: ""
+                          description: "调度生效的天"
                           items:
                             type: object
                             description: ""
                         month:
                           type: array
-                          description: ""
+                          description: "调度生效的月"
                           items:
                             type: integer
                             description: ""
                             example: 1
                         priority:
                           type: integer
-                          description: ""
+                          description: "调度优先级"
                           example: 5
                         schedule_num:
                           type: integer
-                          description: ""
+                          description: "调度计划号"
                           example: 1
                         tod:
                           type: array
-                          description: ""
+                          description: "调度时段"
                           items:
                             type: object
                             description: ""
                             properties:
                               cycle:
                                 type: integer
-                                description: ""
+                                description: "周期"
                                 example: 156
                               end_time:
                                 type: string
-                                description: ""
+                                description: "结束时间"
                                 example: "16:30:00"
                               offset:
                                 type: integer
-                                description: ""
+                                description: "相位差"
                                 example: 0
                               plan_name:
                                 type: string
-                                description: ""
+                                description: "方案名称"
                                 example: 152_00_平峰单口.PHE
                               plan_num:
                                 type: integer
-                                description: ""
+                                description: "方案号"
                                 example: 6
                               sequence_table:
                                 type: integer
-                                description: ""
+                                description: "调度计划表号"
                                 example: 6
                               split_table:
                                 type: integer
-                                description: ""
+                                description: "绿信比表号"
                                 example: 6
                               start_time:
                                 type: string
-                                description: ""
+                                description: "开始时间"
                                 example: "09:30:00"
                               vehicle_phase:
                                 type: array
-                                description: ""
+                                description: "相位信息"
                                 items:
                                   type: object
                                   description: ""
                                   properties:
                                     all_green:
                                       type: integer
-                                      description: ""
+                                      description: "是否全绿"
                                       example: 0
                                     barrier:
                                       type: integer
-                                      description: ""
+                                      description: "barrier信息"
                                       example: 0
                                     end_time:
                                       type: integer
-                                      description: ""
+                                      description: "结束时间"
                                       example: 39
                                     flow_info:
                                       type: array
-                                      description: ""
+                                      description: "flow信息"
                                       items:
                                         type: object
                                         description: ""
                                     green:
                                       type: integer
-                                      description: ""
+                                      description: "绿灯时间"
                                       example: 35
                                     green_flash:
                                       type: integer
-                                      description: ""
+                                      description: "绿闪时间"
                                       example: 0
                                     is_ol:
                                       type: integer
-                                      description: ""
+                                      description: "是否是跟随相位"
                                       example: 0
                                     is_virtual:
                                       type: integer
-                                      description: ""
+                                      description: "是否是虚相位"
                                       example: 0
                                     max_green:
                                       type: integer
-                                      description: ""
+                                      description: "最大绿"
                                       example: 49
                                     max_green2:
                                       type: integer
@@ -13032,78 +12764,78 @@ paths:
                                       example: 0
                                     min_green:
                                       type: integer
-                                      description: ""
+                                      description: "最小绿"
                                       example: 35
                                     phase_name:
                                       type: string
-                                      description: ""
+                                      description: "相位名称"
                                       example: ""
                                     phase_num:
                                       type: integer
-                                      description: ""
+                                      description: "相位号"
                                       example: 2
                                     red_clear:
                                       type: integer
-                                      description: ""
+                                      description: "红闪"
                                       example: 1
                                     red_yellow:
                                       type: integer
-                                      description: ""
+                                      description: "红黄"
                                       example: 0
                                     ring_index:
                                       type: integer
-                                      description: ""
+                                      description: "环"
                                       example: 1
                                     sequence_num:
                                       type: integer
-                                      description: ""
+                                      description: "seq号"
                                       example: 1
                                     sg_id:
                                       type: integer
-                                      description: ""
+                                      description: "灯组id"
                                       example: 56107
                                     sg_name:
                                       type: string
-                                      description: ""
+                                      description: "灯组名称"
                                       example: ""
                                     start_time:
                                       type: integer
-                                      description: ""
+                                      description: "开始时间"
                                       example: 0
                                     yellow:
                                       type: integer
-                                      description: ""
+                                      description: "黄灯时间"
                                       example: 3
                         week:
                           type: array
-                          description: ""
+                          description: "调度计划生效的星期几"
                           items:
                             type: integer
                             description: ""
                             example: 4
                   signal_id:
                     type: integer
-                    description: ""
+                    description: "信号机id"
                     example: 5269
                   source:
                     type: integer
-                    description: ""
+                    description: "数据源"
                     example: 2
                   structure:
                     type: integer
-                    description: ""
+                    description: "厂家id"
                     example: 2
                   version_id:
                     type: integer
-                    description: ""
+                    description: "版本id"
                     example: 918820
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码，0代表正常"
                 example: 0
               time:
                 type: object
@@ -13119,7 +12851,7 @@ paths:
                     example: 0.0019秒
               traceid:
                 type: string
-                description: ""
+                description: "链路ID，追查错误使用"
                 example: 645acf295d26a6ec93e97b9b035ba902
               username:
                 type: string
@@ -13138,12 +12870,12 @@ paths:
       parameters:
       - name: city_id
         in: formData
-        description: '示例: 134'
+        description: '城市id，示例: 134'
         required: false
         type: string
       - name: area_id
         in: formData
-        description: '示例: 56'
+        description: '区域id 示例: 56'
         required: false
         type: string
       responses:
@@ -13166,31 +12898,31 @@ paths:
                       properties:
                         alarm:
                           type: object
-                          description: ""
+                          description: "预警信息"
                           properties:
                             comment:
                               type: string
-                              description: ""
+                              description: "预警内容"
                               example: ""
                             is:
                               type: integer
-                              description: ""
+                              description: "是否预警"
                               example: 0
                         is_upload:
                           type: string
-                          description: ""
+                          description: "自适应下发状态 0：否；1：是；"
                           example: "0"
                         junction_name:
                           type: string
-                          description: ""
+                          description: "路口名称"
                           example: _15444700
                         lat:
                           type: string
-                          description: ""
+                          description: "纬度"
                           example: "24.36391"
                         lng:
                           type: string
-                          description: ""
+                          description: "经度"
                           example: "109.51053"
                         logic_junction_id:
                           type: string
@@ -13198,23 +12930,23 @@ paths:
                           example: "2017030116_15444700"
                         pinyin:
                           type: string
-                          description: ""
+                          description: "拼音信息"
                           example: ""
                         source:
                           type: integer
-                          description: ""
+                          description: "数据源"
                           example: 2
                         status:
                           type: integer
-                          description: ""
+                          description: "路口类型：0:无配时；1:有配时；2:自适应；9:配时异常"
                           example: 0
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码，0代表正常"
                 example: 0
               time:
                 type: object
@@ -13230,11 +12962,11 @@ paths:
                     example: 0.4519秒
               traceid:
                 type: string
-                description: ""
+                description: "链路ID，追查错误使用"
                 example: 645a421f5d26a6e760691b2c03728102
               username:
                 type: string
-                description: ""
+                description: "用户名"
                 example: unknown
   /TimingAdaptationArea/getAreaList:
     post:
@@ -13249,7 +12981,7 @@ paths:
       parameters:
       - name: city_id
         in: formData
-        description: '示例: 134'
+        description: '城市id，示例: 134'
         required: false
         type: string
       responses:
@@ -13272,11 +13004,11 @@ paths:
                       properties:
                         adaptive_num:
                           type: integer
-                          description: ""
+                          description: "自适应路口数"
                           example: 165
                         city_id:
                           type: string
-                          description: ""
+                          description: "城市id"
                           example: "134"
                         id:
                           type: string
@@ -13284,59 +13016,55 @@ paths:
                           example: "56"
                         is_upload:
                           type: integer
-                          description: ""
+                          description: "下发状态 0：否 1：是"
                           example: 1
                         junction_num:
                           type: integer
-                          description: ""
+                          description: "路口数"
                           example: 421
-                        last_hour:
-                          type: string
-                          description: ""
-                          example: "11:02:15"
                         llat:
                           type: string
-                          description: ""
+                          description: "左纬度"
                           example: "24.36966"
                         llng:
                           type: string
-                          description: ""
+                          description: "左经度"
                           example: "109.36177"
                         name:
                           type: string
-                          description: ""
+                          description: "区域名称"
                           example: 柳州城区
                         rlat:
                           type: string
-                          description: ""
+                          description: "右纬度"
                           example: "24.26698"
                         rlng:
                           type: string
-                          description: ""
+                          description: "右经度"
                           example: "109.4683"
                         speed:
                           type: string
-                          description: ""
+                          description: "速度"
                           example: 21.55km/h
                         speed_trend:
                           type: integer
-                          description: ""
+                          description: "平均速度趋势 0：无变化 1：上升 2：下降"
                           example: 1
                         stop_delay:
                           type: string
-                          description: ""
+                          description: "停车延误"
                           example: 30.81/s
                         stop_delay_trend:
                           type: integer
-                          description: ""
+                          description: "停车延误趋势 0：无变化 1：上升 2：下降"
                           example: 2
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码，0代表正常"
                 example: 0
               time:
                 type: object
@@ -13352,11 +13080,11 @@ paths:
                     example: 0.7363秒
               traceid:
                 type: string
-                description: ""
+                description: "链路ID，追查错误使用"
                 example: 645a430d5d26a6e6b5671904036fbb02
               username:
                 type: string
-                description: ""
+                description: "用户名"
                 example: unknown
   /TimingAdaptationArea/getAreaQuotaInfo:
     post:
@@ -13371,17 +13099,17 @@ paths:
       parameters:
       - name: city_id
         in: formData
-        description: '示例: 134'
+        description: '城市id 示例: 134'
         required: false
         type: string
       - name: area_id
         in: formData
-        description: '示例: 56'
+        description: '区域id 示例: 56'
         required: false
         type: string
       - name: quota_key
         in: formData
-        description: '示例: stopDelay'
+        description: '指标关键词 示例: stopDelay'
         required: false
         type: string
       responses:
@@ -13400,18 +13128,18 @@ paths:
                     description: ""
                     items:
                       type: array
-                      description: ""
+                      description: "数组形式，前面一个是数值，后面一个是时间"
                       items:
                         type: string
                         description: ""
                         example: "00:00:10"
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码，0代表正常"
                 example: 0
               time:
                 type: object
@@ -13427,7 +13155,7 @@ paths:
                     example: 0.1724秒
               traceid:
                 type: string
-                description: ""
+                description: "链路ID，追查错误使用"
                 example: 645a430d5d26a6e7bce3195e03728b02
               username:
                 type: string
@@ -13446,17 +13174,17 @@ paths:
       parameters:
       - name: logic_junction_id
         in: formData
-        description: '示例: 2017030116_1237814'
+        description: '路口id 示例: 2017030116_1237814'
         required: false
         type: string
       - name: logic_flow_id
         in: formData
-        description: '示例: 2017030116_i_144429441_2017030116_o_16692471'
+        description: 'flowid 示例: 2017030116_i_144429441_2017030116_o_16692471'
         required: false
         type: string
       - name: city_id
         in: formData
-        description: '示例: 134'
+        description: '城市id 示例: 134'
         required: false
         type: string
       responses:
@@ -13476,30 +13204,30 @@ paths:
                     properties:
                       min_trajs_num:
                         type: integer
-                        description: ""
+                        description: "最小轨迹数"
                         example: 8
                       movement_weight_thresh:
                         type: number
-                        description: ""
+                        description: "轨迹权重阈值"
                         example: 0.8
                         format: float
                       multi_stop_upper_thresh:
                         type: number
-                        description: ""
+                        description: "上游多次停车阈值"
                         example: 0.2
                         format: float
                       non_stop_thresh_lower_bound:
                         type: number
-                        description: ""
+                        description: "无停车下阈值"
                         example: 0.05
                         format: float
                       queue_length_upper_thresh:
                         type: integer
-                        description: ""
+                        description: "排队长度阈值"
                         example: 120
                       queue_ratio_thresh:
                         type: integer
-                        description: ""
+                        description: "排队报警阈值"
                         example: 70
                       signal_relax_bound:
                         type: integer
@@ -13510,7 +13238,7 @@ paths:
                     description: ""
                     items:
                       type: array
-                      description: ""
+                      description: "数组形式，前面一个是x轴，后面一个是y轴"
                       items:
                         type: integer
                         description: ""
@@ -13525,11 +13253,11 @@ paths:
                         properties:
                           max:
                             type: integer
-                            description: ""
+                            description: "x轴最大值"
                             example: 39030
                           min:
                             type: integer
-                            description: ""
+                            description: "x轴最小值"
                             example: 38084
                       "y":
                         type: object
@@ -13537,19 +13265,19 @@ paths:
                         properties:
                           max:
                             type: integer
-                            description: ""
+                            description: "y轴最大值"
                             example: 100
                           min:
                             type: integer
-                            description: ""
+                            description: "y轴最小值"
                             example: 0
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码，0代表正常"
                 example: 0
               time:
                 type: object
@@ -13565,11 +13293,11 @@ paths:
                     example: 0.4517秒
               traceid:
                 type: string
-                description: ""
+                description: "链路ID，追查错误使用"
                 example: 645a441f5d26a6f0132559f303604902
               username:
                 type: string
-                description: ""
+                description: "用户名"
                 example: unknown
   /TimingAdaptationArea/getScatterMtraj:
     post:
@@ -13584,7 +13312,7 @@ paths:
       parameters:
       - name: logic_junction_id
         in: formData
-        description: '示例: 2017030116_1237814'
+        description: '路口id 示例: 2017030116_1237814'
         required: false
         type: string
       - name: logic_flow_id
@@ -13594,7 +13322,7 @@ paths:
         type: string
       - name: city_id
         in: formData
-        description: '示例: 134'
+        description: '城市id 示例: 134'
         required: false
         type: string
       responses:
@@ -13613,7 +13341,7 @@ paths:
                     description: ""
                     items:
                       type: array
-                      description: ""
+                      description: "数组形式，前面一个是x轴，后面一个是y轴"
                       items:
                         type: integer
                         description: ""
@@ -13652,311 +13380,32 @@ paths:
                     properties:
                       "10:32":
                         type: object
-                        description: ""
+                        description: "key值为时间点"
                         properties:
                           cycle:
                             type: integer
-                            description: ""
+                            description: "周期"
                             example: 156
                           green:
                             type: integer
-                            description: ""
+                            description: "绿灯时长"
                             example: 37
                           offset:
                             type: integer
-                            description: ""
+                            description: "相位差"
                             example: 0
                           yellow:
                             type: integer
-                            description: ""
+                            description: "黄灯时间"
                             example: 3
-                      "10:34":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "10:36":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "10:38":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "10:40":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "10:44":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "10:46":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "10:48":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "10:50":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "10:52":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "10:54":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "10:56":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "10:58":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "11:00":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
-                      "11:02":
-                        type: object
-                        description: ""
-                        properties:
-                          cycle:
-                            type: integer
-                            description: ""
-                            example: 156
-                          green:
-                            type: integer
-                            description: ""
-                            example: 37
-                          offset:
-                            type: integer
-                            description: ""
-                            example: 0
-                          yellow:
-                            type: integer
-                            description: ""
-                            example: 3
+                      
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码，0代表正常"
                 example: 0
               time:
                 type: object
@@ -13972,11 +13421,11 @@ paths:
                     example: 0.0657秒
               traceid:
                 type: string
-                description: ""
+                description: "链路ID，追查错误使用"
                 example: 645a410c5d26a6f38ba596840372b902
               username:
                 type: string
-                description: ""
+                description: "用户名"
                 example: unknown
   /TimingAdaptationArea/getSpaceTimeMtraj:
     post:
@@ -14001,7 +13450,7 @@ paths:
         type: string
       - name: city_id
         in: formData
-        description: '示例: 134'
+        description: '城市id 示例: 134'
         required: false
         type: string
       responses:
@@ -14017,14 +13466,14 @@ paths:
                 properties:
                   clock_shift:
                     type: integer
-                    description: ""
+                    description: "轨迹修正"
                     example: 127
                   dataList:
                     type: array
                     description: ""
                     items:
                       type: array
-                      description: ""
+                      description: "数组形式，前面一个是x轴，后面一个是y轴"
                       items:
                         type: array
                         description: ""
@@ -14066,54 +13515,54 @@ paths:
                     properties:
                       cycle:
                         type: integer
-                        description: ""
+                        description: "周期"
                         example: 156
                       green:
                         type: array
-                        description: ""
+                        description: "绿灯信息集合"
                         items:
                           type: object
                           description: ""
                           properties:
                             comment:
                               type: string
-                              description: ""
+                              description: "备注"
                               example: 东直
                             duration:
                               type: integer
-                              description: ""
+                              description: "绿灯持续时间"
                               example: 40
                             logic_flow_id:
                               type: string
-                              description: ""
+                              description: "flowid"
                               example: 2017030116_i_144429441_2017030116_o_16692471
                             start_time:
                               type: integer
-                              description: ""
+                              description: "绿灯开始时间"
                               example: 39
                       offset:
                         type: integer
-                        description: ""
+                        description: "相位差"
                         example: 0
                       tod_end_time:
                         type: string
-                        description: ""
+                        description: "时段方案结束时间"
                         example: "16:30:00"
                       tod_start_time:
                         type: string
-                        description: ""
+                        description: "时段方案开始时间"
                         example: "09:30:00"
                       yellow:
                         type: integer
-                        description: ""
+                        description: "黄灯时长"
                         example: 3
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码，0代表正常"
                 example: 0
               time:
                 type: object
@@ -14129,11 +13578,11 @@ paths:
                     example: 0.2727秒
               traceid:
                 type: string
-                description: ""
+                description: "链路ID，追查错误使用"
                 example: 645a441f5d26a6ed132559f3035ff502
               username:
                 type: string
-                description: ""
+                description: "用户名"
                 example: unknown
   /TimingAdaptationArea/realTimeAlarmList:
     post:
@@ -14148,12 +13597,12 @@ paths:
       parameters:
       - name: city_id
         in: formData
-        description: '示例: 134'
+        description: '城市id 示例: 134'
         required: false
         type: string
       - name: area_id
         in: formData
-        description: '示例: 56'
+        description: '区域id 示例: 56'
         required: false
         type: string
       responses:
@@ -14176,63 +13625,63 @@ paths:
                       properties:
                         alarm_comment:
                           type: string
-                          description: ""
+                          description: "报警问题"
                           example: 过饱和
                         alarm_key:
                           type: integer
-                          description: ""
+                          description: "报警类型：1，过饱和，2，溢流。"
                           example: 1
                         check:
                           type: integer
-                          description: ""
+                          description: "人工标注。0，无；1，对，2，错"
                           example: 0
                         duration_time:
                           type: integer
-                          description: ""
+                          description: "持续时长"
                           example: 19
                         flow_name:
                           type: string
-                          description: ""
+                          description: "相位名称"
                           example: 西北直
                         is_ignore:
                           type: integer
-                          description: ""
+                          description: "是否忽略"
                           example: 2
                         junction_name:
                           type: string
-                          description: ""
+                          description: "路口名称"
                           example: 鹅山路红岩路路口
                         junction_type:
                           type: integer
-                          description: ""
+                          description: "路口报警类型"
                           example: 1
                         logic_flow_id:
                           type: string
-                          description: ""
+                          description: "相位ID"
                           example: 2017030116_i_848523321_2017030116_o_703332890
                         logic_junction_id:
                           type: string
-                          description: ""
+                          description: "路口ID"
                           example: "2017030116_23610402"
                         order:
                           type: string
-                          description: ""
+                          description: "相位报警类型 1，过饱和；2，溢流；3，空放；4，轻度过饱和"
                           example: "3"
                         start_time:
                           type: string
-                          description: ""
+                          description: "开始时间"
                           example: "10:42"
                         type:
                           type: integer
-                          description: ""
+                          description: "相位报警类型"
                           example: 1
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码，0代表正常"
                 example: 0
               time:
                 type: object
@@ -14248,11 +13697,11 @@ paths:
                     example: 0.2901秒
               traceid:
                 type: string
-                description: ""
+                description: "链路ID，追查错误使用"
                 example: 645a430d5d26a6e7b5671904036fd102
               username:
                 type: string
-                description: ""
+                description: "用户名"
                 example: unknown
   /area/download:
     get:
