@@ -6701,9 +6701,39 @@ paths:
       produces:
       - application/json
       parameters:
+      - name: junctions
+        in: formData
+        description: '路口详细信息'
+        required: true
+        type: string
+      - name: forward_length
+        in: formData
+        description: '正向路段长度 (PS:路段长度个数 = 路口数 - 1) 格式：[100, 200, 300] 当method=0或2时必传 当method=1时不传或传[]'
+        required: false
+        type: string
+      - name: forward_speed
+        in: formData
+        description: '正向速度 (PS:速度个数 = 路口数 - 1)      格式：[100, 200, 300] 当method=0或2时必传 当method=1时不传或传[]'
+        required: false
+        type: string
+      - name: reverse_length
+        in: formData
+        description: '反向路段长度 (PS:路段长度个数 = 路口数 - 1) 格式：[100, 200, 300] 当method=1或2时必传 当method=0时不传或传[]'
+        required: false
+        type: string
+      - name: reverse_speed
+        in: formData
+        description: '返向速度 (PS:速度个数 = 路口数 - 1)      格式：[100, 200, 300] 当method=1或2时必传 当method=0时不传或传[]'
+        required: false
+        type: string
+      - name: method
+        in: formData
+        description: '0=>正向 1=>反向 2=>双向'
+        required: true
+        type: integer
       - name: token
         in: formData
-        description: '示例: 24869182338bf15b599f569e8f18149c'
+        description: '此次请求唯一标识，用于前端轮询 首次可不传'
         required: false
         type: string
       responses:
@@ -6712,43 +6742,65 @@ paths:
           schema:
             type: object
             description: ""
-            properties:
-              data:
-                type: object
-                description: ""
-                properties:
-                  token:
-                    type: string
-                    description: ""
-                    example: 24869182338bf15b599f569e8f18149c
-              errmsg:
-                type: string
-                description: ""
-                example: ""
-              errno:
-                type: integer
-                description: ""
-                example: 0
-              time:
-                type: object
-                description: ""
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.0090秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 秒
-              traceid:
-                type: string
-                description: ""
-                example: 645acf405d26a6577f240cc903dc9a02
-              username:
-                type: string
-                description: ""
-                example: unknown
+            properties: 
+              errno: 
+                type: "number"
+                description: "错误码，0代表正常"
+              errmsg: 
+                type: "string"
+              data: 
+                properties: 
+                  dataList: 
+                    type: "array"
+                    items: 
+                      type: "object"
+                      properties: 
+                        junction_id: 
+                          type: "string"
+                          description: "路口ID"
+                        cycle: 
+                          type: "number"
+                          description: "配时周期"
+                        offset: 
+                          type: "number"
+                          description: "配时相位差"
+                        forward_green: 
+                          type: "array"
+                          description: "正向绿灯集合"
+                          items: 
+                            type: "object"
+                            properties: 
+                              green_start: 
+                                type: "number"
+                                description: "绿灯开始时间"
+                              green_duration: 
+                                type: "number"
+                                description: "绿灯持续时间"
+                        reverse_green: 
+                          type: "array"
+                          description: "反向绿灯信息集合"
+                          items: 
+                            type: "object"
+                            properties: 
+                              green_start: 
+                                type: "number"
+                                description: "绿灯开始时间  如果获取的只是正向数据 此时返回-1"
+                              green_duration: 
+                                type: "number"
+                                description: "绿灯持续时间  如果获取的只是正向数据 此时返回-1"
+                        lock_cycle: 
+                          type: "number"
+                          description: "周期是否锁定"
+                        lock_offset: 
+                          type: "number"
+                          description: "偏移量是否锁定"
+                  token: 
+                    type: "string"
+                    description: "token 唯一标识"
+                type: "object"
+              username: 
+                type: "string"
+                description: "用户信息"
   /Arterialgreenwave/queryGreenWaveOptPlan:
     post:
       summary: 干线绿波优化-请求绿波图优化接口
@@ -6759,7 +6811,136 @@ paths:
       - application/json
       produces:
       - application/json
-      parameters: []
+      parameters: 
+         - in : "body"
+         name: body
+         required: true
+         schema:
+            type: object
+            properties: 
+              dates: 
+                type: "array"
+                description: "开始日期"
+                items: 
+                  type: "string"
+              request: 
+                properties: 
+                  junction_list: 
+                    type: "array"
+                    description: "路口信息列表"
+                    items: 
+                      type: "object"
+                      properties: 
+                        end_time: 
+                          type: "string"
+                          description: "结束时间"
+                        start_time: 
+                          type: "string"
+                          description: "开始时间"
+                        junction_id: 
+                          type: "string"
+                          description: "路口id"
+                        cycle: 
+                          type: "number"
+                          description: "周期"
+                        offset: 
+                          type: "number"
+                          description: "相位"
+                        min_cycle: 
+                          type: "number"
+                          description: "最小周期"
+                        max_cycle: 
+                          type: "number"
+                          description: "最大周期"
+                        lock_cycle: 
+                          type: "number"
+                          description: "周期锁定"
+                        lock_offset: 
+                          type: "number"
+                          description: "相位锁定"
+                        clock_shift: 
+                          type: "number"
+                          description: "相位偏移量"
+                        forward_movement: 
+                          properties: 
+                            movement_id: 
+                              type: "string"
+                              description: "正向flow_id"
+                            green: 
+                              type: "array"
+                              items: 
+                                type: "object"
+                                properties: 
+                                  green_start: 
+                                    type: "number"
+                                    description: "绿灯开始"
+                                  green_duration: 
+                                    type: "number"
+                                    description: "绿灯持续"
+                                  yellow: 
+                                    type: "number"
+                                    description: "黄灯"
+                                  red_clean: 
+                                    type: "number"
+                                    description: "全红"
+                            weight: 
+                              type: "number"
+                              description: "权重"
+                          type: "object"
+                        backward_movement: 
+                          properties: 
+                            movement_id: 
+                              type: "string"
+                            green: 
+                              type: "array"
+                              items: 
+                                type: "object"
+                                properties: 
+                                  green_start: 
+                                    type: "number"
+                                  green_duration: 
+                                    type: "number"
+                                  yellow: 
+                                    type: "number"
+                                  red_clean: 
+                                    type: "number"
+                            weight: 
+                              type: "number"
+                          type: "object"
+                        forward_in_length: 
+                          type: "number"
+                          description: "正向入轨迹长度"
+                        forward_out_length: 
+                          type: "number"
+                          description: "正向出轨迹长度"
+                        forward_in_speed: 
+                          type: "number"
+                          description: "正向入速度"
+                        forward_out_speed: 
+                          type: "number"
+                          description: "正向出速度"
+                        backward_in_length: 
+                          type: "number"
+                          description: "反向入轨迹长度"
+                        backward_out_length: 
+                          type: "number"
+                          description: "反向出轨迹长度"
+                        backward_in_speed: 
+                          type: "number"
+                          description: "反向入速度"
+                        backward_out_speed: 
+                          type: "number"
+                          description: "反向出速度"
+                  opt_type: 
+                    type: "number"
+                    description: "0为带宽模型，1为轨迹模型"
+                  equal_cycle: 
+                    type: "number"
+                    description: "周期一致标志，0为可不一致，1为必须一致"
+                  direction: 
+                    type: "number"
+                    description: "优化方向，0为正向，1为反向，2为双向"
+                type: "object"
       responses:
         200:
           description: 请求成功
@@ -6773,7 +6954,7 @@ paths:
                 properties:
                   token:
                     type: string
-                    description: ""
+                    description: "token标识，用于getGreenWaveOptPlan"
                     example: 24869182338bf15b599f569e8f18149c
               errmsg:
                 type: string
@@ -6781,7 +6962,7 @@ paths:
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码，0代表正常"
                 example: 0
               time:
                 type: object
@@ -6801,7 +6982,7 @@ paths:
                 example: 645acf405d26a6577f240cc903dc9502
               username:
                 type: string
-                description: ""
+                description: "访问用户"
                 example: unknown
   /Arterialjunction/getAdjJunctions:
     post:
@@ -6839,19 +7020,19 @@ paths:
                       properties:
                         end_junc_id:
                           type: string
-                          description: ""
+                          description: "结束的路口id"
                           example: "2017030116_3478854"
                         links:
                           type: string
-                          description: ""
+                          description: "连接的干线link"
                           example: 90000595071841,503478221,43558791,710813721,710813711,44090371,44090361,393128001,146890141,90000840888011,90000840917291,302576531,44090441,44090461,393127341,196666031,196666021,859845791
                         links_geo:
                           type: object
-                          description: ""
+                          description: "连接线的geo信息"
                           properties:
                             features:
                               type: array
-                              description: ""
+                              description: "geo标准格式"
                               items:
                                 type: object
                                 description: ""
@@ -6862,7 +7043,7 @@ paths:
                                     properties:
                                       coordinates:
                                         type: array
-                                        description: ""
+                                        description: "geo标准点信息"
                                         items:
                                           type: number
                                           description: ""
@@ -6870,7 +7051,7 @@ paths:
                                           format: float
                                       type:
                                         type: string
-                                        description: ""
+                                        description: "geo类型"
                                         example: Point
                                   properties:
                                     type: object
@@ -6882,19 +7063,19 @@ paths:
                                         example: 0
                                   type:
                                     type: string
-                                    description: ""
+                                    description: "固定格式"
                                     example: Feature
                             type:
                               type: string
-                              description: ""
+                              description: "固定类型"
                               example: FeatureCollection
                         reverse_links:
                           type: string
-                          description: ""
+                          description: "反向link串信息"
                           example: 859845770,859845780,393127270,44090410,44090420,43935990,146890110,146890120,393128050,44090270,44090280,710813730,710813740,1103239390,1103239410,1103239420,302575690,302575700
                         reverse_links_geo:
                           type: object
-                          description: ""
+                          description: "反向geo信息集合"
                           properties:
                             features:
                               type: array
@@ -6937,80 +7118,34 @@ paths:
                               example: FeatureCollection
                   junctions_info:
                     type: object
-                    description: ""
+                    description: "路口信息"
                     properties:
                       "2017030116_3472198":
                         type: object
-                        description: ""
+                        description: "路口逻辑id"
                         properties:
                           lat:
                             type: string
-                            description: ""
+                            description: "纬度"
                             example: "31.30989"
                           lng:
                             type: string
-                            description: ""
+                            description: "经度"
                             example: "120.63851"
                           name:
                             type: string
-                            description: ""
+                            description: "路口名称"
                             example: 干将东路_仓街
                           node_ids:
                             type: array
-                            description: ""
+                            description: "地图node数据，node点集合"
                             items:
                               type: integer
-                              description: ""
-                              example: 3.472196e+06
-                      "2017030116_3478854":
-                        type: object
-                        description: ""
-                        properties:
-                          lat:
-                            type: string
-                            description: ""
-                            example: "31.31236"
-                          lng:
-                            type: string
-                            description: ""
-                            example: "120.65002"
-                          name:
-                            type: string
-                            description: ""
-                            example: 东环路_干将东路
-                          node_ids:
-                            type: array
-                            description: ""
-                            items:
-                              type: integer
-                              description: ""
-                              example: 3.478854e+06
-                      "2017030116_3482204":
-                        type: object
-                        description: ""
-                        properties:
-                          lat:
-                            type: string
-                            description: ""
-                            example: "31.30907"
-                          lng:
-                            type: string
-                            description: ""
-                            example: "120.63492"
-                          name:
-                            type: string
-                            description: ""
-                            example: 干将东路_平江路
-                          node_ids:
-                            type: array
-                            description: ""
-                            items:
-                              type: integer
-                              description: ""
-                              example: 3.482204e+06
+                              description: "滴滴地图node点格式"
+                              example: 5546486
                   last_geo:
                     type: object
-                    description: ""
+                    description: "geojson标准格式补充信息"
                     properties:
                       features:
                         type: array
@@ -7020,29 +7155,29 @@ paths:
                           description: ""
                       type:
                         type: string
-                        description: ""
+                        description: "固定类型"
                         example: FeatureCollection
                   map_version:
                     type: integer
-                    description: ""
-                    example: 2.019070918e+09
+                    description: "地图版本"
+                    example: 2018042512
                   path_geo:
                     type: object
-                    description: ""
+                    description: "已选中线路的正向geo点信息"
                     properties:
                       features:
                         type: array
-                        description: ""
+                        description: "连接线geo信息"
                         items:
                           type: object
-                          description: ""
+                          description: "geojson标准格式"
                       type:
                         type: string
-                        description: ""
+                        description: "固定类型"
                         example: FeatureCollection
                   path_links:
                     type: string
-                    description: ""
+                    description: "路径连接link信息"
                     example: ""
                   reverse_last_geo:
                     type: object
@@ -7060,11 +7195,11 @@ paths:
                         example: FeatureCollection
                   reverse_path_geo:
                     type: object
-                    description: ""
+                    description: "已选中线路的逆向geo点信息"
                     properties:
                       features:
                         type: array
-                        description: ""
+                        description: "geo标准格式"
                         items:
                           type: object
                           description: ""
@@ -7078,7 +7213,7 @@ paths:
                     example: ""
                   start_junc_id:
                     type: string
-                    description: ""
+                    description: "选中路口id"
                     example: "2017030116_3472198"
               errmsg:
                 type: string
@@ -7086,7 +7221,7 @@ paths:
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码，0代表正常"
                 example: 0
               time:
                 type: object
@@ -7154,15 +7289,15 @@ paths:
                     description: ""
                     items:
                       type: object
-                      description: ""
+                      description: "路口信息列表"
                       properties:
                         lat:
                           type: string
-                          description: ""
+                          description: "纬度"
                           example: "24.4834"
                         lng:
                           type: string
-                          description: ""
+                          description: "经度"
                           example: "109.75376"
                         logic_junction_id:
                           type: string
@@ -7223,510 +7358,90 @@ paths:
       produces:
       - application/json
       parameters:
-      - name: junctions%5B0%5D%5Bjunction_id%5D
+      - name: method
         in: formData
-        description: '示例: e0d1589f20012ae92a72bec310ccce12'
-        required: false
-        type: string
-      - name: junctions%5B0%5D%5Bforward_flow_id%5D
-        in: formData
-        description: '示例: 638c913a3d56538e059bb8ebd841b0ae'
-        required: false
-        type: string
-      - name: junctions%5B0%5D%5Breverse_flow_id%5D
-        in: formData
-        description: '示例: '
-        required: false
-        type: string
-      - name: junctions%5B0%5D%5Bforward_in_links%5D
-        in: formData
-        description: '示例: 90000913306651%2C63467661%2C63467651%2C63462880%2C421407050%2C421407060%2C63462870%2C421407110%2C421407120%2C63349940%2C63462850%2C63462860%2C63528411%2C732162041%2C732162031%2C421404161%2C421404151%2C150655171'
-        required: false
-        type: string
-      - name: junctions%5B0%5D%5Bforward_out_links%5D
-        in: formData
-        description: '示例: 1023362551%2C1023362541'
-        required: false
-        type: string
-      - name: junctions%5B0%5D%5Breverse_in_links%5D
-        in: formData
-        description: '示例: 704735971%2C1023362531%2C1023362521'
-        required: false
-        type: string
-      - name: junctions%5B0%5D%5Breverse_out_links%5D
-        in: formData
-        description: '示例: 339990290%2C339990300%2C421404170%2C421404180%2C174982610%2C63528640%2C64014750%2C880343360%2C90000597273630%2C90000597457640%2C63462840%2C90000597360440%2C90000597501200%2C421407100%2C421407070%2C421407080%2C90000597501440%2C90000908303170%2C90000907985530%2C90000908252570'
-        required: false
-        type: string
-      - name: junctions%5B0%5D%5Bjunction_inner_links%5D
-        in: formData
-        description: '示例: '
-        required: false
-        type: string
-      - name: junctions%5B0%5D%5Btod_start_time%5D
-        in: formData
-        description: '示例: 09%3A00%3A00'
-        required: false
-        type: string
-      - name: junctions%5B0%5D%5Btod_end_time%5D
-        in: formData
-        description: '示例: 11%3A30%3A00'
-        required: false
-        type: string
-      - name: junctions%5B0%5D%5Bcycle%5D
-        in: formData
-        description: '示例: 180'
-        required: false
-        type: string
-      - name: junctions%5B0%5D%5Boffset%5D
-        in: formData
-        description: '示例: 135'
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Bjunction_id%5D
-        in: formData
-        description: '示例: 2017030116_4881812'
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Bforward_flow_id%5D
-        in: formData
-        description: '示例: 2017030116_i_63707081_2017030116_o_704737581'
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Breverse_flow_id%5D
-        in: formData
-        description: '示例: '
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Bforward_in_links%5D
-        in: formData
-        description: '示例: 1023362551%2C1023362541'
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Bforward_out_links%5D
-        in: formData
-        description: '示例: 704737581%2C704737601%2C713675081%2C713675071'
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Breverse_in_links%5D
-        in: formData
-        description: '示例: 704737621%2C704737641%2C603229641%2C603229631%2C603229611'
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Breverse_out_links%5D
-        in: formData
-        description: '示例: 704735971%2C1023362531%2C1023362521'
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Bjunction_inner_links%5D
-        in: formData
-        description: '示例: 63707090%2C63707091%2C63957070%2C63957071'
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Btod_start_time%5D
-        in: formData
-        description: '示例: 09%3A00%3A00'
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Btod_end_time%5D
-        in: formData
-        description: '示例: 11%3A30%3A00'
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Bcycle%5D
-        in: formData
-        description: '示例: 180'
-        required: false
-        type: string
-      - name: junctions%5B1%5D%5Boffset%5D
-        in: formData
-        description: '示例: 135'
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Bjunction_id%5D
-        in: formData
-        description: '示例: 2017030116_4870293'
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Bforward_flow_id%5D
-        in: formData
-        description: '示例: 2017030116_i_713675071_2017030116_o_63957121'
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Breverse_flow_id%5D
-        in: formData
-        description: '示例: '
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Bforward_in_links%5D
-        in: formData
-        description: '示例: 704737581%2C704737601%2C713675081%2C713675071'
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Bforward_out_links%5D
-        in: formData
-        description: '示例: 63957121%2C885359151%2C885359141%2C63400771%2C704737681%2C704737671%2C505297821%2C713674561%2C713674551'
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Breverse_in_links%5D
-        in: formData
-        description: '示例: 885359181%2C885359171%2C63529081%2C885359131%2C885359121%2C63957171'
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Breverse_out_links%5D
-        in: formData
-        description: '示例: 704737621%2C704737641%2C603229641%2C603229631%2C603229611'
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Bjunction_inner_links%5D
-        in: formData
-        description: '示例: 63528470%2C63528471%2C63957140%2C63957141%2C885359110%2C885359111'
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Btod_start_time%5D
-        in: formData
-        description: '示例: 09%3A00%3A00'
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Btod_end_time%5D
-        in: formData
-        description: '示例: 11%3A30%3A00'
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Bcycle%5D
-        in: formData
-        description: '示例: 180'
-        required: false
-        type: string
-      - name: junctions%5B2%5D%5Boffset%5D
-        in: formData
-        description: '示例: 137'
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Bjunction_id%5D
-        in: formData
-        description: '示例: 2017030116_4875899'
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Bforward_flow_id%5D
-        in: formData
-        description: '示例: 2017030116_i_713674551_2017030116_o_298191981'
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Breverse_flow_id%5D
-        in: formData
-        description: '示例: '
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Bforward_in_links%5D
-        in: formData
-        description: '示例: 63957121%2C885359151%2C885359141%2C63400771%2C704737681%2C704737671%2C505297821%2C713674561%2C713674551'
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Bforward_out_links%5D
-        in: formData
-        description: '示例: 298191971%2C732382821%2C732382811%2C90000604271761%2C408645391%2C408645381%2C90000913213821%2C90000913213861%2C90000908309071%2C90000908309031%2C90000908255691%2C90000912878971'
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Breverse_in_links%5D
-        in: formData
-        description: '示例: 90000908309151%2C63528861%2C298193201%2C298193191%2C154707511%2C298193021%2C298193011%2C63767871%2C603230101%2C724278601%2C90000908157111'
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Breverse_out_links%5D
-        in: formData
-        description: '示例: 885359181%2C885359171%2C63529081%2C885359131%2C885359121%2C63957171'
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Bjunction_inner_links%5D
-        in: formData
-        description: '示例: 298191981%2C298191990%2C620991101%2C620991110%2C620991131%2C620991150%2C620991171%2C704737261%2C704737300%2C90000908332540'
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Btod_start_time%5D
-        in: formData
-        description: '示例: 09%3A00%3A00'
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Btod_end_time%5D
-        in: formData
-        description: '示例: 11%3A30%3A00'
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Bcycle%5D
-        in: formData
-        description: '示例: 180'
-        required: false
-        type: string
-      - name: junctions%5B3%5D%5Boffset%5D
-        in: formData
-        description: '示例: 127'
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Bjunction_id%5D
-        in: formData
-        description: '示例: 2017030116_4878880'
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Bforward_flow_id%5D
-        in: formData
-        description: '示例: 2017030116_i_490115701_2017030116_o_63528801'
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Breverse_flow_id%5D
-        in: formData
-        description: '示例: '
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Bforward_in_links%5D
-        in: formData
-        description: '示例: 298191971%2C732382821%2C732382811%2C90000604271761%2C408645391%2C408645381%2C90000913213821%2C90000913213861%2C90000908309071%2C90000908309031%2C90000908255691%2C90000912878971'
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Bforward_out_links%5D
-        in: formData
-        description: '示例: 90000913103761%2C90000912839511%2C63528691%2C63410681%2C63529201%2C408645491%2C408645481%2C128545770%2C647330230%2C647330240%2C90000908306690%2C90000908212190%2C90000908174890%2C90000908306650%2C90000908333060%2C90000908174970%2C90000907989810%2C90000908309830%2C90000908256250%2C90000908415920%2C90000908332900%2C90000908333020'
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Breverse_in_links%5D
-        in: formData
-        description: '示例: 90000908212151%2C457900151%2C603226531%2C421404391%2C421404381%2C885359241%2C885359231%2C348516791%2C348516781%2C603414851%2C63953251%2C647330261%2C647330251%2C128545751%2C90000913249711%2C90000912985111%2C63410671%2C408645511%2C408645501%2C90000913078141%2C90000912959201%2C90000912879011'
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Breverse_out_links%5D
-        in: formData
-        description: '示例: 90000908309151%2C63528861%2C298193201%2C298193191%2C154707511%2C298193021%2C298193011%2C63767871%2C603230101%2C724278601%2C90000908157111'
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Bjunction_inner_links%5D
-        in: formData
-        description: '示例: 90000907989051%2C90000907989091%2C90000908084331%2C90000908156750%2C90000908173891%2C90000908211231%2C90000908255650%2C90000908309110%2C90000908309190%2C90000908309230%2C90000908383840%2C90000912839551%2C90000912839591%2C90000912879051%2C90000912879170%2C90000912879210%2C90000912895100%2C90000912895141%2C90000912998580%2C90000913016720%2C90000913103920%2C90000913214020%2C90000913214100%2C90000913214141'
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Btod_start_time%5D
-        in: formData
-        description: '示例: 09%3A00%3A00'
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Btod_end_time%5D
-        in: formData
-        description: '示例: 11%3A30%3A00'
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Bcycle%5D
-        in: formData
-        description: '示例: 180'
-        required: false
-        type: string
-      - name: junctions%5B4%5D%5Boffset%5D
-        in: formData
-        description: '示例: 110'
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Bjunction_id%5D
-        in: formData
-        description: '示例: 2017030116_4878792'
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Bforward_flow_id%5D
-        in: formData
-        description: '示例: 2017030116_i_63466360_2017030116_o_603226510'
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Breverse_flow_id%5D
-        in: formData
-        description: '示例: '
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Bforward_in_links%5D
-        in: formData
-        description: '示例: 90000913103761%2C90000912839511%2C63528691%2C63410681%2C63529201%2C408645491%2C408645481%2C128545770%2C647330230%2C647330240%2C90000908306690%2C90000908212190%2C90000908174890%2C90000908306650%2C90000908333060%2C90000908174970%2C90000907989810%2C90000908309830%2C90000908256250%2C90000908415920%2C90000908332900%2C90000908333020'
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Bforward_out_links%5D
-        in: formData
-        description: '示例: 90000908157270%2C90000844729330%2C282876700%2C282876710%2C457901920%2C457901930%2C63590320%2C885359330%2C90000921310340%2C90000921035050%2C128548630%2C543715550%2C543715560%2C543715500%2C726272990%2C726273000%2C408645420%2C1121258720%2C1121258730%2C885359390%2C90000913381550%2C90000908330580'
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Breverse_in_links%5D
-        in: formData
-        description: '示例: 90000908172970%2C90000913381590%2C90000913464880%2C885359380%2C63777460%2C726272970%2C726272980%2C543715480%2C543715520%2C543715530%2C128548570%2C885359350%2C90000844730090%2C90000844542960%2C90000844463800%2C457901350%2C457901360%2C505297910%2C408645460%2C408645470%2C63767930%2C90000912839750'
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Breverse_out_links%5D
-        in: formData
-        description: '示例: 90000908212151%2C457900151%2C603226531%2C421404391%2C421404381%2C885359241%2C885359231%2C348516791%2C348516781%2C603414851%2C63953251%2C647330261%2C647330251%2C128545751%2C90000913249711%2C90000912985111%2C63410671%2C408645511%2C408645501%2C90000913078141%2C90000912959201%2C90000912879011'
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Bjunction_inner_links%5D
-        in: formData
-        description: '示例: 63767381%2C733714090%2C733714091%2C90000907989850%2C90000908157191%2C90000908157230%2C90000908212070%2C90000908256210%2C90000908332981%2C90000908415880%2C90000912839790%2C90000912879250%2C90000912895021'
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Btod_start_time%5D
-        in: formData
-        description: '示例: 09%3A00%3A00'
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Btod_end_time%5D
-        in: formData
-        description: '示例: 11%3A30%3A00'
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Bcycle%5D
-        in: formData
-        description: '示例: 180'
-        required: false
-        type: string
-      - name: junctions%5B5%5D%5Boffset%5D
-        in: formData
-        description: '示例: 138'
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Bjunction_id%5D
-        in: formData
-        description: '示例: 2017030116_4878797'
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Bforward_flow_id%5D
-        in: formData
-        description: '示例: 2017030116_i_885359400_2017030116_o_885359440'
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Breverse_flow_id%5D
-        in: formData
-        description: '示例: '
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Bforward_in_links%5D
-        in: formData
-        description: '示例: 90000908157270%2C90000844729330%2C282876700%2C282876710%2C457901920%2C457901930%2C63590320%2C885359330%2C90000921310340%2C90000921035050%2C128548630%2C543715550%2C543715560%2C543715500%2C726272990%2C726273000%2C408645420%2C1121258720%2C1121258730%2C885359390%2C90000913381550%2C90000908330580'
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Bforward_out_links%5D
-        in: formData
-        description: '示例: 90000908210230%2C885359450%2C133410110%2C63833350%2C63767790%2C63164620%2C390556490%2C390556500%2C128546570%2C90000908305030%2C90000908410960%2C90000907984330%2C90000908327860%2C90000908327900%2C90000908152390%2C90000908327940%2C90000908302090'
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Breverse_in_links%5D
-        in: formData
-        description: '示例: 90000908207551%2C90000913344541%2C128546491%2C63954071%2C63954061%2C63400821%2C128546521%2C128546511%2C90000913487061%2C90000908382801%2C90000908413800%2C90000908254690%2C90000908305010%2C90000908382720%2C90000908155350%2C90000908210110%2C90000908155550%2C90000908155510'
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Breverse_out_links%5D
-        in: formData
-        description: '示例: 90000908172970%2C90000913381590%2C90000913464880%2C885359380%2C63777460%2C726272970%2C726272980%2C543715480%2C543715520%2C543715530%2C128548570%2C885359350%2C90000844730090%2C90000844542960%2C90000844463800%2C457901350%2C457901360%2C505297910%2C408645460%2C408645470%2C63767930%2C90000912839750'
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Bjunction_inner_links%5D
-        in: formData
-        description: '示例: 63344150%2C63767391%2C90000907987970%2C90000908083410%2C90000908172931%2C90000908173010%2C90000908210150%2C90000908254651%2C90000908307791%2C90000908307910'
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Btod_start_time%5D
-        in: formData
-        description: '示例: 09%3A00%3A00'
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Btod_end_time%5D
-        in: formData
-        description: '示例: 11%3A30%3A00'
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Bcycle%5D
-        in: formData
-        description: '示例: 180'
-        required: false
-        type: string
-      - name: junctions%5B6%5D%5Boffset%5D
-        in: formData
-        description: '示例: 58'
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Bjunction_id%5D
-        in: formData
-        description: '示例: 2017030116_12726115'
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Bforward_flow_id%5D
-        in: formData
-        description: '示例: 2017030116_i_877948550_2017030116_o_63590520'
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Breverse_flow_id%5D
-        in: formData
-        description: '示例: '
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Bforward_in_links%5D
-        in: formData
-        description: '示例: 90000908210230%2C885359450%2C133410110%2C63833350%2C63767790%2C63164620%2C390556490%2C390556500%2C128546570%2C90000908305030%2C90000908410960%2C90000907984330%2C90000908327860%2C90000908327900%2C90000908152390%2C90000908327940%2C90000908302090'
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Bforward_out_links%5D
-        in: formData
-        description: '示例: 90000913344460%2C63155490%2C63767780%2C63767770%2C63155580%2C603415530%2C603415540%2C63523410%2C63523520%2C63523440%2C63523450%2C63523290%2C408644820%2C408644830%2C129449820%2C408644840%2C408644850%2C491471390'
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Breverse_in_links%5D
-        in: formData
-        description: '示例: 603415170%2C603415180%2C129449800%2C63767540%2C603415510%2C603415520%2C63523490%2C63523511%2C63523471%2C603228841%2C603228831%2C63400841%2C63767761%2C63646101%2C90000908152471%2C90000908411041%2C90000908152431'
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Breverse_out_links%5D
-        in: formData
-        description: '示例: 90000908207551%2C90000913344541%2C128546491%2C63954071%2C63954061%2C63400821%2C128546521%2C128546511%2C90000913487061%2C90000908382801%2C90000908413800%2C90000908254690%2C90000908305010%2C90000908382720%2C90000908155350%2C90000908210110%2C90000908155550%2C90000908155510'
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Bjunction_inner_links%5D
-        in: formData
-        description: '示例: 63584640%2C63584641%2C154706920%2C90000908170331%2C90000908305071%2C90000908379000%2C90000913027290%2C90000913148470'
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Btod_start_time%5D
-        in: formData
-        description: '示例: 09%3A00%3A00'
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Btod_end_time%5D
-        in: formData
-        description: '示例: 11%3A30%3A00'
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Bcycle%5D
-        in: formData
-        description: '示例: 180'
-        required: false
-        type: string
-      - name: junctions%5B7%5D%5Boffset%5D
-        in: formData
-        description: '示例: 17'
-        required: false
+        description: '0=>正向 1=>反向 2=>双向'
+        required: true
         type: string
       - name: time_point
         in: formData
-        description: '示例: 11%3A00'
-        required: false
-        type: string
-      - name: dates%5B0%5D
-        in: formData
-        description: '示例: 20190710'
-        required: false
-        type: string
-      - name: method
-        in: formData
-        description: '示例: 0'
-        required: false
+        description: '查询时间点 格式：00:00'
+        required: true
         type: string
       - name: map_version
         in: formData
-        description: '示例: 2019070818'
-        required: false
+        description: '地图版本'
+        required: true
+        type: string
+      - name: dates
+        in: formData
+        description: '评估/诊断日期 格式：[20180101,20180303]'
+        required: true
         type: string
       - name: token
         in: formData
-        description: '示例: '
+        description: '此次请求唯一标识，用于前端轮询 首次可不传'
         required: false
+        type: string
+      - name: task_id
+        in: formData
+        description: '任务ID'
+        required: false
+        type: string
+      - name: junctions[0]['junction_id']
+        in: formData
+        description: '数组类型，此项参数代表：路口ID'
+        required: true
+        type: string
+      - name: junctions[0]['forward_flow_id']
+        in: formData
+        description: '数组类型，此项参数代表：正向flow id 没有传空'
+        required: true
+        type: string
+      - name: junctions[0]['forward_in_links']
+        in: formData
+        description: '数组类型，此项参数代表：正向inlinks 以逗号隔开 没有传空'
+        required: true
+        type: string
+      - name: junctions[0]['forward_out_links']
+        in: formData
+        description: '数组类型，此项参数代表：正向outlinks 以逗号隔开 没有传空 '
+        required: true
+        type: string
+      - name: junctions[0]['reverse_flow_id']
+        in: formData
+        description: '数组类型，此项参数代表：反向flow id 没有传空'
+        required: true
+        type: string
+      - name: junctions[0]['reverse_out_links']
+        in: formData
+        description: '数组类型，此项参数代表：反向outlinks 以逗号隔开 没有传空'
+        required: true
+        type: string
+      - name: junctions[0]['junction_inner_links']
+        in: formData
+        description: '数组类型，此项参数代表：inner_links 没有传空 以逗号隔开 (正、反向是一样的'
+        required: true
+        type: string
+      - name: junctions[0]['tod_start_time']
+        in: formData
+        description: '数组类型，此项参数代表：配时方案开始时间 PS:当前时间点所属方案的开始结束时间'
+        required: true
+        type: string
+      - name: junctions[0]['tod_end_time']
+        in: formData
+        description: '数组类型，此项参数代表：配时方案结束时间'
+        required: true
+        type: string
+      - name: junctions[0]['cycle']
+        in: formData
+        description: '数组类型，此项参数代表：配时周期 没有传200'
+        required: true
+        type: string
+      - name: junctions[0]['offset']
+        in: formData
+        description: '数组类型，此项参数代表：配时偏移量 没有传0'
+        required: true
         type: string
       responses:
         200:
@@ -7741,23 +7456,23 @@ paths:
                 properties:
                   dataList:
                     type: array
-                    description: ""
+                    description: "数据集合"
                     items:
                       type: object
                       description: ""
                       properties:
                         cycle:
                           type: integer
-                          description: ""
+                          description: "配时周期"
                           example: 180
                         forward_speed:
                           type: number
-                          description: ""
+                          description: "正向速度"
                           example: 47.736
                           format: float
                         forward_stop_delay:
                           type: array
-                          description: ""
+                          description: "正向停车延误数据"
                           items:
                             type: array
                             description: ""
@@ -7767,38 +7482,38 @@ paths:
                               example: 33739
                         forward_traj:
                           type: array
-                          description: ""
+                          description: "正向轨迹数据"
                           items:
                             type: array
                             description: ""
                             items:
                               type: array
-                              description: ""
+                              description: "第一个是时间（秒数），第二个是值"
                               items:
                                 type: integer
                                 description: ""
                                 example: 33619
                         junction_id:
                           type: string
-                          description: ""
+                          description: " 路口ID"
                           example: e0d1589f20012ae92a72bec310ccce12
                         offset:
                           type: integer
-                          description: ""
+                          description: "配时偏移量"
                           example: 135
                         reverse_speed:
                           type: integer
-                          description: ""
+                          description: "反向速度"
                           example: 0
                         reverse_stop_delay:
                           type: array
                           description: ""
                           items:
                             type: object
-                            description: ""
+                            description: "反向停车延误数据"
                         reverse_traj:
                           type: array
-                          description: ""
+                          description: "反向轨迹数据"
                           items:
                             type: object
                             description: ""
@@ -7812,7 +7527,7 @@ paths:
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "正确是返回0"
                 example: 0
               time:
                 type: object
@@ -7832,7 +7547,7 @@ paths:
                 example: 6445463d5d26a6577d59248903da9002
               username:
                 type: string
-                description: ""
+                description: "请求用户"
                 example: unknown
   /Common/getJunctionAdAndCross:
     post:
