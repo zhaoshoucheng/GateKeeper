@@ -732,14 +732,16 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回结构"
             properties:
               errno:
                 type: "number"
+                description: "错误码"
                 example: 0
               errmsg:
                 type: "string"
                 example: ""
+                description: "错误信息"
               data:
                 required:
                   - "dataList"
@@ -747,17 +749,21 @@ paths:
                 properties:
                   dataList:
                     type: "array"
+                    description: "返回数据"
                     items:
                       type: "object"
                       properties:
                         hour:
                           type: "number"
+                          description: "小时"
                           example: 0
                         value:
                           type: "number"
+                          description: "纵轴值"
                           example: 0
                   topInfo:
                     type: "array"
+                    description: "高峰时段"
                     items:
                       type: "string"
                 type: "object"
@@ -816,13 +822,15 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回对象"
             properties:
               errno:
                 type: "number"
+                description: "错误码"
                 example: 0
               errmsg:
                 type: "string"
+                description: "错误信息"
                 example: ""
               data:
                 required:
@@ -830,21 +838,26 @@ paths:
                 properties:
                   dataList:
                     type: "array"
+                    description: "数据列表"
                     items:
                       type: "object"
                       properties:
                         hour:
                           type: "string"
+                          description: "小时"
                           example: "0:00"
                         value:
                           type: "number"
+                          description: "纵坐标值"
                           example: 0
                 type: "object"
               traceid:
                 type: "string"
+                description: "链路ID，追查错误使用"
                 example: "6493f9063eb34f00be08cccbfefb0ae0"
               username:
                 type: "string"
+                description: "用户信息"
                 example: "unkown"
               time:
                 required:
@@ -905,56 +918,18 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回对象"
             properties:
               errno:
                 type: "number"
+                description: "错误码"
                 example: 0
               errmsg:
                 type: "string"
+                description: "错误信息"
                 example: ""
               data:
                 properties:
-                  "0:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "1:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "2:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "3:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "4:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "5:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "6:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "7:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
                   "8:00":
                     properties:
                       list:
@@ -964,34 +939,43 @@ paths:
                           properties:
                             name:
                               type: "string"
+                              description: "路口报警类型"
                               example: "失衡"
                             value:
                               type: "number"
+                              description: "路口报警类型的指标值"
                               example: 2
                             key:
                               type: "number"
+                              description: "路口报警类型的key"
                               example: 3
                             phase_list:
                               type: "array"
+                              description: "相位报警信息"
                               items:
                                 type: "object"
                                 properties:
                                   phase_name:
                                     type: "string"
+                                    description: "相位名称"
                                     example: "北左"
                                   count:
                                     type: "number"
+                                    description: "报警指标值"
                                     example: 1
                       count:
                         type: "number"
+                        description: "总体这个时段的报警数"
                         example: 3
                     type: "object"
                 type: "object"
               traceid:
                 type: "string"
+                description: "跟踪id，调试使用"
                 example: "79f075e462bb465fa2c17f6245878514"
               username:
                 type: "string"
+                description: "访问用户"
                 example: "unkown"
               time:
                 properties:
@@ -9058,41 +9042,41 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回结构"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   count:
                     type: array
-                    description: ""
+                    description: "路口个数"
                     items:
                       type: object
-                      description: ""
+                      description: "各个类型个数 1畅通/2缓行/3拥堵"
                       properties:
                         cate:
                           type: string
-                          description: ""
+                          description: "概览类型"
                           example: 畅通
                         num:
                           type: integer
-                          description: ""
+                          description: "此类型个数"
                           example: 648
                   ratio:
                     type: array
-                    description: ""
+                    description: "占比"
                     items:
                       type: object
-                      description: ""
+                      description: "占比类型"
                       properties:
                         cate:
                           type: string
-                          description: ""
+                          description: "类型"
                           example: 畅通
                         ratio:
                           type: string
-                          description: ""
+                          description: "占比"
                           example: 92%
               errmsg:
                 type: string
@@ -9138,31 +9122,31 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回结构"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   date:
                     type: string
-                    description: ""
+                    description: "日期"
                     example: "2019-07-10"
                   time:
                     type: string
-                    description: ""
+                    description: "时间"
                     example: "19:02:53"
                   week:
                     type: string
-                    description: ""
+                    description: "星期"
                     example: 星期三
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码"
                 example: 0
               time:
                 type: object
@@ -9178,11 +9162,11 @@ paths:
                     example: 0.0034秒
               traceid:
                 type: string
-                description: ""
+                description: "唯一码"
                 example: 645a441f5d25c5dda81a0418241f0a02
               username:
                 type: string
-                description: ""
+                description: "访问用户"
                 example: unknown
   /Overview/junctionSurvey:
     post:
@@ -9205,27 +9189,27 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回结构"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   alarm_total:
                     type: integer
-                    description: ""
+                    description: "报警数"
                     example: 7
                   amble_total:
                     type: integer
-                    description: ""
+                    description: "缓行路口数"
                     example: 28
                   congestion_total:
                     type: integer
-                    description: ""
+                    description: "拥堵路口数"
                     example: 26
                   junction_total:
                     type: integer
-                    description: ""
+                    description: "总路口数"
                     example: 702
               errmsg:
                 type: string
@@ -9276,120 +9260,120 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回结构"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   center:
                     type: object
-                    description: ""
+                    description: "中心点"
                     properties:
                       lat:
                         type: number
-                        description: ""
+                        description: "纬度"
                         example: 31.315863290598
                         format: float
                       lng:
                         type: number
-                        description: ""
+                        description: "经度"
                         example: 120.73645081197
                         format: float
                   dataList:
                     type: array
-                    description: ""
+                    description: "返回路口列表"
                     items:
                       type: object
-                      description: ""
+                      description: "返回路口列表"
                       properties:
                         alarm:
                           type: object
-                          description: ""
+                          description: "路口实时报警信息"
                           properties:
                             comment:
                               type: array
-                              description: ""
+                              description: "路口报警评价"
                               items:
                                 type: object
-                                description: ""
+                                description: "报警描述"
                             is:
                               type: integer
-                              description: ""
+                              description: "是否有报警"
                               example: 0
                         jid:
                           type: string
-                          description: ""
+                          description: "路口id"
                           example: "2017030116_3475442"
                         lat:
                           type: string
-                          description: ""
+                          description: "路口纬度"
                           example: "31.3193"
                         lng:
                           type: string
-                          description: ""
+                          description: "路口经度"
                           example: "120.65538"
                         name:
                           type: string
-                          description: ""
+                          description: "路口名字"
                           example: 现代大道_Ｓ２２７
                         quota:
                           type: object
-                          description: ""
+                          description: "路口状态"
                           properties:
                             stop_delay:
                               type: object
-                              description: ""
+                              description: "路口停车延误"
                               properties:
                                 name:
                                   type: string
-                                  description: ""
+                                  description: "状态名称"
                                   example: 平均延误
                                 unit:
                                   type: string
-                                  description: ""
+                                  description: "单位"
                                   example: 秒
                                 value:
                                   type: number
-                                  description: ""
+                                  description: "值"
                                   example: 33.26
                                   format: float
                             stop_time_cycle:
                               type: object
-                              description: ""
+                              description: "最大停车次数"
                               properties:
                                 name:
                                   type: string
-                                  description: ""
+                                  description: "描述"
                                   example: 最大停车次数
                                 unit:
                                   type: string
-                                  description: ""
+                                  description: "单位"
                                   example: 次
                                 value:
                                   type: number
-                                  description: ""
+                                  description: "值"
                                   example: 1.2
                                   format: float
                         status:
                           type: object
-                          description: ""
+                          description: "状态"
                           properties:
                             key:
                               type: integer
-                              description: ""
+                              description: "状态key"
                               example: 1
                             name:
                               type: string
-                              description: ""
+                              description: "状态描述"
                               example: 畅通
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码"
                 example: 0
               time:
                 type: object
@@ -9413,8 +9397,8 @@ paths:
                 example: unknown
   /Overview/operationCondition:
     post:
-      summary: 概览页-运行情况
-      description: 概览页-运行情况
+      summary: 概览页-平均延误
+      description: 概览页-平均延误
       tags:
         - 概览
       consumes:
@@ -9432,30 +9416,32 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回结构"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   dataList:
                     type: array
-                    description: ""
+                    description: "数据列表"
                     items:
                       type: array
-                      description: ""
+                      description: "数组"
                       items:
-                        type: number
-                        description: ""
-                        example: 14.27
-                        format: float
+                        type: array
+                        description: 
+                        items:
+                          type: array
+                          description: "曲线图的点, 第一个值是y轴，第二个是x轴/时间"
+                          example: [8.5, "00:00"]
                   info:
                     type: object
-                    description: ""
+                    description: "额外信息"
                     properties:
                       unit:
                         type: string
-                        description: ""
+                        description: "单位"
                         example: 秒
                       value:
                         type: integer
@@ -9510,71 +9496,71 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回对象"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   dataList:
                     type: array
-                    description: ""
+                    description: "返回列表"
                     items:
                       type: object
-                      description: ""
+                      description: "数组"
                       properties:
                         alarm_comment:
                           type: string
-                          description: ""
+                          description: "报警类型说明"
                           example: 溢流
                         alarm_key:
                           type: integer
-                          description: ""
+                          description: "报警类型的key"
                           example: 2
                         check:
                           type: integer
-                          description: ""
+                          description: "是否人工标注"
                           example: 0
                         duration_time:
                           type: number
-                          description: ""
+                          description: "持续时间"
                           example: 5.33
                           format: float
                         flow_name:
                           type: string
-                          description: ""
+                          description: "flow的名字"
                           example: 北直
                         full_time:
                           type: string
-                          description: ""
+                          description: "开始时间的全格式"
                           example: "2019-07-10 18:57:00"
                         junction_name:
                           type: string
-                          description: ""
+                          description: "路口名称"
                           example: 星湖街_星湖街立交
                         junction_type:
                           type: integer
-                          description: ""
+                          description: "路口类型"
                           example: 2
                         logic_flow_id:
                           type: string
-                          description: ""
+                          description: "路口flow的类型"
                           example: 2018031110_i_419347280_2018031110_o_196923860
                         logic_junction_id:
                           type: string
-                          description: ""
+                          description: "路口id"
                           example: "2018031110_3476915"
                         order:
                           type: string
-                          description: ""
+                          description: "排序"
                           example: "4"
                         start_time:
                           type: string
-                          description: ""
+                          description: "开始时间"
                           example: "18:57"
                         type:
                           type: integer
-                          description: ""
+                          description: "类型"
                           example: 2
               errmsg:
                 type: string
@@ -9625,26 +9611,26 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回对象"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   dataList:
                     type: array
-                    description: ""
+                    description: "数组列表"
                     items:
                       type: object
-                      description: ""
+                      description: "数组"
                       properties:
                         date:
                           type: string
-                          description: 日期 格式：YYYY-MM-DD 例：2018-08-08
+                          description: "日期 格式：YYYY-MM-DD 例：2018-08-08"
                           example: "2019-07-04"
                         value:
                           type: integer
-                          description: ""
+                          description: "值"
                           example: 851
               errmsg:
                 type: string
@@ -9695,41 +9681,41 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回对象"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   count:
                     type: array
-                    description: ""
+                    description: "个数"
                     items:
                       type: object
-                      description: ""
+                      description: "数组"
                       properties:
                         cate:
                           type: string
-                          description: ""
+                          description: "报警类型"
                           example: 过饱和
                         num:
                           type: integer
-                          description: ""
+                          description: "报警个数"
                           example: 370
                   ratio:
                     type: array
-                    description: ""
+                    description: "比例"
                     items:
                       type: object
-                      description: ""
+                      description: "数组"
                       properties:
                         cate:
                           type: string
-                          description: ""
+                          description: "报警类型"
                           example: 过饱和
                         ratio:
                           type: string
-                          description: ""
+                          description: "报警比例"
                           example: 50%
               errmsg:
                 type: string
@@ -9785,35 +9771,35 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回结构"
             properties:
               data:
                 type: array
-                description: ""
+                description: "返回数据"
                 items:
                   type: object
-                  description: ""
+                  description: "数组"
                   properties:
                     junction_name:
                       type: string
-                      description: ""
+                      description: "路口名称"
                       example: 东兴路_人行过街
                     logic_junction_id:
                       type: string
-                      description: ""
+                      description: "路口id"
                       example: "2017030116_19595160"
                     quota_unit:
                       type: string
-                      description: ""
+                      description: "单位"
                       example: 秒
                     stop_delay:
                       type: number
-                      description: ""
+                      description: "延误时间"
                       example: 182.43
                       format: float
                     time:
                       type: string
-                      description: ""
+                      description: "时间"
                       example: "19:01:40"
               errmsg:
                 type: string
@@ -9869,43 +9855,43 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回对象"
             properties:
               data:
                 type: array
-                description: ""
+                description: "返回数据"
                 items:
                   type: object
-                  description: ""
+                  description: "数组"
                   properties:
                     flow_name:
                       type: string
-                      description: ""
+                      description: "flow名称"
                       example: 东直
                     junction_name:
                       type: string
-                      description: ""
+                      description: "路口个名称"
                       example: 东环路_干将东路
                     logic_flow_id:
                       type: string
-                      description: ""
+                      description: "flow的id"
                       example: 2017030116_i_302575680_2017030116_o_859845770
                     logic_junction_id:
                       type: string
-                      description: ""
+                      description: "路口id"
                       example: "2017030116_3478854"
                     quota_unit:
                       type: string
-                      description: ""
+                      description: "单位"
                       example: 次
                     stop_time_cycle:
                       type: number
-                      description: ""
+                      description: "停车次数"
                       example: 2.58
                       format: float
                     time:
                       type: string
-                      description: ""
+                      description: "时间"
                       example: "19:01:40"
               errmsg:
                 type: string
