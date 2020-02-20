@@ -6003,7 +6003,7 @@ paths:
                             type: string
                             description: ""
                             example: "00:00"
-                      
+
                   evaluate:
                     type: object
                     description: ""
@@ -6717,63 +6717,63 @@ paths:
           schema:
             type: object
             description: ""
-            properties: 
-              errno: 
+            properties:
+              errno:
                 type: "number"
                 description: "错误码，0代表正常"
-              errmsg: 
+              errmsg:
                 type: "string"
-              data: 
-                properties: 
-                  dataList: 
+              data:
+                properties:
+                  dataList:
                     type: "array"
-                    items: 
+                    items:
                       type: "object"
-                      properties: 
-                        junction_id: 
+                      properties:
+                        junction_id:
                           type: "string"
                           description: "路口ID"
-                        cycle: 
+                        cycle:
                           type: "number"
                           description: "配时周期"
-                        offset: 
+                        offset:
                           type: "number"
                           description: "配时相位差"
-                        forward_green: 
+                        forward_green:
                           type: "array"
                           description: "正向绿灯集合"
-                          items: 
+                          items:
                             type: "object"
-                            properties: 
-                              green_start: 
+                            properties:
+                              green_start:
                                 type: "number"
                                 description: "绿灯开始时间"
-                              green_duration: 
+                              green_duration:
                                 type: "number"
                                 description: "绿灯持续时间"
-                        reverse_green: 
+                        reverse_green:
                           type: "array"
                           description: "反向绿灯信息集合"
-                          items: 
+                          items:
                             type: "object"
-                            properties: 
-                              green_start: 
+                            properties:
+                              green_start:
                                 type: "number"
                                 description: "绿灯开始时间  如果获取的只是正向数据 此时返回-1"
-                              green_duration: 
+                              green_duration:
                                 type: "number"
                                 description: "绿灯持续时间  如果获取的只是正向数据 此时返回-1"
-                        lock_cycle: 
+                        lock_cycle:
                           type: "number"
                           description: "周期是否锁定"
-                        lock_offset: 
+                        lock_offset:
                           type: "number"
                           description: "偏移量是否锁定"
-                  token: 
+                  token:
                     type: "string"
                     description: "token 唯一标识"
                 type: "object"
-              username: 
+              username:
                 type: "string"
                 description: "用户信息"
   /Arterialgreenwave/queryGreenWaveOptPlan:
@@ -6786,133 +6786,133 @@ paths:
       - application/json
       produces:
       - application/json
-      parameters: 
+      parameters:
          - in : "body"
-         name: body
-         required: true
-         schema:
+           name: body
+           required: true
+           schema:
             type: object
-            properties: 
-              dates: 
+            properties:
+              dates:
                 type: "array"
                 description: "开始日期"
-                items: 
+                items:
                   type: "string"
-              request: 
-                properties: 
-                  junction_list: 
+              request:
+                properties:
+                  junction_list:
                     type: "array"
                     description: "路口信息列表"
-                    items: 
+                    items:
                       type: "object"
-                      properties: 
-                        end_time: 
+                      properties:
+                        end_time:
                           type: "string"
                           description: "结束时间"
-                        start_time: 
+                        start_time:
                           type: "string"
                           description: "开始时间"
-                        junction_id: 
+                        junction_id:
                           type: "string"
                           description: "路口id"
-                        cycle: 
+                        cycle:
                           type: "number"
                           description: "周期"
-                        offset: 
+                        offset:
                           type: "number"
                           description: "相位"
-                        min_cycle: 
+                        min_cycle:
                           type: "number"
                           description: "最小周期"
-                        max_cycle: 
+                        max_cycle:
                           type: "number"
                           description: "最大周期"
-                        lock_cycle: 
+                        lock_cycle:
                           type: "number"
                           description: "周期锁定"
-                        lock_offset: 
+                        lock_offset:
                           type: "number"
                           description: "相位锁定"
-                        clock_shift: 
+                        clock_shift:
                           type: "number"
                           description: "相位偏移量"
-                        forward_movement: 
-                          properties: 
-                            movement_id: 
+                        forward_movement:
+                          properties:
+                            movement_id:
                               type: "string"
                               description: "正向flow_id"
-                            green: 
+                            green:
                               type: "array"
-                              items: 
+                              items:
                                 type: "object"
-                                properties: 
-                                  green_start: 
+                                properties:
+                                  green_start:
                                     type: "number"
                                     description: "绿灯开始"
-                                  green_duration: 
+                                  green_duration:
                                     type: "number"
                                     description: "绿灯持续"
-                                  yellow: 
+                                  yellow:
                                     type: "number"
                                     description: "黄灯"
-                                  red_clean: 
+                                  red_clean:
                                     type: "number"
                                     description: "全红"
-                            weight: 
+                            weight:
                               type: "number"
                               description: "权重"
                           type: "object"
-                        backward_movement: 
-                          properties: 
-                            movement_id: 
+                        backward_movement:
+                          properties:
+                            movement_id:
                               type: "string"
-                            green: 
+                            green:
                               type: "array"
-                              items: 
+                              items:
                                 type: "object"
-                                properties: 
-                                  green_start: 
+                                properties:
+                                  green_start:
                                     type: "number"
-                                  green_duration: 
+                                  green_duration:
                                     type: "number"
-                                  yellow: 
+                                  yellow:
                                     type: "number"
-                                  red_clean: 
+                                  red_clean:
                                     type: "number"
-                            weight: 
+                            weight:
                               type: "number"
                           type: "object"
-                        forward_in_length: 
+                        forward_in_length:
                           type: "number"
                           description: "正向入轨迹长度"
-                        forward_out_length: 
+                        forward_out_length:
                           type: "number"
                           description: "正向出轨迹长度"
-                        forward_in_speed: 
+                        forward_in_speed:
                           type: "number"
                           description: "正向入速度"
-                        forward_out_speed: 
+                        forward_out_speed:
                           type: "number"
                           description: "正向出速度"
-                        backward_in_length: 
+                        backward_in_length:
                           type: "number"
                           description: "反向入轨迹长度"
-                        backward_out_length: 
+                        backward_out_length:
                           type: "number"
                           description: "反向出轨迹长度"
-                        backward_in_speed: 
+                        backward_in_speed:
                           type: "number"
                           description: "反向入速度"
-                        backward_out_speed: 
+                        backward_out_speed:
                           type: "number"
                           description: "反向出速度"
-                  opt_type: 
+                  opt_type:
                     type: "number"
                     description: "0为带宽模型，1为轨迹模型"
-                  equal_cycle: 
+                  equal_cycle:
                     type: "number"
                     description: "周期一致标志，0为可不一致，1为必须一致"
-                  direction: 
+                  direction:
                     type: "number"
                     description: "优化方向，0为正向，1为反向，2为双向"
                 type: "object"
@@ -8783,7 +8783,7 @@ paths:
                             type: integer
                             description: ""
                             example: 76
-                      
+
                   info:
                     type: object
                     description: ""
@@ -8828,7 +8828,7 @@ paths:
                                 type: string
                                 description: "相位名称"
                                 example: 南左
-                          
+
                       junction_lat:
                         type: string
                         description: "路口纬度"
@@ -13398,7 +13398,7 @@ paths:
                             type: integer
                             description: "黄灯时间"
                             example: 3
-                      
+
               errmsg:
                 type: string
                 description: "错误信息，当errno非0的时候有内容，可直接在页面显示"
@@ -21777,3 +21777,2481 @@ paths:
                 type: string
                 description: 链路ID，追查错误使用
                 example: 64454c135d25c58d58fd81d4267cf502
+  /signal-control/signaledit/signal/info:
+    get:
+      summary: 路口信息
+      description: 路口信息
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "id"
+                  - "lat"
+                  - "lng"
+                  - "logic_junction_id"
+                  - "structure"
+                properties:
+                  id:
+                    type: "number"
+                    example: 4709
+                  lat:
+                    type: "number"
+                    example: 40.04645
+                  lng:
+                    type: "number"
+                    example: 116.61193
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_509786"
+                  structure:
+                    type: "number"
+                    example: 2
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "64594b125e4cdfe033a9a7f008295202"
+  /signal-control/signalversion/queryversionlist:
+    get:
+      summary: 版本列表
+      description: 版本列表
+      tags:
+        - 配时
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: page
+          in: query
+          description: 分页page
+          required: true
+          type: string
+        - name: pageSize
+          in: query
+          description: 分页size
+          required: true
+          type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "total"
+                  - "version_list"
+                properties:
+                  total:
+                    type: "number"
+                    example: 22
+                  version_list:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 2002228
+                        signal_id:
+                          type: "number"
+                          example: 4709
+                        source:
+                          type: "number"
+                          example: 2
+                        start_version:
+                          type: "number"
+                          example: 20191028140240
+                        end_version:
+                          type: "number"
+                          example: 99999999999999
+                        fingerprint:
+                          type: "string"
+                          example: "f6aed6f6007bf3f5693facd592a29f13"
+                        comment:
+                          type: "string"
+                          example: ""
+                        user:
+                          type: "string"
+                          example: ""
+                        create_time:
+                          type: "string"
+                          example: "2019-10-28T14:02:41+08:00"
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "64457c115e4cdfe04ea284e808189502"
+  /signal-control/signalversion/group/all:
+    get:
+      summary: 查询 灯组相位表
+      description: 查询 灯组相位表
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "signal_groups"
+                  - "signal_group_draw"
+                  - "signal_group_phase"
+                  - "signal_group_flow"
+                  - "phases"
+                  - "overlaps"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_509786"
+                  signal_id:
+                    type: "number"
+                    example: 4709
+                  signal_groups:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 48071
+                        name:
+                          type: "string"
+                          example: "西左"
+                        sg_num:
+                          type: "string"
+                          example: "10"
+                        type:
+                          type: "number"
+                          example: 0
+                  signal_group_draw:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 26365
+                        sg_id:
+                          type: "number"
+                          example: 48071
+                        leg:
+                          type: "number"
+                          example: 113752
+                        lane:
+                          type: "number"
+                          example: 392778
+                        block:
+                          type: "number"
+                          example: 0
+                        offset:
+                          type: "number"
+                          example: 0
+                  signal_group_phase:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 20482704
+                        phase_id:
+                          type: "number"
+                          example: 20491236
+                        sg_id:
+                          type: "number"
+                          example: 48083
+                        type:
+                          type: "number"
+                          example: 1
+                  signal_group_flow:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 54555
+                        sg_id:
+                          type: "number"
+                          example: 48071
+                        logic_flow_id:
+                          type: "string"
+                          example: "2017030116_i_879138040_2017030116_o_128739280"
+                        direction:
+                          type: "number"
+                          example: 0
+                        flow_name:
+                          type: "string"
+                          example: "西左"
+                  phases:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        phase_id:
+                          type: "number"
+                          example: 20491236
+                        phase_num:
+                          type: "number"
+                          example: 1
+                        min_green:
+                          type: "number"
+                          example: 0
+                        max_green:
+                          type: "number"
+                          example: 0
+                        max_green2:
+                          type: "number"
+                          example: 0
+                        yellow:
+                          type: "number"
+                          example: 0
+                        red_clear:
+                          type: "number"
+                          example: 0
+                        red_yellow:
+                          type: "number"
+                          example: 0
+                        green_flash:
+                          type: "number"
+                          example: 0
+                        phase_name:
+                          type: "string"
+                          example: "相位1"
+                        is_virtual:
+                          type: "number"
+                          example: 0
+                        pedestrian_id:
+                          type: "number"
+                          example: 0
+                        pedestrian_walk:
+                          type: "number"
+                          example: 0
+                        pedestrian_clear:
+                          type: "number"
+                          example: 0
+                        fdw:
+                          type: "number"
+                          example: 0
+                        psg_id:
+                          type: "number"
+                          example: 0
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "6445b81e5e4cebfe2c991abc08302d02"
+  /signal-control/signalversion/stage/all:
+    get:
+      summary: 查询 阶段表
+      description: 查询 阶段表
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "stage_tables"
+                  - "phases"
+                  - "plans"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_509786"
+                  signal_id:
+                    type: "number"
+                    example: 4709
+                  stage_tables:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        stage_table_id:
+                          type: "number"
+                          example: 1
+                        stage_table_name:
+                          type: "string"
+                          example: ""
+                        stages:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "number"
+                                example: 0
+                              stage_num:
+                                type: "number"
+                                example: 1
+                              yellow:
+                                type: "number"
+                                example: 4
+                              red_clear:
+                                type: "number"
+                                example: 2
+                              stage_time:
+                                type: "number"
+                                example: 26
+                              phase_nums:
+                                type: "array"
+                                items:
+                                  type: "number"
+                                example:
+                                  - 1
+                                  - 2
+                                  - 3
+                                  - 4
+                  phases:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 20491236
+                        phase_num:
+                          type: "number"
+                          example: 1
+                        phase_name:
+                          type: "string"
+                          example: "相位1"
+                        phase_draws:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "number"
+                                example: 26377
+                              lane:
+                                type: "number"
+                                example: 392758
+                              leg:
+                                type: "number"
+                                example: 113748
+                  plans:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 2010394
+                        signal_id:
+                          type: "number"
+                          example: 4709
+                        cycle:
+                          type: "number"
+                          example: 160
+                        offset:
+                          type: "number"
+                          example: 115
+                        comment:
+                          type: "string"
+                          example: ""
+                        plan_num:
+                          type: "number"
+                          example: 1
+                        plan_name:
+                          type: "string"
+                          example: "方案1"
+                        sequence_table:
+                          type: "number"
+                          example: 0
+                        split_table:
+                          type: "number"
+                          example: 1
+                        stage_table:
+                          type: "number"
+                          example: 1
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "6445bb0e5e4cf5c50bea1175085e8a02"
+  /signal-control/signalversion/scheduleinfo:
+    get:
+      summary: 查询 时段调度
+      description: 查询 时段调度
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "schedule"
+                  - "tod"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_509786"
+                  signal_id:
+                    type: "number"
+                    example: 0
+                  schedule:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 1987006
+                        tod_num:
+                          type: "number"
+                          example: 1
+                        comment:
+                          type: "string"
+                          example: ""
+                        month:
+                          type: "array"
+                          items:
+                            type: "number"
+                          example:
+                            - 1
+                            - 2
+                            - 3
+                            - 4
+                            - 5
+                            - 6
+                            - 7
+                            - 8
+                            - 9
+                            - 10
+                            - 11
+                            - 12
+                        week:
+                          type: "array"
+                          items:
+                            type: "number"
+                          example:
+                            - 7
+                            - 1
+                            - 2
+                            - 3
+                            - 4
+                            - 5
+                            - 6
+                        day:
+                          type: "array"
+                          items:
+                            type: "number"
+                          example:
+                            - 1
+                            - 2
+                            - 3
+                            - 4
+                            - 5
+                            - 6
+                        priority:
+                          type: "number"
+                          example: 1
+                  tod:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        tod_num:
+                          type: "number"
+                          example: 1
+                        schedule_plan:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              start_time:
+                                type: "string"
+                                example: "05:00:00"
+                              end_time:
+                                type: "string"
+                                example: "22:00:00"
+                              plan_num:
+                                type: "number"
+                                example: 1
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "645a421f5e4d034c9e0e3c9408863a02"
+  /signal-control/signalversion/queryringinfo:
+    get:
+      summary: 查询 相序绿信比
+      description: 查询 相序绿信比
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "sequence"
+                  - "split"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_4875785"
+                  signal_id:
+                    type: "number"
+                    example: 4535
+                  sequence:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        table:
+                          type: "number"
+                          example: 1
+                        table_detail:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              ring_index:
+                                type: "number"
+                                example: 1
+                              barrier_list:
+                                type: "array"
+                                items:
+                                  type: "object"
+                                  properties:
+                                    barrier_index:
+                                      type: "number"
+                                      example: 1
+                                    seq_detail:
+                                      type: "array"
+                                      items:
+                                        type: "object"
+                                        properties:
+                                          seq:
+                                            type: "number"
+                                            example: 1
+                                          phase_id:
+                                            type: "number"
+                                            example: 239748
+                                          phase_num:
+                                            type: "number"
+                                            example: 1
+                                          phase_name:
+                                            type: "string"
+                                            example: "相位1"
+                  split:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        table:
+                          type: "number"
+                          example: 1
+                        table_detail:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              phase_id:
+                                type: "number"
+                                example: 239748
+                              phase_num:
+                                type: "number"
+                                example: 1
+                              phase_name:
+                                type: "string"
+                                example: "相位1"
+                              split_time:
+                                type: "number"
+                                example: 103
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "645acf295e4cfe1d7bf0725c08778302"
+  /signal-control/signalversion/getringgraph:
+    get:
+      summary: 查询 环图
+      description: 查询 环图
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "sequence"
+                  - "split"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_4875785"
+                  signal_id:
+                    type: "number"
+                    example: 4535
+                  sequence:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        table:
+                          type: "number"
+                          example: 1
+                        table_detail:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              ring_index:
+                                type: "number"
+                                example: 1
+                              barrier_list:
+                                type: "array"
+                                items:
+                                  type: "object"
+                                  properties:
+                                    barrier_index:
+                                      type: "number"
+                                      example: 1
+                                    seq_detail:
+                                      type: "array"
+                                      items:
+                                        type: "object"
+                                        properties:
+                                          seq:
+                                            type: "number"
+                                            example: 1
+                                          phase_id:
+                                            type: "number"
+                                            example: 239748
+                                          phase_num:
+                                            type: "number"
+                                            example: 1
+                                          phase_name:
+                                            type: "string"
+                                            example: "相位1"
+                  split:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        table:
+                          type: "number"
+                          example: 1
+                        table_detail:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              phase_id:
+                                type: "number"
+                                example: 239748
+                              phase_num:
+                                type: "number"
+                                example: 1
+                              phase_name:
+                                type: "string"
+                                example: "相位1"
+                              split_time:
+                                type: "number"
+                                example: 103
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "645acf295e4cfe1d7bf0725c08778302"
+  /signal-control/signalversion/planinfo:
+    get:
+      summary: 查询 方案表
+      description: 查询 方案表
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "plan"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_5178834"
+                  signal_id:
+                    type: "number"
+                    example: 0
+                  plan:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 8798270
+                        signal_id:
+                          type: "number"
+                          example: 4613
+                        cycle:
+                          type: "number"
+                          example: 210
+                        offset:
+                          type: "number"
+                          example: 0
+                        comment:
+                          type: "string"
+                          example: ""
+                        plan_num:
+                          type: "number"
+                          example: 1
+                        plan_name:
+                          type: "string"
+                          example: "方案1"
+                        sequence_table:
+                          type: "number"
+                          example: 1
+                        split_table:
+                          type: "number"
+                          example: 1
+                        stage_table:
+                          type: "number"
+                          example: 0
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "6446810b5e4dde72aeb88df60a098902"
+  /signal-control/signaledit/group/all:
+    get:
+      summary: 查询 编辑库 灯组相位表
+      description: 查询 编辑库 灯组相位表
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "signal_groups"
+                  - "signal_group_draw"
+                  - "signal_group_phase"
+                  - "signal_group_flow"
+                  - "phases"
+                  - "overlaps"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_509786"
+                  signal_id:
+                    type: "number"
+                    example: 4709
+                  signal_groups:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 48071
+                        name:
+                          type: "string"
+                          example: "西左"
+                        sg_num:
+                          type: "string"
+                          example: "10"
+                        type:
+                          type: "number"
+                          example: 0
+                  signal_group_draw:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 26365
+                        sg_id:
+                          type: "number"
+                          example: 48071
+                        leg:
+                          type: "number"
+                          example: 113752
+                        lane:
+                          type: "number"
+                          example: 392778
+                        block:
+                          type: "number"
+                          example: 0
+                        offset:
+                          type: "number"
+                          example: 0
+                  signal_group_phase:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 20482704
+                        phase_id:
+                          type: "number"
+                          example: 20491236
+                        sg_id:
+                          type: "number"
+                          example: 48083
+                        type:
+                          type: "number"
+                          example: 1
+                  signal_group_flow:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 54555
+                        sg_id:
+                          type: "number"
+                          example: 48071
+                        logic_flow_id:
+                          type: "string"
+                          example: "2017030116_i_879138040_2017030116_o_128739280"
+                        direction:
+                          type: "number"
+                          example: 0
+                        flow_name:
+                          type: "string"
+                          example: "西左"
+                  phases:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        phase_id:
+                          type: "number"
+                          example: 20491236
+                        phase_num:
+                          type: "number"
+                          example: 1
+                        min_green:
+                          type: "number"
+                          example: 0
+                        max_green:
+                          type: "number"
+                          example: 0
+                        max_green2:
+                          type: "number"
+                          example: 0
+                        yellow:
+                          type: "number"
+                          example: 0
+                        red_clear:
+                          type: "number"
+                          example: 0
+                        red_yellow:
+                          type: "number"
+                          example: 0
+                        green_flash:
+                          type: "number"
+                          example: 0
+                        phase_name:
+                          type: "string"
+                          example: "相位1"
+                        is_virtual:
+                          type: "number"
+                          example: 0
+                        pedestrian_id:
+                          type: "number"
+                          example: 0
+                        pedestrian_walk:
+                          type: "number"
+                          example: 0
+                        pedestrian_clear:
+                          type: "number"
+                          example: 0
+                        fdw:
+                          type: "number"
+                          example: 0
+                        psg_id:
+                          type: "number"
+                          example: 0
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "6445b81e5e4cebfe2c991abc08302d02"
+  /signal-control/signaledit/stage/all:
+    get:
+      summary: 查询 编辑库 阶段表
+      description: 查询 编辑库 阶段表
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "stage_tables"
+                  - "phases"
+                  - "plans"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_509786"
+                  signal_id:
+                    type: "number"
+                    example: 4709
+                  stage_tables:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        stage_table_id:
+                          type: "number"
+                          example: 1
+                        stage_table_name:
+                          type: "string"
+                          example: ""
+                        stages:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "number"
+                                example: 0
+                              stage_num:
+                                type: "number"
+                                example: 1
+                              yellow:
+                                type: "number"
+                                example: 4
+                              red_clear:
+                                type: "number"
+                                example: 2
+                              stage_time:
+                                type: "number"
+                                example: 26
+                              phase_nums:
+                                type: "array"
+                                items:
+                                  type: "number"
+                                example:
+                                  - 1
+                                  - 2
+                                  - 3
+                                  - 4
+                  phases:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 20491236
+                        phase_num:
+                          type: "number"
+                          example: 1
+                        phase_name:
+                          type: "string"
+                          example: "相位1"
+                        phase_draws:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "number"
+                                example: 26377
+                              lane:
+                                type: "number"
+                                example: 392758
+                              leg:
+                                type: "number"
+                                example: 113748
+                  plans:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 2010394
+                        signal_id:
+                          type: "number"
+                          example: 4709
+                        cycle:
+                          type: "number"
+                          example: 160
+                        offset:
+                          type: "number"
+                          example: 115
+                        comment:
+                          type: "string"
+                          example: ""
+                        plan_num:
+                          type: "number"
+                          example: 1
+                        plan_name:
+                          type: "string"
+                          example: "方案1"
+                        sequence_table:
+                          type: "number"
+                          example: 0
+                        split_table:
+                          type: "number"
+                          example: 1
+                        stage_table:
+                          type: "number"
+                          example: 1
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "6445bb0e5e4cf5c50bea1175085e8a02"
+  /signal-control/signaledit/scheduleinfo:
+    get:
+      summary: 查询 编辑库 时段调度
+      description: 查询 编辑库 时段调度
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "schedule"
+                  - "tod"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_509786"
+                  signal_id:
+                    type: "number"
+                    example: 0
+                  schedule:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 1987006
+                        tod_num:
+                          type: "number"
+                          example: 1
+                        comment:
+                          type: "string"
+                          example: ""
+                        month:
+                          type: "array"
+                          items:
+                            type: "number"
+                          example:
+                            - 1
+                            - 2
+                            - 3
+                            - 4
+                            - 5
+                            - 6
+                            - 7
+                            - 8
+                            - 9
+                            - 10
+                            - 11
+                            - 12
+                        week:
+                          type: "array"
+                          items:
+                            type: "number"
+                          example:
+                            - 7
+                            - 1
+                            - 2
+                            - 3
+                            - 4
+                            - 5
+                            - 6
+                        day:
+                          type: "array"
+                          items:
+                            type: "number"
+                          example:
+                            - 1
+                            - 2
+                            - 3
+                            - 4
+                            - 5
+                            - 6
+                        priority:
+                          type: "number"
+                          example: 1
+                  tod:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        tod_num:
+                          type: "number"
+                          example: 1
+                        schedule_plan:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              start_time:
+                                type: "string"
+                                example: "05:00:00"
+                              end_time:
+                                type: "string"
+                                example: "22:00:00"
+                              plan_num:
+                                type: "number"
+                                example: 1
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "645a421f5e4d034c9e0e3c9408863a02"
+  /signal-control/signaledit/queryringinfo:
+    get:
+      summary: 查询 编辑库 相序绿信比
+      description: 查询 编辑库 相序绿信比
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "sequence"
+                  - "split"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_4875785"
+                  signal_id:
+                    type: "number"
+                    example: 4535
+                  sequence:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        table:
+                          type: "number"
+                          example: 1
+                        table_detail:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              ring_index:
+                                type: "number"
+                                example: 1
+                              barrier_list:
+                                type: "array"
+                                items:
+                                  type: "object"
+                                  properties:
+                                    barrier_index:
+                                      type: "number"
+                                      example: 1
+                                    seq_detail:
+                                      type: "array"
+                                      items:
+                                        type: "object"
+                                        properties:
+                                          seq:
+                                            type: "number"
+                                            example: 1
+                                          phase_id:
+                                            type: "number"
+                                            example: 239748
+                                          phase_num:
+                                            type: "number"
+                                            example: 1
+                                          phase_name:
+                                            type: "string"
+                                            example: "相位1"
+                  split:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        table:
+                          type: "number"
+                          example: 1
+                        table_detail:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              phase_id:
+                                type: "number"
+                                example: 239748
+                              phase_num:
+                                type: "number"
+                                example: 1
+                              phase_name:
+                                type: "string"
+                                example: "相位1"
+                              split_time:
+                                type: "number"
+                                example: 103
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "645acf295e4cfe1d7bf0725c08778302"
+  /signal-control/signaledit/getringgraph:
+    get:
+      summary: 查询 编辑库 环图
+      description: 查询 编辑库 环图
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "sequence"
+                  - "split"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_4875785"
+                  signal_id:
+                    type: "number"
+                    example: 4535
+                  sequence:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        table:
+                          type: "number"
+                          example: 1
+                        table_detail:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              ring_index:
+                                type: "number"
+                                example: 1
+                              barrier_list:
+                                type: "array"
+                                items:
+                                  type: "object"
+                                  properties:
+                                    barrier_index:
+                                      type: "number"
+                                      example: 1
+                                    seq_detail:
+                                      type: "array"
+                                      items:
+                                        type: "object"
+                                        properties:
+                                          seq:
+                                            type: "number"
+                                            example: 1
+                                          phase_id:
+                                            type: "number"
+                                            example: 239748
+                                          phase_num:
+                                            type: "number"
+                                            example: 1
+                                          phase_name:
+                                            type: "string"
+                                            example: "相位1"
+                  split:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        table:
+                          type: "number"
+                          example: 1
+                        table_detail:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              phase_id:
+                                type: "number"
+                                example: 239748
+                              phase_num:
+                                type: "number"
+                                example: 1
+                              phase_name:
+                                type: "string"
+                                example: "相位1"
+                              split_time:
+                                type: "number"
+                                example: 103
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "645acf295e4cfe1d7bf0725c08778302"
+  /signal-control/signaledit/planinfo:
+    get:
+      summary: 查询 编辑库 方案表
+      description: 查询 编辑库 方案表
+      tags:
+        - 配时
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: query
+          description: 路口id
+          required: true
+          type: string
+        - name: source
+          in: query
+          description: 配时类型，1人工2信号机3优化
+          required: true
+          type: string
+        - name: version_id
+          in: query
+          description: 分页page
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "data"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              data:
+                required:
+                  - "logic_junction_id"
+                  - "signal_id"
+                  - "plan"
+                properties:
+                  logic_junction_id:
+                    type: "string"
+                    example: "2017030116_5178834"
+                  signal_id:
+                    type: "number"
+                    example: 0
+                  plan:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "number"
+                          example: 8798270
+                        signal_id:
+                          type: "number"
+                          example: 4613
+                        cycle:
+                          type: "number"
+                          example: 210
+                        offset:
+                          type: "number"
+                          example: 0
+                        comment:
+                          type: "string"
+                          example: ""
+                        plan_num:
+                          type: "number"
+                          example: 1
+                        plan_name:
+                          type: "string"
+                          example: "方案1"
+                        sequence_table:
+                          type: "number"
+                          example: 1
+                        split_table:
+                          type: "number"
+                          example: 1
+                        stage_table:
+                          type: "number"
+                          example: 0
+                type: "object"
+              trace_id:
+                type: "string"
+                example: "6446810b5e4dde72aeb88df60a098902"
+  /signal-control/signaledit/group/update:
+    post:
+      summary: 编辑更新 灯组相位表
+      description: 编辑更新 灯组相位表
+      tags:
+        - 配时
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          schema:
+            required:
+              - "logic_junction_id"
+              - "signal_id"
+              - "signal_groups"
+              - "signal_group_draw"
+              - "signal_group_phase"
+              - "signal_group_flow"
+              - "phases"
+              - "overlaps"
+            properties:
+              logic_junction_id:
+                type: "string"
+                example: "2017030116_509786"
+              signal_id:
+                type: "number"
+                example: 4709
+              signal_groups:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "number"
+                      example: 48071
+                    name:
+                      type: "string"
+                      example: "西左"
+                    sg_num:
+                      type: "string"
+                      example: "10"
+                    type:
+                      type: "number"
+                      example: 0
+              signal_group_draw:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "number"
+                      example: 26365
+                    sg_id:
+                      type: "number"
+                      example: 48071
+                    leg:
+                      type: "number"
+                      example: 113752
+                    lane:
+                      type: "number"
+                      example: 392778
+                    block:
+                      type: "number"
+                      example: 0
+                    offset:
+                      type: "number"
+                      example: 0
+              signal_group_phase:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "number"
+                      example: 20482704
+                    phase_id:
+                      type: "number"
+                      example: 20491236
+                    sg_id:
+                      type: "number"
+                      example: 48083
+                    type:
+                      type: "number"
+                      example: 1
+              signal_group_flow:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "number"
+                      example: 54555
+                    sg_id:
+                      type: "number"
+                      example: 48071
+                    logic_flow_id:
+                      type: "string"
+                      example: "2017030116_i_879138040_2017030116_o_128739280"
+                    direction:
+                      type: "number"
+                      example: 0
+                    flow_name:
+                      type: "string"
+                      example: "西左"
+              phases:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    phase_id:
+                      type: "number"
+                      example: 20491236
+                    phase_num:
+                      type: "number"
+                      example: 1
+                    min_green:
+                      type: "number"
+                      example: 0
+                    max_green:
+                      type: "number"
+                      example: 0
+                    max_green2:
+                      type: "number"
+                      example: 0
+                    yellow:
+                      type: "number"
+                      example: 0
+                    red_clear:
+                      type: "number"
+                      example: 0
+                    red_yellow:
+                      type: "number"
+                      example: 0
+                    green_flash:
+                      type: "number"
+                      example: 0
+                    phase_name:
+                      type: "string"
+                      example: "相位1"
+                    is_virtual:
+                      type: "number"
+                      example: 0
+                    pedestrian_id:
+                      type: "number"
+                      example: 0
+                    pedestrian_walk:
+                      type: "number"
+                      example: 0
+                    pedestrian_clear:
+                      type: "number"
+                      example: 0
+                    fdw:
+                      type: "number"
+                      example: 0
+                    psg_id:
+                      type: "number"
+                      example: 0
+            type: "object"
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              trace_id:
+                type: "string"
+                example: "6445b81e5e4cebfe2c991abc08302d02"
+  /signal-control/signaledit/stage/update:
+    post:
+      summary: 编辑更新 阶段表
+      description: 编辑更新 阶段表
+      tags:
+        - 配时
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          schema:
+            required:
+              - "logic_junction_id"
+              - "signal_id"
+              - "stage_tables"
+              - "phases"
+              - "plans"
+            properties:
+              logic_junction_id:
+                type: "string"
+                example: "2017030116_509786"
+              signal_id:
+                type: "number"
+                example: 4709
+              stage_tables:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    stage_table_id:
+                      type: "number"
+                      example: 1
+                    stage_table_name:
+                      type: "string"
+                      example: ""
+                    stages:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties:
+                          id:
+                            type: "number"
+                            example: 0
+                          stage_num:
+                            type: "number"
+                            example: 1
+                          yellow:
+                            type: "number"
+                            example: 4
+                          red_clear:
+                            type: "number"
+                            example: 2
+                          stage_time:
+                            type: "number"
+                            example: 26
+                          phase_nums:
+                            type: "array"
+                            items:
+                              type: "number"
+                            example:
+                              - 1
+                              - 2
+                              - 3
+                              - 4
+              phases:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "number"
+                      example: 20491236
+                    phase_num:
+                      type: "number"
+                      example: 1
+                    phase_name:
+                      type: "string"
+                      example: "相位1"
+                    phase_draws:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties:
+                          id:
+                            type: "number"
+                            example: 26377
+                          lane:
+                            type: "number"
+                            example: 392758
+                          leg:
+                            type: "number"
+                            example: 113748
+              plans:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "number"
+                      example: 2010394
+                    signal_id:
+                      type: "number"
+                      example: 4709
+                    cycle:
+                      type: "number"
+                      example: 160
+                    offset:
+                      type: "number"
+                      example: 115
+                    comment:
+                      type: "string"
+                      example: ""
+                    plan_num:
+                      type: "number"
+                      example: 1
+                    plan_name:
+                      type: "string"
+                      example: "方案1"
+                    sequence_table:
+                      type: "number"
+                      example: 0
+                    split_table:
+                      type: "number"
+                      example: 1
+                    stage_table:
+                      type: "number"
+                      example: 1
+            type: "object"
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              trace_id:
+                type: "string"
+                example: "6445bb0e5e4cf5c50bea1175085e8a02"
+  /signal-control/signaledit/scheduleinfoupdate:
+    post:
+      summary: 编辑更新 时段调度
+      description: 编辑更新 时段调度
+      tags:
+        - 配时
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          schema:
+            required:
+              - "logic_junction_id"
+              - "signal_id"
+              - "schedule"
+              - "tod"
+            properties:
+              logic_junction_id:
+                type: "string"
+                example: "2017030116_509786"
+              signal_id:
+                type: "number"
+                example: 0
+              schedule:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "number"
+                      example: 1987006
+                    tod_num:
+                      type: "number"
+                      example: 1
+                    comment:
+                      type: "string"
+                      example: ""
+                    month:
+                      type: "array"
+                      items:
+                        type: "number"
+                      example:
+                        - 1
+                        - 2
+                        - 3
+                        - 4
+                        - 5
+                        - 6
+                        - 7
+                        - 8
+                        - 9
+                        - 10
+                        - 11
+                        - 12
+                    week:
+                      type: "array"
+                      items:
+                        type: "number"
+                      example:
+                        - 7
+                        - 1
+                        - 2
+                        - 3
+                        - 4
+                        - 5
+                        - 6
+                    day:
+                      type: "array"
+                      items:
+                        type: "number"
+                      example:
+                        - 1
+                        - 2
+                        - 3
+                        - 4
+                        - 5
+                        - 6
+                    priority:
+                      type: "number"
+                      example: 1
+              tod:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    tod_num:
+                      type: "number"
+                      example: 1
+                    schedule_plan:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties:
+                          start_time:
+                            type: "string"
+                            example: "05:00:00"
+                          end_time:
+                            type: "string"
+                            example: "22:00:00"
+                          plan_num:
+                            type: "number"
+                            example: 1
+            type: "object"
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              trace_id:
+                type: "string"
+                example: "645a421f5e4d034c9e0e3c9408863a02"
+  /signal-control/signaledit/updateringinfo:
+    post:
+      summary: 编辑更新 相序绿信比
+      description: 编辑更新 相序绿信比
+      tags:
+        - 配时
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          schema:
+            required:
+              - "logic_junction_id"
+              - "signal_id"
+              - "sequence"
+              - "split"
+            properties:
+              logic_junction_id:
+                type: "string"
+                example: "2017030116_4875785"
+              signal_id:
+                type: "number"
+                example: 4535
+              sequence:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    table:
+                      type: "number"
+                      example: 1
+                    table_detail:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties:
+                          ring_index:
+                            type: "number"
+                            example: 1
+                          barrier_list:
+                            type: "array"
+                            items:
+                              type: "object"
+                              properties:
+                                barrier_index:
+                                  type: "number"
+                                  example: 1
+                                seq_detail:
+                                  type: "array"
+                                  items:
+                                    type: "object"
+                                    properties:
+                                      seq:
+                                        type: "number"
+                                        example: 1
+                                      phase_id:
+                                        type: "number"
+                                        example: 239748
+                                      phase_num:
+                                        type: "number"
+                                        example: 1
+                                      phase_name:
+                                        type: "string"
+                                        example: "相位1"
+              split:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    table:
+                      type: "number"
+                      example: 1
+                    table_detail:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties:
+                          phase_id:
+                            type: "number"
+                            example: 239748
+                          phase_num:
+                            type: "number"
+                            example: 1
+                          phase_name:
+                            type: "string"
+                            example: "相位1"
+                          split_time:
+                            type: "number"
+                            example: 103
+            type: "object"
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              trace_id:
+                type: "string"
+                example: "645acf295e4cfe1d7bf0725c08778302"
+  /signal-control/signaledit/planinfoupdate:
+    post:
+      summary: 编辑更新 方案表
+      description: 编辑更新 方案表
+      tags:
+        - 配时
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          schema:
+            required:
+              - "logic_junction_id"
+              - "signal_id"
+              - "plan"
+            properties:
+              logic_junction_id:
+                type: "string"
+                example: "2017030116_5178834"
+              signal_id:
+                type: "number"
+                example: 0
+              plan:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "number"
+                      example: 8798270
+                    signal_id:
+                      type: "number"
+                      example: 4613
+                    cycle:
+                      type: "number"
+                      example: 210
+                    offset:
+                      type: "number"
+                      example: 0
+                    comment:
+                      type: "string"
+                      example: ""
+                    plan_num:
+                      type: "number"
+                      example: 1
+                    plan_name:
+                      type: "string"
+                      example: "方案1"
+                    sequence_table:
+                      type: "number"
+                      example: 1
+                    split_table:
+                      type: "number"
+                      example: 1
+                    stage_table:
+                      type: "number"
+                      example: 0
+            type: "object"
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              trace_id:
+                type: "string"
+                example: "6446810b5e4dde72aeb88df60a098902"
