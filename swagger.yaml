@@ -24250,3 +24250,49 @@ paths:
               trace_id:
                 type: "string"
                 example: "6446810b5e4dde72aeb88df60a098902"
+  /signal-control/signalversion/releasetiming:
+    post:
+      summary: 人工配时发布
+      description: 人工配时发布
+      tags:
+        - 配时
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - name: logic_junction_id
+          in: formData
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: formData
+          type: string
+          description: "开始时间"
+          required: true
+        - name: comment
+          in: formData
+          type: string
+          description: "备注说明"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            required:
+              - "errno"
+              - "errmsg"
+              - "trace_id"
+              - "ext"
+            properties:
+              errno:
+                type: "number"
+                example: 0
+              errmsg:
+                type: "string"
+                example: ""
+              trace_id:
+                type: "string"
+                example: "6445b81e5e4cebfe2c991abc08302d02"
