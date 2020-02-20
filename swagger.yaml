@@ -11720,11 +11720,6 @@ paths:
                               type: "string"
                               example: "FeatureCollection"
                           type: "object"
-                        reverse_geo:
-                          type: "array"
-                          items:
-                            type: "undefined"
-                          example: []
               errmsg:
                 type: string
                 description: 错误信息，当errno非0的时候有内容，可直接在页面显示
