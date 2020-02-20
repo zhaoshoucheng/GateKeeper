@@ -110,8 +110,8 @@ class Alarmanalysis extends MY_Controller
             'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'select_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
-            'start_hour'     => 'required|trim|regex_match[/\d{2}\:\d{2}/]',
-            'end_hour'       => 'required|trim|regex_match[/\d{2}\:\d{2}/]',
+            'start_hour'     => 'required|trim|regex_match[/\d{1}\:\d{2}/]',
+            'end_hour'       => 'required|trim|regex_match[/\d{1}\:\d{2}/]',
             'alarm_type'     => 'required|is_natural',
             'top_num'        => 'is_natural',
         ], $params);
