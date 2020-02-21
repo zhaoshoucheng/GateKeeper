@@ -14883,8 +14883,8 @@ paths:
                 example: unknown
   /diagnosisNoTiming/getAllCityJunctionsDiagnoseList:
     post:
-      summary: 新诊断-列表页 -  诊断路口问题详情
-      description: 新诊断-列表页 -  诊断路口问题详情
+      summary: 新诊断-列表页 -  全城诊断问题
+      description: 新诊断-列表页 -  全城诊断问题
       tags:
         - 诊断
       consumes:
@@ -14904,7 +14904,7 @@ paths:
         type: string
       - name: hour
         in: formData
-        description: '示例: 10%3A30'
+        description: '示例: 10:30'
         required: false
         type: string
       responses:
@@ -14912,255 +14912,255 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回结构"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   center:
                     type: object
-                    description: ""
+                    description: "中心点"
                     properties:
                       lat:
                         type: number
-                        description: ""
+                        description: "纬度"
                         example: 31.318903582444
                         format: float
                       lng:
                         type: number
-                        description: ""
+                        description: "经度"
                         example: 120.74295965599
                         format: float
                   count:
                     type: object
-                    description: ""
+                    description: "统计"
                     properties:
                       imbalance_index:
                         type: object
-                        description: ""
+                        description: "失衡"
                         properties:
                           name:
                             type: string
-                            description: ""
+                            description: "失衡说明"
                             example: 失衡
                           num:
                             type: integer
-                            description: ""
+                            description: "失衡数量"
                             example: 12
                           other:
                             type: string
-                            description: ""
+                            description: "其他占比"
                             example: 98.58%
                           percent:
                             type: string
-                            description: ""
+                            description: "占比"
                             example: 1.42%
                       oversaturation_index:
                         type: object
-                        description: ""
+                        description: "过饱和"
                         properties:
                           name:
                             type: string
-                            description: ""
+                            description: "过饱和说明"
                             example: 过饱和
                           num:
                             type: integer
-                            description: ""
+                            description: "过饱和个数"
                             example: 14
                           other:
                             type: string
-                            description: ""
+                            description: "其他占比"
                             example: 98.34%
                           percent:
                             type: string
-                            description: ""
+                            description: "过饱和占比"
                             example: 1.66%
                       spillover_index:
                         type: object
-                        description: ""
+                        description: "溢流"
                         properties:
                           name:
                             type: string
-                            description: ""
+                            description: "溢流说明"
                             example: 溢流
                           num:
                             type: integer
-                            description: ""
+                            description: "溢流个数"
                             example: 1
                           other:
                             type: string
-                            description: ""
+                            description: "其他占比"
                             example: 99.88%
                           percent:
                             type: string
-                            description: ""
+                            description: "溢流占比"
                             example: 0.12%
                   dataList:
                     type: array
-                    description: ""
+                    description: "路口列表"
                     items:
                       type: object
-                      description: ""
+                      description: "数组"
                       properties:
                         diagnose_detail:
                           type: object
-                          description: ""
+                          description: "诊断详情"
                           properties:
                             imbalance_index_diagnose:
                               type: integer
-                              description: ""
+                              description: "失衡指标"
                               example: 0
                             oversaturation_index_diagnose:
                               type: integer
-                              description: ""
+                              description: "过饱和时表"
                               example: 0
                             spillover_index_diagnose:
                               type: integer
-                              description: ""
+                              description: "溢流指标"
                               example: 0
                         info:
                           type: object
-                          description: ""
+                          description: "信息"
                           properties:
                             question:
                               type: array
-                              description: ""
+                              description: "问题"
                               items:
                                 type: string
-                                description: ""
+                                description: "问题描述"
                                 example: 无
                             quota:
                               type: array
-                              description: ""
+                              description: "指标"
                               items:
                                 type: object
-                                description: ""
+                                description: "指标对象"
                                 properties:
                                   name:
                                     type: string
-                                    description: ""
+                                    description: "指标名称"
                                     example: 平均延误
                                   unit:
                                     type: string
-                                    description: ""
+                                    description: "指标单位"
                                     example: 秒
                                   value:
                                     type: number
-                                    description: ""
+                                    description: "指标具体值"
                                     example: 29.57
                                     format: float
                         lat:
                           type: string
-                          description: ""
+                          description: "路口纬度"
                           example: "31.27966"
                         lng:
                           type: string
-                          description: ""
+                          description: "路口经度"
                           example: "120.73424"
                         logic_junction_id:
                           type: string
-                          description: ""
+                          description: "路口id"
                           example: 1ff9ee773bcbb227c9ea37bfad8bede8
                         name:
                           type: string
-                          description: ""
+                          description: "路口名称"
                           example: 独墅湖大道-松涛街
                   junctionTotal:
                     type: integer
-                    description: ""
+                    description: "路口总数"
                     example: 843
                   quotaCount:
                     type: array
-                    description: ""
+                    description: "全城指标描述"
                     items:
                       type: object
                       description: ""
                       properties:
                         name:
                           type: string
-                          description: ""
+                          description: "指标名称"
                           example: 平均延误
                         unit:
                           type: string
-                          description: ""
+                          description: "单位"
                           example: 秒
                         value:
                           type: number
-                          description: ""
+                          description: "值"
                           example: 17.18
                           format: float
                   rankList:
                     type: object
-                    description: ""
+                    description: "排名"
                     properties:
                       imbalance_index:
                         type: array
-                        description: ""
+                        description: "失衡排名"
                         items:
                           type: object
-                          description: ""
+                          description: "数组"
                           properties:
                             junction_id:
                               type: string
-                              description: ""
+                              description: "路口id"
                               example: "2017030116_3198349"
                             junction_label:
                               type: string
-                              description: ""
+                              description: "路口名称"
                               example: 钟南街_东沙湖路
                             value:
                               type: number
-                              description: ""
+                              description: "值"
                               example: 17.05
                               format: float
                       oversaturation_index:
                         type: array
-                        description: ""
+                        description: "过饱和排名"
                         items:
                           type: object
-                          description: ""
+                          description: "数组"
                           properties:
                             junction_id:
                               type: string
-                              description: ""
+                              description: "路口id"
                               example: "2017030116_3198349"
                             junction_label:
                               type: string
-                              description: ""
+                              description: "路口名称"
                               example: 钟南街_东沙湖路
                             value:
                               type: number
-                              description: ""
+                              description: "值"
                               example: 17.05
                               format: float
                       spillover_index:
                         type: array
-                        description: ""
+                        description: "溢流排名"
                         items:
                           type: object
-                          description: ""
+                          description: "数组"
                           properties:
                             junction_id:
                               type: string
-                              description: ""
+                              description: "路口id"
                               example: "2017030116_3552455"
                             junction_label:
                               type: string
-                              description: ""
+                              description: "路口名称"
                               example: 东兴路_人行过街
                             value:
                               type: number
-                              description: ""
+                              description: "值"
                               example: 5.87
                               format: float
               errmsg:
                 type: string
-                description: ""
+                description: "错误消息"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码"
                 example: 0
               time:
                 type: object
@@ -15208,60 +15208,60 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回对象"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   center:
                     type: object
-                    description: ""
+                    description: "中心点"
                     properties:
                       lat:
                         type: string
-                        description: ""
+                        description: "纬度"
                         example: "31.38263"
                       lng:
                         type: string
-                        description: ""
+                        description: "经度"
                         example: "120.71733"
                   dataList:
                     type: array
-                    description: ""
+                    description: "数据列表"
                     items:
                       type: object
-                      description: ""
+                      description: "数组"
                       properties:
                         flow_label:
                           type: string
-                          description: ""
+                          description: "方向"
                           example: 南
                         lat:
                           type: number
-                          description: ""
+                          description: "纬度"
                           example: 31.382045
                           format: float
                         lng:
                           type: number
-                          description: ""
+                          description: "经度"
                           example: 120.717438
                           format: float
                         logic_flow_id:
                           type: string
-                          description: ""
+                          description: "flow的ID"
                           example: 2017030116_i_202037081_2017030116_o_202037040
                   map_version:
                     type: integer
-                    description: ""
-                    example: 2.019070918e+09
+                    description: "路网版本号"
+                    example: 2019070918
               errmsg:
                 type: string
-                description: ""
+                description: "错误消息"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码"
                 example: 0
               time:
                 type: object
@@ -15314,231 +15314,47 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回结构"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   junction_question:
                     type: object
-                    description: ""
+                    description: "路口问题"
                     properties:
                       is_imbalance:
                         type: object
-                        description: ""
+                        description: "是否失衡"
                         properties:
                           info:
                             type: object
-                            description: ""
+                            description: "失衡信息"
                             properties:
                               name:
                                 type: string
-                                description: ""
+                                description: "失衡描述"
                                 example: 失衡
                               quota_name:
                                 type: string
-                                description: ""
+                                description: "指标名称"
                                 example: 失衡问题趋势
                           list:
                             type: object
-                            description: ""
+                            description: "时段数据，key为时段，从00:00 半小时一个时段"
                             properties:
-                              "00:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "00:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "01:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "01:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "02:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "02:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "03:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "03:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "04:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "04:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "05:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "05:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "06:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "06:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "07:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "07:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "08:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "08:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "09:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "09:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "10:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "10:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "11:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "11:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "12:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "12:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "13:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "13:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "14:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "14:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "15:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "15:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "16:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "16:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "17:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "17:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "18:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "18:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "19:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "19:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "20:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "20:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "21:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "21:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "22:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "22:30":
-                                type: integer
-                                description: ""
-                                example: 0
                               "23:00":
                                 type: integer
-                                description: ""
+                                description: "指标值"
                                 example: 0
                               "23:30":
                                 type: integer
-                                description: ""
+                                description: "指标值"
                                 example: 0
                       is_oversaturation:
                         type: object
-                        description: ""
+                        description: "是否过饱和"
                         properties:
                           info:
                             type: object
@@ -15546,427 +15362,51 @@ paths:
                             properties:
                               name:
                                 type: string
-                                description: ""
+                                description: "类型描述"
                                 example: 过饱和
                               quota_name:
                                 type: string
-                                description: ""
+                                description: "指标描述"
                                 example: 过饱和问题趋势
                           list:
                             type: object
-                            description: ""
+                            description: "时段数据，key为时段，从00:00 半小时一个时段"
                             properties:
                               "00:00":
                                 type: integer
-                                description: ""
-                                example: 0
-                              "00:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "01:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "01:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "02:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "02:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "03:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "03:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "04:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "04:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "05:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "05:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "06:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "06:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "07:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "07:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "08:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "08:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "09:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "09:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "10:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "10:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "11:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "11:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "12:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "12:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "13:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "13:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "14:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "14:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "15:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "15:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "16:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "16:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "17:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "17:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "18:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "18:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "19:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "19:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "20:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "20:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "21:00":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "21:30":
-                                type: integer
-                                description: ""
-                                example: 1
-                              "22:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "22:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "23:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "23:30":
-                                type: integer
-                                description: ""
+                                description: "指标值"
                                 example: 0
                       is_spillover:
                         type: object
-                        description: ""
+                        description: "溢流描述"
                         properties:
                           info:
                             type: object
-                            description: ""
+                            description: "溢流信息"
                             properties:
                               name:
                                 type: string
-                                description: ""
+                                description: "指标名称"
                                 example: 溢流
                               quota_name:
                                 type: string
-                                description: ""
+                                description: "指标问题趋势"
                                 example: 溢流问题趋势
                           list:
                             type: object
-                            description: ""
+                            description: "时段数据，key为时段，从00:00 半小时一个时段"
                             properties:
                               "00:00":
                                 type: integer
-                                description: ""
-                                example: 0
-                              "00:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "01:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "01:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "02:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "02:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "03:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "03:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "04:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "04:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "05:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "05:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "06:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "06:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "07:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "07:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "08:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "08:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "09:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "09:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "10:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "10:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "11:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "11:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "12:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "12:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "13:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "13:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "14:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "14:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "15:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "15:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "16:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "16:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "17:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "17:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "18:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "18:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "19:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "19:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "20:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "20:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "21:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "21:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "22:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "22:30":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "23:00":
-                                type: integer
-                                description: ""
-                                example: 0
-                              "23:30":
-                                type: integer
-                                description: ""
+                                description: "指标"
                                 example: 0
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码"
                 example: 0
               time:
                 type: object
@@ -16004,256 +15444,256 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回结构"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   flow_quota_all:
                     type: object
-                    description: ""
+                    description: "指标单位描述"
                     properties:
                       confidence:
                         type: object
-                        description: ""
+                        description: "置信度"
                         properties:
                           name:
                             type: string
-                            description: ""
+                            description: "指标名称"
                             example: 置信度
                           unit:
                             type: string
-                            description: ""
+                            description: "指标单位"
                             example: ""
                       route_length:
                         type: object
-                        description: ""
+                        description: "路段长度"
                         properties:
                           name:
                             type: string
-                            description: ""
+                            description: "指标名称"
                             example: 路段长度
                           unit:
                             type: string
-                            description: ""
+                            description: "指标单位"
                             example: 米
                       spillover_rate:
                         type: object
-                        description: ""
+                        description: "溢流比率"
                         properties:
                           name:
                             type: string
-                            description: ""
+                            description: "指标名称"
                             example: 溢流比率
                           unit:
                             type: string
-                            description: ""
+                            description: "指标但闻"
                             example: ""
                       stop_delay:
                         type: object
-                        description: ""
+                        description: "停车延误"
                         properties:
                           name:
                             type: string
-                            description: ""
+                            description: "指标名称"
                             example: 停车延误
                           unit:
                             type: string
-                            description: ""
+                            description: "指标单位"
                             example: 秒
                       stop_rate:
                         type: object
-                        description: ""
+                        description: "停车比率"
                         properties:
                           name:
                             type: string
-                            description: ""
+                            description: "指标名称"
                             example: 停车比率
                           unit:
                             type: string
-                            description: ""
+                            description: "指标单位"
                             example: ""
                       stop_time_cycle:
                         type: object
-                        description: ""
+                        description: "停车次数"
                         properties:
                           name:
                             type: string
-                            description: ""
+                            description: "指标名称"
                             example: 停车次数
                           unit:
                             type: string
-                            description: ""
+                            description: "指标单位"
                             example: ""
                   junction_id:
                     type: string
-                    description: ""
+                    description: "路口ID"
                     example: "2017030116_3475515"
                   junction_question:
                     type: object
-                    description: ""
+                    description: "路口问题"
                     properties:
                       is_imbalance:
                         type: object
-                        description: ""
+                        description: "是否失衡"
                         properties:
                           name:
                             type: string
-                            description: ""
+                            description: "指标名称"
                             example: 失衡
                           quota_name:
                             type: string
-                            description: ""
+                            description: "指标描述"
                             example: 失衡问题趋势
                       is_oversaturation:
                         type: object
-                        description: ""
+                        description: "是否过饱和"
                         properties:
                           name:
                             type: string
-                            description: ""
+                            description: "指标名称"
                             example: 过饱和
                           quota_name:
                             type: string
-                            description: ""
+                            description: "指标描述"
                             example: 过饱和问题趋势
                   movements:
                     type: array
-                    description: ""
+                    description: "路口每个方向情况"
                     items:
                       type: object
-                      description: ""
+                      description: "数组"
                       properties:
                         comment:
                           type: string
-                          description: ""
+                          description: "方向"
                           example: 北掉头
                         confidence:
                           type: string
-                          description: ""
+                          description: "评价"
                           example: 低
                         delay_sum:
                           type: integer
-                          description: ""
+                          description: "延误时间"
                           example: 0
                         free_flow_speed:
                           type: number
-                          description: ""
+                          description: "自由流flow速度"
                           example: 30.6
                           format: float
                         free_speed:
                           type: integer
-                          description: ""
+                          description: "自由流速度"
                           example: 0
                         movement_id:
                           type: string
-                          description: ""
+                          description: "flow_id"
                           example: 2017030116_i_196829981_2017030116_o_196829960
                         nonsaturation_delay:
                           type: number
-                          description: ""
+                          description: "非饱和延迟"
                           example: 117.5
                           format: float
                         nonsaturation_stop_frequency:
                           type: integer
-                          description: ""
+                          description: "非饱和停止频率"
                           example: 1
                         nonsaturation_traj_count:
                           type: integer
-                          description: ""
+                          description: "非饱和轨迹数"
                           example: 1
                         oversaturation_delay:
                           type: integer
-                          description: ""
+                          description: "过饱和延迟"
                           example: 0
                         oversaturation_stop_frequency:
                           type: integer
-                          description: ""
+                          description: "过饱和停止频率"
                           example: 0
                         oversaturation_traj_count:
                           type: integer
-                          description: ""
+                          description: "过饱和轨迹数"
                           example: 0
                         queue_length:
                           type: integer
-                          description: ""
+                          description: "排队长度"
                           example: 38
                         queue_length_flag:
                           type: integer
-                          description: ""
+                          description: "排队长度标记"
                           example: 0
                         route_length:
                           type: string
-                          description: ""
+                          description: "道路长度"
                           example: "245"
                         sort_key:
                           type: integer
-                          description: ""
+                          description: "排序类型"
                           example: 11
                         speed:
                           type: integer
-                          description: ""
+                          description: "速度"
                           example: 1
                         spillover_delay:
                           type: integer
-                          description: ""
+                          description: "溢出延迟"
                           example: 0
                         spillover_rate:
                           type: integer
-                          description: ""
+                          description: "溢出率"
                           example: 0
                         spillover_rate_flag:
                           type: integer
-                          description: ""
+                          description: "溢出率标记"
                           example: 0
                         spillover_stop_frequency:
                           type: integer
-                          description: ""
+                          description: "溢出停止频率"
                           example: 0
                         spillover_traj_count:
                           type: integer
-                          description: ""
+                          description: "溢出轨迹书"
                           example: 0
                         stop_delay:
                           type: integer
-                          description: ""
+                          description: "停车延误"
                           example: 115
                         stop_delay_flag:
                           type: integer
-                          description: ""
+                          description: "停车延误标记"
                           example: 1
                         stop_rate:
                           type: integer
-                          description: ""
+                          description: "停车延误比率"
                           example: 1
                         stop_rate_flag:
                           type: integer
-                          description: ""
+                          description: "停车延误频率"
                           example: 1
                         stop_time_cycle:
                           type: integer
-                          description: ""
+                          description: "停车时间周期时长"
                           example: 1
                         traj_count:
                           type: integer
-                          description: ""
+                          description: "轨迹数"
                           example: 1
                         twice_stop_rate:
                           type: integer
-                          description: ""
+                          description: "二次停车比率"
                           example: 0
                         weight:
                           type: integer
-                          description: ""
+                          description: "权重"
                           example: 0
               errmsg:
                 type: string
-                description: ""
+                description: "错误消息"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码"
                 example: 0
               time:
                 type: object
@@ -16286,9 +15726,9 @@ paths:
       produces:
       - application/json
       parameters:
-      - name: dates%5B0%5D
+      - name: dates[]
         in: formData
-        description: '示例: 2019-07-10'
+        description: '示例: [2019-07-10]'
         required: false
         type: string
       - name: city_id
@@ -16301,2371 +15741,115 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回结构"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据"
                 properties:
                   imbalance_index:
                     type: object
-                    description: ""
+                    description: "失衡指标"
                     properties:
                       index:
                         type: object
-                        description: ""
+                        description: "数组，key为日期"
                         properties:
                           "2019-07-10":
                             type: object
-                            description: ""
+                            description: "时段数据，下面key为时段"
                             properties:
                               "00:00":
                                 type: object
-                                description: ""
+                                description: "时段数据"
                                 properties:
                                   hour:
                                     type: string
-                                    description: ""
+                                    description: "时段"
                                     example: "00:00"
                                   num:
                                     type: integer
-                                    description: ""
+                                    description: "指标"
                                     example: 0
                                   percent:
                                     type: string
-                                    description: ""
+                                    description: "占比"
                                     example: 0%
-                              "00:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "00:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "01:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "01:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "01:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "01:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "02:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "02:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "02:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "02:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "03:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "03:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "03:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "03:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "04:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "04:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "04:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "04:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "05:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "05:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "05:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "05:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "06:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "06:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.13%
-                              "06:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "06:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 3
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.37%
-                              "07:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "07:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 9
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.09%
-                              "07:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "07:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 40
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 4.74%
-                              "08:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "08:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 70
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 8.34%
-                              "08:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "08:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 68
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 8.06%
-                              "09:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "09:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 30
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 3.54%
-                              "09:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "09:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 26
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 3.07%
-                              "10:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "10:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 15
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.77%
-                              "10:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "10:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 12
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.42%
-                              "11:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "11:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 11
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.31%
-                              "11:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "11:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 11
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.31%
-                              "12:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "12:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 11
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.31%
-                              "12:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "12:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 10
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.2%
-                              "13:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "13:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 10
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.2%
-                              "13:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "13:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 20
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 2.39%
-                              "14:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "14:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 13
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.56%
-                              "14:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "14:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 16
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.9%
-                              "15:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "15:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 12
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.42%
-                              "15:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "15:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 6
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.72%
-                              "16:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "16:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 15
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.78%
-                              "16:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "16:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 12
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.42%
-                              "17:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "17:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 34
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 4.04%
-                              "17:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "17:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 62
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 7.38%
-                              "18:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "18:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 80
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 9.52%
-                              "18:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "18:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 51
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 6.11%
-                              "19:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "19:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 25
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 2.99%
-                              "19:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "19:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 14
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.66%
-                              "20:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "20:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 21
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 2.5%
-                              "20:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "20:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 20
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 2.37%
-                              "21:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "21:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 15
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.79%
-                              "21:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "21:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 20
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 2.39%
-                              "22:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "22:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 7
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.85%
-                              "22:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "22:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 5
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.61%
-                              "23:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "23:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.12%
-                              "23:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "23:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.13%
                       name:
                         type: string
-                        description: ""
+                        description: "指标名称"
                         example: 失衡
                   oversaturation_index:
                     type: object
-                    description: ""
+                    description: "过饱和指标"
                     properties:
                       index:
                         type: object
-                        description: ""
+                        description: "过饱和指标，key是日期"
                         properties:
                           "2019-07-10":
                             type: object
-                            description: ""
+                            description: "时段指标，key是时段"
                             properties:
                               "00:00":
                                 type: object
-                                description: ""
+                                description: "时段指标"
                                 properties:
                                   hour:
                                     type: string
-                                    description: ""
+                                    description: "时段"
                                     example: "00:00"
                                   num:
                                     type: integer
-                                    description: ""
+                                    description: "指标值"
                                     example: 0
                                   percent:
                                     type: string
-                                    description: ""
+                                    description: "占比"
                                     example: 0%
-                              "00:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "00:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "01:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "01:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "01:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "01:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "02:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "02:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "02:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "02:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "03:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "03:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "03:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "03:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "04:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "04:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "04:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "04:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "05:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "05:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "05:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "05:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "06:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "06:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.13%
-                              "06:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "06:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 4
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.49%
-                              "07:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "07:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 9
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.09%
-                              "07:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "07:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 48
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 5.69%
-                              "08:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "08:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 88
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 10.49%
-                              "08:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "08:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 84
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 9.95%
-                              "09:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "09:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 40
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 4.72%
-                              "09:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "09:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 28
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 3.31%
-                              "10:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "10:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 15
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.77%
-                              "10:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "10:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 14
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.66%
-                              "11:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "11:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 11
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.31%
-                              "11:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "11:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 11
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.31%
-                              "12:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "12:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 11
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.31%
-                              "12:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "12:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 10
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.2%
-                              "13:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "13:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 12
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.44%
-                              "13:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "13:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 22
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 2.63%
-                              "14:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "14:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 13
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.56%
-                              "14:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "14:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 16
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.9%
-                              "15:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "15:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 13
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.54%
-                              "15:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "15:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 8
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.95%
-                              "16:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "16:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 16
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.9%
-                              "16:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "16:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 13
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.53%
-                              "17:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "17:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 37
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 4.4%
-                              "17:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "17:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 75
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 8.93%
-                              "18:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "18:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 98
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 11.67%
-                              "18:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "18:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 59
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 7.07%
-                              "19:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "19:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 25
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 2.99%
-                              "19:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "19:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 15
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.78%
-                              "20:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "20:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 21
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 2.5%
-                              "20:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "20:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 22
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 2.6%
-                              "21:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "21:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 16
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.91%
-                              "21:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "21:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 21
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 2.51%
-                              "22:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "22:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 7
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.85%
-                              "22:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "22:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 5
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.61%
-                              "23:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "23:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 2
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.25%
-                              "23:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "23:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.13%
                       name:
                         type: string
-                        description: ""
+                        description: "指标名称"
                         example: 过饱和
                   spillover_index:
                     type: object
-                    description: ""
+                    description: "溢流"
                     properties:
                       index:
                         type: object
-                        description: ""
+                        description: "溢流指标，key是日期"
                         properties:
                           "2019-07-10":
                             type: object
-                            description: ""
+                            description: "溢流指标，key是时段"
                             properties:
                               "00:00":
                                 type: object
-                                description: ""
+                                description: "指标"
                                 properties:
                                   hour:
                                     type: string
-                                    description: ""
+                                    description: "时段"
                                     example: "00:00"
                                   num:
                                     type: integer
-                                    description: ""
+                                    description: "指标值"
                                     example: 0
                                   percent:
                                     type: string
-                                    description: ""
-                                    example: 0%
-                              "00:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "00:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "01:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "01:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "01:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "01:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "02:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "02:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "02:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "02:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "03:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "03:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "03:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "03:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "04:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "04:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "04:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "04:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "05:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "05:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "05:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "05:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "06:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "06:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "06:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "06:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "07:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "07:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "07:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "07:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "08:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "08:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 4
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.48%
-                              "08:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "08:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 9
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 1.07%
-                              "09:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "09:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 3
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.35%
-                              "09:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "09:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.12%
-                              "10:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "10:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 3
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.35%
-                              "10:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "10:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.12%
-                              "11:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "11:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "11:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "11:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "12:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "12:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.12%
-                              "12:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "12:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.12%
-                              "13:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "13:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.12%
-                              "13:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "13:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "14:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "14:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 2
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.24%
-                              "14:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "14:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "15:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "15:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "15:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "15:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "16:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "16:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "16:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "16:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 2
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.24%
-                              "17:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "17:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 2
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.24%
-                              "17:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "17:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 7
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.83%
-                              "18:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "18:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 7
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.83%
-                              "18:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "18:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.12%
-                              "19:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "19:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 2
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.24%
-                              "19:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "19:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "20:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "20:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 1
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.12%
-                              "20:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "20:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 2
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0.24%
-                              "21:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "21:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "21:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "21:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "22:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "22:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "22:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "22:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "23:00":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "23:00"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
-                                    example: 0%
-                              "23:30":
-                                type: object
-                                description: ""
-                                properties:
-                                  hour:
-                                    type: string
-                                    description: ""
-                                    example: "23:30"
-                                  num:
-                                    type: integer
-                                    description: ""
-                                    example: 0
-                                  percent:
-                                    type: string
-                                    description: ""
+                                    description: "占比"
                                     example: 0%
                       name:
                         type: string
-                        description: ""
+                        description: "指标名称"
                         example: 溢流
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码"
                 example: 0
               time:
                 type: object
@@ -18703,9 +15887,9 @@ paths:
         description: '示例: 23'
         required: false
         type: string
-      - name: dates%5B0%5D
+      - name: dates[]
         in: formData
-        description: '示例: 2019-07-10'
+        description: '示例: [2019-07-10]'
         required: false
         type: string
       - name: junction_id
@@ -18715,7 +15899,7 @@ paths:
         type: string
       - name: time_range
         in: formData
-        description: '示例: 12%3A00-12%3A30'
+        description: '示例: 12:00-12:30'
         required: false
         type: string
       - name: flow_id
@@ -18728,65 +15912,65 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回对象"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据，key是日期"
                 properties:
                   "2019-07-10":
                     type: object
-                    description: ""
+                    description: "指标信息"
                     properties:
                       dataList:
                         type: array
-                        description: ""
+                        description: "散点图值列表"
                         items:
                           type: array
-                          description: ""
+                          description: "散点图值列表"
                           items:
                             type: integer
-                            description: ""
+                            description: "散点图具体值"
                             example: 43839
                       flow_label:
                         type: string
-                        description: ""
+                        description: "flow的标签"
                         example: 北掉头
                       info:
                         type: object
-                        description: ""
+                        description: "散点图信息"
                         properties:
                           x:
                             type: object
-                            description: ""
+                            description: "x轴"
                             properties:
                               max:
                                 type: integer
-                                description: ""
+                                description: "最大"
                                 example: 44793
                               min:
                                 type: integer
-                                description: ""
+                                description: "最小"
                                 example: 43839
                           "y":
                             type: object
-                            description: ""
+                            description: "y轴"
                             properties:
                               max:
                                 type: integer
-                                description: ""
+                                description: "最大"
                                 example: 53
                               min:
                                 type: integer
-                                description: ""
+                                description: "最小"
                                 example: 24
               errmsg:
                 type: string
-                description: ""
+                description: "错误消息"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码"
                 example: 0
               time:
                 type: object
@@ -18802,11 +15986,11 @@ paths:
                     example: 1.4176秒
               traceid:
                 type: string
-                description: ""
+                description: "跟踪id"
                 example: 645acf405d26a47963c70c5703c11902
               username:
                 type: string
-                description: ""
+                description: "用户名"
                 example: unknown
   /diagnosisNoTiming/getSpaceTimeDiagram:
     post:
@@ -18824,9 +16008,9 @@ paths:
         description: '示例: 23'
         required: false
         type: string
-      - name: dates%5B0%5D
+      - name: dates[]
         in: formData
-        description: '示例: 2019-07-10'
+        description: '示例: [2019-07-10]'
         required: false
         type: string
       - name: junction_id
@@ -18836,7 +16020,7 @@ paths:
         type: string
       - name: time_range
         in: formData
-        description: '示例: 12%3A00-12%3A30'
+        description: '示例: 12:00-12:30'
         required: false
         type: string
       - name: flow_id
@@ -18849,68 +16033,68 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "返回对象"
             properties:
               data:
                 type: object
-                description: ""
+                description: "返回数据，key是日期"
                 properties:
                   "2019-07-10":
                     type: object
-                    description: ""
+                    description: "时空图信息"
                     properties:
                       dataList:
                         type: array
-                        description: ""
+                        description: "数据列表"
                         items:
                           type: array
-                          description: ""
+                          description: "数组"
                           items:
                             type: array
-                            description: ""
+                            description: "数组"
                             items:
                               type: integer
-                              description: ""
+                              description: "时空图值"
                               example: 43782
                       flow_label:
                         type: string
-                        description: ""
+                        description: "flow的标记"
                         example: 北掉头
                       info:
                         type: object
-                        description: ""
+                        description: "时空图信息"
                         properties:
                           x:
                             type: object
-                            description: ""
+                            description: "x轴"
                             properties:
                               max:
                                 type: integer
-                                description: ""
+                                description: "最大值"
                                 example: 44881
                               min:
                                 type: integer
-                                description: ""
+                                description: "最小值"
                                 example: 43782
                           "y":
                             type: object
-                            description: ""
+                            description: "y轴"
                             properties:
                               max:
                                 type: integer
-                                description: ""
+                                description: "最大值"
                                 example: 223
                               min:
                                 type: integer
-                                description: ""
+                                description: "最小值"
                                 example: -260
               errmsg:
                 type: string
-                description: ""
+                description: "错误信息"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误码"
                 example: 0
               time:
                 type: object
