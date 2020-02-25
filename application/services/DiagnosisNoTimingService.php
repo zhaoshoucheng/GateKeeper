@@ -233,7 +233,7 @@ class DiagnosisNoTimingService extends BaseService
                 "map_version"=>"1",//不能为空
                 "token"=>"1",//不能为空
                 "dates"=>[$eachDate],
-                "simple_num" => 500,
+                "simple_num" => 2000,
             ];
             try{
                 $trajInfo = $this->traj_model->getSpaceTimeDiagram($trajParam);
