@@ -241,7 +241,7 @@ class Wordreport extends MY_Controller{
         $this->wordreportService->checkFile($_FILES);
 
         //前端数据转换成模板对应的格式
-        $params = $this->wordreportService->formartJuncImgKeyValue($params);
+        $params = $this->wordreportService->formartRoadImgKeyValue($params);
 
 
         //生成chart水印图片
@@ -269,7 +269,7 @@ class Wordreport extends MY_Controller{
         $newFiles = array_merge($tmpFiles,$newFiles);
 
         //生成word文件
-        $docFile = $this->wordreportService->createJuncDoc($params,$newFiles);
+        $docFile = $this->wordreportService->createAreaDoc($params,$newFiles);
 
         //销毁水印图片
         $this->wordreportService->clearWatermark($newFiles);

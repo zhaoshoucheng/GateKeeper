@@ -394,7 +394,7 @@ class WordreportService extends BaseService{
         }else{
             $templateProcessor->cloneBlock("B_BLOCK",0);
         }
-        //区域运行情况
+        //区域运行状态
         if(isset($params['runningIndicator_content_1'])){
             $templateProcessor->cloneBlock("C_BLOCK",1);
             $templateProcessor->setValue("runningIndicator_content_1",$params['runningIndicator_content_1']);
@@ -409,59 +409,48 @@ class WordreportService extends BaseService{
         }else{
             $templateProcessor->cloneBlock("C_BLOCK",0);
         }
-        //轨迹热力演变
-        if(isset($params['runningCoordination_content_1'])){
-            $templateProcessor->cloneBlock("D_BLOCK",1);
-            $templateProcessor->setValue("runningCoordination_content_1",$params['runningCoordination_content_1']);
-            $templateProcessor->setValue("runningCoordination_content_2",$params['runningCoordination_content_2']);
-            $img  = array("path" => $FILES["runningCoordination_chart_1"]['tmp_watermark'], "width" => 210, "height" => 210);
-            $templateProcessor->setImageValue("runningCoordination_chart_1",$img);
-            $img['path'] = $FILES["runningCoordination_chart_2"]['tmp_watermark'];
-            $templateProcessor->setImageValue("runningCoordination_chart_2",$img);
 
-        }else{
-            $templateProcessor->cloneBlock("D_BLOCK",0);
-        }
+
         //区域拥堵情况分析
-        if(isset($params['runningCongestion_content_1'])){
+        if(isset($params['trafficAnalysis_content_1'])){
             $templateProcessor->cloneBlock("E_BLOCK",1);
-            $templateProcessor->setValue("runningCongestion_content_1",$params['runningCongestion_content_1']);
-            $templateProcessor->setValue("runningCongestion_content_2",$params['runningCongestion_content_2']);
-            $img  = array("path" => $FILES["runningCongestion_img_1"]['tmp_watermark'], "width" => 420, "height" => 420);
-            $templateProcessor->setImageValue("rrunningCongestion_img_1",$img);
-            $img['path'] = $FILES["runningCongestion_img_2"]['tmp_watermark'];
-            $templateProcessor->setImageValue("runningCongestion_img_2",$img);
+            $templateProcessor->setValue("trafficAnalysis_content_1",$params['trafficAnalysis_content_1']);
+            $templateProcessor->setValue("trafficAnalysis_content_2",$params['trafficAnalysis_content_2']);
+            $img  = array("path" => $FILES["trafficAnalysis_img_1"]['tmp_watermark'], "width" => 420, "height" => 420);
+            $templateProcessor->setImageValue("trafficAnalysis_img_1",$img);
+            $img['path'] = $FILES["trafficAnalysis_img_2"]['tmp_watermark'];
+            $templateProcessor->setImageValue("trafficAnalysis_img_2",$img);
         }else{
             $templateProcessor->cloneBlock("E_BLOCK",0);
         }
 
         //区域路口报警总结
-        if(isset($params['runningRoadalarm_img_1'])){
+        if(isset($params['heatMap_content_1'])){
             $templateProcessor->cloneBlock("F_BLOCK",1);
-            $img  = array("path" => $FILES["runningRoadalarm_img_1"]['tmp_watermark'], "width" => 420, "height" => 420);
-            $templateProcessor->setImageValue("runningRoadalarm_img_1",$img);
-            $img['path'] = $FILES["runningRoadalarm_img_1"]['tmp_watermark'];
-            $templateProcessor->setImageValue("runningRoadalarm_img_2",$img);
-            $img['path'] = $FILES["runningRoadalarm_img_2"]['tmp_watermark'];
-            $templateProcessor->setImageValue("runningRoadalarm_img_3",$img);
-            $img['path'] = $FILES["runningRoadalarm_img_3"]['tmp_watermark'];
-            $templateProcessor->setImageValue("runningRoadalarm_img_4",$img);
-            $img['path'] = $FILES["runningRoadalarm_img_4"]['tmp_watermark'];
-            $templateProcessor->setImageValue("runningRoadalarm_img_5",$img);
-            $img['path'] = $FILES["runningRoadalarm_img_5"]['tmp_watermark'];
-            $templateProcessor->setImageValue("runningRoadalarm_img_6",$img);
-            $img['path'] = $FILES["runningRoadalarm_img_6"]['tmp_watermark'];
+            $img  = array("path" => $FILES["heatMap_chart_1"]['tmp_watermark'], "width" => 420, "height" => 420);
+            $templateProcessor->setImageValue("heatMap_chart_1",$img);
+            $img['path'] = $FILES["heatMap_chart_2"]['tmp_watermark'];
+            $templateProcessor->setImageValue("heatMap_chart_2",$img);
+            $img['path'] = $FILES["heatMap_chart_3"]['tmp_watermark'];
+            $templateProcessor->setImageValue("heatMap_chart_3",$img);
+            $img['path'] = $FILES["heatMap_chart_4"]['tmp_watermark'];
+            $templateProcessor->setImageValue("heatMap_chart_4",$img);
+            $img['path'] = $FILES["heatMap_chart_5"]['tmp_watermark'];
+            $templateProcessor->setImageValue("heatMap_chart_5",$img);
+            $img['path'] = $FILES["heatMap_chart_6"]['tmp_watermark'];
+            $templateProcessor->setImageValue("heatMap_chart_6",$img);
+
         }else{
             $templateProcessor->cloneBlock("F_BLOCK",0);
         }
 
         //区域路口运行指数排名
-        if(isset($params['runningToppi_img_1'])){
+        if(isset($params['indicatorsRank_content_1'])){
             $templateProcessor->cloneBlock("G_BLOCK",1);
-            $img  = array("path" => $FILES["runningToppi_img_1"]['tmp_watermark'], "width" => 420, "height" => 420);
-            $templateProcessor->setImageValue("runningToppi_img_1",$img);
-            $img['path'] = $FILES["runningToppi_img_2"]['tmp_watermark'];
-            $templateProcessor->setImageValue("runningToppi_img_2",$img);
+            $img  = array("path" => $FILES["indicatorsRank_img_1"]['tmp_watermark'], "width" => 420, "height" => 420);
+            $templateProcessor->setImageValue("indicatorsRank_img_1",$img);
+            $img['path'] = $FILES["indicatorsRank_img_2"]['tmp_watermark'];
+            $templateProcessor->setImageValue("indicatorsRank_img_2",$img);
 
         }else{
             $templateProcessor->cloneBlock("G_BLOCK",0);
@@ -479,7 +468,7 @@ class WordreportService extends BaseService{
             //按照规律循环添加,多余的置空
             for ($i=1;$i<5;$i++){
                 for ($j=1;$j<=20;$j++){
-                    $imgName = "runningAnalysic_chart_".$i."_".$j;
+                    $imgName = "runningAnalysic_chart_1_".$i."_".$j;
                     if(isset($FILES[$imgName])){
                         $tmpimg  = array("path" => $FILES[$imgName]['tmp_watermark'], "width" => 210, "height" => 210);
                         $templateProcessor->setImageValue($imgName,$tmpimg);
@@ -491,8 +480,57 @@ class WordreportService extends BaseService{
         }else{
             $templateProcessor->cloneBlock("H_BLOCK",0);
         }
+        if(isset($params['runningAnalysic_sub_content_2'])){
+            $templateProcessor->cloneBlock("I_BLOCK",1);
+            $templateProcessor->setValue("runningAnalysic_sub_content_2",$params['runningAnalysic_sub_content_2']);
+            $templateProcessor->setValue("runningAnalysic_2_1",$params['runningAnalysic_2_1']);
+            $templateProcessor->setValue("runningAnalysic_2_2",$params['runningAnalysic_2_2']);
+            $templateProcessor->setValue("runningAnalysic_2_3",$params['runningAnalysic_2_3']);
+            $img  = array("path" => $FILES["runningAnalysic_img_2"]['tmp_watermark'], "width" => 420, "height" => 420);
+            $templateProcessor->setImageValue("runningAnalysic_img_2",$img);
+
+            //按照规律循环添加,多余的置空
+            for ($i=1;$i<5;$i++){
+                for ($j=1;$j<=20;$j++){
+                    $imgName = "runningAnalysic_chart_2_".$i."_".$j;
+                    if(isset($FILES[$imgName])){
+                        $tmpimg  = array("path" => $FILES[$imgName]['tmp_watermark'], "width" => 210, "height" => 210);
+                        $templateProcessor->setImageValue($imgName,$tmpimg);
+                    }else{
+                        $templateProcessor->setValue($imgName,"");
+                    }
+                }
+            }
+        }else{
+            $templateProcessor->cloneBlock("I_BLOCK",0);
+        }
+        if(isset($params['runningAnalysic_sub_content_3'])){
+            $templateProcessor->cloneBlock("J_BLOCK",1);
+            $templateProcessor->setValue("runningAnalysic_sub_content_3",$params['runningAnalysic_sub_content_3']);
+            $templateProcessor->setValue("runningAnalysic_3_1",$params['runningAnalysic_3_1']);
+            $templateProcessor->setValue("runningAnalysic_3_2",$params['runningAnalysic_3_2']);
+            $templateProcessor->setValue("runningAnalysic_3_3",$params['runningAnalysic_3_3']);
+            $img  = array("path" => $FILES["runningAnalysic_img_3"]['tmp_watermark'], "width" => 420, "height" => 420);
+            $templateProcessor->setImageValue("runningAnalysic_img_3",$img);
+
+            //按照规律循环添加,多余的置空
+            for ($i=1;$i<5;$i++){
+                for ($j=1;$j<=20;$j++){
+                    $imgName = "runningAnalysic_chart_3_".$i."_".$j;
+                    if(isset($FILES[$imgName])){
+                        $tmpimg  = array("path" => $FILES[$imgName]['tmp_watermark'], "width" => 210, "height" => 210);
+                        $templateProcessor->setImageValue($imgName,$tmpimg);
+                    }else{
+                        $templateProcessor->setValue($imgName,"");
+                    }
+                }
+            }
+        }else{
+            $templateProcessor->cloneBlock("J_BLOCK",0);
+        }
         return $templateProcessor->save();
     }
+
     public function createJuncDoc($params,$FILES){
         $templateProcessor = new TemplateProcessorMod('application/static/junc_template.docx');
         $templateProcessor->setValue('title',$params['title']);
