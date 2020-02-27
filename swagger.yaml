@@ -401,6 +401,7 @@ paths:
           description: 成功
           schema:
             type: object
+            description: '二进制文件'
   /Alarmanalysis/junctionDataDownload:
     get:
       summary: 路口报警分析----数据详情下载
@@ -446,6 +447,7 @@ paths:
           description: 成功
           schema:
             type: object
+            description: '二进制文件'
   /Alarmanalysis/manyDayAlarmTimeDistribution:
     post:
       summary: 城市、路口报警分析----多天报警发生时段分布
@@ -497,53 +499,15 @@ paths:
               errno:
                 type: "number"
                 example: 0
+                description: '错误编码'
               errmsg:
                 type: "string"
                 example: ""
+                description: '错误描述'
               data:
                 type: "object"
                 properties:
                   "0:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "1:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "2:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "3:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "4:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "5:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "6:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "7:00":
-                    type: "array"
-                    items:
-                      type: "object"
-                    example: []
-                  "8:00":
                     properties:
                       list:
                         type: "array"
@@ -553,12 +517,15 @@ paths:
                             name:
                               type: "string"
                               example: "失衡"
+                              description: '报警类型'
                             value:
                               type: "number"
                               example: 2
+                              description: '报警数统计'
                             key:
                               type: "number"
                               example: 3
+                              description: '报警类型Key'
                             phase_list:
                               type: "array"
                               items:
@@ -567,19 +534,26 @@ paths:
                                   phase_name:
                                     type: "string"
                                     example: "北左"
+                                    description: '相位phase_name'
                                   count:
                                     type: "number"
                                     example: 1
+                                    description: '相位问题统计'
                       count:
                         type: "number"
                         example: 3
+                        description: '报警总数统计'
                     type: "object"
+                    description: '时段值，0:00表示 0:00-1:00前闭后开的时间段'
+                description: '数据结构体'
               traceid:
                 type: "string"
                 example: "a41c6275e311497ab733e8e37510a49a"
+                description: '链路trace_id'
               username:
                 type: "string"
                 example: "unkown"
+                description: '用户名'
               time:
                 properties:
                   a:
@@ -645,14 +619,16 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "接口返回结构体"
             properties:
               errno:
                 type: "number"
                 example: 0
+                description: "错误编号"
               errmsg:
                 type: "string"
                 example: ""
+                description: "错误内容"
               data:
                 type: "array"
                 items:
@@ -661,18 +637,24 @@ paths:
                     junction_id:
                       type: "string"
                       example: "2017030116_4858433"
+                      description: '路口ID'
                     alarm_count:
                       type: "number"
                       example: 11
+                      description: '报警数统计'
                     junction_name:
                       type: "string"
                       example: "新泺大街_崇华路"
+                      description: '路口名称'
+                description: "数据结构体"
               traceid:
                 type: "string"
                 example: "1de7b1a4b6c947b791c17ebc110fbc1d"
+                description: "链路ID，追查错误使用"
               username:
                 type: "string"
                 example: "unkown"
+                description: "请求用户"
               time:
                 required:
                   - "a"
@@ -770,9 +752,11 @@ paths:
               traceid:
                 type: "string"
                 example: "0cbd175a49d14cd68baa8e40c3a52531"
+                description: "链路ID，追查错误使用"
               username:
                 type: "string"
                 example: "unkown"
+                description: "请求用户"
               time:
                 required:
                   - "a"
@@ -1026,6 +1010,7 @@ paths:
                       properties:
                         city:
                           type: "string"
+                          description: "城市名称"
                         obj_type:
                           type: "number"
                         obj_id:
@@ -1041,6 +1026,7 @@ paths:
                             type: "number"
                             description: "一共5个值，第一个TTI实时信息，第二个TTI的值"
                 type: "object"
+                description: "未详细列出描述字段，未被使用"
               traceid:
                 type: "string"
               username:
@@ -1074,6 +1060,7 @@ paths:
                 type: "string"
               data:
                 type: "array"
+                description: "未详细列出描述字段，未被使用"
                 items:
                   type: "object"
                   properties:
@@ -1109,6 +1096,7 @@ paths:
       description: 今日拥堵概览
       tags:
         - 南京建邺区项目
+        - 概览
       consumes:
         - application/x-www-form-urlencoded
       produces:
@@ -1154,8 +1142,12 @@ paths:
                         properties:
                           hour:
                             type: "string"
+                            example: "00:00"
+                            description: "批次时间点"
                           value:
                             type: "number"
+                            example: 1
+                            description: "统计数"
               traceid:
                 type: "string"
               username:
@@ -1244,28 +1236,37 @@ paths:
             properties:
               errno:
                 type: "number"
+                description: "错误编号"
               errmsg:
                 type: "string"
+                description: "错误描述"
               data:
                 type: "array"
                 items:
                   type: "object"
+                  description: "具体数据"
                   properties:
                     road_id:
                       type: "string"
+                      description: "道路ID"
                     road_name:
                       type: "string"
+                      description: "道路名称"
                     road_info:
                       type: "array"
+                      description: "道路详情"
                       items:
                         type: "object"
                         properties:
                           start_junc_id:
                             type: "string"
+                            description: "起点路口ID"
                           end_junc_id:
                             type: "string"
+                            description: "终点路口ID"
                           links:
                             type: "string"
+                            description: "中间的links"
                           forward_geo:
                             description: 干线正向geojson
                             properties:
@@ -1310,14 +1311,19 @@ paths:
                         properties:
                           logic_junction_id:
                             type: "string"
+                            description: "路口ID"
                           junction_name:
                             type: "string"
+                            description: "路口名称"
                           lng:
                             type: "string"
+                            description: "经度"
                           lat:
                             type: "string"
+                            description: "纬度"
                           node_ids:
                             type: "array"
+                            description: "路口nodes点"
                             items:
                               type: "string"
                     quota_info:
@@ -1326,6 +1332,7 @@ paths:
                         - "reverse_quota"
                       properties:
                         forward_quota:
+                          description: "正向指标"
                           required:
                             - "time"
                             - "speed"
@@ -1336,18 +1343,28 @@ paths:
                           properties:
                             time:
                               type: "number"
+                              description: "通过时间"
                             speed:
                               type: "number"
+                              description: "速度"
                             stop_time_cycle:
                               type: "number"
+                              description: "停车延误"
                             PI:
                               type: "number"
+                              description: "PI"
                             length:
                               type: "number"
+                              description: "路段长度"
+                            stop_ratid:
+                              type: "number"
+                              description: "停车比率"
                             level:
                               type: "string"
+                              description: "级别"
                           type: "object"
                         reverse_quota:
+                          description: "反向指标"
                           required:
                             - "time"
                             - "speed"
@@ -1358,22 +1375,33 @@ paths:
                           properties:
                             time:
                               type: "number"
+                              description: "通过时间"
                             speed:
                               type: "number"
+                              description: "速度"
                             stop_time_cycle:
                               type: "number"
+                              description: "停车延误"
                             PI:
                               type: "number"
+                              description: "PI"
                             length:
                               type: "number"
+                              description: "路段长度"
+                            stop_ratid:
+                              type: "number"
+                              description: "停车比率"
                             level:
                               type: "string"
+                              description: "级别"
                           type: "object"
                       type: "object"
               traceid:
                 type: "string"
+                description: "链路ID，追查错误使用"
               username:
                 type: "string"
+                description: "用户名"
   /road/greenWaveAnalysisDetail:
     post:
       summary: 绿波带监控详情
@@ -1411,82 +1439,102 @@ paths:
             properties:
               errno:
                 type: "number"
+                description: "错误编号"
               errmsg:
                 type: "string"
+                description: "错误描述"
               data:
                 required:
                   - "forward_quota"
                   - "reverse_quota"
+                description: "数据结构"
                 properties:
                   forward_quota:
                     type: "array"
+                    description: "正向指标"
                     items:
                       type: "object"
+                      description: "指标内容"
                       properties:
                         start_junc_name:
                           type: "string"
+                          description: "开始路口名"
                         end_junc_name:
                           type: "string"
+                          description: "结束路口名"
                         start_junc_id:
                           type: "string"
+                          description: "开始路口ID"
                         end_junc_id:
                           type: "string"
+                          description: "结束路口ID"
                         time:
                           type: "number"
+                          description: "通过时间"
                         speed:
                           type: "number"
+                          description: "速度"
                         stop_time_cycle:
                           type: "number"
+                          description: "停车延误"
                         stop_ratio:
                           type: "number"
+                          description: "停车比率"
                         PI:
                           type: "number"
+                          description: "PI"
                         length:
                           type: "number"
+                          description: "路段长度"
                         level:
                           type: "string"
+                          description: "级别"
                   reverse_quota:
                     type: "array"
+                    description: "反向指标"
                     items:
                       type: "object"
                       properties:
                         start_junc_name:
                           type: "string"
+                          description: "开始路口名"
                         end_junc_name:
                           type: "string"
+                          description: "结束路口名"
                         start_junc_id:
                           type: "string"
+                          description: "开始路口ID"
                         end_junc_id:
                           type: "string"
+                          description: "结束路口ID"
                         time:
                           type: "number"
+                          description: "通过时间"
                         speed:
                           type: "number"
+                          description: "速度"
                         stop_time_cycle:
                           type: "number"
+                          description: "停车延误"
                         stop_ratio:
                           type: "number"
+                          description: "停车比率"
                         PI:
                           type: "number"
+                          description: "PI"
                         length:
                           type: "number"
+                          description: "路段长度"
                         level:
                           type: "string"
+                          description: "级别"
                 type: "object"
               traceid:
                 type: "string"
+                description: "链路ID，追查错误使用"
               username:
                 type: "string"
-              time:
-                required:
-                  - "a"
-                  - "s"
-                properties:
-                  a:
-                    type: "string"
-                  s:
-                    type: "string"
-                type: "object"
+                description: "用户名"
   /expressway/overview:
     post:
       summary: 快速路概览
@@ -1495,58 +1543,80 @@ paths:
         - 南京建邺区项目
       produces:
         - application/json
+      parameters:
+        - name: city_id
+          in: formData
+          type: integer
+          description: 城市id
+          required: true
       responses:
         200:
           description: 成功
           schema:
-            description: 快速路概览
+            description: "快速路概览"
             type: object
             properties:
               errno:
                 type: "number"
+                description: "错误编号"
               errmsg:
                 type: "string"
+                description: "错误信息"
               data:
+                description: "数据结构体"
                 properties:
                   center:
                     type: "object"
+                    description: "中心点坐标"
                   junc_list:
                     type: "array"
+                    description: "路口列表"
                     items:
                       type: "object"
                       properties:
                         junction_id:
                           type: "string"
-                          description: 匝道口
+                          description: "路口ID"
                         lng:
                           type: "number"
+                          description: "经度"
                         lat:
                           type: "number"
+                          description: "纬度"
                         type:
                           type: "number"
                           description: "0,交叉口 1，上匝道 2，下匝道 3，红绿灯"
                   road_list:
                     type: "array"
+                    description: "道路列表"
                     items:
                       type: "object"
                       properties:
                         id:
                           type: "string"
+                          description: "路口ID"
                         start_junc:
                           type: "string"
+                          description: "开始路口"
                         end_junc:
                           type: "string"
+                          description: "结束路口"
                         length:
                           type: "number"
+                          description: "道路长度"
                         name:
                           type: "string"
+                          description: "道路名称"
                         geom:
                           type: "object"
+                          description: "道路坐标"
                 type: "object"
               traceid:
                 type: "string"
+                description: "链路ID，追查错误使用"
               username:
                 type: "string"
+                description: "用户名"
   /expressway/stopDelayTopList:
     post:
       summary: 快速路拥堵排名
@@ -1567,28 +1637,36 @@ paths:
         200:
           description: 成功
           schema:
-            description: 快速路拥堵排名
+            description: "快速路拥堵排名"
             type: object
             properties:
               errno:
                 type: "number"
+                description: "快速路拥堵排名"
               errmsg:
                 type: "string"
+                description: "快速路拥堵排名"
               data:
+                description: "快速路拥堵排名"
                 type: "array"
                 items:
                   type: "object"
                   properties:
                     time:
                       type: "string"
+                      description: "指标时间"
                     junction_id:
                       type: "string"
+                      description: "路口ID"
                     junction_name:
                       type: "string"
+                      description: "路口名"
                     stop_delay:
-                      type: "string"
+                      type: "number"
+                      description: "停车延误"
                     quota_unit:
                       type: "string"
+                      description: "指标单位"
               traceid:
                 type: "string"
               username:
@@ -1633,30 +1711,36 @@ paths:
         200:
           description: 成功
           schema:
-            description: 快速路详情
+            description: "返回数据"
             type: object
             properties:
               errno:
                 type: "number"
+                description: "错误编号"
               errmsg:
                 type: "string"
+                description: "错误信息"
               data:
                 properties:
-                  update_time:
-                    type: "string"
                   speed:
                     type: "number"
+                    description: "速度"
                   stop_delay:
                     type: "number"
+                    description: "停车延误"
                   across_time:
                     type: "string"
+                    description: "通过时间"
                   type:
                     type: "number"
+                    description: "类型 1=畅通 2=缓行 3=拥堵"
                 type: "object"
               traceid:
                 type: "string"
+                description: "链路ID，追查错误使用"
               username:
                 type: "string"
+                description: "用户名"
   /expressway/alarmlist:
     post:
       summary: 快速路报警列表
@@ -1677,39 +1761,45 @@ paths:
         200:
           description: 成功
           schema:
-            description: 快速路报警列表
+            description: "快速路报警列表"
             type: object
             properties:
               errno:
                 type: "number"
+                description: "快速路报警列表"
               errmsg:
                 type: "string"
+                description: "快速路报警列表"
               data:
                 required:
                   - "juncList"
+                description: "快速路报警列表"
                 properties:
                   juncList:
                     type: "array"
+                    description: "快速路报警列表"
                     items:
                       type: "object"
                       properties:
                         start_time:
                           type: "string"
+                          description: "开始时间"
                         duration_time:
                           type: "number"
+                          description: "阶段时长"
                         junction_id:
                           type: "string"
+                          description: "路口ID"
                         junction_name:
                           type: "string"
+                          description: "路口名"
                         alarm_comment:
                           type: "string"
+                          description: "报警类型名"
                         alarm_type:
                           type: "number"
+                          description: "报警类型"
                 type: "object"
-              traceid:
-                type: "string"
-              username:
-                type: "string"
   /expressway/condition:
     post:
       summary: 快速路路况
@@ -1730,37 +1820,52 @@ paths:
         200:
           description: 成功
           schema:
-            description: 快速路路况
+            description: "快速路路况"
             type: object
-            properties:
-              errno:
+            properties: 
+              errno: 
                 type: "number"
-              errmsg:
+                example: 0
+                description: "错误编号"
+              errmsg: 
                 type: "string"
-              data:
-                properties:
-                  juncList:
+                example: ""
+                description: "错误信息"
+              data: 
+                description: "数据内容"
+                properties: 
+                  trafficList: 
+                    description: "列表"
                     type: "array"
-                    items:
+                    items: 
                       type: "object"
-                      properties:
-                        start_time:
-                          type: "string"
-                        duration_time:
+                      properties: 
+                        avg_speed: 
                           type: "number"
-                        junction_id:
+                          example: 5.63
+                          description: "平均速度"
+                        link_id: 
                           type: "string"
-                        junction_name:
+                          example: "44281610"
+                          description: "link"
+                        city_id: 
                           type: "string"
-                        alarm_comment:
-                          type: "string"
-                        alarm_type:
+                          example: "11"
+                          description: "城市"
+                        type: 
                           type: "number"
+                          example: 3
+                          description: "类型"
+                        geom: 
+                          required: []
+                          properties: {}
+                          type: "object"
+                          description: "坐标"
+                  hms: 
+                    type: "string"
+                    example: "2020-02-26 22:00:00"
+                    description: "更新时间"
                 type: "object"
-              traceid:
-                type: "string"
-              username:
-                type: "string"
   /priorityBus/getAllRoadList:
     post:
       summary: 公交优先
@@ -1791,24 +1896,30 @@ paths:
               data:
                 type: "array"
                 items:
+                  description: "信息列表"
                   type: "object"
                   properties:
                     road_info:
+                      description: "道路信息"
                       type: "array"
                       items:
                         type: "object"
                         properties:
                           start_junc_id:
                             type: "string"
+                            description: "开始路口ID"
                           end_junc_id:
                             type: "string"
+                            description: "结束路口ID"
                           links:
                             type: "string"
+                            description: "links"
                           forward_geo:
-
                             type: "object"
+                            description: "正向坐标点"
                           reverse_geo:
                             type: "array"
+                            description: "反向坐标点"
                             items:
                               type: "object"
                     junctions_info:
@@ -1818,16 +1929,22 @@ paths:
                         properties:
                           logic_junction_id:
                             type: "string"
+                            description: "路口ID"
                           junction_name:
                             type: "string"
+                            description: "路口名"
                           lng:
                             type: "string"
+                            description: "经度"
                           lat:
                             type: "string"
+                            description: "纬度"
                           is_priority:
                             type: "string"
+                            description: "优先路口"
                           node_ids:
                             type: "array"
+                            description: "node点"
                             items:
                               type: "string"
                     station:
@@ -1837,33 +1954,45 @@ paths:
                         properties:
                           station_id:
                             type: "string"
+                            description: "站点ID"
                           station_name:
                             type: "string"
+                            description: "站点名"
                           lng:
                             type: "string"
+                            description: "经度"
                           lat:
                             type: "string"
+                            description: "纬度"
                     center:
                       properties:
                         lng:
                           type: "number"
+                          description: "经度"
                         lat:
                           type: "number"
+                          description: "纬度"
                       type: "object"
                     map_version:
                       type: "number"
+                      description: "路网版本"
                     road:
                       properties:
                         id:
                           type: "string"
+                          description: "ID"
                         road_id:
                           type: "string"
+                          description: "道路ID"
                         logic_junction_ids:
                           type: "string"
+                          description: "逻辑道路ID"
                         road_name:
                           type: "string"
+                          description: "道路名"
                         road_direction:
                           type: "string"
+                          description: "道路方向"
                       type: "object"
                     road_id:
                       type: "string"
@@ -1904,61 +2033,85 @@ paths:
               errmsg:
                 type: "string"
               data:
+                description: "数据结构体"
                 properties:
                   bus_info:
                     type: "array"
+                    description: "公交信息"
                     items:
                       type: "object"
                       properties:
                         bus_id:
                           type: "string"
+                          description: "公交ID"
                         lat:
                           type: "string"
+                          description: "纬度"
                         lng:
                           type: "string"
+                          description: "经度"
                         speed:
                           type: "string"
+                          description: "速度"
                         flow_id:
                           type: "string"
+                          description: "flow_id"
                         distance:
                           type: "string"
+                          description: "距离"
                   junc_info:
                     type: "array"
+                    description: "路口数据"
                     items:
                       type: "object"
                       properties:
                         junction_id:
                           type: "string"
+                          description: "路口ID"
                         junction_name:
                           type: "string"
+                          description: "路口名"
                         request_info:
                           type: "array"
+                          description: "请求信息"
                           items:
                             type: "object"
                             properties:
                               bus_id:
                                 type: "string"
+                                description: "路口ID"
                               road_name:
                                 type: "string"
+                                description: "路段名"
                               control_strategy:
                                 type: "string"
+                                description: "控制策略"
                               phase_name:
                                 type: "string"
+                                description: "相位名"
                               phase_len:
                                 type: "string"
+                                description: "阶段长度"
                               opt_time:
                                 type: "string"
+                                description: "控制时间"
                         timing:
+                          description: "配时"
                           properties:
                             start_time:
                               type: "string"
+                              description: "开始时间"
                             end_time:
                               type: "string"
+                              description: "结束时间"
                             cycle:
                               type: "string"
+                              description: "周期"
                             offset:
                               type: "string"
+                              description: "相位差"
                             current_stage:
+                              description: "当前阶段"
                               required:
                                 - "stage_name"
                                 - "stage_len"
@@ -1966,10 +2119,13 @@ paths:
                               properties:
                                 stage_name:
                                   type: "string"
+                                  description: "阶段名"
                                 stage_len:
                                   type: "string"
+                                  description: "阶段长度"
                                 start_len:
                                   type: "string"
+                                  description: "开始长度"
                               type: "object"
                             stage:
                               required:
@@ -1982,12 +2138,16 @@ paths:
                                     properties:
                                       flow_id:
                                         type: "string"
+                                        description: "相位ID"
                                       len:
                                         type: "string"
+                                        description: "阶段长度"
                                       phase_num:
                                         type: "string"
+                                        description: "相位编号"
                                       phase_name:
                                         type: "string"
+                                        description: "相位名称"
                               type: "object"
                           type: "object"
                 type: "object"
@@ -2005,70 +2165,92 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
+        - name: logic_junction_id
+          in: query
+          type: string
+          description: "路口ID"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
       responses:
         200:
           description: 成功
           schema:
+            description: "接口内容"
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
             properties:
               errno:
                 type: "number"
+                description: "错误编号"
               errmsg:
                 type: "string"
+                description: "错误信息"
               data:
-                required:
-                  - "desc"
-                  - "junction_info"
+                description: "数据结构体"
                 properties:
                   desc:
                     type: "string"
                   junction_info:
-                    description: 路网路口基础信息
+                    description: "路网路口基础信息"
                     properties:
                       logic_junction_id:
                         type: "string"
+                        description: "路口ID"
                       logic_show_id:
                         type: "string"
+                        description: "路口showID"
                       lng:
                         type: "string"
+                        description: "经度"
                       lat:
                         type: "string"
+                        description: "纬度"
                       city_id:
                         type: "number"
+                        description: "城市ID"
                       name:
                         type: "string"
+                        description: "路口名"
                       is_manual:
                         type: "boolean"
+                        description: "人工编辑路口"
                       is_traffic:
                         type: "boolean"
+                        description: "信号灯路口"
                       is_complex:
                         type: "boolean"
+                        description: "复杂路口"
                       is_pedestrian:
                         type: "boolean"
+                        description: "行人过街"
                       start_version:
                         type: "number"
+                        description: "开始版本号"
                       end_version:
                         type: "number"
+                        description: "结束版本号"
                       created_at:
                         type: "string"
+                        description: "开始时间"
                       updated_at:
                         type: "string"
+                        description: "更新时间"
                       district_code:
                         type: "number"
+                        description: "行政区号"
                       district_name:
                         type: "string"
+                        description: "行政区名"
                     type: "object"
                 type: "object"
-              traceid:
-                type: "string"
-              username:
-                type: "string"
   /JunctionReport/queryJuncDataComparison:
     get:
       summary: 路口平均延误对比
@@ -2101,21 +2283,13 @@ paths:
           description: 成功
           schema:
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "info"
-                  - "chart"
+                description: "数据结构体"
                 properties:
                   info:
                     required:
@@ -2124,32 +2298,37 @@ paths:
                       desc:
                         type: "string"
                     type: "object"
+                    description: "描述"
                   chart:
-                    required:
-                      - "title"
-                      - "scale_title"
-                      - "series"
+                    description: "图表数据"
                     properties:
                       title:
                         type: "string"
+                        description: "标题"
                       scale_title:
                         type: "string"
+                        description: "指标标题"
                       series:
                         type: "array"
+                        description: "指标数据项"
                         items:
                           type: "object"
                           properties:
                             name:
                               type: "string"
+                              description: "哪天数据"
                             data:
                               type: "array"
+                              description: "数据数组"
                               items:
                                 type: "object"
                                 properties:
                                   x:
                                     type: "string"
+                                    description: "时刻"
                                   y:
                                     type: "number"
+                                    description: "数据"
                     type: "object"
                 type: "object"
               traceid:
@@ -2194,46 +2373,47 @@ paths:
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "info"
-                  - "charts"
+                description: "数据结构体"
                 properties:
                   info:
                     required:
                       - "desc"
-                      - "instructions"
                     properties:
                       desc:
                         type: "string"
-                      instructions:
-                        type: "string"
                     type: "object"
-                  charts:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        title:
-                          type: "string"
-                        scale_title:
-                          type: "string"
-                        series:
-                          required:
-                            - "name"
-                            - "data"
+                    description: "描述"
+                  chart:
+                    description: "图表数据"
+                    properties:
+                      title:
+                        type: "string"
+                        description: "标题"
+                      scale_title:
+                        type: "string"
+                        description: "指标标题"
+                      series:
+                        type: "array"
+                        description: "指标数据项"
+                        items:
+                          type: "object"
                           properties:
                             name:
                               type: "string"
+                              description: "哪天数据"
                             data:
                               type: "array"
+                              description: "数据数组"
                               items:
                                 type: "object"
                                 properties:
                                   x:
                                     type: "string"
+                                    description: "时刻"
                                   y:
                                     type: "number"
-                          type: "object"
+                                    description: "数据"
+                    type: "object"
                 type: "object"
               traceid:
                 type: "string"
@@ -2250,10 +2430,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: road_id
           in: query
           type: string
-          description: "路口ID"
+          description: "干线ID"
           required: true
         - name: start_time
           in: query
@@ -2270,92 +2450,76 @@ paths:
           description: 成功
           schema:
             type: object
+            description: "接口返回"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
+                description: "数据结构体"
                 properties:
                   desc:
                     type: "string"
+                    description: ""
                   road_info:
                     properties:
                       road_info:
                         type: "array"
+                        description: "道路信息"
                         items:
                           type: "object"
                           properties:
                             start_junc_id:
                               type: "string"
+                              description: "开始路口"
                             end_junc_id:
                               type: "string"
+                              description: "结束路口"
                             links:
                               type: "string"
+                              description: "links信息"
                             forward_geo:
-                              required:
-                                - "features"
-                                - "type"
-                              properties:
-                                features:
-                                  type: "array"
-                                  items:
-                                    type: "object"
-                                    properties:
-                                      geometry:
-                                        required:
-                                          - "coordinates"
-                                          - "type"
-                                        properties:
-                                          coordinates:
-                                            type: "array"
-                                            items:
-                                              type: "number"
-                                          type:
-                                            type: "string"
-                                        type: "object"
-                                      properties:
-                                        required:
-                                          - "id"
-                                        properties:
-                                          id:
-                                            type: "number"
-                                        type: "object"
-                                      type:
-                                        type: "string"
-                                type:
-                                  type: "string"
-                              type: "object"
+                              type: "array"
+                              description: "正向geo信息"
+                              items:
+                                type: "object"
                             reverse_geo:
                               type: "array"
+                              description: "反向geo信息"
                               items:
                                 type: "object"
                       junctions_info:
                         type: "array"
                         items:
                           type: "object"
+                          description: "路口信息"
                           properties:
                             logic_junction_id:
                               type: "string"
+                              description: "路口ID"
                             junction_name:
                               type: "string"
+                              description: "路口名"
                             lng:
                               type: "string"
+                              description: "经度"
                             lat:
                               type: "string"
+                              description: "纬度"
                             node_ids:
                               type: "array"
+                              description: "node_ids"
                               items:
                                 type: "string"
                       center:
-                        required:
-                          - "lng"
-                          - "lat"
                         properties:
                           lng:
                             type: "number"
+                            description: "中心点经度"
                           lat:
                             type: "number"
+                            description: "中心点纬度"
                         type: "object"
                       map_version:
                         type: "number"
@@ -2376,10 +2540,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: road_id
           in: query
           type: string
-          description: "路口ID"
+          description: "干线ID"
           required: true
         - name: start_time
           in: query
@@ -2402,43 +2566,44 @@ paths:
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "info"
-                  - "chart"
+                description: "数据结构体"
                 properties:
                   info:
-                    required:
-                      - "desc"
                     properties:
                       desc:
                         type: "string"
                     type: "object"
+                    description: "描述"
                   chart:
-                    required:
-                      - "title"
-                      - "scale_title"
-                      - "series"
+                    description: "图表数据"
                     properties:
                       title:
                         type: "string"
+                        description: "标题"
                       scale_title:
                         type: "string"
+                        description: "指标标题"
                       series:
                         type: "array"
+                        description: "指标数据项"
                         items:
                           type: "object"
                           properties:
                             name:
                               type: "string"
+                              description: "哪天数据"
                             data:
                               type: "array"
+                              description: "数据数组"
                               items:
                                 type: "object"
                                 properties:
                                   x:
                                     type: "string"
+                                    description: "时刻"
                                   y:
                                     type: "number"
+                                    description: "数据"
                     type: "object"
                 type: "object"
               traceid:
@@ -2456,10 +2621,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: road_id
           in: query
           type: string
-          description: "路口ID"
+          description: "干线ID"
           required: true
         - name: start_time
           in: query
@@ -2476,31 +2641,30 @@ paths:
           description: 成功
           schema:
             type: object
+            description: "接口返回"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "info"
-                  - "charts"
+                description: "数据消息体"
                 properties:
                   info:
-                    required:
-                      - "instructions"
-                      - "desc"
-                      - "morning_rush_time"
-                      - "evening_rush_time"
+                    description: "基本信息"
                     properties:
                       instructions:
                         type: "string"
+                        description: "标题"
                       desc:
                         type: "string"
+                        description: "描述"
                       morning_rush_time:
                         type: "string"
+                        description: "早高峰时段"
                       evening_rush_time:
                         type: "string"
+                        description: "晚高峰时段"
                     type: "object"
                   charts:
                     type: "array"
@@ -2509,8 +2673,10 @@ paths:
                       properties:
                         title:
                           type: "string"
+                          description: "标题"
                         scale_title:
                           type: "string"
+                          description: "指标项标题"
                         series:
                           required:
                             - "name"
@@ -2544,10 +2710,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: road_id
           in: query
           type: string
-          description: "路口ID"
+          description: "干线ID"
           required: true
         - name: start_time
           in: query
@@ -2570,11 +2736,13 @@ paths:
               errmsg:
                 type: "string"
               data:
+                description: "数据结构体"
                 type: "array"
                 items:
                   type: "object"
                   properties:
                     info:
+                      description: "图表描述"
                       required:
                         - "desc"
                       properties:
@@ -2583,13 +2751,16 @@ paths:
                       type: "object"
                     chart_list:
                       type: "array"
+                      description: "图表数据结构"
                       items:
                         type: "object"
                         properties:
                           title:
                             type: "string"
+                            description: "标题"
                           scale_title:
                             type: "string"
+                            description: "数据标题"
                           series:
                             type: "array"
                             items:
@@ -2597,10 +2768,13 @@ paths:
                               properties:
                                 name:
                                   type: "string"
+                                  description: "项目名"
                                 avg:
                                   type: "number"
+                                  description: "平均值"
                                 max:
                                   type: "number"
+                                  description: "最大值"
                                 data:
                                   type: "array"
                                   items:
@@ -2612,6 +2786,7 @@ paths:
                                         type: "number"
                                 max_key:
                                   type: "string"
+                                  description: "最大点"
               traceid:
                 type: "string"
               username:
@@ -2627,10 +2802,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: road_id
           in: query
           type: string
-          description: "路口ID"
+          description: "干线ID"
           required: true
         - name: start_time
           in: query
@@ -2653,18 +2828,20 @@ paths:
               errmsg:
                 type: "string"
               data:
+                description: "数据结构体"
                 required:
                   - "morning_peek"
                   - "evenint_peek"
                 properties:
                   morning_peek:
-                    description: 早高峰数据
+                    description: "早高峰数据"
                     required:
                       - "info"
                       - "center"
                       - "chart"
                     properties:
                       info:
+                        description: "基本信息"
                         required:
                           - "desc"
                         properties:
@@ -2672,6 +2849,7 @@ paths:
                             type: "string"
                         type: "object"
                       center:
+                        description: "中心点坐标"
                         required:
                           - "lng"
                           - "lat"
@@ -2682,6 +2860,7 @@ paths:
                             type: "number"
                         type: "object"
                       chart:
+                        description: "图标数据"
                         required:
                           - "title"
                           - "scale_title"
@@ -2717,7 +2896,7 @@ paths:
                         type: "object"
                     type: "object"
                   evenint_peek:
-                    description: 晚高峰数据
+                    description: "晚高峰数据"
                     required:
                       - "info"
                       - "center"
@@ -2791,10 +2970,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: road_id
           in: query
           type: string
-          description: "路口ID"
+          description: "干线ID"
           required: true
         - name: start_time
           in: query
@@ -2818,22 +2997,21 @@ paths:
                 type: "string"
               data:
                 type: "array"
+                description: "数据结构体"
                 items:
                   type: "object"
                   properties:
                     desc:
                       type: "string"
+                      description: "图表描述"
                     chart:
-                      required:
-                        - "title"
-                        - "scale"
-                        - "one_dimensional"
-                        - "two_dimensional"
-                        - "data"
+                      description: "图表数据"
                       properties:
                         title:
                           type: "string"
+                          description: "标题"
                         scale:
+                          description: "指标标题"
                           required:
                             - "min"
                             - "max"
@@ -2844,10 +3022,12 @@ paths:
                               type: "number"
                           type: "object"
                         one_dimensional:
+                          description: "路口排行"
                           type: "array"
                           items:
                             type: "string"
                         two_dimensional:
+                          description: "早晚高峰时段"
                           type: "array"
                           items:
                             type: "string"
@@ -2871,10 +3051,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: road_id
           in: query
           type: string
-          description: "路口ID"
+          description: "干线ID"
           required: true
         - name: start_time
           in: query
@@ -2904,36 +3084,47 @@ paths:
               errmsg:
                 type: "string"
               data:
+                description: "数据结构体"
                 required:
                   - "morning_peek"
                   - "evening_peek"
                 properties:
                   morning_peek:
+                    description: "早高峰"
                     required:
                       - "quota_table_desc"
                       - "quota_table_data"
                     properties:
                       quota_table_desc:
                         type: "string"
+                        description: "指标描述"
                       quota_table_data:
                         type: "array"
+                        description: "指标数据"
                         items:
                           type: "object"
                           properties:
                             logic_junction_id:
                               type: "string"
+                              description: "路口ID"
                             name:
                               type: "string"
+                              description: "路口名"
                             last_rank:
                               type: "number"
+                              description: "最近排名"
                             stop_delay:
                               type: "number"
+                              description: "停车延误"
                             stop_time_cycle:
                               type: "number"
+                              description: "停车周期"
                             speed:
                               type: "number"
+                              description: "速度"
                             PI:
                               type: "number"
+                              description: "PI"
                     type: "object"
                   evening_peek:
                     required:
@@ -2988,10 +3179,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: area_id
           in: query
           type: string
-          description: "路口ID"
+          description: "区域id"
           required: true
         - name: start_time
           in: query
@@ -3008,78 +3199,86 @@ paths:
           description: 成功
           schema:
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "desc"
-                  - "area_info"
+                description: "数据结构体"
                 properties:
                   desc:
                     type: "string"
+                    description: "数据描述"
                   area_info:
-                    required:
-                      - "center_lat"
-                      - "center_lng"
-                      - "area_id"
-                      - "area_name"
-                      - "junction_list"
+                    description: "区域信息"
                     properties:
                       center_lat:
                         type: "number"
+                        description: "中心点纬度"
                       center_lng:
                         type: "number"
+                        description: "中心点经度"
                       area_id:
                         type: "string"
+                        description: "区域id"
                       area_name:
                         type: "string"
+                        description: "区域名称"
                       junction_list:
                         type: "array"
+                        description: "路口列表"
                         items:
                           type: "object"
                           properties:
                             logic_junction_id:
                               type: "string"
+                              description: "路口ID"
                             logic_show_id:
                               type: "string"
+                              description: "路口展示ID"
                             lng:
                               type: "string"
+                              description: "经度"
                             lat:
                               type: "string"
+                              description: "纬度"
                             city_id:
                               type: "number"
+                              description: "城市ID"
                             name:
                               type: "string"
+                              description: "路口名"
                             is_manual:
                               type: "boolean"
+                              description: "人工路口"
                             is_traffic:
                               type: "boolean"
+                              description: "信控路口"
                             is_complex:
                               type: "boolean"
+                              description: "复杂路口"
                             is_pedestrian:
                               type: "boolean"
+                              description: "行人过街"
                             start_version:
                               type: "number"
+                              description: "开始路网版本号"
                             end_version:
                               type: "number"
+                              description: "结束路网版本号"
                             created_at:
                               type: "string"
+                              description: "创建时间"
                             updated_at:
                               type: "string"
+                              description: "更新时间"
                             district_code:
                               type: "number"
+                              description: "区域编号"
                             district_name:
                               type: "string"
+                              description: "区域名称"
                     type: "object"
                 type: "object"
               traceid:
@@ -3107,106 +3306,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: area_id
           in: query
           type: string
-          description: "路口ID"
-          required: true
-        - name: start_time
-          in: query
-          type: string
-          description: "查询数据开始日期"
-          required: true
-        - name: end_time
-          in: query
-          type: string
-          description: "查询数据结束日期"
-          required: true
-      responses:
-        200:
-          description: 成功
-          schema:
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
-            properties:
-              errno:
-                type: "number"
-              errmsg:
-                type: "string"
-              data:
-                required:
-                  - "info"
-                  - "chart"
-                properties:
-                  info:
-                    required:
-                      - "desc"
-                    properties:
-                      desc:
-                        type: "string"
-                    type: "object"
-                  chart:
-                    required:
-                      - "title"
-                      - "scale_title"
-                      - "series"
-                    properties:
-                      title:
-                        type: "string"
-                      scale_title:
-                        type: "string"
-                      series:
-                        type: "array"
-                        items:
-                          type: "object"
-                          properties:
-                            name:
-                              type: "string"
-                            data:
-                              type: "array"
-                              items:
-                                type: "object"
-                                properties:
-                                  x:
-                                    type: "string"
-                                  y:
-                                    type: "number"
-                    type: "object"
-                type: "object"
-              traceid:
-                type: "string"
-              username:
-                type: "string"
-              time:
-                required:
-                  - "a"
-                  - "s"
-                properties:
-                  a:
-                    type: "string"
-                  s:
-                    type: "string"
-                type: "object"
-  /AreaReport/queryAreaQuotaData:
-    get:
-      summary: 区域运行情况
-      tags:
-        - 南京建邺区项目
-      parameters:
-        - name: city_id
-          in: query
-          type: integer
-          description: "数据所在城市"
-          required: true
-        - name: logic_junction_id
-          in: query
-          type: string
-          description: "路口ID"
+          description: "区域id"
           required: true
         - name: start_time
           in: query
@@ -3223,38 +3326,111 @@ paths:
           description: 成功
           schema:
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "info"
-                  - "charts"
+                description: "数据结构体"
                 properties:
                   info:
-                    required:
-                      - "instructions"
-                      - "desc"
-                      - "morning_rush_time"
-                      - "evening_rush_time"
+                    properties:
+                      desc:
+                        type: "string"
+                    type: "object"
+                    description: "描述"
+                  chart:
+                    description: "图表数据"
+                    properties:
+                      title:
+                        type: "string"
+                        description: "标题"
+                      scale_title:
+                        type: "string"
+                        description: "指标标题"
+                      series:
+                        type: "array"
+                        description: "指标数据项"
+                        items:
+                          type: "object"
+                          properties:
+                            name:
+                              type: "string"
+                              description: "哪天数据"
+                            data:
+                              type: "array"
+                              description: "数据数组"
+                              items:
+                                type: "object"
+                                properties:
+                                  x:
+                                    type: "string"
+                                    description: "时刻"
+                                  y:
+                                    type: "number"
+                                    description: "数据"
+                    type: "object"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+  /AreaReport/queryAreaQuotaData:
+    get:
+      summary: 区域运行情况
+      tags:
+        - 南京建邺区项目
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: area_id
+          in: query
+          type: string
+          description: "区域id"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "接口返回"
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                description: "数据消息体"
+                properties:
+                  info:
+                    description: "基本信息"
                     properties:
                       instructions:
                         type: "string"
+                        description: "标题"
                       desc:
                         type: "string"
+                        description: "描述"
                       morning_rush_time:
                         type: "string"
+                        description: "早高峰时段"
                       evening_rush_time:
                         type: "string"
+                        description: "晚高峰时段"
                     type: "object"
                   charts:
                     type: "array"
@@ -3263,8 +3439,10 @@ paths:
                       properties:
                         title:
                           type: "string"
+                          description: "标题"
                         scale_title:
                           type: "string"
+                          description: "指标项标题"
                         series:
                           required:
                             - "name"
@@ -3287,16 +3465,6 @@ paths:
                 type: "string"
               username:
                 type: "string"
-              time:
-                required:
-                  - "a"
-                  - "s"
-                properties:
-                  a:
-                    type: "string"
-                  s:
-                    type: "string"
-                type: "object"
   /AreaReport/queryAreaThermograph:
     get:
       summary: 热力轨迹查询
@@ -3308,10 +3476,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: area_id
           in: query
           type: string
-          description: "路口ID"
+          description: "区域id"
           required: true
         - name: start_time
           in: query
@@ -3328,36 +3496,26 @@ paths:
           description: 成功
           schema:
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "png"
-                  - "mp4"
-                  - "info"
+                description: "数据结构体"
                 properties:
                   png:
+                    description: "图片地址"
                     type: "array"
                     items:
                       type: "string"
                   mp4:
+                    description: "mp4文件地址"
                     type: "array"
                     items:
                       type: "string"
                   info:
-                    required:
-                      - "png_info"
-                      - "mp4_info"
+                    description: "信息描述"
                     properties:
                       png_info:
                         type: "string"
@@ -3390,10 +3548,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: area_id
           in: query
           type: string
-          description: "路口ID"
+          description: "区域id"
           required: true
         - name: start_time
           in: query
@@ -3407,33 +3565,22 @@ paths:
           required: true
       responses:
         200:
-          description: "成功"
+          description: 成功
           schema:
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "morning_peek"
-                  - "evenint_peek"
+                description: "数据结构体"
                 properties:
                   morning_peek:
-                    required:
-                      - "info"
-                      - "center"
-                      - "chart"
+                    description: "早高峰数据"
                     properties:
                       info:
+                        description: "基本信息"
                         required:
                           - "desc"
                         properties:
@@ -3441,6 +3588,7 @@ paths:
                             type: "string"
                         type: "object"
                       center:
+                        description: "中心点坐标"
                         required:
                           - "lng"
                           - "lat"
@@ -3451,24 +3599,22 @@ paths:
                             type: "number"
                         type: "object"
                       chart:
-                        required:
-                          - "title"
-                          - "scale_title"
-                          - "series"
+                        description: "图标数据"
                         properties:
                           title:
                             type: "string"
+                            description: "标题"
                           scale_title:
                             type: "string"
+                            description: "指标标题"
                           series:
-                            required:
-                              - "name"
-                              - "data"
                             properties:
                               name:
                                 type: "string"
+                                description: "子标题"
                               data:
                                 type: "array"
+                                description: "图表内容"
                                 items:
                                   type: "object"
                                   properties:
@@ -3478,6 +3624,7 @@ paths:
                                       type: "number"
                                     name:
                                       type: "string"
+                                      description: "路口名"
                                     lng:
                                       type: "string"
                                     lat:
@@ -3486,6 +3633,7 @@ paths:
                         type: "object"
                     type: "object"
                   evenint_peek:
+                    description: "晚高峰数据"
                     required:
                       - "info"
                       - "center"
@@ -3548,16 +3696,6 @@ paths:
                 type: "string"
               username:
                 type: "string"
-              time:
-                required:
-                  - "a"
-                  - "s"
-                properties:
-                  a:
-                    type: "string"
-                  s:
-                    type: "string"
-                type: "object"
   /AreaReport/queryAreaAlarm:
     get:
       summary: 区域报警总结
@@ -3569,10 +3707,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: area_id
           in: query
           type: string
-          description: "路口ID"
+          description: "区域id"
           required: true
         - name: start_time
           in: query
@@ -3589,30 +3727,19 @@ paths:
           description: 成功
           schema:
             type: object
-            required:
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
             properties:
               errno:
                 type: "number"
               errmsg:
                 type: "string"
               data:
-                required:
-                  - "morning_peek"
-                  - "evenint_peek"
+                description: "数据结构体"
                 properties:
                   morning_peek:
-                    required:
-                      - "info"
-                      - "center"
-                      - "chart"
+                    description: "早高峰数据"
                     properties:
                       info:
+                        description: "基本信息"
                         required:
                           - "desc"
                         properties:
@@ -3620,6 +3747,7 @@ paths:
                             type: "string"
                         type: "object"
                       center:
+                        description: "中心点坐标"
                         required:
                           - "lng"
                           - "lat"
@@ -3630,24 +3758,22 @@ paths:
                             type: "number"
                         type: "object"
                       chart:
-                        required:
-                          - "title"
-                          - "scale_title"
-                          - "series"
+                        description: "图标数据"
                         properties:
                           title:
                             type: "string"
+                            description: "标题"
                           scale_title:
                             type: "string"
+                            description: "指标标题"
                           series:
-                            required:
-                              - "name"
-                              - "data"
                             properties:
                               name:
                                 type: "string"
+                                description: "子标题"
                               data:
                                 type: "array"
+                                description: "图表内容"
                                 items:
                                   type: "object"
                                   properties:
@@ -3657,6 +3783,7 @@ paths:
                                       type: "number"
                                     name:
                                       type: "string"
+                                      description: "路口名"
                                     lng:
                                       type: "string"
                                     lat:
@@ -3665,6 +3792,7 @@ paths:
                         type: "object"
                     type: "object"
                   evenint_peek:
+                    description: "晚高峰数据"
                     required:
                       - "info"
                       - "center"
@@ -3727,16 +3855,6 @@ paths:
                 type: "string"
               username:
                 type: "string"
-              time:
-                required:
-                  - "a"
-                  - "s"
-                properties:
-                  a:
-                    type: "string"
-                  s:
-                    type: "string"
-                type: "object"
   /AreaReport/queryQuotaRank:
     get:
       summary: 区域路口运行指数排名
@@ -3748,10 +3866,10 @@ paths:
           type: integer
           description: "数据所在城市"
           required: true
-        - name: logic_junction_id
+        - name: area_id
           in: query
           type: string
-          description: "路口ID"
+          description: "区域id"
           required: true
         - name: start_time
           in: query
@@ -3781,36 +3899,47 @@ paths:
               errmsg:
                 type: "string"
               data:
+                description: "数据结构体"
                 required:
                   - "morning_peek"
                   - "evening_peek"
                 properties:
                   morning_peek:
+                    description: "早高峰"
                     required:
                       - "quota_table_desc"
                       - "quota_table_data"
                     properties:
                       quota_table_desc:
                         type: "string"
+                        description: "指标描述"
                       quota_table_data:
                         type: "array"
+                        description: "指标数据"
                         items:
                           type: "object"
                           properties:
                             logic_junction_id:
                               type: "string"
+                              description: "路口ID"
                             name:
                               type: "string"
+                              description: "路口名"
                             last_rank:
                               type: "number"
+                              description: "最近排名"
                             stop_delay:
                               type: "number"
+                              description: "停车延误"
                             stop_time_cycle:
                               type: "number"
+                              description: "停车周期"
                             speed:
                               type: "number"
+                              description: "速度"
                             PI:
                               type: "number"
+                              description: "PI"
                     type: "object"
                   evening_peek:
                     required:
@@ -3889,7 +4018,7 @@ paths:
         200:
           description: 成功
           schema:
-            description: "路口离线相位指标数据"
+            description: "接口请求返回"
             type: object
             required:
               - "errno"
@@ -3900,12 +4029,15 @@ paths:
               errno:
                 type: "number"
                 example: 0
+                description: "错误编号"
               errmsg:
                 type: "string"
                 example: ""
+                description: "错误内容"
               data:
                 required:
                   - "list"
+                description: "数据结构"
                 properties:
                   list:
                     type: "array"
@@ -3945,9 +4077,6 @@ paths:
                           example: 0
                           description: "是否溢流"
                 type: "object"
-              traceid:
-                type: "string"
-                example: "645aa41f5d9f614a898c5d92b22674b0"
   /realtimeQuota/GetQuotaFlowData:
     post:
       summary: 路口实时相位指标数据
@@ -4017,6 +4146,10 @@ paths:
                               type: "string"
                               example: "北直"
                               description: "相位名称"
+                            movement_name:
+                              type: "string"
+                              example: "北直"
+                              description: "信号机相位名称"
                             logic_flow_id:
                               type: "string"
                               example: "2017030116_i_48853090_2017030116_o_48853051"
@@ -4042,7 +4175,7 @@ paths:
               traceid:
                 type: "string"
                 example: "645aa41f5d9f5d5c776d5d92143babb0"
-
+                description: "链路ID，追查错误使用"
   /Alarmanalysis/realtimeSingleQuotaCurve:
     post:
       summary: 实时单指标曲线图
@@ -4079,7 +4212,7 @@ paths:
         - name: end_time
           in: formData
           type: string
-          description: "数据结束时间，如：00:00"
+          description: "数据结束时间，如：24:00"
           required: true
         - name: quota_key
           in: formData
@@ -4090,7 +4223,7 @@ paths:
         200:
           description: 成功
           schema:
-            description: "实时单指标曲线图数据"
+            description: "返回数据"
             type: object
             required:
               - "errno"
@@ -4100,9 +4233,11 @@ paths:
               errno:
                 type: "number"
                 example: 0
+                description: "错误编号"
               errmsg:
                 type: "string"
                 example: ""
+                description: "错误信息"
               data:
                 required:
                   - "quota_list"
@@ -4114,7 +4249,7 @@ paths:
                       - "2019-09-28"
                       - "today"
                     properties:
-                      2019-09-28:
+                      "2019-09-28":
                         type: "array"
                         items:
                           type: "object"
@@ -4122,9 +4257,12 @@ paths:
                             hour:
                               type: "string"
                               example: "00:00:00"
+                              description: "数据批次号"
                             value:
                               type: "string"
                               example: "0.25"
+                              description: "数据批次值"
+                        description: "某天数据，如果当天则为today"
                       today:
                         type: "array"
                         items:
@@ -4132,20 +4270,26 @@ paths:
                           properties:
                             hour:
                               type: "string"
-                              example: "00:00"
+                              example: "00:00:00"
+                              description: "数据批次号"
                             value:
                               type: "string"
                               example: "0.25"
+                              description: "数据批次值"
+                        description: "某天数据，如果当天则为today"
                     type: "object"
+                    description: "指标数据列表"
                   dates:
                     type: "array"
                     items:
                       type: "string"
                     example:
                       - "2019-09-28"
+                    description: "指标数据日期"
                   current_time:
                     type: "string"
                     example: "00:00"
+                    description: "指标当前批次"
                 type: "object"
   /Alarmanalysis/junctionRealtimeFlowQuotaList:
     post:
@@ -4184,7 +4328,7 @@ paths:
         200:
           description: 成功
           schema:
-            description: "实时单指标曲线图数据"
+            description: "接口返回结构"
             required:
               - "errno"
               - "errmsg"
@@ -4193,9 +4337,11 @@ paths:
               errno:
                 type: "number"
                 example: 0
+                description: "错误编码"
               errmsg:
                 type: "string"
                 example: ""
+                description: "错误内容"
               data:
                 required:
                   - "flow_quota_all"
@@ -4335,12 +4481,17 @@ paths:
                             example: ""
                         type: "object"
                     type: "object"
+                    description: "指标列表"
+                  hour:
+                    type: "string"
+                    example: "02:48:00"
+                    description: "指标批次号"
                   movements:
                     required:
                       - "2019-09-29"
                       - "today"
                     properties:
-                      2019-09-29:
+                      "2019-09-29":
                         type: "array"
                         items:
                           type: "object"
@@ -4348,6 +4499,7 @@ paths:
                             movement_id:
                               type: "string"
                               example: "687f3ec1332b17117b5a9672c54a91fd"
+                              description: "相位ID"
                             avg_stop_num_up:
                               type: "string"
                               example: "0.33333334"
@@ -4381,49 +4533,18 @@ paths:
                             route_length:
                               type: "string"
                               example: "1019"
-                      today:
-                        type: "array"
-                        items:
-                          type: "object"
-                          properties:
-                            movement_id:
-                              type: "string"
-                              example: "687f3ec1332b17117b5a9672c54a91fd"
-                            avg_stop_num_up:
-                              type: "string"
-                              example: "0.33333334"
-                            spillover_rate_up:
-                              type: "string"
-                              example: "0"
-                            stop_delay_up:
-                              type: "string"
-                              example: "40.333332"
-                            avg_speed_up:
-                              type: "string"
-                              example: "2.820939"
-                            one_stop_ratio_up:
-                              type: "string"
-                              example: "0.33333334"
-                            travel_time_up:
-                              type: "string"
-                              example: "361.22723"
-                            traffic_jam_index_up:
-                              type: "string"
-                              example: "0"
-                            saturation_up:
-                              type: "string"
-                              example: "0.50416666"
-                            volume_up:
-                              type: "string"
-                              example: "54"
-                            comment:
-                              type: "string"
-                              example: "西右"
-                            route_length:
+                            sg_num:
                               type: "string"
                               example: "1019"
+                              description: "信号机通道号"
+                            spot_id:
+                              type: "string"
+                              example: "1019"
+                              description: "信号机路口ID"
+                        description: "天级指标数据，指标描述参照flow_quota_all字段，如果当天则为today"
                     type: "object"
                 type: "object"
+                description: "数据内容"
   /Alarmanalysis/junctionAlarmDealList:
     post:
       summary: 路口报警处置记录
@@ -4457,7 +4578,7 @@ paths:
           description: 成功
           schema:
             type: object
-            description: "实时单指标曲线图数据"
+            description: "接口请求数据"
             required:
               - "errno"
               - "errmsg"
@@ -4466,9 +4587,11 @@ paths:
               errno:
                 type: "number"
                 example: 0
+                description: "错误编号"
               errmsg:
                 type: "string"
                 example: ""
+                description: "错误内容"
               data:
                 type: "array"
                 items:
@@ -4477,12 +4600,15 @@ paths:
                     create_time:
                       type: "string"
                       example: "2019-09-28 18:49:00"
+                      description: "报警产生时间"
                     type:
                       type: "number"
                       example: 1
+                      description: "报警类型"
                     comments:
                       type: "string"
                       example: "【西直】- 【过饱和】，持续2分钟"
+                      description: "报警详细描述"
   /esdata/sync:
     post:
       summary: 同步es数据
@@ -8487,53 +8613,53 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "接口返回值"
             properties:
               data:
+                description: "数据结构体"
                 type: object
-                description: ""
                 properties:
                   flow_list:
                     type: array
-                    description: ""
+                    description: "flow列表"
                     items:
                       type: object
                       description: ""
                       properties:
                         logic_flow_id:
                           type: string
-                          description: ""
+                          description: "flow_id"
                           example: 2017030116_i_244096140_2017030116_o_17538521
                         phase_name:
                           type: string
-                          description: ""
+                          description: "相位名"
                           example: ""
                         phase_num:
                           type: integer
-                          description: ""
+                          description: "相位编号"
                           example: 0
                         suggest_phase_name:
                           type: string
-                          description: ""
+                          description: "推荐相位名"
                           example: 东右
                         suggest_phase_num:
                           type: integer
-                          description: ""
+                          description: "推荐相位编号"
                           example: 1090
                   phase_list:
                     type: array
-                    description: ""
+                    description: "相位列表"
                     items:
                       type: object
-                      description: ""
+                      description: "相位结构体"
                       properties:
                         all_red:
                           type: integer
-                          description: ""
+                          description: "全红"
                           example: 0
                         channel:
                           type: integer
-                          description: ""
+                          description: "通道号"
                           example: 0
                         create_time:
                           type: string
@@ -8541,7 +8667,7 @@ paths:
                           example: "2018-12-20T14:52:53+08:00"
                         direct:
                           type: integer
-                          description: ""
+                          description: "方向"
                           example: 2
                         extension_green:
                           type: integer
@@ -8569,11 +8695,11 @@ paths:
                           example: 0
                         phase_name:
                           type: string
-                          description: ""
+                          description: "相位名"
                           example: 东直
                         phase_num:
                           type: integer
-                          description: ""
+                          description: "相位编号"
                           example: 1020
                         phase_order:
                           type: integer
@@ -8585,40 +8711,20 @@ paths:
                           example: "2018-12-20T14:52:53+08:00"
                         yellow:
                           type: integer
-                          description: ""
+                          description: "黄灯"
                           example: 0
                   version:
                     type: string
-                    description: ""
+                    description: "路网版本号"
                     example: "2019070918"
               errmsg:
                 type: string
-                description: ""
+                description: "错误描述"
                 example: ""
               errno:
                 type: integer
-                description: ""
+                description: "错误编号"
                 example: 0
-              time:
-                type: object
-                description: ""
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.1172秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 0.1137秒
-              traceid:
-                type: string
-                description: ""
-                example: 6445463d5d26a8d962cd244b0415ab02
-              username:
-                type: string
-                description: ""
-                example: unknown
   /JunctionReport/queryQuotaInfo:
     post:
       summary: 新增报告–单点路口分析–数据查询
@@ -8804,8 +8910,8 @@ paths:
                 example: unknown
   /Mapflow/simplifyFlows:
     post:
-      summary: ""
-      description: ""
+      summary: "获取相位画图信息"
+      description: "获取相位画图信息"
       tags: []
       consumes:
       - application/x-www-form-urlencoded
@@ -8815,81 +8921,6 @@ paths:
       - name: logic_flow_ids%5B0%5D
         in: formData
         description: '示例: 2017030116_i_244096140_2017030116_o_17538521'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B1%5D
-        in: formData
-        description: '示例: 2017030116_i_849637350_2017030116_o_849637351'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B2%5D
-        in: formData
-        description: '示例: 2017030116_i_17443651_2017030116_o_17538521'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B3%5D
-        in: formData
-        description: '示例: 2017030116_i_17460270_2017030116_o_17428740'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B4%5D
-        in: formData
-        description: '示例: 2017030116_i_849637350_2017030116_o_17538521'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B5%5D
-        in: formData
-        description: '示例: 2017030116_i_17443651_2017030116_o_244096141'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B6%5D
-        in: formData
-        description: '示例: 2017030116_i_849637350_2017030116_o_244096141'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B7%5D
-        in: formData
-        description: '示例: 2017030116_i_17460270_2017030116_o_244096141'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B8%5D
-        in: formData
-        description: '示例: 2017030116_i_17460270_2017030116_o_849637351'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B9%5D
-        in: formData
-        description: '示例: 2017030116_i_17443651_2017030116_o_849637351'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B10%5D
-        in: formData
-        description: '示例: 2017030116_i_244096140_2017030116_o_17428740'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B11%5D
-        in: formData
-        description: '示例: 2017030116_i_244096140_2017030116_o_244096141'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B12%5D
-        in: formData
-        description: '示例: 2017030116_i_17460270_2017030116_o_17538521'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B13%5D
-        in: formData
-        description: '示例: 2017030116_i_17443651_2017030116_o_17428740'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B14%5D
-        in: formData
-        description: '示例: 2017030116_i_244096140_2017030116_o_849637351'
-        required: false
-        type: string
-      - name: logic_flow_ids%5B15%5D
-        in: formData
-        description: '示例: 2017030116_i_849637350_2017030116_o_17428740'
         required: false
         type: string
       - name: version
@@ -8906,17 +8937,17 @@ paths:
             properties:
               data:
                 type: array
-                description: ""
+                description: "数据结构体"
                 items:
                   type: object
                   description: ""
                   properties:
                     flows:
                       type: array
-                      description: ""
+                      description: "flow结构体"
                       items:
                         type: array
-                        description: ""
+                        description: "flow画图坐标点"
                         items:
                           type: number
                           description: ""
@@ -8924,7 +8955,7 @@ paths:
                           format: float
                     logic_flow_id:
                       type: string
-                      description: ""
+                      description: "flow_id"
                       example: 2017030116_i_17443651_2017030116_o_17428740
               errmsg:
                 type: string
@@ -10868,6 +10899,8 @@ paths:
     post:
       summary: 评估页-干线评估-获取干线评估结果
       description: 评估页-干线评估-获取干线评估结果
+      tags:
+        - 评估
       consumes:
       - application/x-www-form-urlencoded
       produces:
@@ -10922,95 +10955,35 @@ paths:
             properties:
               data:
                 type: object
-                description: ""
+                description: "数据结构体"
                 properties:
                   base:
                     type: object
-                    description: ""
-                    properties:
-                      "2019-07-01":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
-                            example: "00:00"
-                      "2019-07-02":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
-                            example: "00:00"
-                      "2019-07-03":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
-                            example: "00:00"
-                      "2019-07-04":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
-                            example: "00:00"
-                      "2019-07-05":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
-                            example: "00:00"
-                  evaluate:
-                    type: object
-                    description: ""
+                    description: "评估"
                     properties:
                       "2019-07-08":
                         type: array
-                        description: ""
+                        description: "当天指标数据"
                         items:
                           type: array
-                          description: ""
+                          description: "时间点及指标数据"
                           items:
                             type: string
-                            description: ""
+                            description: "时间点及指标数据"
                             example: "00:00"
-                      "2019-07-09":
+                  evaluate:
+                    type: object
+                    description: "评估"
+                    properties:
+                      "2019-07-08":
                         type: array
-                        description: ""
+                        description: "当天指标数据"
                         items:
                           type: array
-                          description: ""
+                          description: "时间点及指标数据"
                           items:
                             type: string
-                            description: ""
-                            example: "00:00"
-                      "2019-07-10":
-                        type: array
-                        description: ""
-                        items:
-                          type: array
-                          description: ""
-                          items:
-                            type: string
-                            description: ""
+                            description: "时间点及指标数据"
                             example: "00:00"
                   avg:
                     type: object
@@ -11018,61 +10991,61 @@ paths:
                     properties:
                       "base":
                         type: array
-                        description: ""
+                        description: "当天指标数据"
                         items:
                           type: array
-                          description: ""
+                          description: "时间点及指标数据"
                           items:
                             type: string
-                            description: ""
+                            description: "时间点及指标数据"
                             example: "00:00"
                       "evaluate":
                         type: array
-                        description: ""
+                        description: "当天指标数据"
                         items:
                           type: array
-                          description: ""
+                          description: "时间点及指标数据"
                           items:
                             type: string
-                            description: ""
+                            description: "时间点及指标数据"
                             example: "00:00"
                   info:
                     type: object
-                    description: ""
+                    description: "基本信息"
                     properties:
                       base_time:
                         type: array
                         description: ""
                         items:
                           type: string
-                          description: ""
+                          description: "基准时间"
                           example: "2019-07-01"
                       direction:
                         type: string
-                        description: ""
+                        description: "方向"
                         example: 正向
                       download_id:
                         type: string
-                        description: ""
+                        description: "下载id"
                         example: 7adebd0336ca3f39297679636a3689ed
                       evaluate_time:
                         type: array
                         description: ""
                         items:
                           type: string
-                          description: ""
+                          description: "评估时间"
                           example: "2019-07-08"
                       quota_name:
                         type: string
-                        description: ""
+                        description: "通行时间"
                         example: 干线通行时间
                       quota_unit:
                         type: string
-                        description: ""
+                        description: "单位"
                         example: 秒
                       road_name:
                         type: string
-                        description: ""
+                        description: "道路名"
                         example: 现代大道西
               errmsg:
                 type: string
@@ -11370,8 +11343,8 @@ paths:
                 example: unknown
   /Road/getPathHeadTailJunction:
     post:
-      summary: ""
-      description: ""
+      summary: "干线管理–补全头尾路口列表"
+      description: "干线管理–补全头尾路口列表"
       tags: []
       consumes:
       - application/x-www-form-urlencoded
@@ -11397,11 +11370,11 @@ paths:
             properties:
               data:
                 type: object
-                description: ""
+                description: "数据结构体"
                 properties:
                   junction_list:
                     type: array
-                    description: ""
+                    description: "路口列表"
                     items:
                       type: string
                       description: ""
@@ -11756,26 +11729,26 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "接口数据返回"
             properties:
               data:
                 type: object
-                description: ""
+                description: "数据结构体"
                 properties:
                   vehicle_phase:
                     type: array
-                    description: ""
+                    description: "车辆相位"
                     items:
                       type: object
-                      description: ""
+                      description: "车辆相位结构体"
                       properties:
                         all_red:
                           type: integer
-                          description: ""
+                          description: "全红"
                           example: 0
                         channel:
                           type: integer
-                          description: ""
+                          description: "通道"
                           example: 0
                         create_time:
                           type: string
@@ -11783,7 +11756,7 @@ paths:
                           example: "2018-12-20T14:52:53+08:00"
                         direct:
                           type: integer
-                          description: ""
+                          description: "方向"
                           example: 2
                         extension_green:
                           type: integer
@@ -11795,11 +11768,11 @@ paths:
                           example: 3326
                         logic_junction_id:
                           type: string
-                          description: ""
+                          description: "路口ID"
                           example: "2017030116_1308833"
                         max_green:
                           type: integer
-                          description: ""
+                          description: "最大绿"
                           example: 0
                         max_green2:
                           type: integer
@@ -11807,19 +11780,19 @@ paths:
                           example: 0
                         min_green:
                           type: integer
-                          description: ""
+                          description: "最小绿"
                           example: 0
                         phase_name:
                           type: string
-                          description: ""
+                          description: "相位名"
                           example: 东直
                         phase_num:
                           type: integer
-                          description: ""
+                          description: "相位编号"
                           example: 1020
                         phase_order:
                           type: integer
-                          description: ""
+                          description: "相位排序"
                           example: 0
                         update_time:
                           type: string
@@ -11827,11 +11800,11 @@ paths:
                           example: "2018-12-20T14:52:53+08:00"
                         yellow:
                           type: integer
-                          description: ""
+                          description: "黄灯"
                           example: 0
                   walk_phase:
                     type: array
-                    description: ""
+                    description: "行人相位"
                     items:
                       type: object
                       description: ""
@@ -11865,8 +11838,8 @@ paths:
                 example: unknown
   /Splitoptimize/getOrderTimingMovements:
     post:
-      summary: ""
-      description: ""
+      summary: "获取配时排序的movements"
+      description: "获取配时排序的movements"
       tags: []
       consumes:
       - application/x-www-form-urlencoded
@@ -11903,22 +11876,22 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "接口内容"
             properties:
               data:
                 type: array
-                description: ""
+                description: "数据结构体"
                 items:
                   type: object
                   description: ""
                   properties:
                     logic_flow_id:
                       type: string
-                      description: ""
+                      description: "flow_id"
                       example: 2017030116_i_74252330_2017030116_o_74252260
                     name:
                       type: string
-                      description: ""
+                      description: "flow名称"
                       example: 北直
               errmsg:
                 type: string
@@ -13619,9 +13592,9 @@ paths:
                 example: unknown
   /area/download:
     get:
-      summary: ""
-      description: ""
-      tags: []
+      summary: "区域评估数据下载"
+      description: "区域评估数据下载"
+      tags: ["评估"]
       consumes: []
       produces:
       - application/vnd.ms-excel
@@ -14727,7 +14700,7 @@ paths:
     post:
       summary: 概览页-获取城市列表
       description: 概览页-获取城市列表
-      tags: []
+      tags: ["概览"]
       consumes: []
       produces:
       - application/json
@@ -14737,18 +14710,18 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "接口返回"
             properties:
               data:
                 type: array
-                description: ""
+                description: "数据结构体"
                 items:
                   type: object
                   description: ""
                   properties:
                     center:
                       type: object
-                      description: ""
+                      description: "中心点"
                       properties:
                         coordinates:
                           type: array
@@ -14764,15 +14737,15 @@ paths:
                           example: Point
                     city:
                       type: string
-                      description: ""
+                      description: "城市"
                       example: 北京
                     code:
                       type: integer
-                      description: ""
+                      description: "编号"
                       example: 1
                     letter:
                       type: string
-                      description: ""
+                      description: "首字母"
                       example: B
                     obj_id:
                       type: integer
@@ -14780,11 +14753,11 @@ paths:
                       example: 1
                     pinyin:
                       type: string
-                      description: ""
+                      description: "拼音"
                       example: bei jing
                     zoom:
                       type: integer
-                      description: ""
+                      description: "zoom级"
                       example: 11
               errmsg:
                 type: string
@@ -16072,8 +16045,8 @@ paths:
             description: "返回成功，直接下载excel"
   /permission/getMenuList:
     get:
-      summary: ""
-      description: ""
+      summary: "获取菜单"
+      description: "获取菜单"
       tags: []
       consumes:
       - application/x-www-form-urlencoded
@@ -16090,26 +16063,26 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "接口返回"
             properties:
               data:
                 type: array
-                description: ""
+                description: "数据结构体"
                 items:
                   type: object
                   description: ""
                   properties:
                     name:
                       type: string
-                      description: ""
+                      description: "菜单名"
                       example: 概览
                     remark:
                       type: string
-                      description: ""
+                      description: "菜单描述"
                       example: signal
                     url:
                       type: string
-                      description: ""
+                      description: "菜单地址"
                       example: /overview
               errmsg:
                 type: string
@@ -16141,8 +16114,8 @@ paths:
                 example: unknown
   /permission/getPermissionList:
     post:
-      summary: ""
-      description: ""
+      summary: "获取权限列表"
+      description: "获取权限列表"
       tags: []
       consumes:
       - application/x-www-form-urlencoded
@@ -16154,15 +16127,15 @@ paths:
           description: 请求成功
           schema:
             type: object
-            description: ""
+            description: "接口内容"
             properties:
               data:
                 type: object
-                description: ""
+                description: "数据结构体"
                 properties:
                   areas:
                     type: array
-                    description: ""
+                    description: "区域权限"
                     items:
                       type: object
                       description: ""
@@ -16213,7 +16186,7 @@ paths:
                           example: 1.428430535e+12
                   flags:
                     type: array
-                    description: ""
+                    description: "标识位权限"
                     items:
                       type: object
                       description: ""
@@ -16256,7 +16229,7 @@ paths:
                           example: 0
                   roles:
                     type: array
-                    description: ""
+                    description: "角色权限"
                     items:
                       type: object
                       description: ""
@@ -16286,7 +16259,7 @@ paths:
                           example: 1
                   user:
                     type: object
-                    description: ""
+                    description: "用户基本信息"
                     properties:
                       email:
                         type: string
@@ -16338,9 +16311,9 @@ paths:
                 example: unknown
   /road/download:
     get:
-      summary: ""
-      description: ""
-      tags: []
+      summary: "干线评估数据下载"
+      description: "干线评估数据下载"
+      tags: ["评估"]
       consumes: []
       produces:
       - application/vnd.ms-excel
@@ -16658,98 +16631,6 @@ paths:
               username:
                 type: string
                 description: 用户名
-                example: unknown
-  /task/getSuceessCycleTaskList:
-    post:
-      summary: ""
-      description: ""
-      tags: []
-      consumes:
-      - application/x-www-form-urlencoded
-      produces:
-      - application/json
-      parameters:
-      - name: city_id
-        in: formData
-        description: '示例: 23'
-        required: false
-        type: string
-      responses:
-        200:
-          description: 请求成功
-          schema:
-            type: object
-            description: ""
-            properties:
-              data:
-                type: array
-                description: ""
-                items:
-                  type: object
-                  description: ""
-                  properties:
-                    comment:
-                      type: string
-                      description: ""
-                      example: 前4个周四
-                    dates:
-                      type: array
-                      description: ""
-                      items:
-                        type: string
-                        description: ""
-                        example: "2019-07-04"
-                    exec_date:
-                      type: string
-                      description: ""
-                      example: "07.11"
-                    junctions:
-                      type: string
-                      description: ""
-                      example: 全城
-                    reason:
-                      type: string
-                      description: ""
-                      example: ""
-                    status:
-                      type: string
-                      description: ""
-                      example: 100%
-                    task_id:
-                      type: string
-                      description: ""
-                      example: "22793"
-                    time_range:
-                      type: string
-                      description: ""
-                      example: 00:00-24:00
-              errmsg:
-                type: string
-                description: ""
-                example: ""
-              errno:
-                type: integer
-                description: ""
-                example: 0
-              time:
-                type: object
-                description: ""
-                properties:
-                  a:
-                    type: string
-                    description: ""
-                    example: 0.0337秒
-                  s:
-                    type: string
-                    description: ""
-                    example: 秒
-              traceid:
-                type: string
-                description: ""
-                example: 645aae105d26a5b39048b47203411b02
-              username:
-                type: string
-                description: ""
                 example: unknown
   /timeframeoptimize/getJunctionMovements:
     post:
