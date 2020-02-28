@@ -92,13 +92,15 @@ class Timing_model extends CI_Model
         // 获取配时数据
         $timing = $this->getNewTimingInfo($data);
         // 对返回数据格式化,返回需要的格式
-        if (count($timing) >= 1) {
+        // print_r($timing);exit;
+        if(!empty($timing)){
             $flowId2Name = $this->formatTimingIdToName($timing);
-        } else {
+        }
+        if (count($flowId2Name) == 0) {
             $info32 = $this->waymap_model->getFlowInfo32(trim($data['junction_id']));
             $flowId2Name = array_column($info32,"phase_name","logic_flow_id");
         }
-
+        // print_r($flowId2Name);exit;
         return $flowId2Name;
     }
 
@@ -617,6 +619,7 @@ class Timing_model extends CI_Model
     //获取新版本配时并格式化成旧版本格式
     public function getNewTimingInfo($data){
         $info32 = $this->waymap_model->getFlowInfo32(trim($data['junction_id']));
+        // print_r($info32);exit;
         $flowMap = array_column($info32,"phase_name","logic_flow_id");
         //flow信息替换
         $time_range = array_filter(explode('-', trim($data['time_range'])));
