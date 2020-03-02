@@ -295,6 +295,7 @@ class WordreportService extends BaseService{
         //干线重点路口运行指数分析
         if(isset($params['runningAnalysic_sub_content_1'])){
             $templateProcessor->cloneBlock("H_BLOCK",1);
+            $templateProcessor->setValue("runningAnalysic_junction_1",$params['runningAnalysic_junction_1']);
             $templateProcessor->setValue("runningAnalysic_sub_content_1",$params['runningAnalysic_sub_content_1']);
             $templateProcessor->setValue("runningAnalysic_1_1",$params['runningAnalysic_1_1']);
             $templateProcessor->setValue("runningAnalysic_1_2",$params['runningAnalysic_1_2']);
@@ -319,6 +320,7 @@ class WordreportService extends BaseService{
         }
         if(isset($params['runningAnalysic_sub_content_2'])){
             $templateProcessor->cloneBlock("I_BLOCK",1);
+            $templateProcessor->setValue("runningAnalysic_junction_2",$params['runningAnalysic_junction_2']);
             $templateProcessor->setValue("runningAnalysic_sub_content_2",$params['runningAnalysic_sub_content_2']);
             $templateProcessor->setValue("runningAnalysic_2_1",$params['runningAnalysic_2_1']);
             $templateProcessor->setValue("runningAnalysic_2_2",$params['runningAnalysic_2_2']);
@@ -343,6 +345,7 @@ class WordreportService extends BaseService{
         }
         if(isset($params['runningAnalysic_sub_content_3'])){
             $templateProcessor->cloneBlock("J_BLOCK",1);
+            $templateProcessor->setValue("runningAnalysic_junction_3",$params['runningAnalysic_junction_3']);
             $templateProcessor->setValue("runningAnalysic_sub_content_3",$params['runningAnalysic_sub_content_3']);
             $templateProcessor->setValue("runningAnalysic_3_1",$params['runningAnalysic_3_1']);
             $templateProcessor->setValue("runningAnalysic_3_2",$params['runningAnalysic_3_2']);
@@ -458,6 +461,7 @@ class WordreportService extends BaseService{
         //区域重点路口运行指数分析
         if(isset($params['runningAnalysic_sub_content_1'])){
             $templateProcessor->cloneBlock("H_BLOCK",1);
+            $templateProcessor->setValue("runningAnalysic_junction_1",$params['runningAnalysic_junction_1']);
             $templateProcessor->setValue("runningAnalysic_sub_content_1",$params['runningAnalysic_sub_content_1']);
             $templateProcessor->setValue("runningAnalysic_1_1",$params['runningAnalysic_1_1']);
             $templateProcessor->setValue("runningAnalysic_1_2",$params['runningAnalysic_1_2']);
@@ -482,6 +486,7 @@ class WordreportService extends BaseService{
         }
         if(isset($params['runningAnalysic_sub_content_2'])){
             $templateProcessor->cloneBlock("I_BLOCK",1);
+            $templateProcessor->setValue("runningAnalysic_junction_2",$params['runningAnalysic_junction_2']);
             $templateProcessor->setValue("runningAnalysic_sub_content_2",$params['runningAnalysic_sub_content_2']);
             $templateProcessor->setValue("runningAnalysic_2_1",$params['runningAnalysic_2_1']);
             $templateProcessor->setValue("runningAnalysic_2_2",$params['runningAnalysic_2_2']);
@@ -506,6 +511,7 @@ class WordreportService extends BaseService{
         }
         if(isset($params['runningAnalysic_sub_content_3'])){
             $templateProcessor->cloneBlock("J_BLOCK",1);
+            $templateProcessor->setValue("runningAnalysic_junction_3",$params['runningAnalysic_junction_3']);
             $templateProcessor->setValue("runningAnalysic_sub_content_3",$params['runningAnalysic_sub_content_3']);
             $templateProcessor->setValue("runningAnalysic_3_1",$params['runningAnalysic_3_1']);
             $templateProcessor->setValue("runningAnalysic_3_2",$params['runningAnalysic_3_2']);
