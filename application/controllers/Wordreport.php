@@ -157,11 +157,71 @@ class Wordreport extends MY_Controller{
      * */
     public function CreateRoadDoc(){
 
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id'    => 'required|is_natural_no_zero',
+            'task_id'    => 'required',
+        ]);
+        //taskid确认
+        $this->wordreportService->queryByTaskID($params['task_id']);
 
 
+        $this->wordreportService->checkFile($_FILES);
+
+        //前端数据转换成模板对应的格式
+        $params = $this->wordreportService->formartRoadImgKeyValue($params);
 
 
+        //生成chart水印图片
+        try{
+            $tmpFiles = $this->wordreportService->generateChartImg($params,"滴滴智慧交通");
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
 
+        //图片添加水印
+        try{
+            $newFiles = $this->wordreportService->addWatermark($_FILES,"滴滴智慧交通");
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+
+        $newFiles = array_merge($tmpFiles,$newFiles);
+
+        //生成word文件
+        $docFile = $this->wordreportService->createRoadDoc($params,$newFiles);
+
+        //销毁水印图片
+        $this->wordreportService->clearWatermark($newFiles);
+
+        try{
+            //文件上传至gift
+            $ret  = $this->wordreportService->saveDoc($docFile);
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+
+
+        //数据入库
+        if(isset($ret['url'])){
+            $this->wordreportService->updateTask($params['task_id'],$ret['resource_key'],1);
+        }else{
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+        }
+
+        $this->response($ret['url']);
     }
 
     /*
@@ -169,6 +229,71 @@ class Wordreport extends MY_Controller{
      * */
     public function CreateAreaDoc(){
 
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id'    => 'required|is_natural_no_zero',
+            'task_id'    => 'required',
+        ]);
+        //taskid确认
+        $this->wordreportService->queryByTaskID($params['task_id']);
+
+
+        $this->wordreportService->checkFile($_FILES);
+
+        //前端数据转换成模板对应的格式
+        $params = $this->wordreportService->formartRoadImgKeyValue($params);
+
+
+        //生成chart水印图片
+        try{
+            $tmpFiles = $this->wordreportService->generateChartImg($params,"滴滴智慧交通");
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+
+        //图片添加水印
+        try{
+            $newFiles = $this->wordreportService->addWatermark($_FILES,"滴滴智慧交通");
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+
+        $newFiles = array_merge($tmpFiles,$newFiles);
+
+        //生成word文件
+        $docFile = $this->wordreportService->createAreaDoc($params,$newFiles);
+
+        //销毁水印图片
+        $this->wordreportService->clearWatermark($newFiles);
+
+        try{
+            //文件上传至gift
+            $ret  = $this->wordreportService->saveDoc($docFile);
+        }catch (\Exception $e){
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+            com_log_warning('_junc_wordreport_error', 0, $e->getMessage(), compact("params"));
+            $this->errno = ERR_HTTP_FAILED;
+            $this->errmsg = $e->getMessage();
+            return;
+        }
+
+
+        //数据入库
+        if(isset($ret['url'])){
+            $this->wordreportService->updateTask($params['task_id'],$ret['resource_key'],1);
+        }else{
+            $this->wordreportService->updateTask($params['task_id'],"",2);
+        }
+
+        $this->response($ret['url']);
     }
 
 

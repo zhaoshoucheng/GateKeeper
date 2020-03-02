@@ -100,7 +100,7 @@ class Wordreport_model extends CI_Model{
 //        $jsonStr = "{\"infile\":{\"title\": {\"text\": \"Steep Chart\"}, \"xAxis\": {\"categories\": [\"Jan\", \"Feb\", \"Mar\"]}, \"series\": [{\"data\": [29.9, 71.5, 106.4]}]}}";
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_URL, "http://100.90.164.31:8085");
+        curl_setopt($ch, CURLOPT_URL, $this->chartimg_interface);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonStr);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
