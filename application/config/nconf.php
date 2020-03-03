@@ -228,8 +228,8 @@ if ($development == 2) {
 
     $report_proxy_url = "http://10.179.148.73/sg1/api/signalpro/api";
 
-//    $chart_generate_url = "http://100.90.164.31:8085";
-    $chart_generate_url = "https://sts.didichuxing.com/signalpro-report/api/chart/exporter";
+    $chart_generate_url = "http://100.90.164.31:8085";
+//    $chart_generate_url = "https://sts.didichuxing.com/signalpro-report/api/chart/exporter";
 
 }
 

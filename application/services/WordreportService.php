@@ -736,6 +736,8 @@ class WordreportService extends BaseService{
                             ));
                         }
                     }
+                }elseif(strpos($pk,"junction")!==false){
+                    $newParams[$pk] = $pv;
                 }else{
                     $jsonArr = json_decode($pv,true);
                     if($jsonArr){
