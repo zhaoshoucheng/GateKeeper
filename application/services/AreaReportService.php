@@ -200,7 +200,7 @@ class AreaReportService extends BaseService{
             return ($a['hour'] < $b['hour']) ? -1 : 1;
         });
 
-        $text = $this->reportService->getComparisonText(array_column($now_data, 'y'), array_column($last_data, 'y'), $report_type);
+        $text = $this->reportService->getComparisonText(array_column($now_data, 'y'), array_column($last_data, 'y'), $report_type, 'pi');
 
         $desc = sprintf($tpl, $text[1], $text[2], $text[1], $text[2], $text[0]);
 
@@ -306,7 +306,7 @@ class AreaReportService extends BaseService{
                 'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
             ];
         }, $last_data));
-        $stop_time_cycle_text = $this->reportService->getComparisonText(array_column($now_stop_time_cycle_data, 'y'), array_column($last_stop_time_cycle_data, 'y'), $report_type);
+        $stop_time_cycle_text = $this->reportService->getComparisonText(array_column($now_stop_time_cycle_data, 'y'), array_column($last_stop_time_cycle_data, 'y'), $report_type, 'stop_time_cycle');
         $now_stop_delay_data = $this->reportService->addto48(array_map(function($item) {
             return [
                 'x' => $item['key'],
@@ -319,7 +319,7 @@ class AreaReportService extends BaseService{
                 'y' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
             ];
         }, $last_data));
-        $stop_delay_text = $this->reportService->getComparisonText(array_column($now_stop_delay_data, 'y'), array_column($last_stop_delay_data, 'y'), $report_type);
+        $stop_delay_text = $this->reportService->getComparisonText(array_column($now_stop_delay_data, 'y'), array_column($last_stop_delay_data, 'y'), $report_type, 'stop_delay');
         $now_speed_data = $this->reportService->addto48(array_map(function($item) {
             return [
                 'x' => $item['key'],
@@ -332,7 +332,7 @@ class AreaReportService extends BaseService{
                 'y' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
             ];
         }, $last_data));
-        $speed_text = $this->reportService->getComparisonText(array_column($now_speed_data, 'y'), array_column($last_speed_data, 'y'), $report_type);
+        $speed_text = $this->reportService->getComparisonText(array_column($now_speed_data, 'y'), array_column($last_speed_data, 'y'), $report_type, 'speed');
 
         $stop_time_cycle_data = [];
         $stop_delay_data = [];
