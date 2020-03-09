@@ -51,6 +51,34 @@ class RoadReport extends MY_Controller
         $data = $this->roadReportService->queryRoadDataComparison($params);
         $this->response($data);
     }
+    public function queryRoadDataComparisonNJ() {
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'road_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        $params['start_date'] = $params['start_time'];
+        $params['end_date'] = $params['end_time'];
+
+        $data = $this->roadReportService->queryRoadDataComparisonNJ($params);
+        $this->response($data);
+    }
+    public function queryRoadQuotaDataNJ() {
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'road_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        $params['start_date'] = $params['start_time'];
+        $params['end_date'] = $params['end_time'];
+
+        $data = $this->roadReportService->queryRoadQuotaDataNJ($params);
+        $this->response($data);
+    }
     public function queryRoadCongestion() {
         $params = $this->input->get(null, true);
         $this->get_validate([

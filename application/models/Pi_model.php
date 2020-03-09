@@ -106,7 +106,7 @@ class Pi_model extends CI_Model{
     }
 
     public function getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $dates, $hours){
-        if ($city_id == 11) {
+        if ($city_id == 11 || $city_id == 12) {
             $pi_data = $this->dataService->call("/report/GetPiIndex", [
                 'city_id' => $city_id,
                 'dates' => $dates,
@@ -131,9 +131,9 @@ class Pi_model extends CI_Model{
                 ->where_in('hour', $hours)
                 ->group_by('logic_junction_id')
                 ->get();
-                if(empty($res)){
-                    return [];
-                }
+            if(empty($res)){
+                return [];
+            }
     //         var_dump($this->db->last_query());
             return $res->result_array();
         }
@@ -141,7 +141,7 @@ class Pi_model extends CI_Model{
     }
 
     public function getJunctionsPiByHours($city_id, $logic_junction_ids, $dates){
-        if ($city_id == 11) {
+        if ($city_id == 11|| $city_id == 12) {
             $pi_data = $this->dataService->call("/report/GetPiIndex", [
                 'city_id' => $city_id,
                 'dates' => $dates,
@@ -164,6 +164,9 @@ class Pi_model extends CI_Model{
                 ->where_in('date', $dates)
                 ->group_by('hour')
                 ->get();
+            if(empty($res)){
+                return [];
+            }
     //         var_dump($this->db->last_query());
             return $res->result_array();
         }

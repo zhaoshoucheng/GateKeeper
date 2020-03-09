@@ -78,6 +78,34 @@ class JunctionReport extends MY_Controller
         $data = $this->junctionReportService->queryJuncDataComparison($params);
         $this->response($data);
     }
+    public function queryJuncDataComparisonNJ() {
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'logic_junction_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        $params['start_date'] = $params['start_time'];
+        $params['end_date'] = $params['end_time'];
+
+        $data = $this->junctionReportService->queryJunctionDataComparisonNJ($params);
+        $this->response($data);
+    }
+    public function queryJuncQuotaDataNJ() {
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'logic_junction_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+        $params['start_date'] = $params['start_time'];
+        $params['end_date'] = $params['end_time'];
+
+        $data = $this->junctionReportService->queryJunctionQuotaDataNJ($params);
+        $this->response($data);
+    }
 
     public function queryJuncQuotaData() {
         $params = $this->input->get(null, true);

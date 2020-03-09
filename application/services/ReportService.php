@@ -825,16 +825,38 @@ class ReportService extends BaseService
         ];
     }
 
-    public function getComparisonText($now, $last, $report_type) {
+    public function getComparisonText($now, $last, $report_type, $index = 'stop_delay') {
         $text = [];
         $s1 = (empty($now)) ? 0.00 : array_sum($now) / count($now);
         $s2 = (empty($last)) ? 0.00: array_sum($last) / count($last);
+        $texts = [
+            'stop_time_cycle' => [
+                -1 => '有所减少',
+                0  => '基本持平',
+                1  => '有所增加',
+            ],
+            'stop_delay' => [
+                -1 => '得到缓解',
+                0  => '基本持平',
+                1  => '有所增长',
+            ],
+            'speed' => [
+                -1 => '有所下降',
+                0  => '基本持平',
+                1  => '得到提升',
+            ],
+            'pi' => [
+                -1 => '有所缓解',
+                0  => '基本持平',
+                1  => '更加严重',
+            ],
+        ];
         if ($s2 == 0) {
-            $text[] = "基本持平";
+            $text[] = $texts[$index][0];
         } elseif ($s1 / $s2 - 1 >= 0.1) {
-            $text[] = "更加严重";
+            $text[] = $texts[$index][1];
         } elseif ($s1 / $s2 - 1 <= -0.1) {
-            $text[] = "得到缓解";
+            $text[] = $texts[$index][-1];
         } else {
             $text[] = "基本持平";
         }
