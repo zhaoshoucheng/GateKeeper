@@ -162,6 +162,257 @@ class AreaReportService extends BaseService{
     	];
     }
 
+    public function queryAreaDataComparisonNJ($params) {
+        $tpl = "上图展示了研究区域总体运行状态（PI）%s与%s的对⽐，%s该区域拥堵程度与%s相比%s。";
+
+        $city_id = intval($params['city_id']);
+        $area_id = $params['area_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
+
+        // $city_info = $this->openCity_model->getCityInfo($city_id);
+        // if (empty($city_info)) {
+
+        // }
+
+        // $area_info = $this->area_model->getAreaInfo($area_id);
+        // if (empty($area_info)) {
+
+        // }
+
+        $area_detail = $this->areaService->getAreaDetail([
+            'city_id' => $city_id,
+            'area_id' => $area_id,
+        ]);
+        $logic_junction_ids = implode(',', array_column($area_detail['junction_list'], 'logic_junction_id'));
+
+        $report_type = $this->reportService->report_type($start_date, $end_date);
+        $last_report_date = $this->reportService->last_report_date($start_date, $end_date, $report_type);
+        $last_start_date = $last_report_date['start_date'];
+        $last_end_date = $last_report_date['end_date'];
+
+        $now_data = $this->pi_model->getJunctionsPiByHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+        usort($now_data, function($a, $b) {
+            return ($a['hour'] < $b['hour']) ? -1 : 1;
+        });
+        $last_data = $this->pi_model->getJunctionsPiByHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($last_start_date, $last_end_date));
+        usort($last_data, function($a, $b) {
+            return ($a['hour'] < $b['hour']) ? -1 : 1;
+        });
+
+        $text = $this->reportService->getComparisonText(array_column($now_data, 'y'), array_column($last_data, 'y'), $report_type, 'pi');
+
+        $desc = sprintf($tpl, $text[1], $text[2], $text[1], $text[2], $text[0]);
+
+        return [
+            'info' => [
+                'desc' => $desc,
+            ],
+            'chart' => [
+                'title' => 'PI',
+                'scale_title' => '',
+                'series' => [
+                    [
+                        'name' => $text[1],
+                        'data' => $this->reportService->addto48(array_map(function($item) {
+                            return [
+                                'x' => $item['hour'],
+                                'y' => round($item['pi'], 2),
+                            ];
+                        }, $now_data)),
+                    ],
+                    [
+                        'name' => $text[2],
+                        'data' => $this->reportService->addto48(array_map(function($item) {
+                            return [
+                                'x' => $item['hour'],
+                                'y' => round($item['pi'], 2),
+                            ];
+                        }, $last_data)),
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    public function queryAreaQuotaDataNJ($params) {
+        $tpl = "下图利用滴滴数据绘制了该区域全天24⼩时各项运⾏指标（⻋均停⻋次数、⻋均停⻋延误、⻋均行驶速度）。通过数据分析，该区域的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/⻋/路口，停⻋延误接近%.2f秒/⻋/路口，⾏驶速度也达到%.2f千米/小时左右。与%s相比，%s车均停车次数%s，车均停车延误%s，车均行驶速度%s。";
+
+        $city_id = intval($params['city_id']);
+        $area_id = $params['area_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
+
+        // $city_info = $this->openCity_model->getCityInfo($city_id);
+        // if (empty($city_info)) {
+
+        // }
+
+        // $area_info = $this->area_model->getAreaInfo($area_id);
+        // if (empty($area_info)) {
+
+        // }
+
+        $area_detail = $this->areaService->getAreaDetail([
+            'city_id' => $city_id,
+            'area_id' => $area_id,
+        ]);
+        $logic_junction_ids = implode(',', array_column($area_detail['junction_list'], 'logic_junction_id'));
+
+        $report_type = $this->reportService->report_type($start_date, $end_date);
+        $last_report_date = $this->reportService->last_report_date($start_date, $end_date, $report_type);
+        $last_start_date = $last_report_date['start_date'];
+        $last_end_date = $last_report_date['end_date'];
+
+        $morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+        $morning_peek_hours = $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']);
+        $evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+        $evening_peek_hours = $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']);
+        $peek_hours = array_merge($morning_peek_hours, $evening_peek_hours);
+
+        $now_data = $this->dataService->call("/report/GetIndex", [
+            'city_id' => $city_id,
+            'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
+            'logic_junction_ids' => explode(',', $logic_junction_ids),
+            "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(stop_time_cycle * traj_count) AS stop_time_cycle, sum(speed * traj_count) AS speed, sum(traj_count) as traj_count",
+            "group_by" => "hour",
+        ], "POST", 'json');
+        $now_data = $now_data[2];
+        usort($now_data, function($a, $b) {
+            return ($a['key'] < $b['key']) ? -1 : 1;
+        });
+
+        $last_data = $this->dataService->call("/report/GetIndex", [
+            'city_id' => $city_id,
+            'dates' => $this->reportService->getDatesFromRange($last_start_date, $last_end_date),
+            'logic_junction_ids' => explode(',', $logic_junction_ids),
+            "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(stop_time_cycle * traj_count) AS stop_time_cycle, sum(speed * traj_count) AS speed, sum(traj_count) as traj_count",
+            "group_by" => "hour",
+        ], "POST", 'json');
+        $last_data = $last_data[2];
+        usort($last_data, function($a, $b) {
+            return ($a['key'] < $b['key']) ? -1 : 1;
+        });
+
+        $now_stop_time_cycle_data = $this->reportService->addto48(array_map(function($item) {
+            return [
+                'x' => $item['key'],
+                'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+            ];
+        }, $now_data));
+        $last_stop_time_cycle_data = $this->reportService->addto48(array_map(function($item) {
+            return [
+                'x' => $item['key'],
+                'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+            ];
+        }, $last_data));
+        $stop_time_cycle_text = $this->reportService->getComparisonText(array_column($now_stop_time_cycle_data, 'y'), array_column($last_stop_time_cycle_data, 'y'), $report_type, 'stop_time_cycle');
+        $now_stop_delay_data = $this->reportService->addto48(array_map(function($item) {
+            return [
+                'x' => $item['key'],
+                'y' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
+            ];
+        }, $now_data));
+        $last_stop_delay_data = $this->reportService->addto48(array_map(function($item) {
+            return [
+                'x' => $item['key'],
+                'y' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
+            ];
+        }, $last_data));
+        $stop_delay_text = $this->reportService->getComparisonText(array_column($now_stop_delay_data, 'y'), array_column($last_stop_delay_data, 'y'), $report_type, 'stop_delay');
+        $now_speed_data = $this->reportService->addto48(array_map(function($item) {
+            return [
+                'x' => $item['key'],
+                'y' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
+            ];
+        }, $now_data));
+        $last_speed_data = $this->reportService->addto48(array_map(function($item) {
+            return [
+                'x' => $item['key'],
+                'y' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
+            ];
+        }, $last_data));
+        $speed_text = $this->reportService->getComparisonText(array_column($now_speed_data, 'y'), array_column($last_speed_data, 'y'), $report_type, 'speed');
+
+        $stop_time_cycle_data = [];
+        $stop_delay_data = [];
+        $speed_data = [];
+        foreach ($now_data as $value) {
+            if (! in_array($value['key'], $peek_hours)) {
+                continue;
+            }
+            $stop_time_cycle_data[] = $value['stop_time_cycle']['value'] / $value['traj_count']['value'];
+            $stop_delay_data[] = $value['stop_delay']['value'] / $value['traj_count']['value'];
+            $speed_data[] = $value['speed']['value'] / $value['traj_count']['value'] * 3.6;
+        }
+        $stop_time_cycle = 0;
+        if (count($stop_time_cycle_data) != 0) {
+            $stop_time_cycle = round(array_sum($stop_time_cycle_data) / count($stop_time_cycle_data), 2);
+        }
+        $stop_delay = 0;
+        if (count($stop_delay_data) != 0) {
+            $stop_delay = round(array_sum($stop_delay_data) / count($stop_delay_data), 2);
+        }
+        $speed = 0;
+        if (count($speed_data) != 0) {
+            $speed = round(array_sum($speed_data) / count($speed_data), 2);
+        }
+
+        $desc = sprintf($tpl, $morning_peek['start_hour'], $morning_peek['end_hour'], $evening_peek['start_hour'], $evening_peek['end_hour'], $stop_time_cycle, $stop_delay, $speed, $stop_delay_text[2], $stop_delay_text[1], $stop_time_cycle_text[0], $stop_delay_text[0], $speed_text[0]);
+
+        return [
+            'info' => [
+                'desc' => $desc,
+            ],
+            'chart' => [
+                [
+                    'title' => '车均停车次数',
+                    'scale_title' => '停车次数',
+                    'series' => [
+                        [
+                            'name' => $stop_delay_text[1],
+                            'data' => $now_stop_delay_data,
+                        ],
+                        [
+                            'name' => $stop_delay_text[2],
+                            'data' => $last_stop_delay_data,
+                        ],
+
+                    ],
+                ],
+                [
+                    'title' => '车均停车延误',
+                    'scale_title' => '停车延误(s)',
+                    'series' => [
+                        [
+                            'name' => $stop_time_cycle_text[1],
+                            'data' => $now_stop_time_cycle_data,
+                        ],
+                        [
+                            'name' => $stop_time_cycle_text[2],
+                            'data' => $last_stop_time_cycle_data,
+                        ],
+                    ],
+                ],
+                [
+                    'title' => '车均行驶速度',
+                    'scale_title' => '行驶速度(km/h)',
+                    'series' => [
+                        [
+                            'name' => $speed_text[1],
+                            'data' => $now_speed_data,
+                        ],
+                        [
+                            'name' => $speed_text[2],
+                            'data' => $last_speed_data,
+                        ],
+
+                    ],
+                ],
+            ],
+        ];
+    }
+
     public function queryQuotaRank($params) {
     	$tpl = "需要注意的是PI指数的计算中考虑了对过饱和、失衡以及溢流状态的惩罚。例如，两个路口在同样的平均停车或延误时间的情况下，如果某个路口出现了过饱和、失衡或者溢流现象，则该路口的PI值会更高。";
 
