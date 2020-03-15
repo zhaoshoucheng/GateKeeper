@@ -376,10 +376,10 @@ class Realtimewarning_model extends CI_Model
         // 平均延误数据
         // 最新指标批次的hour
         if ($ctype == 1) {
-            $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 6 * 3600);
+            $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 4 * 3600);
         } elseif ($ctype == 0) {
             // 路口概览数据
-            $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 6 * 3600);
+            $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 4 * 3600);
             // 当日拥堵概览曲线
             $todayJamCurve = [];
             $todayJamCurveData = $this->redis_model->getData($todayJamCurveKey);
@@ -388,14 +388,13 @@ class Realtimewarning_model extends CI_Model
                 $todayJamCurve[$hour] = $junctionSurvey;
             }
             $todayJamCurve[$hour] = $junctionSurvey;
-            $this->redis_model->setEx($todayJamCurveKey, json_encode($todayJamCurve), 60 * 24 * 3600);
+            $this->redis_model->setEx($todayJamCurveKey, json_encode($todayJamCurve), 4 * 3600);
             // 缓存诊断路口列表数据
-            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 6 * 3600);
+            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 4 * 3600);
             // 缓存实时报警路口数据
-            $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600);
+            $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 4 * 3600);
             // 冗余缓存实时报警路口数据,每一个批次一份
-            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600); 
-
+            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 4 * 3600); 
 
             // 缓存最新hour
             sleep(0.5);
@@ -513,10 +512,10 @@ class Realtimewarning_model extends CI_Model
 
         // 平均延误数据
         if ($ctype == 1) {
-            $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 6 * 3600);
+            $this->redis_model->setEx($avgStopDelayKey, json_encode($esStopDelay), 4 * 3600);
         } elseif ($ctype == 0) {
             // 路口概览数据
-            $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 6 * 3600);
+            $this->redis_model->setEx($junctionSurveyKey, json_encode($junctionSurvey), 4 * 3600);
             // 当日拥堵概览曲线
             $todayJamCurve = [];
             $todayJamCurveData = $this->redis_model->getData($todayJamCurveKey);
@@ -525,13 +524,13 @@ class Realtimewarning_model extends CI_Model
                 $todayJamCurve[$hour] = $junctionSurvey;
             }
             $todayJamCurve[$hour] = $junctionSurvey;
-            $this->redis_model->setEx($todayJamCurveKey, json_encode($todayJamCurve), 60 * 24 * 3600);
+            $this->redis_model->setEx($todayJamCurveKey, json_encode($todayJamCurve), 4 * 3600);
             // 缓存诊断路口列表数据
-            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 6 * 3600);
+            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 4 * 3600);
             // 缓存实时报警路口数据
-            $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600);
+            $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 4 * 3600);
             // 冗余缓存实时报警路口数据,每一个批次一份
-            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 6 * 3600);
+            $this->redis_model->setEx($realTimeAlarmBakKey, json_encode($realTimeAlarmsInfoResult), 4 * 3600);
         }
     }
 

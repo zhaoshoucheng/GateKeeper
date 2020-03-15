@@ -91,8 +91,6 @@ class Timing_model extends CI_Model
 
         // 获取配时数据
         $timing = $this->getNewTimingInfo($data);
-        // 对返回数据格式化,返回需要的格式
-        // print_r($timing);exit;
         if(!empty($timing)){
             $flowId2Name = $this->formatTimingIdToName($timing);
         }
@@ -100,7 +98,6 @@ class Timing_model extends CI_Model
             $info32 = $this->waymap_model->getFlowInfo32(trim($data['junction_id']));
             $flowId2Name = array_column($info32,"phase_name","logic_flow_id");
         }
-        // print_r($flowId2Name);exit;
         return $flowId2Name;
     }
 

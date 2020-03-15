@@ -69,7 +69,7 @@ if ($development == 2) {
     $es_server = 'http://10.85.128.208:8001';
 
     // new es 新实时轨迹、指标数据
-    $quota_v2_es_server = 'http://10.85.128.208:8001/api/data';
+    $quota_v2_es_server = 'http://10.85.128.137/estimate';
 
     // new timing
     $signal_control_server = '10.88.128.149';
