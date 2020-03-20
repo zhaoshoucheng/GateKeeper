@@ -140,6 +140,9 @@ class TimingService extends BaseService {
                 if ($tod['plan']['id'] != 251 and $tod['plan']['id'] != 252 and $tod['plan']['id'] != 255) {
                     $one['timing_info']['extra_timing']['cycle'] = $tod['plan']['cycle'];
                     $one['timing_info']['extra_timing']['offset'] = $tod['plan']['offset'];
+                    if(empty($tod['plan']['movements'])){
+                        $tod['plan']['movements'] = [];
+                    }
                     foreach ($tod['plan']['movements'] as $movement) {
                         if (in_array($movement['id'], $flows)) {
                             foreach ($movement['sub_phases'] as $phase) {

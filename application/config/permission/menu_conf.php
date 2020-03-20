@@ -18,6 +18,10 @@ $config['menu'] = [
         if(isset($_REQUEST['city_id']) && isset($_REQUEST['from']) && $_REQUEST['city_id']=="11" && $_REQUEST['from']=="nanjing"){
             return 6;
         }
+        if(isset($_REQUEST['city_id']) && isset($_REQUEST['from']) && $_REQUEST['city_id']=="23" && $_REQUEST['from']=="suzhou"){
+            return 8;
+        }
+
         //南昌本地化
         if(isset($_REQUEST['city_id'])
             && isset($_REQUEST['conf'])
@@ -695,6 +699,41 @@ $config['menu'] = [
                                 'url'  => 'task',
                             ],
                     ],
+                ],
+        ],
+        8 => [
+            0 =>
+                [
+                    'name'   => '实时监测',
+                    'url'    => '/',
+                    'remark' => 'signal',
+                    'son'    =>
+                        [
+                            0 =>
+                                [
+                                    'name' => '路口概览',
+                                    'url'  => 'overview',
+                                ],
+                            1 =>
+                                [
+                                    'name' => '快速路监测',
+                                    'url'  => 'expressway',
+                                ],
+                        ],
+                ],
+            1 =>
+                [
+                    'name'   => '问题治理',
+                    'url'    => '/optimize/',
+                    'remark' => 'signal',
+                    'son'    =>
+                        [
+                            0 =>
+                                [
+                                    'name' => '单点时段优化',
+                                    'url'  => 'signal',
+                                ],
+                        ],
                 ],
         ],
     ],

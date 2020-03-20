@@ -66,10 +66,10 @@ if ($development == 2) {
     // 配时上传下发时间
     $signal_timing_machine_status_url = "http://10.85.128.81:30357/signal-control/signalprofile/machinestatus";
     // es 老实时轨迹、指标数据
-    $es_server = 'http://10.85.128.208:8001';
+    $es_server = 'http://10.85.128.137';
 
     // new es 新实时轨迹、指标数据
-    $quota_v2_es_server = 'http://10.85.128.208:8001/api/data';
+    $quota_v2_es_server = 'http://10.85.128.137/estimate';
 
     // new timing
     $signal_control_server = '10.88.128.149';
