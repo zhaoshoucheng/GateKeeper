@@ -34,10 +34,18 @@ class Expressway extends MY_Controller
        $data = $this->expresswayService->queryOverview($params['city_id']);
 
         //TOOD 暂时写死
-        $data['center']=[
-            "lat"=>32.006187833115,
-            "lng"=>118.81212011359
-        ];
+        if($params["city_id"]=="11"){
+            $data['center']=[
+                "lat"=>32.006187833115,
+                "lng"=>118.81212011359
+            ];
+        }
+        if($params["city_id"]=="23"){
+            $data['center']=[
+                "lat"=>31.309009,
+                "lng"=>120.622383
+            ];
+        }
         $data['upramp']=0;
         $data['downramp']=0;
 //        $juncTypeMap = [];
