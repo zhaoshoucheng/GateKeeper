@@ -8,7 +8,7 @@ set -x
 
 function compose() {
       (
-          composer upload
+          composer update
          echo -e "===== composer install ok ====="
      ) || ( echo -e "===== composer install failure =====" &&  exit 2)
 }
