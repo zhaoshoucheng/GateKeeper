@@ -656,19 +656,19 @@ class JunctionReportService extends BaseService{
                 case "stop_time_cycle":
                     $maxQuotaFlow = $this->queryMaxQuotaFlow($chartData[$k]['flowlist']);
                     if($maxQuotaFlow != false){
-                        $chartData[$k]["analysis"]="该路口在评估日期内".$maxQuotaFlow['max_flow']."方向的停车次数最大,其中在".$maxQuotaFlow['max_range'][0]."-".end($maxQuotaFlow['max_range'])."时段内的停车次数最大,需重点关注。";
+                        $chartData[$k]["analysis"]="该路口在评估日期内".$maxQuotaFlow['max_flow']."方向的停车次数最大，其中在".$maxQuotaFlow['max_range'][0]."-".end($maxQuotaFlow['max_range'])."时段内的停车次数最大，需重点关注。";
                     }
                     break;
                 case "speed":
                     $minQuotaFlow = $this->queryMinQuotaFlow($chartData[$k]['flowlist']);
                     if($minQuotaFlow != false){
-                        $chartData[$k]["analysis"]="该路口在评估日期内".$minQuotaFlow['min_flow']."方向的行驶速度最小,其中在".$minQuotaFlow['min_range'][0]."-".end($minQuotaFlow['min_range'])."时段内的行驶速度最小,需重点关注。";
+                        $chartData[$k]["analysis"]="该路口在评估日期内".$minQuotaFlow['min_flow']."方向的行驶速度最小，其中在".$minQuotaFlow['min_range'][0]."-".end($minQuotaFlow['min_range'])."时段内的行驶速度最小，需重点关注。";
                     }
                     break;
                 case "stop_delay":
                     $maxQuotaFlow = $this->queryMaxQuotaFlow($chartData[$k]['flowlist']);
                     if($maxQuotaFlow != false){
-                        $chartData[$k]["analysis"]="该路口在评估日期内".$maxQuotaFlow['max_flow']."方向的停车延误最大,其中在".$maxQuotaFlow['max_range'][0]."-".end($maxQuotaFlow['max_range'])."时段内的停车延误最大,需重点关注。";
+                        $chartData[$k]["analysis"]="该路口在评估日期内".$maxQuotaFlow['max_flow']."方向的停车延误最大，其中在".$maxQuotaFlow['max_range'][0]."-".end($maxQuotaFlow['max_range'])."时段内的停车延误最大，需重点关注。";
                     }
                     break;
             }
