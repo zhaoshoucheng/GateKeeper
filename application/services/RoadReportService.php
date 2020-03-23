@@ -354,7 +354,7 @@ class RoadReportService extends BaseService{
             ],
             'chart' => [
                 [
-                    'title' => '车均停车次数',
+                    'title' => '停车次数',
                     'scale_title' => '停车次数',
                     'series' => [
                         [
@@ -369,7 +369,7 @@ class RoadReportService extends BaseService{
                     ],
                 ],
                 [
-                    'title' => '车均停车延误',
+                    'title' => '停车延误',
                     'scale_title' => '停车延误(s)',
                     'series' => [
                         [
@@ -383,7 +383,7 @@ class RoadReportService extends BaseService{
                     ],
                 ],
                 [
-                    'title' => '车均行驶速度',
+                    'title' => '行驶速度',
                     'scale_title' => '行驶速度(km/h)',
                     'series' => [
                         [
@@ -714,17 +714,17 @@ class RoadReportService extends BaseService{
     public function transRoadQuota2Chart($data){
         $charts=[];
         $stopTimeChartData =[
-            "title"=> "车均停车次数",
+            "title"=> "停车次数",
             "scale_title"=> "停车次数",
             "series"=> [],
         ];
         $speedChartData =[
-            "title"=> "车均行驶速度",
+            "title"=> "行驶速度",
             "scale_title"=> "行驶速度(km/h)",
             "series"=> [],
         ];
         $stopDelayChartData =[
-            "title"=> "车均停车延误",
+            "title"=> "停车延误",
             "scale_title"=> "停车延误(s)",
             "series"=> [],
         ];
