@@ -1297,18 +1297,18 @@ class RoadReportService extends BaseService{
 
         $morningChart=[
             'info'=>[
-                'desc'=>"以下两张图表现了早高峰".$road_info['road_name']."干线不同方向路口平均停车次数与路口延误随时间变化的趋势(蓝色为正,黄色为反)。"
+                'desc'=>"下图表现了早高峰".$road_info['road_name']."干线不同方向路口平均停车次数与路口延误随时间变化的趋势(蓝色为正，黄色为反)。"
             ],
             'chart_list'=>[]
         ];
         $morningChart['chart_list']=$this->transRoadCoordination2Chart($morningData,$forwardFlows,$backwardFlows,$flowmap);
-        $morningChart['info']['desc'].="车辆通过干线正向方向的".count($forwardFlows)."个路口平均需要停车".$morningChart['chart_list'][0]['series'][0]['avg']."次,其中".$morningChart['chart_list'][0]['series'][0]['max_key']."路口停车比例最高,为".$morningChart['chart_list'][0]['series'][0]['max']."次;
-        平均路口延误为".$morningChart['chart_list'][1]['series'][0]['avg']."秒,其中".$morningChart['chart_list'][1]['series'][0]['max_key']."路口延误时间最高,为".$morningChart['chart_list'][1]['series'][0]['max']."秒。
-                车辆通过干线反向方向的".count($backwardFlows)."个路口平均需要停车".$morningChart['chart_list'][0]['series'][1]['avg']."次,其中".$morningChart['chart_list'][0]['series'][1]['max_key']."路口停车比例最高,为".$morningChart['chart_list'][0]['series'][1]['max']."次;
-                平均路口延误为".$morningChart['chart_list'][1]['series'][1]['avg']."秒,其中".$morningChart['chart_list'][1]['series'][1]['max_key']."路口延误时间最高,为".$morningChart['chart_list'][1]['series'][1]['max']."秒。";
+        $morningChart['info']['desc'].="车辆通过干线正向方向的".count($forwardFlows)."个路口平均需要停车".$morningChart['chart_list'][0]['series'][0]['avg']."次，其中".$morningChart['chart_list'][0]['series'][0]['max_key']."路口停车比例最高，为".$morningChart['chart_list'][0]['series'][0]['max']."次；
+        平均路口延误为".$morningChart['chart_list'][1]['series'][0]['avg']."秒，其中".$morningChart['chart_list'][1]['series'][0]['max_key']."路口延误时间最高，为".$morningChart['chart_list'][1]['series'][0]['max']."秒。
+                车辆通过干线反向方向的".count($backwardFlows)."个路口平均需要停车".$morningChart['chart_list'][0]['series'][1]['avg']."次，其中".$morningChart['chart_list'][0]['series'][1]['max_key']."路口停车比例最高，为".$morningChart['chart_list'][0]['series'][1]['max']."次；
+                平均路口延误为".$morningChart['chart_list'][1]['series'][1]['avg']."秒，其中".$morningChart['chart_list'][1]['series'][1]['max_key']."路口延误时间最高，为".$morningChart['chart_list'][1]['series'][1]['max']."秒。";
         $eveningChart=[
             'info'=>[
-                'desc'=>"以下两张图表现了晚高峰".$road_info['road_name']."干线不同方向路口平均停车次数与路口延误随时间变化的趋势(蓝色为正,黄色为反)。"
+                'desc'=>"以下两张图表现了晚高峰".$road_info['road_name']."干线不同方向路口平均停车次数与路口延误随时间变化的趋势(蓝色为正，黄色为反)。"
             ],
             'chart_list'=>[]
         ];

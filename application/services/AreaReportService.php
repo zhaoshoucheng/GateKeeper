@@ -66,7 +66,7 @@ class AreaReportService extends BaseService{
         if($params['userapp'] == 'jinanits'){
             $dates = $this->getDateFromRange($start_date,$end_date);
             $pi = $this->pi_model->getGroupJuncAvgPiWithDates($city_id,explode(",",$logic_junction_ids) ,$dates,$this->createHours());
-            $tpl = "本次报告区域为%s市，整体运行水平PI值为".round($pi,2).",分析区域包含%s等行政区域。本次报告根据%s数据对该区域进行分析。";
+            $tpl = "本次报告区域为%s市，整体PI值为".round($pi,2)."，分析区域包含%s等行政区域。本次报告根据%s数据对该区域进行分析。";
 //            $tpl = "%s干线位于%s市%s，承担较大的交通压力，整体运行水平PI值为".round($pi,2)." 干线包含%s等重要路口。本次报告根据%s~%s数据对该干线进行分析。";
         }
     	$districts_name = implode('、', array_unique(array_column($junctions_info, 'district_name')));
