@@ -25,12 +25,16 @@ class JunctionReportService extends BaseService{
     }
 
     public function introduction($params) {
-    	$tpl = "本次报告分析路口位于%s市%s。本次报告根据%s~%s数据对该路口进行分析。";
+    	$tpl = "本次报告分析路口位于%s市%s。本次报告根据%s数据对该路口进行分析。";
 
     	$city_id = $params['city_id'];
     	$logic_junction_id = $params['logic_junction_id'];
     	$start_date = $params['start_date'];
     	$end_date = $params['end_date'];
+        $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
+        if($start_date == $end_date){
+            $datestr =  date('Y年m月d日', strtotime($start_date));
+        }
 
     	$city_info = $this->openCity_model->getCityInfo($city_id);
     	if (empty($city_info)) {
@@ -44,7 +48,7 @@ class JunctionReportService extends BaseService{
     		$junction_info = $junction_info[0];
     	}
 
-    	$desc = sprintf($tpl, $city_info['city_name'], $junction_info['district_name'], date('Y年m月d日', strtotime($start_date)), date('Y年m月d日', strtotime($end_date)));
+    	$desc = sprintf($tpl, $city_info['city_name'], $junction_info['district_name'], $datestr);
 
     	return [
     		'desc' => $desc,
@@ -208,7 +212,7 @@ class JunctionReportService extends BaseService{
     }
 
     public function queryJunctionQuotaDataNJ($params) {
-        $tpl = "下图利用滴滴数据绘制了该路口全天24⼩时各项运⾏指标（⻋均停⻋次数、⻋均停⻋延误、⻋均行驶速度）。通过数据分析，该路口的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/⻋/路口，停⻋延误接近%.2f秒/⻋/路口，⾏驶速度也达到%.2f千米/小时左右。与%s相比，%s车均停车次数%s，车均停车延误%s，车均行驶速度%s。";
+        $tpl = "下图利用滴滴数据绘制了该路口全天24⼩时各项运⾏指标（⻋均停⻋次数、⻋均停⻋延误、⻋均行驶速度）。通过数据分析，该路口的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/⻋/路口，停⻋延误接近%.2f秒/⻋/路口，⾏驶速度也达到%.2f千米/小时左右。与%s相比，%s停车次数%s，停车延误%s，行驶速度%s。";
 
         $city_id = intval($params['city_id']);
         $logic_junction_id = $params['logic_junction_id'];
@@ -336,7 +340,7 @@ class JunctionReportService extends BaseService{
             ],
             'chart' => [
                 [
-                    'title' => '车均停车次数',
+                    'title' => '停车次数',
                     'scale_title' => '停车次数',
                     'series' => [
                         [
@@ -351,7 +355,7 @@ class JunctionReportService extends BaseService{
                     ],
                 ],
                 [
-                    'title' => '车均停车延误',
+                    'title' => '停车延误',
                     'scale_title' => '停车延误(s)',
                     'series' => [
                         [
@@ -365,7 +369,7 @@ class JunctionReportService extends BaseService{
                     ],
                 ],
                 [
-                    'title' => '车均行驶速度',
+                    'title' => '行驶速度',
                     'scale_title' => '行驶速度(km/h)',
                     'series' => [
                         [
@@ -384,7 +388,7 @@ class JunctionReportService extends BaseService{
     }
 
     public function queryJuncQuotaData($params) {
-    	$tpl = "下图利用滴滴数据绘制了该路口全天24小时各项运行指标（车均停车次数、车均停车延误、车均行驶速度、PI）。通过数据分析，该路口的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/车/路口，停车延误接近%.2f秒/车/路口，车均行驶速度也达到%.2f千米/小时左右。";
+    	$tpl = "下图利用滴滴数据绘制了该路口全天24小时各项运行指标（停车次数、停车延误、行驶速度、PI）。通过数据分析，该路口的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/车/路口，停车延误接近%.2f秒/车/路口，行驶速度也达到%.2f千米/小时左右。";
     	$instructions = "报告采用综合评估指数（PI）来分析路口整体及各维度交通运行情况XXXX";
 
     	$city_id = intval($params['city_id']);
@@ -460,7 +464,7 @@ class JunctionReportService extends BaseService{
     		],
     		'charts' => [
     			[
-	    			'title' => '车均停车次数',
+	    			'title' => '停车次数',
 					'scale_title' => '停车次数',
 					'series' => [
 						'name' => "",
@@ -473,7 +477,7 @@ class JunctionReportService extends BaseService{
 					],
     			],
     			[
-	    			'title' => '车均停车延误',
+	    			'title' => '停车延误',
 					'scale_title' => '停车延误(s)',
 					'series' => [
 						'name' => "",
@@ -486,7 +490,7 @@ class JunctionReportService extends BaseService{
 					],
     			],
     			[
-	    			'title' => '车均行驶速度',
+	    			'title' => '行驶速度',
 					'scale_title' => '行驶速度(km/h)',
 					'series' => [
 						'name' => "",
@@ -575,19 +579,19 @@ class JunctionReportService extends BaseService{
     //es数据转换为表格
     public function trans2Chart($flowQuota,$flowInfo){
         $stopTimeChartData =[
-            "quotaname"=>"车均停车次数",
+            "quotaname"=>"停车次数",
             "quotakey"=>"stop_time_cycle",
             "analysis"=>"",
             "flowlist"=>[],
         ];
         $speedChartData =[
-            "quotaname"=>"车均行驶速度",
+            "quotaname"=>"行驶速度",
             "quotakey"=>"speed",
             "analysis"=>"",
             "flowlist"=>[],
         ];
         $stopDelayChartData =[
-            "quotaname"=>"车均停车延误",
+            "quotaname"=>"停车延误",
             "quotakey"=>"stop_delay",
             "analysis"=>"",
             "flowlist"=>[],
@@ -623,7 +627,7 @@ class JunctionReportService extends BaseService{
                 "logic_flow_id"=>$fk,
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
-                    "scale_title"=>"km/h",
+                    "scale_title"=>"公里/小时",
                     "series"=>[["name"=>"","data"=>$this->sortAndFillHour($speedCycleChart)]]
                 ],
             ];
@@ -631,7 +635,7 @@ class JunctionReportService extends BaseService{
                 "logic_flow_id"=>$fk,
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
-                    "scale_title"=>"S",
+                    "scale_title"=>"秒",
                     "series"=>[["name"=>"","data"=>$this->sortAndFillHour($stopDelayCycleChart)]]
                 ],
             ];

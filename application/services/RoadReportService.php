@@ -31,12 +31,16 @@ class RoadReportService extends BaseService{
     }
 
     public function introduction($params) {
-    	$tpl = "%s干线位于%s市%s，承担较大的交通压力，干线包含%s等重要路口。本次报告根据%s~%s数据对该干线进行分析。";
+    	$tpl = "%s干线位于%s市%s，承担较大的交通压力，干线包含%s等重要路口。本次报告根据%s数据对该干线进行分析。";
 
     	$city_id = $params['city_id'];
     	$road_id = $params['road_id'];
     	$start_date = $params['start_date'];
     	$end_date = $params['end_date'];
+        $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
+        if($start_date == $end_date){
+            $datestr =  date('Y年m月d日', strtotime($start_date));
+        }
 
     	$city_info = $this->openCity_model->getCityInfo($city_id);
     	if (empty($city_info)) {
@@ -58,10 +62,10 @@ class RoadReportService extends BaseService{
         if($params['userapp'] == 'jinanits'){
             $dates = $this->getDateFromRange($start_date,$end_date);
             $pi = $this->pi_model->getGroupJuncAvgPiWithDates($city_id,explode(",",$logic_junction_ids) ,$dates,$this->createHours());
-            $tpl = "%s干线位于%s市%s，承担较大的交通压力，整体运行水平PI值为".round($pi,2).",干线包含%s等重要路口。本次报告根据%s~%s数据对该干线进行分析。";
+            $tpl = "%s干线位于%s市%s，承担较大的交通压力，整体运行水平PI值为".round($pi,2).",干线包含%s等重要路口。本次报告根据%s数据对该干线进行分析。";
         }
 
-    	$desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, date('Y年m月d日', strtotime($start_date)), date('Y年m月d日', strtotime($end_date)));
+    	$desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, $datestr);
 
     	$road_detail = $this->roadService->getRoadDetail([
     		'city_id' => $city_id,
@@ -229,7 +233,7 @@ class RoadReportService extends BaseService{
     }
 
     public function queryRoadQuotaDataNJ($params) {
-        $tpl = "下图利用滴滴数据绘制了该干线全天24⼩时各项运⾏指标（⻋均停⻋次数、⻋均停⻋延误、⻋均行驶速度）。通过数据分析，该干线的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/⻋/路口，停⻋延误接近%.2f秒/⻋/路口，⾏驶速度也达到%.2f千米/小时左右。与%s相比，%s车均停车次数%s，车均停车延误%s，车均行驶速度%s。";
+        $tpl = "下图利用滴滴数据绘制了该干线全天24⼩时各项运⾏指标（⻋均停⻋次数、⻋均停⻋延误、⻋均行驶速度）。通过数据分析，该干线的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/⻋/路口，停⻋延误接近%.2f秒/⻋/路口，⾏驶速度也达到%.2f千米/小时左右。与%s相比，%s停车次数%s，停车延误%s，行驶速度%s。";
 
         $city_id = intval($params['city_id']);
         $road_id = $params['road_id'];
@@ -354,7 +358,7 @@ class RoadReportService extends BaseService{
             ],
             'chart' => [
                 [
-                    'title' => '车均停车次数',
+                    'title' => '停车次数',
                     'scale_title' => '停车次数',
                     'series' => [
                         [
@@ -369,7 +373,7 @@ class RoadReportService extends BaseService{
                     ],
                 ],
                 [
-                    'title' => '车均停车延误',
+                    'title' => '停车延误',
                     'scale_title' => '停车延误(s)',
                     'series' => [
                         [
@@ -383,7 +387,7 @@ class RoadReportService extends BaseService{
                     ],
                 ],
                 [
-                    'title' => '车均行驶速度',
+                    'title' => '行驶速度',
                     'scale_title' => '行驶速度(km/h)',
                     'series' => [
                         [
@@ -714,17 +718,17 @@ class RoadReportService extends BaseService{
     public function transRoadQuota2Chart($data){
         $charts=[];
         $stopTimeChartData =[
-            "title"=> "车均停车次数",
+            "title"=> "停车次数",
             "scale_title"=> "停车次数",
             "series"=> [],
         ];
         $speedChartData =[
-            "title"=> "车均行驶速度",
+            "title"=> "行驶速度",
             "scale_title"=> "行驶速度(km/h)",
             "series"=> [],
         ];
         $stopDelayChartData =[
-            "title"=> "车均停车延误",
+            "title"=> "停车延误",
             "scale_title"=> "停车延误(s)",
             "series"=> [],
         ];
@@ -1301,7 +1305,7 @@ class RoadReportService extends BaseService{
         $morningChart['info']['desc'].="车辆通过干线正向方向的".count($forwardFlows)."个路口平均需要停车".$morningChart['chart_list'][0]['series'][0]['avg']."次,其中".$morningChart['chart_list'][0]['series'][0]['max_key']."路口停车比例最高,为".$morningChart['chart_list'][0]['series'][0]['max']."次;
         平均路口延误为".$morningChart['chart_list'][1]['series'][0]['avg']."秒,其中".$morningChart['chart_list'][1]['series'][0]['max_key']."路口延误时间最高,为".$morningChart['chart_list'][1]['series'][0]['max']."秒。
                 车辆通过干线反向方向的".count($backwardFlows)."个路口平均需要停车".$morningChart['chart_list'][0]['series'][1]['avg']."次,其中".$morningChart['chart_list'][0]['series'][1]['max_key']."路口停车比例最高,为".$morningChart['chart_list'][0]['series'][1]['max']."次;
-                平均路口延误为".$morningChart['chart_list'][1]['series'][1]['avg']."秒,其中".$morningChart['chart_list'][1]['series'][1]['max_key']."路口延误时间最高,为".$morningChart['chart_list'][1]['series'][1]['avg']."秒。";
+                平均路口延误为".$morningChart['chart_list'][1]['series'][1]['avg']."秒,其中".$morningChart['chart_list'][1]['series'][1]['max_key']."路口延误时间最高,为".$morningChart['chart_list'][1]['series'][1]['max']."秒。";
         $eveningChart=[
             'info'=>[
                 'desc'=>"以下两张图表现了晚高峰".$road_info['road_name']."干线不同方向路口平均停车次数与路口延误随时间变化的趋势(蓝色为正,黄色为反)。"
@@ -1312,7 +1316,7 @@ class RoadReportService extends BaseService{
         $eveningChart['info']['desc'].="车辆通过干线正向方向的".count($forwardFlows)."个路口平均需要停车".$eveningChart['chart_list'][0]['series'][0]['avg']."次,其中".$eveningChart['chart_list'][0]['series'][0]['max_key']."路口停车比例最高,为".$eveningChart['chart_list'][0]['series'][0]['max']."次;
         平均路口延误为".$eveningChart['chart_list'][1]['series'][0]['avg']."秒,其中".$eveningChart['chart_list'][1]['series'][0]['max_key']."路口延误时间最高,为".$eveningChart['chart_list'][1]['series'][0]['max']."秒。
                 车辆通过干线反向方向的".count($backwardFlows)."个路口平均需要停车".$eveningChart['chart_list'][0]['series'][1]['avg']."次,其中".$eveningChart['chart_list'][0]['series'][1]['max_key']."路口停车比例最高,为".$eveningChart['chart_list'][0]['series'][1]['max']."次;
-                平均路口延误为".$eveningChart['chart_list'][1]['series'][1]['avg']."秒,其中".$eveningChart['chart_list'][1]['series'][1]['max_key']."路口延误时间最高,为".$eveningChart['chart_list'][1]['series'][1]['avg']."秒。";
+                平均路口延误为".$eveningChart['chart_list'][1]['series'][1]['avg']."秒,其中".$eveningChart['chart_list'][1]['series'][1]['max_key']."路口延误时间最高,为".$eveningChart['chart_list'][1]['series'][1]['max']."秒。";
 
         return [$morningChart,$eveningChart];
     }
