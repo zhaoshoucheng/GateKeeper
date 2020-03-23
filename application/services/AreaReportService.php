@@ -31,14 +31,19 @@ class AreaReportService extends BaseService{
     }
 
     public function introduction($params) {
-    	$tpl = "本次报告区域为%s市，分析区域包含%s等行政区域。本次报告根据%s~%s数据对该区域进行分析。";
 
     	$city_id = $params['city_id'];
     	$area_id = $params['area_id'];
     	$start_date = $params['start_date'];
     	$end_date = $params['end_date'];
+        $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
+        if($start_date == $end_date){
+            $datestr =  date('Y年m月d日', strtotime($start_date));
+        }
+        $tpl = "本次报告区域为%s市，分析区域包含%s等行政区域。本次报告根据%s数据对该区域进行分析。";
 
-    	$city_info = $this->openCity_model->getCityInfo($city_id);
+
+        $city_info = $this->openCity_model->getCityInfo($city_id);
     	if (empty($city_info)) {
 
     	}
@@ -61,12 +66,12 @@ class AreaReportService extends BaseService{
         if($params['userapp'] == 'jinanits'){
             $dates = $this->getDateFromRange($start_date,$end_date);
             $pi = $this->pi_model->getGroupJuncAvgPiWithDates($city_id,explode(",",$logic_junction_ids) ,$dates,$this->createHours());
-            $tpl = "本次报告区域为%s市，整体运行水平PI值为".round($pi,2).",分析区域包含%s等行政区域。本次报告根据%s~%s数据对该区域进行分析。";
+            $tpl = "本次报告区域为%s市，整体运行水平PI值为".round($pi,2).",分析区域包含%s等行政区域。本次报告根据%s数据对该区域进行分析。";
 //            $tpl = "%s干线位于%s市%s，承担较大的交通压力，整体运行水平PI值为".round($pi,2)." 干线包含%s等重要路口。本次报告根据%s~%s数据对该干线进行分析。";
         }
     	$districts_name = implode('、', array_unique(array_column($junctions_info, 'district_name')));
 
-    	$desc = sprintf($tpl, $city_info['city_name'], $districts_name, date('Y年m月d日', strtotime($start_date)), date('Y年m月d日', strtotime($end_date)));
+    	$desc = sprintf($tpl, $city_info['city_name'], $districts_name,$datestr);
 
     	return [
     		'desc' => $desc,
@@ -236,7 +241,7 @@ class AreaReportService extends BaseService{
     }
 
     public function queryAreaQuotaDataNJ($params) {
-        $tpl = "下图利用滴滴数据绘制了该区域全天24⼩时各项运⾏指标（⻋均停⻋次数、⻋均停⻋延误、⻋均行驶速度）。通过数据分析，该区域的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/⻋/路口，停⻋延误接近%.2f秒/⻋/路口，⾏驶速度也达到%.2f千米/小时左右。与%s相比，%s车均停车次数%s，车均停车延误%s，车均行驶速度%s。";
+        $tpl = "下图利用滴滴数据绘制了该区域全天24⼩时各项运⾏指标（停⻋次数、停⻋延误、行驶速度）。通过数据分析，该区域的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/⻋/路口，停⻋延误接近%.2f秒/⻋/路口，⾏驶速度也达到%.2f千米/小时左右。与%s相比，%s停车次数%s，停车延误%s，行驶速度%s。";
 
         $city_id = intval($params['city_id']);
         $area_id = $params['area_id'];

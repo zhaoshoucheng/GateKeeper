@@ -861,8 +861,8 @@ class ReportService extends BaseService
             $text[] = "基本持平";
         }
         if ($report_type == 1) {
-            $text[] = '今天';
-            $text[] = '昨天';
+            $text[] = '当日';
+            $text[] = '前一日';
         } elseif ($report_type == 2) {
             $text[] = '本周';
             $text[] = '上周';
