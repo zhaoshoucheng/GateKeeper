@@ -31,12 +31,16 @@ class RoadReportService extends BaseService{
     }
 
     public function introduction($params) {
-    	$tpl = "%s干线位于%s市%s，承担较大的交通压力，干线包含%s等重要路口。本次报告根据%s~%s数据对该干线进行分析。";
+    	$tpl = "%s干线位于%s市%s，承担较大的交通压力，干线包含%s等重要路口。本次报告根据%s数据对该干线进行分析。";
 
     	$city_id = $params['city_id'];
     	$road_id = $params['road_id'];
     	$start_date = $params['start_date'];
     	$end_date = $params['end_date'];
+        $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
+        if($start_date == $end_date){
+            $datestr =  date('Y年m月d日', strtotime($start_date));
+        }
 
     	$city_info = $this->openCity_model->getCityInfo($city_id);
     	if (empty($city_info)) {
@@ -58,10 +62,10 @@ class RoadReportService extends BaseService{
         if($params['userapp'] == 'jinanits'){
             $dates = $this->getDateFromRange($start_date,$end_date);
             $pi = $this->pi_model->getGroupJuncAvgPiWithDates($city_id,explode(",",$logic_junction_ids) ,$dates,$this->createHours());
-            $tpl = "%s干线位于%s市%s，承担较大的交通压力，整体运行水平PI值为".round($pi,2).",干线包含%s等重要路口。本次报告根据%s~%s数据对该干线进行分析。";
+            $tpl = "%s干线位于%s市%s，承担较大的交通压力，整体运行水平PI值为".round($pi,2).",干线包含%s等重要路口。本次报告根据%s数据对该干线进行分析。";
         }
 
-    	$desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, date('Y年m月d日', strtotime($start_date)), date('Y年m月d日', strtotime($end_date)));
+    	$desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, $datestr);
 
     	$road_detail = $this->roadService->getRoadDetail([
     		'city_id' => $city_id,
@@ -229,7 +233,7 @@ class RoadReportService extends BaseService{
     }
 
     public function queryRoadQuotaDataNJ($params) {
-        $tpl = "下图利用滴滴数据绘制了该干线全天24⼩时各项运⾏指标（⻋均停⻋次数、⻋均停⻋延误、⻋均行驶速度）。通过数据分析，该干线的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/⻋/路口，停⻋延误接近%.2f秒/⻋/路口，⾏驶速度也达到%.2f千米/小时左右。与%s相比，%s车均停车次数%s，车均停车延误%s，车均行驶速度%s。";
+        $tpl = "下图利用滴滴数据绘制了该干线全天24⼩时各项运⾏指标（⻋均停⻋次数、⻋均停⻋延误、⻋均行驶速度）。通过数据分析，该干线的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/⻋/路口，停⻋延误接近%.2f秒/⻋/路口，⾏驶速度也达到%.2f千米/小时左右。与%s相比，%s停车次数%s，停车延误%s，行驶速度%s。";
 
         $city_id = intval($params['city_id']);
         $road_id = $params['road_id'];
@@ -354,7 +358,7 @@ class RoadReportService extends BaseService{
             ],
             'chart' => [
                 [
-                    'title' => '车均停车次数',
+                    'title' => '停车次数',
                     'scale_title' => '停车次数',
                     'series' => [
                         [
@@ -369,7 +373,7 @@ class RoadReportService extends BaseService{
                     ],
                 ],
                 [
-                    'title' => '车均停车延误',
+                    'title' => '停车延误',
                     'scale_title' => '停车延误(s)',
                     'series' => [
                         [
@@ -383,7 +387,7 @@ class RoadReportService extends BaseService{
                     ],
                 ],
                 [
-                    'title' => '车均行驶速度',
+                    'title' => '行驶速度',
                     'scale_title' => '行驶速度(km/h)',
                     'series' => [
                         [
@@ -714,17 +718,17 @@ class RoadReportService extends BaseService{
     public function transRoadQuota2Chart($data){
         $charts=[];
         $stopTimeChartData =[
-            "title"=> "车均停车次数",
+            "title"=> "停车次数",
             "scale_title"=> "停车次数",
             "series"=> [],
         ];
         $speedChartData =[
-            "title"=> "车均行驶速度",
+            "title"=> "行驶速度",
             "scale_title"=> "行驶速度(km/h)",
             "series"=> [],
         ];
         $stopDelayChartData =[
-            "title"=> "车均停车延误",
+            "title"=> "停车延误",
             "scale_title"=> "停车延误(s)",
             "series"=> [],
         ];
