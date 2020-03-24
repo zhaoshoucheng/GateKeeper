@@ -1308,7 +1308,7 @@ class RoadReportService extends BaseService{
                 平均路口延误为".$morningChart['chart_list'][1]['series'][1]['avg']."秒，其中".$morningChart['chart_list'][1]['series'][1]['max_key']."路口延误时间最高，为".$morningChart['chart_list'][1]['series'][1]['max']."秒。";
         $eveningChart=[
             'info'=>[
-                'desc'=>"以下两张图表现了晚高峰".$road_info['road_name']."干线不同方向路口平均停车次数与路口延误随时间变化的趋势(蓝色为正，黄色为反)。"
+                'desc'=>"下图表现了晚高峰".$road_info['road_name']."干线不同方向路口平均停车次数与路口延误随时间变化的趋势(蓝色为正，黄色为反)。"
             ],
             'chart_list'=>[]
         ];
