@@ -819,7 +819,7 @@ class DiagnosisNoTiming_model extends CI_Model
                 $uniqueDirections[] = $phaseWord;
 
                 $result['dataList'][$k]['logic_flow_id'] = $v['logic_flow_id'];
-                $result['dataList'][$k]['flow_label'] = ""; 
+                $result['dataList'][$k]['flow_label'] = $phaseWord;
 
                 $result['dataList'][$k]['lng'] = $v['flows'][0][0];
                 $result['dataList'][$k]['lat'] = $v['flows'][0][1];

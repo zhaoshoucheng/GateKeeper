@@ -160,6 +160,9 @@ class DiagnosisNoTiming extends MY_Controller
         $data['city_id'] = $this->input->post("city_id", TRUE);
         $data['junction_id'] = $this->input->post("junction_id", TRUE);
         $result = $this->dianosisService->getJunctionMapData($data,1);
+        foreach($result["dataList"] as $dKey=>$dValue){
+            $result["dataList"][$dKey]["flow_label"] = "";
+        }
         $this->response($result);
     }
 
