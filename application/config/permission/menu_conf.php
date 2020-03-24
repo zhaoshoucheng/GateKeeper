@@ -711,19 +711,14 @@ $config['menu'] = [
                         [
                             0 =>
                                 [
-                                    'name' => '路口概览',
+                                    'name' => '拥堵预警',
                                     'url'  => 'overview',
-                                ],
-                            1 =>
-                                [
-                                    'name' => '快速路监测',
-                                    'url'  => 'expressway',
                                 ],
                         ],
                 ],
             1 =>
                 [
-                    'name'   => '问题治理',
+                    'name'   => '优化',
                     'url'    => '/optimize/',
                     'remark' => 'signal',
                     'son'    =>
@@ -732,6 +727,25 @@ $config['menu'] = [
                                 [
                                     'name' => '单点时段优化',
                                     'url'  => 'signal',
+                                ],
+                            1 =>
+                                [
+                                    'name' => '绿信比优化',
+                                    'url'  => 'green',
+                                ],
+                        ],
+                ],
+            2 =>
+                [
+                    'name'   => '重点路段保障',
+                    'url'    => '/',
+                    'remark' => 'signal',
+                    'son'    =>
+                        [
+                            0 =>
+                                [
+                                    'name' => '快速路监测',
+                                    'url'  => 'expressway',
                                 ],
                         ],
                 ],
