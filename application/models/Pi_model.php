@@ -65,42 +65,30 @@ class Pi_model extends CI_Model{
 
     public function getGroupJuncPiWithDatesHours($cityID,$logic_junction_ids,$dates,$hours){
         //南京,济南pi数据迁入es
-        if($cityID == 11 || $cityID == 12){
 //            $st = date('Ymd',strtotime($dates[0]));
 //            $et = date('Ymd',strtotime($dates[count($dates)-1]));
-            $req = [
-                'city_id' => (int)$cityID,
-                'logic_junction_ids' => $logic_junction_ids,
-                "dates" => $dates,
+        $req = [
+            'city_id' => (int)$cityID,
+            'logic_junction_ids' => $logic_junction_ids,
+            "dates" => $dates,
 //                'start_date' => (int)$st,
 //                'end_date' => (int)$et,
-                'hours'=>$hours
-            ];
+            'hours'=>$hours
+        ];
 
-            $url = $this->config->item('data_service_interface');
+        $url = $this->config->item('data_service_interface');
 
 
-            $res = httpPOST($url . '/report/GetPiByJunction', $req, 0, 'json');
-            $res = json_decode($res,true);
-            $hourPI = [];
-            if(empty($res)){
-                return [];
-            }
-            foreach ($res['data'] as $v){
-                $hourPI[$v['hour']] = $v['pi'];
-            }
-            return $hourPI;
+        $res = httpPOST($url . '/report/GetPiByJunction', $req, 0, 'json');
+        $res = json_decode($res,true);
+        $hourPI = [];
+        if(empty($res)){
+            return [];
         }
-//            $res = $this->db
-//                ->select('SUM(pi*traj_count)/SUM(traj_count) as pi,hour')
-//                ->from($this->tb.$city_id)
-//                ->where_in('logic_junction_id', $logic_junction_ids)
-//                ->where_in('date', $dates)
-//                ->where_in('hour', $hours)
-//                ->group_by('hour')
-//                ->get();
-////         var_dump($this->db->last_query());
-//            return $res->result_array();
+        foreach ($res['data'] as $v){
+            $hourPI[$v['hour']] = $v['pi'];
+        }
+        return $hourPI;
         return [];
 
     }
@@ -123,14 +111,15 @@ class Pi_model extends CI_Model{
             }
             return $data;
         } else {
-            $res = $this->db
+            $query = $this->db
                 ->select('logic_junction_id, sum(pi * traj_count) / sum(traj_count) as pi')
                 ->from($this->tb.$city_id)
-                ->where_in('logic_junction_id', $logic_junction_ids)
                 ->where_in('date', $dates)
-                ->where_in('hour', $hours)
-                ->group_by('logic_junction_id')
-                ->get();
+                ->where_in('hour', $hours);
+            if(!empty($logic_junction_ids) && count($logic_junction_ids)<1000){
+                $query = $query->where_in('logic_junction_id', $logic_junction_ids);
+            }
+            $res = $query->group_by('logic_junction_id')->get();
             if(empty($res)){
                 return [];
             }
