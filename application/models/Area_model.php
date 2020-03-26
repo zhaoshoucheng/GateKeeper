@@ -116,39 +116,38 @@ class Area_model extends CI_Model
         return $res instanceof CI_DB_result ? $res->result_array() : $res;
     }
 
-    public function getJunctionsAllQuotaEs($dates,$allJunctionIDs,$cityId){
+    public function getJunctionsAllQuotaEs($dates,$junctionIDs,$cityId){
 //        $select='select date, hour, round(avg(speed) * 3.6, 2) as speed,round(avg(stop_delay), 2) as stop_delay,round(avg(stop_time_cycle), 2) as stop_time_cycle  ';
-        $chunkJunctionIDS = array_chunk($allJunctionIDs,900);
+        // $chunkJunctionIDS = array_chunk($allJunctionIDs,900);
         // print_r($chunkJunctionIDS);exit;
         $finalRet=[];
-        foreach ($chunkJunctionIDS as $junctionIDs) {
-            $data = [
-                'city_id'           => (int)$cityId,
-                'dates'             =>$dates,
-                'junction_ids'      =>$junctionIDs,
-                'engine'            => $this->engine,
-            ];
-            $url = $this->config->item('data_service_interface');
-            // print_r($data);exit; 
-            $res = httpPOST($url . '/GetJunctionQuotaData', $data, 0, 'json');
-            if (!$res) {
-                return [];
-            }
+        $data = [
+            'city_id'           => (int)$cityId,
+            'dates'             =>$dates,
+            'junction_ids'      =>$junctionIDs,
+            'engine'            => $this->engine,
+        ];
+        $url = $this->config->item('data_service_interface');
+        // print_r($data);exit;
+        $res = httpPOST($url . '/GetJunctionQuotaData', $data, 20000, 'json');
+        // print_r($res);exit;
+        if (!$res) {
+            return [];
+        }
 
-            $res = json_decode($res, true);
-            if ($res['errno'] != 0) {
-                return [];
-            }
-            //格式化为mysql的返回格式
-            $retData = $res['data'];
-            foreach ($retData['hour']['buckets'] as  $hv){
-                $finalRet[] = [
-                        "hour"=>$hv['key'],
-                       "speed"=>round($hv['speed']['value']/$hv['traj_count']['value']*3.6,2),
-                       "stop_delay"=>round($hv['stop_delay']['value']/$hv['traj_count']['value'],2),
-                       "stop_time_cycle"=> round($hv['stop_time_cycle']['value']/$hv['traj_count']['value'],2),
-                   ];
-            }
+        $res = json_decode($res, true);
+        if ($res['errno'] != 0) {
+            return [];
+        }
+        //格式化为mysql的返回格式
+        $retData = $res['data'];
+        foreach ($retData['hour']['buckets'] as  $hv){
+            $finalRet[] = [
+                    "hour"=>$hv['key'],
+                   "speed"=>round($hv['speed']['value']/$hv['traj_count']['value']*3.6,2),
+                   "stop_delay"=>round($hv['stop_delay']['value']/$hv['traj_count']['value'],2),
+                   "stop_time_cycle"=> round($hv['stop_time_cycle']['value']/$hv['traj_count']['value'],2),
+               ];
         }
         return $finalRet;
 

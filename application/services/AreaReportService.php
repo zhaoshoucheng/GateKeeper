@@ -777,7 +777,7 @@ class AreaReportService extends BaseService{
             $junctionList = [];
         }
         $alarmInfo = $this->diagnosisNoTiming_model->getJunctionAlarmHoursData($cityID, $junctionList, $this->getDateFromRange($startTime,$endTime));
-
+        // print_r($alarmInfo);exit;
         //1: 过饱和 2: 溢流 3:失衡
         $imbalance=[];
         $oversaturation=[];
@@ -843,14 +843,18 @@ class AreaReportService extends BaseService{
             'city_id' => $cityID,
             'area_id' => $roadID,
         ]);
-
         $junctionIDs =array_column($area_detail['junction_list'], 'logic_junction_id');
 
+
         $dates = $this->getDateFromRange($start_time,$end_time);
-
+        if($roadID==201){
+            $junctionIDs = [];
+            //最多取30天数据
+            if(count($dates)>30){
+                $dates = array_slice($dates,0,30);
+            }
+        }
         $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,$junctionIDs,$cityID);
-
-
         $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,$junctionIDs,$dates,$this->createHours());
         foreach ($PiDatas as $pk =>$pv){
             foreach ($roadQuotaData as $rk=>$rv){
@@ -860,8 +864,6 @@ class AreaReportService extends BaseService{
                 }
             }
         }
-
-
         return $roadQuotaData;
     }
 

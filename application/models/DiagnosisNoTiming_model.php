@@ -889,8 +889,7 @@ class DiagnosisNoTiming_model extends CI_Model
             'junction_ids'=>$junctions
         ];
 
-
-
+        // print_r($req);exit; 
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetOnlineJunctionAlarmHoursData', $req, 0, 'json');
 
