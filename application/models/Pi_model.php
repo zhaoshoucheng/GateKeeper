@@ -123,14 +123,15 @@ class Pi_model extends CI_Model{
             }
             return $data;
         } else {
-            $res = $this->db
+            $query = $this->db
                 ->select('logic_junction_id, sum(pi * traj_count) / sum(traj_count) as pi')
                 ->from($this->tb.$city_id)
-                ->where_in('logic_junction_id', $logic_junction_ids)
                 ->where_in('date', $dates)
-                ->where_in('hour', $hours)
-                ->group_by('logic_junction_id')
-                ->get();
+                ->where_in('hour', $hours);
+            if(!empty($logic_junction_ids)){
+                $query = $query->where_in('logic_junction_id', $logic_junction_ids);
+            }
+            $res = $query->group_by('logic_junction_id')->get();
             if(empty($res)){
                 return [];
             }

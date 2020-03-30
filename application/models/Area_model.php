@@ -118,6 +118,9 @@ class Area_model extends CI_Model
 
     public function getJunctionsAllQuotaEs($dates,$junctionIDs,$cityId){
 //        $select='select date, hour, round(avg(speed) * 3.6, 2) as speed,round(avg(stop_delay), 2) as stop_delay,round(avg(stop_time_cycle), 2) as stop_time_cycle  ';
+        // $chunkJunctionIDS = array_chunk($allJunctionIDs,900);
+        // print_r($chunkJunctionIDS);exit;
+        $finalRet=[];
         $data = [
             'city_id'           => (int)$cityId,
             'dates'             =>$dates,
@@ -125,8 +128,9 @@ class Area_model extends CI_Model
             'engine'            => $this->engine,
         ];
         $url = $this->config->item('data_service_interface');
-
-        $res = httpPOST($url . '/GetJunctionQuotaData', $data, 0, 'json');
+        // print_r($data);exit;
+        $res = httpPOST($url . '/GetJunctionQuotaData', $data, 20000, 'json');
+        // print_r($res);exit;
         if (!$res) {
             return [];
         }
@@ -136,10 +140,7 @@ class Area_model extends CI_Model
             return [];
         }
         //格式化为mysql的返回格式
-
         $retData = $res['data'];
-
-        $finalRet=[];
         foreach ($retData['hour']['buckets'] as  $hv){
             $finalRet[] = [
                     "hour"=>$hv['key'],
@@ -148,7 +149,6 @@ class Area_model extends CI_Model
                    "stop_time_cycle"=> round($hv['stop_time_cycle']['value']/$hv['traj_count']['value'],2),
                ];
         }
-
         return $finalRet;
 
     }
