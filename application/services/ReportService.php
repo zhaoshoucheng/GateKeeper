@@ -983,7 +983,7 @@ class ReportService extends BaseService
 
     // 晚高峰开始结束时间
     public function getEveningPeekRange($city_id, $logic_junction_ids, $dates) {
-        $hours = ['07:00', '07:30', '09:00', '09:30'];
+        $hours = ['17:00', '17:30', '19:00', '19:30'];
         $data = $this->dataService->call("/report/GetIndex", [
             'city_id' => $city_id,
             'dates' => $dates,
