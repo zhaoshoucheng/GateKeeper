@@ -94,6 +94,9 @@ class Track extends MY_Controller
             return $this->response($result_data);
         }
         $result_data['signal_detail']=[];
+        if(!isset($result_data['planList'])){
+            return $this->response($result_data);
+        }
         foreach ($result_data['planList'] as $k => $v){
 
                 $result_data['signal_detail']['cycle']=$v['plan']['cycle'];
