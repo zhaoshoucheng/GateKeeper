@@ -66,7 +66,7 @@ class AreaReportService extends BaseService{
         if($params['userapp'] == 'jinanits'){
             $dates = $this->getDateFromRange($start_date,$end_date);
             $pi = $this->pi_model->getGroupJuncAvgPiWithDates($city_id,explode(",",$logic_junction_ids) ,$dates,$this->createHours());
-            $tpl = "本次报告区域为%s市，整体PI值为".round($pi,2)."，分析区域包含%s等行政区域。本次报告根据%s数据对该区域进行分析。";
+            $tpl = "本次报告分析区域为%s市，整体PI为".round($pi,2)."，分析区域包含%s等行政区域。本次报告根据%s数据对该区域进行分析。";
 
         }
     	$districts_name = implode('、', array_unique(array_column($junctions_info, 'district_name')));
@@ -80,7 +80,7 @@ class AreaReportService extends BaseService{
     }
 
     public function queryAreaDataComparison($params) {
-    	$tpl = "上图展示了研究区域%s与%s路口平均延误的对比，%s该区域拥堵程度与%s相比%s。";
+    	$tpl = "上图展示了分析区域%s与%s路口平均延误的对比，%s该区域拥堵程度与%s相比%s。";
 
     	$city_id = intval($params['city_id']);
     	$area_id = $params['area_id'];
@@ -784,6 +784,9 @@ class AreaReportService extends BaseService{
         $spillover=[];
         //路口报警统计
         foreach ($alarmInfo as $ak => $av){
+            if(!in_array($av['logic_junction_id'],$junctionList)){
+                continue;
+            }
             //过滤报警不足5分钟的
             if(strtotime($av['end_time'])-strtotime($av['start_time']) < 5*60){
                 continue;
@@ -800,6 +803,7 @@ class AreaReportService extends BaseService{
                     break;
             }
         }
+
         $imbalance = $this->sortSlice($imbalance);
         $oversaturation = $this->sortSlice($oversaturation);
         $spillover = $this->sortSlice($spillover);
