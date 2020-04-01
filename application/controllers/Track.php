@@ -343,7 +343,12 @@ class Track extends MY_Controller
 
         //轨迹抽样,考虑前端性能问题,暂时上限200
         if (count($dataList) >200){
-            $dataList = array_rand($dataList,200);
+            $datakeyList = array_rand($dataList,200);
+            $tempDataList =[];
+            foreach ($datakeyList as $dv){
+                $tempDataList[] = $dataList[$dv];
+            }
+            $dataList = $tempDataList;
         }
  
         $info['id'] = $params['flow_id'];
@@ -358,7 +363,10 @@ class Track extends MY_Controller
         foreach ($dataList as $dk=>$dv){
             if(empty($dv)){
                 continue;
-            } 
+            }
+            if(!is_array($dv)){
+                continue;
+            }
             foreach ($dv as $k => $v){
                 if($v[0]>$info['x']['max']){
                     $info['x']['max']=$v[0];
