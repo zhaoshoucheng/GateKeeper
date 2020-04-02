@@ -102,9 +102,7 @@ class AreaReportService extends BaseService{
     		'area_id' => $area_id,
     	]);
     	$logic_junction_ids = implode(',', array_column($area_detail['junction_list'], 'logic_junction_id'));
-        if($area_id==201){
-            $logic_junction_ids = "";
-        }
+
     	$report_type = $this->reportService->report_type($start_date, $end_date);
     	$last_report_date = $this->reportService->last_report_date($start_date, $end_date, $report_type);
     	$last_start_date = $last_report_date['start_date'];
@@ -443,9 +441,7 @@ class AreaReportService extends BaseService{
     		'area_id' => $area_id,
     	]);
     	$logic_junction_ids = implode(',', array_column($area_detail['junction_list'], 'logic_junction_id'));
-        if($area_id==201){
-            $logic_junction_ids = "";
-        }
+
     	$junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
     	if (empty($junctions_info)) {
 
@@ -585,9 +581,7 @@ class AreaReportService extends BaseService{
     	array_map(function($item) use(&$junctions_map) {
     		$junctions_map[$item['logic_junction_id']] = $item;
     	}, $junctions_info);
-        if($area_id==201){
-            $logic_junction_ids = "";
-        }
+
     	$morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
     	$evenint_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
 
@@ -702,9 +696,7 @@ class AreaReportService extends BaseService{
     		'area_id' => $area_id,
     	]);
     	$logic_junction_ids =array_column($area_detail['junction_list'], 'logic_junction_id');
-        if($area_id==201){
-            $logic_junction_ids = [];
-        }
+
     	$morning_peek = $this->reportService->getMorningPeekRange($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date));
         // print_r($morning_peek);exit;
     	$morning_peek_hours = $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']);
