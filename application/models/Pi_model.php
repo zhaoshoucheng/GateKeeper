@@ -65,9 +65,8 @@ class Pi_model extends CI_Model{
 
     public function getGroupJuncPiWithDatesHours($cityID,$logic_junction_ids,$dates,$hours){
         //南京,济南pi数据迁入es
-        if($cityID == 11 || $cityID == 12){
-//            $st = date('Ymd',strtotime($dates[0]));
-//            $et = date('Ymd',strtotime($dates[count($dates)-1]));
+
+
             $req = [
                 'city_id' => (int)$cityID,
                 'logic_junction_ids' => $logic_junction_ids,
@@ -90,23 +89,14 @@ class Pi_model extends CI_Model{
                 $hourPI[$v['hour']] = $v['pi'];
             }
             return $hourPI;
-        }
-//            $res = $this->db
-//                ->select('SUM(pi*traj_count)/SUM(traj_count) as pi,hour')
-//                ->from($this->tb.$city_id)
-//                ->where_in('logic_junction_id', $logic_junction_ids)
-//                ->where_in('date', $dates)
-//                ->where_in('hour', $hours)
-//                ->group_by('hour')
-//                ->get();
-////         var_dump($this->db->last_query());
-//            return $res->result_array();
-        return [];
+
+
 
     }
 
     public function getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $dates, $hours){
-        if ($city_id == 11 || $city_id == 12) {
+      
+        if ($city_id == 11 || $city_id == 12 || $city_id == 38) {
             $pi_data = $this->dataService->call("/report/GetPiIndex", [
                 'city_id' => $city_id,
                 'dates' => $dates,

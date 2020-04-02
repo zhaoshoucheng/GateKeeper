@@ -63,7 +63,7 @@ class AreaReportService extends BaseService{
     	if (empty($junctions_info)) {
 
     	}
-        if($params['userapp'] == 'jinanits'){
+        if( isset($params['userapp']) && $params['userapp'] == 'jinanits'){
             $dates = $this->getDateFromRange($start_date,$end_date);
             $pi = $this->pi_model->getGroupJuncAvgPiWithDates($city_id,explode(",",$logic_junction_ids) ,$dates,$this->createHours());
             $tpl = "本次报告分析区域为%s市，整体PI为".round($pi,2)."，分析区域包含%s等行政区域。本次报告根据%s数据对该区域进行分析。";
@@ -773,9 +773,7 @@ class AreaReportService extends BaseService{
             $juncNameMap[$j['name']] = $j['logic_junction_id'];
             $rd['junctions_info'][$j['logic_junction_id']] = ['name'=>$j['name']];
         }
-        if($areaID==201){
-            $junctionList = [];
-        }
+
         $alarmInfo = $this->diagnosisNoTiming_model->getJunctionAlarmHoursData($cityID, $junctionList, $this->getDateFromRange($startTime,$endTime));
         // print_r($alarmInfo);exit;
         //1: 过饱和 2: 溢流 3:失衡
@@ -851,13 +849,7 @@ class AreaReportService extends BaseService{
 
 
         $dates = $this->getDateFromRange($start_time,$end_time);
-        if($roadID==201){
-            $junctionIDs = [];
-            //最多取30天数据
-            if(count($dates)>30){
-                $dates = array_slice($dates,0,30);
-            }
-        }
+
         $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,$junctionIDs,$cityID);
         $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,$junctionIDs,$dates,$this->createHours());
         foreach ($PiDatas as $pk =>$pv){
