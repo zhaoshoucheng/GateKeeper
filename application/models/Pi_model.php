@@ -63,6 +63,30 @@ class Pi_model extends CI_Model{
 
     }
 
+    public function getCityPiWithDatesHours($cityID,$dates,$hours){
+        $req = [
+            'city_id' => (int)$cityID,
+            "dates" => $dates,
+//                'start_date' => (int)$st,
+//                'end_date' => (int)$et,
+            'hours'=>$hours
+        ];
+
+        $url = $this->config->item('data_service_interface');
+
+
+        $res = httpPOST($url . '/report/GetPIByCity', $req, 0, 'json');
+        $res = json_decode($res,true);
+        $hourPI = [];
+        if(empty($res)){
+            return [];
+        }
+        foreach ($res['data'] as $v){
+            $hourPI[$v['hour']] = $v['pi'];
+        }
+        return $hourPI;
+    }
+
     public function getGroupJuncPiWithDatesHours($cityID,$logic_junction_ids,$dates,$hours){
         //南京,济南pi数据迁入es
 

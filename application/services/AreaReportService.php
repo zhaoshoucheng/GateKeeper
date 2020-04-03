@@ -843,7 +843,14 @@ class AreaReportService extends BaseService{
         $dates = $this->getDateFromRange($start_time,$end_time);
 
         $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,$junctionIDs,$cityID);
-        $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,$junctionIDs,$dates,$this->createHours());
+
+        if(count($junctionIDs)>1500){
+            $PiDatas = $this->pi_model->getCityPiWithDatesHours($cityID,$dates,$this->createHours());
+
+        }else{
+            $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,$junctionIDs,$dates,$this->createHours());
+
+        }
         foreach ($PiDatas as $pk =>$pv){
             foreach ($roadQuotaData as $rk=>$rv){
                 if($pk==$rv['hour']){
