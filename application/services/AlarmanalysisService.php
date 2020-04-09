@@ -643,7 +643,7 @@ class AlarmanalysisService extends BaseService
         if(date("Y-m-d") == date("Y-m-d",strtotime($params['start_time'])) && date("Y-m-d") == date("Y-m-d",strtotime($params['end_time']))){
             $nowHour = date("H");
         }else{
-            $nowHour = 24;
+            $nowHour = 23;
         }
         for ($i = 0; $i <= $nowHour; $i++) {
             $continuousHour[$i . ':00'] = [];
