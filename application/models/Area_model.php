@@ -130,7 +130,7 @@ class Area_model extends CI_Model
         $url = $this->config->item('data_service_interface');
         // print_r($data);exit;
         $res = httpPOST($url . '/GetJunctionQuotaData', $data, 20000, 'json');
-        // print_r($res);exit;
+
         if (!$res) {
             return [];
         }
@@ -141,6 +141,10 @@ class Area_model extends CI_Model
         }
         //格式化为mysql的返回格式
         $retData = $res['data'];
+        if(!isset($retData['hour']) || !isset($retData['hour']['buckets'])){
+            return [];
+        }
+
         foreach ($retData['hour']['buckets'] as  $hv){
             $finalRet[] = [
                     "hour"=>$hv['key'],
