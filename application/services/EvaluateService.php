@@ -811,7 +811,8 @@ class EvaluateService extends BaseService
         $key = $this->config->item('quota_evaluate_key_prefix') . $params['download_id'];
 
         if (!$this->redis_model->getData($key)) {
-            throw new \Exception('请先评估再下载', ERR_DEFAULT);
+//            throw new \Exception('请先评估再下载', ERR_DEFAULT);
+            return '';
         }
 
         return [

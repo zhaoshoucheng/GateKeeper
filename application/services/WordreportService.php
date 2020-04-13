@@ -264,6 +264,7 @@ class WordreportService extends BaseService{
         //干线路口报警总结
         if(isset($params['heatMap_content_1'])){
             $templateProcessor->cloneBlock("F_BLOCK",1);
+            $templateProcessor->setValue("heatMap_content_title",$params['heatMap_content_title']);
             $img  = array("path" => $FILES["heatMap_chart_1"]['tmp_watermark'], "width" => 420, "height" => 420);
             $templateProcessor->setImageValue("heatMap_chart_1",$img);
             $img['path'] = $FILES["heatMap_chart_2"]['tmp_watermark'];
@@ -505,6 +506,7 @@ class WordreportService extends BaseService{
         //区域路口报警总结
         if(isset($params['heatMap_content_1'])){
             $templateProcessor->cloneBlock("F_BLOCK",1);
+            $templateProcessor->setValue("heatMap_content_title",$params['heatMap_content_title']);
             $img  = array("path" => $FILES["heatMap_chart_1"]['tmp_watermark'], "width" => 420, "height" => 420);
             $templateProcessor->setImageValue("heatMap_chart_1",$img);
             $img['path'] = $FILES["heatMap_chart_2"]['tmp_watermark'];

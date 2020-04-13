@@ -63,13 +63,9 @@ class Pi_model extends CI_Model{
 
     }
 
-    public function getGroupJuncPiWithDatesHours($cityID,$logic_junction_ids,$dates,$hours){
-        //南京,济南pi数据迁入es
-//            $st = date('Ymd',strtotime($dates[0]));
-//            $et = date('Ymd',strtotime($dates[count($dates)-1]));
+    public function getCityPiWithDatesHours($cityID,$dates,$hours){
         $req = [
             'city_id' => (int)$cityID,
-            'logic_junction_ids' => $logic_junction_ids,
             "dates" => $dates,
 //                'start_date' => (int)$st,
 //                'end_date' => (int)$et,
@@ -79,7 +75,7 @@ class Pi_model extends CI_Model{
         $url = $this->config->item('data_service_interface');
 
 
-        $res = httpPOST($url . '/report/GetPiByJunction', $req, 0, 'json');
+        $res = httpPOST($url . '/report/GetPIByCity', $req, 0, 'json');
         $res = json_decode($res,true);
         $hourPI = [];
         if(empty($res)){
@@ -89,12 +85,42 @@ class Pi_model extends CI_Model{
             $hourPI[$v['hour']] = $v['pi'];
         }
         return $hourPI;
-        return [];
+    }
+
+    public function getGroupJuncPiWithDatesHours($cityID,$logic_junction_ids,$dates,$hours){
+        //南京,济南pi数据迁入es
+
+
+            $req = [
+                'city_id' => (int)$cityID,
+                'logic_junction_ids' => $logic_junction_ids,
+                "dates" => $dates,
+//                'start_date' => (int)$st,
+//                'end_date' => (int)$et,
+            'hours'=>$hours
+        ];
+
+        $url = $this->config->item('data_service_interface');
+
+
+            $res = httpPOST($url . '/report/GetPiByJunction', $req, 0, 'json');
+            $res = json_decode($res,true);
+            $hourPI = [];
+            if(empty($res)){
+                return [];
+            }
+            foreach ($res['data'] as $v){
+                $hourPI[$v['hour']] = $v['pi'];
+            }
+            return $hourPI;
+
+
 
     }
 
     public function getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $dates, $hours){
-        if ($city_id == 11 || $city_id == 12) {
+      
+//        if ($city_id == 11 || $city_id == 12 ) {
             $pi_data = $this->dataService->call("/report/GetPiIndex", [
                 'city_id' => $city_id,
                 'dates' => $dates,
@@ -110,22 +136,22 @@ class Pi_model extends CI_Model{
                 ];
             }
             return $data;
-        } else {
-            $query = $this->db
-                ->select('logic_junction_id, sum(pi * traj_count) / sum(traj_count) as pi')
-                ->from($this->tb.$city_id)
-                ->where_in('date', $dates)
-                ->where_in('hour', $hours);
-            if(!empty($logic_junction_ids) && count($logic_junction_ids)<1000){
-                $query = $query->where_in('logic_junction_id', $logic_junction_ids);
-            }
-            $res = $query->group_by('logic_junction_id')->get();
-            if(empty($res)){
-                return [];
-            }
-    //         var_dump($this->db->last_query());
-            return $res->result_array();
-        }
+//        } else {
+//            $query = $this->db
+//                ->select('logic_junction_id, sum(pi * traj_count) / sum(traj_count) as pi')
+//                ->from($this->tb.$city_id)
+//                ->where_in('date', $dates)
+//                ->where_in('hour', $hours);
+//            if(!empty($logic_junction_ids)){
+//                $query = $query->where_in('logic_junction_id', $logic_junction_ids);
+//            }
+//            $res = $query->group_by('logic_junction_id')->get();
+//            if(empty($res)){
+//                return [];
+//            }
+//    //         var_dump($this->db->last_query());
+//            return $res->result_array();
+//        }
 
     }
 
