@@ -733,6 +733,11 @@ $config['menu'] = [
                                     'name' => '绿信比优化',
                                     'url'  => 'green',
                                 ],
+                            2 =>
+                                [
+                                    'name' => '干线协调优化',
+                                    'url'  => 'coordinate',
+                                ],
                         ],
                 ],
             2 =>

@@ -97,10 +97,10 @@ class Pi_model extends CI_Model{
                 "dates" => $dates,
 //                'start_date' => (int)$st,
 //                'end_date' => (int)$et,
-                'hours'=>$hours
-            ];
+            'hours'=>$hours
+        ];
 
-            $url = $this->config->item('data_service_interface');
+        $url = $this->config->item('data_service_interface');
 
 
             $res = httpPOST($url . '/report/GetPiByJunction', $req, 0, 'json');
