@@ -934,23 +934,81 @@ class RoadReportService extends BaseService{
     //报警热力图最多保留20个路口的数据
     private function shortenChart($chartList){
         $newChartList = [];
-        foreach ($chartList as $chartData){
-            if($chartData['chart']['one_dimensional']<=20){
-                $newChartList[] = $chartData;
-            }
-            $tmpChartData = $chartData;
-            //默认数据已经排序
-            $tmpChartData['chart']['one_dimensional'] = array_slice($tmpChartData['chart']['one_dimensional'], 0, 20);
-            $data = [];
-            foreach ($tmpChartData['chart']['data'] as $v){
-                if($v[1]>=20){
-                    continue;
-                }
-                $data[] = $v;
-            }
-            $tmpChartData['chart']['data'] = $data;
-            $newChartList[] = $tmpChartData;
+        if(count($chartList[0]['chart']['one_dimensional']) <=20){
+            return $chartList;
         }
+        // 'time'=>1,'junc'=>1,'count'=>1,
+        $top20Map = [];
+        $top20Junc = [];
+        foreach ($chartList as $chartData){
+            //取出前20个路口
+            foreach ($chartData['chart']['data'] as $cd){
+                if(count($cd)>0){
+                    $top20Map[] = ['t'=>$cd[0],'j'=>$cd[1],'c'=>$cd[2]];
+                }
+            }
+            //根据报警次数降序排列
+            usort($top20Map,function($oba,$obb){
+                if($oba['c'] < $obb['c']){
+                    return 1;
+                }
+            });
+            foreach ($top20Map as $topv){
+                if(!in_array($topv['j'],$top20Junc) && count($top20Junc) < 20){
+                    $top20Junc[] = $topv['j'];
+                }
+            }
+
+
+            //重新编排图表
+            $tmpChartData = $chartData;
+            $tmpOneDimen = [];
+            $ndx = [];
+            foreach ($top20Junc as $ntk => $ntv){
+                $ndx[$ntv] = $ntk;
+                $tmpOneDimen[] = $chartData['chart']['one_dimensional'][$ntv];
+            }
+
+                //路口不足20个要补充
+               foreach ($chartData['chart']['one_dimensional'] as $jname){
+                   if(count($tmpOneDimen)<20 && !in_array($jname,$tmpOneDimen)){
+                       $tmpOneDimen[] = $jname;
+                   }
+               }
+
+
+
+
+
+            $tmpChartData['chart']['one_dimensional'] = $tmpOneDimen;
+            $tmpNewData  = [];
+            foreach ($top20Map as $t2k => $t2v){
+                //路口替换为新坐标
+                if(in_array($t2v['j'],$top20Junc)){
+                    $tmpNewData[] = [$t2v['t'],$ndx[$t2v['j']],$t2v['c']];
+                }
+            }
+            $tmpChartData['chart']['data'] = $tmpNewData;
+            $newChartList[] = $tmpChartData;
+
+
+//            $tmpChartData = $chartData;
+//
+//            //默认数据已经排序
+//            //TOOD 排序
+//            $tmpChartData['chart']['one_dimensional'] = array_slice($tmpChartData['chart']['one_dimensional'], 0, 20);
+//            $data = [];
+//            foreach ($tmpChartData['chart']['data'] as $v){
+//                if($v[1]>=20){
+//                    continue;
+//                }
+//                $data[] = $v;
+//            }
+//            $tmpChartData['chart']['data'] = $data;
+//            $newChartList[] = $tmpChartData;
+        }
+
+
 
         return $newChartList;
     }
