@@ -16,14 +16,15 @@ use Didi\Cloud\Collection\Collection;
  */
 class RoadService extends BaseService
 {
-    protected  $greenwaves = [];
+    protected $greenwaves = [];
+
     /**
      * RoadService constructor.
      */
     public function __construct()
     {
         parent::__construct();
-        $this->greenwaves = ["a9ff0f8c6fabc79777e5426b80f118b7", "0bc6f81fd483b79f4b499581bee91672","775df757eb84ad1109753b7adf78b750"];
+        $this->greenwaves = ["a9ff0f8c6fabc79777e5426b80f118b7", "0bc6f81fd483b79f4b499581bee91672", "775df757eb84ad1109753b7adf78b750"];
 //        $this->greenwaves = ["a9ff0f8c6fabc79777e5426b80f118b7"];
 //
         $this->load->model('waymap_model');
@@ -42,45 +43,45 @@ class RoadService extends BaseService
      *
      * @return array
      */
-    public function greenWaveAnalysis($cityID){
+    public function greenWaveAnalysis($cityID)
+    {
         //TODO 暂时写死
         $roadIDs = $this->greenwaves;
 
         //查询干线信息
         $roadInfos = [];
-        foreach ($roadIDs as $r){
-            $p=[
-                'city_id'=>$cityID,
-                'road_id'=>$r,
-                'show_type'=>0
+        foreach ($roadIDs as $r) {
+            $p = [
+                'city_id' => $cityID,
+                'road_id' => $r,
+                'show_type' => 0
             ];
             $data = $this->getRoadDetail($p);
-            $rinfo  = $this->road_model->getRoadByRoadId($r,"road_name");
+            $rinfo = $this->road_model->getRoadByRoadId($r, "road_name");
             //TODO 默认值
             $roadInfos[] = [
-                'road_id'=>$r,
-                'road_name'=>$rinfo['road_name'],
-                'road_info'=>$data['road_info'],
-                'junctions_info'=>$data['junctions_info'],
-                'quota_info'=>[
-                    'forward_quota'=>[
-                        'time'=>0,
-                        'speed'=>0,
-                        'stop_time_cycle'=>0,
-                        'PI'=>20,
-                        'level'=>"A"
+                'road_id' => $r,
+                'road_name' => $rinfo['road_name'],
+                'road_info' => $data['road_info'],
+                'junctions_info' => $data['junctions_info'],
+                'quota_info' => [
+                    'forward_quota' => [
+                        'time' => 0,
+                        'speed' => 0,
+                        'stop_time_cycle' => 0,
+                        'PI' => 20,
+                        'level' => "A"
                     ],
-                    'reverse_quota'=>[
-                        'time'=>0,
-                        'speed'=>0,
-                        'stop_time_cycle'=>0,
-                        'PI'=>20,
-                        'level'=>"A"
+                    'reverse_quota' => [
+                        'time' => 0,
+                        'speed' => 0,
+                        'stop_time_cycle' => 0,
+                        'PI' => 20,
+                        'level' => "A"
                     ],
                 ],
             ];
         }
-
 
 
         $url = $this->config->item('its_traj_interface') . '/road/greenwave';
@@ -90,55 +91,55 @@ class RoadService extends BaseService
             'road_ids' => $roadIDs,
             'city_id' => (int)$cityID,
         ];
-        $ret =  httpPOST($url, $query, 20000, "json");
+        $ret = httpPOST($url, $query, 20000, "json");
 
         $ret = json_decode($ret, true);
         $data = $ret['data'];
         $flowQuota = [];
         //数据处理合并
-        if(!isset($data['RoadMap'])){
+        if (!isset($data['RoadMap'])) {
             return $roadInfos;
         }
 
-        foreach ($data['RoadMap'] as $rk => $rv){
-            if(count($rv['forward'])>0){
-                $speed = round(array_sum(array_column($rv['forward'],"speed"))/count($rv['forward'])*3.6,2);
-                $stopTimeCycle = round(array_sum(array_column($rv['forward'],"stop_time_cycle"))/count($rv['forward']),2);
-                $stopRate = round(array_sum(array_column($rv['forward'],"one_stop_ratio_up"))/count($rv['forward']),2) + round(array_sum(array_column($rv['forward'],"multi_stop_ratio_up"))/count($rv['forward']),2);
-                $flowQuota[$rk]['forward_quota']=[
-                        'time'=>0,
-                        'speed'=>$speed,
-                        'stop_time_cycle'=>$stopTimeCycle,
-                        'PI'=>round(array_sum(array_column($rv['forward'],"pi"))/count($rv['forward']),2),
-                        'stop_ratid'=>$stopRate,
-                        'length'=>array_sum(array_column($rv['forward'],"length")),
-                        'level'=>$this->getStopTimeLevel($stopRate)
+        foreach ($data['RoadMap'] as $rk => $rv) {
+            if (count($rv['forward']) > 0) {
+                $speed = round(array_sum(array_column($rv['forward'], "speed")) / count($rv['forward']) * 3.6, 2);
+                $stopTimeCycle = round(array_sum(array_column($rv['forward'], "stop_time_cycle")) / count($rv['forward']), 2);
+                $stopRate = round(array_sum(array_column($rv['forward'], "one_stop_ratio_up")) / count($rv['forward']), 2) + round(array_sum(array_column($rv['forward'], "multi_stop_ratio_up")) / count($rv['forward']), 2);
+                $flowQuota[$rk]['forward_quota'] = [
+                    'time' => 0,
+                    'speed' => $speed,
+                    'stop_time_cycle' => $stopTimeCycle,
+                    'PI' => round(array_sum(array_column($rv['forward'], "pi")) / count($rv['forward']), 2),
+                    'stop_ratid' => $stopRate,
+                    'length' => array_sum(array_column($rv['forward'], "length")),
+                    'level' => $this->getStopTimeLevel($stopRate)
                 ];
-                if($flowQuota[$rk]['forward_quota']['speed']>0){
-                    $flowQuota[$rk]['forward_quota']['time'] = round(($flowQuota[$rk]['forward_quota']['length']/ $flowQuota[$rk]['forward_quota']['speed'] * 3.6)/60,1);
+                if ($flowQuota[$rk]['forward_quota']['speed'] > 0) {
+                    $flowQuota[$rk]['forward_quota']['time'] = round(($flowQuota[$rk]['forward_quota']['length'] / $flowQuota[$rk]['forward_quota']['speed'] * 3.6) / 60, 1);
                 }
             }
-            if(count($rv['backward'])>0){
-                $speed = round(array_sum(array_column($rv['backward'],"speed"))/count($rv['backward'])*3.6,2);
-                $stopTimeCycle = round(array_sum(array_column($rv['backward'],"stop_time_cycle"))/count($rv['backward']),2);
-                $stopRate = round(array_sum(array_column($rv['backward'],"one_stop_ratio_up"))/count($rv['backward']),2) + round(array_sum(array_column($rv['backward'],"multi_stop_ratio_up"))/count($rv['backward']),2);
-                $flowQuota[$rk]['reverse_quota']=[
-                        'time'=>0,
-                        'speed'=>$speed,
-                        'stop_time_cycle'=>$stopTimeCycle,
-                        'PI'=>round(array_sum(array_column($rv['backward'],"pi"))/count($rv['backward']),2),
-                        'stop_ratid'=>$stopRate,
-                        'length'=>array_sum(array_column($rv['backward'],"length")),
-                        'level'=>$this->getStopTimeLevel($stopRate)
+            if (count($rv['backward']) > 0) {
+                $speed = round(array_sum(array_column($rv['backward'], "speed")) / count($rv['backward']) * 3.6, 2);
+                $stopTimeCycle = round(array_sum(array_column($rv['backward'], "stop_time_cycle")) / count($rv['backward']), 2);
+                $stopRate = round(array_sum(array_column($rv['backward'], "one_stop_ratio_up")) / count($rv['backward']), 2) + round(array_sum(array_column($rv['backward'], "multi_stop_ratio_up")) / count($rv['backward']), 2);
+                $flowQuota[$rk]['reverse_quota'] = [
+                    'time' => 0,
+                    'speed' => $speed,
+                    'stop_time_cycle' => $stopTimeCycle,
+                    'PI' => round(array_sum(array_column($rv['backward'], "pi")) / count($rv['backward']), 2),
+                    'stop_ratid' => $stopRate,
+                    'length' => array_sum(array_column($rv['backward'], "length")),
+                    'level' => $this->getStopTimeLevel($stopRate)
                 ];
-                if($flowQuota[$rk]['reverse_quota']['speed'] > 0){
-                    $flowQuota[$rk]['reverse_quota']['time'] = round(($flowQuota[$rk]['reverse_quota']['length']/ $flowQuota[$rk]['reverse_quota']['speed'] * 3.6)/60,1);
+                if ($flowQuota[$rk]['reverse_quota']['speed'] > 0) {
+                    $flowQuota[$rk]['reverse_quota']['time'] = round(($flowQuota[$rk]['reverse_quota']['length'] / $flowQuota[$rk]['reverse_quota']['speed'] * 3.6) / 60, 1);
                 }
             }
 
         }
 
-        foreach ($roadInfos as $rk =>$rv){
+        foreach ($roadInfos as $rk => $rv) {
             $roadInfos[$rk]['quota_info'] = $flowQuota[$rv['road_id']];
         }
 
@@ -146,6 +147,7 @@ class RoadService extends BaseService
         return $roadInfos;
 
     }
+
     /**
      * 干线绿波分析详情
      *
@@ -153,12 +155,13 @@ class RoadService extends BaseService
      *
      * @return array
      */
-    public function greenWaveAnalysisDetail($cityID, $roadID){
+    public function greenWaveAnalysisDetail($cityID, $roadID)
+    {
         //查询干线信息
-        $p=[
-            'city_id'=>$cityID,
-            'road_id'=>$roadID,
-            'show_type'=>0
+        $p = [
+            'city_id' => $cityID,
+            'road_id' => $roadID,
+            'show_type' => 0
         ];
         $data = $this->getRoadDetail($p);
 
@@ -177,11 +180,11 @@ class RoadService extends BaseService
             'road_ids' => [$roadID],
             'city_id' => (int)$cityID,
         ];
-        $ret =  httpPOST($url, $query, 20000, "json");
+        $ret = httpPOST($url, $query, 20000, "json");
 
         $ret = json_decode($ret, true);
         $quota_data = $ret['data'];
-        if(!isset($quota_data['RoadMap'][$roadID])){
+        if (!isset($quota_data['RoadMap'][$roadID])) {
             return $ret;
         }
 
@@ -229,49 +232,54 @@ class RoadService extends BaseService
         return $retdata;
     }
 
-    private function getPIlevel($pi){
-        if($pi>0 && $pi <20){
+    private function getPIlevel($pi)
+    {
+        if ($pi > 0 && $pi < 20) {
             return "A";
         }
-        if($pi>=20 && $pi <40){
+        if ($pi >= 20 && $pi < 40) {
             return "B";
         }
-        if($pi>=40 && $pi <60){
+        if ($pi >= 40 && $pi < 60) {
             return "C";
         }
-        if($pi>=60 && $pi <80){
+        if ($pi >= 60 && $pi < 80) {
             return "D";
         }
 
         return "E";
     }
-    private function getSpeedLevel($speed){
-        if($speed>0 && $speed <20){
+
+    private function getSpeedLevel($speed)
+    {
+        if ($speed > 0 && $speed < 20) {
             return "E";
         }
-        if($speed>=20 && $speed <40){
+        if ($speed >= 20 && $speed < 40) {
             return "D";
         }
-        if($speed>=40 && $speed <60){
+        if ($speed >= 40 && $speed < 60) {
             return "C";
         }
-        if($speed>=60 && $speed <80){
+        if ($speed >= 60 && $speed < 80) {
             return "B";
         }
 
         return "A";
     }
-    private function getStopTimeLevel($stopTime){
-        if ($stopTime > 0.9){
+
+    private function getStopTimeLevel($stopTime)
+    {
+        if ($stopTime > 0.9) {
             return "E";
         }
-        if ($stopTime <= 0.9 && $stopTime > 0.7){
+        if ($stopTime <= 0.9 && $stopTime > 0.7) {
             return "D";
         }
-        if ($stopTime <= 0.7 && $stopTime > 0.5){
+        if ($stopTime <= 0.7 && $stopTime > 0.5) {
             return "C";
         }
-        if ($stopTime <= 0.5 && $stopTime > 0.3){
+        if ($stopTime <= 0.5 && $stopTime > 0.3) {
             return "B";
         }
 
@@ -414,7 +422,7 @@ class RoadService extends BaseService
     public function getPathHeadTailJunction($params)
     {
         $cityId = $params["city_id"];
-        $junctionIdList = explode(",",$params['junction_ids']);
+        $junctionIdList = explode(",", $params['junction_ids']);
         $juncMovements = $this->waymap_model->getFlowMovement($cityId, $junctionIdList[0], 'all', 1);
         //上游路口
         $up_road_degree = [];
@@ -423,8 +431,8 @@ class RoadService extends BaseService
                 $item['downstream_junction_id'] == $junctionIdList[1]
             ) {
                 $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
-                if($absDiff>180){
-                    $absDiff = 360-$absDiff;
+                if ($absDiff > 180) {
+                    $absDiff = 360 - $absDiff;
                 }
                 $up_road_degree[$item['upstream_junction_id']] = $absDiff;
             }
@@ -441,11 +449,12 @@ class RoadService extends BaseService
         $down_road_degree = [];
         foreach ($juncMovements as $item) {
             if ($item['junction_id'] == $junctionIdList[sizeof($junctionIdList) - 1] &&
-                $item['upstream_junction_id'] == $junctionIdList[sizeof($junctionIdList) - 2]) {
+                $item['upstream_junction_id'] == $junctionIdList[sizeof($junctionIdList) - 2]
+            ) {
 
                 $absDiff = abs(floatval($item['in_degree']) - floatval($item['out_degree']));
-                if($absDiff>180){
-                    $absDiff = 360-$absDiff;
+                if ($absDiff > 180) {
+                    $absDiff = 360 - $absDiff;
                 }
                 //print_r($absDiff);
                 //print_r($item['downstream_junction_id']);
@@ -473,7 +482,7 @@ class RoadService extends BaseService
     {
         $cityId = $params['city_id'];
         $show_type = $params['show_type'];
-        $force = $params['force'] ?? 0 ;
+        $force = $params['force'] ?? 0;
         $pre_key = $show_type ? 'Road_extend_' : 'Road_';
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
         $roadList = $this->road_model->getBusRoadsByCityId($cityId, $select);
@@ -496,7 +505,7 @@ class RoadService extends BaseService
                 try {
                     $res = $this->getRoadDetail($data);
                 } catch (\Exception $e) {
-                    com_log_warning("getBusRoadList", "1", "", array("err"=>json_encode($e)));
+                    com_log_warning("getBusRoadList", "1", "", array("err" => json_encode($e)));
                     $res = [];
                 }
                 // 将数据刷新到 Redis
@@ -509,8 +518,8 @@ class RoadService extends BaseService
 
             //追加station信息和路口优先字段
             $sjInfo = $this->priortybus_model->getStationJuncInfo($res['road_id']);
-            if(isset($sjInfo["station"])){
-                foreach($sjInfo["station"] as $sk=>$st){
+            if (isset($sjInfo["station"])) {
+                foreach ($sjInfo["station"] as $sk => $st) {
                     $sjInfo["station"][$sk]["lng"] = (string)$sjInfo["station"][$sk]["lng"];
                     $sjInfo["station"][$sk]["lat"] = (string)$sjInfo["station"][$sk]["lat"];
                 }
@@ -518,13 +527,13 @@ class RoadService extends BaseService
             }
             // print_r($sjInfo);exit;
             $juncprimap = [];
-            if(isset($sjInfo["junctions_info"])){
+            if (isset($sjInfo["junctions_info"])) {
                 foreach ($sjInfo["junctions_info"] as $key => $value) {
                     $juncprimap[$value["logic_junction_id"]] = $value["is_priority"];
                 }
             }
             // print_r($juncprimap);exit;
-            if(isset($res["junctions_info"])){
+            if (isset($res["junctions_info"])) {
                 foreach ($res["junctions_info"] as $key => $value) {
                     $res["junctions_info"][$key]["is_priority"] = $juncprimap[$value["logic_junction_id"]] ?? 0;
                 }
@@ -545,7 +554,7 @@ class RoadService extends BaseService
     {
         $cityId = $params['city_id'];
         $show_type = $params['show_type'];
-        $force = $params['force'] ?? 0 ;
+        $force = $params['force'] ?? 0;
         $pre_key = $show_type ? 'Road_extend_' : 'Road_';
 
         $select = 'id, road_id, logic_junction_ids, road_name, road_direction';
@@ -558,7 +567,7 @@ class RoadService extends BaseService
             if ($force) {
                 $res = [];
             }
-            if($item['id']!=1143){
+            if ($item['id'] != 1143) {
                 // continue;
             }
             // $res = [];
@@ -589,37 +598,65 @@ class RoadService extends BaseService
 
         return $results;
     }
+
     //根据路口之间的经纬度,猜测方向的中文描述
-    public function guessDirectionText($junctionsInfo){
+    public function guessDirectionText($junctionsInfo)
+    {
         $lng1 = $junctionsInfo[0]['lng'];
         $lng2 = $junctionsInfo[1]['lng'];
         $lat1 = $junctionsInfo[0]['lat'];
         $lat2 = $junctionsInfo[1]['lat'];
-        $d = 0;
-        $lat_a=$lat1*M_PI/180;
-        $lng_a = $lng1*M_PI/180;
-        $lat_b=$lat2*M_PI/180;
-        $lng_b = $lng2*M_PI/180;
-        $d=sin($lat_a)*sin($lat_b)+cos($lat_a)*cos($lat_b)*cos($lng_b-$lng_a);
-        $d =sqrt(1-$d*$d);
-        $d=cos($lat_b)*sin($lng_b-$lng_a)/$d;
-        $d=asin($d)*180/M_PI;
+        $a = deg2rad(90 - $lat2);
 
-        if ($d <0) {
-            $d = 360 - $d;
+        $b = deg2rad(90 - $lat1);
+
+        $ab = deg2rad($lng2 - $lng1);
+
+        $cosc = cos($a) * cos($b) + sin($a) * sin($b) * cos($ab);
+        if ($cosc < -1.0) {
+            $cosc = -1.0;
         }
 
-        if ($d<45 || $d>=315 ){
+        if ($cosc > 1.0) {
+            $cosc = 1.0;
+        }
+
+        $c = acos($cosc);
+
+        $sinA = (sin($a) * sin($ab)) / sin($c);
+
+        if ($sinA < -1.0) {
+            $sinA = -1.0;
+        }
+
+        if ($sinA > 1.0) {
+            $sinA = 1.0;
+        }
+
+        $A = asin($sinA);
+
+        $Aangle = rad2deg($A);
+
+
+        if ($lng2 > $lng1 && $lat2 > $lat1) {//B相对于A来说位于第一象限
+
+        } else if ($lng2 < $lng1 && $lat2 > $lat1) {//第二象限
+            $Aangle = 360 + $Aangle;
+        } else {//第三，四象限
+            $Aangle = 180 - $Aangle;
+        }
+
+        if ($Aangle < 45 || $Aangle >= 315){
             return ["北","南"];
-        }else if ($d >= 45 && $d< 135){
+        }else if ($Aangle >= 45 && $Aangle<135){
             return ["东","西"];
-        }else if ($d>=135 && $d < 225){
+        }else if ($Aangle >= 135 && $Aangle<225){
             return ["南","北"];
         }
-
         return ["西","东"];
 
     }
+
 
     public function getRoadInfo($roadID){
         $roadInfo = $this->road_model->getRoadByRoadId($roadID);
