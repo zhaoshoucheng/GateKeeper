@@ -152,7 +152,8 @@ class Area_model extends CI_Model
                    "stop_delay"=>round($hv['stop_delay']['value']/$hv['traj_count']['value'],2),
                    "stop_time_cycle"=> round($hv['stop_time_cycle']['value']/$hv['traj_count']['value'],2),
                ];
-        }
+            }
+
         return $finalRet;
 
     }
