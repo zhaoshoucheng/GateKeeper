@@ -578,12 +578,47 @@ class RoadService extends BaseService
             } else {
                 $res = json_decode($res, true);
             }
+            //猜测干线正反向中文描述
+            $direction_text = $this->guessDirectionText($res['junctions_info']);
+            $item['direction_forward_text'] = $direction_text[0];
+            $item['direction_backward_text'] = $direction_text[1];
             $res['road'] = $item;
             $res['road_id'] = $item['id'];
             $results[] = $res;
         }
 
         return $results;
+    }
+    //根据路口之间的经纬度,猜测方向的中文描述
+    public function guessDirectionText($junctionsInfo){
+        $lng1 = $junctionsInfo[0]['lng'];
+        $lng2 = $junctionsInfo[1]['lng'];
+        $lat1 = $junctionsInfo[0]['lat'];
+        $lat2 = $junctionsInfo[1]['lat'];
+        $d = 0;
+        $lat_a=$lat1*M_PI/180;
+        $lng_a = $lng1*M_PI/180;
+        $lat_b=$lat2*M_PI/180;
+        $lng_b = $lng2*M_PI/180;
+        $d=sin($lat_a)*sin($lat_b)+cos($lat_a)*cos($lat_b)*cos($lng_b-$lng_a);
+        $d =sqrt(1-$d*$d);
+        $d=cos($lat_b)*sin($lng_b-$lng_a)/$d;
+        $d=asin($d)*180/M_PI;
+
+        if ($d <0) {
+            $d = 360 - $d;
+        }
+
+        if ($d<45 || $d>=315 ){
+            return ["北","南"];
+        }else if ($d >= 45 && $d< 135){
+            return ["东","西"];
+        }else if ($d>=135 && $d < 225){
+            return ["南","北"];
+        }
+
+        return ["西","东"];
+
     }
 
     public function getRoadInfo($roadID){
