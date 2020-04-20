@@ -28,7 +28,7 @@ if ($development == 2) {
     // 路网接口服务器端口
     $waymap_port = '80';
     // 路网接口前缀
-    $waymap_ext = '/its';
+    $waymap_ext = '/its_mapdata';
 
     // 配时接口服务器地址
     $timing_server = '100.69.238.11';
