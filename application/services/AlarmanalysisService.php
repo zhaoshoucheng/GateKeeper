@@ -903,10 +903,12 @@ class AlarmanalysisService extends BaseService
                         }
                     }
                     foreach($phaseAgg as $logicFlowID=>$hisList){
+                        if(!empty($flowPhases[$logicFlowID])){
                         $phaseList[] = [
                             "phase_name"=>$flowPhases[$logicFlowID],
                             "count"=>count($hisList),
                         ];
+                        }
                     }
                     $tempRes[0][$dateKey]["list"][] = [
                         "name"=> $junctionAlarmType[$typeKey] ?? "",
