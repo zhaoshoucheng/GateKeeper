@@ -463,6 +463,9 @@ class AlarmanalysisService extends BaseService
         $alarmType = $this->config->item('junction_alarm_type');
         foreach($result["hits"]["hits"] as $source){
             $source["_source"]["phase_name"] = $flowPhases[$source["_source"]["logic_flow_id"]]??"";
+            if(empty($source["_source"]["phase_name"])){
+                continue;
+            }
             $source["_source"]["start_hour"] = date("H:i",strtotime($source["_source"]["start_time"]));
             $durationTime = (strtotime($source["_source"]['last_time']) - strtotime($source["_source"]['start_time'])) / 60;
             if ($durationTime == 0) {
@@ -585,10 +588,12 @@ class AlarmanalysisService extends BaseService
                         }
                     }
                     foreach($phaseAgg as $logicFlowID=>$hisList){
-                        $phaseList[] = [
-                            "phase_name"=>$flowPhases[$logicFlowID],
-                            "count"=>count($hisList),
-                        ];
+                        if(!empty($flowPhases[$logicFlowID])){
+                            $phaseList[] = [
+                                "phase_name"=>$flowPhases[$logicFlowID],
+                                "count"=>count($hisList),
+                            ];
+                        }
                     }
                     $tempRes[0][$hourKey.":00"]["list"][] = [
                         "name"=> $junctionAlarmType[$typeKey] ?? "",
@@ -904,10 +909,10 @@ class AlarmanalysisService extends BaseService
                     }
                     foreach($phaseAgg as $logicFlowID=>$hisList){
                         if(!empty($flowPhases[$logicFlowID])){
-                        $phaseList[] = [
-                            "phase_name"=>$flowPhases[$logicFlowID],
-                            "count"=>count($hisList),
-                        ];
+                            $phaseList[] = [
+                                "phase_name"=>$flowPhases[$logicFlowID],
+                                "count"=>count($hisList),
+                            ];
                         }
                     }
                     $tempRes[0][$dateKey]["list"][] = [

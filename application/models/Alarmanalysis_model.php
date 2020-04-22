@@ -124,7 +124,7 @@ class Alarmanalysis_model extends CI_Model
     {
         $lastTime  = date('Y-m-d') . ' ' . $hour;
         //将lastTime后推2分钟
-        $lastTime = date("Y-m-d H:i:s",strtotime($lastTime)-120);
+        $lastTime = date("Y-m-d H:i:s",strtotime($lastTime)-30);
 
         // 组织ES接口所需DSL
         $json = '{"from":0,"size":10000,"query":{"bool":{"must":{"bool":{"must":[';
