@@ -189,30 +189,6 @@ class MY_Controller extends CI_Controller
             'request' => $_REQUEST
         ]);
 
-        //============>降级开始
-        //判断是否符合降级规则,是则直接输出
-        //避免后面资源报错问题
-        $this->load->model('Downgrade_model');
-        $params = $this->input->get();
-        $params = array_merge($params, $this->input->post());
-        $route  = $this->router->class . "/" . $this->router->method;
-
-        //提前准备好content
-        global $cacheContent;
-        if ($this->Downgrade_model->isCacheUrl($route, $_SERVER['REQUEST_METHOD'], $params)) {
-            $cacheContent = $this->Downgrade_model->getUrlCache($route, $_SERVER['REQUEST_METHOD'], $params);
-        }
-
-        //输出降级内容
-        $downgradeCityId = isset($params['city_id']) ? intval($params['city_id']) : 0;
-        if ($this->Downgrade_model->isOpen($downgradeCityId) && !empty($cacheContent)) {
-            header("Content-Type:application/json;charset=UTF-8");
-            echo $cacheContent;
-            exit;
-        }
-        //<============降级结束
-
-
         //写入权限信息
         $this->permCitys = [];
         // 从用户权限获取可以验证的城市列表获取可以验证的城市列表
