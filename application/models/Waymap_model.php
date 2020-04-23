@@ -621,6 +621,24 @@ class Waymap_model extends CI_Model
         return $flowInfos[$logicJunctionId];
     }
 
+    /**
+     * getFlowBriefInfo
+     *
+     * @param 获取相位简略信息
+     *
+     */
+    public function getFlowBriefInfo($logic_junction_id)
+    {
+        $this->load->helper('phase');
+        if(empty($version)){
+            $version = self::$lastMapVersion;
+        }
+
+        $data = compact('logic_junction_id','version');
+        $url = $this->waymap_interface . '/signal-map/flow/getFlowBriefInfo';
+        $res = $this->get($url, $data);
+        return $res;
+    }
 
     /**
      * getFlowsInfo32
