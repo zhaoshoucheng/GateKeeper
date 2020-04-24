@@ -818,13 +818,10 @@ class AreaReportService extends BaseService{
         }
         array_multisort($count,SORT_DESC,$name);
         $newMap=[];
-        $limit = 0;
+
         foreach ($count as $k => $v){
             $newMap[$name[$k]] = $orimap[$name[$k]];
-            $limit++;
-            if ($limit >= 10){
-                break;
-            }
+
         }
         return $newMap;
 

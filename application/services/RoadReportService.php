@@ -1337,12 +1337,9 @@ class RoadReportService extends BaseService{
         }
         array_multisort($count,SORT_DESC,$name);
         $newMap=[];
-        $limit = 0;
+
         foreach ($count as $k => $v){
-            $limit++;
-            if ($limit >= 10){
-                break;
-            }
+
             $newMap[$name[$k]] = $orimap[$name[$k]];
         }
         return $newMap;
