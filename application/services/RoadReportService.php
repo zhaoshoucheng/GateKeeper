@@ -931,10 +931,11 @@ class RoadReportService extends BaseService{
         return $hour.":".$min;
     }
 
-    //报警热力图最多保留20个路口的数据
+    //报警热力图最多保留10个路口的数据
     private function shortenChart($chartList){
         $newChartList = [];
-        if(count($chartList[0]['chart']['one_dimensional']) <=20){
+
+        if(count($chartList[0]['chart']['one_dimensional']) <=10){
             return $chartList;
         }
         // 'time'=>1,'junc'=>1,'count'=>1,
@@ -954,7 +955,7 @@ class RoadReportService extends BaseService{
                 }
             });
             foreach ($top20Map as $topv){
-                if(!in_array($topv['j'],$top20Junc) && count($top20Junc) < 20){
+                if(!in_array($topv['j'],$top20Junc) && count($top20Junc) < 10){
                     $top20Junc[] = $topv['j'];
                 }
             }
@@ -969,9 +970,9 @@ class RoadReportService extends BaseService{
                 $tmpOneDimen[] = $chartData['chart']['one_dimensional'][$ntv];
             }
 
-                //路口不足20个要补充
+                //路口不足10个要补充
                foreach ($chartData['chart']['one_dimensional'] as $jname){
-                   if(count($tmpOneDimen)<20 && !in_array($jname,$tmpOneDimen)){
+                   if(count($tmpOneDimen)<10 && !in_array($jname,$tmpOneDimen)){
                        $tmpOneDimen[] = $jname;
                    }
                }
