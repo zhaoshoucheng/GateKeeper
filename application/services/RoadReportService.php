@@ -1312,6 +1312,12 @@ class RoadReportService extends BaseService{
             $juncNameMap[$j['name']] = $k;
         }
 
+        //排序
+        $imbalance = $this->sortSlice($imbalance);
+        $oversaturation = $this->sortSlice($oversaturation);
+        $spillover = $this->sortSlice($spillover);
+
+
         //初始化表格
         $initChartList = $this->initRoadAlarmChart($roadDetail,$morningRushTime,$eveningRushTime);
         $fillChartData = $this->fillRoadAlarmChart($initChartList,$imbalance,$oversaturation,$spillover,$juncNameMap);
@@ -1320,6 +1326,24 @@ class RoadReportService extends BaseService{
 
         return $fillChartData;
     }
+
+    //各项指标数组进行排序,并只保留最多10个
+    private function sortSlice($orimap){
+        $name = [];
+        $count=[];
+        foreach ($orimap as  $k=>$v){
+            $name[] = $k;
+            $count[] = count($v);
+        }
+        array_multisort($count,SORT_DESC,$name);
+        $newMap=[];
+        foreach ($count as $k => $v){
+            $newMap[$name[$k]] = $orimap[$name[$k]];
+        }
+        return $newMap;
+
+    }
+
 
     //干线协调相关代码
     public function queryRoadCoordination($city_id,$road_id,$startTime,$endTime,$morningRushTime,$eveningRushTime){
