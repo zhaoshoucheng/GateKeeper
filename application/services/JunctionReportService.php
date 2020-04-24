@@ -717,7 +717,7 @@ class JunctionReportService extends BaseService{
         $maxData = 0;
         //查找最高点
         for($j =12;$j<43;$j++){
-            if($maxFlowData['chart']['series'][0]['data'][$j] >= $maxData){
+            if($maxFlowData['chart']['series'][0]['data'][$j]['y'] >= $maxData){
                 $maxData = $maxFlowData['chart']['series'][0]['data'][$j]['y'];
                 $maxIdx = $j;
             }
@@ -743,6 +743,8 @@ class JunctionReportService extends BaseService{
         $maxRange=[];
         $maxRange[] = $maxFlowData['chart']['series'][0]['data'][$leftIdx]['x'];
         $maxRange[] = $maxFlowData['chart']['series'][0]['data'][$rightIdx]['x'];
+
+        $maxFlow = $maxFlowData['chart']['title'];
 
         return ["max_flow"=>$maxFlow,"max_range"=>$maxRange];
     }
@@ -781,10 +783,11 @@ class JunctionReportService extends BaseService{
         $leftIdx = 0;
         $rightIdx = 0;
         $minIdx = 0;
-        $minData = 0;
+        $minData = 999999;
         //查找最低点
         for($j =12;$j<43;$j++){
-            if($minFlowData['chart']['series'][0]['data'][$j] <= $minData){
+            $mdata = $minFlowData['chart']['series'][0]['data'][$j]['y'];
+            if($mdata >0 && $mdata <= $minData){
                 $minData = $minFlowData['chart']['series'][0]['data'][$j]['y'];
                 $minIdx = $j;
             }
@@ -792,7 +795,7 @@ class JunctionReportService extends BaseService{
         //从最低点向两侧寻找
         for($left = $minIdx;$left > 0;$left --){
             $dat = $minFlowData['chart']['series'][0]['data'][$left]['y'];
-            if($dat <= ($minData + ( $avg -$minData )/2 )){
+            if($dat > 0 && $dat <= ($minData + ( $avg -$minData )/2 )){
                 $leftIdx = $left;
             }else{
                 break;
@@ -801,7 +804,7 @@ class JunctionReportService extends BaseService{
         }
         for($right = $minIdx;$right < 48;$right ++){
             $dat = $minFlowData['chart']['series'][0]['data'][$right]['y'];
-            if($dat <= ($minData + ($avg - $minData )/2 )){
+            if($dat > 0 && $dat <= ($minData + ($avg - $minData )/2 )){
                 $rightIdx = $right;
             }else{
                 break;
@@ -811,6 +814,7 @@ class JunctionReportService extends BaseService{
         $minRange[] = $minFlowData['chart']['series'][0]['data'][$leftIdx]['x'];
         $minRange[] = $minFlowData['chart']['series'][0]['data'][$rightIdx]['x'];
 
+        $minFlow = $minFlowData['chart']['title'];
 
         return ["min_flow"=>$minFlow,"min_range"=>$minRange];
 
