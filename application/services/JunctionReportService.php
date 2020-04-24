@@ -692,6 +692,9 @@ class JunctionReportService extends BaseService{
             if(!isset($flowSumMap[$flowID])){
                 $flowSumMap[$flowID] = 0;
             }
+            if(!isset($zeroFlowMap[$flowID])){
+                $zeroFlowMap[$flowID] = 0;
+            }
             for ($i =12 ;$i<43 ;$i++){
                 $mdata = $v['chart']['series'][0]['data'][$i]['y'];
                 if($mdata == 0){
@@ -768,6 +771,9 @@ class JunctionReportService extends BaseService{
             $flowID = $v['logic_flow_id'];
             if(!isset($flowSumMap[$flowID])){
                 $flowSumMap[$flowID] = 0;
+            }
+            if(!isset($zeroFlowMap[$flowID])){
+                $zeroFlowMap[$flowID] = 0;
             }
             for ($i =12 ;$i<43 ;$i++){
                 $mdata = $v['chart']['series'][0]['data'][$i]['y'];
