@@ -88,7 +88,7 @@ class AreaReportService extends BaseService{
         }
 
         //本阶段pi
-        $stopDelay=0;
+
         $pi = $this->pi_model->getGroupJuncAvgPiWithDates($city_id,explode(",",$logic_junction_ids) ,$theDatelist,$this->createHours());
 
         //上阶段pi
@@ -107,10 +107,17 @@ class AreaReportService extends BaseService{
         }else{
             $conclusion="更加严重";
         }
+        if($mon == 0){
+            $mon="无变化";
+        }elseif ($mon >0){
+            $mon = "上升".$mon."%";
+        }else{
+            $mon = "下降".($mon*(-1))."%";
+        }
 
         $districts_name = implode('、', array_unique(array_column($junctions_info, 'district_name')));
 
-        $desc = sprintf($tpl, $city_info['city_name'], $districts_name,$juncLen,$datestr,$stopDelay,$stageType,$mon,$conclusion);
+        $desc = sprintf($tpl, $city_info['city_name'], $districts_name,$juncLen,$datestr,round($pi,2)."s",$stageType,$mon,$conclusion);
 
         return [
             'desc' => $desc,
