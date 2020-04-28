@@ -30,6 +30,80 @@ class RoadReportService extends BaseService{
         $this->dataService = new DataService();
     }
 
+    //济南定制化需求
+    public function introductionJN($params){
+        $tpl = "%s干线位于%s市%s，承担较大的交通压力，干线包含%s等重要路口。本次报告根据%s数据对该区域进行分析，整体PI为%s，与%s相比%s，%s";
+
+        $city_id = $params['city_id'];
+        $road_id = $params['road_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
+        $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
+        if($start_date == $end_date){
+            $datestr =  date('Y年m月d日', strtotime($start_date));
+        }
+
+        $city_info = $this->openCity_model->getCityInfo($city_id);
+//        $area_info = $this->area_model->getAreaInfo($area_id);
+        $road_info = $this->road_model->getRoadInfo($road_id);
+
+        $logic_junction_ids = $road_info['logic_junction_ids'];
+        $junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
+        $junctions_name = implode('、', array_column($junctions_info, 'name'));
+
+
+        $theDatelist = $this->getDateFromRange($start_date,$end_date);
+        if(count($theDatelist)==1){
+            $stageType="前一日";
+        }else if(count($theDatelist)==7){
+            $stageType="前一周";
+        }else if(count($theDatelist)<40){
+            $stageType="前一月";
+        }else{
+            $stageType="前一季";
+        }
+
+        $piInfo = $this->areaReportService->getJuncsPiCompare($city_id,$start_date,$end_date,$logic_junction_ids);
+
+        if($piInfo['last_pi'] > 0 ){
+            $mon = round(($piInfo['pi']-$piInfo['last_pi'])*100/$piInfo['last_pi'],2);
+        }else{
+            $mon = 100;
+        }
+        if($mon>=-10 && $mon<=10){
+            $conclusion="基本持平";
+        }else if($mon<-10){
+            $conclusion="得到缓解";
+        }else{
+            $conclusion="更加严重";
+        }
+        if($mon == 0){
+            $mon="无变化";
+        }elseif ($mon >0){
+            $mon = "上升".$mon."%";
+        }else{
+            $mon = "下降".($mon*(-1))."%";
+        }
+
+
+//        $desc = sprintf($tpl, $city_info['city_name'], $districts_name, $datestr,$piInfo['pi'],$stageType,$mon,$conclusion);
+
+        $desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, $datestr,$piInfo['pi'],$stageType,$mon,$conclusion);
+
+
+        $road_detail = $this->roadService->getRoadDetail([
+            'city_id' => $city_id,
+            'road_id' => $road_id,
+            'show_type' => 0,
+        ]);
+
+
+        return [
+            'desc' => $desc,
+            'road_info' => $road_detail,
+        ];
+    }
+
     public function introduction($params) {
     	$tpl = "%s干线位于%s市%s，承担较大的交通压力，干线包含%s等重要路口。本次报告根据%s数据对该干线进行分析。";
 

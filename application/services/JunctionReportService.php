@@ -21,7 +21,92 @@ class JunctionReportService extends BaseService{
         $this->load->model('pi_model');
 
         $this->reportService = new ReportService();
+        $this->areaReportService = new AreaReportService();
         $this->dataService = new DataService();
+    }
+    private function getDateFromRange($startdate, $enddate)
+    {
+        if ($startdate==$enddate){
+            return [$startdate];
+        }
+        $stimestamp = strtotime($startdate);
+        $etimestamp = strtotime($enddate);
+
+        // 计算日期段内有多少天
+        $days = ($etimestamp - $stimestamp) / 86400 + 1;
+        // 保存每天日期
+        $date = [];
+        for ($i = 0; $i < $days; $i++) {
+            $date[] = date('Y-m-d', $stimestamp + (86400 * $i));
+        }
+        return $date;
+    }
+
+    //济南定制化
+    public function introductionJN($params){
+        $tpl = "本次报告分析路口位于%s市%s。本次报告根据%s数据对该路口进行分析。整体PI为%s，与%s相比%s，%s";
+
+        $city_id = $params['city_id'];
+        $logic_junction_id = $params['logic_junction_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
+        $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
+        if($start_date == $end_date){
+            $datestr =  date('Y年m月d日', strtotime($start_date));
+        }
+
+        $city_info = $this->openCity_model->getCityInfo($city_id);
+        if (empty($city_info)) {
+
+        }
+
+        $junction_info = $this->waymap_model->getJunctionInfo($logic_junction_id);
+        if (empty($junction_info)) {
+
+        } else {
+            $junction_info = $junction_info[0];
+        }
+        $theDatelist = $this->getDateFromRange($start_date,$end_date);
+        if(count($theDatelist)==1){
+            $stageType="前一日";
+        }else if(count($theDatelist)==7){
+            $stageType="前一周";
+        }else if(count($theDatelist)<40){
+            $stageType="前一月";
+        }else{
+            $stageType="前一季";
+        }
+
+        $piInfo = $this->areaReportService->getJuncsPiCompare($city_id,$start_date,$end_date,[$logic_junction_id]);
+
+        if($piInfo['last_pi'] > 0 ){
+            $mon = round(($piInfo['pi']-$piInfo['last_pi'])*100/$piInfo['last_pi'],2);
+        }else{
+            $mon = 100;
+        }
+        if($mon>=-10 && $mon<=10){
+            $conclusion="基本持平";
+        }else if($mon<-10){
+            $conclusion="得到缓解";
+        }else{
+            $conclusion="更加严重";
+        }
+        if($mon == 0){
+            $mon="无变化";
+        }elseif ($mon >0){
+            $mon = "上升".$mon."%";
+        }else{
+            $mon = "下降".($mon*(-1))."%";
+        }
+
+
+        $desc = sprintf($tpl, $city_info['city_name'], $junction_info['district_name'], $datestr,$piInfo['pi'],$stageType,$mon,$conclusion);
+
+
+        return [
+            'desc' => $desc,
+            'junction_info' => $junction_info,
+        ];
     }
 
     public function introduction($params) {

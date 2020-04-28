@@ -59,8 +59,13 @@ class JunctionReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if($this->userapp == 'jinanits'){
+            $data = $this->junctionReportService->introductionJN($params);
+        }else{
+            $data = $this->junctionReportService->introduction($params);
+        }
 
-        $data = $this->junctionReportService->introduction($params);
+
         $this->response($data);
     }
 
