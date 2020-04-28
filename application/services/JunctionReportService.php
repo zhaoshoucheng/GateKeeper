@@ -21,7 +21,92 @@ class JunctionReportService extends BaseService{
         $this->load->model('pi_model');
 
         $this->reportService = new ReportService();
+        $this->areaReportService = new AreaReportService();
         $this->dataService = new DataService();
+    }
+    private function getDateFromRange($startdate, $enddate)
+    {
+        if ($startdate==$enddate){
+            return [$startdate];
+        }
+        $stimestamp = strtotime($startdate);
+        $etimestamp = strtotime($enddate);
+
+        // 计算日期段内有多少天
+        $days = ($etimestamp - $stimestamp) / 86400 + 1;
+        // 保存每天日期
+        $date = [];
+        for ($i = 0; $i < $days; $i++) {
+            $date[] = date('Y-m-d', $stimestamp + (86400 * $i));
+        }
+        return $date;
+    }
+
+    //济南定制化
+    public function introductionJN($params){
+        $tpl = "本次报告分析路口位于%s市%s。本次报告根据%s数据对该路口进行分析。整体PI为%s，与%s相比%s，%s";
+
+        $city_id = $params['city_id'];
+        $logic_junction_id = $params['logic_junction_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
+        $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
+        if($start_date == $end_date){
+            $datestr =  date('Y年m月d日', strtotime($start_date));
+        }
+
+        $city_info = $this->openCity_model->getCityInfo($city_id);
+        if (empty($city_info)) {
+
+        }
+
+        $junction_info = $this->waymap_model->getJunctionInfo($logic_junction_id);
+        if (empty($junction_info)) {
+
+        } else {
+            $junction_info = $junction_info[0];
+        }
+        $theDatelist = $this->getDateFromRange($start_date,$end_date);
+        if(count($theDatelist)==1){
+            $stageType="前一日";
+        }else if(count($theDatelist)==7){
+            $stageType="前一周";
+        }else if(count($theDatelist)<40){
+            $stageType="前一月";
+        }else{
+            $stageType="前一季";
+        }
+
+        $piInfo = $this->areaReportService->getJuncsPiCompare($city_id,$start_date,$end_date,[$logic_junction_id]);
+
+        if($piInfo['last_pi'] > 0 ){
+            $mon = round(($piInfo['pi']-$piInfo['last_pi'])*100/$piInfo['last_pi'],2);
+        }else{
+            $mon = 100;
+        }
+        if($mon>=-10 && $mon<=10){
+            $conclusion="基本持平";
+        }else if($mon<-10){
+            $conclusion="得到缓解";
+        }else{
+            $conclusion="更加严重";
+        }
+        if($mon == 0){
+            $mon="无变化";
+        }elseif ($mon >0){
+            $mon = "上升".$mon."%";
+        }else{
+            $mon = "下降".($mon*(-1))."%";
+        }
+
+
+        $desc = sprintf($tpl, $city_info['city_name'], $junction_info['district_name'], $datestr,$piInfo['pi'],$stageType,$mon,$conclusion);
+
+
+        return [
+            'desc' => $desc,
+            'junction_info' => $junction_info,
+        ];
     }
 
     public function introduction($params) {
@@ -676,51 +761,86 @@ class JunctionReportService extends BaseService{
         return $chartData;
     }
 
+    /*
+     * 选取最严重相位：用6:00-21:00的数据计算平均值，选取平均值最大的相位（速度选平均值最小，且用非0值算平均值）
+     * 选取最严重相位最堵的时段：a）找到此相位指标最大值以及对应的时间点T；b）从T开始向左/右（T-1/T+1）检索时段起点/终点；c）如果该时间点处于阈值之内，检索继续，否则结束检索；d）阈值的计算方法为最大值与平均值的差的50%。
+     * */
     private function queryMaxQuotaFlow($flowlist){
         if(count($flowlist) == 0){
             return false;
         }
-        //每个时间点的桶
-        $bucket=[];
+        //新算法: 计算06:00-21:00的和,找出最大的flow
+        $flowSumMap = [];
+        $zeroFlowMap = []; //记录0值点的个数,数据过少的flow过滤掉
         foreach ($flowlist as $f => $v){
-            foreach ($v['chart']['series'][0]['data'] as $s){
-                if(!isset($bucket[$s['x']])){
-                    $bucket[$s['x']] = [
-                        'flowname'=>"",
-                        'value'=> 0
-                    ];
+            $flowID = $v['logic_flow_id'];
+            if(!isset($flowSumMap[$flowID])){
+                $flowSumMap[$flowID] = 0;
+            }
+            if(!isset($zeroFlowMap[$flowID])){
+                $zeroFlowMap[$flowID] = 0;
+            }
+            for ($i =12 ;$i<43 ;$i++){
+                $mdata = $v['chart']['series'][0]['data'][$i]['y'];
+                if($mdata == 0){
+                    $zeroFlowMap[$flowID]++;
                 }
-                if ($s['y'] > $bucket[$s['x']]['value'] ){
-                    $bucket[$s['x']] = [
-                        'flowname'=>$v['chart']['title'],
-                        'value'=>$s['y']
-                    ];
-                }
+                $flowSumMap[$flowID] +=$mdata;
             }
         }
-        $count=[];
-        $maxRange=[];
-        $tempRange=[];
-        foreach ($bucket as $k=> $v){
-            if(!isset( $count[$v['flowname']])){
-                $count[$v['flowname']]=0;
+        $maxFlow = "";
+        $avg = 0;
+        foreach ($flowSumMap as $fid => $value){
+            if(isset($zeroFlowMap[$fid]) && $zeroFlowMap[$fid]>12){ //0值点过多的数据过滤掉
+                continue;
             }
-            $count[$v['flowname']]+=1;
+            if($value/21 >= $avg){
+                $maxFlow = $fid;
+                $avg = $value/21;
+            }
         }
-        $maxFlow = array_keys($count, max($count))[0];
-        foreach ($bucket as $k=>$v){
-            if($v['flowname'] == $maxFlow){
-                $tempRange[] = $k;
+        $maxFlowData = [];
+        foreach ($flowlist as $f => $v){
+            if($v['logic_flow_id'] == $maxFlow){
+                $maxFlowData = $v;
+                break;
+            }
+        }
+        //查找时段
+        $leftIdx = 0;
+        $rightIdx = 0;
+        $maxIdx = 0;
+        $maxData = 0;
+        //查找最高点
+        for($j =12;$j<43;$j++){
+            if($maxFlowData['chart']['series'][0]['data'][$j]['y'] >= $maxData){
+                $maxData = $maxFlowData['chart']['series'][0]['data'][$j]['y'];
+                $maxIdx = $j;
+            }
+        }
+        //从最高点向两侧寻找
+        for($left = $maxIdx;$left > 0;$left --){
+            $dat = $maxFlowData['chart']['series'][0]['data'][$left]['y'];
+            if($dat >= ($maxData - ($maxData - $avg)/2 )){
+                $leftIdx = $left;
             }else{
-                if(count($tempRange)>count($maxRange)) {
-                    $maxRange = $tempRange;
-                    $tempRange=[];
-                }
+                break;
+            }
+
+        }
+        for($right = $maxIdx;$right < 48;$right ++){
+            $dat = $maxFlowData['chart']['series'][0]['data'][$right]['y'];
+            if($dat >= ($maxData - ($maxData - $avg)/2 )){
+                $rightIdx = $right;
+            }else{
+                break;
             }
         }
-        if(count($tempRange)>0 && count($maxRange)==0){
-            $maxRange = $tempRange;
-        }
+        $maxRange=[];
+        $maxRange[] = $maxFlowData['chart']['series'][0]['data'][$leftIdx]['x'];
+        $maxRange[] = $maxFlowData['chart']['series'][0]['data'][$rightIdx]['x'];
+
+        $maxFlow = $maxFlowData['chart']['title'];
 
         return ["max_flow"=>$maxFlow,"max_range"=>$maxRange];
     }
@@ -729,48 +849,82 @@ class JunctionReportService extends BaseService{
         if(count($flowlist) == 0){
             return false;
         }
-        $bucket=[];
+        //新算法: 计算06:00-21:00的和,找出最小的flow
+        $flowSumMap = [];
+        $zeroFlowMap = []; //记录0值点的个数,数据过少的flow过滤掉
         foreach ($flowlist as $f => $v){
-            foreach ($v['chart']['series'][0]['data'] as $s){
-                if(!isset($bucket[$s['x']])){
-                    $bucket[$s['x']] = [
-                        'flowname'=>"",
-                        'value'=>999999
-                    ];
+            $flowID = $v['logic_flow_id'];
+            if(!isset($flowSumMap[$flowID])){
+                $flowSumMap[$flowID] = 0;
+            }
+            if(!isset($zeroFlowMap[$flowID])){
+                $zeroFlowMap[$flowID] = 0;
+            }
+            for ($i =12 ;$i<43 ;$i++){
+                $mdata = $v['chart']['series'][0]['data'][$i]['y'];
+                if($mdata == 0){
+                    $zeroFlowMap[$flowID]++;
                 }
-                if ($s['y'] < $bucket[$s['x']]['value']){
-                    $bucket[$s['x']] = [
-                        'flowname'=>$v['chart']['title'],
-                        'value'=>$s['y']
-                    ];
-                }
+                $flowSumMap[$flowID] +=$mdata;
             }
         }
-        $count=[];
-        $minRange=[];
-        $tempRange=[];
-        foreach ($bucket as $k=> $v){
-            if(!isset( $count[$v['flowname']])){
-                $count[$v['flowname']]=0;
+        $minFlow = "";
+        $avg = 0;
+        foreach ($flowSumMap as $fid => $value){
+            if(isset($zeroFlowMap[$fid]) && $zeroFlowMap[$fid]>12){ //0值点过多的数据过滤掉
+                continue;
             }
-            $count[$v['flowname']]+=1;
+            if($value/21 >= $avg){
+                $minFlow = $fid;
+                $avg = $value/21;
+            }
         }
-        $mixFlow = array_keys($count, min($count))[0];
-        foreach ($bucket as $k=>$v){
-            if($v['flowname'] == $mixFlow){
-                $tempRange[] = $k;
+        $minFlowData = [];
+        foreach ($flowlist as $f => $v){
+            if($v['logic_flow_id'] == $minFlow){
+                $minFlowData = $v;
+                break;
+            }
+        }
+        //查找时段
+        $leftIdx = 0;
+        $rightIdx = 0;
+        $minIdx = 0;
+        $minData = 99999;
+        //查找最低非0的点
+        for($j =12;$j<43;$j++){
+            $mdata = $minFlowData['chart']['series'][0]['data'][$j]['y'];
+            if($mdata >0 && $mdata <= $minData){
+                $minData = $mdata;
+                $minIdx = $j;
+            }
+        }
+        //从最高点向两侧寻找
+        for($left = $minIdx;$left > 0;$left --){
+            $dat = $minFlowData['chart']['series'][0]['data'][$left]['y'];
+            if($dat >0 && $dat <= ($minData + ($avg-$minData )/2 )){
+                $leftIdx = $left;
             }else{
-                if(count($tempRange)>count($minRange)) {
-                    $minRange = $tempRange;
-                    $tempRange=[];
-                }
+                break;
+            }
+
+        }
+        for($right = $minIdx;$right < 48;$right ++){
+            $dat = $minFlowData['chart']['series'][0]['data'][$right]['y'];
+            if($dat >0 && $dat <= ($minData + ($avg-$minData )/2 )){
+                $rightIdx = $right;
+            }else{
+                break;
             }
         }
-        if(count($tempRange)>0 && count($minRange)==0){
-            $minRange = $tempRange;
-        }
+        $minRange=[];
+        $minRange[] = $minFlowData['chart']['series'][0]['data'][$leftIdx]['x'];
+        $minRange[] = $minFlowData['chart']['series'][0]['data'][$rightIdx]['x'];
 
-        return ["min_flow"=>$mixFlow,"min_range"=>$minRange];
+        $minFlow = $minFlowData['chart']['title'];
+
+
+        return ["min_flow"=>$minFlow,"min_range"=>$minRange];
 
     }
 

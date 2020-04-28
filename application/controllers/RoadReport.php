@@ -19,6 +19,7 @@ class RoadReport extends MY_Controller
         $this->roadReportService = new RoadReportService();
     }
 
+
     public function introduction() {
         $params = $this->input->get(null, true);
         $this->get_validate([
@@ -33,8 +34,13 @@ class RoadReport extends MY_Controller
 //        if($params['city_id'] == 12){
 //            $params['userapp']  = 'jinanits';
 //        }
+        if($this->userapp == 'jinanits'){
+            $data = $this->roadReportService->introductionJN($params);
 
-        $data = $this->roadReportService->introduction($params);
+        }else{
+            $data = $this->roadReportService->introduction($params);
+
+        }
         $this->response($data);
     }
     public function queryRoadDataComparison(){

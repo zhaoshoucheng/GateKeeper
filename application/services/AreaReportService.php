@@ -30,6 +30,184 @@ class AreaReportService extends BaseService{
         $this->roadReportService = new RoadReportService();
     }
 
+    //获取两个阶段的pi数据
+    public function getJuncsPiCompare($cityID,$juncs,$startTime,$endTime){
+
+        $theDatelist = $this->getDateFromRange($startTime,$endTime);
+        $pi = $this->pi_model->getGroupJuncAvgPiWithDates($cityID,$juncs ,$theDatelist,$this->createHours());
+
+        //上阶段pi
+        $laststage = $this->getLastStage($startTime,$endTime);
+        $lastDatelist = $this->getDateFromRange($laststage[0],$laststage[1]);
+        $lastpi = $this->pi_model->getGroupJuncAvgPiWithDates($cityID,$juncs ,$lastDatelist,$this->createHours());
+
+        return [
+            'pi'=>$pi,
+            'last_pi'=>$lastpi,
+        ];
+
+    }
+
+    public function getLastStage($startTime,$endTime){
+
+        $len = $this->getDateFromRange($startTime,$endTime);
+        $nstart= strtotime($startTime) - 3600*24*count($len);
+        $nend=strtotime($endTime) - 3600*24*count($len);
+
+        return [date("Y-m-d",$nstart),date("Y-m-d",$nend)];
+
+    }
+
+    //南京定制版本
+    public function introductionNJ($params){
+        $city_id = $params['city_id'];
+        $area_id = $params['area_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
+        $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
+        if($start_date == $end_date){
+            $datestr =  date('Y年m月d日', strtotime($start_date));
+        }
+//        本次报告区域为XX市，分析区域包含XX区、XX区等行政区域，共XXX个路口。本次报告根据20XX年XX月XX日～XX月XX日数据该区域进行分析，整体延误指数为30.55s，与前一周相比无变化／上升12%／下降12%，基本持平/更加严重/得到缓解。
+        $tpl = "本次报告区域为%s市，分析区域包含%s区等行政区域，共%s个路口。本次报告根据%s数据对该区域进行分析，整体交叉口延误指数为%s，与%s相比%s，%s";
+
+
+        $city_info = $this->openCity_model->getCityInfo($city_id);
+        if (empty($city_info)) {
+
+        }
+
+        $area_info = $this->area_model->getAreaInfo($area_id);
+        if (empty($area_info)) {
+
+        }
+
+        $area_detail = $this->areaService->getAreaDetail([
+            'city_id' => $city_id,
+            'area_id' => $area_id,
+        ]);
+        $logic_junction_ids = implode(',', array_column($area_detail['junction_list'], 'logic_junction_id'));
+        $juncLen = count(explode(",",$logic_junction_ids));
+        $junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
+
+
+        $theDatelist = $this->getDateFromRange($start_date,$end_date);
+        if(count($theDatelist)==1){
+            $stageType="前一日";
+        }else if(count($theDatelist)==7){
+            $stageType="前一周";
+        }else if(count($theDatelist)<40){
+            $stageType="前一月";
+        }else{
+            $stageType="前一季";
+        }
+
+        //本阶段pi
+
+        $pi = $this->pi_model->getGroupJuncAvgPiWithDates($city_id,explode(",",$logic_junction_ids) ,$theDatelist,$this->createHours());
+
+        //上阶段pi
+        $laststage = $this->getLastStage($start_date,$end_date);
+        $lastDatelist = $this->getDateFromRange($laststage[0],$laststage[1]);
+        $lastpi = $this->pi_model->getGroupJuncAvgPiWithDates($city_id,explode(",",$logic_junction_ids) ,$lastDatelist,$this->createHours());
+        if($lastpi > 0 ){
+            $mon = round(($pi-$lastpi)*100/$lastpi,2);
+        }else{
+            $mon = 100;
+        }
+        if($mon>=-10 && $mon<=10){
+            $conclusion="基本持平";
+        }else if($mon<-10){
+            $conclusion="得到缓解";
+        }else{
+            $conclusion="更加严重";
+        }
+        if($mon == 0){
+            $mon="无变化";
+        }elseif ($mon >0){
+            $mon = "上升".$mon."%";
+        }else{
+            $mon = "下降".($mon*(-1))."%";
+        }
+
+        $districts_name = implode('、', array_unique(array_column($junctions_info, 'district_name')));
+
+        $desc = sprintf($tpl, $city_info['city_name'], $districts_name,$juncLen,$datestr,round($pi,2)."s",$stageType,$mon,$conclusion);
+
+        return [
+            'desc' => $desc,
+            'area_info' => $area_detail,
+        ];
+    }
+
+    //济南定制化需求
+    public function introductionJN($params){
+
+        $tpl = "本次报告区域为%s市，分析区域包含%s区等行政区域。本次报告根据%s数据对该区域进行分析，整体PI为%s，与%s相比%s，%s";
+
+        $city_id = $params['city_id'];
+        $area_id = $params['area_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
+        $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
+        if($start_date == $end_date){
+            $datestr =  date('Y年m月d日', strtotime($start_date));
+        }
+
+        $city_info = $this->openCity_model->getCityInfo($city_id);
+//        $area_info = $this->area_model->getAreaInfo($area_id);
+        $area_detail = $this->areaService->getAreaDetail([
+            'city_id' => $city_id,
+            'area_id' => $area_id,
+        ]);
+        $logic_junction_ids = implode(',', array_column($area_detail['junction_list'], 'logic_junction_id'));
+        $junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
+        $districts_name = implode('、', array_unique(array_column($junctions_info, 'district_name')));
+
+
+        $theDatelist = $this->getDateFromRange($start_date,$end_date);
+        if(count($theDatelist)==1){
+            $stageType="前一日";
+        }else if(count($theDatelist)==7){
+            $stageType="前一周";
+        }else if(count($theDatelist)<40){
+            $stageType="前一月";
+        }else{
+            $stageType="前一季";
+        }
+
+        $piInfo = $this->getJuncsPiCompare($city_id,$start_date,$end_date,$logic_junction_ids);
+
+        if($piInfo['last_pi'] > 0 ){
+            $mon = round(($piInfo['pi']-$piInfo['last_pi'])*100/$piInfo['last_pi'],2);
+        }else{
+            $mon = 100;
+        }
+        if($mon>=-10 && $mon<=10){
+            $conclusion="基本持平";
+        }else if($mon<-10){
+            $conclusion="得到缓解";
+        }else{
+            $conclusion="更加严重";
+        }
+        if($mon == 0){
+            $mon="无变化";
+        }elseif ($mon >0){
+            $mon = "上升".$mon."%";
+        }else{
+            $mon = "下降".($mon*(-1))."%";
+        }
+
+
+        $desc = sprintf($tpl, $city_info['city_name'], $districts_name, $datestr,$piInfo['pi'],$stageType,$mon,$conclusion);
+
+
+        return [
+            'desc' => $desc,
+            'area_info' => $area_detail,
+        ];
+    }
+
     public function introduction($params) {
 
         $city_id = $params['city_id'];
@@ -168,7 +346,7 @@ class AreaReportService extends BaseService{
     }
 
     public function queryAreaDataComparisonNJ($params) {
-        $tpl = "上图展示了研究区域总体运行状态（PI）%s与%s的对⽐，%s该区域拥堵程度与%s相比%s。";
+        $tpl = "上图展示了研究区域总体运行状态（交叉口延误指数）%s与%s的对⽐，%s该区域拥堵程度与%s相比%s。";
 
         $city_id = intval($params['city_id']);
         $area_id = $params['area_id'];
@@ -713,6 +891,9 @@ class AreaReportService extends BaseService{
 
     private function getDateFromRange($startdate, $enddate)
     {
+        if ($startdate==$enddate){
+            return [$startdate];
+        }
         $stimestamp = strtotime($startdate);
         $etimestamp = strtotime($enddate);
 
@@ -808,7 +989,7 @@ class AreaReportService extends BaseService{
         return $fillChartData;
     }
 
-    //各项指标数组进行排序
+    //各项指标数组进行排序,并保留最多10个
     private function sortSlice($orimap){
         $name = [];
         $count=[];
@@ -818,8 +999,10 @@ class AreaReportService extends BaseService{
         }
         array_multisort($count,SORT_DESC,$name);
         $newMap=[];
+
         foreach ($count as $k => $v){
             $newMap[$name[$k]] = $orimap[$name[$k]];
+
         }
         return $newMap;
 
