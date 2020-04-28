@@ -176,7 +176,7 @@ class AreaReportService extends BaseService{
             $stageType="前一季";
         }
 
-        $piInfo = $this->areaReportService->getJuncsPiCompare($city_id,$start_date,$end_date,$logic_junction_ids);
+        $piInfo = $this->getJuncsPiCompare($city_id,$start_date,$end_date,$logic_junction_ids);
 
         if($piInfo['last_pi'] > 0 ){
             $mon = round(($piInfo['pi']-$piInfo['last_pi'])*100/$piInfo['last_pi'],2);
