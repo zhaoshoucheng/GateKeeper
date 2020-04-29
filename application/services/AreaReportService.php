@@ -907,6 +907,13 @@ class AreaReportService extends BaseService{
         return $date;
     }
 
+    //过滤工作日或周末
+    private function skipDate($dateList,$dateType){
+        if($dateType== 0){
+            return $dateList;
+        }
+    }
+
     private function getTimeFromRange($st,$et,$step){
         $stimestamp = strtotime($st);
         $etimestamp = strtotime($et);
@@ -1150,6 +1157,137 @@ class AreaReportService extends BaseService{
         $taskID = $ret[0]['task_id'];
 
         return ['task_id'=>$taskID,'date'=>$date];
+    }
+
+    //区域pi等级统计结果
+    public function piLevelStatistics($cityID,$areaID,$startDate,$endDate){
+
+        //查询区域内全部路口
+        $area_detail = $this->areaService->getAreaDetail([
+            'city_id' => $cityID,
+            'area_id' => $areaID,
+        ]);
+
+        $junctionList =array_column($area_detail['junction_list'], 'logic_junction_id');
+
+        $theDatelist = $this->getDateFromRange($startDate,$endDate);
+
+        //查询本周期区域内全天pi数据
+        $piDatas = $this->pi_model->getJunctionsPiWithDatesHours($cityID, $junctionList, $theDatelist,$this->reportService->getHoursFromRange("00:00","23:00"));
+        $piLevelMap=['A'=>0,'B'=>0,'C'=>0,'D'=>0,'E'=>0];
+        foreach ($piDatas as $pid){
+            $piLevelMap[$this->pi_model->getPIlevel($pid['pi'])]++;
+        }
+
+        //查询上个周期区域内全天pi数据
+        $laststage = $this->getLastStage($startDate,$endDate);
+        $theLastDatelist = $this->getDateFromRange($laststage[0],$laststage[1]);
+        $lastPiDatas = $this->pi_model->getJunctionsPiWithDatesHours($cityID, $junctionList, $theLastDatelist,$this->reportService->getHoursFromRange("00:00","23:00"));
+        $lastPiLevelMap=['A'=>0,'B'=>0,'C'=>0,'D'=>0,'E'=>0];
+        foreach ($lastPiDatas as $pid){
+            $lastPiLevelMap[$this->pi_model->getPIlevel($pid['pi'])]++;
+        }
+
+        return [
+            ['level'=>"A","count"=>$piLevelMap['A'],"percent"=>$piLevelMap['A']/count($junctionList),"mon"=>0.2],
+            ['level'=>"B","count"=>$piLevelMap['B'],"percent"=>$piLevelMap['B']/count($junctionList),"mon"=>0.2],
+            ['level'=>"C","count"=>$piLevelMap['C'],"percent"=>$piLevelMap['C']/count($junctionList),"mon"=>0.2],
+            ['level'=>"D","count"=>$piLevelMap['D'],"percent"=>$piLevelMap['D']/count($junctionList),"mon"=>0.2],
+            ['level'=>"E","count"=>$piLevelMap['E'],"percent"=>$piLevelMap['E']/count($junctionList),"mon"=>0.2],
+        ];
+    }
+
+    public function piLevelTop5($cityID,$areaID,$startDate,$endDate){
+
+        //查询区域内全部路口
+        $area_detail = $this->areaService->getAreaDetail([
+            'city_id' => $cityID,
+            'area_id' => $areaID,
+        ]);
+
+        $junctionList =array_column($area_detail['junction_list'], 'logic_junction_id');
+
+        //查询早晚高峰
+        $morning_peek = $this->reportService->getMorningPeekRange($cityID, $junctionList, $this->reportService->getDatesFromRange($startDate, $endDate));
+        // print_r($morning_peek);exit;
+        $morning_peek_hours = $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']);
+        $evening_peek = $this->reportService->getEveningPeekRange($cityID, $junctionList, $this->reportService->getDatesFromRange($startDate, $endDate));
+        $evening_peek_hours = $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']);
+//        $peek_hours = array_merge($morning_peek_hours, $evening_peek_hours);
+
+
+        $morningChartTop=["A"=>[],"B"=>[],"C"=>[],"D"=>[],"E"=>[]];
+        $eveningChartTop=["A"=>[],"B"=>[],"C"=>[],"D"=>[],"E"=>[]];
+        $alldayChartTop=["A"=>[],"B"=>[],"C"=>[],"D"=>[],"E"=>[]];
+        //查询本周期区域内早高峰pi数据
+        $morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($cityID, $junctionList, $this->reportService->getDatesFromRange($startDate, $endDate), $morning_peek_hours);
+        usort($morning_pi_data, function($a, $b) {
+            return $a['pi'] > $b['pi'] ? -1 : 1;
+        });
+        foreach ($morning_pi_data as $md){
+            if(count($morningChartTop["A"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "A"){
+                $morningChartTop["A"][] = $md['logic_junction_id'];
+            }elseif (count($morningChartTop["B"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "B"){
+                $morningChartTop["B"][] = $md['logic_junction_id'];
+            }elseif (count($morningChartTop["C"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "C"){
+                $morningChartTop["C"][] = $md['logic_junction_id'];
+            }elseif (count($morningChartTop["D"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "D"){
+                $morningChartTop["D"][] = $md['logic_junction_id'];
+            }elseif (count($morningChartTop["E"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "E"){
+                $morningChartTop["E"][] = $md['logic_junction_id'];
+            }
+
+        }
+
+
+        //查询本周期区域内早高峰pi数据
+        $evening_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($cityID, $junctionList, $this->reportService->getDatesFromRange($startDate, $endDate), $evening_peek_hours);
+        usort($evening_pi_data, function($a, $b) {
+            return $a['pi'] > $b['pi'] ? -1 : 1;
+        });
+
+        foreach ($evening_pi_data as $md){
+            if(count($eveningChartTop["A"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "A"){
+                $eveningChartTop["A"][] = $md['logic_junction_id'];
+            }elseif (count($eveningChartTop["B"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "B"){
+                $eveningChartTop["B"][] = $md['logic_junction_id'];
+            }elseif (count($eveningChartTop["C"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "C"){
+                $eveningChartTop["C"][] = $md['logic_junction_id'];
+            }elseif (count($eveningChartTop["D"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "D"){
+                $eveningChartTop["D"][] = $md['logic_junction_id'];
+            }elseif (count($morningChartTop["E"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "E"){
+                $eveningChartTop["E"][] = $md['logic_junction_id'];
+            }
+
+        }
+
+        $allday_peek_hours =  $this->reportService->getHoursFromRange("00:00", "23:30");
+        $allday_pi_data  = $this->pi_model->getJunctionsPiWithDatesHours($cityID, $junctionList, $this->reportService->getDatesFromRange($startDate, $endDate), $allday_peek_hours);
+        usort($allday_pi_data, function($a, $b) {
+            return $a['pi'] > $b['pi'] ? -1 : 1;
+        });
+
+        foreach ($allday_pi_data as $md){
+            if(count($alldayChartTop["A"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "A"){
+                $alldayChartTop["A"][] = $md['logic_junction_id'];
+            }elseif (count($alldayChartTop["B"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "B"){
+                $alldayChartTop["B"][] = $md['logic_junction_id'];
+            }elseif (count($alldayChartTop["C"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "C"){
+                $alldayChartTop["C"][] = $md['logic_junction_id'];
+            }elseif (count($alldayChartTop["D"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "D"){
+                $alldayChartTop["D"][] = $md['logic_junction_id'];
+            }elseif (count($alldayChartTop["E"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "E"){
+                $alldayChartTop["E"][] = $md['logic_junction_id'];
+            }
+
+        }
+
+        return [
+            'morning_chart_top'=>$morningChartTop,
+            'evening_chart_top'=>$eveningChartTop,
+            'allday_chart_top'=>$alldayChartTop,
+        ];
+
 
     }
 
