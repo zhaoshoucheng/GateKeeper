@@ -73,14 +73,10 @@ class AreaReportService extends BaseService{
 
 
         $city_info = $this->openCity_model->getCityInfo($city_id);
-        if (empty($city_info)) {
 
-        }
 
-        $area_info = $this->area_model->getAreaInfo($area_id);
-        if (empty($area_info)) {
+//        $area_info = $this->area_model->getAreaInfo($area_id);
 
-        }
 
         $area_detail = $this->areaService->getAreaDetail([
             'city_id' => $city_id,
@@ -92,6 +88,8 @@ class AreaReportService extends BaseService{
 
 
         $theDatelist = $this->getDateFromRange($start_date,$end_date);
+        $theDatelist = $this->reportService->skipDate($theDatelist,$params['date_type']);
+
         if(count($theDatelist)==1){
             $stageType="前一日";
         }else if(count($theDatelist)==7){
@@ -265,15 +263,7 @@ class AreaReportService extends BaseService{
         $start_date = $params['start_date'];
         $end_date = $params['end_date'];
 
-        // $city_info = $this->openCity_model->getCityInfo($city_id);
-        // if (empty($city_info)) {
 
-        // }
-
-        // $area_info = $this->area_model->getAreaInfo($area_id);
-        // if (empty($area_info)) {
-
-        // }
 
         $area_detail = $this->areaService->getAreaDetail([
             'city_id' => $city_id,
@@ -286,16 +276,25 @@ class AreaReportService extends BaseService{
         $last_start_date = $last_report_date['start_date'];
         $last_end_date = $last_report_date['end_date'];
 
-    	$now_data = $this->dataService->call("/report/GetIndex", [
+
+
+        $theDatelist = $this->reportService->getDatesFromRange($start_date,$end_date);
+        $theDatelist = $this->reportService->skipDate($theDatelist,$params['date_type']);
+
+        $lastDatelist = $this->reportService->getDatesFromRange($last_start_date,$last_end_date);
+        $lastDatelist = $this->reportService->skipDate($lastDatelist,$params['date_type']);
+
+
+        $now_data = $this->dataService->call("/report/GetIndex", [
     		'city_id' => $city_id,
-    		'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
+    		'dates' => $theDatelist,
     		'logic_junction_ids' => !empty($logic_junction_ids) ? explode(',', $logic_junction_ids): [],
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
             "group_by" => "hour",
     	], "POST", 'json');
     	$last_data = $this->dataService->call("/report/GetIndex", [
     		'city_id' => $city_id,
-    		'dates' => $this->reportService->getDatesFromRange($last_start_date, $last_end_date),
+    		'dates' => $lastDatelist,
     		'logic_junction_ids' => !empty($logic_junction_ids) ? explode(',', $logic_junction_ids): [],
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
             "group_by" => "hour",
@@ -353,15 +352,7 @@ class AreaReportService extends BaseService{
         $start_date = $params['start_date'];
         $end_date = $params['end_date'];
 
-        // $city_info = $this->openCity_model->getCityInfo($city_id);
-        // if (empty($city_info)) {
 
-        // }
-
-        // $area_info = $this->area_model->getAreaInfo($area_id);
-        // if (empty($area_info)) {
-
-        // }
 
         $area_detail = $this->areaService->getAreaDetail([
             'city_id' => $city_id,
@@ -374,11 +365,16 @@ class AreaReportService extends BaseService{
         $last_start_date = $last_report_date['start_date'];
         $last_end_date = $last_report_date['end_date'];
 
-        $now_data = $this->pi_model->getJunctionsPiByHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+        $theDatelist = $this->reportService->getDatesFromRange($start_date, $end_date);
+        $theDatelist = $this->reportService->skipDate($theDatelist,$params['date_type']);
+        $now_data = $this->pi_model->getJunctionsPiByHours($city_id, explode(',', $logic_junction_ids), $theDatelist);
         usort($now_data, function($a, $b) {
             return ($a['hour'] < $b['hour']) ? -1 : 1;
         });
-        $last_data = $this->pi_model->getJunctionsPiByHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($last_start_date, $last_end_date));
+        $lastDatelist = $this->reportService->getDatesFromRange($last_start_date, $last_end_date);
+        $lastDatelist = $this->reportService->skipDate($lastDatelist,$params['date_type']);
+
+        $last_data = $this->pi_model->getJunctionsPiByHours($city_id, explode(',', $logic_junction_ids), $lastDatelist);
         usort($last_data, function($a, $b) {
             return ($a['hour'] < $b['hour']) ? -1 : 1;
         });
@@ -426,15 +422,6 @@ class AreaReportService extends BaseService{
         $start_date = $params['start_date'];
         $end_date = $params['end_date'];
 
-        // $city_info = $this->openCity_model->getCityInfo($city_id);
-        // if (empty($city_info)) {
-
-        // }
-
-        // $area_info = $this->area_model->getAreaInfo($area_id);
-        // if (empty($area_info)) {
-
-        // }
 
         $area_detail = $this->areaService->getAreaDetail([
             'city_id' => $city_id,
@@ -447,15 +434,22 @@ class AreaReportService extends BaseService{
         $last_start_date = $last_report_date['start_date'];
         $last_end_date = $last_report_date['end_date'];
 
-        $morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+        $theDatelist = $this->reportService->getDatesFromRange($start_date, $end_date);
+        $theDatelist = $this->reportService->skipDate($theDatelist,$params['date_type']);
+
+        $lastDatelist = $this->reportService->getDatesFromRange($last_start_date, $last_end_date);
+        $lastDatelist = $this->reportService->skipDate($lastDatelist,$params['date_type']);
+
+        $morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
         $morning_peek_hours = $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']);
-        $evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+
+        $evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
         $evening_peek_hours = $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']);
         $peek_hours = array_merge($morning_peek_hours, $evening_peek_hours);
 
         $now_data = $this->dataService->call("/report/GetIndex", [
             'city_id' => $city_id,
-            'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
+            'dates' => $theDatelist,
             'logic_junction_ids' => explode(',', $logic_junction_ids),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(stop_time_cycle * traj_count) AS stop_time_cycle, sum(speed * traj_count) AS speed, sum(traj_count) as traj_count",
             "group_by" => "hour",
@@ -467,7 +461,7 @@ class AreaReportService extends BaseService{
 
         $last_data = $this->dataService->call("/report/GetIndex", [
             'city_id' => $city_id,
-            'dates' => $this->reportService->getDatesFromRange($last_start_date, $last_end_date),
+            'dates' => $lastDatelist,
             'logic_junction_ids' => explode(',', $logic_junction_ids),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(stop_time_cycle * traj_count) AS stop_time_cycle, sum(speed * traj_count) AS speed, sum(traj_count) as traj_count",
             "group_by" => "hour",
@@ -604,15 +598,7 @@ class AreaReportService extends BaseService{
         $start_date = $params['start_date'];
         $end_date = $params['end_date'];
 
-        // $city_info = $this->openCity_model->getCityInfo($city_id);
-        // if (empty($city_info)) {
 
-        // }
-
-        // $area_info = $this->area_model->getAreaInfo($area_id);
-        // if (empty($area_info)) {
-
-        // }
 
         $area_detail = $this->areaService->getAreaDetail([
             'city_id' => $city_id,
@@ -634,17 +620,23 @@ class AreaReportService extends BaseService{
         $last_start_date = $last_report_date['start_date'];
         $last_end_date = $last_report_date['end_date'];
 
-        $morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
-        $evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+        $theDatelist = $this->reportService->getDatesFromRange($start_date,$end_date);
+        $theDatelist = $this->reportService->skipDate($theDatelist,$params['date_type']);
+
+        $lastDatelist = $this->reportService->getDatesFromRange($last_start_date,$last_end_date);
+        $lastDatelist = $this->reportService->skipDate($lastDatelist,$params['date_type']);
+
+        $morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
+        $evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
         // var_dump($this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
         // var_dump($this->reportService->getHoursFromRange($evening_peek['start_hour'], $morning_peek['end_hour']));
 
-        $morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date), $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
+        $morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $theDatelist, $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
         usort($morning_pi_data, function($a, $b) {
             return $a['pi'] > $b['pi'] ? -1 : 1;
         });
         $morning_pi_data = array_slice($morning_pi_data, 0, 20);
-        $morning_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($last_start_date, $last_end_date), $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
+        $morning_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $lastDatelist, $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
         // print_r($morning_last_pi_data);
         $morning_last_pi_data_rank = [];
         for ($i = 0; $i < count($morning_last_pi_data); $i++) {
@@ -652,7 +644,7 @@ class AreaReportService extends BaseService{
         }
         $morning_data = $this->dataService->call("/report/GetIndex", [
             'city_id' => $city_id,
-            'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
+            'dates' => $theDatelist,
             'logic_junction_ids' => array_column($morning_pi_data, 'logic_junction_id'),
             'hours' => $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(stop_time_cycle * traj_count) AS stop_time_cycle, sum(speed * traj_count) AS speed, sum(traj_count) as traj_count",
@@ -667,12 +659,12 @@ class AreaReportService extends BaseService{
             ];
         }, $morning_data[2]);
 
-        $evening_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date), $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
+        $evening_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $theDatelist, $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
         usort($evening_pi_data, function($a, $b) {
             return $a['pi'] > $b['pi'] ? -1 : 1;
         });
         $evening_pi_data = array_slice($evening_pi_data, 0, 20);
-        $evening_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($last_start_date, $last_end_date), $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
+        $evening_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $lastDatelist, $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
         // print_r($evening_last_pi_data);
         $evening_last_pi_data_rank = [];
         for ($i = 0; $i < count($evening_last_pi_data); $i++) {
@@ -680,7 +672,7 @@ class AreaReportService extends BaseService{
         }
         $evening_data = $this->dataService->call("/report/GetIndex", [
             'city_id' => $city_id,
-            'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
+            'dates' => $theDatelist,
             'logic_junction_ids' => array_column($evening_pi_data, 'logic_junction_id'),
             'hours' => $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(stop_time_cycle * traj_count) AS stop_time_cycle, sum(speed * traj_count) AS speed, sum(traj_count) as traj_count",
@@ -735,15 +727,7 @@ class AreaReportService extends BaseService{
         $start_date = $params['start_date'];
         $end_date = $params['end_date'];
 
-        // $city_info = $this->openCity_model->getCityInfo($city_id);
-        // if (empty($city_info)) {
 
-        // }
-
-        // $area_info = $this->area_model->getAreaInfo($area_id);
-        // if (empty($area_info)) {
-
-        // }
 
         $area_detail = $this->areaService->getAreaDetail([
             'city_id' => $city_id,
@@ -760,12 +744,17 @@ class AreaReportService extends BaseService{
             $junctions_map[$item['logic_junction_id']] = $item;
         }, $junctions_info);
 
-        $morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
-        $evenint_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $this->reportService->getDatesFromRange($start_date, $end_date));
+        $theDatelist = $this->reportService->getDatesFromRange($start_date,$end_date);
+        $theDatelist = $this->reportService->skipDate($theDatelist,$params['date_type']);
+
+
+
+        $morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
+        $evenint_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
 
     	$morning_data = $this->dataService->call("/report/GetIndex", [
     		'city_id' => $city_id,
-    		'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
+    		'dates' => $theDatelist,
     		'logic_junction_ids' => !empty($logic_junction_ids)?explode(',', $logic_junction_ids):[],
     		'hours' => $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
@@ -773,7 +762,7 @@ class AreaReportService extends BaseService{
     	], "POST", 'json');
     	$evening_data = $this->dataService->call("/report/GetIndex", [
     		'city_id' => $city_id,
-    		'dates' => $this->reportService->getDatesFromRange($start_date, $end_date),
+    		'dates' => $theDatelist,
     		'logic_junction_ids' => !empty($logic_junction_ids)?explode(',', $logic_junction_ids):[],
     		'hours' => $this->reportService->getHoursFromRange($evenint_peek['start_hour'], $evenint_peek['end_hour']),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
@@ -859,15 +848,6 @@ class AreaReportService extends BaseService{
     	$start_date = $params['start_date'];
     	$end_date = $params['end_date'];
 
-    	// $city_info = $this->openCity_model->getCityInfo($city_id);
-    	// if (empty($city_info)) {
-
-    	// }
-
-    	// $area_info = $this->area_model->getAreaInfo($area_id);
-    	// if (empty($area_info)) {
-
-    	// }
 
     	$area_detail = $this->areaService->getAreaDetail([
     		'city_id' => $city_id,
@@ -875,14 +855,19 @@ class AreaReportService extends BaseService{
     	]);
     	$logic_junction_ids =array_column($area_detail['junction_list'], 'logic_junction_id');
 
-    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date));
+        $theDatelist = $this->reportService->getDatesFromRange($start_date,$end_date);
+        $theDatelist = $this->reportService->skipDate($theDatelist,$params['date_type']);
+
+
+
+    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, $logic_junction_ids, $theDatelist);
         // print_r($morning_peek);exit;
     	$morning_peek_hours = $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']);
-    	$evening_peek = $this->reportService->getEveningPeekRange($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date));
+    	$evening_peek = $this->reportService->getEveningPeekRange($city_id, $logic_junction_ids, $theDatelist);
     	$evening_peek_hours = $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']);
     	$peek_hours = array_merge($morning_peek_hours, $evening_peek_hours);
 
-    	$morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $this->reportService->getDatesFromRange($start_date, $end_date), $peek_hours);
+    	$morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, $logic_junction_ids, $theDatelist, $peek_hours);
     	usort($morning_pi_data, function($a, $b) {
     		return $a['pi'] > $b['pi'] ? -1 : 1;
     	});
@@ -907,12 +892,6 @@ class AreaReportService extends BaseService{
         return $date;
     }
 
-    //过滤工作日或周末
-    private function skipDate($dateList,$dateType){
-        if($dateType== 0){
-            return $dateList;
-        }
-    }
 
     private function getTimeFromRange($st,$et,$step){
         $stimestamp = strtotime($st);

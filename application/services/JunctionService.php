@@ -49,6 +49,7 @@ class JunctionService extends BaseService
 
         $dates = dateRange($evaluateStartDate, $evaluateEndDate);
 
+
         if (empty($dates)) {
             throw new \Exception('日期范围不能为空', ERR_PARAMETERS);
         }

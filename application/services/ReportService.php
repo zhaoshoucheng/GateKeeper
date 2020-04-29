@@ -904,6 +904,30 @@ class ReportService extends BaseService
         }
         return $hours;
     }
+    //过滤工作日或周末
+    public function skipDate($dateList,$dateType){
+        $newList = [];
+        if($dateType == 1){ //工作日
+            foreach ($dateList as $date){
+                if(date('w',$date) == 0 || date('w',$date) == 6){
+                    continue;
+                }
+                $newList[] = $date;
+            }
+            return $newList;
+
+        }elseif ($dateType == 2){ //周末
+
+            foreach ($dateList as $date){
+                if(date('w',$date) == 0 || date('w',$date) == 6){
+                    $newList[] = $date;
+                }
+            }
+            return $newList;
+        }
+        return $dateList;
+    }
+
 
     // {x : hh:mm, y : value}
     // 48个时刻点补全 null
