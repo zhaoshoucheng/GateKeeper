@@ -1161,7 +1161,7 @@ class AreaReportService extends BaseService{
 
     //区域pi等级统计结果
     public function piLevelStatistics($cityID,$areaID,$startDate,$endDate){
-
+        $cityID = (int)$cityID;
         //查询区域内全部路口
         $area_detail = $this->areaService->getAreaDetail([
             'city_id' => $cityID,
@@ -1198,7 +1198,7 @@ class AreaReportService extends BaseService{
     }
 
     public function piLevelTop5($cityID,$areaID,$startDate,$endDate){
-
+        $cityID = (int)$cityID;
         //查询区域内全部路口
         $area_detail = $this->areaService->getAreaDetail([
             'city_id' => $cityID,
