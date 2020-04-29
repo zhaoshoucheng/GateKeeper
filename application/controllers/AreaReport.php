@@ -23,6 +23,29 @@ class AreaReport extends MY_Controller
         $this->areaService = new AreaService();
     }
 
+    //南京定制版
+    public function introductionNJ(){
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+
+        ],$params);
+        $params['start_date'] = $params['start_time'];
+        $params['end_date'] = $params['end_time'];
+        if($params['city_id'] == 12){
+            $params['userapp']  = 'jinanits';
+        }
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
+
+        $data = $this->areaReportService->introductionNJ($params);
+        $this->response($data);
+    }
+
     public function introduction() {
         $params = $this->input->get(null, true);
         $this->get_validate([
@@ -33,12 +56,49 @@ class AreaReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
-        if($params['city_id'] == 12){
-            $params['userapp']  = 'jinanits';
+//        if($params['city_id'] == 12){
+//            $params['userapp']  = 'jinanits';
+//        }
+        if($this->userapp == 'jinanits'){
+            $data = $this->areaReportService->introductionJN($params);
+        }else{
+            $data = $this->areaReportService->introduction($params);
+
         }
 
-        $data = $this->areaReportService->introduction($params);
         $this->response($data);
+    }
+
+    //区域pi等级统计结果
+    public function piLevelStatistics(){
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+//        $params['start_date'] = $params['start_time'];
+//        $params['end_date'] = $params['end_time'];
+
+        $data = $this->areaReportService->piLevelStatistics($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time']);
+        $this->response($data);
+    }
+
+    //各时段pi top5
+    public function piLevelTop5(){
+        $params = $this->input->get(null, true);
+        $this->get_validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'area_id' => 'required|min_length[1]',
+            'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+            'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ],$params);
+//        $params['start_date'] = $params['start_time'];
+//        $params['end_date'] = $params['end_time'];
+        $data = $this->areaReportService->piLevelTop5($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time']);
+        $this->response($data);
+
     }
 
     public function queryAreaDataComparison() {
@@ -51,6 +111,9 @@ class AreaReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->areaReportService->queryAreaDataComparison($params);
         $this->response($data);
@@ -65,6 +128,9 @@ class AreaReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->areaReportService->queryAreaDataComparisonNJ($params);
         $this->response($data);
@@ -79,6 +145,9 @@ class AreaReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->areaReportService->queryAreaQuotaDataNJ($params);
         $this->response($data);
@@ -93,6 +162,9 @@ class AreaReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->areaReportService->queryAreaCongestion($params);
         $this->response($data);
@@ -107,6 +179,9 @@ class AreaReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->areaReportService->queryQuotaRank($params);
         $this->response($data);
@@ -137,6 +212,9 @@ class AreaReport extends MY_Controller
 //            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
 //            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
         ],$params);
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         //FIXME 后端计算早晚高峰
         //查询区域路口的平均指标
@@ -165,6 +243,9 @@ class AreaReport extends MY_Controller
             'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
         ],$params);
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
         //查询区域路口的平均指标
         $data  = $this->areaReportService->QueryAreaQuotaInfo($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time']);
 //        $data  = $this->areaReportService->getJunctionsAllQuotaEs($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time']);

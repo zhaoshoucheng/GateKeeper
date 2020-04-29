@@ -622,8 +622,11 @@ class RoadService extends BaseService
         }
 
         $c = acos($cosc);
-
-        $sinA = (sin($a) * sin($ab)) / sin($c);
+        if ($c != 0){
+            $sinA = (sin($a) * sin($ab)) / sin($c);
+        }else{
+            $sinA = -1.0;
+        }
 
         if ($sinA < -1.0) {
             $sinA = -1.0;
