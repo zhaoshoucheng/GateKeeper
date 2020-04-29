@@ -186,4 +186,23 @@ class Pi_model extends CI_Model{
             return $res->result_array();
         }
     }
+
+    //返回pi的等级
+    public function getPIlevel($pi)
+    {
+        if ($pi > 0 && $pi < 20) {
+            return "A";
+        }
+        if ($pi >= 20 && $pi < 40) {
+            return "B";
+        }
+        if ($pi >= 40 && $pi < 60) {
+            return "C";
+        }
+        if ($pi >= 60 && $pi < 80) {
+            return "D";
+        }
+
+        return "E";
+    }
 }
