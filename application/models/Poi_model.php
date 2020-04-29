@@ -96,10 +96,17 @@ class Poi_model extends CI_Model{
     }
 
     public function delCategory($cityID,$logicJunctionID,$poiTypelist){
-        $this->db->where('city_id', $cityID)
-            ->where('logic_junction_id',$logicJunctionID)
-            ->where_in('poi_type', $poiTypelist)
-            ->delete($this->tb);
+        if(count($poiTypelist) == 0){
+            $this->db->where('city_id', $cityID)
+                ->where('logic_junction_id',$logicJunctionID)
+                ->delete($this->tb);
+        }else{
+            $this->db->where('city_id', $cityID)
+                ->where('logic_junction_id',$logicJunctionID)
+                ->where_in('poi_type', $poiTypelist)
+                ->delete($this->tb);
+        }
+
 
     }
 }

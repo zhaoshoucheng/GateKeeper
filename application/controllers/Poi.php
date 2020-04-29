@@ -47,7 +47,7 @@ class Poi extends MY_Controller
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
             'logic_junction_id' => 'required',
-            'poi_list'=>'required',
+//            'poi_list'=>'required',
         ]);
 
         $this->poiService->saveJunctionPoi($cityID,$logicJunctionID,explode(",",$poiList) );
