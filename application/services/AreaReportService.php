@@ -1207,6 +1207,12 @@ class AreaReportService extends BaseService{
 
         $junctionList =array_column($area_detail['junction_list'], 'logic_junction_id');
 
+        $junctions_info = $this->waymap_model->getJunctionInfo($junctionList);
+        $junctions_map = [];
+        array_map(function($item) use(&$junctions_map) {
+            $junctions_map[$item['logic_junction_id']] = $item;
+        }, $junctions_info);
+
         //查询早晚高峰
         $morning_peek = $this->reportService->getMorningPeekRange($cityID, $junctionList, $this->reportService->getDatesFromRange($startDate, $endDate));
         // print_r($morning_peek);exit;
@@ -1226,15 +1232,15 @@ class AreaReportService extends BaseService{
         });
         foreach ($morning_pi_data as $md){
             if(count($morningChartTop["A"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "A"){
-                $morningChartTop["A"][] = $md['logic_junction_id'];
+                $morningChartTop["A"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($morningChartTop["B"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "B"){
-                $morningChartTop["B"][] = $md['logic_junction_id'];
+                $morningChartTop["B"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($morningChartTop["C"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "C"){
-                $morningChartTop["C"][] = $md['logic_junction_id'];
+                $morningChartTop["C"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($morningChartTop["D"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "D"){
-                $morningChartTop["D"][] = $md['logic_junction_id'];
+                $morningChartTop["D"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($morningChartTop["E"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "E"){
-                $morningChartTop["E"][] = $md['logic_junction_id'];
+                $morningChartTop["E"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }
 
         }
@@ -1248,15 +1254,15 @@ class AreaReportService extends BaseService{
 
         foreach ($evening_pi_data as $md){
             if(count($eveningChartTop["A"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "A"){
-                $eveningChartTop["A"][] = $md['logic_junction_id'];
+                $eveningChartTop["A"][] = $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($eveningChartTop["B"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "B"){
-                $eveningChartTop["B"][] = $md['logic_junction_id'];
+                $eveningChartTop["B"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($eveningChartTop["C"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "C"){
-                $eveningChartTop["C"][] = $md['logic_junction_id'];
+                $eveningChartTop["C"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($eveningChartTop["D"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "D"){
-                $eveningChartTop["D"][] = $md['logic_junction_id'];
+                $eveningChartTop["D"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($morningChartTop["E"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "E"){
-                $eveningChartTop["E"][] = $md['logic_junction_id'];
+                $eveningChartTop["E"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }
 
         }
@@ -1269,15 +1275,15 @@ class AreaReportService extends BaseService{
 
         foreach ($allday_pi_data as $md){
             if(count($alldayChartTop["A"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "A"){
-                $alldayChartTop["A"][] = $md['logic_junction_id'];
+                $alldayChartTop["A"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($alldayChartTop["B"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "B"){
-                $alldayChartTop["B"][] = $md['logic_junction_id'];
+                $alldayChartTop["B"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($alldayChartTop["C"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "C"){
-                $alldayChartTop["C"][] = $md['logic_junction_id'];
+                $alldayChartTop["C"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($alldayChartTop["D"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "D"){
-                $alldayChartTop["D"][] = $md['logic_junction_id'];
+                $alldayChartTop["D"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }elseif (count($alldayChartTop["E"])<=5 && $this->pi_model->getPIlevel($md['pi']) == "E"){
-                $alldayChartTop["E"][] = $md['logic_junction_id'];
+                $alldayChartTop["E"][] =  $junctions_map[$md['logic_junction_id']]['name'];
             }
 
         }
