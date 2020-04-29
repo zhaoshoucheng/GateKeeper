@@ -43,6 +43,9 @@ class JunctionReport extends MY_Controller
             'quota_key' => 'required|in_list[' . implode(',', array_keys($this->config->item('quotas'))) . ']',
             'type' => 'required|in_list[1,2]',
         ]);
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->junctionService->queryQuotaInfo($params);
 
@@ -59,6 +62,9 @@ class JunctionReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
         if($this->userapp == 'jinanits'){
             $data = $this->junctionReportService->introductionJN($params);
         }else{
@@ -79,6 +85,9 @@ class JunctionReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->junctionReportService->queryJuncDataComparison($params);
         $this->response($data);
@@ -93,6 +102,9 @@ class JunctionReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->junctionReportService->queryJunctionDataComparisonNJ($params);
         $this->response($data);
@@ -107,6 +119,9 @@ class JunctionReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->junctionReportService->queryJunctionQuotaDataNJ($params);
         $this->response($data);
@@ -122,6 +137,9 @@ class JunctionReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->junctionReportService->queryJuncQuotaData($params);
         $this->response($data);
@@ -137,6 +155,9 @@ class JunctionReport extends MY_Controller
             'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
         ],$params);
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $junctionInfo =$this->junctionReportService->queryJuncInfo($params['logic_junction_id']);
 

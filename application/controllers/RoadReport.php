@@ -34,6 +34,9 @@ class RoadReport extends MY_Controller
 //        if($params['city_id'] == 12){
 //            $params['userapp']  = 'jinanits';
 //        }
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
         if($this->userapp == 'jinanits'){
             $data = $this->roadReportService->introductionJN($params);
 
@@ -53,6 +56,9 @@ class RoadReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->roadReportService->queryRoadDataComparison($params);
         $this->response($data);
@@ -67,6 +73,9 @@ class RoadReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->roadReportService->queryRoadDataComparisonNJ($params);
         $this->response($data);
@@ -81,6 +90,9 @@ class RoadReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->roadReportService->queryRoadQuotaDataNJ($params);
         $this->response($data);
@@ -95,6 +107,9 @@ class RoadReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
         $data = $this->roadReportService->queryRoadCongestion($params);
         $this->response($data);
     }
@@ -108,6 +123,9 @@ class RoadReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->roadReportService->queryQuotaRank($params);
         $this->response($data);
@@ -122,6 +140,9 @@ class RoadReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         $data = $this->roadReportService->queryTopPI($params);
         $this->response($data);
@@ -142,6 +163,9 @@ class RoadReport extends MY_Controller
             'start_time'     => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
             'end_time'       => 'required|trim|regex_match[/\d{4}-\d{2}-\d{2}/]',
         ],$params);
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         //查询干线路口的平均指标
         $data  = $this->roadReportService->QueryRoadQuotaInfo($params['city_id'],$params['road_id'],$params['start_time'],$params['end_time']);
@@ -184,6 +208,9 @@ class RoadReport extends MY_Controller
 //            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
 //            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
         ],$params);
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
         //FIXME 自己计算早晚高峰
         //查询干线路口的平均指标
@@ -214,6 +241,9 @@ class RoadReport extends MY_Controller
 //            'morning_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
 //            'evening_rush_time' => 'required|trim|regex_match[/\d{2}:\d{2}~\d{2}:\d{2}/]',
         ],$params);
+        if(!isset($params['date_type'])){
+            $params['date_type']=0;
+        }
 
 
         //FIXME 自己计算早晚高峰
