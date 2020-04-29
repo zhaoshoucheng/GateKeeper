@@ -247,7 +247,9 @@ class MY_Controller extends CI_Controller
                 exit();
             }
         }
-
+        // $this->userPerm['route_id'] = [1341];
+        // $this->userPerm['area_id'] = [516];
+        // $this->userPerm['admin_area_id'] = [236];
         com_log_notice('_com_perm', [
             'username' => $accessUser,
             'access_type' => $accessType,

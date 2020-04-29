@@ -297,7 +297,7 @@ class RoadService extends BaseService
     {
         $cityId = $params['city_id'];
 
-        $select = 'road_id, road_name, road_direction';
+        $select = 'id, road_id, road_name, road_direction';
 
         return $this->road_model->getRoadsByCityId($cityId, $select);
     }
