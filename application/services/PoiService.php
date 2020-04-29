@@ -32,14 +32,17 @@ class PoiService extends BaseService{
     }
 
     //更新保存新的映射关系
-    public function saveJunctionPoi($id,$cityID,$logicJunctionID,$poiType){
-        $ret = 0;
-        if ($id == 0){
-            $ret = $this->poi_model->addCategory($cityID,$logicJunctionID,$poiType);
-        }else{
-            $rer = $this->poi_model->updateCategory($id,$poiType);
+    public function saveJunctionPoi($cityID,$logicJunctionID,$poilist){
+
+
+        $this->poi_model->delCategory($cityID,$logicJunctionID,$poilist);
+
+        //批量删除,批量插入
+        foreach ($poilist as $poi){
+            $this->poi_model->addCategory($cityID,$logicJunctionID,$poi);
         }
-        return $ret;
+
+        return ;
 
     }
 
