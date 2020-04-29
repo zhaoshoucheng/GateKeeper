@@ -909,7 +909,8 @@ class ReportService extends BaseService
         $newList = [];
         if($dateType == 1){ //工作日
             foreach ($dateList as $date){
-                if(date('w',$date) == 0 || date('w',$date) == 6){
+                $week =date('w',strtotime($date)) ;
+                if($week == 0 || $week == 6){
                     continue;
                 }
                 $newList[] = $date;
@@ -919,7 +920,8 @@ class ReportService extends BaseService
         }elseif ($dateType == 2){ //周末
 
             foreach ($dateList as $date){
-                if(date('w',$date) == 0 || date('w',$date) == 6){
+                $week =date('w',strtotime($date)) ;
+                if($week == 0 || $week == 6){
                     $newList[] = $date;
                 }
             }
