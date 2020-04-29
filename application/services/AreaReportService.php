@@ -1207,7 +1207,7 @@ class AreaReportService extends BaseService{
 
         $junctionList =array_column($area_detail['junction_list'], 'logic_junction_id');
 
-        $junctions_info = $this->waymap_model->getJunctionInfo($junctionList);
+        $junctions_info = $this->waymap_model->getJunctionInfo(implode(',', $junctionList));
         $junctions_map = [];
         array_map(function($item) use(&$junctions_map) {
             $junctions_map[$item['logic_junction_id']] = $item;
