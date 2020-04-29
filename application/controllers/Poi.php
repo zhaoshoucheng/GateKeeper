@@ -37,6 +37,23 @@ class Poi extends MY_Controller
         $this->response($data);
 
     }
+
+    public function saveJunctionPoi(){
+        $params = $this->input->post(NULL,true);
+        $cityID  = $params['city_id'];
+        $logicJunctionID = $params['logic_junction_id'];
+        $poiList = $params['poi_list'];
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'logic_junction_id' => 'required',
+            'poi_list'=>'required',
+        ]);
+
+        $this->poiService->saveJunctionPoi($cityID,$logicJunctionID,explode(",",$poiList) );
+
+        $this->response("success");
+    }
 //
 //    public function updateJunctionPoi(){
 //        $params = $this->input->post(NULL,true);

@@ -39,13 +39,9 @@ class PoiService extends BaseService{
 
         //批量删除,批量插入
         foreach ($poilist as $poi){
-            $ret = $this->poi_model->addCategory($cityID,$logicJunctionID,$poi);
+            $this->poi_model->addCategory($cityID,$logicJunctionID,$poi);
         }
-//        if ($id == 0){
-//            $ret = $this->poi_model->addCategory($cityID,$logicJunctionID,$poiType);
-//        }else{
-//            $rer = $this->poi_model->updateCategory($id,$poiType);
-//        }
+
         return ;
 
     }
