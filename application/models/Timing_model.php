@@ -853,6 +853,7 @@ class Timing_model extends CI_Model
     {
         print_r("data");
         print_r($data);
+        $data["city_id"] = 23;
         // $authorization = "Authorization: Basic ".base64_encode("test:1234");
         $timing = httpPOST($this->config->item('signal_timing_status_url'), $data, 0, 'json');
         $timing = json_decode($timing, true);
