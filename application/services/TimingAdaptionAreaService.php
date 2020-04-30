@@ -222,12 +222,14 @@ class TimingAdaptionAreaService extends BaseService
         $areaJunctions = $this->getAreaJunctions($params);
 
         // 获取配时
-        $timing = $this->timing_model->queryTimingStatus(
+        $timingModel = new Timing_model();
+        $timing = $timingModel->queryTimingStatus(
             [
                 'city_id' => $cityId,
                 'source' => 0,
             ]
         );
+        print_r($timing);exit;
         $hasTiming = [];
         foreach ($timing as $item) {
             if ($item['status'] == 1) {
