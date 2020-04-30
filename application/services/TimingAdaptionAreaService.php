@@ -16,6 +16,7 @@ use Overtrue\Pinyin\Pinyin;
  * @package Services
  * @property \TimeAlarmRemarks_model $timeAlarmRemarks_model
  * @property \Adapt_model $adapt_model
+ * @property \Timing_model $timing_model
  */
 class TimingAdaptionAreaService extends BaseService
 {
@@ -34,6 +35,7 @@ class TimingAdaptionAreaService extends BaseService
         $this->load->model('alarmanalysis_model');
         $this->load->model('timeAlarmRemarks_model');
         $this->load->model('traj_model');
+        $this->load->model('timing_model')
 
         // load config
         $this->load->config('nconf');
@@ -219,6 +221,22 @@ class TimingAdaptionAreaService extends BaseService
 
         $areaJunctions = $this->getAreaJunctions($params);
 
+        // 获取配时
+        $timingModel = new Timing_model();
+        $timing = $timingModel->queryTimingStatus(
+            [
+                'city_id' => $cityId,
+                'source' => 0,
+            ]
+        );
+        $hasTiming = [];
+        foreach ($timing as $item) {
+            if ($item['status'] == 1) {
+                $hasTiming[] = $item['logic_junction_id'];
+            }
+        }
+
+        print_r($hasTiming);
         return $this->formatGetAreaJunctionListData($cityId, $areaJunctions);
     }
 
