@@ -234,10 +234,16 @@ class TimingAdaptionAreaService extends BaseService
                 $hasTiming[] = $item['logic_junction_id'];
             }
         }
-        print_r("hasTiming");
-        print_r($hasTiming);
-        print_r("areaJunctions");
-        print_r($areaJunctions);
+        // print_r("hasTiming");
+        // print_r($hasTiming);
+
+        foreach($areaJunctions as $areaKey=>$areaJunction){
+            if(in_array($areaJunction["logic_junction_id"],$hasTiming)){
+                $areaJunctions[$areaKey]["status"] = 1;
+            }
+        }
+        print_r("areaJunctions"); 
+        print_r($areaJunctions); 
         return $this->formatGetAreaJunctionListData($cityId, $areaJunctions);
     }
 
