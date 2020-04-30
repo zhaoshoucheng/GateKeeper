@@ -255,7 +255,7 @@ class MY_Controller extends CI_Controller
             && $_REQUEST['city_id']==23
             && in_array($this->userPerm['group_id'],[464,458,466,490])
         ){
-            $this->userPerm['adp_area_id'] = [236];
+            $this->userPerm['adp_area_id'] = [421,60];
         }
         com_log_notice('_com_perm', [
             'username' => $accessUser,
