@@ -68,6 +68,13 @@ class AreaReportService extends BaseService{
         if($start_date == $end_date){
             $datestr =  date('Y年m月d日', strtotime($start_date));
         }
+
+        if($params['date_type'] == 1){
+            $datestr.="(工作日)";
+        }elseif ($params['date_type']==2){
+            $datestr.="(周末)";
+        }
+
 //        本次报告区域为XX市，分析区域包含XX区、XX区等行政区域，共XXX个路口。本次报告根据20XX年XX月XX日～XX月XX日数据该区域进行分析，整体延误指数为30.55s，与前一周相比无变化／上升12%／下降12%，基本持平/更加严重/得到缓解。
         $tpl = "本次报告区域为%s市，分析区域包含%s区等行政区域，共%s个路口。本次报告根据%s数据对该区域进行分析，整体交叉口延误指数为%s，与%s相比%s，%s";
 
@@ -215,6 +222,12 @@ class AreaReportService extends BaseService{
         $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
         if($start_date == $end_date){
             $datestr =  date('Y年m月d日', strtotime($start_date));
+        }
+
+        if($params['date_type'] == 1){
+            $datestr.="(工作日)";
+        }elseif ($params['date_type']==2){
+            $datestr.="(周末)";
         }
         $tpl = "本次报告区域为%s市，分析区域包含%s等行政区域。本次报告根据%s数据对该区域进行分析。";
 

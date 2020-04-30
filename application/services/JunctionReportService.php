@@ -116,9 +116,17 @@ class JunctionReportService extends BaseService{
     	$logic_junction_id = $params['logic_junction_id'];
     	$start_date = $params['start_date'];
     	$end_date = $params['end_date'];
-        $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
+        $thisDatelist = $this->reportService->getDatesFromRange($start_date,$end_date);
+        $thisDatelist = $this->reportService->skipDate($thisDatelist,$params['date_type']);
+        $datestr =  date('Y年m月d日', strtotime($thisDatelist[0]))."~".date('Y年m月d日', strtotime($thisDatelist[count($thisDatelist)-1]));
         if($start_date == $end_date){
             $datestr =  date('Y年m月d日', strtotime($start_date));
+        }
+
+        if($params['date_type'] == 1){
+            $datestr.="(工作日)";
+        }elseif ($params['date_type']==2){
+            $datestr.="(周末)";
         }
 
     	$city_info = $this->openCity_model->getCityInfo($city_id);
