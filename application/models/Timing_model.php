@@ -856,6 +856,8 @@ class Timing_model extends CI_Model
         // $authorization = "Authorization: Basic ".base64_encode("test:1234");
         $timing = httpPOST($this->config->item('signal_timing_status_url'), $data, 0, 'json');
         $timing = json_decode($timing, true);
+        print_r($timing);
+        exit;
         if (isset($timing['errno']) && $timing['errno'] != 0) {
             return [];
         }
