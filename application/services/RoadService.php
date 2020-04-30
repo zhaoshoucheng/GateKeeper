@@ -602,10 +602,11 @@ class RoadService extends BaseService
     //根据路口之间的经纬度,猜测方向的中文描述
     public function guessDirectionText($junctionsInfo)
     {
+        //改为第一个路口和最后一个路口
         $lng1 = $junctionsInfo[0]['lng'];
-        $lng2 = $junctionsInfo[1]['lng'];
+        $lng2 = $junctionsInfo[count($junctionsInfo)-1]['lng'];
         $lat1 = $junctionsInfo[0]['lat'];
-        $lat2 = $junctionsInfo[1]['lat'];
+        $lat2 = $junctionsInfo[count($junctionsInfo)-1]['lat'];
         $a = deg2rad(90 - $lat2);
 
         $b = deg2rad(90 - $lat1);
