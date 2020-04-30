@@ -116,7 +116,14 @@ class RoadReportService extends BaseService{
             $datestr =  date('Y年m月d日', strtotime($start_date));
         }
 
-    	$city_info = $this->openCity_model->getCityInfo($city_id);
+        if($params['date_type'] == 1){
+            $datestr.="(工作日)";
+        }elseif ($params['date_type']==2){
+            $datestr.="(周末)";
+        }
+
+
+        $city_info = $this->openCity_model->getCityInfo($city_id);
     	if (empty($city_info)) {
 
     	}
