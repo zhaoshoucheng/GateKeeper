@@ -242,8 +242,8 @@ class TimingAdaptionAreaService extends BaseService
                 $areaJunctions[$areaKey]["status"] = 1;
             }
         }
-        print_r("areaJunctions"); 
-        print_r($areaJunctions); 
+        // print_r("areaJunctions"); 
+        // print_r($areaJunctions); 
         return $this->formatGetAreaJunctionListData($cityId, $areaJunctions);
     }
 
