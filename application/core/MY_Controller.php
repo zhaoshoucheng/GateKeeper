@@ -247,7 +247,16 @@ class MY_Controller extends CI_Controller
                 exit();
             }
         }
-
+        // $this->userPerm['route_id'] = [1341];
+        // $this->userPerm['area_id'] = [516];
+        // todo 苏州本地化硬编码
+        if(isset($_REQUEST['city_id']) 
+            && isset($this->userPerm['group_id'])
+            && $_REQUEST['city_id']==23
+            && in_array($this->userPerm['group_id'],[464,458,466,490])
+        ){
+            $this->userPerm['adp_area_id'] = [236];
+        }
         com_log_notice('_com_perm', [
             'username' => $accessUser,
             'access_type' => $accessType,
