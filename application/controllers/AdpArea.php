@@ -128,7 +128,7 @@ class AdpArea extends MY_Controller
         $dataList = $data["list"]??[];
         // 根据权限过滤区域
         if (!empty($this->userPerm) && empty($this->userPerm["city_id"])) {
-            $areaIds = $this->userPerm['admin_area_id'];
+            $areaIds = $this->userPerm['adp_area_id'];
             if(!empty($areaIds)){
                 $dataList = array_values(array_filter($dataList, function ($item) use ($areaIds) {
                     if (in_array($item['id'], $areaIds)) {
