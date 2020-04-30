@@ -224,7 +224,7 @@ class TimingAdaptionAreaService extends BaseService
         $timingModel = new Timing_model();
         $timing = $timingModel->queryTimingStatus(
             [
-                'city_id' => $cityId."",
+                'city_id' =>(int)$cityId,
                 'source' => 0,
             ]
         );
