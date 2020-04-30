@@ -8,7 +8,7 @@
 
 namespace Services;
 
-use Didi\Cloud\Collection\Collection;
+use Timing_model;
 use Overtrue\Pinyin\Pinyin;
 
 /**
