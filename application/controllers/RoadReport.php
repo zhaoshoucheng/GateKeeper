@@ -59,8 +59,14 @@ class RoadReport extends MY_Controller
         if(!isset($params['date_type'])){
             $params['date_type']=0;
         }
+        if($this->userapp == 'jinanits'){  //济南新需求复用南京功能
+            $data = $this->roadReportService->queryRoadDataComparisonNJ($params);
+        }else{
+            $data = $this->roadReportService->queryRoadDataComparison($params);
+        }
 
-        $data = $this->roadReportService->queryRoadDataComparison($params);
+
+
         $this->response($data);
     }
     public function queryRoadDataComparisonNJ() {
@@ -165,6 +171,11 @@ class RoadReport extends MY_Controller
         ],$params);
         if(!isset($params['date_type'])){
             $params['date_type']=0;
+        }
+        if($this->userapp == 'jinanits'){ //济南需求复用南京功能
+            $data = $this->roadReportService->queryRoadQuotaDataNJ($params);
+            $this->response($data);
+            return;
         }
 
         //查询干线路口的平均指标

@@ -116,8 +116,13 @@ class AreaReport extends MY_Controller
         if(!isset($params['date_type'])){
             $params['date_type']=0;
         }
+        if($this->userapp == 'jinanits'){ //济南需求复用南京功能
+            $data = $this->areaReportService->queryAreaDataComparisonNJ($params);
+        }else{
+            $data = $this->areaReportService->queryAreaDataComparison($params);
+        }
 
-        $data = $this->areaReportService->queryAreaDataComparison($params);
+
         $this->response($data);
     }
     public function queryAreaDataComparisonNJ() {
@@ -248,6 +253,13 @@ class AreaReport extends MY_Controller
         if(!isset($params['date_type'])){
             $params['date_type']=0;
         }
+        if($this->userapp == 'jinanits'){//济南需求复用南京功能
+            $data = $this->areaReportService->queryAreaQuotaDataNJ($params);
+            $this->response($data);
+            return;
+        }
+
+
         //查询区域路口的平均指标
         $data  = $this->areaReportService->QueryAreaQuotaInfo($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time']);
 //        $data  = $this->areaReportService->getJunctionsAllQuotaEs($params['city_id'],$params['area_id'],$params['start_time'],$params['end_time']);

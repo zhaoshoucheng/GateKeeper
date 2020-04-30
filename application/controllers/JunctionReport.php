@@ -88,8 +88,13 @@ class JunctionReport extends MY_Controller
         if(!isset($params['date_type'])){
             $params['date_type']=0;
         }
+        if($this->userapp == 'jinanits'){ //济南新需求复用南京功能
+            $data = $this->junctionReportService->queryJunctionDataComparisonNJ($params);
+        }else{
+            $data = $this->junctionReportService->queryJuncDataComparison($params);
+        }
 
-        $data = $this->junctionReportService->queryJuncDataComparison($params);
+
         $this->response($data);
     }
     public function queryJuncDataComparisonNJ() {
@@ -140,8 +145,14 @@ class JunctionReport extends MY_Controller
         if(!isset($params['date_type'])){
             $params['date_type']=0;
         }
+        if($this->userapp == 'jinanits'){  //济南新需求复用南京功能
+            $data = $this->junctionReportService->queryJunctionQuotaDataNJ($params);
+        }else{
+            $data = $this->junctionReportService->queryJuncQuotaData($params);
+        }
 
-        $data = $this->junctionReportService->queryJuncQuotaData($params);
+
+
         $this->response($data);
     }
 
