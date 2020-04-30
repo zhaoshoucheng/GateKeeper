@@ -35,7 +35,7 @@ class TimingAdaptionAreaService extends BaseService
         $this->load->model('alarmanalysis_model');
         $this->load->model('timeAlarmRemarks_model');
         $this->load->model('traj_model');
-        $this->load->model('timing_model')
+        $this->load->model('timing_model');
 
         // load config
         $this->load->config('nconf');
@@ -222,8 +222,7 @@ class TimingAdaptionAreaService extends BaseService
         $areaJunctions = $this->getAreaJunctions($params);
 
         // 获取配时
-        $timingModel = new Timing_model();
-        $timing = $timingModel->queryTimingStatus(
+        $timing = $this->timing_model->queryTimingStatus(
             [
                 'city_id' => $cityId,
                 'source' => 0,
@@ -235,8 +234,8 @@ class TimingAdaptionAreaService extends BaseService
                 $hasTiming[] = $item['logic_junction_id'];
             }
         }
-
         print_r($hasTiming);
+
         return $this->formatGetAreaJunctionListData($cityId, $areaJunctions);
     }
 
