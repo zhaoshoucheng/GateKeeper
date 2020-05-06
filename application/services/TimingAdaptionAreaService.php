@@ -10,6 +10,7 @@ namespace Services;
 
 use Timing_model;
 use Overtrue\Pinyin\Pinyin;
+use Didi\Cloud\Collection\Collection;
 
 /**
  * Class TimingAdaptionAreaService
