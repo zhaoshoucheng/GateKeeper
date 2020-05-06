@@ -220,30 +220,32 @@ class TimingAdaptionAreaService extends BaseService
         $cityId = $params['city_id'];
         $areaJunctions = $this->getAreaJunctions($params);
         
-        // 获取配时
-        $timingModel = new Timing_model();
-        $timing = $timingModel->queryTimingStatus(
-            [
-                'city_id' =>(int)$cityId,
-                'source' => 0,
-            ]
-        );
-        $hasTiming = [];
-        foreach ($timing as $item) {
-            if ($item['status'] == 1) {
-                $hasTiming[] = $item['logic_junction_id'];
+        if($cityId==23){
+            // 获取配时
+            $timingModel = new Timing_model();
+            $timing = $timingModel->queryTimingStatus(
+                [
+                    'city_id' =>(int)$cityId,
+                    'source' => 0,
+                ]
+            );
+            $hasTiming = [];
+            foreach ($timing as $item) {
+                if ($item['status'] == 1) {
+                    $hasTiming[] = $item['logic_junction_id'];
+                }
             }
-        }
-        // print_r("hasTiming");
-        // print_r($hasTiming);
+            // print_r("hasTiming");
+            // print_r($hasTiming);
 
-        foreach($areaJunctions as $areaKey=>$areaJunction){
-            if(in_array($areaJunction["logic_junction_id"],$hasTiming)){
-                $areaJunctions[$areaKey]["status"] = 1;
+            foreach($areaJunctions as $areaKey=>$areaJunction){
+                if(in_array($areaJunction["logic_junction_id"],$hasTiming)){
+                    $areaJunctions[$areaKey]["status"] = 1;
+                }
             }
+            // print_r("areaJunctions"); 
+            // print_r($areaJunctions);
         }
-        // print_r("areaJunctions"); 
-        // print_r($areaJunctions); 
         return $this->formatGetAreaJunctionListData($cityId, $areaJunctions);
     }
 
