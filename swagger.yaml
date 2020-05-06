@@ -20,10 +20,521 @@ tags:
   - name: "南京建邺区项目"
   - name: "南昌报警接口"
   - name: "word版本报告"
+  - name: "本地化报告定制修改"
 schemes:
 - http
 - https
 paths:
+  /AreaReport/introductionNJ:
+    get:
+      summary: 区域报告信息概览
+      description: 区域报告信息概览 ,新增区域路口数，计算整体pi，同时与上个周期进行对比。此功能济南适用，仅做部分文案修改
+      tags:
+        - 本地化报告定制修改
+      consumes: []
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: area_id
+          in: query
+          type: string
+          description: "区域id"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                description: "数据结构体"
+                properties:
+                  desc:
+                    type: "string"
+                    description: "数据描述"
+                  area_info:
+                    description: "区域信息"
+                    properties:
+                      center_lat:
+                        type: "number"
+                        description: "中心点纬度"
+                      center_lng:
+                        type: "number"
+                        description: "中心点经度"
+                      area_id:
+                        type: "string"
+                        description: "区域id"
+                      area_name:
+                        type: "string"
+                        description: "区域名称"
+                      junction_list:
+                        type: "array"
+                        description: "路口列表"
+                        items:
+                          type: "object"
+                          properties:
+                            logic_junction_id:
+                              type: "string"
+                              description: "路口ID"
+                            logic_show_id:
+                              type: "string"
+                              description: "路口展示ID"
+                            lng:
+                              type: "string"
+                              description: "经度"
+                            lat:
+                              type: "string"
+                              description: "纬度"
+                            city_id:
+                              type: "number"
+                              description: "城市ID"
+                            name:
+                              type: "string"
+                              description: "路口名"
+                            is_manual:
+                              type: "boolean"
+                              description: "人工路口"
+                            is_traffic:
+                              type: "boolean"
+                              description: "信控路口"
+                            is_complex:
+                              type: "boolean"
+                              description: "复杂路口"
+                            is_pedestrian:
+                              type: "boolean"
+                              description: "行人过街"
+                            start_version:
+                              type: "number"
+                              description: "开始路网版本号"
+                            end_version:
+                              type: "number"
+                              description: "结束路网版本号"
+                            created_at:
+                              type: "string"
+                              description: "创建时间"
+                            updated_at:
+                              type: "string"
+                              description: "更新时间"
+                            district_code:
+                              type: "number"
+                              description: "区域编号"
+                            district_name:
+                              type: "string"
+                              description: "区域名称"
+                    type: "object"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+              time:
+                required:
+                  - "a"
+                  - "s"
+                properties:
+                  a:
+                    type: "string"
+                  s:
+                    type: "string"
+                type: "object"
+  /AreaReport/queryAreaDataComparisonNJ:
+    get:
+      summary: 区域报告总体运行状态对比
+      description: 区域报告总体运行状态对比 ,新增与上个周期进行对比。此功能济南适用，仅做部分文案修改。干线与路口均采用相同修改。
+      tags:
+        - 本地化报告定制修改
+      consumes: []
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: area_id
+          in: query
+          type: string
+          description: "区域id"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                description: "数据结构体"
+                properties:
+                  info:
+                    properties:
+                      desc:
+                        type: "string"
+                    type: "object"
+                    description: "描述"
+                  chart:
+                    description: "图表数据"
+                    properties:
+                      title:
+                        type: "string"
+                        description: "标题"
+                      scale_title:
+                        type: "string"
+                        description: "指标标题"
+                      series:
+                        type: "array"
+                        description: "包含两个周期的数据对比"
+                        items:
+                          type: "array"
+                          description: "指标数据项"
+                          items:
+                            type: "object"
+                            properties:
+                              name:
+                                type: "string"
+                                description: "哪天数据"
+                              data:
+                                type: "array"
+                                description: "数据数组"
+                                items:
+                                  type: "object"
+                                  properties:
+                                    x:
+                                      type: "string"
+                                      description: "时刻"
+                                    y:
+                                      type: "number"
+                                      description: "数据"
+                type: "object"
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+  /AreaReport/queryAreaQuotaDataNJ:
+    get:
+      summary: 区域报告各项指标对比
+      description: 区域报告各项指标对比,新增与上个周期进行对比。此功能济南适用，仅做部分文案修改。干线与路口均采用相同修改。
+      tags:
+        - 本地化报告定制修改
+      consumes: []
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: area_id
+          in: query
+          type: string
+          description: "区域id"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            description: "接口返回"
+            properties:
+              errno:
+                type: "number"
+              errmsg:
+                type: "string"
+              data:
+                description: "数据消息体"
+                properties:
+                  info:
+                    description: "基本信息"
+                    properties:
+                      instructions:
+                        type: "string"
+                        description: "标题"
+                      desc:
+                        type: "string"
+                        description: "描述"
+                      morning_rush_time:
+                        type: "string"
+                        description: "早高峰时段"
+                      evening_rush_time:
+                        type: "string"
+                        description: "晚高峰时段"
+                    type: "object"
+                  charts:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        title:
+                          type: "string"
+                          description: "标题"
+                        scale_title:
+                          type: "string"
+                          description: "指标项标题"
+                        series:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              name:
+                                type: "string"
+                                description: "属于哪个周期的数据"
+                              data:
+                                type: "array"
+                                items:
+                                  type: "object"
+                                  properties:
+                                    x:
+                                      type: "string"
+                                    y:
+                                      type: "number"
+                          
+              traceid:
+                type: "string"
+              username:
+                type: "string"
+  /AreaReport/piLevelStatistics:
+    get:
+      summary: 区域报告PI占比分析
+      description: 区域报告PI占比分析,当前仅济南报告上线。
+      tags:
+        - 本地化报告定制修改
+      consumes: []
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: area_id
+          in: query
+          type: string
+          description: "区域id"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          description: 成功
+          properties: 
+            errno: 
+              type: "number"
+            errmsg: 
+              type: "string"
+            data: 
+              type: "array"
+              items: 
+                type: "object"
+                properties: 
+                  level: 
+                    type: "string"
+                  count: 
+                    type: "number"
+                  percent: 
+                    type: "number"
+                  mon: 
+                    type: "number"
+            traceid: 
+              type: "string"
+            username: 
+              type: "string"
+            time: 
+              required: 
+                - "a"
+                - "s"
+              properties: 
+                a: 
+                  type: "string"
+                s: 
+                  type: "string"
+              type: "object"
+  /AreaReport/piLevelTop5:
+    get:
+      summary: 区域报告PI占比分析
+      description: 区域报告PI占比分析,当前仅济南报告上线。
+      tags:
+        - 本地化报告定制修改
+      consumes: []
+      parameters:
+        - name: city_id
+          in: query
+          type: integer
+          description: "数据所在城市"
+          required: true
+        - name: area_id
+          in: query
+          type: string
+          description: "区域id"
+          required: true
+        - name: start_time
+          in: query
+          type: string
+          description: "查询数据开始日期"
+          required: true
+        - name: end_time
+          in: query
+          type: string
+          description: "查询数据结束日期"
+          required: true
+      responses:
+        200:
+          description: 成功
+          properties: 
+            errno: 
+              type: "number"
+            errmsg: 
+              type: "string"
+            data: 
+              required: 
+                - "morning_chart_top"
+                - "evening_chart_top"
+                - "allday_chart_top"
+              properties: 
+                morning_chart_top: 
+                  required: 
+                    - "A"
+                    - "B"
+                    - "C"
+                    - "D"
+                    - "E"
+                  properties: 
+                    A: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    B: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    C: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    D: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    E: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                  type: "object"
+                evening_chart_top: 
+                  required: 
+                    - "A"
+                    - "B"
+                    - "C"
+                    - "D"
+                    - "E"
+                  properties: 
+                    A: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    B: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    C: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    D: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    E: 
+                      type: "array"
+                      items: 
+                        type: "undefined"
+                  type: "object"
+                allday_chart_top: 
+                  required: 
+                    - "A"
+                    - "B"
+                    - "C"
+                    - "D"
+                    - "E"
+                  properties: 
+                    A: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    B: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    C: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    D: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                    E: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                  type: "object"
+              type: "object"
+            traceid: 
+              type: "string"
+            username: 
+              type: "string"
+            time: 
+              properties: 
+                a: 
+                  type: "string"
+                s: 
+                  type: "string"
+              type: "object"
+
   /Wordreport/GetUUID:
     get:
       summary: 获取任务id
