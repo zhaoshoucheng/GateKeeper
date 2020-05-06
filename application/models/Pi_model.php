@@ -45,10 +45,14 @@ class Pi_model extends CI_Model{
 
             $res = httpPOST($url . '/report/GetPiByJunction', $req, 0, 'json');
             $res = json_decode($res,true);
+
             if(empty($res)){
                 return [];
             }
-//            var_dump($req);
+            if(!isset($res['data']) || empty($res['data'])){
+                return 0;
+            }
+
             $trajSum = 0;
             $piSum = 0;
             foreach ($res['data'] as $v){

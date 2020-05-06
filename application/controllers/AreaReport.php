@@ -117,6 +117,8 @@ class AreaReport extends MY_Controller
             $params['date_type']=0;
         }
         if($this->userapp == 'jinanits'){ //济南需求复用南京功能
+            $params['start_date'] = $params['start_time'];
+            $params['end_date'] = $params['end_time'];
             $data = $this->areaReportService->queryAreaDataComparisonNJ($params);
         }else{
             $data = $this->areaReportService->queryAreaDataComparison($params);
@@ -254,6 +256,8 @@ class AreaReport extends MY_Controller
             $params['date_type']=0;
         }
         if($this->userapp == 'jinanits'){//济南需求复用南京功能
+            $params['start_date'] = $params['start_time'];
+            $params['end_date'] = $params['end_time'];
             $data = $this->areaReportService->queryAreaQuotaDataNJ($params);
             $this->response($data);
             return;

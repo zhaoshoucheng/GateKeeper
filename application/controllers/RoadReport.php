@@ -173,6 +173,8 @@ class RoadReport extends MY_Controller
             $params['date_type']=0;
         }
         if($this->userapp == 'jinanits'){ //济南需求复用南京功能
+            $params['start_date'] = $params['start_time'];
+            $params['end_date'] = $params['end_time'];
             $data = $this->roadReportService->queryRoadQuotaDataNJ($params);
             $this->response($data);
             return;
