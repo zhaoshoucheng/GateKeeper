@@ -28,6 +28,33 @@ class RoadReportService extends BaseService{
         $this->roadService = new RoadService();
         $this->reportService = new ReportService();
         $this->dataService = new DataService();
+//        $this->areaReportService = new AreaReportService();
+    }
+//获取两个阶段的pi数据
+    public function getJuncsPiCompare($cityID,$juncs,$startTime,$endTime){
+
+        $theDatelist = $this->getDateFromRange($startTime,$endTime);
+        $pi = $this->pi_model->getGroupJuncAvgPiWithDates($cityID,explode(",",$juncs),$theDatelist,$this->createHours());
+
+
+        $laststage = $this->getLastStage($startTime,$endTime);
+        $lastDatelist = $this->getDateFromRange($laststage[0],$laststage[1]);
+        $lastpi = $this->pi_model->getGroupJuncAvgPiWithDates($cityID,explode(",",$juncs),$lastDatelist,$this->createHours());
+
+        return [
+            'pi'=>$pi,
+            'last_pi'=>$lastpi,
+        ];
+
+    }
+    public function getLastStage($startTime,$endTime){
+
+        $len = $this->getDateFromRange($startTime,$endTime);
+        $nstart= strtotime($startTime) - 3600*24*count($len);
+        $nend=strtotime($endTime) - 3600*24*count($len);
+
+        return [date("Y-m-d",$nstart),date("Y-m-d",$nend)];
+
     }
 
     //济南定制化需求
@@ -63,7 +90,7 @@ class RoadReportService extends BaseService{
             $stageType="前一季";
         }
 
-        $piInfo = $this->areaReportService->getJuncsPiCompare($city_id,$start_date,$end_date,$logic_junction_ids);
+        $piInfo = $this->getJuncsPiCompare($city_id,$logic_junction_ids,$start_date,$end_date);
 
         if($piInfo['last_pi'] > 0 ){
             $mon = round(($piInfo['pi']-$piInfo['last_pi'])*100/$piInfo['last_pi'],2);
