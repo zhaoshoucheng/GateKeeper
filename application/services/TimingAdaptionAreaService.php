@@ -8,7 +8,7 @@
 
 namespace Services;
 
-use Didi\Cloud\Collection\Collection;
+use Timing_model;
 use Overtrue\Pinyin\Pinyin;
 
 /**
@@ -16,6 +16,7 @@ use Overtrue\Pinyin\Pinyin;
  * @package Services
  * @property \TimeAlarmRemarks_model $timeAlarmRemarks_model
  * @property \Adapt_model $adapt_model
+ * @property \Timing_model $timing_model
  */
 class TimingAdaptionAreaService extends BaseService
 {
@@ -34,6 +35,7 @@ class TimingAdaptionAreaService extends BaseService
         $this->load->model('alarmanalysis_model');
         $this->load->model('timeAlarmRemarks_model');
         $this->load->model('traj_model');
+        $this->load->model('timing_model');
 
         // load config
         $this->load->config('nconf');
@@ -216,9 +218,32 @@ class TimingAdaptionAreaService extends BaseService
     public function getAreaJunctionList($params)
     {
         $cityId = $params['city_id'];
-
         $areaJunctions = $this->getAreaJunctions($params);
+        
+        // 获取配时
+        $timingModel = new Timing_model();
+        $timing = $timingModel->queryTimingStatus(
+            [
+                'city_id' =>(int)$cityId,
+                'source' => 0,
+            ]
+        );
+        $hasTiming = [];
+        foreach ($timing as $item) {
+            if ($item['status'] == 1) {
+                $hasTiming[] = $item['logic_junction_id'];
+            }
+        }
+        // print_r("hasTiming");
+        // print_r($hasTiming);
 
+        foreach($areaJunctions as $areaKey=>$areaJunction){
+            if(in_array($areaJunction["logic_junction_id"],$hasTiming)){
+                $areaJunctions[$areaKey]["status"] = 1;
+            }
+        }
+        // print_r("areaJunctions"); 
+        // print_r($areaJunctions); 
         return $this->formatGetAreaJunctionListData($cityId, $areaJunctions);
     }
 
