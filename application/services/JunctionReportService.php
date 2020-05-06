@@ -100,7 +100,7 @@ class JunctionReportService extends BaseService{
         }
 
 
-        $desc = sprintf($tpl, $city_info['city_name'], $junction_info['district_name'], $datestr,$piInfo['pi'],$stageType,$mon,$conclusion);
+        $desc = sprintf($tpl, $city_info['city_name'], $junction_info['district_name'], $datestr,round($piInfo['pi'],2),$stageType,$mon,$conclusion);
 
 
         return [

@@ -204,7 +204,7 @@ class AreaReportService extends BaseService{
         }
 
 
-        $desc = sprintf($tpl, $city_info['city_name'], $districts_name, $datestr,$piInfo['pi'],$stageType,$mon,$conclusion);
+        $desc = sprintf($tpl, $city_info['city_name'], $districts_name, $datestr,round($piInfo['pi'],2),$stageType,$mon,$conclusion);
 
 
         return [

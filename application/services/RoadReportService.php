@@ -115,7 +115,7 @@ class RoadReportService extends BaseService{
 
 //        $desc = sprintf($tpl, $city_info['city_name'], $districts_name, $datestr,$piInfo['pi'],$stageType,$mon,$conclusion);
 
-        $desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, $datestr,$piInfo['pi'],$stageType,$mon,$conclusion);
+        $desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, $datestr,round($piInfo['pi'],2),$stageType,$mon,$conclusion);
 
 
         $road_detail = $this->roadService->getRoadDetail([
