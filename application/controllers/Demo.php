@@ -63,8 +63,8 @@ class Demo extends MY_Controller
             $outputList[] = [
                 "cnt" => $agg["doc_count"],
                 "avg_delay" => $agg["avg_delay"]["value"],
-                "segment_id" => $agg["key"],
-                "segment_name" => $juncNameMap[$agg["key"]],
+                "downstream_ramp" => $agg["downstream_ramp"],
+                "segment_name" => $juncNameMap[$agg["downstream_ramp"]],
             ];
         }
         print_r($outputList);
