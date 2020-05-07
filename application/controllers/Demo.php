@@ -41,7 +41,7 @@ class Demo extends MY_Controller
         }
         // print_r($response);
         $junctionIDs = [];
-        $responseJson = json_decode($response);
+        $responseJson = json_decode($response, false);
         foreach ($responseJson["aggregations"]["segment_id"]["buckets"] as $agg) {
             $junctionIDs[] = $agg["key"];
         }
