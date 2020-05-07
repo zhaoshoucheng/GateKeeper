@@ -1207,11 +1207,11 @@ class AreaReportService extends BaseService{
         }
 
         return [
-            ['level'=>"A","count"=>$piLevelMap['A'],"percent"=>$piLevelMap['A']/count($junctionList),"mon"=>$monA],
-            ['level'=>"B","count"=>$piLevelMap['B'],"percent"=>$piLevelMap['B']/count($junctionList),"mon"=>$monB],
-            ['level'=>"C","count"=>$piLevelMap['C'],"percent"=>$piLevelMap['C']/count($junctionList),"mon"=>$monC],
-            ['level'=>"D","count"=>$piLevelMap['D'],"percent"=>$piLevelMap['D']/count($junctionList),"mon"=>$monD],
-            ['level'=>"E","count"=>$piLevelMap['E'],"percent"=>$piLevelMap['E']/count($junctionList),"mon"=>$monE],
+            ['level'=>"A","count"=>$piLevelMap['A'],"percent"=>$piLevelMap['A']/count($piDatas),"mon"=>$monA],
+            ['level'=>"B","count"=>$piLevelMap['B'],"percent"=>$piLevelMap['B']/count($piDatas),"mon"=>$monB],
+            ['level'=>"C","count"=>$piLevelMap['C'],"percent"=>$piLevelMap['C']/count($piDatas),"mon"=>$monC],
+            ['level'=>"D","count"=>$piLevelMap['D'],"percent"=>$piLevelMap['D']/count($piDatas),"mon"=>$monD],
+            ['level'=>"E","count"=>$piLevelMap['E'],"percent"=>$piLevelMap['E']/count($piDatas),"mon"=>$monE],
         ];
     }
 
