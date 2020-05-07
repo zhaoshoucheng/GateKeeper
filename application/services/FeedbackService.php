@@ -101,6 +101,7 @@ class FeedbackService extends BaseService
             'city_id'     => $params['city_id'],
             'user_id'     => get_instance()->username,
             'type'        => $params['type'],
+            'pics'        => $params['pics'],
             'question'    => $params['question'],
             'description' => $params['description'],
         ];
