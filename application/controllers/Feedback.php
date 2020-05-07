@@ -36,6 +36,10 @@ class Feedback extends MY_Controller
             'question' => 'required|trim|min_length[1]'
         ]);
 
+        if(!isset($params['pics'])){
+            $params['pics']= "";
+        }
+
         $data = $this->feedbackService->insertFeedback($params);
 
         $this->response($data);

@@ -1180,12 +1180,38 @@ class AreaReportService extends BaseService{
             $lastPiLevelMap[$this->pi_model->getPIlevel($pid['pi'])]++;
         }
 
+
+        $monA=0;
+        $monB=0;
+        $monC=0;
+        $monD=0;
+        $monE=0;
+        if($lastPiLevelMap["A"] > 0){
+            $monA = ($piLevelMap["A"] - $lastPiLevelMap["A"])/$lastPiLevelMap["A"];
+        }
+        if($lastPiLevelMap["B"] > 0){
+            $monB = ($piLevelMap["B"] - $lastPiLevelMap["B"])/$lastPiLevelMap["B"];
+
+        }
+        if($lastPiLevelMap["C"] > 0){
+            $monC = ($piLevelMap["C"] - $lastPiLevelMap["C"])/$lastPiLevelMap["C"];
+
+        }
+        if($lastPiLevelMap["D"] > 0){
+            $monD = ($piLevelMap["D"] - $lastPiLevelMap["D"])/$lastPiLevelMap["D"];
+
+        }
+        if($lastPiLevelMap["E"] > 0){
+            $monE = ($piLevelMap["E"] - $lastPiLevelMap["E"])/$lastPiLevelMap["E"];
+
+        }
+
         return [
-            ['level'=>"A","count"=>$piLevelMap['A'],"percent"=>$piLevelMap['A']/count($junctionList),"mon"=>0.2],
-            ['level'=>"B","count"=>$piLevelMap['B'],"percent"=>$piLevelMap['B']/count($junctionList),"mon"=>0.2],
-            ['level'=>"C","count"=>$piLevelMap['C'],"percent"=>$piLevelMap['C']/count($junctionList),"mon"=>0.2],
-            ['level'=>"D","count"=>$piLevelMap['D'],"percent"=>$piLevelMap['D']/count($junctionList),"mon"=>0.2],
-            ['level'=>"E","count"=>$piLevelMap['E'],"percent"=>$piLevelMap['E']/count($junctionList),"mon"=>0.2],
+            ['level'=>"A","count"=>$piLevelMap['A'],"percent"=>$piLevelMap['A']/count($piDatas),"mon"=>$monA],
+            ['level'=>"B","count"=>$piLevelMap['B'],"percent"=>$piLevelMap['B']/count($piDatas),"mon"=>$monB],
+            ['level'=>"C","count"=>$piLevelMap['C'],"percent"=>$piLevelMap['C']/count($piDatas),"mon"=>$monC],
+            ['level'=>"D","count"=>$piLevelMap['D'],"percent"=>$piLevelMap['D']/count($piDatas),"mon"=>$monD],
+            ['level'=>"E","count"=>$piLevelMap['E'],"percent"=>$piLevelMap['E']/count($piDatas),"mon"=>$monE],
         ];
     }
 
