@@ -53,7 +53,7 @@ class Demo extends MY_Controller
         }
         foreach ($junctionInfos['junctions'] as $j) {
             if ($j['type'] != 1 && $j['type'] != 2) {
-                continue;
+                // continue;
             }
             $juncNameMap[$j['junction_id']] = $j['name'];
         }
