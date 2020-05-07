@@ -41,9 +41,9 @@ class Demo extends MY_Controller
         }
         print_r($response);
         $junctionIDs = [];
-        // foreach ($response["aggregations"][0]["segment_id"]["buckets"] as $agg) {
-        // $junctionIDs[] = $agg["key"];
-        // }
+        foreach ($response["aggregations"]["segment_id"]["buckets"] as $agg) {
+            $junctionIDs[] = $agg["key"];
+        }
         // $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc("23", $junctionIDs);
 
         print_r($junctionIDs);
