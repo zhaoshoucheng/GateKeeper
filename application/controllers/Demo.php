@@ -42,7 +42,7 @@ class Demo extends MY_Controller
         }
         $junctionIDs = [];
         $responseJson = json_decode($response, true);
-        foreach ($responseJson["aggregations"]["segment_id"]["buckets"] as $agg) {
+        foreach ($responseJson["aggregations"]["downstream_ramp"]["buckets"] as $agg) {
             $junctionIDs[] = $agg["key"];
         }
         $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc(23);
@@ -59,12 +59,12 @@ class Demo extends MY_Controller
         }
 
         $outputList = [];
-        foreach ($responseJson["aggregations"]["segment_id"]["buckets"] as $agg) {
+        foreach ($responseJson["aggregations"]["downstream_ramp"]["buckets"] as $agg) {
             $outputList[] = [
                 "cnt" => $agg["doc_count"],
                 "avg_delay" => $agg["avg_delay"]["value"],
-                "downstream_ramp" => $agg["downstream_ramp"],
-                "segment_name" => $juncNameMap[$agg["downstream_ramp"]],
+                "downstream_ramp" => $agg["key"],
+                "segment_name" => $juncNameMap[$agg["key"]],
             ];
         }
         print_r($outputList);
