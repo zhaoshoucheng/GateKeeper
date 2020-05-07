@@ -52,14 +52,17 @@ class Demo extends MY_Controller
             return [];
         }
         foreach ($junctionInfos['junctions'] as $j) {
-            if ($j['type'] != 1 && $j['type'] != 2) {
-                // continue;
+            if ($j['type'] != 2) {
+                continue;
             }
             $juncNameMap[$j['junction_id']] = $j['name'];
         }
 
         $outputList = [];
         foreach ($responseJson["aggregations"]["downstream_ramp"]["buckets"] as $agg) {
+            if (!isset($juncNameMap[$agg["key"]])) {
+                continue;
+            }
             $outputList[] = [
                 "cnt" => $agg["doc_count"],
                 "avg_delay" => $agg["avg_delay"]["value"],
@@ -67,7 +70,7 @@ class Demo extends MY_Controller
                 "segment_name" => $juncNameMap[$agg["key"]],
             ];
         }
-        print_r($outputList);
+        print_r(json_encode($outputList));
         exit;
         $resPart = json_decode($response, true);
     }
