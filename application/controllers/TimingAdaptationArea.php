@@ -1,11 +1,12 @@
 <?php
+
 /***************************************************************
  * # 自适应
  * # user:ningxiangbing@didichuxing.com
  * # date:2018-09-10
  ***************************************************************/
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 use Services\TimingAdaptionAreaService;
 use Services\PermissionService;
@@ -225,7 +226,7 @@ class TimingAdaptationArea extends MY_Controller
     public function getSpaceTimeMtraj()
     {
         $params = $this->input->post(null, true);
-        
+
         $this->validate([
             'city_id' => 'required|is_natural_no_zero',
             'logic_junction_id' => 'required|trim|min_length[1]',
