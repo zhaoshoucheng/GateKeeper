@@ -51,6 +51,8 @@ class Demo extends MY_Controller
         // exit;
         // $junctionIDs = array_column($ret, 'junction_id');
         $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc(23, $junctionIDs);
+        print_r($junctionInfos);
+        exit;
         $juncNameMap = [];
         if (empty($junctionInfos) || empty($junctionInfos['junctions'])) {
             return [];
