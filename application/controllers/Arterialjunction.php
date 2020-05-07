@@ -51,6 +51,7 @@ class Arterialjunction extends MY_Controller
                 $hasTiming[] = $item['logic_junction_id'];
             }
         }
+        // print_r($hasTiming);exit;
 
         $waymapModel = new Waymap_model();
         // 获取地图版本
