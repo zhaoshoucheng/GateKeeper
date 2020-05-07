@@ -40,18 +40,13 @@ class Demo extends MY_Controller
         if (!$response) {
             return [];
         }
-        // print_r($response);
         $junctionIDs = [];
         $responseJson = json_decode($response, true);
         foreach ($responseJson["aggregations"]["segment_id"]["buckets"] as $agg) {
             $junctionIDs[] = $agg["key"];
         }
-        // $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc("23", $junctionIDs);
-        // print_r($junctionIDs);
-        // exit;
-        // $junctionIDs = array_column($ret, 'junction_id');
         $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc(23);
-        print_r($junctionInfos);
+        // print_r($junctionInfos);
         $juncNameMap = [];
         if (empty($junctionInfos) || empty($junctionInfos['junctions'])) {
             return [];
@@ -62,7 +57,17 @@ class Demo extends MY_Controller
             }
             $juncNameMap[$j['junction_id']] = $j['name'];
         }
-        print_r($juncNameMap);
+
+        $outputList = [];
+        foreach ($responseJson["aggregations"]["segment_id"]["buckets"] as $agg) {
+            $outputList[] = [
+                "cnt" => $agg["doc_count"],
+                "avg_delay" => $agg["avg_delay"]["value"],
+                "segment_id" => $agg["key"],
+                "segment_name" => $juncNameMap[$agg["key"]],
+            ];
+        }
+        print_r($outputList);
         exit;
         $resPart = json_decode($response, true);
     }
