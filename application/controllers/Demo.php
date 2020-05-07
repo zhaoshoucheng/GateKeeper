@@ -83,7 +83,9 @@ class Demo extends MY_Controller
             }
             print_r($param[0] . " - " . $param[1]);
             echo "\n";
+            echo "\n";
             print_r(json_encode(array_slice($outputList, 0, 30), 256));
+            echo "\n";
             echo "\n";
         }
         exit;
