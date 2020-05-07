@@ -34,7 +34,7 @@ class Demo extends MY_Controller
 
     public function suzhouQuickRoadDelayList()
     {
-        $sql = 'SELECT count(*) as cnt,avg(delay) as avg_delay,segment_id from cn_signal_pro_freeway_segment_index_online_* where city_id=23 and day_time_hms>="2020-05-06 07:00:00" and day_time_hms<="2020-05-06 10:00:00" group by segment_id order by cnt desc';
+        $sql = 'SELECT count(*) as cnt,avg(delay) as avg_delay,downstream_ramp from cn_signal_pro_freeway_segment_index_online_* where city_id=23 and day_time_hms>="2020-05-06 07:00:00" and day_time_hms<="2020-05-06 10:00:00" group by downstream_ramp order by cnt desc';
         $queryUrl = 'http://2317:W2oTX7qT7nYTKuD@100.90.164.31:8005/_sql';
         $response = httpPOST($queryUrl, $sql, 8000, 'raw');
         if (!$response) {
