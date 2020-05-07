@@ -46,10 +46,10 @@ class Demo extends MY_Controller
             $junctionIDs[] = $agg["key"];
         }
         // $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc("23", $junctionIDs);
-        print_r($junctionIDs);
-        exit;
-        $junctionIDs = array_column($ret, 'junction_id');
-        $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc($cityID, $junctionIDs);
+        // print_r($junctionIDs);
+        // exit;
+        // $junctionIDs = array_column($ret, 'junction_id');
+        $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc(23, $junctionIDs);
         $juncNameMap = [];
         if (empty($junctionInfos) || empty($junctionInfos['junctions'])) {
             return [];
@@ -60,7 +60,8 @@ class Demo extends MY_Controller
             }
             $juncNameMap[$j['junction_id']] = $j['name'];
         }
-
+        print_r($juncNameMap);
+        exit;
         $resPart = json_decode($response, true);
     }
 
