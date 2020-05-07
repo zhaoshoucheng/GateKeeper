@@ -34,43 +34,57 @@ class Demo extends MY_Controller
 
     public function suzhouQuickRoadDelayList()
     {
-        $sql = 'SELECT count(*) as cnt,avg(delay) as avg_delay,downstream_ramp from cn_signal_pro_freeway_segment_index_online_* where city_id=23 and day_time_hms>="2020-05-08 07:00:00" and day_time_hms<="2020-05-08 10:00:00" group by downstream_ramp order by cnt desc limit 10000';
-        $queryUrl = 'http://2317:W2oTX7qT7nYTKuD@100.90.164.31:8005/_sql';
-        $response = httpPOST($queryUrl, $sql, 8000, 'raw');
-        if (!$response) {
-            return [];
-        }
-        $junctionIDs = [];
-        $responseJson = json_decode($response, true);
-        foreach ($responseJson["aggregations"]["downstream_ramp"]["buckets"] as $agg) {
-            $junctionIDs[] = $agg["key"];
-        }
-        $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc(23);
-        // print_r($junctionInfos);
-        $juncNameMap = [];
-        if (empty($junctionInfos) || empty($junctionInfos['junctions'])) {
-            return [];
-        }
-        foreach ($junctionInfos['junctions'] as $j) {
-            if ($j['type'] != 2) {
-                continue;
+        $params = [
+            ["2020-05-06 07:00:00", "2020-05-06 09:59:59"],
+            ["2020-05-07 07:00:00", "2020-05-07 09:59:59"],
+            ["2020-05-08 07:00:00", "2020-05-08 09:59:59"],
+            ["2020-05-09 07:00:00", "2020-05-09 09:59:59"],
+            ["2020-05-06 16:30:00", "2020-05-06 18:59:59"],
+            ["2020-05-07 16:30:00", "2020-05-07 18:59:59"],
+            ["2020-05-08 16:30:00", "2020-05-08 18:59:59"],
+            ["2020-05-09 16:30:00", "2020-05-09 18:59:59"],
+        ];
+        foreach ($params as $param) {
+            $sql = 'SELECT count(*) as cnt,avg(delay) as avg_delay,downstream_ramp from cn_signal_pro_freeway_segment_index_online_* where city_id=23 and day_time_hms>="' . $param[0] . '" and day_time_hms<="' . $param[0] . '" group by downstream_ramp order by cnt desc limit 10000';
+            $queryUrl = 'http://2317:W2oTX7qT7nYTKuD@100.90.164.31:8005/_sql';
+            $response = httpPOST($queryUrl, $sql, 8000, 'raw');
+            if (!$response) {
+                return [];
             }
-            $juncNameMap[$j['junction_id']] = $j['name'];
-        }
+            $junctionIDs = [];
+            $responseJson = json_decode($response, true);
+            foreach ($responseJson["aggregations"]["downstream_ramp"]["buckets"] as $agg) {
+                $junctionIDs[] = $agg["key"];
+            }
+            $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc(23);
+            // print_r($junctionInfos);
+            $juncNameMap = [];
+            if (empty($junctionInfos) || empty($junctionInfos['junctions'])) {
+                return [];
+            }
+            foreach ($junctionInfos['junctions'] as $j) {
+                if ($j['type'] != 2) {
+                    continue;
+                }
+                $juncNameMap[$j['junction_id']] = $j['name'];
+            }
 
-        $outputList = [];
-        foreach ($responseJson["aggregations"]["downstream_ramp"]["buckets"] as $agg) {
-            if (!isset($juncNameMap[$agg["key"]])) {
-                continue;
+            $outputList = [];
+            foreach ($responseJson["aggregations"]["downstream_ramp"]["buckets"] as $agg) {
+                if (!isset($juncNameMap[$agg["key"]])) {
+                    continue;
+                }
+                $outputList[] = [
+                    "cnt" => $agg["doc_count"],
+                    "avg_delay" => $agg["avg_delay"]["value"],
+                    "downstream_ramp" => $agg["key"],
+                    "segment_name" => $juncNameMap[$agg["key"]],
+                ];
             }
-            $outputList[] = [
-                "cnt" => $agg["doc_count"],
-                "avg_delay" => $agg["avg_delay"]["value"],
-                "downstream_ramp" => $agg["key"],
-                "segment_name" => $juncNameMap[$agg["key"]],
-            ];
+            print_r($param[0] . " - " . $param[1]);
+            echo "\n";
+            print_r(json_encode(array_slice($outputList, 0, 30)));
         }
-        print_r(json_encode(array_slice($outputList, 0, 30)));
         exit;
         $resPart = json_decode($response, true);
     }
