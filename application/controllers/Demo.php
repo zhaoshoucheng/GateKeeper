@@ -70,7 +70,7 @@ class Demo extends MY_Controller
                 "segment_name" => $juncNameMap[$agg["key"]],
             ];
         }
-        print_r(json_encode($outputList));
+        print_r(json_encode(array_slice($outputList, 30)));
         exit;
         $resPart = json_decode($response, true);
     }
