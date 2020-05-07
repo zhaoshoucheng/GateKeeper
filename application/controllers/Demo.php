@@ -74,12 +74,14 @@ class Demo extends MY_Controller
                 if (!isset($juncNameMap[$agg["key"]])) {
                     continue;
                 }
-                $outputList[] = [
-                    "cnt" => $agg["doc_count"],
-                    "avg_delay" => $agg["avg_delay"]["value"],
-                    "downstream_ramp" => $agg["key"],
-                    "segment_name" => $juncNameMap[$agg["key"]],
-                ];
+                if ($agg["avg_delay"]["value"] > 100) {
+                    $outputList[] = [
+                        "cnt" => $agg["doc_count"],
+                        "avg_delay" => $agg["avg_delay"]["value"],
+                        "downstream_ramp" => $agg["key"],
+                        "segment_name" => $juncNameMap[$agg["key"]],
+                    ];
+                }
             }
             print_r($param[0] . " - " . $param[1]);
             echo "\n";
