@@ -17,6 +17,7 @@ class Demo extends MY_Controller
         $this->load->helper('phase');
         $this->load->helper('http');
         $this->load->model('timing_model');
+        $this->load->model('expressway_model');
     }
 
     /*http://data.sts.didichuxing.com/signal-map/mapJunction/suggest?keyword=%E6%96%87%E5%8C%96&type=didi&city_id=12&token=0faa6ca90df19d26635391c511d124a1&user_id=roadNet*/
