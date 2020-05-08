@@ -719,6 +719,20 @@ $config['menu'] = [
             ],
             1 =>
             [
+                'name'   => '评估',
+                'url'    => '/assessment/',
+                'remark' => 'signal',
+                'son'    =>
+                [
+                    0 =>
+                    [
+                        'name' => '路口评估',
+                        'url'  => 'junction',
+                    ],
+                ],
+            ],
+            2 =>
+            [
                 'name'   => '优化',
                 'url'    => '/optimize/',
                 'remark' => 'signal',
@@ -739,9 +753,14 @@ $config['menu'] = [
                         'name' => '干线协调优化',
                         'url'  => 'coordinate',
                     ],
+                    3 =>
+                    [
+                        'name' => '子区划分',
+                        'url'  => 'area',
+                    ],
                 ],
             ],
-            2 =>
+            3 =>
             [
                 'name'   => '重点路段保障',
                 'url'    => '/',
@@ -753,9 +772,14 @@ $config['menu'] = [
                         'name' => '快速路监测',
                         'url'  => 'expressway',
                     ],
+                    1 =>
+                    [
+                        'name' => '动态扫描',
+                        'url'  => 'adaptive',
+                    ],
                 ],
             ],
-            3 =>
+            4 =>
             [
                 'name'   => '管理',
                 'url'    => '/manage/',
