@@ -39,7 +39,7 @@ class Sjgt_model extends CI_Model
      */
     public function getTransfor()
     {
-        $res = $this->db->select("area_name", "area_geometry")
+        $res = $this->db
             ->from($this->tb)
             ->order_by("id", "desc")
             ->get();
