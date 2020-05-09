@@ -295,6 +295,8 @@ class AreaService extends BaseService
         $baseDates = !empty($params['base_dates']) ?? explode(",", $params['base_dates']);
         $evaluateDates = [];
         if (!empty($baseDates)) {
+            print_r($baseDates);
+            exit;
             foreach ($baseDates as $baseDate) {
                 $evaluateDates[] = date("Y-m-d", strtotime($baseDate, "-7 day"));
             }
