@@ -266,7 +266,7 @@ class Timeframeoptimize extends MY_Controller
                 "warning" => "时段划分至少15分钟",
             ));
         }
-        $flowInfo = $this->waymap_model->getFlowInfo32();
+        $flowInfo = $this->waymap_model->getFlowInfo32($params["junction_id"]);
         $movementIDS = [];
         foreach ($flowInfo as $flow) {
             $movementIDS[] = $flow["logic_flow_id"];
