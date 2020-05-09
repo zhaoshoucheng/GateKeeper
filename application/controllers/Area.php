@@ -251,6 +251,9 @@ class Area extends MY_Controller
             'base_dates' => 'required|min_length[10]',
         ]);
         $data = $this->areaService->comparison($params);
+        unset($data["info"]);
+        unset($data["evaluate"]);
+        unset($data["base"]);
         $this->response($data);
     }
 
