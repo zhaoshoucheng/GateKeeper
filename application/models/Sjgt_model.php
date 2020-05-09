@@ -48,25 +48,48 @@ class Sjgt_model extends CI_Model
             $coordinates = json_decode($item["area_geometry"], true);
             $points = [];
             print_r($item);
-            foreach ($coordinates["coordinates"][0] as $point) {
-                $points[] = implode(",", $point);
-            }
-            // token=4c3e3b6a3588161128d0604daab528db&user_id=signalPro
-            $params = [];
-            $params["city_id"] = "12";
-            $params["token"] = "4c3e3b6a3588161128d0604daab528db";
-            $params["user_id"] = "signalPro";
-            $params["polygon"] = implode(";", $points);
-            $Url = "http://100.69.238.11:8000/its/signal-map/mapJunction/polygon";
-            $ret = httpPOST($Url, $params);
-            // print_r($points);
-            $polygonResponse = json_decode($ret, true);
-            // print_r(json_decode($ret, true));
-
             echo "INSERT INTO `area` (`id`, `area_name`, `city_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '" . $item["area_name"] . "', '12', '0', '2020-05-09 11:01:02', '2020-05-09 21:28:38', '1970-01-01 00:00:00');<br/>";
-            foreach ($polygonResponse["data"]["filter_juncs"] as $juncItem) {
-                echo "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '175', '" . $juncItem["logic_junction_id"] . "', '0', '2019-12-05 10:28:40', '2019-12-05 10:28:40', '1970-01-01 00:00:00');<br/>";
+
+            if ($coordinates["MultiPolygon"] == "MultiPolygon") {
+                foreach ($coordinates["coordinates"] as $partCoordinate) {
+                    foreach ($partCoordinate[0] as $point) {
+                        $points[] = implode(",", $point);
+                    }
+                    // token=4c3e3b6a3588161128d0604daab528db&user_id=signalPro
+                    $params = [];
+                    $params["city_id"] = "12";
+                    $params["token"] = "4c3e3b6a3588161128d0604daab528db";
+                    $params["user_id"] = "signalPro";
+                    $params["polygon"] = implode(";", $points);
+                    $Url = "http://100.69.238.11:8000/its/signal-map/mapJunction/polygon";
+                    $ret = httpPOST($Url, $params);
+                    // print_r($points);
+                    $polygonResponse = json_decode($ret, true);
+                    // print_r(json_decode($ret, true));
+
+                    foreach ($polygonResponse["data"]["filter_juncs"] as $juncItem) {
+                        echo "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '175', '" . $juncItem["logic_junction_id"] . "', '0', '2019-12-05 10:28:40', '2019-12-05 10:28:40', '1970-01-01 00:00:00');<br/>";
+                    }
+                }
             }
+            // foreach ($coordinates["coordinates"][0] as $point) {
+            //     $points[] = implode(",", $point);
+            // }
+            // // token=4c3e3b6a3588161128d0604daab528db&user_id=signalPro
+            // $params = [];
+            // $params["city_id"] = "12";
+            // $params["token"] = "4c3e3b6a3588161128d0604daab528db";
+            // $params["user_id"] = "signalPro";
+            // $params["polygon"] = implode(";", $points);
+            // $Url = "http://100.69.238.11:8000/its/signal-map/mapJunction/polygon";
+            // $ret = httpPOST($Url, $params);
+            // // print_r($points);
+            // $polygonResponse = json_decode($ret, true);
+            // // print_r(json_decode($ret, true));
+
+            // foreach ($polygonResponse["data"]["filter_juncs"] as $juncItem) {
+            //     echo "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '175', '" . $juncItem["logic_junction_id"] . "', '0', '2019-12-05 10:28:40', '2019-12-05 10:28:40', '1970-01-01 00:00:00');<br/>";
+            // }
         }
         print_r($list);
     }
