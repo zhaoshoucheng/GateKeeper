@@ -181,7 +181,7 @@ class Timeframeoptimize extends MY_Controller
                 ];
             }
         }
-        return $this->response($timing);
+        return $this->response($listTiming);
     }
 
     /**
