@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 快速路相关
  * User: zhuyewei
@@ -38,7 +39,6 @@ class Expressway_model extends CI_Model
 
         $this->waymap_interface = $this->config->item('waymap_interface');
         $this->quickroad_waymap_interface = $this->config->item('quickroad_waymap_interface');
-
     }
     /**
      * 获取全部路网版本
@@ -77,57 +77,60 @@ class Expressway_model extends CI_Model
     public function getQuickRoadMovement($cityID)
     {
         $data = [
-            'city_id'=>$cityID,
-            'version'=>self::$lastMapVersion
+            'city_id' => $cityID,
+            'version' => self::$lastMapVersion
         ];
 
         $url = $this->quickroad_waymap_interface . '/signal-map/quickroad/movements';
-//        $url = 'http://10.86.108.35:8031/signal-map/quickroad/movements';
+        //        $url = 'http://10.86.108.35:8031/signal-map/quickroad/movements';
 
         $result = $this->waymap_model->get($url, $data);
 
         return $result;
     }
 
-    public function getQuickRoadSegmentsByJunc($cityID,$juncs = []){
+    public function getQuickRoadSegmentsByJunc($cityID, $juncs = [])
+    {
         $data = [
-            'city_id'=>(int)$cityID,
+            'city_id' => (int) $cityID,
         ];
-        if(!empty($juncs)){
+        if (!empty($juncs)) {
             $data['junction_ids'] = $juncs;
         }
 
         $url = $this->quickroad_waymap_interface . '/signal-map/quickroad/segments';
-//        $url = "http://10.86.108.35:8031/signal-map/quickroad/segments";
+        //        $url = "http://10.86.108.35:8031/signal-map/quickroad/segments";
 
 
-        $result = $this->waymap_model->post($url, $data,0,'json');
+        $result = $this->waymap_model->post($url, $data, 0, 'json');
 
         return $result;
     }
 
 
     //提取快速路路段信息
-    public function getQuickRoadSegments($cityID,$names = []){
+    public function getQuickRoadSegments($cityID, $names = [])
+    {
         $data = [
-            'city_id'=>(int)$cityID,
+            'city_id' => (int) $cityID,
         ];
-        if(!empty($names)){
+        if (!empty($names)) {
             $data['names'] = $names;
         }
 
         $url = $this->quickroad_waymap_interface . '/signal-map/quickroad/segments';
-//        $url = "http://10.86.108.35:8031/signal-map/quickroad/segments";
+        //        $url = "http://10.86.108.35:8031/signal-map/quickroad/segments";
 
 
-        $result = $this->waymap_model->post($url, $data,0,'json');
+        $result = $this->waymap_model->post($url, $data, 0, 'json');
 
         return $result;
     }
 
 
     //查询快速路的指标
-    public function getOnlineExpresswayQuotaList($cityID,$startJuncID,$endJuncID){
+    public function getOnlineExpresswayQuotaList($cityID, $startJuncID, $endJuncID)
+    {
         $req = [
             'city_id' => $cityID,
             'upstream_id' => $startJuncID,
@@ -147,7 +150,8 @@ class Expressway_model extends CI_Model
     }
 
     //查询快速路的指标详情
-    public function getExpresswayQuotaDetail(){
+    public function getExpresswayQuotaDetail()
+    {
         $req = [
             'city_id' => $city_id,
             'dates' => $dates,
@@ -165,11 +169,4 @@ class Expressway_model extends CI_Model
             return [];
         }
     }
-
-
-
-
-
-
-
 }

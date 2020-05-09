@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: didi
@@ -10,6 +11,7 @@ namespace Services;
 
 use Timing_model;
 use Overtrue\Pinyin\Pinyin;
+use Didi\Cloud\Collection\Collection;
 
 /**
  * Class TimingAdaptionAreaService
@@ -69,7 +71,18 @@ class TimingAdaptionAreaService extends BaseService
     public function getAreaListFormat($params)
     {
         $cityId = $params['city_id'];
-        $data = $this->getAreaList($params);
+        $areaData = $this->getAreaList($params);
+        if ($cityId == 23) {
+            return $this->formatGetAreaListData($cityId, $areaData);
+        }
+        $data = [];
+
+        //todo 苏州硬编码
+        foreach ($areaData as $area) {
+            if (in_array($area["id"], ["441"])) {
+                $data[] = $area;
+            }
+        }
         return $this->formatGetAreaListData($cityId, $data);
     }
 
@@ -219,13 +232,13 @@ class TimingAdaptionAreaService extends BaseService
     {
         $cityId = $params['city_id'];
         $areaJunctions = $this->getAreaJunctions($params);
-        
-        if($cityId==23){
+
+        if ($cityId == 23) {
             // 获取配时
             $timingModel = new Timing_model();
             $timing = $timingModel->queryTimingStatus(
                 [
-                    'city_id' =>(int)$cityId,
+                    'city_id' => (int) $cityId,
                     'source' => 0,
                 ]
             );
@@ -238,8 +251,8 @@ class TimingAdaptionAreaService extends BaseService
             // print_r("hasTiming");
             // print_r($hasTiming);
 
-            foreach($areaJunctions as $areaKey=>$areaJunction){
-                if(in_array($areaJunction["logic_junction_id"],$hasTiming)){
+            foreach ($areaJunctions as $areaKey => $areaJunction) {
+                if (in_array($areaJunction["logic_junction_id"], $hasTiming)) {
                     $areaJunctions[$areaKey]["status"] = 1;
                 }
             }
@@ -530,7 +543,8 @@ class TimingAdaptionAreaService extends BaseService
                 $check = $alarmRemarksFlowKeyTypeValue[$val['logic_flow_id']] ?? 0;
             }
 
-            if (!empty($junctionIdName[$val['logic_junction_id']])
+            if (
+                !empty($junctionIdName[$val['logic_junction_id']])
                 && !empty($flowsInfo[$val['logic_junction_id']][$val['logic_flow_id']])
             ) {
                 $result['data'][$k] = [
@@ -556,7 +570,7 @@ class TimingAdaptionAreaService extends BaseService
                 'dataList' => [],
             ];
         }
-        usort($result['data'], function($a, $b) {
+        usort($result['data'], function ($a, $b) {
             if ($a['is_ignore'] != $b['is_ignore']) {
                 return ($a['is_ignore'] < $b['is_ignore']) ? 1 : -1;
             }
@@ -585,8 +599,8 @@ class TimingAdaptionAreaService extends BaseService
             'area_id' => $data['area_id'],
             'logic_junction_id' => $data['logic_junction_id'],
             'logic_flow_id' => $data['logic_flow_id'],
-            'flow_alarm_type' => $data['flow_alarm_type']??0,
-            'junction_alarm_type' => $data['junction_alarm_type']??0,
+            'flow_alarm_type' => $data['flow_alarm_type'] ?? 0,
+            'junction_alarm_type' => $data['junction_alarm_type'] ?? 0,
             'type' => $data['is_correct'],
             'comment' => $data['comment'],
             'username' => $_COOKIE['username'] ?? "",
@@ -691,8 +705,8 @@ class TimingAdaptionAreaService extends BaseService
             return [];
         }
         $quotaInfo = [];
-        foreach ($quotaInfoTmp as $key=>$item){
-            if(!empty($item['value']) && $item['value']>0){
+        foreach ($quotaInfoTmp as $key => $item) {
+            if (!empty($item['value']) && $item['value'] > 0) {
                 $quotaInfo[] = $item;
             }
         }
@@ -754,21 +768,22 @@ class TimingAdaptionAreaService extends BaseService
      * @return int
      * @throws \Exception
      */
-    public function getClockShift($data){
+    public function getClockShift($data)
+    {
         //获取最近的缓存数据
         $clockKey = sprintf("itstool_junction_clockshift_%s", $data["logic_junction_id"]);
         $clockShift = $this->redis_model->getData($clockKey);
-        if(!empty($clockShift)){
+        if (!empty($clockShift)) {
             return $clockShift;
         }
 
         //获取配时信息
         $allTimingInfo = $this->getAllFlowTimingInfo($data);
         $newTimingInfo = $allTimingInfo;
-        if(empty($allTimingInfo["movement"])){
+        if (empty($allTimingInfo["movement"])) {
             return 0;
         }
-        foreach ($allTimingInfo["movement"] as $key=>$item){
+        foreach ($allTimingInfo["movement"] as $key => $item) {
             $endTime = time();
             $startTime = $endTime - 30 * 60;
             $esData = [
@@ -780,7 +795,7 @@ class TimingAdaptionAreaService extends BaseService
             ];
 
             $esUrl = $this->config->item('new_es_interface') . '/estimate/space/query';
-            if(ENVIRONMENT=="development"){
+            if (ENVIRONMENT == "development") {
                 $esUrl = 'http://10.85.128.208:8001/api/data/estimate/space/query';
             }
 
@@ -800,7 +815,7 @@ class TimingAdaptionAreaService extends BaseService
             $trajList = [];
             //格式化原始轨迹数据
             foreach ($detail['result'] as $k => $v) {
-                if(count($v)<5){
+                if (count($v) < 5) {
                     continue;
                 }
                 $timestampArr = array_column($v, 'timestamp');
@@ -814,18 +829,18 @@ class TimingAdaptionAreaService extends BaseService
                 }
             }
             $newTimingInfo["movement"][$key]["traj"] = array_values($trajList);
-            if(empty($trajList)){
+            if (empty($trajList)) {
                 unset($newTimingInfo["movement"][$key]);
             }
         }
         $newTimingInfo["movement"] = array_values($newTimingInfo["movement"]);
         $requestInfo = [
-            "junction_list"=>[$newTimingInfo],
+            "junction_list" => [$newTimingInfo],
         ];
 
         $correctResult = $this->traj_model->getRealtimeClockShiftCorrect(json_encode($requestInfo));
         $clockShift = $correctResult[0]["clock_shift"] ?? 0;    //纠偏差
-        $this->redis_model->setEx($clockKey,$clockShift,300);
+        $this->redis_model->setEx($clockKey, $clockShift, 300);
         return $clockShift;
     }
 
@@ -851,15 +866,15 @@ class TimingAdaptionAreaService extends BaseService
             $timingInfo['offset'] = 0;
 
             $info32 = $this->waymap_model->getFlowInfo32($data['logic_junction_id']);
-            $flowMap = array_column($info32,"phase_name","logic_flow_id");
+            $flowMap = array_column($info32, "phase_name", "logic_flow_id");
             $comment = "";
-            if(isset($flowMap[$data['logic_flow_id']])){
-                $comment=$flowMap[$data['logic_flow_id']];
+            if (isset($flowMap[$data['logic_flow_id']])) {
+                $comment = $flowMap[$data['logic_flow_id']];
             }
-            $timingInfo['green']=[];
-            $timingInfo['green'][]=["comment"=>$comment];
+            $timingInfo['green'] = [];
+            $timingInfo['green'][] = ["comment" => $comment];
 
-//            return [];
+            //            return [];
         }
 
         //正常逻辑不变
@@ -875,7 +890,7 @@ class TimingAdaptionAreaService extends BaseService
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/space/query';
 
-        if(ENVIRONMENT=="development"){
+        if (ENVIRONMENT == "development") {
             $esUrl = 'http://10.85.128.208:8001/api/data/estimate/space/query';
         }
 
@@ -917,19 +932,21 @@ class TimingAdaptionAreaService extends BaseService
                 ];
             }
             //获取把时空图轨迹压缩在一个周期内
-            $pts = $this->getTrajsInOneCycle($ret['dataList'][$k]
-                , $cycleLength
-                , ($offset + $clockShift) % $cycleLength);   //纠偏
+            $pts = $this->getTrajsInOneCycle(
+                $ret['dataList'][$k],
+                $cycleLength,
+                ($offset + $clockShift) % $cycleLength
+            );   //纠偏
             if (count($pts) < 2) {
                 continue;
             }
             $st = $pts[0][0];
             $et = $pts[count($pts) - 1][0];
-            if (abs($st)>600 || abs($et)>600 || $et - $st > 1000) {
+            if (abs($st) > 600 || abs($et) > 600 || $et - $st > 1000) {
                 continue;
             }
             $ret['dataList'][$cnt] = $pts;
-            $cnt ++;
+            $cnt++;
         }
         $ret['dataList'] = array_filter($ret['dataList']);
 
@@ -950,10 +967,10 @@ class TimingAdaptionAreaService extends BaseService
         $info = $ret['info'];
         $cycle = $cycleLength;
         // 坐标轴的范围: [min(-10, max(t_min, -3*cycle_length)), max(10+cycle_length, min(t_max, 2*cycle_length))];
-        $tmp_min = $info['x']['min'] > -3*$cycle ? $info['x']['min'] : -3*$cycle;
+        $tmp_min = $info['x']['min'] > -3 * $cycle ? $info['x']['min'] : -3 * $cycle;
         $info['x']['min'] = $tmp_min < -10 ? $tmp_min : -10;
-        $tmp_max = $info['x']['max'] < 2*$cycle ? $info['x']['max'] : 2*$cycle;
-        $info['x']['max'] = $tmp_max > 10+$cycle ? $tmp_max : 10+$cycle;
+        $tmp_max = $info['x']['max'] < 2 * $cycle ? $info['x']['max'] : 2 * $cycle;
+        $info['x']['max'] = $tmp_max > 10 + $cycle ? $tmp_max : 10 + $cycle;
         $ret['info'] = $info;
         $ret['signal_info'] = $timingInfo;
         $ret['clock_shift'] = intval($clockShift);
@@ -969,10 +986,10 @@ class TimingAdaptionAreaService extends BaseService
      *
      * @return array
      */
-    private function getAllFlowTimingInfo($data,$flowId="")
+    private function getAllFlowTimingInfo($data, $flowId = "")
     {
         $resData = $this->getFlowTimingInfo($data);
-        if(empty($resData)){
+        if (empty($resData)) {
             return [];
         }
         // 周期 相位差
@@ -984,8 +1001,8 @@ class TimingAdaptionAreaService extends BaseService
         ];
         $tmp = [];
         $tmp['movement_id'] = $data['logic_flow_id'];
-        if (isset($resData['green'])){
-            foreach ($resData['green'] as $k=>$v){
+        if (isset($resData['green'])) {
+            foreach ($resData['green'] as $k => $v) {
                 $tmp['green'][] = [
                     'green_start' => $v['start_time'],
                     'green_duration' => $v['duration'],
@@ -1032,96 +1049,91 @@ class TimingAdaptionAreaService extends BaseService
             'tod_start_time' => $timingInfo['start_time'],
             'tod_end_time' => $timingInfo['end_time'],
         ];
-        if ($Info['data']['structure'] == 2){ //stage类型
+        if ($Info['data']['structure'] == 2) { //stage类型
             $stageLenMap = []; //每个阶段的长度
-            $phaseStageMap = [];//记录每个相位所在的阶段
-            foreach ($timingInfo['vehicle_phase'] as $tk => $tv){
+            $phaseStageMap = []; //记录每个相位所在的阶段
+            foreach ($timingInfo['vehicle_phase'] as $tk => $tv) {
                 $phaseStageMap[$tv['phase_num']][] = $tv['sequence_num'];
-                $stageLenMap[$tv['sequence_num']] = $tv['end_time']-$tv['start_time'];
+                $stageLenMap[$tv['sequence_num']] = $tv['end_time'] - $tv['start_time'];
             }
             ksort($stageLenMap);
 
-            foreach ($timingInfo['vehicle_phase'] as $tk => $tv){
-                if($tv['flow_info'] == null){
+            foreach ($timingInfo['vehicle_phase'] as $tk => $tv) {
+                if ($tv['flow_info'] == null) {
                     continue;
                 }
 
-                foreach ($tv['flow_info'] as $fk=>$fv){
+                foreach ($tv['flow_info'] as $fk => $fv) {
 
-                    if($fv['logic_flow_id']!=$data['logic_flow_id']){//过滤无用的flow
+                    if ($fv['logic_flow_id'] != $data['logic_flow_id']) { //过滤无用的flow
                         continue;
                     }
                     //找到目标flow
-                    if(count($phaseStageMap[$tv['phase_num']])>1 && $phaseStageMap[$tv['phase_num']][1] = $phaseStageMap[$tv['phase_num']][0]+1 ){ //跨阶段
+                    if (count($phaseStageMap[$tv['phase_num']]) > 1 && $phaseStageMap[$tv['phase_num']][1] = $phaseStageMap[$tv['phase_num']][0] + 1) { //跨阶段
                         //跨阶段的第一段先不用计算
-                        if($phaseStageMap[$tv['phase_num']][0] == $tv['sequence_num']){
+                        if ($phaseStageMap[$tv['phase_num']][0] == $tv['sequence_num']) {
                             continue;
                         }
                         //跨阶段的第二阶段
-                        $startTime=0;
-                        foreach ($stageLenMap as $k => $v){
-                            if ($k == $tv['sequence_num']-1){
+                        $startTime = 0;
+                        foreach ($stageLenMap as $k => $v) {
+                            if ($k == $tv['sequence_num'] - 1) {
                                 break;
-                            }else{
+                            } else {
                                 $startTime += $v;
                             }
                         }
                         $tmpMovementTiming = array(
-                            'comment'=>$tv['sg_name'],
-                            'logic_flow_id'=>$fv['logic_flow_id'],
-                            'start_time'=>$startTime,
-                            'duration'=>$stageLenMap[$tv['sequence_num']]+$stageLenMap[$tv['sequence_num']-1],
+                            'comment' => $tv['sg_name'],
+                            'logic_flow_id' => $fv['logic_flow_id'],
+                            'start_time' => $startTime,
+                            'duration' => $stageLenMap[$tv['sequence_num']] + $stageLenMap[$tv['sequence_num'] - 1],
                         );
                         $res['green'][] = $tmpMovementTiming;
-
-                    }else{
-                        $startTime=0;
-                        foreach ($stageLenMap as $k => $v){
-                            if ($k == $tv['sequence_num']){
+                    } else {
+                        $startTime = 0;
+                        foreach ($stageLenMap as $k => $v) {
+                            if ($k == $tv['sequence_num']) {
                                 break;
-                            }else{
+                            } else {
                                 $startTime += $v;
                             }
                         }
                         $tmpMovementTiming = array(
-                            'comment'=>$tv['sg_name'],
-                            'logic_flow_id'=>$fv['logic_flow_id'],
-                            'start_time'=>$startTime,
-                            'duration'=>$stageLenMap[$tv['sequence_num']],
+                            'comment' => $tv['sg_name'],
+                            'logic_flow_id' => $fv['logic_flow_id'],
+                            'start_time' => $startTime,
+                            'duration' => $stageLenMap[$tv['sequence_num']],
                         );
                         $res['green'][] = $tmpMovementTiming;
                     }
-
-
                 }
             }
-
-        }else{
+        } else {
             if (isset($timingInfo['vehicle_phase']) && !empty($timingInfo['vehicle_phase'])) {
-                foreach ($timingInfo['vehicle_phase'] as $tk => $tv){
-                    if (empty($tv['flow_info']) || count($tv['flow_info']) == 0){
+                foreach ($timingInfo['vehicle_phase'] as $tk => $tv) {
+                    if (empty($tv['flow_info']) || count($tv['flow_info']) == 0) {
                         continue;
                     }
-                    foreach ($tv['flow_info'] as $fk=>$fv){
-                        if($fv['logic_flow_id']!=$data['logic_flow_id']){//过滤无用的flow
+                    foreach ($tv['flow_info'] as $fk => $fv) {
+                        if ($fv['logic_flow_id'] != $data['logic_flow_id']) { //过滤无用的flow
                             continue;
                         }
                         //找到目标flow
                         $tmpMovementTiming = array(
-                            'comment'=>$tv['sg_name'],
-                            'logic_flow_id'=>$fv['logic_flow_id'],
-                            'start_time'=>$tv['start_time'],
-                            'duration'=>$tv['end_time']-$tv['start_time'],
+                            'comment' => $tv['sg_name'],
+                            'logic_flow_id' => $fv['logic_flow_id'],
+                            'start_time' => $tv['start_time'],
+                            'duration' => $tv['end_time'] - $tv['start_time'],
                         );
                         $res['green'][] = $tmpMovementTiming;
-
                     }
                 }
             }
         }
 
 
-        $res['yellow']=3;
+        $res['yellow'] = 3;
 
         return $res;
     }
@@ -1194,41 +1206,36 @@ class TimingAdaptionAreaService extends BaseService
                     }
 
 
-                    $cycle = $timingInfo["cycle"]??0;
-                    $offset = $timingInfo["offset"]??0;
-                    foreach ($timingInfo['vehicle_phase'] as $tk=>$tv){
+                    $cycle = $timingInfo["cycle"] ?? 0;
+                    $offset = $timingInfo["offset"] ?? 0;
+                    foreach ($timingInfo['vehicle_phase'] as $tk => $tv) {
                         if (empty($tv['flow_info'])) {
                             continue;
                         }
 
-                        foreach ($tv['flow_info'] as $fk=>$fv){
-                                if($fv['logic_flow_id'] == $data['logic_flow_id'] ){
+                        foreach ($tv['flow_info'] as $fk => $fv) {
+                            if ($fv['logic_flow_id'] == $data['logic_flow_id']) {
 
-                                    $green = $tv['green'];
-                                    $yellow = $tv['yellow'];
-                                     if (isset($flowTimingCurve[date("H:i", strtotime($ctime))]) && !isset($phaseMap[$tv['phase_num']."_".$tv['sequence_num']."_".date("H:i", strtotime($ctime))])) {
+                                $green = $tv['green'];
+                                $yellow = $tv['yellow'];
+                                if (isset($flowTimingCurve[date("H:i", strtotime($ctime))]) && !isset($phaseMap[$tv['phase_num'] . "_" . $tv['sequence_num'] . "_" . date("H:i", strtotime($ctime))])) {
 
-                                        $flowTimingCurve[date("H:i", strtotime($ctime))]["green"] += $green;
-                                        $flowTimingCurve[date("H:i", strtotime($ctime))]["yellow"] += $yellow;
-
-
-                                     } else {
-                                        $flowTimingCurve[date("H:i", strtotime($ctime))] = [
-                                            "green" => $green,
-                                            "yellow" => $yellow,
-                                            "cycle" => $cycle,
-                                            "offset" => $offset,
-                                        ];
-                                    }
-                                    $phaseMap[$tv['phase_num']."_".$tv['sequence_num']."_".date("H:i", strtotime($ctime))] = 1;
-
-
+                                    $flowTimingCurve[date("H:i", strtotime($ctime))]["green"] += $green;
+                                    $flowTimingCurve[date("H:i", strtotime($ctime))]["yellow"] += $yellow;
+                                } else {
+                                    $flowTimingCurve[date("H:i", strtotime($ctime))] = [
+                                        "green" => $green,
+                                        "yellow" => $yellow,
+                                        "cycle" => $cycle,
+                                        "offset" => $offset,
+                                    ];
                                 }
+                                $phaseMap[$tv['phase_num'] . "_" . $tv['sequence_num'] . "_" . date("H:i", strtotime($ctime))] = 1;
                             }
                         }
                     }
-
                 }
+            }
         }
 
         return $flowTimingCurve;
@@ -1265,7 +1272,7 @@ class TimingAdaptionAreaService extends BaseService
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/scatter/query';
 
-        if(ENVIRONMENT=="development"){
+        if (ENVIRONMENT == "development") {
             $esUrl = 'http://10.85.128.208:8001/api/data/estimate/scatter/query';
         }
 
@@ -1295,11 +1302,11 @@ class TimingAdaptionAreaService extends BaseService
             if ($v['stopDelayBefore'] > 300) {
                 continue;
             }
-            $dataValueTime = date("H:i",$v['timestamp']);
-            foreach ($flowTimingCurve as $flowtime=>$flowItem){
-                $flowFullTimestamp = strtotime(date("Y-m-d")." ".$flowtime.":00");
-                if($v['timestamp']>($flowFullTimestamp-120) && $v['timestamp']<$flowFullTimestamp){
-                    $dataValueTime = date("H:i",$flowFullTimestamp);
+            $dataValueTime = date("H:i", $v['timestamp']);
+            foreach ($flowTimingCurve as $flowtime => $flowItem) {
+                $flowFullTimestamp = strtotime(date("Y-m-d") . " " . $flowtime . ":00");
+                if ($v['timestamp'] > ($flowFullTimestamp - 120) && $v['timestamp'] < $flowFullTimestamp) {
+                    $dataValueTime = date("H:i", $flowFullTimestamp);
                 }
             }
 
@@ -1360,7 +1367,7 @@ class TimingAdaptionAreaService extends BaseService
         if (isset($controlParams["city"][$cityId])) {
             $cityParams = $controlParams["city"][$cityId];
         }
-        $cityParams["queue_ratio_thresh"] = $cityParams["queue_ratio_thresh"]*100;
+        $cityParams["queue_ratio_thresh"] = $cityParams["queue_ratio_thresh"] * 100;
         return $cityParams;
     }
 
@@ -1392,7 +1399,7 @@ class TimingAdaptionAreaService extends BaseService
 
         $esUrl = $this->config->item('new_es_interface') . '/estimate/queue/query';
 
-        if(ENVIRONMENT=="development"){
+        if (ENVIRONMENT == "development") {
             $esUrl = 'http://10.85.128.208:8001/api/data/estimate/queue/query';
         }
 
