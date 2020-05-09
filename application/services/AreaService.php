@@ -299,6 +299,8 @@ class AreaService extends BaseService
                 $evaluateDates[] = date("Y-m-d", strtotime($baseDate, "-7 day"));
             }
         }
+        print_r($evaluateDates);
+        exit;
 
         // 指标算法映射
         $methods = [
