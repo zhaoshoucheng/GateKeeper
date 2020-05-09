@@ -296,7 +296,7 @@ class AreaService extends BaseService
         $evaluateDates = [];
         if (!empty($baseDates)) {
             foreach ($baseDates as $baseDate) {
-                $evaluateDates[] = date("Y-m-d", strtotime($baseDate, "-7 days"));
+                $evaluateDates[] = date("Y-m-d", strtotime($baseDate) - 7 * 24 * 3600);
             }
         }
         print_r($evaluateDates);
