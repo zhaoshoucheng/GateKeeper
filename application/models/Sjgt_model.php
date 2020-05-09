@@ -59,10 +59,12 @@ class Sjgt_model extends CI_Model
             $Url = "http://100.69.238.11:8000/its/signal-map/mapJunction/polygon";
             $ret = httpPOST($Url, $params);
             print_r($points);
-            print_r($ret);
+            $polygonResponse = json_decode($ret, true);
+            print_r(json_decode($ret, true));
+            foreach ($polygonResponse["data"]["filter_juncs"] as $juncItem) {
+                echo "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '175', '" . $juncItem["logic_junction_id"] . "', '0', '2019-12-05 10:28:40', '2019-12-05 10:28:40', '1970-01-01 00:00:00');<br/>";
+            }
             exit;
-            $polygon = [];
-            // http://100.90.164.31:8001/signal-map/mapJunction/polygon?city_id=12&districts=370102,370103&polygon=116.930362,36.724026;117.115069,36.719623;117.187854,36.654649;117.086917,36.612772;116.933108,36.664013&version=2018071912
         }
         print_r($list);
     }
