@@ -275,7 +275,7 @@ class RoadReportService extends BaseService{
     }
 
     public function queryRoadDataComparisonNJ($params) {
-        $tpl = "上图展示了研究干线总体运行状态（PI）%s与%s的对⽐，%s该干线拥堵程度与%s相比%s。";
+        $tpl = "上图展示了研究干线总体运行状态（PI）%s与%s的对比，%s该干线拥堵程度与%s相比%s。";
 
         $city_id = intval($params['city_id']);
         $road_id = $params['road_id'];
@@ -344,7 +344,7 @@ class RoadReportService extends BaseService{
     }
 
     public function queryRoadQuotaDataNJ($params) {
-        $tpl = "下图利用滴滴数据绘制了该干线全天24⼩时各项运⾏指标（⻋均停⻋次数、⻋均停⻋延误、⻋均行驶速度）。通过数据分析，该干线的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/⻋/路口，停⻋延误接近%.2f秒/⻋/路口，⾏驶速度也达到%.2f千米/小时左右。与%s相比，%s停车次数%s，停车延误%s，行驶速度%s。";
+        $tpl = "下图利用滴滴数据绘制了该干线全天24小时各项运⾏指标（车均停车次数、车均停车延误、车均行驶速度）。通过数据分析，该干线的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/车/路口，停车延误接近%.2f秒/车/路口，行驶速度也达到%.2f千米/小时左右。与%s相比，%s停车次数%s，停车延误%s，行驶速度%s。";
 
         $city_id = intval($params['city_id']);
         $road_id = $params['road_id'];
