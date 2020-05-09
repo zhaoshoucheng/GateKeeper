@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 信控平台 - 区域相关接口
  *
@@ -216,7 +217,7 @@ class AreaService extends BaseService
         // 获取城市全部区域信息
         $areaList       = $this->area_model->getAreasByCityId($cityId, 'id, area_name');
         if (empty($areaList)) {
-            return (object)[];
+            return (object) [];
         }
         $areaCollection = Collection::make($areaList);
 
@@ -291,6 +292,11 @@ class AreaService extends BaseService
         $baseEndDate       = $params['base_end_date'];
         $evaluateStartDate = $params['evaluate_start_date'];
         $evaluateEndDate   = $params['evaluate_end_date'];
+        $baseDates = explode(",", $params['base_dates']);
+        $evaluateDates = [];
+        foreach ($baseDates as $baseDate) {
+            $evaluateDates[] = date("Y-m-d", strtotime($baseDate, "-7 day"));
+        }
 
         // 指标算法映射
         $methods = [
@@ -328,8 +334,10 @@ class AreaService extends BaseService
         $junctionIds = $junctionCollection->column('junction_id')->get();
 
         // 基准、评估时间范围
-        $baseDates     = dateRange($baseStartDate, $baseEndDate);
-        $evaluateDates = dateRange($evaluateStartDate, $evaluateEndDate);
+        if (empty($baseDates)) {
+            $baseDates     = dateRange($baseStartDate, $baseEndDate);
+            $evaluateDates = dateRange($evaluateStartDate, $evaluateEndDate);
+        }
 
         // 生成 00:00 - 23:30 间的 粒度为 30 分钟的时间集合数组
         $hours = hourRange();
@@ -376,10 +384,10 @@ class AreaService extends BaseService
                 $avg['evaluate'][$hour] = round(array_sum($values) / count($values), 2);
             }
         }
-        $avg['base'] = array_map(function($k, $v) {
+        $avg['base'] = array_map(function ($k, $v) {
             return [$k, $v];
         }, array_keys($avg['base']), $avg['base']);
-        $avg['evaluate'] = array_map(function($k, $v) {
+        $avg['evaluate'] = array_map(function ($k, $v) {
             return [$k, $v];
         }, array_keys($avg['evaluate']), $avg['evaluate']);
 
@@ -449,7 +457,6 @@ class AreaService extends BaseService
         return [
             'download_url' => $this->config->item('area_download_url_prefix') . $params['download_id'],
         ];
-
     }
 
     /**
