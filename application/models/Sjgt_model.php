@@ -55,7 +55,7 @@ class Sjgt_model extends CI_Model
             $params["city_id"] = "12";
             $params["token"] = "4c3e3b6a3588161128d0604daab528db";
             $params["user_id"] = "signalPro";
-            $params["polygon"] = implode(",", $points);
+            $params["polygon"] = implode(";", $points);
             $Url = "http://100.69.238.11:8000/its/signal-map/mapJunction/polygon";
             $ret = httpPOST($Url, $params);
             print_r($points);
