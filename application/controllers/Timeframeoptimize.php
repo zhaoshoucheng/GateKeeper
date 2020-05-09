@@ -272,18 +272,6 @@ class Timeframeoptimize extends MY_Controller
             $movementIDS[] = $flow["logic_flow_id"];
         }
         $params["movements"] = $movementIDS;
-        //todo 这里获取一下相位列表
-        // type GetTodOptimizePlanRequest struct {
-        //     DivideNum  string   `json:"divide_num" validate:"required"`
-        //     Dates      []string `json:"dates" validate:"required"`
-        //     JunctionID string   `json:"junction_id" validate:"required"`
-        //     CityID     string   `json:"city_id" validate:"required"`
-        //     TaskID     string   `json:"task_id" validate:""`
-        //     Movements  []string `json:"movements" validate:"required"`
-        //     StartTime  string   `json:"start_time" validate:"required"`
-        //     EndTime    string   `json:"end_time" validate:"required"`
-        // }
-
         $result = $this->traj_model->getTodOptimizePlan($params);
         return $this->response($result);
     }
@@ -314,8 +302,6 @@ class Timeframeoptimize extends MY_Controller
                 "warning" => "时段划分至少15分钟",
             ));
         }
-        // print_r($params);
-        // exit;
         $result = $this->traj_model->getTodOptimizePlan($params);
         return $this->response($result);
         /*
