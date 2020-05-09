@@ -1,4 +1,5 @@
 <?php
+
 /********************************************
  * # desc:    路网数据模型
  * # author:  ningxiangbing@didichuxing.com
@@ -41,12 +42,12 @@ class Waymap_model extends CI_Model
         $this->waymap_interface = $this->config->item('waymap_interface');
     }
 
-    public function getJunctionFilterByDistrict($cityID,$district)
+    public function getJunctionFilterByDistrict($cityID, $district)
     {
         $data = [
-            'city_id'=>$cityID,
-            'districts'=>$district,
-            'version'=>self::$lastMapVersion
+            'city_id' => $cityID,
+            'districts' => $district,
+            'version' => self::$lastMapVersion
         ];
 
         $url = $this->waymap_interface . '/signal-map/mapJunction/polygon';
@@ -59,9 +60,9 @@ class Waymap_model extends CI_Model
     public function getCityName($cityID)
     {
         $url = $this->waymap_interface . '/signal-map/map/citys';
-        $result = $this->get($url,[]);
-        $cityID2Name = array_column($result,"city_name","city_id");
-        return $cityID2Name[$cityID]??"";
+        $result = $this->get($url, []);
+        $cityID2Name = array_column($result, "city_name", "city_id");
+        return $cityID2Name[$cityID] ?? "";
     }
 
 
@@ -105,12 +106,13 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function getDateVersion($dates) {
+    public function getDateVersion($dates)
+    {
         $data = [
-                    'date' => implode(',', $dates),
-                    'token'     => $this->config->item('waymap_token'),
-                    'user_id'   => $this->config->item('waymap_userid'),
-                ];
+            'date' => implode(',', $dates),
+            'token'     => $this->config->item('waymap_token'),
+            'user_id'   => $this->config->item('waymap_userid'),
+        ];
         $res = httpPOST($this->config->item('waymap_interface') . '/signal-map/map/getDateVersion', $data);
         $res = json_decode($res, true);
         if (isset($res['data'])) {
@@ -137,23 +139,23 @@ class Waymap_model extends CI_Model
 
         $res = httpGET($url, $data, $timeout, $header);
         if (!$res) {
-        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+            com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception('路网数据获取失败', ERR_REQUEST_WAYMAP_API);
         }
 
         $res = json_decode($res, true);
         if (!$res) {
-        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+            com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception('路网数据格式错误', ERR_REQUEST_WAYMAP_API);
         }
 
         if (isset($res['errno']) && $res['errno'] != 0) {
-        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+            com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception($res['errmsg'], $res['errno']);
         }
 
         if (isset($res['errorCode']) && $res['errorCode'] != 0) {
-            if(strpos($res['errorMsg'],"不存在该路口")===false){
+            if (strpos($res['errorMsg'], "不存在该路口") === false) {
                 com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
                 throw new \Exception($res['errorMsg'], $res['errorCode']);
             }
@@ -217,17 +219,17 @@ class Waymap_model extends CI_Model
 
         return $this->get($url, $data);
     }
-    
+
     public function getJunctionNames($logic_ids)
     {
         $juncInfo = $this->getJunctionInfo($logic_ids);
         $juncNames = [];
-        foreach($juncInfo as $eachJunc){
+        foreach ($juncInfo as $eachJunc) {
             $juncNames[] = $eachJunc["name"];
         }
         return $juncNames;
     }
-    
+
     /**
      * 根据路口ID串获取路口名称
      *
@@ -247,7 +249,7 @@ class Waymap_model extends CI_Model
             $data = compact('logic_ids', 'version');
             $url = $this->waymap_interface . '/signal-map/map/many';
             $res = $this->post($url, $data);
-            if($withCache){
+            if ($withCache) {
                 $this->redis_model->setEx($redis_key, json_encode($res), 30);
             }
             return $res;
@@ -306,7 +308,7 @@ class Waymap_model extends CI_Model
      *
      * @throws \Exception
      */
-    public function getAllCityJunctions($city_id, $version = 0, $force=0)
+    public function getAllCityJunctions($city_id, $version = 0, $force = 0)
     {
         /*-------------------------------------------------
         | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
@@ -321,7 +323,7 @@ class Waymap_model extends CI_Model
         $redis_key = 'all_city_junctions_' . $city_id . '_' . $version;
         $result = $this->redis_model->getData($redis_key);
 
-        if($force){
+        if ($force) {
             $result = 0;
         }
         if (empty($result)) {
@@ -391,7 +393,7 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function getLinksGeoInfos($link_ids, $version, $cached=true)
+    public function getLinksGeoInfos($link_ids, $version, $cached = true)
     {
         $this->load->model('redis_model');
         $link_ids = is_array($link_ids) ? implode(",", $link_ids) : $link_ids;
@@ -415,7 +417,7 @@ class Waymap_model extends CI_Model
 
                     $geoInfo = explode(',', $geo);
 
-                    $coords[] = [(float)$geoInfo[0], (float)$geoInfo[1]];
+                    $coords[] = [(float) $geoInfo[0], (float) $geoInfo[1]];
                 }
 
                 $linkInfo['s_node']['lng']     = $linkInfo['s_node']['lng'] ?? 0;
@@ -431,7 +433,7 @@ class Waymap_model extends CI_Model
                         'type' => 'Point',
                     ],
                     'properties' => [
-                        'id' => (int)$linkInfo['s_node']['node_id'],
+                        'id' => (int) $linkInfo['s_node']['node_id'],
                     ],
                     'type' => 'Feature',
                 ];
@@ -442,7 +444,7 @@ class Waymap_model extends CI_Model
                         'type' => 'Point',
                     ],
                     'properties' => [
-                        'id' => (int)$linkInfo['e_node']['node_id'],
+                        'id' => (int) $linkInfo['e_node']['node_id'],
                     ],
                     'type' => 'Feature',
                 ];
@@ -454,8 +456,8 @@ class Waymap_model extends CI_Model
                     ],
                     'properties' => [
                         'id' => $linkId,
-                        'snodeid' => (int)$linkInfo['s_node']['node_id'],
-                        'enodeid' => (int)$linkInfo['e_node']['node_id'],
+                        'snodeid' => (int) $linkInfo['s_node']['node_id'],
+                        'enodeid' => (int) $linkInfo['e_node']['node_id'],
                     ],
                     'type' => 'Feature',
                 ];
@@ -467,7 +469,7 @@ class Waymap_model extends CI_Model
                 'features' => $features,
                 'type' => 'FeatureCollection',
             ];
-            if($cached){
+            if ($cached) {
                 $this->redis_model->setEx($redis_key, json_encode($res), 3600);
             }
             return $res;
@@ -490,7 +492,7 @@ class Waymap_model extends CI_Model
      */
     public function getConnectionAdjJunctions($map_version, $city_id, $selected_junctionid, $selected_path)
     {
-//        $map_version = self::$lastMapVersion;
+        //        $map_version = self::$lastMapVersion;
         $data = compact('city_id', 'selected_junctionid', 'selected_path', 'map_version');
 
         $url = $this->waymap_interface . '/signal-map/connect/adj_junctions';
@@ -521,23 +523,23 @@ class Waymap_model extends CI_Model
 
         $res = httpPOST($url, $data, $timeout, $contentType, $header);
         if (!$res) {
-        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+            com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception($url . '接口请求失败', ERR_REQUEST_WAYMAP_API);
         }
 
         $res = json_decode($res, true);
         if (!$res) {
-        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+            com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception('接口请求失败', ERR_REQUEST_WAYMAP_API);
         }
 
         if (isset($res['errno']) && $res['errno'] != 0) {
-        	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+            com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
             throw new \Exception($res['errmsg'], $res['errno']);
         }
         if (isset($res['errorCode']) && $res['errorCode'] != 0) {
-            if(strpos($res['errorMsg'],"logic flow is empty")===false){
-            	com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
+            if (strpos($res['errorMsg'], "logic flow is empty") === false) {
+                com_log_warning('waymap_api_error', ERR_REQUEST_WAYMAP_API, "waymap错误", compact("url", "data", "header", "timeout", "res"));
                 throw new \Exception($res['errorMsg'], $res['errorCode']);
             }
         }
@@ -554,9 +556,9 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function getConnectPath($city_id, $map_version=0, array $selected_junctionids)
+    public function getConnectPath($city_id, $map_version = 0, array $selected_junctionids)
     {
-        if($map_version==0){
+        if ($map_version == 0) {
             $map_version = self::$lastMapVersion;
         }
 
@@ -578,9 +580,9 @@ class Waymap_model extends CI_Model
      * @return array
      * @throws \Exception
      */
-    public function getFlowsInfo($logic_junction_ids,$cached=false)
+    public function getFlowsInfo($logic_junction_ids, $cached = false)
     {
-        if(empty($logic_junction_ids)){
+        if (empty($logic_junction_ids)) {
             return [];
         }
         $this->load->helper('phase');
@@ -603,11 +605,15 @@ class Waymap_model extends CI_Model
             // 调用相位接口出错
             if (count($logic_junction_ids) > 0 && count($res) == 0) {
                 return [];
-                com_log_warning('mapJunction_phase_empty', 0, "mapJunction_phase_empty",
-                    ["junctionIds" => $logic_junction_ids, "res" => count($res),]);
+                com_log_warning(
+                    'mapJunction_phase_empty',
+                    0,
+                    "mapJunction_phase_empty",
+                    ["junctionIds" => $logic_junction_ids, "res" => count($res),]
+                );
             }
 
-            if($cached){
+            if ($cached) {
                 $this->redis_model->setEx($redis_key, json_encode($res), 30);
             }
             return $res;
@@ -630,11 +636,11 @@ class Waymap_model extends CI_Model
     public function getFlowBriefInfo($logic_junction_id)
     {
         $this->load->helper('phase');
-        if(empty($version)){
+        if (empty($version)) {
             $version = self::$lastMapVersion;
         }
 
-        $data = compact('logic_junction_id','version');
+        $data = compact('logic_junction_id', 'version');
         $url = $this->waymap_interface . '/signal-map/flow/getFlowBriefInfo';
         $res = $this->get($url, $data);
         return $res;
@@ -646,24 +652,28 @@ class Waymap_model extends CI_Model
      * @param with_hidden 是否包含隐藏flow
      *
      */
-    public function getFlowsInfo32($logic_junction_ids,$version=0,$with_hidden=0)
+    public function getFlowsInfo32($logic_junction_ids, $version = 0, $with_hidden = 0)
     {
         $this->load->helper('phase');
-        if(empty($version)){
+        if (empty($version)) {
             $version = self::$lastMapVersion;
         }
         if (is_array($logic_junction_ids)) {
             $logic_junction_ids = implode(",", $logic_junction_ids);
         }
 
-        $data = compact('logic_junction_ids','version','with_hidden');
+        $data = compact('logic_junction_ids', 'version', 'with_hidden');
         $url = $this->waymap_interface . '/signal-map/mapJunction/phase32';
         $res = $this->post($url, $data);
         // 调用相位接口出错
 
         if (count($res) == 0) {
-            com_log_warning('mapJunction_phase_empty', 0, "mapJunction_phase_empty",
-                ["junctionIds" => $logic_junction_ids, "res" => count($res),]);
+            com_log_warning(
+                'mapJunction_phase_empty',
+                0,
+                "mapJunction_phase_empty",
+                ["junctionIds" => $logic_junction_ids, "res" => count($res),]
+            );
         }
         $res["version"] = $version;
         return $res;
@@ -697,9 +707,9 @@ class Waymap_model extends CI_Model
      * @return array|mixed
      * @throws \Exception
      */
-    public function getFlowMovement($city_id, $logic_junction_id, $logic_flow_id="all", $juncMovements = 0, $version="")
+    public function getFlowMovement($city_id, $logic_junction_id, $logic_flow_id = "all", $juncMovements = 0, $version = "")
     {
-        if($version == ""){
+        if ($version == "") {
             $version = $this->getLastMapVersion();
         }
         $data = compact('city_id', 'logic_junction_id', 'logic_flow_id', 'version');
@@ -741,7 +751,7 @@ class Waymap_model extends CI_Model
     {
         $map_version = $map_version ?? self::$lastMapVersion;
 
-        if(empty($map_version)){
+        if (empty($map_version)) {
             $map_version = self::$lastMapVersion;
         }
 
@@ -758,10 +768,10 @@ class Waymap_model extends CI_Model
     public function getJunctionDetail($logic_junction_id)
     {
         $data = [
-                    'logic_id'   => $logic_junction_id,
-                    // 'token'     => $this->config->item('waymap_token'),
-                    // 'user_id'   => $this->config->item('waymap_userid'),
-                ];
+            'logic_id'   => $logic_junction_id,
+            // 'token'     => $this->config->item('waymap_token'),
+            // 'user_id'   => $this->config->item('waymap_userid'),
+        ];
 
 
         $url   = $this->waymap_interface . '/signal-map/map/detail';
@@ -773,10 +783,10 @@ class Waymap_model extends CI_Model
     public function getJunctionVersion($logic_junction_id)
     {
         $data = [
-                    'logic_junction_ids'   => $logic_junction_id,
-                    // 'token'     => $this->config->item('waymap_token'),
-                    // 'user_id'   => $this->config->item('waymap_userid'),
-                ];
+            'logic_junction_ids'   => $logic_junction_id,
+            // 'token'     => $this->config->item('waymap_token'),
+            // 'user_id'   => $this->config->item('waymap_userid'),
+        ];
 
         $url   = $this->waymap_interface . '/signal-map/map/getFlagVersions';
         $res = $this->get($url, $data);
@@ -804,7 +814,7 @@ class Waymap_model extends CI_Model
 
     public function flowsByJunction($logic_junction_id, $version = 0)
     {
-        if($version==0){
+        if ($version == 0) {
             $version = self::$lastMapVersion;
         }
         $data = [
@@ -819,7 +829,7 @@ class Waymap_model extends CI_Model
         return $res;
     }
 
-    public function getRestrictJunctionCached($cityId, $version = 0, $force=0)
+    public function getRestrictJunctionCached($cityId, $version = 0, $force = 0)
     {
         /*-------------------------------------------------
         | 先去redis中获取，如没有再调用api获取且将结果放入redis中 |
@@ -832,7 +842,7 @@ class Waymap_model extends CI_Model
         $result = [];
         $redis_key = 'all_restrict_junctions_' . $cityId . '_' . $version;
         $result = $this->redis_model->getData($redis_key);
-        if($force){
+        if ($force) {
             $result = 0;
         }
         if (empty($result)) {
@@ -856,14 +866,14 @@ class Waymap_model extends CI_Model
     }
 
     // 修改路口名称
-    public function saveJunctionName($junctionID,$junctionName)
+    public function saveJunctionName($junctionID, $junctionName)
     {
         $url = $this->waymap_interface . '/signal-map/map/saveJunctionName';
         $ret = $this->post($url, [
             'logic_id' => $junctionID,
             'name' => $junctionName,
         ]);
-        if($ret["name"]==$junctionName){
+        if ($ret["name"] == $junctionName) {
             return true;
         }
         return false;
@@ -871,13 +881,13 @@ class Waymap_model extends CI_Model
 
 
     // 修改相位信息
-    public function saveFlowInfo($junctionID,$flowID,$phaseName,$isHidden=0)
+    public function saveFlowInfo($junctionID, $flowID, $phaseName, $isHidden = 0)
     {
         $url = $this->waymap_interface . '/signal-map/mapFlow/saveDesc';
         $data = [
             'logic_junction_id' => $junctionID,
             'flows' => [
-                ["logic_flow_id"=>$flowID,"desc"=>$phaseName,"is_hidden"=>$isHidden,]
+                ["logic_flow_id" => $flowID, "desc" => $phaseName, "is_hidden" => $isHidden,]
             ],
         ];
         $ret = $this->post($url, $data, 5000, 'json');
