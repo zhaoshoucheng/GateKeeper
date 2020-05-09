@@ -35,9 +35,9 @@ class AreaReport extends MY_Controller
         ],$params);
         $params['start_date'] = $params['start_time'];
         $params['end_date'] = $params['end_time'];
-        if($params['city_id'] == 12){
-            $params['userapp']  = 'jinanits';
-        }
+//        if($params['city_id'] == 12){
+//            $params['userapp']  = 'jinanits';
+//        }
         if(!isset($params['date_type'])){
             $params['date_type']=0;
         }
