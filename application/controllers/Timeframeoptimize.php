@@ -271,8 +271,10 @@ class Timeframeoptimize extends MY_Controller
         foreach (explode(",", $params["junction_ids"]) as $junctionId) {
             $flowInfo = $this->waymap_model->getFlowInfo32($junctionId);
             $movementIDS = [];
-            foreach ($flowInfo as $flow) {
-                $movementIDS[] = $flow["logic_flow_id"];
+            if (!empty($flowInfo)) {
+                foreach ($flowInfo as $flow) {
+                    $movementIDS[] = $flow["logic_flow_id"];
+                }
             }
             $params["movements"] = $movementIDS;
             $params["junction_id"] = $junctionId;
