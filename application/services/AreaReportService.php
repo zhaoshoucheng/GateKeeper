@@ -76,7 +76,7 @@ class AreaReportService extends BaseService{
         }
 
 //        本次报告区域为XX市，分析区域包含XX区、XX区等行政区域，共XXX个路口。本次报告根据20XX年XX月XX日～XX月XX日数据该区域进行分析，整体延误指数为30.55s，与前一周相比无变化／上升12%／下降12%，基本持平/更加严重/得到缓解。
-        $tpl = "本次报告区域为%s市，%s，共%s个路口。本次报告根据%s数据对该区域进行分析，整体交叉口延误指数为%s，与%s相比%s，%s";
+        $tpl = "本次报告区域为%s市%s，共%s个路口。本次报告根据%s数据对该区域进行分析，整体交叉口延误指数为%s，与%s相比%s，%s";
 
 
         $city_info = $this->openCity_model->getCityInfo($city_id);
@@ -358,7 +358,7 @@ class AreaReportService extends BaseService{
     }
 
     public function queryAreaDataComparisonNJ($params) {
-        $tpl = "上图展示了研究区域总体运行状态（交叉口延误指数）%s与%s的对⽐，%s该区域拥堵程度与%s相比%s。";
+        $tpl = "上图展示了研究区域总体运行状态（交叉口延误指数）%s与%s的对比，%s该区域拥堵程度与%s相比%s。";
 
         $city_id = intval($params['city_id']);
         $area_id = $params['area_id'];
@@ -428,7 +428,7 @@ class AreaReportService extends BaseService{
     }
 
     public function queryAreaQuotaDataNJ($params) {
-        $tpl = "下图利用滴滴数据绘制了该区域全天24小时各项运⾏指标（停车次数、停车延误、行驶速度）。通过数据分析，该区域的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/车/路口，停⻋延误接近%.2f秒/车/路口，行驶速度也达到%.2f千米/小时左右。与%s相比，%s停车次数%s，停车延误%s，行驶速度%s。";
+        $tpl = "下图利用滴滴数据绘制了该区域全天24小时各项运行指标（停车次数、停车延误、行驶速度）。通过数据分析，该区域的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/车/路口，停车延误接近%.2f秒/车/路口，行驶速度也达到%.2f千米/小时左右。与%s相比，%s停车次数%s，停车延误%s，行驶速度%s。";
 
         $city_id = intval($params['city_id']);
         $area_id = $params['area_id'];
