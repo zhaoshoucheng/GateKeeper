@@ -60,12 +60,12 @@ class Sjgt_model extends CI_Model
             $ret = httpPOST($Url, $params);
             // print_r($points);
             $polygonResponse = json_decode($ret, true);
-            print_r(json_decode($ret, true));
+            // print_r(json_decode($ret, true));
+
             echo "INSERT INTO `area` (`id`, `area_name`, `city_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '" . $item["area_name"] . "', '12', '0', '2020-05-09 11:01:02', '2020-05-09 21:28:38', '1970-01-01 00:00:00');<br/>";
             foreach ($polygonResponse["data"]["filter_juncs"] as $juncItem) {
                 echo "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '175', '" . $juncItem["logic_junction_id"] . "', '0', '2019-12-05 10:28:40', '2019-12-05 10:28:40', '1970-01-01 00:00:00');<br/>";
             }
-            exit;
         }
         print_r($list);
     }
