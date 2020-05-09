@@ -275,7 +275,7 @@ class Timeframeoptimize extends MY_Controller
                 $movementIDS[] = $flow["logic_flow_id"];
             }
             $params["movements"] = $movementIDS;
-            $params["logic_junction_ids"] = $junctionId;
+            $params["junction_id"] = $junctionId;
             $todPlans[$junctionId] = $this->traj_model->getTodOptimizePlan($params);
         }
         return $this->response($todPlans);
