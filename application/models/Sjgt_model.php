@@ -50,10 +50,17 @@ class Sjgt_model extends CI_Model
             foreach ($coordinates["coordinates"][0] as $point) {
                 $points[] = implode(",", $point);
             }
+            // token=4c3e3b6a3588161128d0604daab528db&user_id=signalPro
+            $params = [];
+            $params["token"] = "4c3e3b6a3588161128d0604daab528db";
+            $params["user_id"] = "signalPro";
+            $params["polygon"] = implode(",", $points);
+            $Url = "http://100.69.238.11:8000/its/signal-map/mapJunction/polygon";
+            $ret = httpPOST($Url, $params);
             print_r($points);
+            print_r($ret);
             exit;
             $polygon = [];
-
             // http://100.90.164.31:8001/signal-map/mapJunction/polygon?city_id=12&districts=370102,370103&polygon=116.930362,36.724026;117.115069,36.719623;117.187854,36.654649;117.086917,36.612772;116.933108,36.664013&version=2018071912
         }
         print_r($list);
