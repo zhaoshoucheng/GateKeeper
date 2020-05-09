@@ -43,7 +43,7 @@ class Sjgt_model extends CI_Model
             ->from($this->tb)
             ->order_by("id", "desc")
             ->get();
-        $list = $res instanceof CI_DB_result ? $res->row_array() : $res;
+        $list = $res instanceof CI_DB_result ? $res->result_array() : $res;
         print_r($list);
     }
 }
