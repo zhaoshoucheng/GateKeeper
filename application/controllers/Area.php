@@ -248,7 +248,7 @@ class Area extends MY_Controller
             'city_id' => 'required|is_natural_no_zero',
             'area_id' => 'required|is_natural_no_zero',
             'quota_key' => 'required|min_length[1]',
-            'base_dates' => 'required|exact_length[10]',
+            'base_dates' => 'required|min_length[10]',
         ]);
         $data = $this->areaService->comparison($params);
         $this->response($data);
