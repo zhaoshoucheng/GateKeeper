@@ -242,7 +242,7 @@ class Timeframeoptimize extends MY_Controller
         $validate = Validate::make(
             $params,
             [
-                'junction_id'      => 'nullunable',
+                'junction_ids'      => 'nullunable',
                 'task_time_range'      => 'nullunable',
                 'divide_num'       => 'min:1',
             ]
@@ -266,14 +266,19 @@ class Timeframeoptimize extends MY_Controller
                 "warning" => "时段划分至少15分钟",
             ));
         }
-        $flowInfo = $this->waymap_model->getFlowInfo32($params["junction_id"]);
-        $movementIDS = [];
-        foreach ($flowInfo as $flow) {
-            $movementIDS[] = $flow["logic_flow_id"];
+
+        $todPlans = [];
+        foreach (explode(",", $params["junction_ids"]) as $junctionId) {
+            $flowInfo = $this->waymap_model->getFlowInfo32($params["junction_id"]);
+            $movementIDS = [];
+            foreach ($flowInfo as $flow) {
+                $movementIDS[] = $flow["logic_flow_id"];
+            }
+            $params["movements"] = $movementIDS;
+            $params["junction_id"] = $junctionId;
+            $todPlans[$junctionId] = $this->traj_model->getTodOptimizePlan($params);
         }
-        $params["movements"] = $movementIDS;
-        $result = $this->traj_model->getTodOptimizePlan($params);
-        return $this->response($result);
+        return $this->response($todPlans);
     }
 
     /**
