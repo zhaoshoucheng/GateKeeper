@@ -294,8 +294,10 @@ class AreaService extends BaseService
         $evaluateEndDate   = $params['evaluate_end_date'];
         $baseDates = !empty($params['base_dates']) ?? explode(",", $params['base_dates']);
         $evaluateDates = [];
-        foreach ($baseDates as $baseDate) {
-            $evaluateDates[] = date("Y-m-d", strtotime($baseDate, "-7 day"));
+        if (!empty($baseDates)) {
+            foreach ($baseDates as $baseDate) {
+                $evaluateDates[] = date("Y-m-d", strtotime($baseDate, "-7 day"));
+            }
         }
 
         // 指标算法映射
