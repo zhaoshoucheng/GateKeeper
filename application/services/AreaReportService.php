@@ -76,7 +76,7 @@ class AreaReportService extends BaseService{
         }
 
 //        本次报告区域为XX市，分析区域包含XX区、XX区等行政区域，共XXX个路口。本次报告根据20XX年XX月XX日～XX月XX日数据该区域进行分析，整体延误指数为30.55s，与前一周相比无变化／上升12%／下降12%，基本持平/更加严重/得到缓解。
-        $tpl = "本次报告区域为%s市，%s，共%s个路口。本次报告根据%s数据对该区域进行分析，整体交叉口延误指数为%s，与%s相比%s，%s";
+        $tpl = "本次报告区域为%s市%s，共%s个路口。本次报告根据%s数据对该区域进行分析，整体交叉口延误指数为%s，与%s相比%s，%s";
 
 
         $city_info = $this->openCity_model->getCityInfo($city_id);
