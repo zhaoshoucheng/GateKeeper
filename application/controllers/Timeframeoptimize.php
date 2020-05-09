@@ -314,8 +314,8 @@ class Timeframeoptimize extends MY_Controller
                 "warning" => "时段划分至少15分钟",
             ));
         }
-        print_r($params);
-        exit;
+        // print_r($params);
+        // exit;
         $result = $this->traj_model->getTodOptimizePlan($params);
         return $this->response($result);
         /*
