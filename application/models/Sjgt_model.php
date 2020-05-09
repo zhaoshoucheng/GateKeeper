@@ -44,6 +44,18 @@ class Sjgt_model extends CI_Model
             ->order_by("id", "desc")
             ->get();
         $list = $res instanceof CI_DB_result ? $res->result_array() : $res;
+        foreach ($list as $item) {
+            $coordinates = json_decode($item["area_geometry"]);
+            $points = [];
+            foreach ($coordinates[0][0] as $point) {
+                $points[] = implode(",", $point);
+            }
+            print_r($points);
+            exit;
+            $polygon = [];
+
+            // http://100.90.164.31:8001/signal-map/mapJunction/polygon?city_id=12&districts=370102,370103&polygon=116.930362,36.724026;117.115069,36.719623;117.187854,36.654649;117.086917,36.612772;116.933108,36.664013&version=2018071912
+        }
         print_r($list);
     }
 }
