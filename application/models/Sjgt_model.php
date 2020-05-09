@@ -35,12 +35,9 @@ class Sjgt_model extends CI_Model
     /**
      * 获取指定路口的自适应配时信息
      *
-     * @param string $logicJunctionId
-     * @param string $select
-     *
      * @return array
      */
-    public function getTransfor($logicJunctionId, $select = '*')
+    public function getTransfor()
     {
         $res = $this->db->select($select)
             ->from($this->tb)
