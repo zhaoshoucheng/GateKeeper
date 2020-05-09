@@ -52,6 +52,7 @@ class Sjgt_model extends CI_Model
             }
             // token=4c3e3b6a3588161128d0604daab528db&user_id=signalPro
             $params = [];
+            $params["city_id"] = "12";
             $params["token"] = "4c3e3b6a3588161128d0604daab528db";
             $params["user_id"] = "signalPro";
             $params["polygon"] = implode(",", $points);
