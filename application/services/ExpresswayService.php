@@ -25,61 +25,62 @@ class ExpresswayService extends BaseService
         $this->dataService = new DataService();
     }
 
-    public function queryOverview($cityID){
+    public function queryOverview($cityID)
+    {
 
-        $juncNames=[];
-        $skipJunc=[];
-        $skipSegments=[];
-        if($cityID == 11){
-            $juncNames = ["宁洛","水吉","长江","郑和","下关","内环","玄武","扬子江","定淮","江东","应天","沪蓉","扬子江","凤台","卡子门","栖霞"];
-            $skipJunc = ["3888566","3891510","72978335","72978326","72978327","89103480","3852948","4023026","72978339","3870579","3888594","3888593","3888595","3888596","3876608","3897615","3879469","3882371","3885459","3879472","3876614","3885455","3972937","3973026","4023024","4023023","4023025","4005651"];
+        $juncNames = [];
+        $skipJunc = [];
+        $skipSegments = [];
+        if ($cityID == 11) {
+            $juncNames = ["宁洛", "水吉", "长江", "郑和", "下关", "内环", "玄武", "扬子江", "定淮", "江东", "应天", "沪蓉", "扬子江", "凤台", "卡子门", "栖霞"];
+            $skipJunc = ["3888566", "3891510", "72978335", "72978326", "72978327", "89103480", "3852948", "4023026", "72978339", "3870579", "3888594", "3888593", "3888595", "3888596", "3876608", "3897615", "3879469", "3882371", "3885459", "3879472", "3876614", "3885455", "3972937", "3973026", "4023024", "4023023", "4023025", "4005651"];
         }
-        if($cityID == 23){
+        if ($cityID == 23) {
             $skipJunc = ["junction_id"];
             $skipSegments = ["segment_id"];
         }
         //TODO 路口过滤
         //查询匝道信息
-        $juncInfos  = $this->expressway_model->getQuickRoadSegments($cityID,$juncNames);
+        $juncInfos  = $this->expressway_model->getQuickRoadSegments($cityID, $juncNames);
 
 
 
         $ret = [
-            'junc_list'=>[],
-            'road_list'=>[]
+            'junc_list' => [],
+            'road_list' => []
         ];
 
-        foreach ($juncInfos['junctions'] as $j){
-            if(in_array($j['junction_id'],$skipJunc)){
+        foreach ($juncInfos['junctions'] as $j) {
+            if (in_array($j['junction_id'], $skipJunc)) {
                 continue;
             }
             $ret['junc_list'][] = [
-                "junction_id"=>$j['junction_id'],
-                "lng"=>$j['lng'],
-                "lat"=>$j['lat'],
-                "name"=>$j['name'],
-                "type"=>$j['type']
+                "junction_id" => $j['junction_id'],
+                "lng" => $j['lng'],
+                "lat" => $j['lat'],
+                "name" => $j['name'],
+                "type" => $j['type']
             ];
         }
 
-        foreach ($juncInfos['segments'] as $s){
-            if(in_array($s['start_junc_id'],$skipJunc)){
+        foreach ($juncInfos['segments'] as $s) {
+            if (in_array($s['start_junc_id'], $skipJunc)) {
                 continue;
             }
-            if(in_array($s['end_junc_id'],$skipJunc)){
+            if (in_array($s['end_junc_id'], $skipJunc)) {
                 continue;
             }
-            if(in_array($s['segment_id'],$skipSegments)){
+            if (in_array($s['segment_id'], $skipSegments)) {
                 continue;
             }
             $ret['road_list'][] = [
-                "id"=>$s['segment_id'],
-                "start_junc"=>$s['start_junc_id'],
-                "end_junc"=>$s['end_junc_id'],
-                "length"=>$s['length'],
-                "name"=>$s['name'],
-                "link_ids"=>$s['link_ids'],
-                "geom"=>$s['geom']
+                "id" => $s['segment_id'],
+                "start_junc" => $s['start_junc_id'],
+                "end_junc" => $s['end_junc_id'],
+                "length" => $s['length'],
+                "name" => $s['name'],
+                "link_ids" => $s['link_ids'],
+                "geom" => $s['geom']
             ];
         }
 
@@ -88,62 +89,62 @@ class ExpresswayService extends BaseService
         return $ret;
     }
 
-    public function queryStopDelayList($cityID){
+    public function queryStopDelayList($cityID)
+    {
         $req = [
-            'city_id' => (int)$cityID,
-            'upstream_id'=>"",
-            'downstream_id'=>"",
-            'hms'=>date("Y-m-d H:i:s",strtotime("-5 minute")),
+            'city_id' => (int) $cityID,
+            'upstream_id' => "",
+            'downstream_id' => "",
+            'hms' => date("Y-m-d H:i:s", strtotime("-5 minute")),
 
         ];
 
         $url = $this->config->item('data_service_interface');
-//        $url = "http://127.0.0.1:8093";
+        //        $url = "http://127.0.0.1:8093";
         $res = httpPOST($url . '/report/GetExpresswayQuota', $req, 0, 'json');
         if (!empty($res)) {
             $res = json_decode($res, true);
             $ret = [];
-            if(empty($res['data']['data_list'])){
+            if (empty($res['data']['data_list'])) {
                 return $ret;
             }
 
             $juncList  = $this->queryOverview($cityID);
 
-            $jlist = array_column($juncList['junc_list'],"junction_id");
+            $jlist = array_column($juncList['junc_list'], "junction_id");
 
 
-            foreach ($res['data']['data_list'] as $v){
-                if(!in_array($v['downstream_ramp'],$jlist)){
+            foreach ($res['data']['data_list'] as $v) {
+                if (!in_array($v['downstream_ramp'], $jlist)) {
                     continue;
                 }
                 $ret[] = [
-                    "time"=>$res['data']['hms'],
-                    "junction_id"=>$v['downstream_ramp'],
-                    "junction_name"=>"",
-                    "stop_delay"=>round($v['delay']/60,2),
-                    "quota_unit"=>"分钟"
+                    "time" => $res['data']['hms'],
+                    "junction_id" => $v['downstream_ramp'],
+                    "junction_name" => "",
+                    "stop_delay" => round($v['delay'] / 60, 2),
+                    "quota_unit" => "分钟"
                 ];
             }
 
-            $junctionIDs = array_column($ret,'junction_id');
-            $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc($cityID,$junctionIDs);
+            $junctionIDs = array_column($ret, 'junction_id');
+            $junctionInfos = $this->expressway_model->getQuickRoadSegmentsByJunc($cityID, $junctionIDs);
             $juncNameMap = [];
-            if(empty($junctionInfos) || empty($junctionInfos['junctions'])){
+            if (empty($junctionInfos) || empty($junctionInfos['junctions'])) {
                 return [];
             }
-            foreach ($junctionInfos['junctions'] as $j){
-                if($j['type']!=1 && $j['type']!=2){
+            foreach ($junctionInfos['junctions'] as $j) {
+                if ($j['type'] != 1 && $j['type'] != 2) {
                     continue;
                 }
                 $juncNameMap[$j['junction_id']] = $j['name'];
             }
             $finalRet = [];
-            foreach ($ret as $rk => $rv){
-                if(isset($juncNameMap[$rv['junction_id']])){
-                    $ret[$rk]['junction_name']=$juncNameMap[$rv['junction_id']];
+            foreach ($ret as $rk => $rv) {
+                if (isset($juncNameMap[$rv['junction_id']])) {
+                    $ret[$rk]['junction_name'] = $juncNameMap[$rv['junction_id']];
                     $finalRet[] = $ret[$rk];
                 }
-
             }
 
             return $finalRet;
@@ -152,13 +153,14 @@ class ExpresswayService extends BaseService
         }
     }
 
-    public function queryQuotaDetail($params){
+    public function queryQuotaDetail($params)
+    {
         $req = [
-            'city_id' => (int)$params['city_id'],
-            'upstream_id'=>$params['start_junc_id'],
-            'downstream_id'=>$params['end_junc_id'],
-            'segment_id'=>$params['id'],
-            'hms'=>$params['time'],
+            'city_id' => (int) $params['city_id'],
+            'upstream_id' => $params['start_junc_id'],
+            'downstream_id' => $params['end_junc_id'],
+            'segment_id' => $params['id'],
+            'hms' => $params['time'],
         ];
 
         $url = $this->config->item('data_service_interface');
@@ -168,23 +170,23 @@ class ExpresswayService extends BaseService
         if (!empty($res)) {
             $res = json_decode($res, true);
             $ret = [
-                "speed"=>round($res['data']['data_list'][0]['avg_speed']*3.6,2),
-                "stop_delay"=>round($res['data']['data_list'][0]['delay'],2),
-                "across_time"=>round($res['data']['data_list'][0]['travel_time'],2),
-                "type"=>0
+                "speed" => round($res['data']['data_list'][0]['avg_speed'] * 3.6, 2),
+                "stop_delay" => round($res['data']['data_list'][0]['delay'], 2),
+                "across_time" => round($res['data']['data_list'][0]['travel_time'], 2),
+                "type" => 0
             ];
-            if($ret['speed'] == 0){
+            if ($ret['speed'] == 0) {
                 $ret['speed'] = "-";
                 $ret['stop_delay'] = "-";
                 $ret['across_time'] = "-";
                 return $ret;
             }
 
-            if($ret['speed'] <= 15 ){
+            if ($ret['speed'] <= 15) {
                 $ret['type'] = 3;
-            }elseif($ret['speed'] <= 35 ){
+            } elseif ($ret['speed'] <= 35) {
                 $ret['type'] = 2;
-            }else{
+            } else {
                 $ret['type'] = 1;
             }
             return $ret;
@@ -193,115 +195,117 @@ class ExpresswayService extends BaseService
         }
     }
 
-    public function alarmlist($params) {
-    	$city_id = $params['city_id'];
+    public function alarmlist($params)
+    {
+        $city_id = $params['city_id'];
 
-    	$alarmlist = $this->redis_model->getData('ramp_alarm_history_'.$city_id);
-    	if (empty($alarmlist)) {
-    		return [
-	    		"trafficList" => [],
-	    	];
-    	} else {
-    		$alarmlist = json_decode($alarmlist, true);
-    	}
+        $alarmlist = $this->redis_model->getData('ramp_alarm_history_' . $city_id);
+        if (empty($alarmlist)) {
+            return [
+                "trafficList" => [],
+            ];
+        } else {
+            $alarmlist = json_decode($alarmlist, true);
+        }
         // print_r($alarmlist);
-    	// 过滤junction
-    	$overview = $this->queryOverview($city_id);
+        // 过滤junction
+        $overview = $this->queryOverview($city_id);
         // print_r($overview);
-    	$ids = [];
-    	foreach ($overview['junc_list'] as $value) {
-    		if (!empty($value['name'])) {
-    			$ids[$value['junction_id']] = $value;
-    		}
-    	}
+        $ids = [];
+        foreach ($overview['junc_list'] as $value) {
+            if (!empty($value['name'])) {
+                $ids[$value['junction_id']] = $value;
+            }
+        }
         // print_r($ids);exit;
-    	$list = [];
-    	foreach ($alarmlist as $value) {
-    		if (isset($ids[$value['ramp_id']])) {
+        $list = [];
+        foreach ($alarmlist as $value) {
+            if (isset($ids[$value['ramp_id']])) {
                 // echo "yesyes get";exit;
-    			$list[] = [
-					"start_time"=> $value['start'],
-		            "duration_time"=> $value['last'] / 60,
-		            "junction_id"=> $value['ramp_id'],
-		            "junction_name"=> $ids[$value['ramp_id']]['name'],
-		            "lng"=> $ids[$value['ramp_id']]['lng'],
-		            "lat"=> $ids[$value['ramp_id']]['lat'],
-		            "alarm_comment"=> "过饱和",
-		            "alarm_type"=> 1,
-    			];
-    		}
-    	}
+                $list[] = [
+                    "start_time" => $value['start'],
+                    "duration_time" => $value['last'] / 60,
+                    "junction_id" => $value['ramp_id'],
+                    "junction_name" => $ids[$value['ramp_id']]['name'],
+                    "lng" => $ids[$value['ramp_id']]['lng'],
+                    "lat" => $ids[$value['ramp_id']]['lat'],
+                    "alarm_comment" => "过饱和",
+                    "alarm_type" => 1,
+                ];
+            }
+        }
         // print_r($list);exit;
-    	usort($list, function($a, $b) {
+        usort($list, function ($a, $b) {
             return ($a['duration_time'] < $b['duration_time']) ? 1 : -1;
         });
 
-    	return [
-    		"trafficList" => $list,
-    	];
+        return [
+            "trafficList" => $list,
+        ];
     }
 
-    public function condition($params) {
-    	$city_id = intval($params['city_id']);
-    	$es_data = $this->dataService->call("/expressway/Condition", [
-    		'city_id' => $city_id,
-    	], "POST", 'json');
+    public function condition($params)
+    {
+        $city_id = intval($params['city_id']);
+        $es_data = $this->dataService->call("/expressway/Condition", [
+            'city_id' => $city_id,
+        ], "POST", 'json');
 
-    	$list = $es_data[2]['list'];
-    	// 阈值 35 50，过滤掉50以上的，降低数据量
-    	// 拥堵程度 3 > 2 > 1
-    	foreach ($list as $key => $value) {
-    		$speed = round($value['avg_speed'] * 3.6, 2);
-    		$list[$key]['avg_speed'] = $speed;
-    		if ( $speed < 10 && $speed > 0 ) {
-    			$list[$key]['type'] = 3;
-    		} elseif ($speed < 30 && $speed > 0 ) {
-    			$list[$key]['type'] = 2;
-    		} else {
-    			$list[$key]['type'] = 1;
-    			unset($list[$key]);
-    		}
-    	}
+        $list = $es_data[2]['list'];
+        // 阈值 35 50，过滤掉50以上的，降低数据量
+        // 拥堵程度 3 > 2 > 1
+        foreach ($list as $key => $value) {
+            $speed = round($value['avg_speed'] * 3.6, 2);
+            $list[$key]['avg_speed'] = $speed;
+            if ($speed < 10 && $speed > 0) {
+                $list[$key]['type'] = 3;
+            } elseif ($speed < 30 && $speed > 0) {
+                $list[$key]['type'] = 2;
+            } else {
+                $list[$key]['type'] = 1;
+                unset($list[$key]);
+            }
+        }
 
-    	// 过滤link
-    	$overview = $this->queryOverview($city_id);
-    	$ids = [];
-    	foreach ($overview['road_list'] as $value) {
-    		$ids = array_merge($ids, explode(',', $value['link_ids']));
-    	}
-    	// var_dump(count($list));
-    	foreach ($list as $key => $value) {
-    		if (!in_array($value['link_id'], $ids)) {
-    			unset($list[$key]);
-    		}
-    	}
-    	// var_dump(count($list));
+        // 过滤link
+        $overview = $this->queryOverview($city_id);
+        $ids = [];
+        foreach ($overview['road_list'] as $value) {
+            $ids = array_merge($ids, explode(',', $value['link_ids']));
+        }
+        // var_dump(count($list));
+        foreach ($list as $key => $value) {
+            if (!in_array($value['link_id'], $ids)) {
+                unset($list[$key]);
+            }
+        }
+        // var_dump(count($list));
 
-    	$list = array_values($list);
-    	$link_ids = array_column($list, 'link_id');
-    	$version =$this->waymap_model->getLastMapVersion();
-    	$link_infos = $this->waymap_model->getLinksGeoInfos($link_ids, $version, true);
-    	$link_geom_map = [];
-    	foreach ($link_infos['features'] as $link_info) {
-    		if (in_array($link_info['properties']['id'], $link_ids)) {
-    			$link_geom_map[$link_info['properties']['id']] = $link_info['geometry'];
-    		}
-    	}
+        $list = array_values($list);
+        $link_ids = array_column($list, 'link_id');
+        $version = $this->waymap_model->getLastMapVersion();
+        $link_infos = $this->waymap_model->getLinksGeoInfos($link_ids, $version, true);
+        $link_geom_map = [];
+        foreach ($link_infos['features'] as $link_info) {
+            if (in_array($link_info['properties']['id'], $link_ids)) {
+                $link_geom_map[$link_info['properties']['id']] = $link_info['geometry'];
+            }
+        }
 
 
-    	foreach ($list as $key => $value) {
-    		if (isset($link_geom_map[$value['link_id']])) {
-    			$list[$key]['geom'] = $link_geom_map[$value['link_id']];
-    		} else {
-    			$list[$key]['geom'] = [
-    				"coordinates" => [],
-    				"type" => "LineString",
-    			];
-    		}
-    	}
-    	return [
-    		'trafficList' => $list,
-    		'hms' => $es_data[2]['hms'],
-    	];
+        foreach ($list as $key => $value) {
+            if (isset($link_geom_map[$value['link_id']])) {
+                $list[$key]['geom'] = $link_geom_map[$value['link_id']];
+            } else {
+                $list[$key]['geom'] = [
+                    "coordinates" => [],
+                    "type" => "LineString",
+                ];
+            }
+        }
+        return [
+            'trafficList' => $list,
+            'hms' => $es_data[2]['hms'],
+        ];
     }
 }
