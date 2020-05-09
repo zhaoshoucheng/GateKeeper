@@ -283,6 +283,7 @@ class Timeframeoptimize extends MY_Controller
         //     StartTime  string   `json:"start_time" validate:"required"`
         //     EndTime    string   `json:"end_time" validate:"required"`
         // }
+
         $result = $this->traj_model->getTodOptimizePlan($params);
         return $this->response($result);
     }
@@ -313,7 +314,8 @@ class Timeframeoptimize extends MY_Controller
                 "warning" => "时段划分至少15分钟",
             ));
         }
-
+        print_r($params);
+        exit;
         $result = $this->traj_model->getTodOptimizePlan($params);
         return $this->response($result);
         /*
