@@ -45,7 +45,7 @@ class Sjgt_model extends CI_Model
             ->get();
         $list = $res instanceof CI_DB_result ? $res->result_array() : $res;
         foreach ($list as $item) {
-            $coordinates = json_decode($item["area_geometry"], false);
+            $coordinates = json_decode($item["area_geometry"], true);
             $points = [];
             foreach ($coordinates[0][0] as $point) {
                 $points[] = implode(",", $point);
