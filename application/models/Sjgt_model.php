@@ -39,10 +39,8 @@ class Sjgt_model extends CI_Model
      */
     public function getTransfor()
     {
-        $res = $this->db->select($select)
+        $res = $this->db->select("area_name", "area_geometry")
             ->from($this->tb)
-            ->select("area_name", "area_geometry")
-            ->where('logic_junction_id', $logicJunctionId)
             ->order_by("id", "desc")
             ->get();
         $list = $res instanceof CI_DB_result ? $res->row_array() : $res;
