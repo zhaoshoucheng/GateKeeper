@@ -43,7 +43,6 @@ paths:
         200:
           description: 成功
           type: object
-          description: ""
   /Area/intervalComparison:
     post:
       summary: 多路口运行延误图
