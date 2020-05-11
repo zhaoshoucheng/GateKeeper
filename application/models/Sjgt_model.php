@@ -68,8 +68,10 @@ class Sjgt_model extends CI_Model
                     $ret = httpPOST($Url, $params);
                     $polygonResponse = json_decode($ret, true);
                     $filterJuncs=$polygonResponse["data"]["filter_juncs"];
-                    $juncIds=array_column($filterJuncs,"logic_junction_id");
-                    $unionJuncIds = array_unique(array_merge($unionJuncIds,$juncIds));
+                    if(!empty($filterJuncs)){
+                        $juncIds=array_column($filterJuncs,"logic_junction_id");
+                        $unionJuncIds = array_unique(array_merge($unionJuncIds,$juncIds));
+                    }
                 }
             }else{ 
                 foreach ($coordinates["coordinates"][0] as $point) {
@@ -87,7 +89,9 @@ class Sjgt_model extends CI_Model
                 $polygonResponse = json_decode($ret, true);
                 // print_r(json_decode($ret, true));
                 $filterJuncs=$polygonResponse["data"]["filter_juncs"];
-                $unionJuncIds=array_unique(array_column($filterJuncs,"logic_junction_id"));
+                if(!empty($filterJuncs)){ 
+                    $unionJuncIds=array_unique(array_column($filterJuncs,"logic_junction_id"));
+                }
             }
             print_r($unionJuncIds);
             foreach ($unionJuncIds as $juncId) {
