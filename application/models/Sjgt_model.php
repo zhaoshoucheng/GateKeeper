@@ -51,7 +51,7 @@ class Sjgt_model extends CI_Model
             // print_r($item);
             $insertSql =  "INSERT INTO `area` (`id`, `area_name`, `city_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '" . $item["area_name"] . "', '12', '0', '2020-05-09 11:01:02', '2020-05-09 21:28:38', '1970-01-01 00:00:00');";
             $this->db->query($insertSql);
-            $areaID=$this->db->insertID();
+            $areaID=$this->db->insert_id();
             echo $areaID;exit;
             if ($coordinates["type"] == "MultiPolygon") {
                 foreach ($coordinates["coordinates"] as $partCoordinate) {
