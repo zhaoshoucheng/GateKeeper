@@ -72,17 +72,19 @@ class TimingAdaptionAreaService extends BaseService
     {
         $cityId = $params['city_id'];
         $areaData = $this->getAreaList($params);
-        if ($cityId == 23) {
+        //默认城市
+        if ($cityId != 23) {
             return $this->formatGetAreaListData($cityId, $areaData);
         }
-        // $data = [];
-        // //todo 苏州硬编码
-        // foreach ($areaData as $area) {
-        //     if (in_array($area["id"], ["441"])) {
-        //         $data[] = $area;
-        //     }
-        // }
-        return $this->formatGetAreaListData($cityId, $areaData);
+
+        //todo 苏州硬编码
+        $data = [];
+        foreach ($areaData as $area) {
+            if (in_array($area["id"], ["441"])) {
+                $data[] = $area;
+            }
+        }
+        return $this->formatGetAreaListData($cityId, $data);
     }
 
     /**
