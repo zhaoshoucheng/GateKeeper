@@ -71,6 +71,7 @@ class Sjgt_model extends CI_Model
 
                     foreach ($polygonResponse["data"]["filter_juncs"] as $juncItem) {
                         $insertSql = "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '".$areaID."', '" . $juncItem["logic_junction_id"] . "', '0', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."', '1970-01-01 00:00:00');";
+                        echo $insertSql."\n";
                         $this->db->query($insertSql);
                     }
                 }
@@ -92,6 +93,7 @@ class Sjgt_model extends CI_Model
 
                 foreach ($polygonResponse["data"]["filter_juncs"] as $juncItem) {
                     $insertSql = "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '".$areaID."', '" . $juncItem["logic_junction_id"] . "', '0', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."', '1970-01-01 00:00:00');";
+                    echo $insertSql."\n";
                     $this->db->query($insertSql);
                 }
             }
