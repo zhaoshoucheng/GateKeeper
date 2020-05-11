@@ -24,9 +24,10 @@ class Sjgt_model extends CI_Model
     {
         parent::__construct();
 
+        $this->test_db = $this->load->database('test_default', true);
         $this->db = $this->load->database('default', true);
 
-        $isExisted = $this->db->table_exists($this->tb);
+        $isExisted = $this->test_db->table_exists($this->tb);
         if (!$isExisted) {
             throw new \Exception('数据表不存在', ERR_DATABASE);
         }
@@ -39,12 +40,12 @@ class Sjgt_model extends CI_Model
      */
     public function getTransfor()
     {
-        $res = $this->db
+        $res = $this->test_db
             ->from($this->tb)
             ->order_by("id", "desc")
             ->get();
-        $this->db->trans_begin();
         $list = $res instanceof CI_DB_result ? $res->result_array() : $res;
+        $this->db->trans_begin();
         foreach ($list as $item) {
             $coordinates = json_decode($item["area_geometry"], true);
             $points = [];
