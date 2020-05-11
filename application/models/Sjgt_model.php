@@ -101,6 +101,7 @@ class Sjgt_model extends CI_Model
             // exit;
         }
         $this->db->trans_commit();
+        echo "all done\n";
         // print_r($list);
     }
 }
