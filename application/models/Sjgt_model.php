@@ -93,7 +93,7 @@ class Sjgt_model extends CI_Model
                     $unionJuncIds=array_unique(array_column($filterJuncs,"logic_junction_id"));
                 }
             }
-            print_r($unionJuncIds);
+            // print_r($unionJuncIds);
             foreach ($unionJuncIds as $juncId) {
                 $insertSql = "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '".$areaID."', '" . $juncId . "', '0', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."', '1970-01-01 00:00:00');";
                 // echo $insertSql."\n";
