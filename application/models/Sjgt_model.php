@@ -97,6 +97,7 @@ class Sjgt_model extends CI_Model
                     $this->db->query($insertSql);
                 }
             }
+            $this->db->trans_commit();
             exit;
         }
         $this->db->trans_commit();
