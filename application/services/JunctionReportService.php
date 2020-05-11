@@ -653,18 +653,21 @@ class JunctionReportService extends BaseService{
             "quotaname"=>"停车次数",
             "quotakey"=>"stop_time_cycle",
             "analysis"=>"",
+            "max"=>0,
             "flowlist"=>[],
         ];
         $speedChartData =[
             "quotaname"=>"行驶速度",
             "quotakey"=>"speed",
             "analysis"=>"",
+            "max"=>0,
             "flowlist"=>[],
         ];
         $stopDelayChartData =[
             "quotaname"=>"停车延误",
             "quotakey"=>"stop_delay",
             "analysis"=>"",
+            "max"=>0,
             "flowlist"=>[],
         ];
         $maxstoptime=0;
@@ -712,7 +715,6 @@ class JunctionReportService extends BaseService{
                     "series"=>[["name"=>"","data"=>$this->sortAndFillHour($stopTimeCycleChart)]],
                 ],
             ];
-            $stopTimeChartData['max'] = $maxstoptime;
             $speedChartData['flowlist'][]=[
                 "logic_flow_id"=>$fk,
                 "chart"=>[
@@ -722,7 +724,6 @@ class JunctionReportService extends BaseService{
                     "series"=>[["name"=>"","data"=>$this->sortAndFillHour($speedCycleChart)]]
                 ],
             ];
-            $speedChartData['max']= $maxspeedcycle;
             $stopDelayChartData['flowlist'][]=[
                 "logic_flow_id"=>$fk,
                 "chart"=>[
@@ -732,8 +733,12 @@ class JunctionReportService extends BaseService{
                     "series"=>[["name"=>"","data"=>$this->sortAndFillHour($stopDelayCycleChart)]]
                 ],
             ];
-            $stopDelayChartData['max']=$stopDelayChartData;
         }
+//        var_dump($stopTimeChartData);
+        $stopTimeChartData['max'] = $maxstoptime;
+        $speedChartData['max']= $maxspeedcycle;
+        $stopDelayChartData['max']=$stopDelayChartData;
+
 
         $chartDataList=[];
         $chartDataList[]= $stopTimeChartData;
