@@ -52,6 +52,7 @@ class Sjgt_model extends CI_Model
             $insertSql =  "INSERT INTO `area` (`id`, `area_name`, `city_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '" . $item["area_name"] . "', '12', '0', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."', '1970-01-01 00:00:00');";
             $this->db->query($insertSql);
             $areaID=$this->db->insert_id();
+            $unionJuncIds = [];
             if ($coordinates["type"] == "MultiPolygon") {
                 foreach ($coordinates["coordinates"] as $partCoordinate) {
                     foreach ($partCoordinate[0] as $point) {
@@ -65,16 +66,10 @@ class Sjgt_model extends CI_Model
                     $params["polygon"] = implode(";", $points);
                     $Url = "http://100.69.238.11:8000/its/signal-map/mapJunction/polygon";
                     $ret = httpPOST($Url, $params);
-                    // print_r($points);
                     $polygonResponse = json_decode($ret, true);
                     $filterJuncs=$polygonResponse["data"]["filter_juncs"];
-                    $juncIds=array_unique(array_column($filterJuncs,"logic_junction_id"));
-                    print_r($juncIds);
-                    foreach ($juncIds as $juncId) {
-                        $insertSql = "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '".$areaID."', '" . $juncId . "', '0', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."', '1970-01-01 00:00:00');";
-                        // echo $insertSql."\n";
-                        $this->db->query($insertSql);
-                    }
+                    $juncIds=array_column($filterJuncs,"logic_junction_id");
+                    $unionJuncIds = array_unique(array_merge($unionJuncIds,$juncIds));
                 }
             }else{ 
                 foreach ($coordinates["coordinates"][0] as $point) {
@@ -92,13 +87,13 @@ class Sjgt_model extends CI_Model
                 $polygonResponse = json_decode($ret, true);
                 // print_r(json_decode($ret, true));
                 $filterJuncs=$polygonResponse["data"]["filter_juncs"];
-                $juncIds=array_unique(array_column($filterJuncs,"logic_junction_id"));
-                print_r($juncIds);
-                foreach ($juncIds as $juncId) {
-                    $insertSql = "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '".$areaID."', '" . $juncId . "', '0', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."', '1970-01-01 00:00:00');";
-                    // echo $insertSql."\n";
-                    $this->db->query($insertSql);
-                }
+                $unionJuncIds=array_unique(array_column($filterJuncs,"logic_junction_id"));
+            }
+            print_r($unionJuncIds);
+            foreach ($unionJuncIds as $juncId) {
+                $insertSql = "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '".$areaID."', '" . $juncId . "', '0', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."', '1970-01-01 00:00:00');";
+                // echo $insertSql."\n";
+                $this->db->query($insertSql);
             }
             // $this->db->trans_commit();
             // exit;
