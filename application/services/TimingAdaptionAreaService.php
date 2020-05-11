@@ -75,15 +75,14 @@ class TimingAdaptionAreaService extends BaseService
         if ($cityId == 23) {
             return $this->formatGetAreaListData($cityId, $areaData);
         }
-        $data = [];
-
-        //todo 苏州硬编码
-        foreach ($areaData as $area) {
-            if (in_array($area["id"], ["441"])) {
-                $data[] = $area;
-            }
-        }
-        return $this->formatGetAreaListData($cityId, $data);
+        // $data = [];
+        // //todo 苏州硬编码
+        // foreach ($areaData as $area) {
+        //     if (in_array($area["id"], ["441"])) {
+        //         $data[] = $area;
+        //     }
+        // }
+        return $this->formatGetAreaListData($cityId, $areaData);
     }
 
     /**
