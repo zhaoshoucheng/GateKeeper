@@ -75,48 +75,46 @@ paths:
       responses:
         200:
           description: 成功
-          schema:
-            type: object
+          properties: 
+            errno: 
+              type: "number"
+              example: 0
+            errmsg: 
+              type: "string"
+              example: ""
+            data: 
+              required: 
+                - "avg"
               properties: 
-                errno: 
-                  type: "number"
-                  example: 0
-                errmsg: 
-                  type: "string"
-                  example: ""
-                data: 
+                avg: 
                   required: 
-                    - "avg"
+                    - "base"
                   properties: 
-                    avg: 
-                      required: 
-                        - "base"
-                      properties: 
-                        base: 
-                          type: "array"
-                          items: 
-                            type: "undefined"
-                          example: []
-                      type: "object"
+                    base: 
+                      type: "array"
+                      items: 
+                        type: "undefined"
+                      example: []
                   type: "object"
-                traceid: 
+              type: "object"
+            traceid: 
+              type: "string"
+              example: "8b3c9f2050b44c968699ee90952632f2"
+            username: 
+              type: "string"
+              example: "unkown"
+            time: 
+              required: 
+                - "a"
+                - "s"
+              properties: 
+                a: 
                   type: "string"
-                  example: "8b3c9f2050b44c968699ee90952632f2"
-                username: 
+                  example: "0.4137秒"
+                s: 
                   type: "string"
-                  example: "unkown"
-                time: 
-                  required: 
-                    - "a"
-                    - "s"
-                  properties: 
-                    a: 
-                      type: "string"
-                      example: "0.4137秒"
-                    s: 
-                      type: "string"
-                      example: "0.3921秒"
-                  type: "object"
+                  example: "0.3921秒"
+              type: "object"
   /timeframeoptimize/getOptimizeTimingPlus:
     post:
       summary: 多路口原始方案
@@ -144,68 +142,66 @@ paths:
       responses:
         200:
           description: 成功
-          schema:
-            type: object
+          required: 
+            - "errno"
+            - "errmsg"
+            - "data"
+            - "traceid"
+            - "username"
+            - "time"
+          properties: 
+            errno: 
+              type: "number"
+              example: 0
+            errmsg: 
+              type: "string"
+              example: ""
+            data: 
               required: 
-                - "errno"
-                - "errmsg"
-                - "data"
-                - "traceid"
-                - "username"
-                - "time"
+                - "2017030116_3539886"
               properties: 
-                errno: 
-                  type: "number"
-                  example: 0
-                errmsg: 
-                  type: "string"
-                  example: ""
-                data: 
+                2017030116_3539886: 
                   required: 
-                    - "2017030116_3539886"
+                    - "type"
+                    - "timing"
                   properties: 
-                    2017030116_3539886: 
-                      required: 
-                        - "type"
-                        - "timing"
-                      properties: 
-                        type: 
-                          type: "string"
-                          example: "1"
-                        timing: 
-                          type: "array"
-                          items: 
-                            type: "object"
-                            properties: 
-                              start: 
-                                type: "string"
-                                example: "00:00:00"
-                              end: 
-                                type: "string"
-                                example: "06:00:00"
-                              comment: 
-                                type: "string"
-                                example: "1"
-                      type: "object"
-                  type: "object"
-                traceid: 
-                  type: "string"
-                  example: "5061093d11fd437996efd21751bdc63f"
-                username: 
-                  type: "string"
-                  example: "unkown"
-                time: 
-                  required: 
-                    - "a"
-                    - "s"
-                  properties: 
-                    a: 
+                    type: 
                       type: "string"
-                      example: "0.1028秒"
-                    s: 
-                      type: "string"
-                      example: "0.0733秒"
+                      example: "1"
+                    timing: 
+                      type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          start: 
+                            type: "string"
+                            example: "00:00:00"
+                          end: 
+                            type: "string"
+                            example: "06:00:00"
+                          comment: 
+                            type: "string"
+                            example: "1"
                   type: "object"
+              type: "object"
+            traceid: 
+              type: "string"
+              example: "5061093d11fd437996efd21751bdc63f"
+            username: 
+              type: "string"
+              example: "unkown"
+            time: 
+              required: 
+                - "a"
+                - "s"
+              properties: 
+                a: 
+                  type: "string"
+                  example: "0.1028秒"
+                s: 
+                  type: "string"
+                  example: "0.0733秒"
+              type: "object"
 
   /timeframeoptimize/getTodOptimizePlanPlus:
     post:
@@ -244,74 +240,65 @@ paths:
       responses:
         200:
           description: 成功
-          schema:
-            type: object
-            required: 
-              - "errno"
-              - "errmsg"
-              - "data"
-              - "traceid"
-              - "username"
-              - "time"
-            properties: 
-              errno: 
-                type: "number"
-                example: 0
-              errmsg: 
-                type: "string"
-                example: ""
-              data: 
-                required: 
-                  - "2017030116_3539886"
-                properties: 
-                  2017030116_3539886: 
-                    required: 
-                      - "tod_plans"
-                      - "cutTime"
-                    properties: 
-                      tod_plans: 
-                        type: "array"
-                        items: 
-                          type: "object"
-                          properties: 
-                            start: 
-                              type: "string"
-                              example: "00:00:00"
-                            end: 
-                              type: "string"
-                              example: "07:00:00"
-                            comment: 
-                              type: "string"
-                              example: "1"
-                      cutTime: 
-                        type: "array"
-                        items: 
-                          type: "string"
-                        example: 
-                          - "07:00:00"
-                          - "10:15:00"
-                          - "12:00:00"
-                          - "19:15:00"
-                    type: "object"
-                type: "object"
-              traceid: 
-                type: "string"
-                example: "2007fa8b081a45c5a8004127137b30c7"
-              username: 
-                type: "string"
-                example: "unkown"
-              time: 
-                required: 
-                  - "a"
-                  - "s"
-                properties: 
-                  a: 
-                    type: "string"
-                    example: "1.0529秒"
-                  s: 
-                    type: "string"
-                    example: "1.0272秒"
-                type: "object"
+          properties: 
+            errno: 
+              type: "number"
+              example: 0
+            errmsg: 
+              type: "string"
+              example: ""
+            data: 
+              required: 
+                - "2017030116_3539886"
+              properties: 
+                2017030116_3539886: 
+                  required: 
+                    - "tod_plans"
+                    - "cutTime"
+                  properties: 
+                    tod_plans: 
+                      type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          start: 
+                            type: "string"
+                            example: "00:00:00"
+                          end: 
+                            type: "string"
+                            example: "07:00:00"
+                          comment: 
+                            type: "string"
+                            example: "1"
+                    cutTime: 
+                      type: "array"
+                      items: 
+                        type: "string"
+                      example: 
+                        - "07:00:00"
+                        - "10:15:00"
+                        - "12:00:00"
+                        - "19:15:00"
+                  type: "object"
+              type: "object"
+            traceid: 
+              type: "string"
+              example: "2007fa8b081a45c5a8004127137b30c7"
+            username: 
+              type: "string"
+              example: "unkown"
+            time: 
+              required: 
+                - "a"
+                - "s"
+              properties: 
+                a: 
+                  type: "string"
+                  example: "1.0529秒"
+                s: 
+                  type: "string"
+                  example: "1.0272秒"
+              type: "object"
   /AreaReport/introductionNJ:
     get:
       summary: 区域报告信息概览
