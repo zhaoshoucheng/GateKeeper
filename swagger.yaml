@@ -77,13 +77,6 @@ paths:
           description: 成功
           schema:
             type: object
-              required: 
-                - "errno"
-                - "errmsg"
-                - "data"
-                - "traceid"
-                - "username"
-                - "time"
               properties: 
                 errno: 
                   type: "number"
