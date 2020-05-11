@@ -68,7 +68,10 @@ class Sjgt_model extends CI_Model
                     // print_r($points);
                     $polygonResponse = json_decode($ret, true);
                     // print_r(json_decode($ret, true));
-
+                    $filterJuncs=$polygonResponse["data"]["filter_juncs"];
+                    $juncIds=array_column($filterJuncs,"logic_junction_id");
+                    print_r($juncIds);
+                    exit;
                     foreach ($polygonResponse["data"]["filter_juncs"] as $juncItem) {
                         $insertSql = "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '".$areaID."', '" . $juncItem["logic_junction_id"] . "', '0', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."', '1970-01-01 00:00:00');";
                         echo $insertSql."\n";
@@ -90,7 +93,10 @@ class Sjgt_model extends CI_Model
                 // print_r($points);
                 $polygonResponse = json_decode($ret, true);
                 // print_r(json_decode($ret, true));
-
+                $filterJuncs=$polygonResponse["data"]["filter_juncs"];
+                $juncIds=array_column($filterJuncs,"logic_junction_id");
+                print_r($juncIds);
+                exit;
                 foreach ($polygonResponse["data"]["filter_juncs"] as $juncItem) {
                     $insertSql = "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '".$areaID."', '" . $juncItem["logic_junction_id"] . "', '0', '".date("Y-m-d H:i:s")."', '".date("Y-m-d H:i:s")."', '1970-01-01 00:00:00');";
                     echo $insertSql."\n";
