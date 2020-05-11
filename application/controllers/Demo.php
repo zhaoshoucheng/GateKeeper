@@ -38,7 +38,6 @@ class Demo extends MY_Controller
         $this->sjgt_model->getTransfor();
     }
 
-
     public function suzhouQuickRoadDelayList()
     {
         $params = [
