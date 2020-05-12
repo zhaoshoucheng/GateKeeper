@@ -137,14 +137,10 @@ class Timeframeoptimize extends MY_Controller
                 'junction_id' => strip_tags(trim($junctionId)),
                 'time_range'  => strip_tags(trim($params['task_time_range'])),
             ];
-            // if (isset($params['source'])) {
-            //     $data['source'] = $params['source']);
-            // } elseif if (isset($params['source_type'])) {
-            //     $data['source'] = $params['source_type']);
-            // }
             $timing = $this->timingService->getOptimizeTiming($data);
             if (empty($timing)) {
-                $listTiming[$junctionId] = [
+                $listTiming[] = [
+                    "junction_id" => $junctionId,
                     "type" => "1",
                     "timing" => [
                         [
@@ -175,7 +171,8 @@ class Timeframeoptimize extends MY_Controller
                     ],
                 ];
             } else {
-                $listTiming[$junctionId] = [
+                $listTiming[] = [
+                    "junction_id" => $junctionId,
                     "type" => "1",
                     "timing" => $timing,
                 ];
