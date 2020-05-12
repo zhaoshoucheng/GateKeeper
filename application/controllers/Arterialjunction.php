@@ -57,11 +57,11 @@ class Arterialjunction extends MY_Controller
         // 获取scats配时
         $scatsJunctions = $timingModel->getScatsJunctions($cityId);
         $scatsJunctions = array_column($scatsJunctions,"junction_id");
-        echo "hasTiming";
-        print_r($hasTiming);
-        echo "scatsJunctions";
-        print_r($scatsJunctions);exit;
-        $mapHasTiming = array_flip($scatsJunctions);
+        $interTiming = array_intersect($hasTiming,$scatsJunctions);
+
+        // 求scats与普通配时交集
+        $mapHasTiming = array_flip($interTiming);
+        
         $waymapModel = new Waymap_model();
         $version = $waymapModel::$lastMapVersion;
 
