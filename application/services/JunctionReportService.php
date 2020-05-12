@@ -737,7 +737,7 @@ class JunctionReportService extends BaseService{
 //        var_dump($stopTimeChartData);
         $stopTimeChartData['max'] = $maxstoptime;
         $speedChartData['max']= $maxspeedcycle;
-        $stopDelayChartData['max']=$stopDelayChartData;
+        $stopDelayChartData['max']=$maxstopdelay;
 
 
         $chartDataList=[];
