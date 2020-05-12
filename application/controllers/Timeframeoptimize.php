@@ -141,12 +141,12 @@ class Timeframeoptimize extends MY_Controller
             if (empty($timing)) {
                 $listTiming[] = [
                     "junction_id" => $junctionId,
-                    "type" => "1",
+                    "type" => "0",
                     "timing" => [
                         [
                             "comment" => "1",
-                            "start" => "05:00:00",
-                            "end" => "00:00:00",
+                            "start" => "00:00:00",
+                            "end" => "05:00:00",
                         ],
                         [
                             "comment" => "1",
