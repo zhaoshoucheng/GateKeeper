@@ -148,7 +148,7 @@ class AreaReportService extends BaseService{
     //济南定制化需求
     public function introductionJN($params){
 
-        $tpl = "本次报告区域为%s市，分析区域包含%s区等行政区域。本次报告根据%s数据对该区域进行分析，整体PI为%s，与%s相比%s，%s";
+        $tpl = "本次报告区域为%s市的%s区。本次报告根据%s数据对该区域进行分析，整体PI为%s，与%s相比%s，%s";
 
         $city_id = $params['city_id'];
         $area_id = $params['area_id'];
