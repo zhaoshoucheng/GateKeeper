@@ -196,7 +196,7 @@ class Demo extends MY_Controller
 
     public function districtsTest()
     {
-        $url = "http://100.69.238.11:8000/its/signal-map/map/getList?city_id=11&offset=0&count=10000&districts=320106,320104,320113,320105,320114,320102&token=4c3e3b6a3588161128d0604daab528db&user_id=signalPro";
+        $url = "http://100.69.238.11:8000/its/signal-map/map/getList?city_id=12&offset=0&count=10000&token=4c3e3b6a3588161128d0604daab528db&user_id=signalPro";
         $jsonData  = httpPOST($url, []);
         // $jsonData = json_decode($ret,true);
         // print_r($finalRet);exit;
