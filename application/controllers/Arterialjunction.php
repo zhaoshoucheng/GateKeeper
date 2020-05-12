@@ -15,7 +15,7 @@ class Arterialjunction extends MY_Controller
         $this->load->model('arterialjunction_model');
         $this->load->model('timing_model');
     }
-    
+
     /**
      * 获取优化全城路口集合接口
      */
@@ -40,6 +40,7 @@ class Arterialjunction extends MY_Controller
         // 获取配时 traffic_timing_solve
         $timingModel = new Timing_model();
         $scatsJunctions = $timingModel->getScatsJunctions($cityId);
+        print_r($scatsJunctions);exit;
         $mapHasTiming = array_flip($scatsJunctions);
 
         $waymapModel = new Waymap_model();
