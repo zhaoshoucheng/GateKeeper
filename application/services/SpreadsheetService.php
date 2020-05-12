@@ -53,6 +53,36 @@ class SpreadsheetService extends BaseService{
         }
     }
 
+    public function AreaTimeOptSpreadsheet($Obj){
+        $spreadsheet = new Spreadsheet();
+        $worksheet = $spreadsheet->getActiveSheet();
+
+        $worksheet->setTitle($Obj['area_name'].'时段优化结果');
+        $rowIndex=0;
+        $worksheet->setCellValueByColumnAndRow(1, ++$rowIndex, '区域名称');
+        $worksheet->setCellValueByColumnAndRow(2, $rowIndex, $Obj['area_name']);
+        foreach($Obj["list"] as $juncItem){
+            $worksheet->setCellValueByColumnAndRow(1, ++$rowIndex, '路口名称');
+            $worksheet->setCellValueByColumnAndRow(2, $rowIndex, $juncItem['junction_name']);
+            $worksheet->setCellValueByColumnAndRow(1, ++$rowIndex, '优化时段');
+            $worksheet->setCellValueByColumnAndRow(2, ++$rowIndex, '开始时间');
+            $worksheet->setCellValueByColumnAndRow(3, $rowIndex, '结束时间');
+            foreach ($juncItem['opt_rets'] as $key => $value){
+                $worksheet->setCellValueByColumnAndRow(1,++$rowIndex, '时段'.($key+1));
+                $worksheet->setCellValueByColumnAndRow(2,$rowIndex, $value['start_time']);
+                $worksheet->setCellValueByColumnAndRow(3,$rowIndex, $value['end_time']);
+            }
+        }
+        
+        $filename = $Obj['area_name'].'时段优化结果.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="'.$filename.'"');
+        header('Cache-Control: max-age=0');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
     public function SingleTimeOptSpreadsheet($FILE,$Obj){
 
         $spreadsheet = new Spreadsheet();
