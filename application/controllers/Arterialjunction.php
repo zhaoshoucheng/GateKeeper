@@ -42,7 +42,7 @@ class Arterialjunction extends MY_Controller
         $scatsJunctions = $timingModel->getScatsJunctions($cityId);
         $scatsJunctions = array_column($scatsJunctions,"junction_id");
         $mapHasTiming = array_flip($scatsJunctions);
-        print_r($mapHasTiming);exit;
+        // print_r($mapHasTiming);exit;
         $waymapModel = new Waymap_model();
         $version = $waymapModel::$lastMapVersion;
 

@@ -51,13 +51,13 @@ class Timing_model extends CI_Model
     public function getScatsJunctions($cityId){
         $this->db = $this->load->database('traffic_timing_solve', true);
         $res = $this->db->select("DISTINCT(junction_id)")
-            ->from("scats_split_plan")
+            ->from("scats_phase_mapping")
             ->where('city_id', $cityId)
             ->get();
         $result = $res instanceof CI_DB_result ? $res->result_array() : $res;
         return $result;
     }
-
+    
     /**
      * 获取路口配时时间方案
      * @param $data['junction_id'] string   逻辑路口ID
