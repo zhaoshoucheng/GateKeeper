@@ -40,9 +40,9 @@ class Arterialjunction extends MY_Controller
         // 获取配时 traffic_timing_solve
         $timingModel = new Timing_model();
         $scatsJunctions = $timingModel->getScatsJunctions($cityId);
-        print_r($scatsJunctions);exit;
+        $scatsJunctions = array_column($scatsJunctions,"junction_id");
         $mapHasTiming = array_flip($scatsJunctions);
-
+        print_r($mapHasTiming);exit;
         $waymapModel = new Waymap_model();
         $version = $waymapModel::$lastMapVersion;
 
