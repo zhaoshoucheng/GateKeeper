@@ -45,8 +45,12 @@ class DownloadSpreadsheet extends MY_Controller{
     }
 
     public function AreaTimeOpt(){
+        $this->convertJsonToPost();
         $params = $this->input->post(null, true);
-        $obj = json_decode($params['values'],true);
+        $this->validate([
+            'values' => 'required|trim',
+        ]);
+        $obj = $params['values'];
         $this->SpreadsheetService->AreaTimeOptSpreadsheet($obj);
     }
 
