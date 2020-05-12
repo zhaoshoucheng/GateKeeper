@@ -653,27 +653,31 @@ class JunctionReportService extends BaseService{
             "quotaname"=>"停车次数",
             "quotakey"=>"stop_time_cycle",
             "analysis"=>"",
+            "max"=>0,
             "flowlist"=>[],
         ];
         $speedChartData =[
             "quotaname"=>"行驶速度",
             "quotakey"=>"speed",
             "analysis"=>"",
+            "max"=>0,
             "flowlist"=>[],
         ];
         $stopDelayChartData =[
             "quotaname"=>"停车延误",
             "quotakey"=>"stop_delay",
             "analysis"=>"",
+            "max"=>0,
             "flowlist"=>[],
         ];
+        $maxstoptime=0;
+        $maxspeedcycle=0;
+        $maxstopdelay=0;
         foreach ($flowQuota as $fk => $fv){
             $stopTimeCycleChart = [];
             $speedCycleChart = [];
             $stopDelayCycleChart = [];
-            $maxstoptime=0;
-            $maxspeedcycle=0;
-            $maxstopdelay=0;
+
             foreach ($fv as $h => $series){
                 $stop_time_cycle = round($series['stop_time_cycle']/$series['traj_count'],2);
                 $stopTimeCycleChart[] = [
@@ -707,7 +711,7 @@ class JunctionReportService extends BaseService{
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"次/车",
-                    "max"=>$maxstoptime,
+//                    "max"=>$maxstoptime,
                     "series"=>[["name"=>"","data"=>$this->sortAndFillHour($stopTimeCycleChart)]],
                 ],
             ];
@@ -716,7 +720,7 @@ class JunctionReportService extends BaseService{
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"公里/小时",
-                    "max"=>$maxspeedcycle,
+//                    "max"=>$maxspeedcycle,
                     "series"=>[["name"=>"","data"=>$this->sortAndFillHour($speedCycleChart)]]
                 ],
             ];
@@ -725,11 +729,16 @@ class JunctionReportService extends BaseService{
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"秒",
-                    "max"=>$maxstopdelay,
+//                    "max"=>$maxstopdelay,
                     "series"=>[["name"=>"","data"=>$this->sortAndFillHour($stopDelayCycleChart)]]
                 ],
             ];
         }
+//        var_dump($stopTimeChartData);
+        $stopTimeChartData['max'] = $maxstoptime;
+        $speedChartData['max']= $maxspeedcycle;
+        $stopDelayChartData['max']=$stopDelayChartData;
+
 
         $chartDataList=[];
         $chartDataList[]= $stopTimeChartData;
