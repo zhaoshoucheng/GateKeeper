@@ -37,12 +37,28 @@ class Arterialjunction extends MY_Controller
         $commonService = new \Services\CommonService();
         $userPerm = $commonService->mergeUserPermAreaJunction($cityId, $this->userPerm);
 
-        // 获取配时 traffic_timing_solve
+        // 获取配时
         $timingModel = new Timing_model();
+        
+        // 获取普通配时
+        $timingModel = new Timing_model();
+        $timing = $timingModel->queryTimingStatus(
+            [
+                'city_id' => $cityId,
+                'source' => 0,
+            ]
+        );
+        $hasTiming = [];
+        foreach ($timing as $item) {
+            if ($item['status'] == 1) {
+                $hasTiming[] = $item['logic_junction_id'];
+            }
+        }
+        // 获取scats配时
         $scatsJunctions = $timingModel->getScatsJunctions($cityId);
         $scatsJunctions = array_column($scatsJunctions,"junction_id");
+        print_r($scatsJunctions);exit;
         $mapHasTiming = array_flip($scatsJunctions);
-        print_r($mapHasTiming);exit;
         $waymapModel = new Waymap_model();
         $version = $waymapModel::$lastMapVersion;
 
