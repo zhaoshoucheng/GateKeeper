@@ -148,7 +148,7 @@ class AreaReportService extends BaseService{
     //济南定制化需求
     public function introductionJN($params){
 
-        $tpl = "本次报告区域为%s市的%s区。本次报告根据%s数据对该区域进行分析，整体PI为%s，与%s相比%s，%s";
+        $tpl = "本次报告区域为%s市的%s。本次报告根据%s数据对该区域进行分析，整体PI为%s，与%s相比%s，%s";
 
         $city_id = $params['city_id'];
         $area_id = $params['area_id'];
@@ -166,8 +166,9 @@ class AreaReportService extends BaseService{
             'area_id' => $area_id,
         ]);
         $logic_junction_ids = implode(',', array_column($area_detail['junction_list'], 'logic_junction_id'));
-        $junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
-        $districts_name = implode('、', array_unique(array_column($junctions_info, 'district_name')));
+//        $junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
+//        $districts_name = implode('、', array_unique(array_column($junctions_info, 'district_name')));
+        $districts_name = $area_detail['area_name'];
 
 
         $theDatelist = $this->getDateFromRange($start_date,$end_date);
