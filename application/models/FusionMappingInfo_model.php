@@ -32,7 +32,7 @@ class FusionMappingInfo_model extends CI_Model
      */
     public function getFusionJuncList($cityID)
     {
-        $res = $this->db->select("junc_id")
+        $res = $this->db->select("DISTINCT junc_id")
             ->from($this->tb)
             ->where('city_id', $cityID)
             ->where_in('service_name', ["suzhou_gusu_bayonet","suzhou_gusu_loop"])
