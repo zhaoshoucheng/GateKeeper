@@ -169,6 +169,47 @@ class Area extends MY_Controller
         $this->response($data);
     }
 
+
+    /**
+     * 获取城市Scats区域的详细信息
+     * @param $params['city_id'] int 城市ID
+     * @throws Exception
+     */
+    public function getAllScatsAreaJunctionList()
+    {
+        $params = $this->input->post(null, true);
+
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+        ]);
+
+        $data = $this->areaService->getCityAreaDetail($params);
+
+        //根据路口数过滤
+        $data = array_values(array_filter($data, function ($item) use ($areaIds) {
+            if(count($item['junction_list'])>100){
+                return false;
+            }
+            return true;
+        }));
+        
+        // 根据权限过滤区域
+        if (!empty($this->userPerm) && empty($this->userPerm["city_id"])) {
+            $areaIds = $this->userPerm['area_id'];
+            if (!empty($areaIds)) {
+                $data = array_values(array_filter($data, function ($item) use ($areaIds) {
+                    if (in_array($item['area_id'], $areaIds)) {
+                        return true;
+                    }
+                    return false;
+                }));
+            } else {
+                $data = [];
+            }
+        }
+        $this->response($data);
+    }
+
     /**
      * 获取城市全部区域的详细信息
      * @param $params['city_id'] int 城市ID
