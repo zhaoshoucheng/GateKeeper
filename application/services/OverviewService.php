@@ -9,6 +9,7 @@
 namespace Services;
 
 use Didi\Cloud\Collection\Collection;
+use FusionMappingInfo_model;
 
 /**
  * Class OverviewService  alarmanalysis_model
@@ -124,6 +125,30 @@ class OverviewService extends BaseService
 
 
         return $data;
+    }
+
+
+    /**
+     * 检测器路口列表
+     *
+     * @param $params
+     * @throws \Exception
+     */
+    public function fusionJunctionsList($params,$userPerm=[])
+    {
+        $junctionList=$this->junctionsList($params,$userPerm);
+        $fusionModel=new FusionMappingInfo_model();
+        $fusionJuncList=$fusionModel->getFusionJuncList($params["city_id"]);
+        $fusionJuncIds = array_column($fusionJuncList,"junc_id");
+        if(!empty($junctionList["dataList"])){
+            foreach($junctionList["dataList"] as $juncIndex=>$juncItem){
+                $junctionList["dataList"][$juncIndex]["fusion_status"] = 1;
+                if(in_array($juncItem["jid"],$fusionJuncIds)){
+                    $junctionList["dataList"][$juncIndex]["fusion_status"] = 0;
+                }
+            }
+        }
+        return $junctionList;
     }
 
     /**

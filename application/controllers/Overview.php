@@ -92,6 +92,24 @@ class Overview extends MY_Controller
         $this->response($data);
     }
 
+
+    /**
+     * 获取路口列表
+     *
+     * @throws Exception
+     */
+    public function fusionJunctionsList()
+    {
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]',
+        ]);
+        $params['date'] = $params['date'] ?? date('Y-m-d');
+        $data = $this->overviewService->fusionJunctionsList($params,$this->userPerm);
+        $this->response($data);
+    }
+
     /**
      * 获取路口列表
      *
