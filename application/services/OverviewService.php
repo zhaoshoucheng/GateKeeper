@@ -39,6 +39,7 @@ class OverviewService extends BaseService
         $this->load->model('timeAlarmRemarks_model');
         $this->load->model('timing_model');
         $this->load->model('area_model');
+        $this->load->model('fusionMappingInfo_model');
         $this->config->load('realtime_conf');
     }
 
@@ -137,8 +138,7 @@ class OverviewService extends BaseService
     public function fusionJunctionsList($params,$userPerm=[])
     {
         $junctionList=$this->junctionsList($params,$userPerm);
-        $fusionModel=new FusionMappingInfo_model();
-        $fusionJuncList=$fusionModel->getFusionJuncList($params["city_id"]);
+        $fusionJuncList=$this->fusionMappingInfo_model->getFusionJuncList($params["city_id"]);
         $fusionJuncIds = array_column($fusionJuncList,"junc_id");
         if(!empty($junctionList["dataList"])){
             foreach($junctionList["dataList"] as $juncIndex=>$juncItem){
