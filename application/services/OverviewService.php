@@ -138,7 +138,7 @@ class OverviewService extends BaseService
     public function fusionJunctionsList($params,$userPerm=[])
     {
         $fusionJuncList=$this->fusionMappingInfo_model->getFusionJuncList($params["city_id"]);
-        print_r($fusionJuncList);exit; 
+        // print_r($fusionJuncList);exit; 
         $junctionList=$this->junctionsList($params,$userPerm);
         $fusionJuncIds = array_column($fusionJuncList,"junc_id");
         if(!empty($junctionList["dataList"])){
