@@ -128,8 +128,8 @@ class RealtimeQuotaService extends BaseService
         $data["quota_key"] = $quotaKey;
 
         $flowList = $this->diagnosisNoTiming_model->getRealtimeFlowQuotaList($cityID, $logicJunctionID, $dates, $startTime, $endTime);
-        echo "2233";
         print_r($flowList);exit;
+        echo "2233";
         $flowList = $this->realtime_model->getJunctionQuotaCurve($data,true);
         $quotaList = $this->junctionRealtimeFlowQuotaList($params);
         // $todayQuota = $quotaList["movements"]["today"];
