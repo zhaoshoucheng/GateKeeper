@@ -334,6 +334,19 @@ class Alarmanalysis extends MY_Controller
         $this->response(["quota_list"=>$resultList,"dates"=>$params["dates"],"current_time"=>$currentTime]);
     }
 
+    // 获取flow的各种详细指标，开放平台使用
+    public function flowAnalysis()
+    {
+        $this->convertJsonToPost();
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id'        => 'required|is_natural_no_zero',
+            'junction_id'  => 'required|trim',
+        ]);
+        $result = $this->realtimeQuotaService->junctionRealtimeFlowQuotaList($params);
+           
+    }
+
     public function junctionRealtimeFlowQuotaList(){
         $this->convertJsonToPost();
         $params = $this->input->post(null, true);

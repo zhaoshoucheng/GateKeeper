@@ -48,6 +48,7 @@ class RealtimeQuotaService extends BaseService
             $data["junction_id"] = $logicJunctionID;
             $data["quota_key"] = $quotaKey;
             $flowList = $this->realtime_model->getJunctionQuotaCurve($data,true);
+            print_r($flowList);exit;
             if($date==date("Y-m-d")){
                 if(strtotime(date("Y-m-d")." ".$endTime) > strtotime(date("Y-m-d")." ".$lastHour)){
                    $endTime = $lastHour;
@@ -108,6 +109,12 @@ class RealtimeQuotaService extends BaseService
         }
         ksort($mapList);
         return array_values($mapList);
+    }
+
+    public function flowAnalysis($params){
+        // $quotaList = $this->junctionRealtimeFlowQuotaList($params);
+        // $todayQuota = $quotaList["movements"]["today"];
+
     }
 
     public function junctionRealtimeFlowQuotaList($params){
