@@ -24,6 +24,7 @@ class RealtimeQuotaService extends BaseService
         $this->load->helper('http_helper');
         $this->load->model('common_model');
         $this->load->model('alarmanalysis_model');
+        $this->load->model('diagnosisNoTiming_model');
         $this->helperService = new HelperService();
         $this->overviewService = new OverviewService();
         $this->load->config("nconf");
@@ -48,7 +49,6 @@ class RealtimeQuotaService extends BaseService
             $data["junction_id"] = $logicJunctionID;
             $data["quota_key"] = $quotaKey;
             $flowList = $this->realtime_model->getJunctionQuotaCurve($data,true);
-            print_r($flowList);exit;
             if($date==date("Y-m-d")){
                 if(strtotime(date("Y-m-d")." ".$endTime) > strtotime(date("Y-m-d")." ".$lastHour)){
                    $endTime = $lastHour;
@@ -112,7 +112,25 @@ class RealtimeQuotaService extends BaseService
     }
 
     public function flowAnalysis($params){
-        // $quotaList = $this->junctionRealtimeFlowQuotaList($params);
+        $cityID = $params["city_id"];
+        $logicJunctionID = $params["junction_id"];
+        $startTime = $params["start_time"];
+        $endTime = $params["end_time"];
+        $quotaKey = $params["quota_key"];
+        if(empty($params["dates"])){
+            $params["dates"] = [date("Y-m-d")];
+        }
+        $dates = $params["dates"];
+        $data = [];
+        $data["city_id"] = $cityID;
+        $data["date"] = $dates[0];
+        $data["junction_id"] = $logicJunctionID;
+        $data["quota_key"] = $quotaKey;
+
+        $flowList = $this->diagnosisNoTiming_model->getRealtimeFlowQuotaList($cityID, $logicJunctionID, $dates, $startTime, $endTime);
+        print_r($flowList);exit;
+        $flowList = $this->realtime_model->getJunctionQuotaCurve($data,true);
+        $quotaList = $this->junctionRealtimeFlowQuotaList($params);
         // $todayQuota = $quotaList["movements"]["today"];
 
     }

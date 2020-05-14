@@ -343,8 +343,7 @@ class Alarmanalysis extends MY_Controller
             'city_id'        => 'required|is_natural_no_zero',
             'junction_id'  => 'required|trim',
         ]);
-        $result = $this->realtimeQuotaService->junctionRealtimeFlowQuotaList($params);
-           
+        $result = $this->realtimeQuotaService->flowAnalysis($params);
     }
 
     public function junctionRealtimeFlowQuotaList(){
