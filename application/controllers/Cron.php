@@ -37,6 +37,7 @@ class Cron extends CI_Controller
         $this->load->model('flowDurationV6_model');
         $this->load->model('realtime_model');
         $this->load->model('adapt_model');
+        $this->load->model('sjgt_model');
 
         $this->roadService = new RoadService();
     }
@@ -46,7 +47,7 @@ class Cron extends CI_Controller
         print_r(date("Y-m-d H:i:s")." deleteAdaptLog execute success.\n");
         $this->adapt_model->deleteAdaptLog("-1 day");
     }
-
+    
     public function scan_custom_task()
     {
         $this->customtask_model->process();
@@ -55,6 +56,11 @@ class Cron extends CI_Controller
     public function scan_cycle_task()
     {
         $this->cycletask_model->process();
+    }
+
+    public function sjgtTransfer()
+    {
+        $this->sjgt_model->getTransfor();
     }
 
     public function del_old_offline_data($cityIdsStr, $date)

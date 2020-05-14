@@ -18,6 +18,7 @@ class Demo extends MY_Controller
         $this->load->helper('http');
         $this->load->model('timing_model');
         $this->load->model('expressway_model');
+        $this->load->model('sjgt_model');
     }
 
     /*http://data.sts.didichuxing.com/signal-map/mapJunction/suggest?keyword=%E6%96%87%E5%8C%96&type=didi&city_id=12&token=0faa6ca90df19d26635391c511d124a1&user_id=roadNet*/
@@ -30,6 +31,11 @@ class Demo extends MY_Controller
         $ret = httpGET($Url, $params);
         $finalRet = json_decode($ret, true);
         $this->response($finalRet['data']);
+    }
+
+    public function sjgtTransfer()
+    {
+        $this->sjgt_model->getTransfor();
     }
 
     public function suzhouQuickRoadDelayList()
@@ -190,7 +196,7 @@ class Demo extends MY_Controller
 
     public function districtsTest()
     {
-        $url = "http://100.69.238.11:8000/its/signal-map/map/getList?city_id=11&offset=0&count=10000&districts=320106,320104,320113,320105,320114,320102&token=4c3e3b6a3588161128d0604daab528db&user_id=signalPro";
+        $url = "http://100.69.238.11:8000/its/signal-map/map/getList?city_id=12&offset=0&count=10000&token=4c3e3b6a3588161128d0604daab528db&user_id=signalPro";
         $jsonData  = httpPOST($url, []);
         // $jsonData = json_decode($ret,true);
         // print_r($finalRet);exit;

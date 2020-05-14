@@ -653,37 +653,57 @@ class JunctionReportService extends BaseService{
             "quotaname"=>"停车次数",
             "quotakey"=>"stop_time_cycle",
             "analysis"=>"",
+            "max"=>0,
             "flowlist"=>[],
         ];
         $speedChartData =[
             "quotaname"=>"行驶速度",
             "quotakey"=>"speed",
             "analysis"=>"",
+            "max"=>0,
             "flowlist"=>[],
         ];
         $stopDelayChartData =[
             "quotaname"=>"停车延误",
             "quotakey"=>"stop_delay",
             "analysis"=>"",
+            "max"=>0,
             "flowlist"=>[],
         ];
+        $maxstoptime=0;
+        $maxspeedcycle=0;
+        $maxstopdelay=0;
         foreach ($flowQuota as $fk => $fv){
             $stopTimeCycleChart = [];
             $speedCycleChart = [];
             $stopDelayCycleChart = [];
+
             foreach ($fv as $h => $series){
+                $stop_time_cycle = round($series['stop_time_cycle']/$series['traj_count'],2);
                 $stopTimeCycleChart[] = [
                     "x"=>$h,
-                    "y"=>round($series['stop_time_cycle']/$series['traj_count'],2)
+                    "y"=>$stop_time_cycle,
                 ];
+                if($stop_time_cycle >$maxstoptime){
+                    $maxstoptime = $stop_time_cycle;
+                }
+                $speed = round($series['speed']/$series['traj_count'],2);
                 $speedCycleChart[] = [
                     "x"=>$h,
-                    "y"=>round($series['speed']/$series['traj_count'],2)
+                    "y"=>$speed,
                 ];
+                if($speed > $maxspeedcycle ){
+                    $maxspeedcycle = $speed;
+                }
+                $stop_delay = round($series['stop_delay']/$series['traj_count'],2);
                 $stopDelayCycleChart[] = [
                     "x"=>$h,
-                    "y"=>round($series['stop_delay']/$series['traj_count'],2)
+                    "y"=>$stop_delay,
                 ];
+                if($stop_delay > $maxstopdelay){
+                    $maxstopdelay = $stop_delay;
+                }
+
             }
 
             $stopTimeChartData['flowlist'][]=[
@@ -691,6 +711,7 @@ class JunctionReportService extends BaseService{
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"次/车",
+//                    "max"=>$maxstoptime,
                     "series"=>[["name"=>"","data"=>$this->sortAndFillHour($stopTimeCycleChart)]],
                 ],
             ];
@@ -699,6 +720,7 @@ class JunctionReportService extends BaseService{
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"公里/小时",
+//                    "max"=>$maxspeedcycle,
                     "series"=>[["name"=>"","data"=>$this->sortAndFillHour($speedCycleChart)]]
                 ],
             ];
@@ -707,10 +729,16 @@ class JunctionReportService extends BaseService{
                 "chart"=>[
                     "title"=>$flowInfo[$fk],
                     "scale_title"=>"秒",
+//                    "max"=>$maxstopdelay,
                     "series"=>[["name"=>"","data"=>$this->sortAndFillHour($stopDelayCycleChart)]]
                 ],
             ];
         }
+//        var_dump($stopTimeChartData);
+        $stopTimeChartData['max'] = $maxstoptime;
+        $speedChartData['max']= $maxspeedcycle;
+        $stopDelayChartData['max']=$maxstopdelay;
+
 
         $chartDataList=[];
         $chartDataList[]= $stopTimeChartData;

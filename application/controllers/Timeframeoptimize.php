@@ -137,20 +137,16 @@ class Timeframeoptimize extends MY_Controller
                 'junction_id' => strip_tags(trim($junctionId)),
                 'time_range'  => strip_tags(trim($params['task_time_range'])),
             ];
-            // if (isset($params['source'])) {
-            //     $data['source'] = $params['source']);
-            // } elseif if (isset($params['source_type'])) {
-            //     $data['source'] = $params['source_type']);
-            // }
             $timing = $this->timingService->getOptimizeTiming($data);
             if (empty($timing)) {
-                $listTiming[$junctionId] = [
-                    "type" => "1",
+                $listTiming[] = [
+                    "junction_id" => $junctionId,
+                    "type" => "0",
                     "timing" => [
                         [
                             "comment" => "1",
-                            "start" => "05:00:00",
-                            "end" => "00:00:00",
+                            "start" => "00:00:00",
+                            "end" => "05:00:00",
                         ],
                         [
                             "comment" => "1",
@@ -175,7 +171,8 @@ class Timeframeoptimize extends MY_Controller
                     ],
                 ];
             } else {
-                $listTiming[$junctionId] = [
+                $listTiming[] = [
+                    "junction_id" => $junctionId,
                     "type" => "1",
                     "timing" => $timing,
                 ];
@@ -278,7 +275,9 @@ class Timeframeoptimize extends MY_Controller
             }
             $params["movements"] = $movementIDS;
             $params["junction_id"] = $junctionId;
-            $todPlans[$junctionId] = $this->traj_model->getTodOptimizePlan($params);
+            $todPlan = $this->traj_model->getTodOptimizePlan($params);
+            $todPlan["junction_id"] = $junctionId;
+            $todPlans[] = $todPlan;
         }
         return $this->response($todPlans);
     }
