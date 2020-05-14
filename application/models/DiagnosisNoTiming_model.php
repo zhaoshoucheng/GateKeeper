@@ -283,6 +283,7 @@ class DiagnosisNoTiming_model extends CI_Model
             'start_hour' => $start_hour . ':00',
             'end_hour' => $end_hour . ':00',
         ];
+        print_r($req);exit;
         $url = $this->config->item('data_service_interface');
         $res = httpPOST($url . '/GetRealtimeJunctionDataBetween', $req, 0, 'json');
         if (!empty($res)) {
