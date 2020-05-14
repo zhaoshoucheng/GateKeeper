@@ -760,7 +760,7 @@ $config['menu'] = [
                     ],
                     4 =>
                     [
-                        'name' => '时区划分',
+                        'name' => '时段划分',
                         'url'  => 'time-divide',
                     ],
                 ],
