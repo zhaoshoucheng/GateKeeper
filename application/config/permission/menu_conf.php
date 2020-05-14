@@ -758,6 +758,11 @@ $config['menu'] = [
                         'name' => '子区划分',
                         'url'  => 'area',
                     ],
+                    4 =>
+                    [
+                        'name' => '子区划分',
+                        'url'  => 'time-divide',
+                    ],
                 ],
             ],
             3 =>
