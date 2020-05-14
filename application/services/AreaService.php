@@ -366,37 +366,30 @@ class AreaService extends BaseService
             if ($value == null) {
                 continue;
             }
-            $lastBase = 0;
-            $lastEva = 0;
             if (in_array($value['date'], $baseDates)) {
                 $avg['base'][$value['hour']][] = $value[$quotaKey];
-                if(empty($value[$quotaKey])){
-                    $avg['base'][$value['hour']][] = $lastBase;
-                }else{
-                    $lastBase = $value[$quotaKey];
-                }
+                $lastBase = $value[$quotaKey];
             } else {
                 $avg['evaluate'][$value['hour']][] = $value[$quotaKey];
-                if(empty($value[$quotaKey])){
-                    $avg['evaluate'][$value['hour']][] = $lastBase;
-                }else{
-                    $lastEva = $value[$quotaKey];
-                }
+                $lastEva = $value[$quotaKey];
             }
-            
         }
+        $lastBase = 0;
         foreach ($avg['base'] as $hour => $values) {
             if (empty($values)) {
-                $avg['base'][$hour] = null;
+                $avg['base'][$hour] = $lastBase;
             } else {
                 $avg['base'][$hour] = round(array_sum($values) / count($values), 2);
+                $lastBase = $avg['base'][$hour];
             }
         }
+        $lastEva = 0;
         foreach ($avg['evaluate'] as $hour => $values) {
             if (empty($values)) {
-                $avg['evaluate'][$hour] = null;
+                $avg['evaluate'][$hour] = $lastEva;
             } else {
                 $avg['evaluate'][$hour] = round(array_sum($values) / count($values), 2);
+                $lastEva = $avg['evaluate'][$hour];
             }
         }
         $avg['base'] = array_map(function ($k, $v) {
