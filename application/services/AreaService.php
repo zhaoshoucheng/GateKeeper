@@ -366,11 +366,24 @@ class AreaService extends BaseService
             if ($value == null) {
                 continue;
             }
+            $lastBase = 0;
+            $lastEva = 0;
             if (in_array($value['date'], $baseDates)) {
                 $avg['base'][$value['hour']][] = $value[$quotaKey];
+                if(empty($value[$quotaKey])){
+                    $avg['base'][$value['hour']][] = $lastBase;
+                }else{
+                    $lastBase = $value[$quotaKey];
+                }
             } else {
                 $avg['evaluate'][$value['hour']][] = $value[$quotaKey];
+                if(empty($value[$quotaKey])){
+                    $avg['evaluate'][$value['hour']][] = $lastBase;
+                }else{
+                    $lastEva = $value[$quotaKey];
+                }
             }
+            
         }
         foreach ($avg['base'] as $hour => $values) {
             if (empty($values)) {
