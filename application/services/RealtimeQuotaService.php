@@ -151,7 +151,7 @@ class RealtimeQuotaService extends BaseService
             foreach($flows as $flow){
                 $direction=$flowIdDirection[$flow["logic_flow_id"]];
                 $toDirection=$flowIdToDirection[$flow["logic_flow_id"]];
-                if($direction!=$toDirection){
+                if($direction==$toDirection){
                     continue;
                 }
                 if(isset($directionSum[$direction][$toDirection])){
