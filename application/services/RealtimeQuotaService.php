@@ -147,11 +147,58 @@ class RealtimeQuotaService extends BaseService
 
         foreach($hourList as $hour=>$flows){
             $directionSum = [];
+            $channelList = [];
             foreach($flows as $flow){
                 $direction=$flowIdDirection[$flow["logic_flow_id"]];
                 $toDirection=$flowIdToDirection[$flow["logic_flow_id"]];
-                $directionSum[$direction][$toDirection] = $flow["volume_up"]*3.6;
+                if($direction!=$toDirection){
+                    continue;
+                }
+                if(isset($directionSum[$direction][$toDirection])){
+                    $directionSum[$direction][$toDirection]+=$flow["volume_up"]*3.6;
+                }
+                $directionSum[$direction][$toDirection]=$flow["volume_up"]*3.6;
             }
+            $channelList["e"] = [
+                "angle"=>0,
+                "name"=>"东进口",
+                "straightTo"=>"w",
+                "to"=>[
+                    "s"=>$directionSum["东"]["南"]??0,
+                    "n"=>$directionSum["东"]["北"]??0,
+                    "w"=>$directionSum["东"]["西"]??0,
+                ],
+            ];
+            $channelList["w"] = [
+                "angle"=>180,
+                "name"=>"西进口",
+                "straightTo"=>"e",
+                "to"=>[
+                    "s"=>$directionSum["西"]["南"]??0,
+                    "n"=>$directionSum["西"]["北"]??0,
+                    "e"=>$directionSum["西"]["东"]??0,
+                ],
+            ];
+            $channelList["s"] = [
+                "angle"=>270,
+                "name"=>"南进口",
+                "straightTo"=>"n",
+                "to"=>[
+                    "w"=>$directionSum["南"]["西"]??0,
+                    "e"=>$directionSum["南"]["东"]??0,
+                    "n"=>$directionSum["南"]["北"]??0,
+                ],
+            ];
+            $channelList["n"] = [
+                "angle"=>0,
+                "name"=>"北进口",
+                "straightTo"=>"s",
+                "to"=>[
+                    "s"=>$directionSum["北"]["南"]??0,
+                    "e"=>$directionSum["北"]["东"]??0,
+                    "w"=>$directionSum["北"]["西"]??0,
+                ],
+            ];
             print_r($directionSum);
             exit;
         }
