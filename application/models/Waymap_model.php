@@ -627,6 +627,17 @@ class Waymap_model extends CI_Model
         return $flowInfos[$logicJunctionId];
     }
 
+    function phase4Direction($inDegree)
+    {
+        $BASE = 22.5;
+        $link /= $BASE;
+        if ($link < 2 || $link >= 14) return '北';
+        elseif ($link >= 2 && $link < 6) return '东';
+        elseif ($link >= 6 && $link < 10) return '南';
+        elseif ($link >= 10 && $link < 14) return '西';
+        return false;
+    }
+
     /**
      * getFlowBriefInfo
      *

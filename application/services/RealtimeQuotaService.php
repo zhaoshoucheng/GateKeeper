@@ -116,24 +116,67 @@ class RealtimeQuotaService extends BaseService
         $logicJunctionID = $params["junction_id"];
         $startTime = $params["start_time"];
         $endTime = $params["end_time"];
-        $quotaKey = $params["quota_key"];
-        if(empty($params["dates"])){
-            $params["dates"] = [date("Y-m-d")];
+        // $quotaKey = $params["quota_key"];
+
+        //计算相位转换到具体方向上的值
+        $flowInfos = $this->waymap_model->getFlowInfo32($logicJunctionID);
+        $flowIdDirection = [];
+        foreach($flowInfos as $flowInfo){
+            $direction=$this->waymap_model->phase4Direction($flowInfo["in_degree"]);
+            $flowIdDirection[$flowInfo["logic_flow_id"]] = $direction;
         }
-        $dates = $params["dates"];
-        $data = [];
-        $data["city_id"] = $cityID;
-        $data["date"] = $dates[0];
-        $data["junction_id"] = $logicJunctionID;
-        $data["quota_key"] = $quotaKey;
 
-        $flowList = $this->diagnosisNoTiming_model->getRealtimeFlowQuotaList($cityID, $logicJunctionID, $dates, $startTime, $endTime);
-        print_r($flowList);exit;
-        echo "2233";
-        $flowList = $this->realtime_model->getJunctionQuotaCurve($data,true);
-        $quotaList = $this->junctionRealtimeFlowQuotaList($params);
-        // $todayQuota = $quotaList["movements"]["today"];
+        $indexList = $this->diagnosisNoTiming_model->getRealtimeFlowQuotaList($cityID, $logicJunctionID, date("Y-m-d"), $startTime, $endTime);
 
+        //按照时间排序
+        usort($indexList["data"],function($a,$b){
+            $a = strtotime($a);
+            $a = strtotime($b);
+            if (strtotime($a)==$b) return 0;
+                return ($a<$b)?-1:1;
+            }
+        );
+
+        $flowList = [];
+        if(!empty($indexList["data"])){
+            foreach($indexList as $indexItem){
+                $flowList[$indexItem["logic_flow_id"]][] = $indexItem;
+            }
+        }
+
+        //先获取flow_id关联方向和角度的信息
+        //获取 flow_id、volumn_up对应指标信息
+        $channelList = [];
+        foreach($flowList as $flowId=>$flows){
+            $dataList = [];
+            foreach($flows as $flowItem){
+                $startTime = "00:00:00";
+                $dataList[] = [
+                    "start_time"=> $startTime,
+                    "end_time"=> date("H:i:s",strtotime($flowItem["day_time_hms"])),
+                    "value"=> $flowItem["volume_up"],
+                ];
+                $startTime = date("H:i:s",strtotime($flowItem["day_time_hms"]));
+            }
+
+            //根据flowId换算对应方向名
+            if(!isset($flowIdDirection[$flowId])){
+                continue;
+            }
+            $channelList[$flowIdDirection[$flowId]][] = [
+                "cname"=>$flowId,
+                "data_list"=>$dataList,
+            ];
+        }
+        
+        $directions = [];
+        foreach($channelList as $direction=>$items){
+            $directions = [
+                "dname"=>$direction,
+                "channel_list"=>$items,
+            ];
+        }
+        return ["direction_type"=>["today"=>$directions]];  
     }
 
     public function junctionRealtimeFlowQuotaList($params){

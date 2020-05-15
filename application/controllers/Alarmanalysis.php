@@ -344,8 +344,9 @@ class Alarmanalysis extends MY_Controller
             'junction_id'  => 'required|trim',
         ]);
         $result = $this->realtimeQuotaService->flowAnalysis($params);
+        $this->response($result);
     }
-
+    
     public function junctionRealtimeFlowQuotaList(){
         $this->convertJsonToPost();
         $params = $this->input->post(null, true);
