@@ -200,7 +200,22 @@ class RealtimeQuotaService extends BaseService
                     "w"=>$directionSum["北"]["西"]??0,
                 ],
             ];
-            $directionList[$hour] = $channelList;
+            $formatList = [];
+            foreach($channelList as $cIndex=>$cItem){
+                $toItems = [];
+                foreach($cItem["to"] as $ccIndex=>$ccItem){
+                    if(!empty($ccItem)){
+                        $toItems[$ccIndex] = $ccItem;
+                    }
+                }
+                $formatList[$cIndex] = [
+                    "angle"=>$cItem["angle"],
+                    "name"=>$cItem["name"],
+                    "straightTo"=>$cItem["straightTo"],
+                    "to"=>$toItems,
+                ];
+            }
+            $directionList[$hour] = $formatList;
         }
         return $directionList;
     }
