@@ -122,8 +122,10 @@ class RealtimeQuotaService extends BaseService
         $flowInfos = $this->waymap_model->getFlowInfo32($logicJunctionID);
         $flowIdDirection = [];
         foreach($flowInfos as $flowInfo){
-            $direction=$this->waymap_model->phase4Direction($flowInfo["in_degree"]);
-            $flowIdDirection[$flowInfo["logic_flow_id"]] = $direction;
+            $fromDirection=$this->waymap_model->phaseFromDirection($flowInfo["in_degree"]);
+            $toDirection=$this->waymap_model->phaseToDirection($flowInfo["in_degree"]);
+            $flowIdDirection[$flowInfo["logic_flow_id"]] = $fromDirection;
+            $flowIdToDirection[$flowInfo["logic_flow_id"]] = $toDirection;
         }
         // print_r($flowIdDirection);exit;
         $indexDataList = $this->diagnosisNoTiming_model->getRealtimeFlowQuotaList($cityID, $logicJunctionID, date("Y-m-d"), $startTime, $endTime);
@@ -137,14 +139,30 @@ class RealtimeQuotaService extends BaseService
             }
         );
 
+        //时间戳聚合
+        $hourList = [];
+        foreach($indexDataList as $indexItem){
+            $hourList[$indexItem["day_time_hms"]][] = $indexItem;
+        }
+
+        foreach($hourList as $hour=>$flows){
+            $directionSum = [];
+            foreach($flows as $flow){
+                $direction=$flowIdDirection[$flow];
+                $toDirection=$flowIdToDirection[$flow];
+                $directionSum[$direction][$toDirection] = $flow["volume_up"]*3.6;
+            }
+            print_r($directionSum);
+        }
+        exit;
+
         $flowList = [];
         foreach($indexDataList as $indexItem){
             $flowList[$indexItem["logic_flow_id"]][] = $indexItem;
         }
 
-
         //先获取flow_id关联方向和角度的信息
-        //获取 flow_id、volumn_up对应指标信息
+        //获取flow_id、volumn_up对应指标信息
         $channelList = [];
         foreach($flowList as $flowId=>$flows){
             $dataList = [];
@@ -167,7 +185,6 @@ class RealtimeQuotaService extends BaseService
                 "data_list"=>$dataList,
             ];
         }
-        
         $directions = [];
         foreach($channelList as $direction=>$items){
             $directions = [
