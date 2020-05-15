@@ -148,8 +148,8 @@ class RealtimeQuotaService extends BaseService
         foreach($hourList as $hour=>$flows){
             $directionSum = [];
             foreach($flows as $flow){
-                $direction=$flowIdDirection[$flow];
-                $toDirection=$flowIdToDirection[$flow];
+                $direction=$flowIdDirection[$flow["logic_flow_id"]];
+                $toDirection=$flowIdToDirection[$flow["logic_flow_id"]];
                 $directionSum[$direction][$toDirection] = $flow["volume_up"]*3.6;
             }
             print_r($directionSum);
