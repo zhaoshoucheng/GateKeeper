@@ -129,6 +129,7 @@ class RealtimeQuotaService extends BaseService
         $indexList = $this->diagnosisNoTiming_model->getRealtimeFlowQuotaList($cityID, $logicJunctionID, date("Y-m-d"), $startTime, $endTime);
 
         //按照时间排序
+        print_r($indexList);exit;
         $indexDataList = $indexList["data"];
         usort($indexDataList,function($a,$b){
             $a = strtotime($a);
