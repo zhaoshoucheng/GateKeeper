@@ -627,7 +627,7 @@ class Waymap_model extends CI_Model
         return $flowInfos[$logicJunctionId];
     }
 
-    function phase4Direction($inDegree)
+    function phase4Direction($link)
     {
         $BASE = 22.5;
         $link /= $BASE;
