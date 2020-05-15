@@ -126,11 +126,9 @@ class RealtimeQuotaService extends BaseService
             $flowIdDirection[$flowInfo["logic_flow_id"]] = $direction;
         }
 
-        $indexList = $this->diagnosisNoTiming_model->getRealtimeFlowQuotaList($cityID, $logicJunctionID, date("Y-m-d"), $startTime, $endTime);
+        $indexDataList = $this->diagnosisNoTiming_model->getRealtimeFlowQuotaList($cityID, $logicJunctionID, date("Y-m-d"), $startTime, $endTime);
 
         //按照时间排序
-        print_r($indexList);exit;
-        $indexDataList = $indexList["data"];
         usort($indexDataList,function($a,$b){
             $a = strtotime($a);
             $a = strtotime($b);
@@ -138,7 +136,7 @@ class RealtimeQuotaService extends BaseService
                 return ($a<$b)?-1:1;
             }
         );
-
+        
         $flowList = [];
         foreach($indexDataList as $indexItem){
             $flowList[$indexItem["logic_flow_id"]][] = $indexItem;
