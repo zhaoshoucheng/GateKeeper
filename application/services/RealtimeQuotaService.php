@@ -130,13 +130,13 @@ class RealtimeQuotaService extends BaseService
 
         //按照时间排序
         usort($indexDataList,function($a,$b){
-            $a = strtotime($a);
-            $a = strtotime($b);
-            if (strtotime($a)==$b) return 0;
+            $a = strtotime($a["day_time_hms"]);
+            $a = strtotime($b["day_time_hms"]);
+            if ($a==$b) return 0;
                 return ($a<$b)?-1:1;
             }
         );
-        
+
         $flowList = [];
         foreach($indexDataList as $indexItem){
             $flowList[$indexItem["logic_flow_id"]][] = $indexItem;
