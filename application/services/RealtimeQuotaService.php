@@ -131,6 +131,7 @@ class RealtimeQuotaService extends BaseService
         //按照时间排序
         // print_r($indexDataList);
         usort($indexDataList,function($a,$b){
+            print_r($a);exit;
             $a = strtotime($a["day_time_hms"]);
             $a = strtotime($b["day_time_hms"]);
             if ($a==$b) return 0;
