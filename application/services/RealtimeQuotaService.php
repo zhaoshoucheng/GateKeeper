@@ -147,12 +147,12 @@ class RealtimeQuotaService extends BaseService
         $channelList = [];
         foreach($flowList as $flowId=>$flows){
             $dataList = [];
+            $startTime = "00:00:00";
             foreach($flows as $flowItem){
-                $startTime = "00:00:00";
                 $dataList[] = [
                     "start_time"=> $startTime,
                     "end_time"=> date("H:i:s",strtotime($flowItem["day_time_hms"])),
-                    "value"=> $flowItem["volume_up"],
+                    "value"=> $flowItem["volume_up"]*3.6,
                 ];
                 $startTime = date("H:i:s",strtotime($flowItem["day_time_hms"]));
             }
