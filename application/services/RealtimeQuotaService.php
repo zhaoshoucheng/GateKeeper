@@ -145,6 +145,7 @@ class RealtimeQuotaService extends BaseService
             $hourList[$indexItem["day_time_hms"]][] = $indexItem;
         }
 
+        $directionList = [];
         foreach($hourList as $hour=>$flows){
             $directionSum = [];
             $channelList = [];
@@ -199,47 +200,47 @@ class RealtimeQuotaService extends BaseService
                     "w"=>$directionSum["北"]["西"]??0,
                 ],
             ];
-            print_r($directionSum);
-            exit;
+            $directionList[$hour] = $channelList;
         }
-        exit;
+        return directionList;
+        // exit;
 
-        $flowList = [];
-        foreach($indexDataList as $indexItem){
-            $flowList[$indexItem["logic_flow_id"]][] = $indexItem;
-        }
+        // $flowList = [];
+        // foreach($indexDataList as $indexItem){
+        //     $flowList[$indexItem["logic_flow_id"]][] = $indexItem;
+        // }
 
-        //先获取flow_id关联方向和角度的信息
-        //获取flow_id、volumn_up对应指标信息
-        $channelList = [];
-        foreach($flowList as $flowId=>$flows){
-            $dataList = [];
-            $startTime = "00:00:00";
-            foreach($flows as $flowItem){
-                $dataList[] = [
-                    "start_time"=> $startTime,
-                    "end_time"=> date("H:i:s",strtotime($flowItem["day_time_hms"])),
-                    "value"=> $flowItem["volume_up"]*3.6,
-                ];
-                $startTime = date("H:i:s",strtotime($flowItem["day_time_hms"]));
-            }
+        // //先获取flow_id关联方向和角度的信息
+        // //获取flow_id、volumn_up对应指标信息
+        // $channelList = [];
+        // foreach($flowList as $flowId=>$flows){
+        //     $dataList = [];
+        //     $startTime = "00:00:00";
+        //     foreach($flows as $flowItem){
+        //         $dataList[] = [
+        //             "start_time"=> $startTime,
+        //             "end_time"=> date("H:i:s",strtotime($flowItem["day_time_hms"])),
+        //             "value"=> $flowItem["volume_up"]*3.6,
+        //         ];
+        //         $startTime = date("H:i:s",strtotime($flowItem["day_time_hms"]));
+        //     }
 
-            //根据flowId换算对应方向名
-            if(!isset($flowIdDirection[$flowId])){
-                continue;
-            }
-            $channelList[$flowIdDirection[$flowId]][] = [
-                "cname"=>$flowId,
-                "data_list"=>$dataList,
-            ];
-        }
-        $directions = [];
-        foreach($channelList as $direction=>$items){
-            $directions = [
-                "dname"=>$direction,
-                "channel_list"=>$items,
-            ];
-        }
+        //     //根据flowId换算对应方向名
+        //     if(!isset($flowIdDirection[$flowId])){
+        //         continue;
+        //     }
+        //     $channelList[$flowIdDirection[$flowId]][] = [
+        //         "cname"=>$flowId,
+        //         "data_list"=>$dataList,
+        //     ];
+        // }
+        // $directions = [];
+        // foreach($channelList as $direction=>$items){
+        //     $directions = [
+        //         "dname"=>$direction,
+        //         "channel_list"=>$items,
+        //     ];
+        // }
         return ["direction_type"=>["today"=>$directions]];  
     }
 
