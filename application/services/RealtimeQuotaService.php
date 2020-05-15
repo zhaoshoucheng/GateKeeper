@@ -125,7 +125,7 @@ class RealtimeQuotaService extends BaseService
             $direction=$this->waymap_model->phase4Direction($flowInfo["in_degree"]);
             $flowIdDirection[$flowInfo["logic_flow_id"]] = $direction;
         }
-        print_r($flowIdDirection);exit;
+        // print_r($flowIdDirection);exit;
         $indexDataList = $this->diagnosisNoTiming_model->getRealtimeFlowQuotaList($cityID, $logicJunctionID, date("Y-m-d"), $startTime, $endTime);
 
         //按照时间排序
