@@ -123,7 +123,7 @@ class RealtimeQuotaService extends BaseService
         $flowIdDirection = [];
         foreach($flowInfos as $flowInfo){
             $fromDirection=$this->waymap_model->phaseFromDirection($flowInfo["in_degree"]);
-            $toDirection=$this->waymap_model->phaseToDirection($flowInfo["in_degree"]);
+            $toDirection=$this->waymap_model->phaseToDirection($flowInfo["out_degree"]);
             $flowIdDirection[$flowInfo["logic_flow_id"]] = $fromDirection;
             $flowIdToDirection[$flowInfo["logic_flow_id"]] = $toDirection;
         }
@@ -153,6 +153,7 @@ class RealtimeQuotaService extends BaseService
                 $directionSum[$direction][$toDirection] = $flow["volume_up"]*3.6;
             }
             print_r($directionSum);
+            exit;
         }
         exit;
 
