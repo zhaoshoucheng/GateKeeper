@@ -24,13 +24,13 @@ class Sjgt_model extends CI_Model
     {
         parent::__construct();
 
-        $this->test_db = $this->load->database('test_default', true);
+        $this->test_db = $this->load->database('default', true);
         $this->db = $this->load->database('default', true);
-
-        $isExisted = $this->test_db->table_exists($this->tb);
-        if (!$isExisted) {
-            throw new \Exception('数据表不存在', ERR_DATABASE);
-        }
+        
+        // $isExisted = $this->test_db->table_exists($this->tb);
+        // if (!$isExisted) {
+            // throw new \Exception('数据表不存在', ERR_DATABASE);
+        // }
     }
 
     /**

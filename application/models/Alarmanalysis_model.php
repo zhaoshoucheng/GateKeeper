@@ -25,7 +25,7 @@ class Alarmanalysis_model extends CI_Model
         $this->load->model('redis_model');
         $this->helperService = new HelperService();
     }
-
+    
     /**
      * 报警es查询接口，改造版本支持滚动
      * @param $body json 查询DSL

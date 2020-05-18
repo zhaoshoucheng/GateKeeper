@@ -206,7 +206,7 @@ class Demo extends MY_Controller
         // array_column(input, column_key);
         $junctions = array_column($arr["data"], "logic_junction_id");
         foreach ($junctions as $junctionid) {
-            echo "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '219', '" . $junctionid . "', '0', '2019-08-30 21:29:40', '2019-08-30 21:29:40', '1970-01-01 00:00:00');<br/>";
+            echo "INSERT INTO `area_junction_relation` (`id`, `area_id`, `junction_id`, `user_id`, `update_at`, `create_at`, `delete_at`) VALUES (NULL, '768', '" . $junctionid . "', '0', '2020-05-12 21:29:40', '2020-05-12 21:29:40', '1970-01-01 00:00:00');<br/>";
         }
         exit;
         // print_r($junctions);exit;
