@@ -186,13 +186,13 @@ class Area extends MY_Controller
         $data = $this->areaService->getCityAreaDetail($params);
 
         //根据路口数过滤
-        $data = array_values(array_filter($data, function ($item) use ($areaIds) {
+        $data = array_values(array_filter($data, function ($item) {
             if(count($item['junction_list'])>100){
                 return false;
             }
             return true;
         }));
-        
+
         // 根据权限过滤区域
         if (!empty($this->userPerm) && empty($this->userPerm["city_id"])) {
             $areaIds = $this->userPerm['area_id'];
