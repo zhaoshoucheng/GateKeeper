@@ -705,6 +705,9 @@ class JunctionReportService extends BaseService{
                 }
 
             }
+            if(!isset($flowInfo[$fk])){
+                continue;
+            }
 
             $stopTimeChartData['flowlist'][]=[
                 "logic_flow_id"=>$fk,
@@ -734,7 +737,7 @@ class JunctionReportService extends BaseService{
                 ],
             ];
         }
-//        var_dump($stopTimeChartData);
+
         $stopTimeChartData['max'] = $maxstoptime;
         $speedChartData['max']= $maxspeedcycle;
         $stopDelayChartData['max']=$maxstopdelay;
@@ -794,7 +797,7 @@ class JunctionReportService extends BaseService{
             if(!isset($zeroFlowMap[$flowID])){
                 $zeroFlowMap[$flowID] = 0;
             }
-            for ($i =12 ;$i<43 ;$i++){
+            for ($i =13 ;$i<43 ;$i++){
                 $mdata = $v['chart']['series'][0]['data'][$i]['y'];
                 if($mdata == 0){
                     $zeroFlowMap[$flowID]++;
@@ -821,19 +824,22 @@ class JunctionReportService extends BaseService{
             }
         }
         //查找时段
-        $leftIdx = 0;
-        $rightIdx = 0;
+//        $leftIdx = 0;
+//        $rightIdx = 0;
         $maxIdx = 0;
         $maxData = 0;
         //查找最高点
-        for($j =12;$j<43;$j++){
+        for($j =13;$j<43;$j++){
             if($maxFlowData['chart']['series'][0]['data'][$j]['y'] >= $maxData){
                 $maxData = $maxFlowData['chart']['series'][0]['data'][$j]['y'];
                 $maxIdx = $j;
             }
         }
+        $leftIdx = $maxIdx;
+        $rightIdx = $maxIdx;
+
         //从最高点向两侧寻找
-        for($left = $maxIdx;$left > 0;$left --){
+        for($left = $maxIdx;$left > 13;$left --){
             $dat = $maxFlowData['chart']['series'][0]['data'][$left]['y'];
             if($dat >= ($maxData - ($maxData - $avg)/2 )){
                 $leftIdx = $left;
@@ -842,13 +848,18 @@ class JunctionReportService extends BaseService{
             }
 
         }
-        for($right = $maxIdx;$right < 48;$right ++){
+        for($right = $maxIdx;$right < 43;$right ++){
             $dat = $maxFlowData['chart']['series'][0]['data'][$right]['y'];
             if($dat >= ($maxData - ($maxData - $avg)/2 )){
                 $rightIdx = $right;
             }else{
                 break;
             }
+        }
+        //尽量包含两侧的点
+        if($leftIdx == $rightIdx){
+            $leftIdx--;
+            $rightIdx++;
         }
         $maxRange=[];
         $maxRange[] = $maxFlowData['chart']['series'][0]['data'][$leftIdx]['x'];
@@ -858,7 +869,7 @@ class JunctionReportService extends BaseService{
 
         return ["max_flow"=>$maxFlow,"max_range"=>$maxRange];
     }
-    //查询指标最高的flow
+    //查询指标最低的flow
     private function queryMinQuotaFlow($flowlist){
         if(count($flowlist) == 0){
             return false;
@@ -874,7 +885,7 @@ class JunctionReportService extends BaseService{
             if(!isset($zeroFlowMap[$flowID])){
                 $zeroFlowMap[$flowID] = 0;
             }
-            for ($i =12 ;$i<43 ;$i++){
+            for ($i =13 ;$i<43 ;$i++){
                 $mdata = $v['chart']['series'][0]['data'][$i]['y'];
                 if($mdata == 0){
                     $zeroFlowMap[$flowID]++;
@@ -884,6 +895,7 @@ class JunctionReportService extends BaseService{
         }
         $minFlow = "";
         $avg = 0;
+
         foreach ($flowSumMap as $fid => $value){
             if(isset($zeroFlowMap[$fid]) && $zeroFlowMap[$fid]>12){ //0值点过多的数据过滤掉
                 continue;
@@ -901,20 +913,21 @@ class JunctionReportService extends BaseService{
             }
         }
         //查找时段
-        $leftIdx = 0;
-        $rightIdx = 0;
+
         $minIdx = 0;
         $minData = 99999;
         //查找最低非0的点
-        for($j =12;$j<43;$j++){
+        for($j =13;$j<43;$j++){
             $mdata = $minFlowData['chart']['series'][0]['data'][$j]['y'];
             if($mdata >0 && $mdata <= $minData){
                 $minData = $mdata;
                 $minIdx = $j;
             }
         }
+        $leftIdx = $minIdx;
+        $rightIdx = $minIdx;
         //从最高点向两侧寻找
-        for($left = $minIdx;$left > 0;$left --){
+        for($left = $minIdx;$left > 13;$left --){
             $dat = $minFlowData['chart']['series'][0]['data'][$left]['y'];
             if($dat >0 && $dat <= ($minData + ($avg-$minData )/2 )){
                 $leftIdx = $left;
@@ -923,7 +936,7 @@ class JunctionReportService extends BaseService{
             }
 
         }
-        for($right = $minIdx;$right < 48;$right ++){
+        for($right = $minIdx;$right < 43;$right ++){
             $dat = $minFlowData['chart']['series'][0]['data'][$right]['y'];
             if($dat >0 && $dat <= ($minData + ($avg-$minData )/2 )){
                 $rightIdx = $right;
@@ -931,6 +944,12 @@ class JunctionReportService extends BaseService{
                 break;
             }
         }
+        //尽量包含两侧的点
+        if($leftIdx == $rightIdx){
+            $leftIdx--;
+            $rightIdx++;
+        }
+
         $minRange=[];
         $minRange[] = $minFlowData['chart']['series'][0]['data'][$leftIdx]['x'];
         $minRange[] = $minFlowData['chart']['series'][0]['data'][$rightIdx]['x'];

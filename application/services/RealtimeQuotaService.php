@@ -24,6 +24,7 @@ class RealtimeQuotaService extends BaseService
         $this->load->helper('http_helper');
         $this->load->model('common_model');
         $this->load->model('alarmanalysis_model');
+        $this->load->model('diagnosisNoTiming_model');
         $this->helperService = new HelperService();
         $this->overviewService = new OverviewService();
         $this->load->config("nconf");
@@ -108,6 +109,115 @@ class RealtimeQuotaService extends BaseService
         }
         ksort($mapList);
         return array_values($mapList);
+    }
+
+    public function flowAnalysis($params){
+        $cityID = $params["city_id"];
+        $logicJunctionID = $params["junction_id"];
+        $startTime = $params["start_time"];
+        $endTime = $params["end_time"];
+        // $quotaKey = $params["quota_key"];
+
+        //计算相位转换到具体方向上的值
+        $flowInfos = $this->waymap_model->getFlowInfo32($logicJunctionID);
+        $flowIdDirection = [];
+        foreach($flowInfos as $flowInfo){
+            $fromDirection=$this->waymap_model->phaseFromDirection($flowInfo["in_degree"]);
+            $toDirection=$this->waymap_model->phaseToDirection($flowInfo["out_degree"]);
+            $flowIdDirection[$flowInfo["logic_flow_id"]] = $fromDirection;
+            $flowIdToDirection[$flowInfo["logic_flow_id"]] = $toDirection;
+        }
+        // print_r($flowIdDirection);exit;
+        $indexDataList = $this->diagnosisNoTiming_model->getRealtimeFlowQuotaList($cityID, $logicJunctionID, date("Y-m-d"), $startTime, $endTime);
+
+        //按照时间排序
+        usort($indexDataList,function($a,$b){
+            $a = strtotime($a["day_time_hms"]);
+            $b = strtotime($b["day_time_hms"]);
+            if ($a==$b) return 0;
+                return ($a<$b)?-1:1;
+            }
+        );
+
+        //时间戳聚合
+        $hourList = [];
+        foreach($indexDataList as $indexItem){
+            $hourList[$indexItem["day_time_hms"]][] = $indexItem;
+        }
+
+        $directionList = [];
+        foreach($hourList as $hour=>$flows){
+            $directionSum = [];
+            $channelList = [];
+            foreach($flows as $flow){
+                $direction=$flowIdDirection[$flow["logic_flow_id"]];
+                $toDirection=$flowIdToDirection[$flow["logic_flow_id"]];
+                if($direction==$toDirection){
+                    continue;
+                }
+                if(isset($directionSum[$direction][$toDirection])){
+                    $directionSum[$direction][$toDirection]+=$flow["volume_up"]*3.6;
+                }
+                $directionSum[$direction][$toDirection]=$flow["volume_up"]*3.6;
+            }
+            $channelList["e"] = [
+                "angle"=>0,
+                "name"=>"东进口",
+                "straightTo"=>"w",
+                "to"=>[
+                    "s"=>$directionSum["东"]["南"]??0,
+                    "n"=>$directionSum["东"]["北"]??0,
+                    "w"=>$directionSum["东"]["西"]??0,
+                ],
+            ];
+            $channelList["w"] = [
+                "angle"=>180,
+                "name"=>"西进口",
+                "straightTo"=>"e",
+                "to"=>[
+                    "s"=>$directionSum["西"]["南"]??0,
+                    "n"=>$directionSum["西"]["北"]??0,
+                    "e"=>$directionSum["西"]["东"]??0,
+                ],
+            ];
+            $channelList["s"] = [
+                "angle"=>270,
+                "name"=>"南进口",
+                "straightTo"=>"n",
+                "to"=>[
+                    "w"=>$directionSum["南"]["西"]??0,
+                    "e"=>$directionSum["南"]["东"]??0,
+                    "n"=>$directionSum["南"]["北"]??0,
+                ],
+            ];
+            $channelList["n"] = [
+                "angle"=>0,
+                "name"=>"北进口",
+                "straightTo"=>"s",
+                "to"=>[
+                    "s"=>$directionSum["北"]["南"]??0,
+                    "e"=>$directionSum["北"]["东"]??0,
+                    "w"=>$directionSum["北"]["西"]??0,
+                ],
+            ];
+            $formatList = [];
+            foreach($channelList as $cIndex=>$cItem){
+                $toItems = [];
+                foreach($cItem["to"] as $ccIndex=>$ccItem){
+                    if(!empty($ccItem)){
+                        $toItems[$ccIndex] = $ccItem;
+                    }
+                }
+                $formatList[$cIndex] = [
+                    "angle"=>$cItem["angle"],
+                    "name"=>$cItem["name"],
+                    "straightTo"=>$cItem["straightTo"],
+                    "to"=>$toItems,
+                ];
+            }
+            $directionList[$hour] = $formatList;
+        }
+        return $directionList;
     }
 
     public function junctionRealtimeFlowQuotaList($params){

@@ -1061,9 +1061,9 @@ class RoadReportService extends BaseService{
     private function shortenChart($chartList){
         $newChartList = [];
 
-        if(count($chartList[0]['chart']['one_dimensional']) <=10){
-            return $chartList;
-        }
+//        if(count($chartList[0]['chart']['one_dimensional']) <=10){
+//            return $chartList;
+//        }
         // 'time'=>1,'junc'=>1,'count'=>1,
         $top20Map = [];
         $top20Junc = [];
