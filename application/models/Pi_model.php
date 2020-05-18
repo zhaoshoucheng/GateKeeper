@@ -160,7 +160,7 @@ class Pi_model extends CI_Model{
     }
 
     public function getJunctionsPiByHours($city_id, $logic_junction_ids, $dates){
-        if ($city_id == 11|| $city_id == 12) {
+//        if ($city_id == 11|| $city_id == 12) {
             $pi_data = $this->dataService->call("/report/GetPiIndex", [
                 'city_id' => $city_id,
                 'dates' => $dates,
@@ -175,20 +175,20 @@ class Pi_model extends CI_Model{
                 ];
             }
             return $data;
-        } else {
-            $res = $this->db
-                ->select('hour, sum(pi * traj_count) / sum(traj_count) as pi')
-                ->from($this->tb.$city_id)
-                ->where_in('logic_junction_id', $logic_junction_ids)
-                ->where_in('date', $dates)
-                ->group_by('hour')
-                ->get();
-            if(empty($res)){
-                return [];
-            }
-    //         var_dump($this->db->last_query());
-            return $res->result_array();
-        }
+//        } else {
+//            $res = $this->db
+//                ->select('hour, sum(pi * traj_count) / sum(traj_count) as pi')
+//                ->from($this->tb.$city_id)
+//                ->where_in('logic_junction_id', $logic_junction_ids)
+//                ->where_in('date', $dates)
+//                ->group_by('hour')
+//                ->get();
+//            if(empty($res)){
+//                return [];
+//            }
+//    //         var_dump($this->db->last_query());
+//            return $res->result_array();
+//        }
     }
 
     //返回pi的等级
