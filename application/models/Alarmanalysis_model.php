@@ -45,7 +45,7 @@ class Alarmanalysis_model extends CI_Model
             $queryUrl = sprintf('http://%s/_sql?%s',$hosts[0],$scrollInfo); 
             $response = httpPOST($queryUrl, $body, 8000, 'raw');
         }else{
-            $queryUrl = sprintf('http://%s/%s/type/_search?%s',$hosts[0],$index['flow'],$scrollInfo);
+            $queryUrl = sprintf('http://%s/%s/_search?%s',$hosts[0],$index['flow'],$scrollInfo);
             $response = httpPOST($queryUrl, json_decode($body,true), 0, 'json');
         }
         if (!$response) {

@@ -48,35 +48,26 @@ class Realtime_model extends CI_Model
     {
         $this->quotaCityIds = $this->common_model->getV5DMPCityID();
 
-        $baseUrl = $this->esUrl;
-        if(!empty($data["cityId"]) && in_array($data["cityId"],$this->quotaCityIds)){
-            $baseUrl = $this->newEsUrl;
-        }
+//        $baseUrl = $this->esUrl;
+//        if(!empty($data["cityId"]) && in_array($data["cityId"],$this->quotaCityIds)){
+//            $baseUrl = $this->newEsUrl;
+//        }
+        $baseUrl = $this->newEsUrl;
         $resData = [];
-        $result = httpPOST($baseUrl . '/estimate/diagnosis/queryIndices', $data, 0, 'json');
+        $result = httpPOST($baseUrl , $data, 0, 'json');
 
         if (!$result) {
             throw new \Exception('调用es接口 queryIndices 失败！', ERR_DEFAULT);
         }
         $result = json_decode($result, true);
 
-        if ($scroll) {
-            if ($result['code'] == '000000') {  // 000000:还有数据可查询 400001:查询完成
-                $resData = $result['result']['diagnosisIndices'];
-                $data['scrollsId'] = $result['result']['scrollsId'];
-                $resData = array_merge($resData, $this->searchDetail($data));
-            }
 
-            if ($result['code'] == '400001') {
-                $resData = array_merge($resData, $result['result']['diagnosisIndices']);
-            }
-        } else {
-            $resData = $result['result']['diagnosisIndices'];
-        }
+        $resData = $result['data']['result']['diagnosisIndices'];
 
-        if ($result['code'] != '000000' && $result['code'] != '400001') {
-            throw new \Exception($result['message'], ERR_DEFAULT);
-        }
+
+//        if ($result['code'] != '000000' && $result['code'] != '400001') {
+//            throw new \Exception($result['message'], ERR_DEFAULT);
+//        }
 
         return $resData;
     }
@@ -90,23 +81,25 @@ class Realtime_model extends CI_Model
     {
         $this->quotaCityIds = $this->common_model->getV5DMPCityID();
 
-        $baseUrl = $this->esUrl;
-        if(!empty($data["cityId"]) && in_array($data["cityId"],$this->quotaCityIds)){
-            $baseUrl = $this->newEsUrl;
-        }
-        $queryUrl = $baseUrl . '/estimate/diagnosis/queryQuota';
-        $result = httpPOST($queryUrl, $data, 9000, 'json');
+//        $baseUrl = $this->esUrl;
+//        if(!empty($data["cityId"]) && in_array($data["cityId"],$this->quotaCityIds)){
+//
+//        }
+        $baseUrl = $this->newEsUrl;
+//        $queryUrl = $baseUrl . '/estimate/diagnosis/queryQuota';
+
+        $result = httpPOST($baseUrl, $data, 9000, 'json');
         if (!$result) {
             com_log_warning('searchQuota_result_invalid', 0, "", compact("queryUrl","data","result"));
             throw new \Exception('调用es接口 queryIndices 失败！', ERR_DEFAULT);
         }
         $result = json_decode($result, true);
 
-        if ($result['code'] != '000000' && $result['code'] != '400001') {
-            com_log_warning('searchQuota_result_errcode', 0, "", compact("queryUrl","data","result"));
-            throw new \Exception($result['message'], ERR_DEFAULT);
-        }
-        return $result;
+//        if ($result['code'] != '000000' && $result['code'] != '400001') {
+//            com_log_warning('searchQuota_result_errcode', 0, "", compact("queryUrl","data","result"));
+//            throw new \Exception($result['message'], ERR_DEFAULT);
+//        }
+        return $result['data'];
     }
 
     /**
@@ -144,7 +137,6 @@ class Realtime_model extends CI_Model
         $lastHour = date('H:i:s', strtotime($res['result']['quotaResults'][0]['quotaMap']['dayTime']));
         return $lastHour;
     }
-
     /**
      * 平均延误曲线图
      * @param $cityId int    城市ID
@@ -424,7 +416,22 @@ class Realtime_model extends CI_Model
                 'trailNum' => 'gte', // 轨迹数大于等于5
                 'dayTime' => 'eq',  // 等于hour
             ],
-            'limit' => 5000,
+            'orderOperations'=>[
+                [
+                    'orderField'=>'trailNum',
+                    'orderType'=>"DESC",
+                ],
+//                    "orderField": "trailNum",
+//        "orderType": "DESC"
+//    }
+
+            ],
+
+//            'quotaRequest'=>[
+//                'groupField'=>'junctionId',
+//                'quotas' =>'sum_stopDelayUp*trailNum, sum_trailNum'
+//            ],
+            'limit' => 10000,
         ];
         if (!empty($junctionIds)) {
             $data['junctionId'] = implode(",",$junctionIds);
@@ -445,7 +452,7 @@ class Realtime_model extends CI_Model
                 'twice_stop_rate' => $v['multiStopRatioUp'],
                 'speed' => $v['avgSpeedUp'],
                 'free_flow_speed' => $v['freeFlowSpeedUp'],
-                'traj_count' => $v['trailNum'],
+                'traj_count' => $v['trajNum'],
             ];
         }
 

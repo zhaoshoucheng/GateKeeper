@@ -74,11 +74,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
-$hostname = '100.69.238.94';
-$username = 'its_tool_its_tool_rw';
-$password = 'Oibvwqpc7zyUTQ2';
+$hostname = '172.54.0.107';
+$username = 'xinkong';
+$password = 'xinkong_Auth_Rw@2020';
 $database = 'its_tool';
-$port = 4002;
+$port = 4003;
 
 $db['default'] = array(
     'dsn'   => '',
@@ -103,122 +103,4 @@ $db['default'] = array(
     'save_queries' => TRUE,
     'query_flag' => '0',         //查询标记
     'force_master' => FALSE,    //强制从主库查询
-);
-
-$db['dmp_captain'] = array(
-    'dsn'   => '',
-    'hostname' => "10.88.128.156",
-    'username' => "dmp_captain_dmp_captain_rw",
-    'password' => "yXUZsxiNPwKd1kj",
-    'database' => "dmp_captain",
-    'port'     => "4007",
-    'dbdriver' => 'mysqli',
-    'dbprefix' => '',
-    'pconnect' => FALSE,
-    'db_debug' => (ENVIRONMENT !== 'production'),
-    'cache_on' => FALSE,
-    'cachedir' => '',
-    'char_set' => 'utf8',
-    'dbcollat' => 'utf8_general_ci',
-    'swap_pre' => '',
-    'encrypt' => FALSE,
-    'compress' => FALSE,
-    //'stricton' => FALSE,
-    'failover' => array(),
-    'save_queries' => TRUE,
-    'query_flag' => '0',         //查询标记
-    'force_master' => FALSE,    //强制从主库查询
-);
-
-$db['signal_control'] = array(
-    'dsn'   => '',
-    'username' => 'signal_control_sig_con_rw',
-    'hostname' => '100.69.238.28',
-    'port' => 4050,
-    'password' => 'E52cMGSkiWsgK6T',
-    'database' => 'signal_control',
-    'dbdriver' => 'mysqli',
-    'dbprefix' => '',
-    'pconnect' => FALSE,
-    'db_debug' => (ENVIRONMENT !== 'production'),
-    'cache_on' => FALSE,
-    'cachedir' => '',
-    'char_set' => 'utf8',
-    'dbcollat' => 'utf8_general_ci',
-    'swap_pre' => '',
-    'encrypt' => FALSE,
-    'compress' => FALSE,
-    // 'stricton' => FALSE,
-    'failover' => array(),
-    'save_queries' => TRUE
-);
-
-$db['traffic_timing_solve'] = array(
-    'dsn'   => '',
-    'username' => 'root',
-    'hostname' => '100.90.164.31',
-    'port' => 8004,
-    'password' => 'Znjty@Didi@2017',
-    'database' => 'traffic_timing_solve',
-    'dbdriver' => 'mysqli',
-    'dbprefix' => '',
-    'pconnect' => FALSE,
-    'db_debug' => (ENVIRONMENT !== 'production'),
-    'cache_on' => FALSE,
-    'cachedir' => '',
-    'char_set' => 'utf8',
-    'dbcollat' => 'utf8_general_ci',
-    'swap_pre' => '',
-    'encrypt' => FALSE,
-    'compress' => FALSE,
-    // 'stricton' => FALSE,
-    'failover' => array(),
-    'save_queries' => TRUE
-);
-
-$db['its_trace_log'] = array(
-    'dsn'   => '',
-    'hostname' => $hostname,
-    'username' => $username,
-    'password' => $password,
-    'database' => $database,
-    'port'     => $port,
-    'dbdriver' => 'mysqli',
-    'dbprefix' => '',
-    'pconnect' => FALSE,
-    'db_debug' => (ENVIRONMENT !== 'production'),
-    'cache_on' => FALSE,
-    'cachedir' => '',
-    'char_set' => 'utf8',
-    'dbcollat' => 'utf8_general_ci',
-    'swap_pre' => '',
-    'encrypt' => FALSE,
-    'compress' => FALSE,
-    // 'stricton' => FALSE,
-    'failover' => array(),
-    'save_queries' => TRUE
-);
-
-
-$db['sts_index'] = array(
-    'dsn'   => '',
-    'username' => "sts_index_8nd69t_rw",
-    'hostname' => "10.88.128.156",
-    'password' => "6cBP0pAnXZ7drIu",
-    'port'     => "4047",
-    'database' => 'sts_index',
-    'dbdriver' => 'mysqli',
-    'dbprefix' => '',
-    'pconnect' => FALSE,
-    'db_debug' => (ENVIRONMENT !== 'production'),
-    'cache_on' => FALSE,
-    'cachedir' => '',
-    'char_set' => 'utf8',
-    'dbcollat' => 'utf8_general_ci',
-    'swap_pre' => '',
-    'encrypt' => FALSE,
-    'compress' => FALSE,
-    // 'stricton' => FALSE,
-    'failover' => array(),
-    'save_queries' => TRUE
 );

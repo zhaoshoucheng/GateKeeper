@@ -29,7 +29,9 @@ class Redis_model extends CI_Model
             $host       = $redis_conf['host'];
             $port       = $redis_conf['port'];
             $timeout    = $redis_conf['timeout'];  //增加超时时间
+            $password   = $redis_conf['password']; //连接密码
             $connResult = $this->redis->connect($host, $port, $timeout);
+            $this->redis->auth($password);
             if (!$connResult) {
                 throw new \Exception("redis connection error:" . json_encode($redis_conf));
             }

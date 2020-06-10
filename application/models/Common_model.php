@@ -120,29 +120,30 @@ class Common_model extends CI_Model
      */
     public function getV5DMPCityID()
     {
-        if(ENVIRONMENT=="development"){
-            $cityIDS = $this->config->item('quota_v2_city_ids');
-            return $cityIDS;
-        }
-        //return $this->getAdaptCityIDS();
-        $table = 'dmp_city_config';
-        $select = 'city_id, city_name';
-        $where = [
-            'sys_id'   => "signal_control_pro",
-            'extra' => "v5",
-            'status' => "1",
-        ];
-
-        $res = $this->dmpSearch($table, $select, $where);
-        if (!$res) {
-            return [];
-        }
-
-        $result = [];
-        foreach ($res as $k=>$v) {
-            $result[] = (int)$v['city_id'];
-        }
-        return $result;
+        return [12];
+//        if(ENVIRONMENT=="development"){
+//            $cityIDS = $this->config->item('quota_v2_city_ids');
+//            return $cityIDS;
+//        }
+//        //return $this->getAdaptCityIDS();
+//        $table = 'dmp_city_config';
+//        $select = 'city_id, city_name';
+//        $where = [
+//            'sys_id'   => "signal_control_pro",
+//            'extra' => "v5",
+//            'status' => "1",
+//        ];
+//
+//        $res = $this->dmpSearch($table, $select, $where);
+//        if (!$res) {
+//            return [];
+//        }
+//
+//        $result = [];
+//        foreach ($res as $k=>$v) {
+//            $result[] = (int)$v['city_id'];
+//        }
+//        return $result;
     }
 
 

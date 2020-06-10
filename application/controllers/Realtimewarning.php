@@ -17,9 +17,9 @@ class Realtimewarning extends Inroute_Controller
         $this->load->model('realtimewarning_model');
         $this->load->config('nconf');
         $this->load->model('redis_model');
-        $this->load->model('common_model');
-        $this->load->model('adapt_model');
-        $this->quotaCityIds = $this->common_model->getV5DMPCityID();
+//        $this->load->model('common_model');
+//        $this->load->model('adapt_model');
+        $this->quotaCityIds = [12];
     }
 
     public function getNewHour(){
@@ -171,12 +171,12 @@ class Realtimewarning extends Inroute_Controller
         }
 
         //权限验证
-        if (ENVIRONMENT != 'development') {
-            $this->authToken($params);
-        }
+//        if (ENVIRONMENT != 'development') {
+//            $this->authToken($params);
+//        }
         $hour    = $params["hour"];
         $date    = $params["date"];
-        $cityId  = $params["city_id"];
+        $cityId  = 12;
         $traceId = $params["trace_id"];
         $uid     = $params["uid"];
 
@@ -209,11 +209,11 @@ class Realtimewarning extends Inroute_Controller
         }
 
         // 实时报警城市必须传递的uid
-        $quotaCityIds = $this->quotaCityIds;
-        if(in_array($cityId,$quotaCityIds) && !in_array($uid,["traj_index_pro","traffic_realtime_alarm"])){
-            echo "uid 非预期! \n";
-            exit;
-        }
+        $quotaCityIds = 12;
+//        if(in_array($cityId,$quotaCityIds) && !in_array($uid,["traj_index_pro","traffic_realtime_alarm"])){
+//            echo "uid 非预期! \n";
+//            exit;
+//        }
 
         $alarmFunction = $this->getAlarmFuncName($cityId);
         exec("ps aux | grep \"realtimewarn\" | grep '{$alarmFunction}/{$cityId}/' | grep -v \"grep\" | wc -l", $processOut);
@@ -223,15 +223,15 @@ class Realtimewarning extends Inroute_Controller
         if ($processNum == 0) {
             $logPath = $this->config->item('log_path');
 
-            $phpPath = "/home/xiaoju/php7/bin/php -c /home/xiaoju/php7/etc/php.ini ";
-            if (gethostname() == 'ipd-cloud-server01.gz01') {
-                $phpPath = "php ";
-            }
-            $command = "nohup {$phpPath} index.php realtimewarning {$alarmFunction}/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
+//            $phpPath = "/home/xiaoju/php7/bin/php -c /home/xiaoju/php7/etc/php.ini ";
+//            if (gethostname() == 'ipd-cloud-server01.gz01') {
+                $phpPath = "/user/local/php7.4.5/bin/php ";
+//            }
+            $command = "nohup {$phpPath} /home/xiaoju/webroot/itstool/itstool/index.php /home/xiaoju/webroot/itstool/itstool/realtimewarning {$alarmFunction}/{$cityId}/{$hour}/{$date}/{$traceId}/{$uid} >>" .
                 "{$logPath}realtimewarning.log  2>&1 &";
             exec($command);
 
-            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$command, "trace_id"=>$traceId, "dltag"=>"realtimewarning.command", "log_time"=>date("Y-m-d H:i:s"),]);
+//            $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$command, "trace_id"=>$traceId, "dltag"=>"realtimewarning.command", "log_time"=>date("Y-m-d H:i:s"),]);
         }
 
         $output = [
@@ -260,26 +260,26 @@ class Realtimewarning extends Inroute_Controller
 
         //预先计算平均延误数据
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculating\n\r";
-        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"realtimewarning.Start", "log_time"=>date("Y-m-d H:i:s"),]);
+//        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
+//            "dltag"=>"realtimewarning.Start", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
 
         $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId, 1);
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculated\n\r";
-        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"pre_calculated", "log_time"=>date("Y-m-d H:i:s"),]);
+//        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
+//            "dltag"=>"pre_calculated", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
 
         //再计算报警数据
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculating\n\r";
-        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"calculating", "log_time"=>date("Y-m-d H:i:s"),]);
+//        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
+//            "dltag"=>"calculating", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
 
         $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId);
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculated\n\r";
-        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"calculated", "log_time"=>date("Y-m-d H:i:s"),]);
+//        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
+//            "dltag"=>"calculated", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
         return true;
     }
@@ -299,8 +299,8 @@ class Realtimewarning extends Inroute_Controller
         }
         //预先计算平均延误数据
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculating\n\r";
-        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"realtimewarning.Start", "log_time"=>date("Y-m-d H:i:s"),]);
+//        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
+//            "dltag"=>"realtimewarning.Start", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
         $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId, 1);
 
@@ -320,8 +320,8 @@ class Realtimewarning extends Inroute_Controller
             echo $command."\n\r";
         }
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=pre_calculated\n\r";
-        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"pre_calculated", "log_time"=>date("Y-m-d H:i:s"),]);
+//        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
+//            "dltag"=>"pre_calculated", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
         return true;
     }
@@ -350,8 +350,8 @@ class Realtimewarning extends Inroute_Controller
             'uid' => $uid,
         ];
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=task_handler_doing\n\r";
-        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"task_handler_doing", "log_time"=>date("Y-m-d H:i:s"),]);
+//        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
+//            "dltag"=>"task_handler_doing", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
 
         sleep(5);
@@ -367,17 +367,17 @@ class Realtimewarning extends Inroute_Controller
         }
 
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=task_handler_done\n\r";
-        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"task_handler_done", "log_time"=>date("Y-m-d H:i:s"),]);
+//        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
+//            "dltag"=>"task_handler_done", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculating\n\r";
-        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"calculating", "log_time"=>date("Y-m-d H:i:s"),]);
+//        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
+//            "dltag"=>"calculating", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
         $this->realtimewarning_model->calculate($cityId, $date, $hour, $traceId);
         $message = "[INFO] " . date("Y-m-d\TH:i:s") . " city_id=" . $cityId . "||hour=" . $hour . "||date=" . $date . "||trace_id=" . $traceId . "||didi_trace_id=" . get_traceid() . "||message=calculated\n\r";
-        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
-            "dltag"=>"calculated", "log_time"=>date("Y-m-d H:i:s"),]);
+//        $this->adapt_model->insertAdaptLog(["type"=>4, "rel_id"=>$cityId, "log"=>$message, "trace_id"=>$traceId,
+//            "dltag"=>"calculated", "log_time"=>date("Y-m-d H:i:s"),]);
         echo $message;
         return true;
     }

@@ -719,41 +719,27 @@ class ReportService extends BaseService
                 return $carry;
             }, []);
 
-            $protocol   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+//            $protocol   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+//
+//            $hostName = $_SERVER['HTTP_HOST'];
+//
+//            $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
+//            $lastPos    = strrpos($currentUrl, '/');
+//            $baseUrl    = substr($currentUrl, 0, $lastPos);
 
-            $hostName = $_SERVER['HTTP_HOST'];
-            if($_SERVER['REMOTE_ADDR']=="59.52.254.218"){
-                $hostName = "59.52.254.216:91";
-            }
-            if(isset($_SERVER["HTTP_REFERER"]) && strpos($_SERVER["HTTP_REFERER"], "/nanjing")){
-                $hostName = "sts.didichuxing.com/sg1/api/nanjing";
-            }
-            if (isset($_SERVER['HTTP_REFERER'])) {
-                if (strpos($_SERVER['HTTP_REFERER'], 'http://test.sts.xiaojukeji.com/signalpro/report') !== false) {
-                    $hostName    = "test.sts.xiaojukeji.com/sg1/api";
-                }
-                if (strpos($_SERVER['HTTP_REFERER'], 'http://sts.xiaojukeji.com/signalpro/report') !== false) {
-                    $hostName    = "sts.didichuxing.com/sg1/api";
-                }
-                if (strpos($_SERVER['HTTP_REFERER'], 'https://sts.xiaojukeji.com/signalpro/report') !== false) {
-                    $hostName    = "sts.didichuxing.com/sg1/api";
-                }
-            }
-            $currentUrl = $protocol . $hostName . $_SERVER['REQUEST_URI'];
-            $lastPos    = strrpos($currentUrl, '/');
-            $baseUrl    = substr($currentUrl, 0, $lastPos);
-//            $baseUrl    = $this->report_proxy;
             foreach ($result as $key => $item) {
-                $itemInfo = $this->gift_model->getResourceUrlList($resourceKeys, $namespace);
-                if (!empty($itemInfo[$item["file_key"]])) {
-                    $result[$key]['url']      = $itemInfo[$item["file_key"]]['download_url'];
-                    $result[$key]['down_url'] = $baseUrl . "/downReport?key=" . $item["file_key"];
-                    if($userapp == "jinanits"){
-                        $result[$key]['url']  = str_replace("img-hxy022.didistatic.com","172.54.0.136:8886",$result[$key]['url']);
-                        $result[$key]['down_url']  = str_replace("sts.didichuxing.com","172.54.1.214:8088/sg1/api",$result[$key]['down_url']);
-                    }
-//                    $result[$key]['url']      = $baseUrl."/Report/reportProxy?url=".base64_encode($itemInfo[$item["file_key"]]['download_url']);
-                }
+                $result[$key]['url'] = $item["file_key"];
+                $result[$key]['down_url'] = $item["file_key"];
+//                $itemInfo = $this->gift_model->getResourceUrlList($resourceKeys, $namespace);
+//                if (!empty($itemInfo[$item["file_key"]])) {
+//                    $result[$key]['url']      = $itemInfo[$item["file_key"]]['download_url'];
+//                    $result[$key]['down_url'] = $baseUrl . "/downReport?key=" . $item["file_key"];
+//                    if($userapp == "jinanits"){
+//                        $result[$key]['url']  = str_replace("img-hxy022.didistatic.com","172.54.0.136:8886",$result[$key]['url']);
+//                        $result[$key]['down_url']  = str_replace("sts.didichuxing.com","172.54.1.214:8088/sg1/api",$result[$key]['down_url']);
+//                    }
+////                    $result[$key]['url']      = $baseUrl."/Report/reportProxy?url=".base64_encode($itemInfo[$item["file_key"]]['download_url']);
+//                }
             }
             return [
                 "list" => $result,

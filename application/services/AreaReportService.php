@@ -651,7 +651,9 @@ class AreaReportService extends BaseService{
         });
         $morning_pi_data = array_slice($morning_pi_data, 0, 20);
         $morning_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $lastDatelist, $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
-        // print_r($morning_last_pi_data);
+        usort($morning_last_pi_data, function($a, $b) {
+            return $a['pi'] > $b['pi'] ? -1 : 1;
+        });
         $morning_last_pi_data_rank = [];
         for ($i = 0; $i < count($morning_last_pi_data); $i++) {
             $morning_last_pi_data_rank[$morning_last_pi_data[$i]['logic_junction_id']] = $i + 1;
@@ -679,7 +681,9 @@ class AreaReportService extends BaseService{
         });
         $evening_pi_data = array_slice($evening_pi_data, 0, 20);
         $evening_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $lastDatelist, $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
-        // print_r($evening_last_pi_data);
+        usort($evening_last_pi_data, function($a, $b) {
+            return $a['pi'] > $b['pi'] ? -1 : 1;
+        });
         $evening_last_pi_data_rank = [];
         for ($i = 0; $i < count($evening_last_pi_data); $i++) {
             $evening_last_pi_data_rank[$evening_last_pi_data[$i]['logic_junction_id']] = $i + 1;

@@ -15,20 +15,19 @@ $online_host = [
 ];
 
 $hostname    = gethostname();
-$development = 1; //开发环境
-if (in_array($hostname, $online_host)) {
-    $development = 2;
-}
+
+$development = 2;
+
 
 if ($development == 2) {
     //线上及预发环境配置
 
     // 路网接口服务器地址
-    $waymap_server = '10.85.128.137';
+    $waymap_server = '172.54.17.94';
     // 路网接口服务器端口
-    $waymap_port = '80';
+    $waymap_port = '8000';
     // 路网接口前缀
-    $waymap_ext = '/its_mapdata';
+    $waymap_ext = '';
 
     // 配时接口服务器地址
     $timing_server = '100.69.238.11';
@@ -38,8 +37,9 @@ if ($development == 2) {
     $timing_ext = '/its/signal-mis';
 
     $config['redis'] = [
-        'host' => '100.69.239.57',
-        'port' => '3060',
+        'host' => '172.54.0.94',
+        'port' => '6001',
+        'password'=>'xinkong',
         'timeout' => '3',
     ];
 
@@ -69,7 +69,7 @@ if ($development == 2) {
     $es_server = 'http://10.85.128.137';
 
     // new es 新实时轨迹、指标数据
-    $quota_v2_es_server = 'http://10.85.128.137/estimate';
+    $quota_v2_es_server = 'http://127.0.0.1:8033/GetRealtimeQuota';
 
     // new timing
     $signal_control_server = '10.88.128.149';
@@ -82,12 +82,12 @@ if ($development == 2) {
     $xmmtrace_ext    = '/api/transmit/Traffic';
 
     //traj  config
-    $traj_server = '10.85.128.81:30187';
+    $traj_server = '127.0.0.1:8032';
     $traj_ext   = '/traj-service';
 
     // 报警es接口
     $alarm_es_interface = [
-        '1819:v19NJfhpxfL0pit@10.88.128.149:30963',
+        '172.54.1.161:9202',
     ];
     // 报警ES索引
     $alarm_es_index = [
@@ -96,8 +96,8 @@ if ($development == 2) {
     ];
 
     // 数据服务
-    $data_service_server = '100.90.163.51';
-    $data_service_prot = '8099';
+    $data_service_server = '127.0.0.1';
+    $data_service_prot = '8033';
     $data_service_ext = '';
 
     //报警数据历史处理
@@ -109,128 +109,18 @@ if ($development == 2) {
     //城市自适应配时下发频率配置
     $city_upsigntime_interval = [
         "12"=>2,
-        "134"=>2,
+
     ];
 
     //新版指标开城列表
-    $quota_v2_city_ids = [1, 12, 57, 85, 134];
+    $quota_v2_city_ids = [12];
 
     //新版报警开城列表
-    $alarm_v2_city_ids = [12, 23];
+    $alarm_v2_city_ids = [12];
 
     $report_proxy_url = "https://sts.didichuxing.com/sg1/api/signalpro/api";
 
     $chart_generate_url = "https://sts.didichuxing.com/signalpro-report/api/chart/exporter";
-} else {
-    // 路网接口服务器地址
-    $waymap_server = '100.69.238.11';
-    // 路网接口服务器端口
-    $waymap_port = '8000';
-    // 路网接口前缀
-    $waymap_ext = '/its';
-    
-    // // 路网接口服务器地址
-    // $waymap_server = '10.85.128.137';
-    // // 路网接口服务器端口
-    // $waymap_port = '80';
-    // // 路网接口前缀
-    // $waymap_ext = '/its';    
-
-    // 配时接口服务器地址
-    $timing_server = '100.90.164.31';
-    // 配时接口服务器端口
-    $timing_port = '8031';
-    // 配时接口前缀
-    $timing_ext = '/signal-timing';
-
-    $config['redis'] = [
-        'host' => '127.0.0.1',
-        'port' => '6379',
-        'timeout' => '3',
-    ];
-
-    // signal-mis
-    $signal_mis_server = '100.90.164.31';
-    $signal_mis_port   = '8006';
-    $signal_mis_ext    = '/signal-mis';
-
-    // signal_light
-    $signal_light_server = 'http://10.148.28.204:8001';
-
-    // signal_rollback
-    $signal_rollback_url = "http://100.90.164.31:8016/signal-control/signalprofile/rollback";
-    $signal_base_url = "http://100.90.164.31:8016/signal-control/signalopt/querybasetiming";
-    $signal_timing_url = "http://100.90.164.31:8016/signal-control/signal/querytiming";
-
-    // 路口配时版本历史
-    $signal_timing_releasehistory = "http://100.90.164.31:8016/signal-control/signalprofile/releasehistory";
-    $signal_timing_flowchannel = "http://100.90.164.31:8016/signal-control/signalopt/queryflowchannel";
-    // 路口配时状态
-    $signal_timing_status_url = "http://100.90.164.31:8016/signal-control/signalprofile/timingstatusbatch";
-    // 配时上传下发时间
-    $signal_timing_machine_status_url = "http://100.90.164.31:8016/signal-control/signalprofile/machinestatus";
-
-    // es
-    $es_server = 'http://10.89.236.25:8087';
-
-    // new es
-    $quota_v2_es_server = 'http://10.89.236.25:8090';
-//    $quota_v2_es_server = '10.89.234.61';
-//    $quota_v2_es_port   = '8090';
-//    $quota_v2_es_ext    = '';
-
-    // new timing
-    $signal_control_server = '100.90.164.31';
-    $signal_control_port   = '8031';
-    $signal_control_ext    = '/signal-timing';
-
-    // xmmtrace
-    $xmmtrace_server = '100.69.238.158';
-    $xmmtrace_port   = '8001';
-    $xmmtrace_ext    = '/api/transmit/Traffic';
-
-    //traj  config
-    $traj_server = '100.90.164.31:8032';
-    $traj_ext   = '/traj-service';
-
-    // 报警es
-    $alarm_es_interface = [
-        '1819:v19NJfhpxfL0pit@10.88.128.149:30963',
-    ];
-    // 报警ES索引
-    $alarm_es_index = [
-        'junction' => 'its_alarm_junction_month*',
-        'flow'     => 'its_alarm_movement_month*',
-    ];
-
-    // 数据服务
-    $data_service_server = '100.90.164.31';
-    $data_service_prot = '8093';
-    $data_service_ext = '';
-
-    //报警数据历史处理
-    $realtime_callback = 'http://100.90.164.31:8033';
-
-    //需要验证城市权限
-    $validateCity = 0;
-
-    //城市自适应配时下发频率配置
-    $city_upsigntime_interval = [
-        "12"=>2,
-        "134"=>2,
-    ];
-
-    //新版诊断指标开城列表(后期被common_model->getV5DMPCityID替代了)
-    $quota_v2_city_ids = [1,2,3,4,5,6,10,11,12,13,15,22,23,26,29,33,34,38,47,56,57,60,85,134,135,145,157,161,162,164,168,232,260,262];
-
-    //新版报警开城列表（当接收到报警消息时，哪些城市走scala新版报警？）
-    $alarm_v2_city_ids = [1,5,10,12,23,134];
-
-    $report_proxy_url = "http://10.179.148.73/sg1/api/signalpro/api";
-
-    $chart_generate_url = "http://100.90.164.31:8085";
-//    $chart_generate_url = "https://sts.didichuxing.com/signalpro-report/api/chart/exporter";
-
 }
 
 $temp_waymap_port  = !empty($waymap_port) ? ":" . $waymap_port : "";
