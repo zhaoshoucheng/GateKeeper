@@ -15,7 +15,7 @@ class DiagnosisNoTiming extends MY_Controller
         $this->load->model('timing_model');
         $this->load->model('waymap_model');
         $this->load->config('nconf');
-        $this->setTimingType();
+        //$this->setTimingType();
     }
 
     public function getDateVersion() {

@@ -89,6 +89,9 @@ if ($development == 2) {
     $alarm_es_interface = [
         '172.54.1.161:9202',
     ];
+    $dmp_es_interface = [
+        '172.54.1.161:9202',
+    ];
     // 报警ES索引
     $alarm_es_index = [
         'junction' => 'online_its_alarm_junction_month*',
@@ -152,7 +155,7 @@ $config['traj_userid'] = 'signalPro';
 
 $config['its_traj_interface'] = 'http://' . $traj_server . "/itstool";
 
-
+$config['dmp_es_interface'] = $dmp_es_interface;
 // 配时接口地址
 $config['timing_interface'] = 'http://' . $timing_server . $temp_timing_port . $timing_ext;
 

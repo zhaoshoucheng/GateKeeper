@@ -125,6 +125,9 @@ if (!function_exists('httpPOST')) {
                 'Content-Type: application/json', 'Content-Length: ' . strlen($data),
             ]);
         } elseif ($contentType == 'raw') {
+            $headers = array_merge($headers, [
+                'Content-Type: application/json', 'Content-Length: ' . strlen($data),
+            ]);
             $data = $data;
         } else  {
             $data = http_build_query($data);

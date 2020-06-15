@@ -19,7 +19,7 @@ class RealtimeQuotaService extends BaseService
     {
         parent::__construct();
         $this->load->model('realtime_model');
-        $this->load->model('timing_model');
+       //$this->load->model('timing_model');
         $this->load->model('waymap_model');
         $this->load->helper('http_helper');
         $this->load->model('common_model');

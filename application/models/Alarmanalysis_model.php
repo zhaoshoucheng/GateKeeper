@@ -37,6 +37,7 @@ class Alarmanalysis_model extends CI_Model
     {
         $hosts = $this->config->item('alarm_es_interface');
         $index = $this->config->item('alarm_es_index');
+        $isScroll=0;
         $scrollInfo = "";
         if($isScroll){
             $scrollInfo = "scroll=5m";

@@ -19,7 +19,7 @@ class JunctionReport extends MY_Controller
 
         $this->config->load('report_conf');
 
-        $this->junctionService = new JunctionService();
+//        $this->junctionService = new JunctionService();
         $this->junctionReportService = new JunctionReportService();
     }
 

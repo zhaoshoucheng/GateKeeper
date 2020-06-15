@@ -36,10 +36,10 @@ class OverviewService extends BaseService
         $this->load->model('realtime_model');
         $this->load->model('realtimewarning_model');
         $this->load->model('alarmanalysis_model');
-        $this->load->model('timeAlarmRemarks_model');
-        $this->load->model('timing_model');
+        //$this->load->model('timeAlarmRemarks_model');
+        //$this->load->model('timing_model');
         $this->load->model('area_model');
-        $this->load->model('fusionMappingInfo_model');
+       // $this->load->model('fusionMappingInfo_model');
         $this->config->load('realtime_conf');
     }
 

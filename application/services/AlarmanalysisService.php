@@ -19,7 +19,7 @@ class AlarmanalysisService extends BaseService
 
         // load model
         $this->load->model('alarmanalysis_model');
-        $this->load->model('timing_model');
+//        $this->load->model('timing_model');
         $this->config->load('realtime_conf');
         $this->load->model('waymap_model');
         $this->commonService = new CommonService();
@@ -445,7 +445,7 @@ class AlarmanalysisService extends BaseService
             $json .= ',{"match":{"frequency_type":{"query":'. (int)$params['frequency_type'] .',"type":"phrase"}}}';
         }
 
-        $json .= ']}}}},"_source":{"excludes":[]},"fields":["date","type","frequency_type","type"],"sort":[{"created_at":{"order":"asc"}}]}';
+        $json .= ']}}}},"_source":{"excludes":[]},"stored_fields":["date","type","frequency_type","type"],"sort":[{"created_at":{"order":"asc"}}]}';
         $result = $this->alarmanalysis_model->search($json,0,1);
 
         //准备相位信息
@@ -549,7 +549,7 @@ class AlarmanalysisService extends BaseService
 
         /*新的数据处理逻辑--开始*/
         if(!empty($params['logic_junction_id'])){
-            $json .= ']}}}},"_source":{"excludes":[]},"fields":["hour","type","frequency_type"]}';
+            $json .= ']}}}},"_source":{"excludes":[]},"stored_fields":["hour","type","frequency_type"]}';
             // print_r($json);exit;
             $result = $this->alarmanalysis_model->search($json);
             if (empty($result["hits"]["hits"])) {
@@ -609,7 +609,7 @@ class AlarmanalysisService extends BaseService
         }else{
             //通过明细查询，转换为原来的格式？？？
             //老的数据处理逻辑
-            $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":["hour","type","frequency_type"],"aggregations":{"hour":{"terms":{"field":"hour","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
+            $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"stored_fields":["hour","type","frequency_type"],"aggregations":{"hour":{"terms":{"field":"hour","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
             // echo $json;exit;
 
             $result = $this->alarmanalysis_model->search($json);
@@ -752,7 +752,7 @@ class AlarmanalysisService extends BaseService
             $json .= ',{"match":{"frequency_type":{"query":'. (int)$params['frequency_type'] .',"type":"phrase"}}}';
         }
 
-        $json .= ']}}}},"_source":{"includes":["COUNT","date"],"excludes":[]},"fields":"date","aggregations":{"date":{"terms":{"field":"date","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
+        $json .= ']}}}},"_source":{"includes":["COUNT","date"],"excludes":[]},"stored_fields":"date","aggregations":{"date":{"terms":{"field":"date","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
 
         $result = $this->alarmanalysis_model->search($json);
         if (!$result) {
@@ -870,7 +870,7 @@ class AlarmanalysisService extends BaseService
         /*新的数据处理逻辑--开始*/
         //新逻辑思路是基于明细数据聚合相位级别数据
         if(!empty($params['logic_junction_id'])){
-            $json .= ']}}}},"_source":{"excludes":[]},"fields":["date","type","frequency_type","type"]}';
+            $json .= ']}}}},"_source":{"excludes":[]},"stored_fields":["date","type","frequency_type","type"]}';
             // echo $json;exit;
             $result = $this->alarmanalysis_model->search($json);
             if (empty($result["hits"]["hits"])) {
@@ -927,7 +927,7 @@ class AlarmanalysisService extends BaseService
             // print_r($tempData);exit;
             // echo $json;exit;
         }else{
-            $json .= ']}}}},"_source":{"includes":["COUNT","date"],"excludes":[]},"fields":"date","aggregations":{"date":{"terms":{"field":"date","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
+            $json .= ']}}}},"_source":{"includes":["COUNT","date"],"excludes":[]},"stored_fields":"date","aggregations":{"date":{"terms":{"field":"date","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
             // echo $json;exit;
             $result = $this->alarmanalysis_model->search($json);
             if (!$result) {
@@ -1108,7 +1108,7 @@ class AlarmanalysisService extends BaseService
             $json .= ',{"match":{"frequency_type":{"query":'. (int)$params['frequency_type'] .',"type":"phrase"}}}';
         }
 
-        $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":"hour","sort":[{"hour":{"order":"asc"}}],"aggregations":{"hour":{"terms":{"field":"hour","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}';
+        $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"stored_fields":"hour","sort":[{"hour":{"order":"asc"}}],"aggregations":{"hour":{"terms":{"field":"hour","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}';
 
         $result = $this->alarmanalysis_model->search($json);
         if (!$result) {
@@ -1211,60 +1211,60 @@ class AlarmanalysisService extends BaseService
     }
 
     private function getJunctionAlarmListByDates($cityID, $dates, $junctionID){
-        $phaseNames = $this->getFlowFinalPhaseNames($junctionID);
-        $alarmEsList = $this->alarmanalysis_model->getJunctionAlarmByDates($cityID, $dates, $junctionID);
-        $alarmCate = $this->config->item('flow_alarm_category');
-        $alarmList = [];
-        foreach ($alarmEsList as $val) {
-            $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
-            if ($durationTime < 1) {
-                $durationTime = 1;
-            }
-
-            if(!isset($phaseNames[$val["logic_flow_id"]])){
-                continue;
-            }
-            $phaseName = $phaseNames[$val["logic_flow_id"]];
-            $cateName = $alarmCate[$val["type"]]["name"];
-            $alarmItem["create_time"] = $val["start_time"];
-            $alarmItem["type"] = $val["type"];
-            $alarmItem["comments"] = "【".$phaseName."】- 【".$cateName."】，持续".$durationTime."分钟";
-            $alarmList[] = $alarmItem;
-        }
-
-        //这里读取配时下发数据
-        $startTime = end($dates)." 00:00:00";
-        $endTime = date("Y-m-d H:i:s");
-        $timingHis = $this->timing_model->getJuncTimingHistory($junctionID,$startTime,$endTime);
-        // print_r($timingHis);exit;
-        foreach ($timingHis as $val) {
-            $alarmItem["create_time"] = $val["time_point"];
-            $alarmItem["type"] = 10;
-            $alarmItem["comments"] = "自适应方案 - 【下发】，执行成功";
-            $alarmList[] = $alarmItem;
-        }
-
-        //这里读取配时变更数据
-        $relsHis = $this->timing_model->getJuncReleaseHistory($junctionID,$startTime,$endTime);
-        foreach ($relsHis as $val) {
-            if(empty($val["comment"])){
-                $alarmItem["comments"] = "配时发布";
-            }else{
-                $alarmItem["comments"] = "配时发布，".$val["comment"];
-            }
-            $alarmItem["create_time"] = $val["time_point"];
-            $alarmItem["type"] = 20;
-            $alarmList[] = $alarmItem;
-        }
-
-        $createSlice = [];
-        foreach($alarmList as $key=>$val){
-            $createSlice[$key] = strtotime($val["create_time"]);
-        }
-
-        //排序数据
-        array_multisort($createSlice, SORT_NUMERIC, SORT_DESC, $alarmList);
-        return $alarmList;
+//        $phaseNames = $this->getFlowFinalPhaseNames($junctionID);
+//        $alarmEsList = $this->alarmanalysis_model->getJunctionAlarmByDates($cityID, $dates, $junctionID);
+//        $alarmCate = $this->config->item('flow_alarm_category');
+//        $alarmList = [];
+//        foreach ($alarmEsList as $val) {
+//            $durationTime = round((strtotime($val['last_time']) - strtotime($val['start_time'])) / 60, 2);
+//            if ($durationTime < 1) {
+//                $durationTime = 1;
+//            }
+//
+//            if(!isset($phaseNames[$val["logic_flow_id"]])){
+//                continue;
+//            }
+//            $phaseName = $phaseNames[$val["logic_flow_id"]];
+//            $cateName = $alarmCate[$val["type"]]["name"];
+//            $alarmItem["create_time"] = $val["start_time"];
+//            $alarmItem["type"] = $val["type"];
+//            $alarmItem["comments"] = "【".$phaseName."】- 【".$cateName."】，持续".$durationTime."分钟";
+//            $alarmList[] = $alarmItem;
+//        }
+//
+//        //这里读取配时下发数据
+//        $startTime = end($dates)." 00:00:00";
+//        $endTime = date("Y-m-d H:i:s");
+//        $timingHis = $this->timing_model->getJuncTimingHistory($junctionID,$startTime,$endTime);
+//        // print_r($timingHis);exit;
+//        foreach ($timingHis as $val) {
+//            $alarmItem["create_time"] = $val["time_point"];
+//            $alarmItem["type"] = 10;
+//            $alarmItem["comments"] = "自适应方案 - 【下发】，执行成功";
+//            $alarmList[] = $alarmItem;
+//        }
+//
+//        //这里读取配时变更数据
+//        $relsHis = $this->timing_model->getJuncReleaseHistory($junctionID,$startTime,$endTime);
+//        foreach ($relsHis as $val) {
+//            if(empty($val["comment"])){
+//                $alarmItem["comments"] = "配时发布";
+//            }else{
+//                $alarmItem["comments"] = "配时发布，".$val["comment"];
+//            }
+//            $alarmItem["create_time"] = $val["time_point"];
+//            $alarmItem["type"] = 20;
+//            $alarmList[] = $alarmItem;
+//        }
+//
+//        $createSlice = [];
+//        foreach($alarmList as $key=>$val){
+//            $createSlice[$key] = strtotime($val["create_time"]);
+//        }
+//
+//        //排序数据
+//        array_multisort($createSlice, SORT_NUMERIC, SORT_DESC, $alarmList);
+//        return $alarmList;
     }
 
     private function getFlowFinalPhaseNames($junctionId){
@@ -1324,7 +1324,7 @@ class AlarmanalysisService extends BaseService
             $json .= ',{"match":{"frequency_type":{"query":'. (int)$params['frequency_type'] .',"type":"phrase"}}}';
         }
 
-        $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"fields":"hour","sort":[{"hour":{"order":"asc"}}],"aggregations":{"hour":{"terms":{"field":"hour","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}';
+        $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"stored_fields":"hour","sort":[{"hour":{"order":"asc"}}],"aggregations":{"hour":{"terms":{"field":"hour","size":200,"order":{"_term":"asc"}},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}';
         // echo $json;exit;
         $result = $this->alarmanalysis_model->search($json);
         if (!$result) {

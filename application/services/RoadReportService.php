@@ -1592,29 +1592,56 @@ class RoadReportService extends BaseService{
 
         $cycseriesfcol = array_column($cycseriesf['data'],'y');
 
-//        $cfs = array_multisort(array_column($cycseriesf['data'],'y'),SORT_DESC,$cycseriesf['data']);
-        $cycseriesf['max']=max($cycseriesfcol);
-        $key = array_search(max($cycseriesfcol),$cycseriesfcol);
-        $cycseriesf['max_key']=$cycseriesf['data'][$key]['x'];
-        $cycseriesf['avg']=round(array_sum($cycseriesfcol)/count($cycseriesfcol),2);
+        if(count($cycseriesfcol)>0){
+            $cycseriesf['max']=max($cycseriesfcol);
+            $key = array_search(max($cycseriesfcol),$cycseriesfcol);
+            $cycseriesf['max_key']=$cycseriesf['data'][$key]['x'];
+            $cycseriesf['avg']=round(array_sum($cycseriesfcol)/count($cycseriesfcol),2);
+        }else{
+            $cycseriesf['max']=0;
+            $cycseriesf['max_key']=0;
+            $cycseriesf['avg']=0;
+        }
+
 
         $cycseriesbcol = array_column($cycseriesb['data'],'y');
-        $cycseriesb['max']=max($cycseriesbcol);
-        $key = array_search(max($cycseriesbcol),$cycseriesbcol);
-        $cycseriesb['max_key']=$cycseriesb['data'][$key]['x'];
-        $cycseriesb['avg']=round(array_sum($cycseriesbcol)/count($cycseriesbcol),2);
+        if(count($cycseriesbcol)>0){
+            $cycseriesb['max']=max($cycseriesbcol);
+            $key = array_search(max($cycseriesbcol),$cycseriesbcol);
+            $cycseriesb['max_key']=$cycseriesb['data'][$key]['x'];
+            $cycseriesb['avg']=round(array_sum($cycseriesbcol)/count($cycseriesbcol),2);
+
+        }else{
+            $cycseriesb['max']=0;
+            $cycseriesb['max_key']=0;
+            $cycseriesb['avg']=0;
+        }
 
         $delayseriesfcol = array_column($delayseriesf['data'],'y');
-        $delayseriesf['max']=max($delayseriesfcol);
-        $key = array_search(max($delayseriesfcol),$delayseriesfcol);
-        $delayseriesf['max_key']=$delayseriesf['data'][$key]['x'];
-        $delayseriesf['avg']=round(array_sum($delayseriesfcol)/count($delayseriesfcol),2);
+        if(count($delayseriesfcol)>0){
+            $delayseriesf['max']=max($delayseriesfcol);
+            $key = array_search(max($delayseriesfcol),$delayseriesfcol);
+            $delayseriesf['max_key']=$delayseriesf['data'][$key]['x'];
+            $delayseriesf['avg']=round(array_sum($delayseriesfcol)/count($delayseriesfcol),2);
+        }else{
+            $delayseriesf['max']=0;
+            $delayseriesf['max_key']=0;
+            $delayseriesf['avg']=0;
+        }
+
 
         $delayseriesbcol = array_column($delayseriesb['data'],'y');
-        $delayseriesb['max']=max($delayseriesbcol);
-        $key = array_search(max($delayseriesbcol),$delayseriesbcol);
-        $delayseriesb['max_key']=$delayseriesb['data'][$key]['x'];
-        $delayseriesb['avg']=round(array_sum($delayseriesbcol)/count($delayseriesbcol),2);
+        if(count($delayseriesbcol)>0){
+            $delayseriesb['max']=max($delayseriesbcol);
+            $key = array_search(max($delayseriesbcol),$delayseriesbcol);
+            $delayseriesb['max_key']=$delayseriesb['data'][$key]['x'];
+            $delayseriesb['avg']=round(array_sum($delayseriesbcol)/count($delayseriesbcol),2);
+        }else{
+            $delayseriesb['max']=0;
+            $delayseriesb['max_key']=0;
+            $delayseriesb['avg']=0;
+        }
+
 
         $stopTimeCycleChart['series'][] = $cycseriesf;
         $stopTimeCycleChart['series'][] = $cycseriesb;
@@ -1652,7 +1679,7 @@ class RoadReportService extends BaseService{
         }
         $final=[];
         foreach ($ret as $rfk => $rfv){
-
+            if($rfv['count']==0)continue;
                 $final[$rfk] = [
                     'speed'=>round($rfv['speed']*3.6/$rfv['count'],2),
                     'stop_delay'=>round($rfv['stop_delay']/$rfv['count'],2),
