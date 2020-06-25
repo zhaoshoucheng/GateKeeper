@@ -9,7 +9,7 @@ $config['menu'] = [
             return 3;
         }
         if (isset($_REQUEST['city_id']) && $_REQUEST['city_id'] == "12") {
-            return 7;
+            return 9;
         }
         if (isset($_REQUEST['city_id']) && $_REQUEST['city_id'] == "11" && strpos($_SERVER["HTTP_REFERER"], "/nanjing")) {
             return 6;
@@ -797,6 +797,97 @@ $config['menu'] = [
                     ],
                 ],
             ],
+        ],
+        9 => [
+            0 =>
+                [
+                    'name'   => '实时预警',
+                    'url'    => '/overview',
+                    'remark' => 'signal',
+                ],
+            1 =>
+                [
+                    'name'   => '诊断分析',
+                    'url'    => '/diagnose/tendency',
+                    'remark' => 'signal',
+                ],
+            2 =>
+                [
+                    'name'   => '优化决策',
+                    'url'    => '/optimize/',
+                    'remark' => 'signal',
+                    'son'    =>
+                        [
+                            0 =>
+                                [
+                                    'name' => '单点时段优化',
+                                    'url'  => 'signal',
+                                ],
+                            1 =>
+                                [
+                                    'name' => '单点绿信比优化',
+                                    'url'  => 'green',
+                                ],
+                            2 =>
+                                [
+                                    'name' => '干线／区域协调优化',
+                                    'url'  => 'coordinate',
+                                ],
+                        ],
+                ],
+            3 =>
+                [
+                    'name'   => '效果评估',
+                    'url'    => '/assessment/',
+                    'remark' => 'signal',
+                    'son'    =>
+                        [
+                            0 =>
+                                [
+                                    'name' => '路口评估',
+                                    'url'  => 'junction',
+                                ],
+                            1 =>
+                                [
+                                    'name' => '干线评估',
+                                    'url'  => 'road',
+                                ],
+                            2 =>
+                                [
+                                    'name' => '区域评估',
+                                    'url'  => 'area',
+                                ],
+                        ],
+                ],
+            4 =>
+                [
+                    'name'   => '信控报告',
+                    'url'    => '/report',
+                    'remark' => 'signal',
+                ],
+            5 =>
+                [
+                    'name'   => '信控设置',
+                    'url'    => '/manage/',
+                    'remark' => 'signal',
+                    'son'    => [
+                        0 =>
+                            [
+                                'name' => '路口管理',
+                                'url'  => 'configuration',
+                            ],
+                        1 =>
+                            [
+                                'name' => '信控管理',
+                                'url'  => 'diagnose',
+                            ],
+                        2 =>
+                            [
+                                'name' => '任务管理',
+                                'url'  => 'task',
+                            ],
+                    ],
+                ],
         ],
     ],
 ];
