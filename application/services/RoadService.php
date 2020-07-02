@@ -563,14 +563,16 @@ class RoadService extends BaseService
         $results = [];
         foreach ($roadList as $item) {
             $roadId = $item['road_id'];
-            $res = $this->redis_model->getData($pre_key . $roadId);
+//            $res = $this->redis_model->getData($pre_key . $roadId);
             if ($force) {
                 $res = [];
             }
             if ($item['id'] != 1143) {
                 // continue;
             }
-            // $res = [];
+            if($res == "[]"){
+                $res = [];
+            }
             if (!$res) {
                 $data = [
                     'city_id' => $cityId,
@@ -583,14 +585,14 @@ class RoadService extends BaseService
                     $res = [];
                 }
                 // 将数据刷新到 Redis
-                $this->redis_model->setEx($pre_key . $roadId, json_encode($res), 86400);
+//                $this->redis_model->setEx($pre_key . $roadId, json_encode($res), 86400);
             } else {
                 $res = json_decode($res, true);
             }
             //猜测干线正反向中文描述
-            $direction_text = $this->guessDirectionText($res['junctions_info']);
-            $item['direction_forward_text'] = $direction_text[0];
-            $item['direction_backward_text'] = $direction_text[1];
+//            $direction_text = $this->guessDirectionText($res['junctions_info']);
+//            $item['direction_forward_text'] = $direction_text[0];
+//            $item['direction_backward_text'] = $direction_text[1];
             $res['road'] = $item;
             $res['road_id'] = $item['id'];
             $results[] = $res;

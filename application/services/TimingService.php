@@ -74,14 +74,14 @@ class TimingService extends BaseService {
     public function queryArterialTimingInfo($data) {
         $junction_flow = [];
         foreach ($data['junction_infos'] as $value) {
-            $logic_junction_id = $value['logic_junction_id'];
+            $logic_junction_id = str_replace(' ', '', implode(',', $value['logic_junction_id']));
             $junction_flow[$logic_junction_id] = [];
             $flows =$value['flows'];
             if (empty($flows)) {
                 continue;
             }
             foreach ($flows as $flow) {
-                $junction_flow[$logic_junction_id][] = $flow;
+                $junction_flow[$logic_junction_id][] = str_replace(' ', '', implode(',', $flow));
             }
         }
         $logic_junction_ids = array_keys($junction_flow);
@@ -94,11 +94,11 @@ class TimingService extends BaseService {
             $source = '2,1';
         }
         $req = [
-            'logic_junction_ids' => implode(',', $logic_junction_ids),
-            'source'            => $source,
-            'start_time'        => $time_point.":00",
-            'end_time'          => $time_point.":01",
-            'date'              => $reqdate,
+            'logic_junction_ids' =>str_replace(' ', '', implode(',', $logic_junction_ids)),
+            'source'            => str_replace(' ', '',$source),
+            'start_time'        => str_replace(' ', '',$time_point.":00"),
+            'end_time'          => str_replace(' ', '',$time_point.":01"),
+            'date'              => str_replace(' ', '',$reqdate),
             'format'            => 2,
         ];
 
@@ -131,6 +131,7 @@ class TimingService extends BaseService {
                     'movement_timing' => [],
                 ],
             ];
+            $logic_junction_id = str_replace(' ', '', implode(',', $logic_junction_id));
             if (isset($timing[$logic_junction_id]) and !empty($timing[$logic_junction_id]['tod'])) {
                 $tod = $timing[$logic_junction_id]['tod'];
                 $one['id'] = $timing[$logic_junction_id]['signal_id'];

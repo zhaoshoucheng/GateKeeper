@@ -37,7 +37,7 @@ class OverviewService extends BaseService
         $this->load->model('realtimewarning_model');
         $this->load->model('alarmanalysis_model');
         //$this->load->model('timeAlarmRemarks_model');
-        //$this->load->model('timing_model');
+        $this->load->model('timing_model');
         $this->load->model('area_model');
        // $this->load->model('fusionMappingInfo_model');
         $this->config->load('realtime_conf');
@@ -1102,11 +1102,11 @@ class OverviewService extends BaseService
         // 需要获取路口name的路口ID串
         $alarmJunctonIdArr = array_unique(array_column($res, 'logic_junction_id'));
         $alarmFlowIdArr = array_unique(array_column($res, 'logic_flow_id'));
-        $alarmRemarks = $this->timeAlarmRemarks_model->getAlarmRemarks($cityId, 0, $alarmJunctonIdArr, $alarmFlowIdArr);
-        $alarmRemarksFlowKeyTypeValue = [];
-        if (!empty($alarmRemarks)) {
-            $alarmRemarksFlowKeyTypeValue = array_column($alarmRemarks, 'type', 'logic_flow_id');
-        }
+//        $alarmRemarks = $this->timeAlarmRemarks_model->getAlarmRemarks($cityId, 0, $alarmJunctonIdArr, $alarmFlowIdArr);
+//        $alarmRemarksFlowKeyTypeValue = [];
+//        if (!empty($alarmRemarks)) {
+//            $alarmRemarksFlowKeyTypeValue = array_column($alarmRemarks, 'type', 'logic_flow_id');
+//        }
         asort($alarmJunctonIdArr);
         // $ids = implode(',', $alarmJunctonIdArr);
 

@@ -51,31 +51,32 @@ class Realtime_model extends CI_Model
             $queryUrl = sprintf('http://%s/_sql?%s',$hosts[0],$scrollInfo);
             $response = httpPOST($queryUrl, $body, 8000, 'raw');
         }else{
-            $queryUrl = sprintf('http://%s/%s/_search?%s',$hosts[0],$index['flow'],$scrollInfo);
-            $response = httpPOST($queryUrl, json_decode($body,true), 0, 'json');
+            $queryUrl = sprintf('http://%s/%s/_search?%s',$hosts[0],"new_dmp_forecast",$scrollInfo);
+//            $response = httpPOST($queryUrl, json_decode($body,true), 0, 'json');
+            $response = httpPOST($queryUrl,$body, 0, 'raw');
         }
         if (!$response) {
             return [];
         }
         $resPart = json_decode($response,true);
         return $resPart;
-        if(!$isScroll){
-            return $resPart;
-        }
-        $hits = $resPart["hits"]["hits"];
-        while(count($resPart["hits"]["hits"])>0){
-            $scrollID = $resPart["_scroll_id"];
-            $qBody = [
-                "scroll_id"=>$scrollID,
-                "scroll"=>"1m",
-            ];
-            $queryUrl = sprintf('http://%s/_search/scroll',$hosts[0]);
-            $response = httpPOST($queryUrl, $qBody, 0, 'json');
-            $resPart = json_decode($response,true);
-            $hits = array_merge($hits,$resPart["hits"]["hits"]);
-        }
-        $resPart["hits"]["hits"] = $hits;
-        return $resPart;
+//        if(!$isScroll){
+//            return $resPart;
+//        }
+//        $hits = $resPart["hits"]["hits"];
+//        while(count($resPart["hits"]["hits"])>0){
+//            $scrollID = $resPart["_scroll_id"];
+//            $qBody = [
+//                "scroll_id"=>$scrollID,
+//                "scroll"=>"1m",
+//            ];
+//            $queryUrl = sprintf('http://%s/_search/scroll',$hosts[0]);
+//            $response = httpPOST($queryUrl, $qBody, 0, 'json');
+//            $resPart = json_decode($response,true);
+//            $hits = array_merge($hits,$resPart["hits"]["hits"]);
+//        }
+//        $resPart["hits"]["hits"] = $hits;
+//        return $resPart;
     }
 
     /**
@@ -201,9 +202,11 @@ class Realtime_model extends CI_Model
         if(!empty($junctionIds)){
             $juncSql = ' and logic_junction_id in ('.implode(",",$juncsWithQuota).') ';
         }
-        $sql = sprintf('select sum(stop_delay_up * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id=%d and day_time_hms="%s" %s group by terms("alias"="day_time_hms","field"="day_time_hms","size"=10000) order by day_time_hms asc', $cityId, $date." ".$hour, $juncSql);
+//        $sql = sprintf('select sum(stop_delay_up * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id=%d and day_time_hms="%s" %s group by terms("alias"="day_time_hms","field"="day_time_hms","size"=10000) order by day_time_hms asc', $cityId, $date." ".$hour, $juncSql);
         // echo $sql;
-        $res = $this->search($sql,1,0);
+
+        $dsl = sprintf("{\"from\":0,\"size\":0,\"query\":{\"bool\":{\"must\":[{\"match_phrase\":{\"city_id\":{\"query\":\"%s\"}}},{\"match_phrase\":{\"day_time_hms\":{\"query\":\"%s\"}}}]}},\"_source\":{\"includes\":[\"SUM\",\"SUM\",\"day_time_hms\"],\"excludes\":[]},\"stored_fields\":\"day_time_hms\",\"sort\":[{\"day_time_hms\":{\"order\":\"asc\"}}],\"aggregations\":{\"day_time_hms\":{\"terms\":{\"field\":\"day_time_hms\",\"size\":10000},\"aggregations\":{\"agg_0\":{\"sum\":{\"script\":{\"inline\":\"doc['stop_delay_up'].value * doc['traj_num'].value\"}}},\"agg_1\":{\"sum\":{\"field\":\"traj_num\"}}}}}}",$cityId, $date." ".$hour);
+        $res = $this->search($dsl,0,0);
         if(empty($res["aggregations"]["day_time_hms"]["buckets"]["0"])){
             return [];
         }
@@ -272,9 +275,11 @@ class Realtime_model extends CI_Model
             if(!empty($juncsWithQuota)){
                 $juncSql = ' and logic_junction_id in ('.implode(",",$juncsWithQuota).') ';
             }
-            $sql = sprintf('select sum(stop_delay_up * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id=%d and day_time_hms="%s" %s group by terms("alias"="day_time_hms","field"="day_time_hms","size"=10000) order by day_time_hms asc', $cityId, $date." ".$hour, $juncSql);
-            // echo $sql;
-            $res = $this->search($sql,1,0);
+            $dsl = sprintf("{\"from\":0,\"size\":0,\"query\":{\"bool\":{\"must\":[{\"match_phrase\":{\"city_id\":{\"query\":\"%s\"}}},{\"match_phrase\":{\"day_time_hms\":{\"query\":\"%s\"}}},{\"terms\":{\"logic_junction_id\":[\"%s\"]}}]}},\"_source\":{\"includes\":[\"SUM\",\"SUM\",\"day_time_hms\"],\"excludes\":[]},\"stored_fields\":\"day_time_hms\",\"sort\":[{\"day_time_hms\":{\"order\":\"asc\"}}],\"aggregations\":{\"day_time_hms\":{\"terms\":{\"field\":\"day_time_hms\",\"size\":10000},\"aggregations\":{\"agg_0\":{\"sum\":{\"script\":{\"inline\":\"doc['stop_delay_up'].value * doc['traj_num'].value\"}}},\"agg_1\":{\"sum\":{\"field\":\"traj_num\"}}}}}}",$cityId, $date." ".$hour, implode(",",$juncsWithQuota));
+            $res = $this->search($dsl,0,0);
+//            $sql = sprintf('select sum(stop_delay_up * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id=%d and day_time_hms="%s" %s group by terms("alias"="day_time_hms","field"="day_time_hms","size"=10000) order by day_time_hms asc', $cityId, $date." ".$hour, $juncSql);
+//            // echo $sql;
+//            $res = $this->search($sql,1,0);
             if(empty($res["aggregations"]["day_time_hms"]["buckets"]["0"])){
                 //一次查询失败不影响其他批次查询
                 // return [];
@@ -360,9 +365,11 @@ class Realtime_model extends CI_Model
         if(!empty($juncsWithQuota)){
             $juncSql = ' and logic_junction_id in ('.implode(",",$juncsWithQuota).') ';
         }
-        $sql = sprintf('select sum(%s * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id=%d and day_time_hms="%s" %s group by terms("alias"="day_time_hms","field"="day_time_hms","size"=10000) order by day_time_hms asc', $quotaKey, $cityId, $dayTime, $juncSql);
-        // echo $sql;
-        $res = $this->search($sql,1,0);
+//        $sql = sprintf('select sum(%s * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id=%d and day_time_hms="%s" %s group by terms("alias"="day_time_hms","field"="day_time_hms","size"=10000) order by day_time_hms asc', $quotaKey, $cityId, $dayTime, $juncSql);
+//        // echo $sql;
+//        $res = $this->search($sql,1,0);
+        $dsl = sprintf("{\"from\":0,\"size\":0,\"query\":{\"bool\":{\"must\":[{\"match_phrase\":{\"city_id\":{\"query\":\"%s\"}}},{\"match_phrase\":{\"day_time_hms\":{\"query\":\"%s\"}}},{\"terms\":{\"logic_junction_id\":[\"%s\"]}}]}},\"_source\":{\"includes\":[\"SUM\",\"SUM\",\"day_time_hms\"],\"excludes\":[]},\"stored_fields\":\"day_time_hms\",\"sort\":[{\"day_time_hms\":{\"order\":\"asc\"}}],\"aggregations\":{\"day_time_hms\":{\"terms\":{\"field\":\"day_time_hms\",\"size\":10000},\"aggregations\":{\"agg_0\":{\"sum\":{\"script\":{\"inline\":\"doc['%s'].value * doc['traj_num'].value\"}}},\"agg_1\":{\"sum\":{\"field\":\"traj_num\"}}}}}}",$quotaKey,$cityId, $dayTime, implode(",",$juncsWithQuota));
+        $res = $this->search($dsl,0,0);
         if(empty($res["aggregations"]["day_time_hms"]["buckets"]["0"])){
             return [];
         }
@@ -448,9 +455,11 @@ class Realtime_model extends CI_Model
             if ($i == 21) {
                 $eTime = strtotime('23:59:59');
             }
-            $sql = sprintf('select sum(%s * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id="%s" and (day_time_hms >= "%s" and day_time_hms <= "%s") %s group by terms("alias"="day_time_hms","field"="day_time_hms","size"=10000) order by day_time_hms asc', $quotaKey, $cityId, date("Y-m-d H:i:s", $sTime), date("Y-m-d H:i:s", $eTime), $juncSql);
-            // echo $sql;
-            $res = $this->search($sql,1,0);
+//            $sql = sprintf('select sum(%s * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id="%s" and (day_time_hms >= "%s" and day_time_hms <= "%s") %s group by terms("alias"="day_time_hms","field"="day_time_hms","size"=10000) order by day_time_hms asc', $quotaKey, $cityId, date("Y-m-d H:i:s", $sTime), date("Y-m-d H:i:s", $eTime), $juncSql);
+//            // echo $sql;
+//            $res = $this->search($sql,1,0);
+            $dsl = sprintf("{\"from\":0,\"size\":0,\"query\":{\"bool\":{\"must\":[{\"match_phrase\":{\"city_id\":{\"query\":\"%s\"}}},{\"range\":{\"day_time_hms\":{\"from\":\"%s\",\"to\":\"%s\",\"include_lower\":true,\"include_upper\":true,}}},{\"terms\":{\"logic_junction_id\":[\"%s\"]}}]}},\"_source\":{\"includes\":[\"SUM\",\"SUM\",\"day_time_hms\"],\"excludes\":[]},\"stored_fields\":\"day_time_hms\",\"sort\":[{\"day_time_hms\":{\"order\":\"asc\"}}],\"aggregations\":{\"day_time_hms\":{\"terms\":{\"field\":\"day_time_hms\",\"size\":10000},\"aggregations\":{\"agg_0\":{\"sum\":{\"script\":{\"inline\":\"doc['%s'].value * doc['traj_num'].value\"}}},\"agg_1\":{\"sum\":{\"field\":\"traj_num\"}}}}}}",$quotaKey,$cityId, date("Y-m-d H:i:s", $sTime),date("Y-m-d H:i:s", $eTime), implode(",",$juncsWithQuota));
+            $res = $this->search($dsl,0,0);
             if(empty($res["aggregations"]["day_time_hms"]["buckets"])){
                 return [];
             }
@@ -718,7 +727,7 @@ class Realtime_model extends CI_Model
             $juncSql = ' and logic_junction_id = "'.$logicJunctionId.'" ';
         }
         $flowsWithQuota = [];
-        foreach($logicFlowIds as $flow){
+        foreach($logicFlowId as $flow){
             $flowsWithQuota[] = '"'.$flow.'"';
         }
         if(!empty($logicFlowIds)){
@@ -817,10 +826,14 @@ class Realtime_model extends CI_Model
         if(!empty($junctionID)){
             $juncSql = ' and logic_junction_id = "'.$junctionID.'" ';
         }
+
+
         $result = [];
         if (in_array($params['quota_key'],$sumKeys)) {
-            $sql = sprintf('select sum(%s * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id="%s" and day_time_hms >= "%s" %s group by terms("alias"="day_time_hms","field"="day_time_hms","size"=10000) order by day_time_hms asc', $quotaKey, $cityID, $dayTime, $juncSql);
-            $res = $this->search($sql,1,0);
+//            $sql = sprintf('select sum(%s * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id="%s" and day_time_hms >= "%s" %s group by terms("alias"="day_time_hms","field"="day_time_hms","size"=10000) order by day_time_hms asc', $quotaKey, $cityID, $dayTime, $juncSql);
+//            $res = $this->search($sql,1,0);
+            $dsl = sprintf("{\"from\":0,\"size\":0,\"query\":{\"bool\":{\"must\":[{\"match_phrase\":{\"city_id\":{\"query\":\"%s\"}}},{\"range\":{\"day_time_hms\":{\"from\":\"%s\",\"to\":null,\"include_lower\":false,\"include_upper\":true,}}},{\"terms\":{\"logic_junction_id\":[\"%s\"]}}]}},\"_source\":{\"includes\":[\"SUM\",\"SUM\",\"day_time_hms\"],\"excludes\":[]},\"stored_fields\":\"day_time_hms\",\"sort\":[{\"day_time_hms\":{\"order\":\"asc\"}}],\"aggregations\":{\"day_time_hms\":{\"terms\":{\"field\":\"day_time_hms\",\"size\":10000},\"aggregations\":{\"agg_0\":{\"sum\":{\"script\":{\"inline\":\"doc['%s'].value * doc['traj_num'].value\"}}},\"agg_1\":{\"sum\":{\"field\":\"traj_num\"}}}}}}",$quotaKey,$params['city_id'], $dayTime,$junctionID);
+            $res = $this->search($dsl,0,0);
             if(empty($res["aggregations"]["day_time_hms"]["buckets"])){
                 return [];
             }
@@ -1063,9 +1076,11 @@ class Realtime_model extends CI_Model
             if(!empty($juncsWithQuota)){
                 $juncSql = ' and logic_junction_id in ('.implode(",",$juncsWithQuota).') ';
             }
-            $sql = sprintf('select sum(stop_delay_up * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id=%s and day_time_hms = "%s" and traj_num >= %s %s group by terms("alias"="logic_junction_id","field"="logic_junction_id","size"=10000) order by day_time_hms asc', $cityId, $dayTime, $trajNum, $juncSql);
-            // echo $sql;
-            $res = $this->search($sql,1,0);
+//            $sql = sprintf('select sum(stop_delay_up * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id=%s and day_time_hms = "%s" and traj_num >= %s %s group by terms("alias"="logic_junction_id","field"="logic_junction_id","size"=10000) order by day_time_hms asc', $cityId, $dayTime, $trajNum, $juncSql);
+//            // echo $sql;
+//            $res = $this->search($sql,1,0);
+            $dsl = sprintf("{\"from\":0,\"size\":0,\"query\":{\"bool\":{\"must\":[{\"match_phrase\":{\"city_id\":{\"query\":\"%s\"}}},{\"match_phrase\":{\"day_time_hms\":{\"query\":\"%s\"}}},{\"terms\":{\"logic_junction_id\":[\"%s\"]}}]}},\"_source\":{\"includes\":[\"SUM\",\"SUM\",\"day_time_hms\"],\"excludes\":[]},\"stored_fields\":\"logic_junction_id\",\"sort\":[{\"day_time_hms\":{\"order\":\"asc\"}}],\"aggregations\":{\"logic_junction_id\":{\"terms\":{\"field\":\"logic_junction_id\",\"size\":10000},\"aggregations\":{\"agg_0\":{\"sum\":{\"script\":{\"inline\":\"doc['stop_delay_up'].value * doc['traj_num'].value\"}}},\"agg_1\":{\"sum\":{\"field\":\"traj_num\"}}}}}}",$cityId, $date." ".$hour, implode(",",$juncsWithQuota));
+            $res = $this->search($dsl,0,0);
             if(empty($res["aggregations"]["logic_junction_id"]["buckets"])){
                 return [];
             }
@@ -1156,9 +1171,11 @@ class Realtime_model extends CI_Model
         if($cityId==175){
             $trajNum = 1;
         }
-        $sql = sprintf('select sum(stop_delay_up * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id=%s and day_time_hms = "%s" and traj_num >= %s group by terms("alias"="logic_junction_id","field"="logic_junction_id","size"=10000) order by day_time_hms asc', $cityId, $dayTime, $trajNum);
-        // echo $sql;
-        $res = $this->search($sql,1,0);
+//        $sql = sprintf('select sum(stop_delay_up * traj_num) as agg_0,sum(traj_num) as agg_1,day_time_hms from new_dmp_forecast* where city_id=%s and day_time_hms = "%s" and traj_num >= %s group by terms("alias"="logic_junction_id","field"="logic_junction_id","size"=10000) order by day_time_hms asc', $cityId, $dayTime, $trajNum);
+//        // echo $sql;
+//        $res = $this->search($sql,1,0);
+        $dsl = sprintf("{\"from\":0,\"size\":0,\"query\":{\"bool\":{\"must\":[{\"match_phrase\":{\"city_id\":{\"query\":\"%s\"}}},{\"match_phrase\":{\"day_time_hms\":{\"query\":\"%s\"}}}]}},\"_source\":{\"includes\":[\"SUM\",\"SUM\",\"day_time_hms\"],\"excludes\":[]},\"stored_fields\":\"logic_junction_id\",\"sort\":[{\"day_time_hms\":{\"order\":\"asc\"}}],\"aggregations\":{\"logic_junction_id\":{\"terms\":{\"field\":\"logic_junction_id\",\"size\":10000},\"aggregations\":{\"agg_0\":{\"sum\":{\"script\":{\"inline\":\"doc['stop_delay_up'].value * doc['traj_num'].value\"}}},\"agg_1\":{\"sum\":{\"field\":\"traj_num\"}}}}}}",$cityId, $date." ".$hour);
+        $res = $this->search($dsl,0,0);
         if(empty($res["aggregations"]["logic_junction_id"]["buckets"])){
             return [];
         }
@@ -1519,8 +1536,10 @@ class Realtime_model extends CI_Model
             $maxKeys=["spillover_rate_up"];
             $result = [];
             if (in_array($quotaKey,$sumKeys)) {
-                $sql = sprintf('select sum(%s * traj_num) as agg_0,sum(traj_num) as agg_1,logic_junction_id from new_dmp_forecast* where city_id="%s" and day_time_hms = "%s" and traj_num>=%d  group by terms("alias"="logic_junction_id","field"="logic_junction_id","size"=10000)', $quotaKey, $cityId, $dayTime, $trajNum);
-                $res = $this->search($sql,1,0);
+//                $sql = sprintf('select sum(%s * traj_num) as agg_0,sum(traj_num) as agg_1,logic_junction_id from new_dmp_forecast* where city_id="%s" and day_time_hms = "%s" and traj_num>=%d  group by terms("alias"="logic_junction_id","field"="logic_junction_id","size"=10000)', $quotaKey, $cityId, $dayTime, $trajNum);
+//                $res = $this->search($sql,1,0);
+                $dsl = sprintf("{\"from\":0,\"size\":0,\"query\":{\"bool\":{\"must\":{\"bool\":{\"must\":[{\"match\":{\"city_id\":{\"query\":\"%s\",\"type\":\"phrase\"}}},{\"match\":{\"day_time_hms\":{\"query\":\"%s\",\"type\":\"phrase\"}}},{\"range\":{\"traj_num\":{\"from\":%s,\"to\":null,\"include_lower\":true,\"include_upper\":true}}}]}}}},\"_source\":{\"includes\":[\"SUM\",\"SUM\",\"logic_junction_id\"],\"excludes\":[]},\"stored_fields\":\"logic_junction_id\",\"aggregations\":{\"logic_junction_id\":{\"terms\":{\"field\":\"logic_junction_id\",\"size\":10000},\"aggregations\":{\"agg_0\":{\"sum\":{\"script\":{\"inline\":\"doc['stop_delay_up'].value * doc['traj_num'].value\"}}},\"agg_1\":{\"sum\":{\"field\":\"traj_num\"}}}}}}",$cityId, $dayTime,$trajNum);
+                $res = $this->search($dsl,0,0);
                 if(empty($res["aggregations"]["logic_junction_id"]["buckets"])){
                     return [];
                 }

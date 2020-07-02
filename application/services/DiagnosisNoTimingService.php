@@ -384,11 +384,11 @@ class DiagnosisNoTimingService extends BaseService
         // avg speed and delay
         $rest = $this->diagnosisNoTiming_model->GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour, $userPerm);
         // city junctions
-        $versions = $this->waymap_model->getDateVersion($dates);
-        $version = max(array_values($versions));
-        if (empty($version)) {
-            $version = 0;
-        }
+//        $versions = $this->waymap_model->getDateVersion($dates);
+//        $version = max(array_values($versions));
+//        if (empty($version)) {
+        $version = 0;
+//        }
         $allCityJunctions = $this->waymap_model->getAllCityJunctions($city_id, $version);
         $junctionsPos = [];
         foreach ($allCityJunctions as $v) {

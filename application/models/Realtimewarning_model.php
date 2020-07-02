@@ -254,9 +254,9 @@ class Realtimewarning_model extends CI_Model
         $lastScheduleKey = "new_its_schedule_lasthour_{$cityId}";
         $realTimeAlarmRedisKey = "new_its_realtime_alarm_{$cityId}";
         $realTimeAlarmBakKey = "new_its_realtime_alarm_{$cityId}_{$date}_{$hour}";
+
         //高优先级设置
         $this->redis_model->setEx($lastScheduleKey, $hour, 24 * 3600);
-
         //平均延误曲线数据
         //每次只取一个批次进行追加缓存。
         $avgStopDelayList = $this->realtime_model->avgStopdelay($cityId, $date, $hour);
@@ -406,7 +406,10 @@ class Realtimewarning_model extends CI_Model
                 sleep(2);
                 $this->redis_model->setEx($lastHourKey, $hour, 24 * 3600);
             }
+
         }
+
+
     }
 
     public function dealGroupData($cityId, $date, $hour, $traceId, $groupId, $realtimeJunctionListOri, $realTimeAlarmsInfoResultOri, $esStopDelayOri, $ctype = 0)

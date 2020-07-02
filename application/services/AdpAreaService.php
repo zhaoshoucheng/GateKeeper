@@ -25,7 +25,7 @@ class AdpAreaService extends BaseService
         parent::__construct();
 
         $this->load->model('waymap_model');
-        $this->load->model('adpArea_model');
+//        $this->load->model('adpArea_model');
         $this->load->model('redis_model');
 
         $this->load->config('nconf');
@@ -42,19 +42,20 @@ class AdpAreaService extends BaseService
     public function getList($params)
     {
 
-        $cityId = $params['city_id'];
-
-        $areaList = $this->adpArea_model->getAreasByCityId($cityId);
-        $areaList = array_map(function($item){
-            return [
-                'city_id' => $item['city_id'],
-                'id' => $item['id'],
-                'area_name' => $item['name'],
-            ];
-        }, $areaList);
+//
+//        $cityId = $params['city_id'];
+//
+//        $areaList = $this->adpArea_model->getAreasByCityId($cityId);
+//        $areaList = array_map(function($item){
+//            return [
+//                'city_id' => $item['city_id'],
+//                'id' => $item['id'],
+//                'area_name' => $item['name'],
+//            ];
+//        }, $areaList);
 
         return [
-            'list' => $areaList,
+            'list' => [],
         ];
     }
 

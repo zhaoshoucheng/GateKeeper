@@ -603,7 +603,7 @@ class Waymap_model extends CI_Model
             }, $res);
 
             // 调用相位接口出错
-            if (count($logic_junction_ids) > 0 && count($res) == 0) {
+            if (count($res) == 0) {
                 return [];
                 com_log_warning(
                     'mapJunction_phase_empty',

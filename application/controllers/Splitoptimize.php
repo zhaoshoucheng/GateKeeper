@@ -21,7 +21,7 @@ class Splitoptimize extends MY_Controller
         $this->load->model('splitoptimize_model');
         $this->load->model('traj_model');
         $this->load->model("waymap_model");
-        $this->setTimingType();
+//        $this->setTimingType();
     }
 
 
