@@ -245,6 +245,7 @@ class Evaluate extends MY_Controller
             // 当前星期几 如果星期一，结束时间要到当前时间 如果大于星期一，结束时间要前一天 如果是周日则向前推两天
             $week = date('w');
             if ($week == 0) { // 周日
+                $startTime = strtotime(date('Y-m-d') . '-2 days');
                 $endTime = strtotime(date('Y-m-d') . '-2 days') + 24 * 3600 - 1;
             } elseif ($week == 1) { // 周一
                 $endTime = time();
