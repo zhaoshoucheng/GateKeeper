@@ -1081,7 +1081,8 @@ class OverviewService extends BaseService
     {
         $cityId = $params['city_id'];
         $date   = $params['date'];
-
+        $timePoint   = $params['time_point'];
+        
         if(!empty($userPerm)){
             $cityIds = !empty($userPerm['city_id']) ? $userPerm['city_id'] : [];
             $junctionIds = !empty($userPerm['junction_id']) ? $userPerm['junction_id'] : [];
@@ -1093,7 +1094,7 @@ class OverviewService extends BaseService
             }
         }
 
-        $res = $this->alarmanalysis_model->getRealTimeAlarmsInfo($cityId, $date);
+        $res = $this->alarmanalysis_model->getRealTimeAlarmsInfo($cityId, $date, $timePoint);
         if (!$res || empty($res)) {
             return [];
         }

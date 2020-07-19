@@ -1,7 +1,15 @@
 <?php
 
 use \Services\RealtimeQuotaService;
+use \Services\HelperService;
 
+/**
+ * Class RealtimeQuota
+ *
+ * @property \Redis_model $redis_model
+ * @property \Overview_model $overview_model
+ * @package controllers
+ */
 class RealtimeQuota extends MY_Controller
 {
     protected $realtimeQuotaService;
@@ -10,7 +18,32 @@ class RealtimeQuota extends MY_Controller
         parent::__construct();
 
         $this->realtimeQuotaService = new RealtimeQuotaService();
+        $this->helperService = new HelperService();
         $this->load->model('redis_model');
+    }
+
+    /**
+     * 获取实时数据批次号
+     * @param $params['junction_id'] string Y 路口ID
+     * @param $params['quota_keys']  string Y 以逗号间隔的指标key
+     * @throws Exception
+     */
+    public function getTimePoint()
+    {
+        $cityId = $this->input->get("city_id");
+        if(empty($cityId)){
+            $this->response([],1000,"city_id不能为空");
+            return;
+        }
+        $fullTimePoint = $this->redis_model->getData(sprintf("itstool_%s_time_point",$cityId));
+        if(empty($fullTimePoint)){
+            $fullTimePoint = $this->helperService->getLastestHour($cityId);
+            $this->redis_model->setData(sprintf("itstool_%s_time_point",$cityId),$fullTimePoint);
+            $this->redis_model->setExpire(sprintf("itstool_%s_time_point",$cityId),600);
+        }
+        $timePoint=date("H:i:s",strtotime($fullTimePoint));
+        $this->response(["time_point"=>$timePoint]);
+        return;
     }
 
     /**
@@ -37,7 +70,8 @@ class RealtimeQuota extends MY_Controller
                 return;
             }
         }
-        $data = $this->realtimeQuotaService->getFlowQuota($params["city_id"],[$params["logic_junction_id"]],explode(",",$quotaKey),$this->userPerm);
+        $timePoint = $params["time_point"] ?? "";
+        $data = $this->realtimeQuotaService->getFlowQuota($params["city_id"],[$params["logic_junction_id"]],explode(",",$quotaKey),$this->userPerm, $timePoint);
         $this->response($data);
     }
 
