@@ -383,7 +383,7 @@ class RealtimeQuotaService extends BaseService
      * @param array $userPerm
      * @return array
      */
-    public function getFlowQuota($cityId, $inputJunctionIds = [], $quotaKeys = [],$userPerm=[])
+    public function getFlowQuota($cityId, $inputJunctionIds = [], $quotaKeys = [],$userPerm=[], $timePoint="")
     {
         //权限验证
         if(!empty($userPerm)){
@@ -404,6 +404,9 @@ class RealtimeQuotaService extends BaseService
 
         $date = date('Y-m-d');
         $hour = $this->helperService->getLastestHour($cityId);
+        if(!empty($timePoint)){
+            $hour = $timePoint;
+        }
         $flowList = $this->realtime_model->getRealTimeJunctionsQuota($cityId, $date, $hour, $inputJunctionIds);
         $flowInfo = $this->waymap_model->getFlowsInfo(implode(",", $inputJunctionIds));
 

@@ -105,7 +105,7 @@ class Overviewalarm extends MY_Controller
             'time_point' => 'exact_length[8]|regex_match[/\d{2}:\d{2}:\d{2}/]',
         ]);
         $params['date']       = $params['date'] ?? date('Y-m-d');
-        $params['time_point'] = $params['time_point'] ?? date('H:i:s');
+        $params['time_point'] = $params['time_point'] ?? "";
 
         //针对行政区进行路口过滤
         if(isset($params['division_id']) && $params['division_id']>0 && empty($this->userPerm['junction_id'])) {
