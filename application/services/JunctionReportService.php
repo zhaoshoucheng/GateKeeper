@@ -42,6 +42,123 @@ class JunctionReportService extends BaseService{
         return $date;
     }
 
+
+    //济南定制化需求,查询本地流量
+    public function queryLocalFlowJN($params){
+        $dates = $this->getDateFromRange($params['start_date'],$params['end_date']);
+        $queryData = [
+            'city_id'=>$params['city_id'],
+            'logic_junction_id'=>$params['logic_junction_id'],
+            'dates'=>$dates,
+            'source_type'=>2,
+            'start_time'=>"00:00",
+            'end_time'=>"24:00",
+            'time_step'=>30,
+            'with_last_week'=>1,
+            'with_week_avg'=>1
+        ];
+
+        $theDatelist = $this->getDateFromRange($params['start_date'],$params['end_date']);
+        if(count($theDatelist)==1){
+            $stage="日";
+            $stageType="前一日";
+        }else if(count($theDatelist)<=7){
+            $stage="周";
+            $stageType="前一周";
+        }else if(count($theDatelist)<40){
+            $stage="月";
+            $stageType="前一月";
+        }else{
+            $stage="季";
+            $stageType="前一季";
+        }
+        $ret  = $this->traj_model->queryLocalFLowJn($queryData);
+//        var_dump(json_encode($ret));
+        //重新组装数据
+        $chartData = [
+            'scale_title'=>"",
+            "series"=>[],
+            'title'=>"路口流量",
+        ];
+        $timeSlice = [];
+        $lastTimeSlice = [];
+
+        foreach ($ret['direction_type']['average']['directions'] as $av){
+            foreach ($av['channel_list'] as $acl){
+                foreach ($acl['data_list'] as $adl){
+                    if(!isset($timeSlice[$adl['start_time']])){
+                        $timeSlice[$adl['start_time']] = 0;
+                    }
+                    $timeSlice[$adl['start_time']] += $adl['value'];
+
+                }
+            }
+        }
+        foreach ($ret['direction_type']['last_average']['directions'] as $lav){
+            foreach ($lav['channel_list'] as $lacl){
+                foreach ($lacl['data_list'] as $ladl){
+                    if(!isset($lastTimeSlice[$ladl['start_time']])){
+                        $lastTimeSlice[$ladl['start_time']] = 0;
+                    }
+                    $lastTimeSlice[$ladl['start_time']] += $ladl['value'];
+                }
+            }
+        }
+        $cdata = [
+            "name"=>"本".$stage
+        ];
+
+
+        foreach ($timeSlice as $tk => $tv){
+            $cdata['data'][] = [
+                'x'=>substr($tk,0,5),
+                'y'=>$tv,
+            ];
+        }
+
+
+        $lcdata = [
+            "name"=>"上".$stage
+        ];
+
+        foreach ($lastTimeSlice as $ltk => $ltv){
+            $lcdata['data'][] = [
+                'x'=>substr($ltk,0,5),
+                'y'=>$ltv,
+            ];
+        }
+
+
+        $chartData['series'][] = $cdata;
+        $chartData['series'][] = $lcdata;
+        $ret = $this->reportService->findMaxTimeRange($cdata['data']);
+
+        $lastsum = 0;
+        for($l = $ret[0];$l< $ret[1];$l++){
+            $lastsum += $lcdata['data'][$l]['y'];
+        }
+        $trend = 1;
+        if($lastsum >0 ){
+            $trend = ($ret[2] - $lastsum)/$lastsum;
+        }
+        $trendStr = "增长";
+        if($trend<0.1 && $trend > -0.1){
+            $trendStr = "持平";
+        }elseif ($trend < -0.1){
+            $trendStr = "减少";
+        }
+
+
+
+        $tpl = "路口在各个时段内,路口整体交通流量变化情况如下图所示。本%s流量最大的时段为%s,与%s相比%s%s";
+
+
+        $chartData['desc'] = sprintf($tpl,$stage,$cdata['data'][$ret[0]]['x']."-".$cdata['data'][$ret[1]]['x'],$stageType,$trendStr,round($trend*100,2)."%");
+
+        return $chartData;
+
+    }
+
     //济南定制化
     public function introductionJN($params){
         $tpl = "本次报告分析路口位于%s市%s。本次报告根据%s数据对该路口进行分析。整体PI为%s，与%s相比%s，%s";
@@ -69,7 +186,7 @@ class JunctionReportService extends BaseService{
         $theDatelist = $this->getDateFromRange($start_date,$end_date);
         if(count($theDatelist)==1){
             $stageType="前一日";
-        }else if(count($theDatelist)==7){
+        }else if(count($theDatelist)<=7){
             $stageType="前一周";
         }else if(count($theDatelist)<40){
             $stageType="前一月";
@@ -645,6 +762,128 @@ class JunctionReportService extends BaseService{
             }
         }
         return $newData;
+    }
+
+    public function queryJuncModelJN($params){
+        //查询最新路口模型
+        $res['junc_model'] = $this->waymap_model->getJunctionModel($params['logic_junction_id']);
+        //查询缓存的路口模型,从redis中查询,如果查不到则换成现有模型
+
+        $sdefaultDate = date("Y-m-d");
+        $w=date('w',strtotime($sdefaultDate));
+        $week_start=date('Y-m-d',strtotime("$sdefaultDate -".($w ? $w - 1 : 6).' days'));
+
+        $data = $this->redis_model->getData($params['logic_junction_id']."_junc_model_cache_".$week_start);
+        if (empty($data)) {
+            $res['last_junc_model'] = $res['junc_model'];
+        }else{
+            $result = json_decode($data, true);
+            $res['last_junc_model']  = $result;
+        }
+        $theDatelist = $this->getDateFromRange($params['start_date'],$params['end_date']);
+        if(count($theDatelist)==1){
+            $stageType="日";
+        }else if(count($theDatelist)<=7){
+            $stageType="周";
+        }else if(count($theDatelist)<40){
+            $stageType="月";
+        }else{
+            $stageType="季";
+        }
+        $tpl="本%s的路口渠化信息与上周期的对比情况,如下图所示。";
+        $res['desc'] = sprintf($tpl,$stageType);
+
+        return $res;
+    }
+
+    //路口报警总结
+    public function queryJuncAlarm($params){
+        $cityID = $params['city_id'];
+        $juncID = $params['logic_junction_id'];
+        $startTime = $params['start_date'];
+        $endTime = $params['end_date'];
+        $alarmInfo = $this->diagnosisNoTiming_model->getJunctionAlarmHoursData($cityID, [$juncID], $this->getDateFromRange($startTime,$endTime));
+//        $chart = [];
+        //初始化数据
+        $chartMap = [];
+        for ($i=0;$i<24;$i++){
+            $time = sprintf('%02s',$i).":00";
+            $chartMap[$time] = [
+                'time'=>$time,
+                'sum'=>0,
+                'spillover'=>0, // 溢流
+                'oversaturation'=>0,//过饱和
+                'imbalance'=>0,//失衡
+            ];
+        }
+        //	路口报警问题 1: 过饱和 2: 溢流 3:失衡
+        foreach ($alarmInfo as $value){
+            //填充数据
+            $time = substr($value['start_time'],11,2).":00";
+
+            $type = $value['type'];
+            switch ($type){
+                case 1:
+                    $chartMap[$time]["oversaturation"]++;
+                    break;
+                case 2:
+                    $chartMap[$time]["spillover"]++;
+                    break;
+                case 3:
+                    $chartMap[$time]["imbalance"]++;
+                    break;
+            }
+            $chartMap[$time]["sum"]++;
+        }
+
+        $maxTimeLine = "00:00";
+        $maxSum = 0;
+
+        foreach ($chartMap as $tk => $tv){
+            if($tv['sum']>$maxSum){
+                $maxSum = $tv['sum'];
+                $maxTimeLine = $tk;
+            }
+        }
+        $tpl = "路口在各时段内,过饱和、溢流、失衡报警类型的报警次数统计如下图所示。报警次数最多的时段为%s,溢流报警次数为%s次,过饱和报警次数为%s次,失衡报警次数为%s次。";
+
+        $ret = [
+            'chart'=>array_values($chartMap),
+            'desc'=> sprintf($tpl, $maxTimeLine,$chartMap[$maxTimeLine]['spillover'],$chartMap[$maxTimeLine]['oversaturation'],$chartMap[$maxTimeLine]['imbalance'])
+        ];
+        return $ret;
+    }
+
+    //济南定制化需求
+    public function conclusionJN($chartData){
+        $conclusion="";
+        foreach ($chartData as $k=> $v){
+            switch ($v['quotakey']){
+                case "stop_time_cycle":
+                    $maxQuotaFlow = $this->queryMaxQuotaFlow($chartData[$k]['flowlist']);
+                    if($maxQuotaFlow != false){
+//                        $chartData[$k]["analysis"]="该路口在评估日期内".$maxQuotaFlow['max_flow']."方向的停车次数最大，其中在".$maxQuotaFlow['max_range'][0]."-".end($maxQuotaFlow['max_range'])."时段内的停车次数最大，需重点关注。";
+                        $conclusion.= "在".$maxQuotaFlow['max_range'][0]."-".end($maxQuotaFlow['max_range'])."时段内".$maxQuotaFlow['max_flow']."方向的停车次数最大。";
+                    }
+                    break;
+                case "speed":
+                    $minQuotaFlow = $this->queryMinQuotaFlow($chartData[$k]['flowlist']);
+                    if($minQuotaFlow != false){
+//                        $chartData[$k]["analysis"]="该路口在评估日期内".$minQuotaFlow['min_flow']."方向的行驶速度最小，其中在".$minQuotaFlow['min_range'][0]."-".end($minQuotaFlow['min_range'])."时段内的行驶速度最小，需重点关注。";
+                        $conclusion.= "在".$minQuotaFlow['min_range'][0]."-".end($minQuotaFlow['min_range'])."时段内".$minQuotaFlow['min_flow']."方向的行驶速度最小。";
+                    }
+                    break;
+                case "stop_delay":
+                    $maxQuotaFlow = $this->queryMaxQuotaFlow($chartData[$k]['flowlist']);
+                    if($maxQuotaFlow != false){
+//                        $chartData[$k]["analysis"]="该路口在评估日期内".$maxQuotaFlow['max_flow']."方向的停车延误最大，其中在".$maxQuotaFlow['max_range'][0]."-".end($maxQuotaFlow['max_range'])."时段内的停车延误最大，需重点关注。";
+                        $conclusion.= "在".$maxQuotaFlow['max_range'][0]."-".end($maxQuotaFlow['max_range'])."时段内".$maxQuotaFlow['max_flow']."方向的停车延误最大。";
+
+                    }
+                    break;
+            }
+        }
+        return $conclusion;
     }
 
     //es数据转换为表格

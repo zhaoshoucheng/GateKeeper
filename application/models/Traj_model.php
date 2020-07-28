@@ -34,6 +34,7 @@ class Traj_model extends CI_Model
         $this->userid = $this->config->item('traj_userid');
         $this->interface = $this->config->item('traj_interface');
         $this->its_interface = $this->config->item('its_traj_interface');
+        $this->local_flow = $this->config->item('jinan_local_flow');
     }
 
     /**
@@ -48,6 +49,32 @@ class Traj_model extends CI_Model
 //        $url =  'http://127.0.0.1:8032/itstool/road/offlinegreenwave';
         return $this->post($url, $data, 20000, "json");
     }
+
+
+
+    public function queryLocalFLowJn($data){
+        $url = $this->local_flow;
+        $res = httpPOST($url, $data, 20000, "json");
+
+        if (!$res) {
+            throw new \Exception('流量数据获取失败', ERR_REQUEST_WAYMAP_API);
+        }
+
+        $res = json_decode($res, true);
+
+
+        if (!$res) {
+            throw new \Exception('traj数据格式错误', ERR_REQUEST_WAYMAP_API);
+        }
+
+        if ($res['errno'] != 0) {
+            throw new \Exception($res['errmsg'], $res['errno']);
+        }
+
+        return $res['data'] ?? [];
+//        return $this->post($url, $data, 20000, "json");
+    }
+
 
     /**
      * 获取时段划分方案

@@ -546,6 +546,21 @@ class Waymap_model extends CI_Model
         return $res['data'] ?? [];
     }
 
+    public function getJunctionModel($logic_junction_id)
+    {
+        $data = [
+            'junc_id'   => $logic_junction_id,
+            'token'     => $this->config->item('waymap_token'),
+            'user_id'   => $this->config->item('waymap_userid'),
+            // 'token'     => $this->config->item('waymap_token'),
+            // 'user_id'   => $this->config->item('waymap_userid'),
+        ];
+
+        $url   = $this->waymap_interface . '/signal-map/juncModel/query';
+        $res = $this->get($url, $data);
+        return $res;
+    }
+
     /**
      * 获取指定路口结合的干线路径
      *

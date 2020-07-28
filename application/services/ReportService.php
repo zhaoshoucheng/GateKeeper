@@ -36,6 +36,28 @@ class ReportService extends BaseService
         $this->dataService = new DataService();
     }
 
+    //查询【x=>"00:00",y=>1】 数组的最大时段,默认数组已排序
+    public function findMaxTimeRange($chartDatas){
+        $startx ="";
+        $endx = "";
+        $maxSumy=0;
+        for ($i=0;$i<count($chartDatas)-4;$i++){
+            $j = $i+3;
+            $sum = 0;
+            for($k=$i;$k<=$j;$k++){
+                $sum+=$chartDatas[$k]['y'];
+            }
+            if($sum>$maxSumy){
+                $startx = $i;
+                $endx = $j;
+                $maxSumy = $sum;
+            }
+
+        }
+        return [$startx,$endx,$maxSumy];
+
+    }
+
     /**
      * @return array
      */

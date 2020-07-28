@@ -132,12 +132,12 @@ class RoadReportService extends BaseService{
     }
 
     public function introduction($params) {
-    	$tpl = "%s干线位于%s市%s，承担较大的交通压力，干线包含%s等重要路口。本次报告根据%s数据对该干线进行分析。";
+        $tpl = "%s干线位于%s市%s，承担较大的交通压力，干线包含%s等重要路口。本次报告根据%s数据对该干线进行分析。";
 
-    	$city_id = $params['city_id'];
-    	$road_id = $params['road_id'];
-    	$start_date = $params['start_date'];
-    	$end_date = $params['end_date'];
+        $city_id = $params['city_id'];
+        $road_id = $params['road_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
         $datestr =  date('Y年m月d日', strtotime($start_date))."~".date('Y年m月d日', strtotime($end_date));
         if($start_date == $end_date){
             $datestr =  date('Y年m月d日', strtotime($start_date));
@@ -151,21 +151,21 @@ class RoadReportService extends BaseService{
 
 
         $city_info = $this->openCity_model->getCityInfo($city_id);
-    	if (empty($city_info)) {
+        if (empty($city_info)) {
 
-    	}
+        }
 
-    	$road_info = $this->road_model->getRoadInfo($road_id);
-    	if (empty($road_info)) {
+        $road_info = $this->road_model->getRoadInfo($road_id);
+        if (empty($road_info)) {
 
-    	}
-    	$logic_junction_ids = $road_info['logic_junction_ids'];
+        }
+        $logic_junction_ids = $road_info['logic_junction_ids'];
 
-    	$junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
-    	if (empty($junctions_info)) {
+        $junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
+        if (empty($junctions_info)) {
 
-    	}
-    	$junctions_name = implode('、', array_column($junctions_info, 'name'));
+        }
+        $junctions_name = implode('、', array_column($junctions_info, 'name'));
 //        if(true){
         if($params['userapp'] == 'jinanits'){
             $dates = $this->getDateFromRange($start_date,$end_date);
@@ -173,40 +173,40 @@ class RoadReportService extends BaseService{
             $tpl = "%s干线位于%s市%s，承担较大的交通压力，整体PI为".round($pi,2)."，干线包含%s等重要路口。本次报告根据%s数据对该干线进行分析。";
         }
 
-    	$desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, $datestr);
+        $desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, $datestr);
 
-    	$road_detail = $this->roadService->getRoadDetail([
-    		'city_id' => $city_id,
-    		'road_id' => $road_id,
-    		'show_type' => 0,
-    	]);
+        $road_detail = $this->roadService->getRoadDetail([
+            'city_id' => $city_id,
+            'road_id' => $road_id,
+            'show_type' => 0,
+        ]);
 
 
-    	return [
-    		'desc' => $desc,
-    		'road_info' => $road_detail,
-    	];
+        return [
+            'desc' => $desc,
+            'road_info' => $road_detail,
+        ];
     }
 
     public function queryRoadDataComparison($params) {
-    	$tpl = "上图展示了研究干线%s与%s路口平均延误的对比，%s干线拥堵程度与%s相比%s。";
+        $tpl = "上图展示了研究干线%s与%s路口平均延误的对比，%s干线拥堵程度与%s相比%s。";
 
-    	$city_id = intval($params['city_id']);
-    	$road_id = $params['road_id'];
-    	$start_date = $params['start_date'];
-    	$end_date = $params['end_date'];
+        $city_id = intval($params['city_id']);
+        $road_id = $params['road_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
 
 
-    	$road_info = $this->road_model->getRoadInfo($road_id);
-    	if (empty($road_info)) {
+        $road_info = $this->road_model->getRoadInfo($road_id);
+        if (empty($road_info)) {
 
-    	}
-    	$logic_junction_ids = $road_info['logic_junction_ids'];
+        }
+        $logic_junction_ids = $road_info['logic_junction_ids'];
 
-    	$report_type = $this->reportService->report_type($start_date, $end_date);
-    	$last_report_date = $this->reportService->last_report_date($start_date, $end_date, $report_type);
-    	$last_start_date = $last_report_date['start_date'];
-    	$last_end_date = $last_report_date['end_date'];
+        $report_type = $this->reportService->report_type($start_date, $end_date);
+        $last_report_date = $this->reportService->last_report_date($start_date, $end_date, $report_type);
+        $last_start_date = $last_report_date['start_date'];
+        $last_end_date = $last_report_date['end_date'];
 
         $theDatelist = $this->reportService->getDatesFromRange($start_date,$end_date);
         $theDatelist = $this->reportService->skipDate($theDatelist,$params['date_type']);
@@ -214,64 +214,64 @@ class RoadReportService extends BaseService{
         $lastDatelist = $this->reportService->getDatesFromRange($last_start_date,$last_end_date);
         $lastDatelist = $this->reportService->skipDate($lastDatelist,$params['date_type']);
 
-    	$now_data = $this->dataService->call("/report/GetIndex", [
-    		'city_id' => $city_id,
-    		'dates' => $theDatelist,
-    		'logic_junction_ids' => explode(',', $logic_junction_ids),
+        $now_data = $this->dataService->call("/report/GetIndex", [
+            'city_id' => $city_id,
+            'dates' => $theDatelist,
+            'logic_junction_ids' => explode(',', $logic_junction_ids),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
             "group_by" => "hour",
-    	], "POST", 'json');
-    	$last_data = $this->dataService->call("/report/GetIndex", [
-    		'city_id' => $city_id,
-    		'dates' => $lastDatelist,
-    		'logic_junction_ids' => explode(',', $logic_junction_ids),
+        ], "POST", 'json');
+        $last_data = $this->dataService->call("/report/GetIndex", [
+            'city_id' => $city_id,
+            'dates' => $lastDatelist,
+            'logic_junction_ids' => explode(',', $logic_junction_ids),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
             "group_by" => "hour",
-    	], "POST", 'json');
+        ], "POST", 'json');
 
-    	$now_data = array_map(function($item) {
+        $now_data = array_map(function($item) {
             return [
-            	'x' => $item['key'],
-            	'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+                'x' => $item['key'],
+                'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
             ];
-     	}, $now_data[2]);
-     	usort($now_data, function($a, $b) {
+        }, $now_data[2]);
+        usort($now_data, function($a, $b) {
             return ($a['x'] < $b['x']) ? -1 : 1;
         });
 
-     	$last_data = array_map(function($item) {
+        $last_data = array_map(function($item) {
             return [
-            	'x' => $item['key'],
-            	'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+                'x' => $item['key'],
+                'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
             ];
-     	}, $last_data[2]);
-     	usort($last_data, function($a, $b) {
+        }, $last_data[2]);
+        usort($last_data, function($a, $b) {
             return ($a['x'] < $b['x']) ? -1 : 1;
         });
 
         $text = $this->reportService->getComparisonText(array_column($now_data, 'y'), array_column($last_data, 'y'), $report_type);
 
-    	$desc = sprintf($tpl, $text[1], $text[2], $text[1], $text[2], $text[0]);
+        $desc = sprintf($tpl, $text[1], $text[2], $text[1], $text[2], $text[0]);
 
-    	return [
-    		'info' => [
-    			'desc' => $desc,
-    		],
-    		'chart' => [
-    			'title' => '平均延误对比',
-				'scale_title' => '平均延误(s)',
-				'series' => [
-					[
-          				'name' => $text[1],
-          				'data' => $this->reportService->addto48($now_data),
-          			],
-          			[
-          				'name' => $text[2],
-          				'data' => $this->reportService->addto48($last_data),
-          			],
-				],
-    		],
-    	];
+        return [
+            'info' => [
+                'desc' => $desc,
+            ],
+            'chart' => [
+                'title' => '平均延误对比',
+                'scale_title' => '平均延误(s)',
+                'series' => [
+                    [
+                        'name' => $text[1],
+                        'data' => $this->reportService->addto48($now_data),
+                    ],
+                    [
+                        'name' => $text[2],
+                        'data' => $this->reportService->addto48($last_data),
+                    ],
+                ],
+            ],
+        ];
     }
 
     public function queryRoadDataComparisonNJ($params) {
@@ -345,6 +345,7 @@ class RoadReportService extends BaseService{
 
     public function queryRoadQuotaDataNJ($params) {
         $tpl = "下图利用滴滴数据绘制了该干线全天24小时各项运⾏指标（车均停车次数、车均停车延误、车均行驶速度）。通过数据分析，该干线的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/车/路口，停车延误接近%.2f秒/车/路口，行驶速度也达到%.2f千米/小时左右。与%s相比，%s停车次数%s，停车延误%s，行驶速度%s。";
+        $conclusion="通过交通大数据分析，该干线的早高峰时段为%s-%s，晚高峰时段为%s-%s。早晚高峰的运行情况与平峰相比，停车次数达到%.2f次/车/路口，停车延误接近%.2f秒/车/路口，行驶速度也达到%.2f千米/小时左右，需重点关注存在问题的路口，可以通过调整路口的绿信比、相位差和周期的方式进行优化，从而缓解交通压力。";
 
         $city_id = intval($params['city_id']);
         $road_id = $params['road_id'];
@@ -467,6 +468,8 @@ class RoadReportService extends BaseService{
         $desc = sprintf($tpl, $morning_peek['start_hour'], $morning_peek['end_hour'], $evening_peek['start_hour'], $evening_peek['end_hour'], $stop_time_cycle, $stop_delay, $speed, $stop_delay_text[2], $stop_delay_text[1], $stop_time_cycle_text[0], $stop_delay_text[0], $speed_text[0]);
 
         return [
+            'conclusion'=>sprintf($conclusion, $morning_peek['start_hour'], $morning_peek['end_hour'], $evening_peek['start_hour'], $evening_peek['end_hour'], $stop_time_cycle, $stop_delay, $speed),
+
             'info' => [
                 'desc' => $desc,
             ],
@@ -520,32 +523,32 @@ class RoadReportService extends BaseService{
     }
 
     public function queryRoadCongestion($params) {
-    	$tpl = "下图展示了分析干线%s高峰延误排名前%d的路口。其中%s%s高峰拥堵情况严重。";
+        $tpl = "下图展示了分析干线%s高峰延误排名前%d的路口。其中%s%s高峰拥堵情况严重。";
 
-    	$city_id = intval($params['city_id']);
-    	$road_id = $params['road_id'];
-    	$start_date = $params['start_date'];
-    	$end_date = $params['end_date'];
+        $city_id = intval($params['city_id']);
+        $road_id = $params['road_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
         if(empty($city_id)){
             return [];
         }
-    	// $city_info = $this->openCity_model->getCityInfo($city_id);
-    	// if (empty($city_info)) {
-    	// }
-    	$road_info = $this->road_model->getRoadInfo($road_id);
-    	if (empty($road_info)) {
+        // $city_info = $this->openCity_model->getCityInfo($city_id);
+        // if (empty($city_info)) {
+        // }
+        $road_info = $this->road_model->getRoadInfo($road_id);
+        if (empty($road_info)) {
             return [];
-    	}
-    	$logic_junction_ids = $road_info['logic_junction_ids'];
+        }
+        $logic_junction_ids = $road_info['logic_junction_ids'];
 
-    	$junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
-    	if (empty($junctions_info)) {
+        $junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
+        if (empty($junctions_info)) {
 
-    	}
-    	$junctions_map = [];
-    	array_map(function($item) use(&$junctions_map) {
-    		$junctions_map[$item['logic_junction_id']] = $item;
-    	}, $junctions_info);
+        }
+        $junctions_map = [];
+        array_map(function($item) use(&$junctions_map) {
+            $junctions_map[$item['logic_junction_id']] = $item;
+        }, $junctions_info);
 
         $theDatelist = $this->reportService->getDatesFromRange($start_date,$end_date);
         $theDatelist = $this->reportService->skipDate($theDatelist,$params['date_type']);
@@ -553,128 +556,128 @@ class RoadReportService extends BaseService{
 //        $lastDatelist = $this->reportService->getDatesFromRange($last_start_date,$last_end_date);
 //        $lastDatelist = $this->reportService->skipDate($lastDatelist,$params['date_type']);
 
-    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
-    	$evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
+        $morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
+        $evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
 
-    	$morning_data = $this->dataService->call("/report/GetIndex", [
-    		'city_id' => $city_id,
-    		'dates' => $theDatelist,
-    		'logic_junction_ids' => explode(',', $logic_junction_ids),
-    		'hours' => $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']),
+        $morning_data = $this->dataService->call("/report/GetIndex", [
+            'city_id' => $city_id,
+            'dates' => $theDatelist,
+            'logic_junction_ids' => explode(',', $logic_junction_ids),
+            'hours' => $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
             "group_by" => "logic_junction_id",
-    	], "POST", 'json');
-    	$evening_data = $this->dataService->call("/report/GetIndex", [
-    		'city_id' => $city_id,
-    		'dates' => $theDatelist,
-    		'logic_junction_ids' => explode(',', $logic_junction_ids),
-    		'hours' => $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']),
+        ], "POST", 'json');
+        $evening_data = $this->dataService->call("/report/GetIndex", [
+            'city_id' => $city_id,
+            'dates' => $theDatelist,
+            'logic_junction_ids' => explode(',', $logic_junction_ids),
+            'hours' => $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(traj_count) as traj_count",
             "group_by" => "logic_junction_id",
-    	], "POST", 'json');
+        ], "POST", 'json');
 
-    	$morning_data = array_map(function($item) use($junctions_map) {
+        $morning_data = array_map(function($item) use($junctions_map) {
             return [
-            	'x' => $item['key'],
-            	'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
-            	'name' => $junctions_map[$item['key']]['name'],
-            	'lng' => $junctions_map[$item['key']]['lng'],
-            	'lat' => $junctions_map[$item['key']]['lat'],
+                'x' => $item['key'],
+                'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+                'name' => $junctions_map[$item['key']]['name'],
+                'lng' => $junctions_map[$item['key']]['lng'],
+                'lat' => $junctions_map[$item['key']]['lat'],
             ];
-     	}, $morning_data[2]);
-     	usort($morning_data, function($a, $b) {
+        }, $morning_data[2]);
+        usort($morning_data, function($a, $b) {
             return ($a['y'] > $b['y']) ? -1 : 1;
         });
         $morning_data = array_slice($morning_data, 0, 10);
         $morning_junction_names = array_map(function($item) use($junctions_map) {
-        	return $item['name'];
+            return $item['name'];
         }, array_slice($morning_data, 0, 3));
 
-     	$evening_data = array_map(function($item) use($junctions_map) {
+        $evening_data = array_map(function($item) use($junctions_map) {
             return [
-            	'x' => $item['key'],
-            	'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
-            	'name' => $junctions_map[$item['key']]['name'],
-            	'lng' => $junctions_map[$item['key']]['lng'],
-            	'lat' => $junctions_map[$item['key']]['lat'],
+                'x' => $item['key'],
+                'y' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+                'name' => $junctions_map[$item['key']]['name'],
+                'lng' => $junctions_map[$item['key']]['lng'],
+                'lat' => $junctions_map[$item['key']]['lat'],
             ];
-     	}, $evening_data[2]);
-     	usort($evening_data, function($a, $b) {
+        }, $evening_data[2]);
+        usort($evening_data, function($a, $b) {
             return ($a['y'] > $b['y']) ? -1 : 1;
         });
         $evening_data = array_slice($evening_data, 0, 10);
         $evening_junction_names = array_map(function($item) use($junctions_map) {
-        	return $item['name'];
+            return $item['name'];
         }, array_slice($evening_data, 0, 3));
 
-    	return [
-    		'morning_peek' => [
-	    		'info' => [
-	    			'desc' => sprintf($tpl, '早', count($morning_data), implode(',', $morning_junction_names), '早'),
-	    		],
-	    		'center' => [
-	    			'lng' => round(array_sum(array_column($morning_data, 'lng')) / count(array_column($morning_data, 'lng')), 5),
-	    			'lat' => round(array_sum(array_column($morning_data, 'lat')) / count(array_column($morning_data, 'lat')), 5),
-	    		],
-	    		'chart' => [
-	    			'title' => '平均延误对比',
-					'scale_title' => '平均延误(s)',
-					'series' => [
-						'name' => '早高峰',
-          				'data' => $morning_data,
-					],
-	    		],
-    		],
-    		'evenint_peek' => [
-    			'info' => [
-	    			'desc' => sprintf($tpl, '晚', count($evening_data), implode(',', $evening_junction_names), '晚'),
-	    		],
-	    		'center' => [
-	    			'lng' => round(array_sum(array_column($evening_data, 'lng')) / count(array_column($evening_data, 'lng')), 5),
-	    			'lat' => round(array_sum(array_column($evening_data, 'lat')) / count(array_column($evening_data, 'lat')), 5),
-	    		],
-	    		'chart' => [
-	    			'title' => '平均延误对比',
-					'scale_title' => '平均延误(s)',
-					'series' => [
-          				'name' => '晚高峰',
-          				'data' => $evening_data,
-					],
-	    		],
-    		],
-    	];
+        return [
+            'morning_peek' => [
+                'info' => [
+                    'desc' => sprintf($tpl, '早', count($morning_data), implode('，', $morning_junction_names), '早'),
+                ],
+                'center' => [
+                    'lng' => round(array_sum(array_column($morning_data, 'lng')) / count(array_column($morning_data, 'lng')), 5),
+                    'lat' => round(array_sum(array_column($morning_data, 'lat')) / count(array_column($morning_data, 'lat')), 5),
+                ],
+                'chart' => [
+                    'title' => '平均延误对比',
+                    'scale_title' => '平均延误(s)',
+                    'series' => [
+                        'name' => '早高峰',
+                        'data' => $morning_data,
+                    ],
+                ],
+            ],
+            'evenint_peek' => [
+                'info' => [
+                    'desc' => sprintf($tpl, '晚', count($evening_data), implode('，', $evening_junction_names), '晚'),
+                ],
+                'center' => [
+                    'lng' => round(array_sum(array_column($evening_data, 'lng')) / count(array_column($evening_data, 'lng')), 5),
+                    'lat' => round(array_sum(array_column($evening_data, 'lat')) / count(array_column($evening_data, 'lat')), 5),
+                ],
+                'chart' => [
+                    'title' => '平均延误对比',
+                    'scale_title' => '平均延误(s)',
+                    'series' => [
+                        'name' => '晚高峰',
+                        'data' => $evening_data,
+                    ],
+                ],
+            ],
+        ];
     }
 
     public function queryQuotaRank($params) {
-    	$tpl = "需要注意的是PI指数的计算中考虑了对过饱和、失衡以及溢流状态的惩罚。例如，两个路口在同样的平均停车或延误时间的情况下，如果某个路口出现了过饱和、失衡或者溢流现象，则该路口的PI值会更高。";
+        $tpl = "需要注意的是PI指数的计算中考虑了对过饱和、失衡以及溢流状态的惩罚。例如，两个路口在同样的平均停车或延误时间的情况下，如果某个路口出现了过饱和、失衡或者溢流现象，则该路口的PI值会更高。";
 
-    	$city_id = intval($params['city_id']);
-    	$road_id = $params['road_id'];
-    	$start_date = $params['start_date'];
-    	$end_date = $params['end_date'];
+        $city_id = intval($params['city_id']);
+        $road_id = $params['road_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
 
-    	// $city_info = $this->openCity_model->getCityInfo($city_id);
+        // $city_info = $this->openCity_model->getCityInfo($city_id);
 
 
-    	$road_info = $this->road_model->getRoadInfo($road_id);
-    	if (empty($road_info)) {
+        $road_info = $this->road_model->getRoadInfo($road_id);
+        if (empty($road_info)) {
 
-    	}
-    	$logic_junction_ids = $road_info['logic_junction_ids'];
+        }
+        $logic_junction_ids = $road_info['logic_junction_ids'];
 
-    	$junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
-    	if (empty($junctions_info)) {
+        $junctions_info = $this->waymap_model->getJunctionInfo($logic_junction_ids);
+        if (empty($junctions_info)) {
 
-    	}
-    	$junctions_map = [];
-    	array_map(function($item) use(&$junctions_map) {
-    		$junctions_map[$item['logic_junction_id']] = $item;
-    	}, $junctions_info);
+        }
+        $junctions_map = [];
+        array_map(function($item) use(&$junctions_map) {
+            $junctions_map[$item['logic_junction_id']] = $item;
+        }, $junctions_info);
 
-    	$report_type = $this->reportService->report_type($start_date, $end_date);
-    	$last_report_date = $this->reportService->last_report_date($start_date, $end_date, $report_type);
-    	$last_start_date = $last_report_date['start_date'];
-    	$last_end_date = $last_report_date['end_date'];
+        $report_type = $this->reportService->report_type($start_date, $end_date);
+        $last_report_date = $this->reportService->last_report_date($start_date, $end_date, $report_type);
+        $last_start_date = $last_report_date['start_date'];
+        $last_end_date = $last_report_date['end_date'];
 
         $theDatelist = $this->reportService->getDatesFromRange($start_date,$end_date);
         $theDatelist = $this->reportService->skipDate($theDatelist,$params['date_type']);
@@ -682,128 +685,128 @@ class RoadReportService extends BaseService{
         $lastDatelist = $this->reportService->getDatesFromRange($last_start_date,$last_end_date);
         $lastDatelist = $this->reportService->skipDate($lastDatelist,$params['date_type']);
 
-    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
-    	$evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
+        $morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
+        $evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
 
 
-    	$morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $theDatelist, $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
-    	usort($morning_pi_data, function($a, $b) {
-    		return $a['pi'] > $b['pi'] ? -1 : 1;
-    	});
-    	$morning_pi_data = array_slice($morning_pi_data, 0, 20);
-    	$morning_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $lastDatelist, $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
-    	$morning_last_pi_data_rank = [];
-    	for ($i = 0; $i < count($morning_last_pi_data); $i++) {
-    		$morning_last_pi_data_rank[$morning_last_pi_data[$i]['logic_junction_id']] = $i + 1;
-    	}
-    	$morning_data = $this->dataService->call("/report/GetIndex", [
-    		'city_id' => $city_id,
-    		'dates' => $theDatelist,
-    		'logic_junction_ids' => array_column($morning_pi_data, 'logic_junction_id'),
-    		'hours' => $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']),
+        $morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $theDatelist, $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
+        usort($morning_pi_data, function($a, $b) {
+            return $a['pi'] > $b['pi'] ? -1 : 1;
+        });
+        $morning_pi_data = array_slice($morning_pi_data, 0, 20);
+        $morning_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $lastDatelist, $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']));
+        $morning_last_pi_data_rank = [];
+        for ($i = 0; $i < count($morning_last_pi_data); $i++) {
+            $morning_last_pi_data_rank[$morning_last_pi_data[$i]['logic_junction_id']] = $i + 1;
+        }
+        $morning_data = $this->dataService->call("/report/GetIndex", [
+            'city_id' => $city_id,
+            'dates' => $theDatelist,
+            'logic_junction_ids' => array_column($morning_pi_data, 'logic_junction_id'),
+            'hours' => $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(stop_time_cycle * traj_count) AS stop_time_cycle, sum(speed * traj_count) AS speed, sum(traj_count) as traj_count",
             "group_by" => "logic_junction_id",
-    	], "POST", 'json');
-    	$morning_data_map = [];
-    	array_map(function($item) use(&$morning_data_map) {
-    		$morning_data_map[$item['key']] = [
-    			'stop_delay' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
-    			'stop_time_cycle' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
-    			'speed' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
-    		];
-     	}, $morning_data[2]);
+        ], "POST", 'json');
+        $morning_data_map = [];
+        array_map(function($item) use(&$morning_data_map) {
+            $morning_data_map[$item['key']] = [
+                'stop_delay' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+                'stop_time_cycle' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
+                'speed' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
+            ];
+        }, $morning_data[2]);
 
-    	$evening_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $theDatelist, $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
-    	usort($evening_pi_data, function($a, $b) {
-    		return $a['pi'] > $b['pi'] ? -1 : 1;
-    	});
-    	$evening_pi_data = array_slice($evening_pi_data, 0, 20);
-    	$evening_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $lastDatelist, $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
-    	$evening_last_pi_data_rank = [];
-    	for ($i = 0; $i < count($evening_last_pi_data); $i++) {
-    		$evening_last_pi_data_rank[$evening_last_pi_data[$i]['logic_junction_id']] = $i + 1;
-    	}
-    	$evening_data = $this->dataService->call("/report/GetIndex", [
-    		'city_id' => $city_id,
-    		'dates' => $theDatelist,
-    		'logic_junction_ids' => array_column($evening_pi_data, 'logic_junction_id'),
-    		'hours' => $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']),
+        $evening_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $theDatelist, $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
+        usort($evening_pi_data, function($a, $b) {
+            return $a['pi'] > $b['pi'] ? -1 : 1;
+        });
+        $evening_pi_data = array_slice($evening_pi_data, 0, 20);
+        $evening_last_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $lastDatelist, $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']));
+        $evening_last_pi_data_rank = [];
+        for ($i = 0; $i < count($evening_last_pi_data); $i++) {
+            $evening_last_pi_data_rank[$evening_last_pi_data[$i]['logic_junction_id']] = $i + 1;
+        }
+        $evening_data = $this->dataService->call("/report/GetIndex", [
+            'city_id' => $city_id,
+            'dates' => $theDatelist,
+            'logic_junction_ids' => array_column($evening_pi_data, 'logic_junction_id'),
+            'hours' => $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']),
             "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(stop_time_cycle * traj_count) AS stop_time_cycle, sum(speed * traj_count) AS speed, sum(traj_count) as traj_count",
             "group_by" => "logic_junction_id",
-    	], "POST", 'json');
-    	$evening_data_map = [];
-    	array_map(function($item) use(&$evening_data_map) {
-    		$evening_data_map[$item['key']] = [
-    			'stop_delay' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
-    			'stop_time_cycle' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
-    			'speed' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
-    		];
-     	}, $evening_data[2]);
+        ], "POST", 'json');
+        $evening_data_map = [];
+        array_map(function($item) use(&$evening_data_map) {
+            $evening_data_map[$item['key']] = [
+                'stop_delay' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+                'stop_time_cycle' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
+                'speed' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
+            ];
+        }, $evening_data[2]);
 
-    	return [
-    		'morning_peek' => [
-    			'quota_table_desc' => $tpl,
-    			'quota_table_data' => array_map(function($item) use($junctions_map, $morning_last_pi_data_rank, $morning_data_map) {
-    				return [
-    					'logic_junction_id' => $item['logic_junction_id'],
-    					'name' => $junctions_map[$item['logic_junction_id']]['name'],
-    					'last_rank' => isset($morning_last_pi_data_rank[$item['logic_junction_id']]) ? $morning_last_pi_data_rank[$item['logic_junction_id']] : "-",
-    					'stop_delay' => $morning_data_map[$item['logic_junction_id']]['stop_delay'],
-    					'stop_time_cycle' => $morning_data_map[$item['logic_junction_id']]['stop_time_cycle'],
-    					'speed' => $morning_data_map[$item['logic_junction_id']]['speed'],
-    					'PI' => round($item['pi'], 2),
-    				];
-    			}, $morning_pi_data),
-    		],
-    		'evening_peek' => [
-    			'quota_table_desc' => $tpl,
-    			'quota_table_data' => array_map(function($item) use($junctions_map, $evening_last_pi_data_rank, $evening_data_map) {
-    				return [
-    					'logic_junction_id' => $item['logic_junction_id'],
-    					'name' => $junctions_map[$item['logic_junction_id']]['name'],
-    					'last_rank' => isset($evening_last_pi_data_rank[$item['logic_junction_id']]) ? $evening_last_pi_data_rank[$item['logic_junction_id']] : "-",
-    					'stop_delay' => $evening_data_map[$item['logic_junction_id']]['stop_delay'],
-    					'stop_time_cycle' => $evening_data_map[$item['logic_junction_id']]['stop_time_cycle'],
-    					'speed' => $evening_data_map[$item['logic_junction_id']]['speed'],
-    					'PI' => round($item['pi'], 2),
-    				];
-    			}, $evening_pi_data),
-    		],
-    	];
+        return [
+            'morning_peek' => [
+                'quota_table_desc' => $tpl,
+                'quota_table_data' => array_map(function($item) use($junctions_map, $morning_last_pi_data_rank, $morning_data_map) {
+                    return [
+                        'logic_junction_id' => $item['logic_junction_id'],
+                        'name' => $junctions_map[$item['logic_junction_id']]['name'],
+                        'last_rank' => isset($morning_last_pi_data_rank[$item['logic_junction_id']]) ? $morning_last_pi_data_rank[$item['logic_junction_id']] : "-",
+                        'stop_delay' => $morning_data_map[$item['logic_junction_id']]['stop_delay'],
+                        'stop_time_cycle' => $morning_data_map[$item['logic_junction_id']]['stop_time_cycle'],
+                        'speed' => $morning_data_map[$item['logic_junction_id']]['speed'],
+                        'PI' => round($item['pi'], 2),
+                    ];
+                }, $morning_pi_data),
+            ],
+            'evening_peek' => [
+                'quota_table_desc' => $tpl,
+                'quota_table_data' => array_map(function($item) use($junctions_map, $evening_last_pi_data_rank, $evening_data_map) {
+                    return [
+                        'logic_junction_id' => $item['logic_junction_id'],
+                        'name' => $junctions_map[$item['logic_junction_id']]['name'],
+                        'last_rank' => isset($evening_last_pi_data_rank[$item['logic_junction_id']]) ? $evening_last_pi_data_rank[$item['logic_junction_id']] : "-",
+                        'stop_delay' => $evening_data_map[$item['logic_junction_id']]['stop_delay'],
+                        'stop_time_cycle' => $evening_data_map[$item['logic_junction_id']]['stop_time_cycle'],
+                        'speed' => $evening_data_map[$item['logic_junction_id']]['speed'],
+                        'PI' => round($item['pi'], 2),
+                    ];
+                }, $evening_pi_data),
+            ],
+        ];
     }
 
     public function queryTopPI($params) {
-    	$city_id = intval($params['city_id']);
-    	$road_id = $params['road_id'];
-    	$start_date = $params['start_date'];
-    	$end_date = $params['end_date'];
-    	$top = 3;
-    	if (isset($params['top'])) {
-    		$top = $params['top'];
-    	}
+        $city_id = intval($params['city_id']);
+        $road_id = $params['road_id'];
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'];
+        $top = 3;
+        if (isset($params['top'])) {
+            $top = $params['top'];
+        }
         $theDatelist = $this->reportService->getDatesFromRange($start_date,$end_date);
         $theDatelist = $this->reportService->skipDate($theDatelist,$params['date_type']);
 
 //        $lastDatelist = $this->reportService->getDatesFromRange($last_start_date,$last_end_date);
 //        $lastDatelist = $this->reportService->skipDate($lastDatelist,$params['date_type']);
 
-    	$road_info = $this->road_model->getRoadInfo($road_id);
-    	if (empty($road_info)) {
+        $road_info = $this->road_model->getRoadInfo($road_id);
+        if (empty($road_info)) {
 
-    	}
-    	$logic_junction_ids = $road_info['logic_junction_ids'];
+        }
+        $logic_junction_ids = $road_info['logic_junction_ids'];
 
-    	$morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
-    	$morning_peek_hours = $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']);
-    	$evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
-    	$evening_peek_hours = $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']);
-    	$peek_hours = array_merge($morning_peek_hours, $evening_peek_hours);
+        $morning_peek = $this->reportService->getMorningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
+        $morning_peek_hours = $this->reportService->getHoursFromRange($morning_peek['start_hour'], $morning_peek['end_hour']);
+        $evening_peek = $this->reportService->getEveningPeekRange($city_id, explode(',', $logic_junction_ids), $theDatelist);
+        $evening_peek_hours = $this->reportService->getHoursFromRange($evening_peek['start_hour'], $evening_peek['end_hour']);
+        $peek_hours = array_merge($morning_peek_hours, $evening_peek_hours);
 
-    	$morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $theDatelist, $peek_hours);
-    	usort($morning_pi_data, function($a, $b) {
-    		return $a['pi'] > $b['pi'] ? -1 : 1;
-    	});
-    	return array_slice(array_column($morning_pi_data, 'logic_junction_id'), 0, 3);
+        $morning_pi_data = $this->pi_model->getJunctionsPiWithDatesHours($city_id, explode(',', $logic_junction_ids), $theDatelist, $peek_hours);
+        usort($morning_pi_data, function($a, $b) {
+            return $a['pi'] > $b['pi'] ? -1 : 1;
+        });
+        return array_slice(array_column($morning_pi_data, 'logic_junction_id'), 0, 3);
     }
 
     private function createHours(){
@@ -818,16 +821,9 @@ class RoadReportService extends BaseService{
         $road_info = $this->road_model->getRoadInfo($roadID);
         $junctionIDs = $road_info['logic_junction_ids'];
         $dates = $this->getDateFromRange($start_time,$end_time);
-
-
-
-
         $roadQuotaData = $this->area_model->getJunctionsAllQuotaEs($dates,explode(",",$junctionIDs),$cityID);
-
         $PiDatas = $this->pi_model->getGroupJuncPiWithDatesHours($cityID,explode(",",$junctionIDs),$dates,$this->createHours());
-
         //数据合并
-
         foreach ($PiDatas as $pk =>$pv){
             foreach ($roadQuotaData as $rk=>$rv){
                 if($pk==$rv['hour']){
@@ -867,41 +863,53 @@ class RoadReportService extends BaseService{
         $speedCycleChart = [];
         $stopDelayCycleChart = [];
         $piChart=[];
-        foreach ($data as $h => $v){
-            if(!isset($v['pi'])){
-                $v['pi'] = 0;
+        //48个点数据补全
+        $hours = $this->reportService->getHoursFromRange("00:00", "24:00");
+        foreach ($hours as $hour){
+            $hasData = false;
+            foreach ($data as $h => $v){
+                if($v['hour'] == $hour){
+                    $hasData = true;
+                    if(!isset($v['pi'])){
+                        $v['pi'] = 0;
+                    }
+                    $stopTimeCycleChart[] = [
+                        "x"=>$v['hour'],
+                        "y"=>round($v['stop_time_cycle'],2)
+                    ];
+                    $speedCycleChart[] = [
+                        "x"=>$v['hour'],
+                        "y"=>round($v['speed'],2)
+                    ];
+                    $stopDelayCycleChart[] = [
+                        "x"=>$v['hour'],
+                        "y"=>round($v['stop_delay'],2)
+                    ];
+                    $piChart[] = [
+                        "x"=>$v['hour'],
+                        "y"=>round($v['pi'],2)
+                    ];
+                }
             }
-            $stopTimeCycleChart[] = [
-                "x"=>$v['hour'],
-                "y"=>round($v['stop_time_cycle'],2)
-            ];
-            $speedCycleChart[] = [
-                "x"=>$v['hour'],
-                "y"=>round($v['speed'],2)
-            ];
-            $stopDelayCycleChart[] = [
-                "x"=>$v['hour'],
-                "y"=>round($v['stop_delay'],2)
-            ];
-            $piChart[] = [
-                "x"=>$v['hour'],
-                "y"=>round($v['pi'],2)
-            ];
+            if($hasData == false){
+                $stopTimeCycleChart[] = [
+                    "x"=>$hour,
+                    "y"=>null
+                ];
+                $speedCycleChart[] = [
+                    "x"=>$hour,
+                    "y"=>null
+                ];
+                $stopDelayCycleChart[] = [
+                    "x"=>$hour,
+                    "y"=>null
+                ];
+                $piChart[] = [
+                    "x"=>$hour,
+                    "y"=>null
+                ];
+            }
         }
-        //时间排序
-        usort($stopTimeCycleChart, function($a, $b) {
-            return (strtotime($a['x']) < strtotime($b['x'])) ? -1 : 1;
-        });
-        usort($speedCycleChart, function($a, $b) {
-            return (strtotime($a['x']) < strtotime($b['x'])) ? -1 : 1;
-        });
-        usort($stopDelayCycleChart, function($a, $b) {
-            return (strtotime($a['x']) < strtotime($b['x'])) ? -1 : 1;
-        });
-        usort($piChart, function($a, $b) {
-            return (strtotime($a['x']) < strtotime($b['x'])) ? -1 : 1;
-        });
-
         $stopTimeChartData['series'] =['name'=>"",'data'=>$stopTimeCycleChart];
         $speedChartData['series'] =['name'=>"",'data'=>$speedCycleChart];
         $stopDelayChartData['series'] =['name'=>"",'data'=>$stopDelayCycleChart];
@@ -1061,28 +1069,48 @@ class RoadReportService extends BaseService{
     private function shortenChart($chartList){
         $newChartList = [];
 
-//        if(count($chartList[0]['chart']['one_dimensional']) <=10){
-//            return $chartList;
+//
+//
+//        foreach ($chartList as $chartData){
+//            $top10Map = [];
+//            $top10Junc = [];
+//            //取出前10个路口
+//            foreach ($chartData['chart']['data'] as $cd){
+//                if(count($cd)>0){
+//                    $top10Map[] = ['t'=>$cd[0],'j'=>$cd[1],'c'=>$cd[2]];
+//                }
+//            }
+//            //根据报警次数降序排列
+//            usort($top10Map,function($oba,$obb){
+//                if($oba['c'] < $obb['c']){
+//                    return 1;
+//                }
+//            });
+//            foreach ($top10Map as $topv){
+//                if(!in_array($topv['j'],$top10Junc) && count($top10Junc) < 10){
+//                    $top10Junc[] = $topv['j'];
+//                }
+//            }
+//            $newChartList[] = $chartData;
 //        }
-        // 'time'=>1,'junc'=>1,'count'=>1,
-        $top20Map = [];
-        $top20Junc = [];
         foreach ($chartList as $chartData){
-            //取出前20个路口
+            $top10Map = [];
+            $top10Junc = [];
+            //取出前10个路口
             foreach ($chartData['chart']['data'] as $cd){
                 if(count($cd)>0){
-                    $top20Map[] = ['t'=>$cd[0],'j'=>$cd[1],'c'=>$cd[2]];
+                    $top10Map[] = ['t'=>$cd[0],'j'=>$cd[1],'c'=>$cd[2]];
                 }
             }
             //根据报警次数降序排列
-            usort($top20Map,function($oba,$obb){
+            usort($top10Map,function($oba,$obb){
                 if($oba['c'] < $obb['c']){
                     return 1;
                 }
             });
-            foreach ($top20Map as $topv){
-                if(!in_array($topv['j'],$top20Junc) && count($top20Junc) < 10){
-                    $top20Junc[] = $topv['j'];
+            foreach ($top10Map as $topv){
+                if(!in_array($topv['j'],$top10Junc) && count($top10Junc) < 10){
+                    $top10Junc[] = $topv['j'];
                 }
             }
 
@@ -1091,48 +1119,29 @@ class RoadReportService extends BaseService{
             $tmpChartData = $chartData;
             $tmpOneDimen = [];
             $ndx = [];
-            foreach ($top20Junc as $ntk => $ntv){
+            foreach ($top10Junc as $ntk => $ntv){
                 $ndx[$ntv] = $ntk;
                 $tmpOneDimen[] = $chartData['chart']['one_dimensional'][$ntv];
             }
 
-                //路口不足10个要补充
-               foreach ($chartData['chart']['one_dimensional'] as $jname){
-                   if(count($tmpOneDimen)<10 && !in_array($jname,$tmpOneDimen)){
-                       $tmpOneDimen[] = $jname;
-                   }
-               }
-
-
-
-
+            //路口不足10个要补充
+            foreach ($chartData['chart']['one_dimensional'] as $jname){
+                if(count($tmpOneDimen)<10 && !in_array($jname,$tmpOneDimen)){
+                    $tmpOneDimen[] = $jname;
+                }
+            }
 
             $tmpChartData['chart']['one_dimensional'] = $tmpOneDimen;
             $tmpNewData  = [];
-            foreach ($top20Map as $t2k => $t2v){
+            foreach ($top10Map as $t2k => $t2v){
                 //路口替换为新坐标
-                if(in_array($t2v['j'],$top20Junc)){
+                if(in_array($t2v['j'],$top10Junc)){
                     $tmpNewData[] = [$t2v['t'],$ndx[$t2v['j']],$t2v['c']];
                 }
             }
             $tmpChartData['chart']['data'] = $tmpNewData;
             $newChartList[] = $tmpChartData;
 
-
-//            $tmpChartData = $chartData;
-//
-//            //默认数据已经排序
-//            //TOOD 排序
-//            $tmpChartData['chart']['one_dimensional'] = array_slice($tmpChartData['chart']['one_dimensional'], 0, 20);
-//            $data = [];
-//            foreach ($tmpChartData['chart']['data'] as $v){
-//                if($v[1]>=20){
-//                    continue;
-//                }
-//                $data[] = $v;
-//            }
-//            $tmpChartData['chart']['data'] = $data;
-//            $newChartList[] = $tmpChartData;
         }
 
 
@@ -1158,109 +1167,122 @@ class RoadReportService extends BaseService{
         }
         $morningmaxscale=0;
         $eveningmaxscale=0;
-        $morningdata=[];
-        $eveningdata=[];
+        $imbalanceMorningdata=[];
+        $embalanceEveningdata=[];
+        //处理失衡
+        //$imbalanceData[logic_junction_id][time,time,time]
         foreach ($imbalanceData as $k=> $v){
+            if(!isset($juncIndex[$k])){
+                continue;
+            }
             foreach ($v as $t){
                 $time = $this->roundingtime($t);
                 if(isset($morningIndex[$time])){
-                    if(!isset($morningdata[$juncIndex[$k]])){
-                        $morningdata[$juncIndex[$k]]=[];
+                    if(!isset($imbalanceMorningdata[$juncIndex[$k]])){
+                        $imbalanceMorningdata[$juncIndex[$k]]=[];
                     }
-                    if(!isset($morningdata[$juncIndex[$k]][$morningIndex[$time]])){
-                        $morningdata[$juncIndex[$k]][$morningIndex[$time]]=0;
+                    if(!isset($imbalanceMorningdata[$juncIndex[$k]][$morningIndex[$time]])){
+                        $imbalanceMorningdata[$juncIndex[$k]] = array((string)$morningIndex[$time] => 0);
                     }
-                    $morningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
+                    $imbalanceMorningdata[$juncIndex[$k]][(string)$morningIndex[$time]]++;
+
                 }elseif(isset($eveningIndex[$time])){
-                    if(!isset($eveningdata[$juncIndex[$k]])){
-                        $eveningdata[$juncIndex[$k]]=[];
+                    if(!isset($embalanceEveningdata[$juncIndex[$k]])){
+                        $embalanceEveningdata[$juncIndex[$k]]=[];
                     }
-                    if(!isset($eveningdata[$juncIndex[$k]][$eveningIndex[$time]])){
-                        $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]=0;
+                    if(!isset($embalanceEveningdata[$juncIndex[$k]][$eveningIndex[$time]])){
+                        $embalanceEveningdata[$juncIndex[$k]]=array((string)$eveningIndex[$time] => 0);
                     }
-                    $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]+=1;
+                    $embalanceEveningdata[$juncIndex[$k]][$eveningIndex[$time]]++;
                 }
             }
         }
-        if(!empty($morningdata)){
-            $mcd = &$chartList[0];
-            foreach ($morningdata as $k1=>$v1){
+
+        if(!empty($imbalanceMorningdata)){
+            $mbcd = &$chartList[0];
+            foreach ($imbalanceMorningdata as $k1=>$v1){
                 foreach ($v1 as $k2=>$v2){
                     if($v2>$morningmaxscale){
                         $morningmaxscale=$v2;
                     }
 
-                    $mcd['chart']['data'][] = [$k2,$k1,$v2];
+                    $mbcd['chart']['data'][] = [$k2,$k1,$v2];
                 }
             }
-            $mcd['chart']['scale']['max']=$morningmaxscale+5;
+            $mbcd['chart']['scale']['max']=$morningmaxscale+5;
 
         }
-        if(!empty($eveningdata)){
-            $ecd=&$chartList[3];
-            foreach ($eveningdata as $k1=>$v1){
+
+        if(!empty($embalanceEveningdata)){
+            $ebcd=&$chartList[3];
+            foreach ($embalanceEveningdata as $k1=>$v1){
                 foreach ($v1 as $k2=>$v2){
                     if($v2>$eveningmaxscale){
                         $eveningmaxscale=$v2;
                     }
 
-                    $ecd['chart']['data'][] = [$k2,$k1,$v2];
+                    $ebcd['chart']['data'][] = [$k2,$k1,$v2];
                 }
             }
-            $ecd['chart']['scale']['max']=$eveningmaxscale+5;
+            $ebcd['chart']['scale']['max']=$eveningmaxscale+5;
         }
+
+        //处理过饱和
         //TODO 后续三段合成一段
         $morningmaxscale=0;
         $eveningmaxscale=0;
-        $morningdata=[];
-        $eveningdata=[];
+        $overMorningdata=[];
+        $overEveningdata=[];
         foreach ($overData as $k=> $v){
+            if(!isset($juncIndex[$k])){
+                continue;
+            }
             foreach ($v as $t){
                 $time = $this->roundingtime($t);
                 if(isset($morningIndex[$time])){
-                    if(!isset($morningdata[$juncIndex[$k]])){
-                        $morningdata[$juncIndex[$k]]=[];
+                    if(!isset($overMorningdata[$juncIndex[$k]])){
+                        $overMorningdata[$juncIndex[$k]]=[];
                     }
-                    if(!isset($morningdata[$juncIndex[$k]][$morningIndex[$time]])){
-                        $morningdata[$juncIndex[$k]][$morningIndex[$time]]=0;
+                    if(!isset($overMorningdata[$juncIndex[$k]][$morningIndex[$time]])){
+                        $overMorningdata[$juncIndex[$k]]=array((string)$morningIndex[$time] => 0);
                     }
-                    $morningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
+                    $overMorningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
                 }elseif(isset($eveningIndex[$time])){
-                    if(!isset($eveningdata[$juncIndex[$k]])){
-                        $eveningdata[$juncIndex[$k]]=[];
+                    if(!isset($overEveningdata[$juncIndex[$k]])){
+                        $overEveningdata[$juncIndex[$k]]=[];
                     }
-                    if(!isset($eveningdata[$juncIndex[$k]][$eveningIndex[$time]])){
-                        $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]=0;
+                    if(!isset($overEveningdata[$juncIndex[$k]][$eveningIndex[$time]])){
+                        $overEveningdata[$juncIndex[$k]]=array((string)$eveningIndex[$time] => 0);
                     }
-                    $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]+=1;
+                    $overEveningdata[$juncIndex[$k]][$eveningIndex[$time]]+=1;
                 }
             }
         }
-        if(!empty($morningdata)){
-            $mcd = &$chartList[1];
-            foreach ($morningdata as $k1=>$v1){
+        if(!empty($overMorningdata)){
+            $mocd = &$chartList[1];
+            foreach ($overMorningdata as $k1=>$v1){
                 foreach ($v1 as $k2=>$v2){
                     if($v2>$morningmaxscale){
                         $morningmaxscale=$v2;
                     }
 
-                    $mcd['chart']['data'][] = [$k2,$k1,$v2];
+                    $mocd['chart']['data'][] = [$k2,$k1,$v2];
                 }
             }
-            $mcd['chart']['scale']['max']=$morningmaxscale+5;
+            $mocd['chart']['scale']['max']=$morningmaxscale+5;
         }
-        if(!empty($eveningdata)){
-            $ecd=&$chartList[4];
-            foreach ($eveningdata as $k1=>$v1){
+        if(!empty($overEveningdata)){
+            $eocd=&$chartList[4];
+            foreach ($overEveningdata as $k1=>$v1){
                 foreach ($v1 as $k2=>$v2){
                     if($v2>$eveningmaxscale){
                         $eveningmaxscale=$v2;
                     }
 
-                    $ecd['chart']['data'][] = [$k2,$k1,$v2];
+                    $eocd['chart']['data'][] = [$k2,$k1,$v2];
                 }
             }
-            $ecd['chart']['scale']['max']=$eveningmaxscale+5;
+            $eocd['chart']['scale']['max']=$eveningmaxscale+5;
         }
         //TODO 后续三段合成一段
         $morningmaxscale=0;
@@ -1268,6 +1290,9 @@ class RoadReportService extends BaseService{
         $morningdata=[];
         $eveningdata=[];
         foreach ($spillData as $k=> $v){
+            if(!isset($juncIndex[$k])){
+                continue;
+            }
             foreach ($v as $t){
                 $time = $this->roundingtime($t);
                 if(isset($morningIndex[$time])){
@@ -1275,7 +1300,7 @@ class RoadReportService extends BaseService{
                         $morningdata[$juncIndex[$k]]=[];
                     }
                     if(!isset($morningdata[$juncIndex[$k]][$morningIndex[$time]])){
-                        $morningdata[$juncIndex[$k]][$morningIndex[$time]]=0;
+                        $morningdata[$juncIndex[$k]]=array((string)$morningIndex[$time] => 0);
                     }
                     $morningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
                 }elseif(isset($eveningIndex[$time])){
@@ -1283,12 +1308,13 @@ class RoadReportService extends BaseService{
                         $eveningdata[$juncIndex[$k]]=[];
                     }
                     if(!isset($eveningdata[$juncIndex[$k]][$eveningIndex[$time]])){
-                        $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]=0;
+                        $eveningdata[$juncIndex[$k]] = array((string)$eveningIndex[$time] => 0);
                     }
                     $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]+=1;
                 }
             }
         }
+
         if(!empty($morningdata)){
             $mcd = &$chartList[2];
             foreach ($morningdata as $k1=>$v1){
@@ -1302,6 +1328,7 @@ class RoadReportService extends BaseService{
             }
             $mcd['chart']['scale']['max']=$morningmaxscale+5;
         }
+
         if(!empty($eveningdata)){
             $ecd=&$chartList[5];
             foreach ($eveningdata as $k1=>$v1){
@@ -1315,6 +1342,7 @@ class RoadReportService extends BaseService{
             }
             $ecd['chart']['scale']['max']=$eveningmaxscale+5;
         }
+
 
         return $this->shortenChart($chartList);
     }
@@ -1592,56 +1620,29 @@ class RoadReportService extends BaseService{
 
         $cycseriesfcol = array_column($cycseriesf['data'],'y');
 
-        if(count($cycseriesfcol)>0){
-            $cycseriesf['max']=max($cycseriesfcol);
-            $key = array_search(max($cycseriesfcol),$cycseriesfcol);
-            $cycseriesf['max_key']=$cycseriesf['data'][$key]['x'];
-            $cycseriesf['avg']=round(array_sum($cycseriesfcol)/count($cycseriesfcol),2);
-        }else{
-            $cycseriesf['max']=0;
-            $cycseriesf['max_key']=0;
-            $cycseriesf['avg']=0;
-        }
-
+//        $cfs = array_multisort(array_column($cycseriesf['data'],'y'),SORT_DESC,$cycseriesf['data']);
+        $cycseriesf['max']=max($cycseriesfcol);
+        $key = array_search(max($cycseriesfcol),$cycseriesfcol);
+        $cycseriesf['max_key']=$cycseriesf['data'][$key]['x'];
+        $cycseriesf['avg']=round(array_sum($cycseriesfcol)/count($cycseriesfcol),2);
 
         $cycseriesbcol = array_column($cycseriesb['data'],'y');
-        if(count($cycseriesbcol)>0){
-            $cycseriesb['max']=max($cycseriesbcol);
-            $key = array_search(max($cycseriesbcol),$cycseriesbcol);
-            $cycseriesb['max_key']=$cycseriesb['data'][$key]['x'];
-            $cycseriesb['avg']=round(array_sum($cycseriesbcol)/count($cycseriesbcol),2);
-
-        }else{
-            $cycseriesb['max']=0;
-            $cycseriesb['max_key']=0;
-            $cycseriesb['avg']=0;
-        }
+        $cycseriesb['max']=max($cycseriesbcol);
+        $key = array_search(max($cycseriesbcol),$cycseriesbcol);
+        $cycseriesb['max_key']=$cycseriesb['data'][$key]['x'];
+        $cycseriesb['avg']=round(array_sum($cycseriesbcol)/count($cycseriesbcol),2);
 
         $delayseriesfcol = array_column($delayseriesf['data'],'y');
-        if(count($delayseriesfcol)>0){
-            $delayseriesf['max']=max($delayseriesfcol);
-            $key = array_search(max($delayseriesfcol),$delayseriesfcol);
-            $delayseriesf['max_key']=$delayseriesf['data'][$key]['x'];
-            $delayseriesf['avg']=round(array_sum($delayseriesfcol)/count($delayseriesfcol),2);
-        }else{
-            $delayseriesf['max']=0;
-            $delayseriesf['max_key']=0;
-            $delayseriesf['avg']=0;
-        }
-
+        $delayseriesf['max']=max($delayseriesfcol);
+        $key = array_search(max($delayseriesfcol),$delayseriesfcol);
+        $delayseriesf['max_key']=$delayseriesf['data'][$key]['x'];
+        $delayseriesf['avg']=round(array_sum($delayseriesfcol)/count($delayseriesfcol),2);
 
         $delayseriesbcol = array_column($delayseriesb['data'],'y');
-        if(count($delayseriesbcol)>0){
-            $delayseriesb['max']=max($delayseriesbcol);
-            $key = array_search(max($delayseriesbcol),$delayseriesbcol);
-            $delayseriesb['max_key']=$delayseriesb['data'][$key]['x'];
-            $delayseriesb['avg']=round(array_sum($delayseriesbcol)/count($delayseriesbcol),2);
-        }else{
-            $delayseriesb['max']=0;
-            $delayseriesb['max_key']=0;
-            $delayseriesb['avg']=0;
-        }
-
+        $delayseriesb['max']=max($delayseriesbcol);
+        $key = array_search(max($delayseriesbcol),$delayseriesbcol);
+        $delayseriesb['max_key']=$delayseriesb['data'][$key]['x'];
+        $delayseriesb['avg']=round(array_sum($delayseriesbcol)/count($delayseriesbcol),2);
 
         $stopTimeCycleChart['series'][] = $cycseriesf;
         $stopTimeCycleChart['series'][] = $cycseriesb;
@@ -1679,12 +1680,12 @@ class RoadReportService extends BaseService{
         }
         $final=[];
         foreach ($ret as $rfk => $rfv){
-            if($rfv['count']==0)continue;
-                $final[$rfk] = [
-                    'speed'=>round($rfv['speed']*3.6/$rfv['count'],2),
-                    'stop_delay'=>round($rfv['stop_delay']/$rfv['count'],2),
-                    'stop_time_cycle'=>round($rfv['stop_time_cycle']/$rfv['count'],2),
-                ];
+
+            $final[$rfk] = [
+                'speed'=>round($rfv['speed']*3.6/$rfv['count'],2),
+                'stop_delay'=>round($rfv['stop_delay']/$rfv['count'],2),
+                'stop_time_cycle'=>round($rfv['stop_time_cycle']/$rfv['count'],2),
+            ];
 
         }
         return $final;

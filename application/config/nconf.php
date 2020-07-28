@@ -208,6 +208,9 @@ $config['city_upsigntime_interval'] = $city_upsigntime_interval;
 // 数据服务
 $config['data_service_interface'] = 'http://' . $data_service_server . $data_service_prot . $data_service_ext;
 
+//济南本地流量接口
+$config['jinan_local_flow'] = "http://test.sts.xiaojukeji.com/signal/api/signal-local/avi/flow_analysis";
+
 // 评估置信度阈值
 $confidence_threshold = 0.5;
 

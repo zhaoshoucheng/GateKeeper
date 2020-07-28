@@ -226,7 +226,11 @@ class Evaluate extends MY_Controller
          */
         $baseStartTime = $params['base_start_time'] ? strtotime($params['base_start_time']) : strtotime('monday last week');
         $baseEndTime = $params['base_end_time'] ? strtotime($params['base_end_time']) : (strtotime('monday this week') - 2 * 24 * 3600 - 1);
-
+        if($baseStartTime > $baseEndTime){
+            $errmsg = "开始时间不能大于结束时间";
+            throw new Exception($errmsg, ERR_PARAMETERS);
+            return;
+        }
         // 用于返回
         $data['base_time_start_end'] = [
             'start' => date('Y-m-d H:i:s', $baseStartTime),

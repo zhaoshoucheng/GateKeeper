@@ -98,6 +98,7 @@ class Timing_model extends CI_Model
         if (count($data) < 1) {
             return [];
         }
+        $flowId2Name = [];
 
         // 获取配时数据
         $timing = $this->getNewTimingInfo($data);

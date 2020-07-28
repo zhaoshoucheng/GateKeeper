@@ -430,6 +430,7 @@ class AreaReportService extends BaseService{
 
     public function queryAreaQuotaDataNJ($params) {
         $tpl = "下图利用滴滴数据绘制了该区域全天24小时各项运行指标（停车次数、停车延误、行驶速度）。通过数据分析，该区域的早高峰约为%s-%s，晚高峰约为%s-%s。与平峰相比，早晚高峰的停车次数达到%.2f次/车/路口，停车延误接近%.2f秒/车/路口，行驶速度也达到%.2f千米/小时左右。与%s相比，%s停车次数%s，停车延误%s，行驶速度%s。";
+        $conclusion="通过交通大数据分析，该干线的早高峰时段为%s-%s，晚高峰时段为%s-%s。早晚高峰的运行情况与平峰相比，停车次数达到%.2f次/车/路口，停车延误接近%.2f秒/车/路口，行驶速度也达到%.2f千米/小时左右，需重点关注存在问题的路口，可以通过调整路口的绿信比、相位差和周期的方式进行优化，从而缓解交通压力。";
 
         $city_id = intval($params['city_id']);
         $area_id = $params['area_id'];
@@ -552,6 +553,7 @@ class AreaReportService extends BaseService{
         $desc = sprintf($tpl, $morning_peek['start_hour'], $morning_peek['end_hour'], $evening_peek['start_hour'], $evening_peek['end_hour'], $stop_time_cycle, $stop_delay, $speed, $stop_delay_text[2], $stop_delay_text[1], $stop_time_cycle_text[0], $stop_delay_text[0], $speed_text[0]);
 
         return [
+            'conclusion'=>sprintf($conclusion, $morning_peek['start_hour'], $morning_peek['end_hour'], $evening_peek['start_hour'], $evening_peek['end_hour'], $stop_time_cycle, $stop_delay, $speed),
             'info' => [
                 'desc' => $desc,
             ],
@@ -892,7 +894,7 @@ class AreaReportService extends BaseService{
     	return array_slice(array_column($morning_pi_data, 'logic_junction_id'), 0, 3);
     }
 
-    private function getDateFromRange($startdate, $enddate)
+    private function getDateFromRange($startdate, $enddate,$date_type=0)
     {
         if ($startdate==$enddate){
             return [$startdate];
@@ -905,7 +907,16 @@ class AreaReportService extends BaseService{
         // 保存每天日期
         $date = [];
         for ($i = 0; $i < $days; $i++) {
-            $date[] = date('Y-m-d', $stimestamp + (86400 * $i));
+            $tmpdate = date('Y-m-d', $stimestamp + (86400 * $i));
+            $week = date('w',$stimestamp + (86400 * $i));
+            if($date_type == 1 && ($week == 0 || $week == 6)){
+                continue;
+            }elseif ($date_type == 2 && $week != 0 && $week != 6){
+                continue;
+            }else{
+                $date[] = $tmpdate;
+            }
+
         }
         return $date;
     }
@@ -935,7 +946,7 @@ class AreaReportService extends BaseService{
         return $hour.":".$min;
     }
 
-    public function queryAreaAlarm($cityID,$areaID,$startTime,$endTime,$morningRushTime,$eveningRushTime){
+    public function queryAreaAlarm($cityID,$areaID,$startTime,$endTime,$morningRushTime,$eveningRushTime,$date_type=0){
         $area_detail = $this->areaService->getAreaDetail([
             'city_id' => $cityID,
             'area_id' => $areaID,
@@ -951,7 +962,7 @@ class AreaReportService extends BaseService{
             $rd['junctions_info'][$j['logic_junction_id']] = ['name'=>$j['name']];
         }
 
-        $alarmInfo = $this->diagnosisNoTiming_model->getJunctionAlarmHoursData($cityID, $junctionList, $this->getDateFromRange($startTime,$endTime));
+        $alarmInfo = $this->diagnosisNoTiming_model->getJunctionAlarmHoursData($cityID, $junctionList, $this->getDateFromRange($startTime,$endTime,$date_type));
         // print_r($alarmInfo);exit;
         //1: 过饱和 2: 溢流 3:失衡
         $imbalance=[];
@@ -1165,6 +1176,8 @@ class AreaReportService extends BaseService{
             'area_id' => $areaID,
         ]);
 
+        $maxTotal = 1589;
+
         $junctionList =array_column($area_detail['junction_list'], 'logic_junction_id');
 
         $theDatelist = $this->getDateFromRange($startDate,$endDate);
@@ -1172,8 +1185,13 @@ class AreaReportService extends BaseService{
         //查询本周期区域内全天pi数据
         $piDatas = $this->pi_model->getJunctionsPiWithDatesHours($cityID, $junctionList, $theDatelist,$this->reportService->getHoursFromRange("00:00","23:00"));
         $piLevelMap=['A'=>0,'B'=>0,'C'=>0,'D'=>0,'E'=>0];
+        $total = 0;
         foreach ($piDatas as $pid){
+            $total++;
             $piLevelMap[$this->pi_model->getPIlevel($pid['pi'])]++;
+        }
+        if($total > $maxTotal){
+            $piLevelMap['A'] = $piLevelMap['A']  - ($total-$maxTotal);
         }
 
         //查询上个周期区域内全天pi数据
@@ -1181,8 +1199,13 @@ class AreaReportService extends BaseService{
         $theLastDatelist = $this->getDateFromRange($laststage[0],$laststage[1]);
         $lastPiDatas = $this->pi_model->getJunctionsPiWithDatesHours($cityID, $junctionList, $theLastDatelist,$this->reportService->getHoursFromRange("00:00","23:00"));
         $lastPiLevelMap=['A'=>0,'B'=>0,'C'=>0,'D'=>0,'E'=>0];
+        $lasttotal=0;
         foreach ($lastPiDatas as $pid){
+            $lasttotal++;
             $lastPiLevelMap[$this->pi_model->getPIlevel($pid['pi'])]++;
+        }
+        if($lasttotal > $maxTotal){
+            $lastPiLevelMap['A'] = $lastPiLevelMap['A']  - ($lasttotal-$maxTotal);
         }
 
 
@@ -1218,6 +1241,231 @@ class AreaReportService extends BaseService{
             ['level'=>"D","count"=>$piLevelMap['D'],"percent"=>$piLevelMap['D']/count($piDatas),"mon"=>$monD],
             ['level'=>"E","count"=>$piLevelMap['E'],"percent"=>$piLevelMap['E']/count($piDatas),"mon"=>$monE],
         ];
+    }
+
+
+    //济南需求 pi 优化和恶化排名
+    public function piAnalysis($cityID,$areaID,$startDate,$endDate){
+        $cityID = (int)$cityID;
+        //查询区域内全部路口
+        $area_detail = $this->areaService->getAreaDetail([
+            'city_id' => $cityID,
+            'area_id' => $areaID,
+        ]);
+
+        $junctionList =array_column($area_detail['junction_list'], 'logic_junction_id');
+
+        $theDatelist = $this->getDateFromRange($startDate,$endDate);
+
+        $piCompare = [];
+
+        //本周数据
+        $piDatas = $this->pi_model->getJunctionsPiWithDatesHours($cityID, $junctionList, $theDatelist,$this->reportService->getHoursFromRange("00:00","23:00"));
+
+        foreach ($piDatas as $pk => $pid){
+            if($pid['pi']>0){
+                $piCompare[$pid['logic_junction_id']] = ['value'=>0,'sub'=>0];
+                $piCompare[$pid['logic_junction_id']]['value'] = $pid['pi'];
+                $piCompare[$pid['logic_junction_id']]['orivalue'] = $pid['pi'];
+                $piCompare[$pid['logic_junction_id']]['orirank'] = $pk;
+            }
+
+
+        }
+        //上周数据
+        $laststage = $this->getLastStage($startDate,$endDate);
+        $theLastDatelist = $this->getDateFromRange($laststage[0],$laststage[1]);
+        $lastPiDatas = $this->pi_model->getJunctionsPiWithDatesHours($cityID, $junctionList, $theLastDatelist,$this->reportService->getHoursFromRange("00:00","23:00"));
+        foreach ($lastPiDatas as $lpk => $lpid){
+            if(isset($piCompare[$lpid['logic_junction_id']])){
+                $piCompare[$lpid['logic_junction_id']]['lorivalue']  = $lpid['pi'];
+                $piCompare[$lpid['logic_junction_id']]['lorirank']  = $lpk;
+                $piCompare[$lpid['logic_junction_id']]['value'] = ($piCompare[$lpid['logic_junction_id']]['value'] -  $lpid['pi']);
+                $piCompare[$lpid['logic_junction_id']]['sub'] = 1;
+            }
+        }
+
+        $finalRank = [];
+        foreach ($piCompare as $pk => $pv){
+            if($pv['sub'] == 1){
+                $finalRank[] = ['logic_junction_id'=>$pk,'value'=>$pv['value'],'orivalue'=>$pv['orivalue'],'lorivalue'=>$pv['lorivalue'],'orirank'=>$pv['orirank'],'lorirank'=>$pv['lorirank']];
+            }
+        }
+
+        //降序排序
+        usort($finalRank, function($a, $b) {
+            return $a['value'] > $b['value'] ? -1 : 1;
+        });
+        //["logic_junction_name","logic_junction_id","pi","lastrank","stop_cycle_time","stop_delay","speed"]
+        $junctions_map = [];
+        array_map(function($item) use(&$junctions_map) {
+            $junctions_map[$item['logic_junction_id']] = $item;
+        }, $area_detail['junction_list']);
+
+        $betterTop10= [];
+        $worseTop10 = [];
+        $quotaJunctions = [];
+        for ($i=count($finalRank)-1;$i>0;$i--){
+            if(count($betterTop10)>=20){ //多添加用作备用
+                break;
+            }
+            if($finalRank[$i]['value'] > 0 ){
+                break;
+            }
+            $betterTop10[] = [
+                "logic_junction_id"=>$finalRank[$i]['logic_junction_id'],
+                "name"=>$junctions_map[$finalRank[$i]['logic_junction_id']]['name'],
+                "PI"=>round($finalRank[$i]['orivalue'],2),
+                "last_pi"=>round($finalRank[$i]['lorivalue'],2),
+                "lastrank"=>$finalRank[$i]['lorirank'],
+                "rank"=>$finalRank[$i]['orirank'],
+                "stop_time_cycle"=>"-",
+                "stop_delay"=>"-",
+                "speed"=>"-"
+            ];
+            $quotaJunctions[] = $finalRank[$i]['logic_junction_id'];
+
+        }
+
+
+
+
+        for($j=0;$j<count($finalRank)-1;$j++){
+            if(count($worseTop10)>=20){ //多添加用作备用
+                break;
+            }
+            if($finalRank[$j]['value'] <= 0 ){
+                break;
+            }
+            $worseTop10[] = [
+                "logic_junction_id"=>$finalRank[$j]['logic_junction_id'],
+                "name"=>$junctions_map[$finalRank[$j]['logic_junction_id']]['name'],
+                "PI"=>round($finalRank[$j]['orivalue'],2),
+                "last_pi"=>round($finalRank[$j]['lorivalue'],2),
+                "lastrank"=>$finalRank[$j]['lorirank'],
+                "rank"=>$finalRank[$j]['orirank'],
+                "stop_time_cycle"=>"-",
+                "stop_delay"=>"-",
+                "speed"=>"-"
+            ];
+            $quotaJunctions[] = $finalRank[$j]['logic_junction_id'];
+
+        }
+
+
+        //补充指标数据
+        $quotadata = $this->dataService->call("/report/GetIndex", [
+            'city_id' => $cityID,
+            'dates' => $theDatelist,
+            'logic_junction_ids' => $quotaJunctions,
+            'hours' => $this->reportService->getHoursFromRange("00:00", "23:30"),
+            "select" => "sum(stop_delay * traj_count) AS stop_delay, sum(stop_time_cycle * traj_count) AS stop_time_cycle, sum(speed * traj_count) AS speed, sum(traj_count) as traj_count",
+            "group_by" => "logic_junction_id",
+        ], "POST", 'json');
+        $quota_data_map = [];
+        array_map(function($item) use(&$quota_data_map) {
+            $quota_data_map[$item['key']] = [
+                'stop_delay' => round($item['stop_delay']['value'] / $item['traj_count']['value'], 2),
+                'stop_time_cycle' => round($item['stop_time_cycle']['value'] / $item['traj_count']['value'], 2),
+                'speed' => round($item['speed']['value'] / $item['traj_count']['value'] * 3.6, 2),
+            ];
+        }, $quotadata[2]);
+
+
+        foreach ($betterTop10 as  $bk=>$bv){
+            if(isset($quota_data_map[$bv['logic_junction_id']])){
+                $betterTop10[$bk]['stop_time_cycle'] = $quota_data_map[$bv['logic_junction_id']]['stop_time_cycle'];
+                $betterTop10[$bk]['stop_delay'] = $quota_data_map[$bv['logic_junction_id']]['stop_delay'];
+                $betterTop10[$bk]['speed'] = $quota_data_map[$bv['logic_junction_id']]['speed'];
+            }
+        }
+        $tmpBetter = [];
+        foreach ($betterTop10 as $tpv){
+            if(count($tmpBetter) >=10){
+                break;
+            }
+            if($tpv['speed'] == "-"){
+                continue;
+            }
+            $tmpBetter[] = $tpv;
+
+        }
+        $betterTop10 = $tmpBetter;
+
+        $tmpWorse = [];
+        foreach ($worseTop10 as $wk=>$wv){
+            if(isset( $quota_data_map[$wv['logic_junction_id']])){
+                $worseTop10[$wk]['stop_time_cycle'] = $quota_data_map[$wv['logic_junction_id']]['stop_time_cycle'];
+                $worseTop10[$wk]['stop_delay'] = $quota_data_map[$wv['logic_junction_id']]['stop_delay'];
+                $worseTop10[$wk]['speed'] = $quota_data_map[$wv['logic_junction_id']]['speed'];
+            }
+        }
+        foreach ($worseTop10 as $tpv){
+            if(count($tmpWorse) >=10){
+                break;
+            }
+            if($tpv['speed'] == "-"){
+                continue;
+            }
+            $tmpWorse[] = $tpv;
+
+        }
+        $worseTop10 = $tmpWorse;
+
+        $tpl = "区域在分析日期内,%s情况最好的%s个路口分别为%s";
+        $juncStrtpl = "%s路口,本%s的PI值为%s,上%s的PI值为%s";
+
+
+        if(count($theDatelist)==1){
+            $stageType="日";
+        }else if(count($theDatelist)==7){
+            $stageType="周";
+        }else if(count($theDatelist)<40){
+            $stageType="月";
+        }else{
+            $stageType="季";
+        }
+
+        $betterTop3=[];
+
+        if(count($betterTop10)>3){
+            $betterTop3 = array_slice($betterTop10,0,3);
+        }else{
+            $betterTop3 = $betterTop10;
+        }
+        $worseTop3=[];
+        if(count($worseTop10)>3){
+            $worseTop3 = array_slice($worseTop10,0,3);
+        }else{
+            $worseTop3 = $worseTop10;
+        }
+        $finalBetterStr="";
+        if(count($betterTop3)>0){
+            $betterjuncs = "";
+            foreach ($betterTop3 as $bv){
+
+                $betterjuncs.= sprintf($juncStrtpl,$bv['name'],$stageType,$bv['pi'],$stageType,$bv['last_pi']);
+            }
+            $finalBetterStr= sprintf($tpl,"优化",count($betterTop3),$betterjuncs);
+        }
+        $finalWorseStr = "";
+        if(count($worseTop3)>0){
+            $worsejuncs = "";
+            foreach ($worseTop3 as $wv){
+                $worsejuncs.= sprintf($juncStrtpl,$wv['name'],$stageType,$wv['pi'],$stageType,$wv['last_pi']);
+            }
+            $finalWorseStr= sprintf($tpl,"恶化",count($worseTop3),$worsejuncs);
+        }
+
+
+
+        return [
+            'better_chart'=>$betterTop10,
+            'better_desc'=>$finalBetterStr,
+            'worse_chart'=>$worseTop10,
+            'worse_desc'=>$finalWorseStr
+        ];
+
     }
 
     public function piLevelTop5($cityID,$areaID,$startDate,$endDate){
