@@ -1680,7 +1680,9 @@ class RoadReportService extends BaseService{
         }
         $final=[];
         foreach ($ret as $rfk => $rfv){
-
+            if($rfv['count']==0){
+                continue;
+            }
             $final[$rfk] = [
                 'speed'=>round($rfv['speed']*3.6/$rfv['count'],2),
                 'stop_delay'=>round($rfv['stop_delay']/$rfv['count'],2),

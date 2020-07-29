@@ -292,7 +292,7 @@ class JunctionReportJN extends MY_Controller
             $params['date_type']=0;
         }
 
-        $data = $this->junctionReportService->queryJunctionQuotaDataNJ($params);
+        $data = $this->junctionReportService->queryJuncQuotaData($params);
 
 
         $this->response($data);
