@@ -73,6 +73,9 @@ class JunctionReportService extends BaseService{
             $stageType="前一季";
         }
         $ret  = $this->traj_model->queryLocalFLowJn($queryData);
+        if(empty($ret)){
+            return [];
+        }
 //        var_dump(json_encode($ret));
         //重新组装数据
         $chartData = [
@@ -161,7 +164,7 @@ class JunctionReportService extends BaseService{
 
     //济南定制化
     public function introductionJN($params){
-        $tpl = "本次报告分析路口位于%s市%s。本次报告根据%s数据对该路口进行分析。整体PI为%s，与%s相比%s，%s";
+        $tpl = "本次报告分析路口位于%s。本次报告根据%s数据对该路口进行分析。整体PI为%s，%sPI为%s，与%s相比%s，%s";
 
         $city_id = $params['city_id'];
         $logic_junction_id = $params['logic_junction_id'];
@@ -217,7 +220,7 @@ class JunctionReportService extends BaseService{
         }
 
 
-        $desc = sprintf($tpl, $city_info['city_name'], $junction_info['district_name'], $datestr,round($piInfo['pi'],2),$stageType,$mon,$conclusion);
+        $desc = sprintf($tpl,  $junction_info['district_name'], $datestr,round($piInfo['pi'],2),$stageType,round($piInfo['last_pi'],2),$stageType,$mon,$conclusion);
 
 
         return [

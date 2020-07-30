@@ -59,7 +59,7 @@ class RoadReportService extends BaseService{
 
     //济南定制化需求
     public function introductionJN($params){
-        $tpl = "%s干线位于%s市%s，承担较大的交通压力，干线包含%s等重要路口。本次报告根据%s数据对该区域进行分析，整体PI为%s，与%s相比%s，%s";
+        $tpl = "%s干线位于%s市%s，承担较大的交通压力，干线包含%s等重要路口。本次报告根据%s数据对该区域进行分析，整体PI为%s，%sPI为%s，与%s相比%s，%s";
 
         $city_id = $params['city_id'];
         $road_id = $params['road_id'];
@@ -115,7 +115,7 @@ class RoadReportService extends BaseService{
 
 //        $desc = sprintf($tpl, $city_info['city_name'], $districts_name, $datestr,$piInfo['pi'],$stageType,$mon,$conclusion);
 
-        $desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, $datestr,round($piInfo['pi'],2),$stageType,$mon,$conclusion);
+        $desc = sprintf($tpl, $road_info['road_name'], $city_info['city_name'], $junctions_info[0]['district_name'], $junctions_name, $datestr,round($piInfo['pi'],2),$stageType,round($piInfo['last_pi'],2),$stageType,$mon,$conclusion);
 
 
         $road_detail = $this->roadService->getRoadDetail([
@@ -1595,26 +1595,60 @@ class RoadReportService extends BaseService{
             "max"=>0,
             'data'=>[]
         ];
-        foreach ($data as $k=>$v){
+        //自动补充所有路口,暂时以正向为主
+        foreach ($forward as $f){
+            $cycseriesf['data'][] = [
+                'x'=>$flow2JuncMap[$f],
+                'y'=>0,
+            ];
+            $delayseriesf['data'][]=[
+                'x'=>$flow2JuncMap[$f],
+                'y'=>0,
+            ];
 
+            $cycseriesb['data'][] = [
+                'x'=>$flow2JuncMap[$f],
+                'y'=>0,
+            ];
+            $delayseriesb['data'][]=[
+                'x'=>$flow2JuncMap[$f],
+                'y'=>0,
+            ];
+        }
+
+        foreach ($data as $k=>$v){
             if(in_array($k,$forward)){
-                $cycseriesf['data'][] = [
-                    'x'=>$flow2JuncMap[$k],
-                    'y'=>$v['stop_time_cycle'],
-                ];
-                $delayseriesf['data'][]=[
-                    'x'=>$flow2JuncMap[$k],
-                    'y'=>$v['stop_delay'],
-                ];
+                foreach ($cycseriesf['data'] as $ck=>$cv){
+                    if ($flow2JuncMap[$k] == $cv['x']){
+                        $cycseriesf['data'][$ck]['y'] = $v['stop_time_cycle'];
+                        $delayseriesf['data'][$ck]['y'] = $v['stop_delay'];
+                        break;
+                    }
+                }
+//                $cycseriesf['data'][] = [
+//                    'x'=>$flow2JuncMap[$k],
+//                    'y'=>$v['stop_time_cycle'],
+//                ];
+//                $delayseriesf['data'][]=[
+//                    'x'=>$flow2JuncMap[$k],
+//                    'y'=>$v['stop_delay'],
+//                ];
             }elseif (in_array($k,$backward)){
-                $cycseriesb['data'][] = [
-                    'x'=>$flow2JuncMap[$k],
-                    'y'=>$v['stop_time_cycle'],
-                ];
-                $delayseriesb['data'][]=[
-                    'x'=>$flow2JuncMap[$k],
-                    'y'=>$v['stop_delay'],
-                ];
+                foreach ($cycseriesb['data'] as $ck=>$cv){
+                    if ($flow2JuncMap[$k] == $cv['x']){
+                        $cycseriesb['data'][$ck]['y'] = $v['stop_time_cycle'];
+                        $delayseriesb['data'][$ck]['y'] = $v['stop_delay'];
+                        break;
+                    }
+                }
+//                $cycseriesb['data'][] = [
+//                    'x'=>$flow2JuncMap[$k],
+//                    'y'=>$v['stop_time_cycle'],
+//                ];
+//                $delayseriesb['data'][]=[
+//                    'x'=>$flow2JuncMap[$k],
+//                    'y'=>$v['stop_delay'],
+//                ];
             }
         }
 

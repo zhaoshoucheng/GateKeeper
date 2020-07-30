@@ -148,7 +148,7 @@ class AreaReportService extends BaseService{
     //济南定制化需求
     public function introductionJN($params){
 
-        $tpl = "本次报告区域为%s市的%s。本次报告根据%s数据对该区域进行分析，整体PI为%s，与%s相比%s，%s";
+        $tpl = "本次报告区域为%s。本次报告根据%s数据对该区域进行分析，整体PI为%s，%sPI为%s，与%s相比%s，%s";
 
         $city_id = $params['city_id'];
         $area_id = $params['area_id'];
@@ -205,7 +205,7 @@ class AreaReportService extends BaseService{
         }
 
 
-        $desc = sprintf($tpl, $city_info['city_name'], $districts_name, $datestr,round($piInfo['pi'],2),$stageType,$mon,$conclusion);
+        $desc = sprintf($tpl,  $districts_name, $datestr,round($piInfo['pi'],2),$stageType,round($piInfo['last_pi'],2),$stageType,$mon,$conclusion);
 
 
         return [
@@ -1317,7 +1317,7 @@ class AreaReportService extends BaseService{
                 "name"=>$junctions_map[$finalRank[$i]['logic_junction_id']]['name'],
                 "PI"=>round($finalRank[$i]['orivalue'],2),
                 "last_pi"=>round($finalRank[$i]['lorivalue'],2),
-                "lastrank"=>$finalRank[$i]['lorirank'],
+                "last_rank"=>$finalRank[$i]['lorirank'],
                 "rank"=>$finalRank[$i]['orirank'],
                 "stop_time_cycle"=>"-",
                 "stop_delay"=>"-",
@@ -1342,7 +1342,7 @@ class AreaReportService extends BaseService{
                 "name"=>$junctions_map[$finalRank[$j]['logic_junction_id']]['name'],
                 "PI"=>round($finalRank[$j]['orivalue'],2),
                 "last_pi"=>round($finalRank[$j]['lorivalue'],2),
-                "lastrank"=>$finalRank[$j]['lorirank'],
+                "last_rank"=>$finalRank[$j]['lorirank'],
                 "rank"=>$finalRank[$j]['orirank'],
                 "stop_time_cycle"=>"-",
                 "stop_delay"=>"-",
