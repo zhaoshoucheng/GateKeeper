@@ -438,7 +438,7 @@ class RealtimeQuotaService extends BaseService
 
         $junctionMovements = [];
         foreach ($inputJunctionIds as $junctionId){
-            $junctionMovements[$junctionId] = $this->common_model->getTimingMovementNames($junctionId);
+            // $junctionMovements[$junctionId] = $this->common_model->getTimingMovementNames($junctionId);
         }
 
         foreach ($newFlowList as $key => $item) {

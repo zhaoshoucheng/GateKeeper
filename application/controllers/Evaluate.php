@@ -45,6 +45,25 @@ class Evaluate extends MY_Controller
     }
 
     /**
+     * 获取权限区域路口列表
+     *
+     * @throws Exception
+     */
+    public function getDistrictsJunctionList()
+    {
+        $params = $this->input->post(null, true);
+        $this->validate([
+            'city_id' => 'required|is_natural_no_zero',
+            'date' => 'exact_length[10]|regex_match[/\d{4}-\d{2}-\d{2}/]'
+        ]);
+
+        $params['date'] = $params['date'] ?? date('Y-m-d');
+        $params['districts'] = '370102';
+        $data = $this->evaluateService->getCityJunctionList($params,$this->userPerm);
+        $this->response($data);
+    }
+
+    /**
      * 获取指标列表
      *
      * @throws Exception

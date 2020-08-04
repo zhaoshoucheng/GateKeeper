@@ -68,7 +68,11 @@ class EvaluateService extends BaseService
             ];
         };
 
-        $result = $this->waymap_model->getAllCityJunctions($cityId);
+        if(!empty($params["districts"])){
+            $result = $this->waymap_model->getCityJunctionsByDistricts($cityId,$params["districts"]);
+        }else{
+            $result = $this->waymap_model->getAllCityJunctions($cityId);
+        }
         $restrictJuncs = $this->waymap_model->getRestrictJunctionCached($cityId);
         $mapRestrictJuncs = array_flip($restrictJuncs);
         $result = array_filter($result, function($item) use($mapRestrictJuncs){
