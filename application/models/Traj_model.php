@@ -68,7 +68,8 @@ class Traj_model extends CI_Model
         }
 
         if ($res['errno'] != 0) {
-            throw new \Exception($res['errmsg'], $res['errno']);
+            return [];
+//            throw new \Exception($res['errmsg'], $res['errno']);
         }
 
         return $res['data'] ?? [];
@@ -96,7 +97,7 @@ class Traj_model extends CI_Model
         }
         $data['start_time'] =$sstr.":00";
         $data['end_time']=$estr.":00";
-        $url = $this->interface . '/timeframeoptimize/getTodOptimizePlan';
+        $url = $this->interface . '/timeframeoptimize/getTodOptimizePlanWithoutTraj';
         return $this->post($url, $data, 20000, "json");
     }
 
@@ -174,7 +175,7 @@ class Traj_model extends CI_Model
      */
     public function queryGreenWaveOptPlan($data)
     {
-        $url = $this->interface . '/Arterialgreenwave/queryGreenWaveOptPlan';
+        $url = $this->interface . '/Arterialgreenwave/queryGreenWaveOptPlanWithoutTraj';
         return $this->postRaw($url, $data, 15000, "json");
     }
 
@@ -200,7 +201,7 @@ class Traj_model extends CI_Model
      */
     public function getSplitOptimizePlan($data)
     {
-        $url = $this->interface . '/greensplit/greenSplitOpt';
+        $url = $this->interface . '/greensplit/greenSplitOptWithoutTraj';
         return $this->post($url, $data, 20000, "json");
     }
 

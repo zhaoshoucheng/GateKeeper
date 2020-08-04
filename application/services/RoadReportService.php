@@ -1182,16 +1182,17 @@ class RoadReportService extends BaseService{
                         $imbalanceMorningdata[$juncIndex[$k]]=[];
                     }
                     if(!isset($imbalanceMorningdata[$juncIndex[$k]][$morningIndex[$time]])){
-                        $imbalanceMorningdata[$juncIndex[$k]] = array((string)$morningIndex[$time] => 0);
+                        $imbalanceMorningdata[$juncIndex[$k]][$morningIndex[$time]] = 0;
                     }
-                    $imbalanceMorningdata[$juncIndex[$k]][(string)$morningIndex[$time]]++;
+                    $imbalanceMorningdata[$juncIndex[$k]][$morningIndex[$time]]++;
+
 
                 }elseif(isset($eveningIndex[$time])){
                     if(!isset($embalanceEveningdata[$juncIndex[$k]])){
                         $embalanceEveningdata[$juncIndex[$k]]=[];
                     }
                     if(!isset($embalanceEveningdata[$juncIndex[$k]][$eveningIndex[$time]])){
-                        $embalanceEveningdata[$juncIndex[$k]]=array((string)$eveningIndex[$time] => 0);
+                        $embalanceEveningdata[$juncIndex[$k]][$eveningIndex[$time]]=0;
                     }
                     $embalanceEveningdata[$juncIndex[$k]][$eveningIndex[$time]]++;
                 }
@@ -1244,7 +1245,7 @@ class RoadReportService extends BaseService{
                         $overMorningdata[$juncIndex[$k]]=[];
                     }
                     if(!isset($overMorningdata[$juncIndex[$k]][$morningIndex[$time]])){
-                        $overMorningdata[$juncIndex[$k]]=array((string)$morningIndex[$time] => 0);
+                        $overMorningdata[$juncIndex[$k]][$morningIndex[$time]]=0;
                     }
                     $overMorningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
                 }elseif(isset($eveningIndex[$time])){
@@ -1252,7 +1253,7 @@ class RoadReportService extends BaseService{
                         $overEveningdata[$juncIndex[$k]]=[];
                     }
                     if(!isset($overEveningdata[$juncIndex[$k]][$eveningIndex[$time]])){
-                        $overEveningdata[$juncIndex[$k]]=array((string)$eveningIndex[$time] => 0);
+                        $overEveningdata[$juncIndex[$k]][$eveningIndex[$time]]=0;
                     }
                     $overEveningdata[$juncIndex[$k]][$eveningIndex[$time]]+=1;
                 }
@@ -1300,7 +1301,7 @@ class RoadReportService extends BaseService{
                         $morningdata[$juncIndex[$k]]=[];
                     }
                     if(!isset($morningdata[$juncIndex[$k]][$morningIndex[$time]])){
-                        $morningdata[$juncIndex[$k]]=array((string)$morningIndex[$time] => 0);
+                        $morningdata[$juncIndex[$k]][$morningIndex[$time]]=0;
                     }
                     $morningdata[$juncIndex[$k]][$morningIndex[$time]]+=1;
                 }elseif(isset($eveningIndex[$time])){
@@ -1308,7 +1309,7 @@ class RoadReportService extends BaseService{
                         $eveningdata[$juncIndex[$k]]=[];
                     }
                     if(!isset($eveningdata[$juncIndex[$k]][$eveningIndex[$time]])){
-                        $eveningdata[$juncIndex[$k]] = array((string)$eveningIndex[$time] => 0);
+                        $eveningdata[$juncIndex[$k]][$eveningIndex[$time]] = 0;
                     }
                     $eveningdata[$juncIndex[$k]][$eveningIndex[$time]]+=1;
                 }
