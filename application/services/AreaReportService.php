@@ -1412,7 +1412,7 @@ class AreaReportService extends BaseService{
         }
         $worseTop10 = $tmpWorse;
 
-        $tpl = "区域在分析日期内,%s情况最好的%s个路口分别为%s";
+        $tpl = "区域在分析日期内,%s情况最%s的%s个路口分别为%s";
         $juncStrtpl = "%s路口,本%s的PI值为%s,上%s的PI值为%s";
 
 
@@ -1446,7 +1446,7 @@ class AreaReportService extends BaseService{
 
                 $betterjuncs.= sprintf($juncStrtpl,$bv['name'],$stageType,$bv['pi'],$stageType,$bv['last_pi']);
             }
-            $finalBetterStr= sprintf($tpl,"优化",count($betterTop3),$betterjuncs);
+            $finalBetterStr= sprintf($tpl,"优化","好",count($betterTop3),$betterjuncs);
         }
         $finalWorseStr = "";
         if(count($worseTop3)>0){
@@ -1454,7 +1454,7 @@ class AreaReportService extends BaseService{
             foreach ($worseTop3 as $wv){
                 $worsejuncs.= sprintf($juncStrtpl,$wv['name'],$stageType,$wv['pi'],$stageType,$wv['last_pi']);
             }
-            $finalWorseStr= sprintf($tpl,"恶化",count($worseTop3),$worsejuncs);
+            $finalWorseStr= sprintf($tpl,"恶化","严重",count($worseTop3),$worsejuncs);
         }
 
 
