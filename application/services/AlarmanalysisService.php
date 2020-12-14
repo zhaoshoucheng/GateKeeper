@@ -514,7 +514,7 @@ class AlarmanalysisService extends BaseService
      */
     private function getDailyAlarmAnalysis($params)
     {
-        $size = 0;
+        $size = 10000;
         if(!empty($params['logic_junction_id'])){
             $size = 10000;
         }
@@ -609,7 +609,7 @@ class AlarmanalysisService extends BaseService
         }else{
             //通过明细查询，转换为原来的格式？？？
             //老的数据处理逻辑
-            $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"stored_fields":["hour","type","frequency_type"],"aggregations":{"hour":{"terms":{"field":"hour","size":200},"aggregations":{"type":{"terms":{"field":"type","size":0},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
+            $json .= ']}}}},"_source":{"includes":["COUNT","hour"],"excludes":[]},"stored_fields":["hour","type","frequency_type"],"aggregations":{"hour":{"terms":{"field":"hour","size":200},"aggregations":{"type":{"terms":{"field":"type","size":200},"aggregations":{"num":{"value_count":{"field":"id"}}}}}}}}';
             // echo $json;exit;
 
             $result = $this->alarmanalysis_model->search($json);
@@ -833,7 +833,7 @@ class AlarmanalysisService extends BaseService
      */
     private function getTimeAlarmAnalysis($params)
     {
-        $size = 0;
+        $size = 10000;
         if(!empty($params['logic_junction_id'])){
             $size = 10000;
         }
