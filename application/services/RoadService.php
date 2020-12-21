@@ -563,7 +563,7 @@ class RoadService extends BaseService
         $results = [];
         foreach ($roadList as $item) {
             $roadId = $item['road_id'];
-//            $res = $this->redis_model->getData($pre_key . $roadId);
+            $res = $this->redis_model->getData($pre_key . $roadId);
             if ($force) {
                 $res = [];
             }
@@ -585,7 +585,7 @@ class RoadService extends BaseService
                     $res = [];
                 }
                 // 将数据刷新到 Redis
-//                $this->redis_model->setEx($pre_key . $roadId, json_encode($res), 86400);
+                $this->redis_model->setData($pre_key . $roadId, json_encode($res));
             } else {
                 $res = json_decode($res, true);
             }

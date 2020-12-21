@@ -134,6 +134,9 @@ class JunctionReportService extends BaseService{
 
         $chartData['series'][] = $cdata;
         $chartData['series'][] = $lcdata;
+        if(!isset($cdata['data'])){
+            return [];
+        }
         $ret = $this->reportService->findMaxTimeRange($cdata['data']);
 
         $lastsum = 0;
