@@ -596,6 +596,10 @@ class DiagnosisNoTimingService extends BaseService
         return $this->diagnosisNoTiming_model->GetLastAlarmDateByCityID($cityID);
     }
 
+    public function GetOfflineDataStatus($cityID){
+        return $this->diagnosisNoTiming_model->GetOfflineDataStatus($cityID);
+    }
+
     public function GetBaseQuotaFlowData($params){
         $flowInfo = $this->waymap_model->getFlowsInfo($params["logic_junction_id"]);
         $quotaList = $this->diagnosisNoTiming_model->GetBaseQuotaFlowData($params);

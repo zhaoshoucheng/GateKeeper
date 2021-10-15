@@ -400,6 +400,22 @@ class Redis_model extends CI_Model
 
         return json_decode($data, true);
     }
+    
+    /**
+     * 离线数据状态校验时间
+     * @param $cityId
+     * @param $date
+     *
+     * @return bool
+     */
+    public function setOfflineDataStatus($cityId,$date)
+    {
+        $d = $this->setData( "set_offline_dataStatus".date("Y_m_d")."_". $cityId, json_encode($date));
+        $e = $this->setExpire( "set_offline_dataStatus".date("Y_m_d")."_". $cityId, 2 * 3600);
+
+        return $d && $e;
+    }
+
 
     /**
      * @param $token

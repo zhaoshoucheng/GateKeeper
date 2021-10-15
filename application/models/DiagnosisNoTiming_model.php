@@ -14,6 +14,7 @@ class DiagnosisNoTiming_model extends CI_Model
         $this->load->config('disgnosisnotiming_conf');
         $this->load->model('waymap_model');
         $this->load->helper('phase');
+        $this->load->model('redis_model');
         $this->load->config("nconf");
     }
 
@@ -931,6 +932,31 @@ class DiagnosisNoTiming_model extends CI_Model
         }
         return date("Y-m-d",strtotime("-1 day"));
     }
+
+    public function GetOfflineDataStatus($cityID)
+    {
+        $redis_data = $this->redis_model->getData("set_offline_dataStatus".date("Y_m_d")."_". $cityID);
+        if($redis_data){
+            return json_decode($redis_data, true);
+        }
+        url = $this->config->item('data_service_interface');
+        
+        $res = httpGET($url . '/GetLastAlarmDateByCityID?city_id='.$cityID, [], 0);
+        if (!empty($res)) {
+            $res = json_decode($res, true);
+            if (isset($res['data']['dt'])) {
+                $dt = $res['data']['dt'];
+                $res = $this->redis_model->setOfflineDataStatus($cityID,$dt);
+                if(!$res){
+                    $label = !$label;
+                    $reason =  "设置redis失败" . $res;
+                }
+                return $dt;
+            }
+            
+        }
+        return null;
+   }
 
     public function GetJunctionAlarmDataByJunctionAVG($city_id, $dates, $hour, $userPerm = []) {
         $req = [

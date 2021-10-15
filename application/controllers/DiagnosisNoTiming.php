@@ -318,6 +318,26 @@ class DiagnosisNoTiming extends MY_Controller
         $this->response($dt);
     }
 
+    public function NewGetLastAlarmDateByCityID(){
+        $params = [];
+        $params["city_id"] = intval($this->input->get("city_id", true));
+        if(empty($params["city_id"])){
+            throw new \Exception("city_id为空");
+        }
+        $label = $this->GetOfflineDataStatus($params["city_id"]);
+        $data = [
+            "date" => date("Y-m-d",strtotime("-2 day")),
+            "reason" => $label["reason"]
+        ];
+        if(!$label["label"]){
+            $this->response($data);
+            return;
+        }
+        $dt = $this->dianosisService->GetLastAlarmDateByCityID($params["city_id"]);
+        $data["date"] = $dt;
+        $this->response($data);
+    }
+
     /**
      * 获取实时指标数据10分钟间隔
      * for 中控SaaS
