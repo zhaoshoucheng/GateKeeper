@@ -324,16 +324,16 @@ class DiagnosisNoTiming extends MY_Controller
         if(empty($params["city_id"])){
             throw new \Exception("city_id为空");
         }
-        $label = $this->GetOfflineDataStatus($params["city_id"]);
+        $dt = $this->dianosisService->GetOfflineDataStatus($params["city_id"]);
         $data = [
             "date" => date("Y-m-d",strtotime("-2 day")),
             "reason" => $label["reason"]
         ];
-        if(!$label["label"]){
+        if(!$dt){
             $this->response($data);
             return;
         }
-        $dt = $this->dianosisService->GetLastAlarmDateByCityID($params["city_id"]);
+        //$dt = $this->dianosisService->GetLastAlarmDateByCityID($params["city_id"]);
         $data["date"] = $dt;
         $this->response($data);
     }

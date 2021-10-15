@@ -939,7 +939,7 @@ class DiagnosisNoTiming_model extends CI_Model
         if($redis_data){
             return json_decode($redis_data, true);
         }
-        url = $this->config->item('data_service_interface');
+        $url = $this->config->item('data_service_interface');
         
         $res = httpGET($url . '/GetLastAlarmDateByCityID?city_id='.$cityID, [], 0);
         if (!empty($res)) {
