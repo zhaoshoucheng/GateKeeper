@@ -390,7 +390,7 @@ class Realtimewarning_model extends CI_Model
             $todayJamCurve[$hour] = $junctionSurvey;
             $this->redis_model->setEx($todayJamCurveKey, json_encode($todayJamCurve), 24 * 3600);
             // 缓存诊断路口列表数据
-            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 4 * 3600);
+            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
             // 缓存实时报警路口数据
             $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 4 * 3600);
             // 冗余缓存实时报警路口数据,每一个批次一份
@@ -401,10 +401,10 @@ class Realtimewarning_model extends CI_Model
             if ($this->redis_model->getData($junctionSurveyKey) && $this->redis_model->getData($junctionListKey)
                 && $this->redis_model->getData($realTimeAlarmRedisKey) && $this->redis_model->getData($realTimeAlarmBakKey)
             ) {
-                $this->redis_model->setEx($lastHourKey, $hour, 24 * 3600);
+               $this->redis_model->setEx($lastHourKey, $hour, 24 * 3600);
             } else {
                 sleep(2);
-                $this->redis_model->setEx($lastHourKey, $hour, 24 * 3600);
+               $this->redis_model->setEx($lastHourKey, $hour, 24 * 3600);
             }
 
         }
@@ -529,7 +529,7 @@ class Realtimewarning_model extends CI_Model
             $todayJamCurve[$hour] = $junctionSurvey;
             $this->redis_model->setEx($todayJamCurveKey, json_encode($todayJamCurve), 24 * 3600);
             // 缓存诊断路口列表数据
-            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 4 * 3600);
+            $this->redis_model->setEx($junctionListKey, json_encode($junctionList), 24 * 3600);
             // 缓存实时报警路口数据
             $this->redis_model->setEx($realTimeAlarmRedisKey, json_encode($realTimeAlarmsInfoResult), 4 * 3600);
             // 冗余缓存实时报警路口数据,每一个批次一份
